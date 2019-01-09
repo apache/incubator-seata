@@ -21,9 +21,15 @@ package com.alibaba.fescar.tm.api;
  */
 public enum GlobalTransactionRole {
 
+    /**
+     * The Launcher.
+     */
     // The one begins the current global transaction.
     Launcher,
 
+    /**
+     * The Participant.
+     */
     // The one just joins into a existing global transaction.
     Participant
 }
