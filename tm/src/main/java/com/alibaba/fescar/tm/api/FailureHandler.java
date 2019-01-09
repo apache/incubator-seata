@@ -21,9 +21,27 @@ package com.alibaba.fescar.tm.api;
  */
 public interface FailureHandler {
 
+    /**
+     * On begin failure.
+     *
+     * @param tx    the tx
+     * @param cause the cause
+     */
     void onBeginFailure(GlobalTransaction tx, Throwable cause);
 
+    /**
+     * On commit failure.
+     *
+     * @param tx    the tx
+     * @param cause the cause
+     */
     void onCommitFailure(GlobalTransaction tx, Throwable cause);
 
+    /**
+     * On rollback failure.
+     *
+     * @param tx    the tx
+     * @param cause the cause
+     */
     void onRollbackFailure(GlobalTransaction tx, Throwable cause);
 }

@@ -30,8 +30,26 @@ import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.model.ResourceManagerInbound;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 import com.alibaba.fescar.core.protocol.AbstractResultMessage;
-import com.alibaba.fescar.core.protocol.transaction.*;
+import com.alibaba.fescar.core.protocol.transaction.AbstractTransactionRequestToTC;
+import com.alibaba.fescar.core.protocol.transaction.AbstractTransactionResponse;
 import com.alibaba.fescar.core.protocol.transaction.BranchCommitRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchCommitResponse;
+import com.alibaba.fescar.core.protocol.transaction.BranchRegisterRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
+import com.alibaba.fescar.core.protocol.transaction.BranchReportRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchReportResponse;
+import com.alibaba.fescar.core.protocol.transaction.BranchRollbackRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchRollbackResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalBeginRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalBeginResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalCommitRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalCommitResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalStatusRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalStatusResponse;
 import com.alibaba.fescar.core.rpc.RpcContext;
 import com.alibaba.fescar.core.rpc.ServerMessageSender;
 import com.alibaba.fescar.core.rpc.TransactionMessageHandler;
@@ -209,16 +227,16 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     }
 
     private ScheduledThreadPoolExecutor retryRollbacking = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("RetryRollbacking", 1, true));
+        new NamedThreadFactory("RetryRollbacking", 1));
 
     private ScheduledThreadPoolExecutor retryCommitting = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("RetryCommitting", 1, true));
+        new NamedThreadFactory("RetryCommitting", 1));
 
     private ScheduledThreadPoolExecutor asyncCommitting = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("AsyncCommitting", 1, true));
+        new NamedThreadFactory("AsyncCommitting", 1));
 
     private ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("TimeoutCheck", 1, true));
+        new NamedThreadFactory("TxTimeoutCheck", 1));
 
     public void init() {
         retryRollbacking.scheduleAtFixedRate(new Runnable() {

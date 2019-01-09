@@ -21,8 +21,16 @@ import com.alibaba.fescar.core.context.RootContext;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * The type Api test.
+ */
 public class APITest {
 
+    /**
+     * Test current.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testCurrent() throws Exception {
         String xid = "1234567890";

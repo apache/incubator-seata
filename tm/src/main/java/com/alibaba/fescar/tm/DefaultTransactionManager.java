@@ -23,16 +23,32 @@ import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.model.TransactionManager;
-import com.alibaba.fescar.core.protocol.transaction.*;
+import com.alibaba.fescar.core.protocol.transaction.AbstractTransactionRequest;
+import com.alibaba.fescar.core.protocol.transaction.AbstractTransactionResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalBeginRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalBeginResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalCommitRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalCommitResponse;
 import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalStatusRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalStatusResponse;
 import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
 
+/**
+ * The type Default transaction manager.
+ */
 public class DefaultTransactionManager implements TransactionManager {
 
     private static class SingletonHolder {
         private static final TransactionManager INSTANCE = new DefaultTransactionManager();
     }
 
+    /**
+     * Get transaction manager.
+     *
+     * @return the transaction manager
+     */
     public static TransactionManager get() {
         return SingletonHolder.INSTANCE;
     }

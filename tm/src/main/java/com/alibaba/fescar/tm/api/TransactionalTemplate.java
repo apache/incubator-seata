@@ -23,6 +23,13 @@ import com.alibaba.fescar.core.exception.TransactionException;
  */
 public class TransactionalTemplate {
 
+    /**
+     * Execute object.
+     *
+     * @param business the business
+     * @return the object
+     * @throws ExecutionException the execution exception
+     */
     public Object execute(TransactionalExecutor business) throws TransactionalExecutor.ExecutionException {
 
         // 1. get or create a transaction
