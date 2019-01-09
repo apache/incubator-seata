@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~  Copyright 1999-2018 Alibaba Group Holding Ltd.
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <bean name="storageDataSource" class="com.alibaba.druid.pool.DruidDataSource"
+          init-method="init" destroy-method="close">
+        <property name="url" value="jdbc:mysql://xxx:3306/demo"/>
+        <property name="username" value="xxx"/>
+        <property name="password" value="xxx"/>
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="initialSize" value="0" />
+        <property name="maxActive" value="180" />
+        <property name="minIdle" value="0" />
+        <property name="maxWait" value="60000" />
+        <property name="validationQuery" value="Select 'x' from DUAL" />
+        <property name="testOnBorrow" value="false" />
+        <property name="testOnReturn" value="false" />
+        <property name="testWhileIdle" value="true" />
+        <property name="timeBetweenEvictionRunsMillis" value="60000" />
+        <property name="minEvictableIdleTimeMillis" value="25200000" />
+        <property name="removeAbandoned" value="true" />
+        <property name="removeAbandonedTimeout" value="1800" />
+        <property name="logAbandoned" value="true" />
+        <property name="filters" value="mergeStat" />
+    </bean>
+
+    <bean id="storageDataSourceProxy" class="com.alibaba.fescar.rm.datasource.DataSourceProxy">
+        <constructor-arg ref="storageDataSource" />
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="storageDataSourceProxy" />
+    </bean>
+
+    <dubbo:application name="dubbo-demo-storage-service"  />
+    <dubbo:registry address="multicast://224.5.6.7:1234?unicast=false" />
+    <dubbo:protocol name="dubbo" port="20882" />
+    <dubbo:service interface="com.alibaba.fescar.tm.dubbo.StorageService" ref="service" timeout="10000"/>
+
+    <bean id="service" class="com.alibaba.fescar.tm.dubbo.impl.StorageServiceImpl">
+        <property name="jdbcTemplate" ref="jdbcTemplate"/>
+    </bean>
+
+    <bean class="com.alibaba.fescar.spring.annotation.GlobalTransactionScanner">
+        <constructor-arg value="dubbo-demo-storage-service"/>
+        <constructor-arg value="my_test_tx_group"/>
+    </bean>
+</beans>
+            
