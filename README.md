@@ -90,6 +90,10 @@ Contributors are welcomed to join FEATS project. Please check [CONTRIBUTING](./C
      * TBD: FESCAR developer discussion (APIs, feature design, etc).
      * TBD: Commits notice, very high frequency.
 
+**Dingtalk**
+
+![Dingtalk](https://intranetproxy.alipay.com/skylark/lark/0/2019/png/18862/1547018338480-6507b99e-8a64-49ab-9da3-5c9e37ee68a4.png) 
+
 ## License
 
 FESCAR is under the Apache 2.0 license. See the [LICENSE](https://github.com/apache/incubator-dubbo/blob/master/LICENSE) file for details.
