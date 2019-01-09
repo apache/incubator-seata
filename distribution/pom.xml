@@ -24,11 +24,51 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>fescar-distribution</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>fescar-distribution ${project.version}</name>
     <properties>
         <maven.compiler.source>1.7</maven.compiler.source>
         <maven.compiler.target>1.7</maven.compiler.target>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.alibaba.fescar</groupId>
+            <artifactId>fescar-server</artifactId>
+        </dependency>
+    </dependencies>
+    <profiles>
+        <profile>
+            <id>release-fescar</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.alibaba.fescar</groupId>
+                    <artifactId>fescar-server</artifactId>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>release-fescar.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>make-assembly</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+                <finalName>fescar</finalName>
+            </build>
+        </profile>
+    </profiles>
 </project>
