@@ -22,9 +22,13 @@ import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.model.TransactionManager;
 import com.alibaba.fescar.tm.DefaultTransactionManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The type Default global transaction.
+ */
 public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultGlobalTransaction.class);
@@ -41,10 +45,18 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private GlobalTransactionRole role = GlobalTransactionRole.Launcher;
 
+    /**
+     * Instantiates a new Default global transaction.
+     */
     DefaultGlobalTransaction() {
         this(null);
     }
 
+    /**
+     * Instantiates a new Default global transaction.
+     *
+     * @param xid the xid
+     */
     DefaultGlobalTransaction(String xid) {
         this.transactionManager = DefaultTransactionManager.get();
         this.xid = xid;
