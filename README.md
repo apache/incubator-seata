@@ -36,9 +36,9 @@ We say, a **Distributed Transaction** is a **Global Transaction** which is made 
 
 There are 3 basic components in FESACR: 
 
-- **Transaction Coordinator(TC): **Maintain status of global and branch transactions, drive the global commit or rollback.
-- **Transaction Manager(TM): **Define the scope of global transaction: begin a global transaction, commit or rollback a global transaction.
-- **Resource Manager(RM): **Manage resources that branch transactions working on, talk to TC for registering branch transactions and reporting status of branch transactions, and drive the branch transaction commit or rollback.
+- **Transaction Coordinator(TC):** Maintain status of global and branch transactions, drive the global commit or rollback.
+- **Transaction Manager(TM):** Define the scope of global transaction: begin a global transaction, commit or rollback a global transaction.
+- **Resource Manager(RM):** Manage resources that branch transactions working on, talk to TC for registering branch transactions and reporting status of branch transactions, and drive the branch transaction commit or rollback.
 
 ![Model](https://cdn.nlark.com/lark/0/2018/png/18862/1545013915286-4a90f0df-5fda-41e1-91e0-2aa3d331c035.png) 
 
