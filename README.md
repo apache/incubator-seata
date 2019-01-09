@@ -92,7 +92,7 @@ Contributors are welcomed to join FEATS project. Please check [CONTRIBUTING](./C
 
 **Dingtalk**
 
-![Dingtalk](https://intranetproxy.alipay.com/skylark/lark/0/2019/png/18862/1547018338480-6507b99e-8a64-49ab-9da3-5c9e37ee68a4.png) 
+![dingding.png](https://upload-images.jianshu.io/upload_images/4420767-4e95b186a1a1bfba.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ## License
 
