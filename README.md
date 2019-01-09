@@ -71,7 +71,7 @@ You can view the full documentation from wiki: [FESCAR wiki page](https://github
 
 ## Reporting bugs
 
-Please follow the [template](https://github.com/apache/incubator-dubbo/issues/new?template=dubbo-issue-report-template.md) for reporting any issues.
+Please follow the [template](https://github.com/TBD) for reporting any issues.
 
 
 ## Contributing
