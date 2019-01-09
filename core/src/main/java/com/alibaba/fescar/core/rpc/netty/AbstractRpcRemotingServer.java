@@ -53,7 +53,6 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     private final EventLoopGroup eventLoopGroupBoss;
     private final NettyServerConfig nettyServerConfig;
     private DefaultEventExecutorGroup defaultEventExecutorGroup;
-
     private int listenPort;
 
     public void setListenPort(int listenPort) {
@@ -99,7 +98,6 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         if (null != handlers) {
             channelHandlers = handlers;
         }
-        this.listenPort = nettyServerConfig.getListenPort();
 
     }
 
@@ -109,6 +107,9 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
             nettyServerConfig.getServerWorkerThreads(),
             new NamedThreadFactory(nettyServerConfig.getExecutorThreadPrefix(),
                 nettyServerConfig.getServerWorkerThreads()));
+        if (listenPort == 0) {
+            listenPort = nettyServerConfig.getDefaultListenPort();
+        }
         this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupWorker)
             .channel(nettyServerConfig.SERVER_CHANNEL_CLAZZ)
             .option(ChannelOption.SO_BACKLOG, nettyServerConfig.getSoBackLogSize())
@@ -139,7 +140,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
 
         try {
             LOGGER.info("Server starting ... ");
-            ChannelFuture future = this.serverBootstrap.bind(this.nettyServerConfig.getListenPort()).sync();
+            ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
             LOGGER.info("Server started ... ");
             future.channel().closeFuture().sync();
         } catch (InterruptedException exx) {
