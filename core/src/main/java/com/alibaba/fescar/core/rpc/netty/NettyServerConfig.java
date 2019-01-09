@@ -42,7 +42,7 @@ public class NettyServerConfig extends NettyBaseConfig {
     private int soBackLogSize = 1024;
     private int writeBufferHighWaterMark = 67108864;
     private int writeBufferLowWaterMark = 1048576;
-    private int listenPort = 8091;
+    private static final int DEFAULT_LISTEN_PORT = 8091;
     private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
     private boolean enableServerPooledByteBufAllocator = true;
     private int serverChannelMaxIdleTimeSeconds = 30;
@@ -216,8 +216,8 @@ public class NettyServerConfig extends NettyBaseConfig {
      *
      * @return the listen port
      */
-    public int getListenPort() {
-        return listenPort;
+    public int getDefaultListenPort() {
+        return DEFAULT_LISTEN_PORT;
     }
 
     /**
