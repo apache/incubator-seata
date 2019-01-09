@@ -81,10 +81,10 @@ Contributors are welcomed to join FEATS project. Please check [CONTRIBUTING](./C
 
 ## Contact
 
-* [Gitter](https://gitter.im/alibaba/nacos): TBD. FESCAR's IM tool for community messaging, collaboration and discovery.
-* [Twitter](https://twitter.com/nacos2): TBD. Follow along for latest FESCAR news on Twitter.
-* [Weibo](https://weibo.com/u/6574374908): TBD. Follow along for latest FESCAR news on Weibo (Twitter of China version).
-* [Segmentfault](https://segmentfault.com/t/nacos): TBD. Get latest notice and prompt help from Segmentfault.
+* [Gitter](https://gitter.im/alibaba/fescar): TBD. FESCAR's IM tool for community messaging, collaboration and discovery.
+* [Twitter](https://twitter.com/fescar): TBD. Follow along for latest FESCAR news on Twitter.
+* [Weibo](https://weibo.com/u/xxxxxxx): TBD. Follow along for latest FESCAR news on Weibo (Twitter of China version).
+* [Segmentfault](https://segmentfault.com/t/fescar): TBD. Get latest notice and prompt help from Segmentfault.
 * Email Group:
      * TBD: FESCAR usage general discussion.
      * TBD: FESCAR developer discussion (APIs, feature design, etc).
@@ -96,5 +96,5 @@ Contributors are welcomed to join FEATS project. Please check [CONTRIBUTING](./C
 
 ## License
 
-FESCAR is under the Apache 2.0 license. See the [LICENSE](https://github.com/apache/incubator-dubbo/blob/master/LICENSE) file for details.
+FESCAR is under the Apache 2.0 license. See the [LICENSE](https://github.com/alibaba/fescar/blob/master/LICENSE) file for details.
 
