@@ -16,14 +16,6 @@
 
 package com.alibaba.fescar.common;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import com.alibaba.fescar.common.util.NetUtil;
-
-import io.netty.channel.Channel;
-import io.netty.util.AttributeKey;
-
 /**
  * @Author: jimin.jm@alibaba-inc.com
  * @Project: fescar-all
