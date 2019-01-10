@@ -20,7 +20,7 @@ import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.AbstractTransactionRequest;
 import com.alibaba.fescar.core.protocol.transaction.AbstractTransactionResponse;
 
-public abstract class AbstractExceptionHander {
+public abstract class AbstractExceptionHandler {
 
     public interface Callback<T extends AbstractTransactionRequest, S extends AbstractTransactionResponse> {
         void execute(T request, S response) throws TransactionException;
