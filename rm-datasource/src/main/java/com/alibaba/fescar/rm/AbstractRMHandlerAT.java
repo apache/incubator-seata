@@ -17,7 +17,7 @@
 package com.alibaba.fescar.rm;
 
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
-import com.alibaba.fescar.core.exception.AbstractExceptionHander;
+import com.alibaba.fescar.core.exception.AbstractExceptionHandler;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 import com.alibaba.fescar.core.protocol.AbstractResultMessage;
@@ -26,7 +26,7 @@ import com.alibaba.fescar.core.protocol.transaction.BranchRollbackRequest;
 import com.alibaba.fescar.core.rpc.RpcContext;
 import com.alibaba.fescar.core.rpc.TransactionMessageHandler;
 
-public abstract class AbstractRMHandlerAT extends AbstractExceptionHander
+public abstract class AbstractRMHandlerAT extends AbstractExceptionHandler
     implements RMInboundHandler, TransactionMessageHandler {
 
     @Override
