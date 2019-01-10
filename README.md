@@ -10,13 +10,13 @@ A **distributed transaction solution** with high performance and ease of use for
 
 ### Distributed Transaction Problem in Microservices
 
-Let's image a traditional monolithic application. Its business is built up with 3 modules. They use a single local data source.
+Let's imagine a traditional monolithic application. Its business is built up with 3 modules. They use a single local data source.
 
-Naturally, data consistency will be guaranteed by local transaction.
+Naturally, data consistency will be guaranteed by the local transaction.
 
 ![Monolithic App](https://cdn.nlark.com/lark/0/2018/png/18862/1545296770244-4cedf37e-9dc6-4fc0-a97f-f4240b9d8640.png) 
 
-Thing changed in microservices architecture. The 3 modules mentioned are designed to be 3 services on top of 3 different data sources ([Pattern: Database per service](http://microservices.io/patterns/data/database-per-service.html)). Data consistency within every single service is naturally guaranteed by local transaction. 
+Things have changed in microservices architecture. The 3 modules mentioned above are designed to be 3 services on top of 3 different data sources ([Pattern: Database per service](http://microservices.io/patterns/data/database-per-service.html)). Data consistency within every single service is naturally guaranteed by the local transaction. 
 
 **But how about the whole business logic scope?**
 
@@ -24,13 +24,13 @@ Thing changed in microservices architecture. The 3 modules mentioned are designe
 
 ### How FESCAR do?
 
-FESCAR is just a solution for problem mentioned above. 
+FESCAR is just a solution to the problem mentioned above. 
 
-![FESCAR solution](https://cdn.nlark.com/lark/0/2018/png/18862/1545296791074-3bce7bce-025e-45c3-9386-7b95135dade8.png)  
+![FESCAR solution](https://cdn.nlark.com/lark/0/2018/png/18862/1545296791074-3bce7bce-025e-45c3-9386-7b95135dade8.png)
 
 Firstly, how to define a **Distributed Transaction**?
 
-We say, a **Distributed Transaction** is a **Global Transaction** which is made up with batch of **Branch Transaction**, and normally **Branch Transaction** is just **Local Transaction**.
+We say, a **Distributed Transaction** is a **Global Transaction** which is made up with a batch of **Branch Transaction**, and normally **Branch Transaction** is just **Local Transaction**.
 
 ![Global & Branch](https://cdn.nlark.com/lark/0/2018/png/18862/1545015454979-a18e16f6-ed41-44f1-9c7a-bd82c4d5ff99.png) 
 
@@ -44,11 +44,11 @@ There are 3 basic components in FESACR:
 
 A typical lifecycle of FESCAR managed distributed transaction:
 
-1. TM asks TC to begin a new global transaction. TC generates a XID representing the global transaction.
+1. TM asks TC to begin a new global transaction. TC generates an XID representing the global transaction.
 2. XID is propagated through microservices' invoke chain.
 3. RM register local transaction as a branch of the corresponding global transaction of XID to TC. 
-4. TM asks TC for committing or rollbacking the corresponding global transaction of  XID.
-5. TC drives all branch transactions under the corresponding global transaction of  XID to finish branch committing or rollbaking.
+4. TM asks TC for committing or rollbacking the corresponding global transaction of XID.
+5. TC drives all branch transactions under the corresponding global transaction of XID to finish branch committing or rollbacking.
 
 ![Typical Process](https://cdn.nlark.com/lark/0/2018/png/18862/1545296917881-26fabeb9-71fa-4f3e-8a7a-fc317d3389f4.png) 
 
@@ -56,9 +56,9 @@ For more details about principle and design, please go to [FESCAR wiki page](htt
 
 ### History
 
-- **TXC**: Taobao Transaction Constructor. Alibaba middleware team start this project since 2014 to meet dirstribuited transaction problem caused by application architecture change from monolithic to microservices.
-- **GTS**: Global Transaction Service. TXC as a Aliyun middleware product with new name GTS was published since 2016.
-- **FESCAR**: we start the open source project FESCAR based on TXC/GTS since 2019 to work closly with community in the future.
+- **TXC**: Taobao Transaction Constructor. Alibaba middleware team start this project since 2014 to meet distributed transaction problem caused by application architecture change from monolithic to microservices.
+- **GTS**: Global Transaction Service. TXC as an Aliyun middleware product with new name GTS was published since 2016.
+- **FESCAR**: we start the open source project FESCAR based on TXC/GTS since 2019 to work closely with the community in the future.
 
 
 ## Quick Start
@@ -67,7 +67,7 @@ For more details about principle and design, please go to [FESCAR wiki page](htt
 
 ## Documentation
 
-You can view the full documentation from wiki: [FESCAR wiki page](https://github.com/alibaba/fescar/wiki).
+You can view the full documentation from the wiki: [FESCAR wiki page](https://github.com/alibaba/fescar/wiki).
 
 ## Reporting bugs
 
@@ -76,7 +76,7 @@ Please follow the [template](https://github.com/TBD) for reporting any issues.
 
 ## Contributing
 
-Contributors are welcomed to join FEATS project. Please check [CONTRIBUTING](./CONTRIBUTING.md) about how to contribute to this project.
+Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING](./CONTRIBUTING.md) about how to contribute to this project.
 
 
 ## Contact
@@ -84,7 +84,7 @@ Contributors are welcomed to join FEATS project. Please check [CONTRIBUTING](./C
 * [Gitter](https://gitter.im/alibaba/fescar): TBD. FESCAR's IM tool for community messaging, collaboration and discovery.
 * [Twitter](https://twitter.com/fescar): TBD. Follow along for latest FESCAR news on Twitter.
 * [Weibo](https://weibo.com/u/xxxxxxx): TBD. Follow along for latest FESCAR news on Weibo (Twitter of China version).
-* [Segmentfault](https://segmentfault.com/t/fescar): TBD. Get latest notice and prompt help from Segmentfault.
+* [Segmentfault](https://segmentfault.com/t/fescar): TBD. Get the latest notice and prompt help from Segmentfault.
 * Email Group:
      * TBD: FESCAR usage general discussion.
      * TBD: FESCAR developer discussion (APIs, feature design, etc).
@@ -97,4 +97,3 @@ Contributors are welcomed to join FEATS project. Please check [CONTRIBUTING](./C
 ## License
 
 FESCAR is under the Apache 2.0 license. See the [LICENSE](https://github.com/alibaba/fescar/blob/master/LICENSE) file for details.
-
