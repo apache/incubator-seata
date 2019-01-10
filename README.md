@@ -30,7 +30,7 @@ FESCAR is just a solution for problem mentioned above.
 
 Firstly, how to define a **Distributed Transaction**?
 
-We say, a **Distributed Transaction** is a **Global Transaction** which is made up with batch of **Branch Transation**, and normally **Branch Transation** is just **Local Transaction**.
+We say, a **Distributed Transaction** is a **Global Transaction** which is made up with batch of **Branch Transaction**, and normally **Branch Transaction** is just **Local Transaction**.
 
 ![Global & Branch](https://cdn.nlark.com/lark/0/2018/png/18862/1545015454979-a18e16f6-ed41-44f1-9c7a-bd82c4d5ff99.png) 
 
