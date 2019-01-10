@@ -16,13 +16,13 @@
 
 package com.alibaba.fescar.server;
 
-import com.alibaba.fescar.core.exception.AbstractExceptionHander;
+import com.alibaba.fescar.core.exception.AbstractExceptionHandler;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.protocol.transaction.*;
 import com.alibaba.fescar.core.protocol.transaction.GlobalBeginRequest;
 import com.alibaba.fescar.core.rpc.RpcContext;
 
-public abstract class AbstractTCInboundHandler extends AbstractExceptionHander implements TCInboundHandler {
+public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler implements TCInboundHandler {
 
 
     @Override
