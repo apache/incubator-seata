@@ -86,7 +86,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         this.nettyServerConfig = nettyServerConfig;
         this.eventLoopGroupBoss = new NioEventLoopGroup(nettyServerConfig.getBossThreadSize(),
             new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
-        if (NettyServerConfig.enableEpool()) {
+        if (NettyServerConfig.enableEpoll()) {
             this.eventLoopGroupWorker = new EpollEventLoopGroup(nettyServerConfig.getServerWorkerThreads(),
                 new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
                     nettyServerConfig.getServerWorkerThreads()));
