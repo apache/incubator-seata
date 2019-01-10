@@ -48,7 +48,7 @@ public class NettyServerConfig extends NettyBaseConfig {
     private int serverChannelMaxIdleTimeSeconds = 30;
     private static final Configuration CONFIG = new FileConfiguration();
     private static final String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
-    private static final String EPOOL_WORKER_THREAD_PREFIX = "NettyServerEPoolWorker";
+    private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
     private static final String NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";
     private static final String DEFAULT_EXECUTOR_THREAD_PREFIX = "NettyServerBizHandler";
     private static final int DEFAULT_BOSS_THREAD_SIZE = 1;
@@ -93,11 +93,11 @@ public class NettyServerConfig extends NettyBaseConfig {
     }
 
     /**
-     * Enable epool boolean.
+     * Enable epoll boolean.
      *
      * @return the boolean
      */
-    public static boolean enableEpool() {
+    public static boolean enableEpoll() {
         return NettyBaseConfig.SERVER_CHANNEL_CLAZZ.equals(EpollServerSocketChannel.class)
             && Epoll.isAvailable();
 
@@ -281,7 +281,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public String getWorkerThreadPrefix() {
         return CONFIG.getConfig("transport.thread-factory.worker-thread-prefix",
-            enableEpool() ? EPOOL_WORKER_THREAD_PREFIX : NIO_WORKER_THREAD_PREFIX);
+            enableEpoll() ? EPOLL_WORKER_THREAD_PREFIX : NIO_WORKER_THREAD_PREFIX);
     }
 
     /**
