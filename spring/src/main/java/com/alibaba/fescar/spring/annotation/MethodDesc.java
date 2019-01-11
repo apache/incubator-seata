@@ -34,7 +34,7 @@ public class MethodDesc {
     /**
      * Instantiates a new Method desc.
      *
-     * @param transactionAnnotation the trasaction annotation
+     * @param transactionAnnotation the transaction annotation
      * @param method               the method
      */
     public MethodDesc(GlobalTransactional transactionAnnotation, Method method) {
@@ -43,18 +43,18 @@ public class MethodDesc {
     }
 
     /**
-     * Gets trasaction annotation.
+     * Gets transaction annotation.
      *
-     * @return the trasaction annotation
+     * @return the transaction annotation
      */
     public GlobalTransactional getTransactionAnnotation() {
         return transactionAnnotation;
     }
 
     /**
-     * Sets trasaction annotation.
+     * Sets transaction annotation.
      *
-     * @param transactionAnnotation the trasaction annotation
+     * @param transactionAnnotation the transaction annotation
      */
     public void setTransactionAnnotation(GlobalTransactional transactionAnnotation) {
         this.transactionAnnotation = transactionAnnotation;

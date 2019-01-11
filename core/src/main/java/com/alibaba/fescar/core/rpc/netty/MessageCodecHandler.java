@@ -43,7 +43,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageCodecHandler.class);
     private static short MAGIC = (short)0xdada;
-    private static int HEAD_LENGHT = 14;
+    private static int HEAD_LENGTH = 14;
     private static final int FLAG_REQUEST = 0x80;
     private static final int FLAG_ASYNC = 0x40;
     private static final int FLAG_HEARTBEAT = 0x20;
@@ -122,11 +122,11 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
             LOGGER.info("please notice magicIndex is not zero offset!!!");
         }
         in.skipBytes(magicIndex - in.readerIndex());
-        if (in.readableBytes() < HEAD_LENGHT) {
+        if (in.readableBytes() < HEAD_LENGTH) {
             LOGGER.error("decode less than header length");
             return;
         }
-        byte[] buffer = new byte[HEAD_LENGHT];
+        byte[] buffer = new byte[HEAD_LENGTH];
         in.readBytes(buffer);
         ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
         short magic = byteBuffer.getShort();

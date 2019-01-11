@@ -40,7 +40,7 @@ public class Version {
         return VERSION_MAP.get(NetUtil.toStringAddress(c.remoteAddress()));
     }
 
-    public static String checkVersion(String version) throws UncompatibleVersionException {
+    public static String checkVersion(String version) throws IncompatibleVersionException {
         // TODO: check
         return version;
     }
