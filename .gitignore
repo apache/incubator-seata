@@ -1,4 +1,4 @@
-#distribution/*
+distribution/*
 # maven ignore
 target/
 *.jar
