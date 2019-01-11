@@ -81,10 +81,7 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 
 ## Contact
 
-* [Gitter](https://gitter.im/alibaba/fescar): TBD. FESCAR's IM tool for community messaging, collaboration and discovery.
 * [Twitter](https://twitter.com/fescar): TBD. Follow along for latest FESCAR news on Twitter.
-* [Weibo](https://weibo.com/u/xxxxxxx): TBD. Follow along for latest FESCAR news on Weibo (Twitter of China version).
-* [Segmentfault](https://segmentfault.com/t/fescar): TBD. Get the latest notice and prompt help from Segmentfault.
 * Email Group:
      * TBD: FESCAR usage general discussion.
      * TBD: FESCAR developer discussion (APIs, feature design, etc).

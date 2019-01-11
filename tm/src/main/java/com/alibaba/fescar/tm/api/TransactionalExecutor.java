@@ -30,7 +30,7 @@ public interface TransactionalExecutor {
     Object execute() throws Throwable;
 
     /**
-     * Global transacton timeout in MILLISECONDS.
+     * Global transaction timeout in MILLISECONDS.
      *
      * @return timeout in MILLISECONDS.
      */

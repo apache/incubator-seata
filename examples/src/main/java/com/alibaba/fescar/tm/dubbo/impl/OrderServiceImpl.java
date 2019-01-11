@@ -35,6 +35,12 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 
+/**
+ * Please add the follow VM arguments:
+ * <pre>
+ *     -Djava.net.preferIPv4Stack=true
+ * </pre>
+ */
 public class OrderServiceImpl implements OrderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
