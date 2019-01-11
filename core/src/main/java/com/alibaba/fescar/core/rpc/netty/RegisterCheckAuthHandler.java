@@ -39,10 +39,10 @@ public interface RegisterCheckAuthHandler {
     boolean regTransactionManagerCheckAuth(RegisterTMRequest request);
 
     /**
-     * Reg resource manager chec k auth boolean.
+     * Reg resource manager check auth boolean.
      *
      * @param request the request
      * @return the boolean
      */
-    boolean regResourceManagerChecKAuth(RegisterRMRequest request);
+    boolean regResourceManagerCheckAuth(RegisterRMRequest request);
 }

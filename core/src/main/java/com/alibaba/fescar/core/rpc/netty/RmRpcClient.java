@@ -471,7 +471,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
 
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(
-                "register RM sucesss. server version:" + ((RegisterRMResponse)response).getVersion()
+                "register RM success. server version:" + ((RegisterRMResponse)response).getVersion()
                     + ",channel:" + channel);
         }
         if (customerKeys == null) {

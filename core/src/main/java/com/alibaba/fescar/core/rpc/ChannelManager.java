@@ -121,10 +121,10 @@ public class ChannelManager {
      *
      * @param request the request
      * @param channel the channel
-     * @throws UncompatibleVersionException the uncompatible version exception
+     * @throws IncompatibleVersionException the incompatible version exception
      */
     public static void registerTMChannel(RegisterTMRequest request, Channel channel)
-        throws UncompatibleVersionException {
+        throws IncompatibleVersionException {
         Version.checkVersion(request.getVersion());
         RpcContext rpcContext = buildChannelHolder(TransactionRole.TMROLE, request.getVersion(),
             request.getApplicationId(),
@@ -143,10 +143,10 @@ public class ChannelManager {
      *
      * @param resourceManagerRequest the resource manager request
      * @param channel                the channel
-     * @throws UncompatibleVersionException the uncompatible  version exception
+     * @throws IncompatibleVersionException the incompatible  version exception
      */
     public static void registerRMChannel(RegisterRMRequest resourceManagerRequest, Channel channel)
-        throws UncompatibleVersionException {
+        throws IncompatibleVersionException {
         Version.checkVersion(resourceManagerRequest.getVersion());
         Set<String> dbkeySet = dbKeytoSet(resourceManagerRequest.getResourceIds());
         RpcContext rpcContext;
