@@ -162,7 +162,7 @@ public class NettyClientConfig extends NettyBaseConfig {
     }
 
     /**
-     * Enable nactive boolean.
+     * Enable native boolean.
      *
      * @return the boolean
      */
