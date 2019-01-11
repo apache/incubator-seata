@@ -27,6 +27,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+/**
+ * Please add the follow VM arguments:
+ * <pre>
+ *     -Djava.net.preferIPv4Stack=true
+ * </pre>
+ */
 public class AccountServiceImpl implements AccountService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
