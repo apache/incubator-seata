@@ -16,9 +16,9 @@
 
 package com.alibaba.fescar.core.protocol;
 
-public class UncompatibleVersionException extends Exception {
+public class IncompatibleVersionException extends Exception {
 
-    public UncompatibleVersionException(String message) {
+    public IncompatibleVersionException(String message) {
         super(message);
     }
 }

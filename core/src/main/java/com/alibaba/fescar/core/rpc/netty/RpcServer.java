@@ -184,7 +184,7 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
 
     /**
      * Send request.
-     * handle asyn branch commit and rollback
+     * handle async branch commit and rollback
      *
      * @param dbKey         the db key
      * @param clientIp      the client ip
@@ -356,7 +356,7 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
             }
         } else {
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("remove unuse channel:" + ctx.channel());
+                LOGGER.info("remove unused channel:" + ctx.channel());
             }
         }
     }

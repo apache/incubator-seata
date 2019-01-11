@@ -231,7 +231,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         try {
             f.await(this.nettyClientConfig.getConnectTimeoutMillis(), TimeUnit.MILLISECONDS);
             if (f.isCancelled()) {
-                throw new FrameworkException("connect concelled, can not connect to fescar-server.");
+                throw new FrameworkException("connect cancelled, can not connect to fescar-server.");
             } else if (!f.isSuccess()) {
                 throw new FrameworkException("connect failed, can not connect to fescar-server.");
             } else {
