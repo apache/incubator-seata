@@ -1,4 +1,3 @@
-distribution/*
 # maven ignore
 target/
 *.jar
@@ -25,6 +24,7 @@ target/
 *.diff
 *.patch
 *.tmp
+distribution/*
 
 # system ignore
 .DS_Store
