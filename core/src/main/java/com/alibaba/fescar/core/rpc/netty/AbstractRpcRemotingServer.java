@@ -57,6 +57,11 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     private int listenPort;
 
     public void setListenPort(int listenPort) {
+    	
+    	if(listenPort <= 0) {
+    		throw new IllegalArgumentException("listen port: " + listenPort +" is invalid!");
+    	}
+    	
         this.listenPort = listenPort;
     }
 
@@ -100,8 +105,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
             channelHandlers = handlers;
         }
         // init listenPort in constructor so that getListenPort() will always get the exact port
-        listenPort = nettyServerConfig.getDefaultListenPort();
-
+        setListenPort(nettyServerConfig.getDefaultListenPort());
     }
 
     @Override
