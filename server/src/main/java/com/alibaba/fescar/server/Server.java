@@ -34,13 +34,18 @@ public class Server {
 
     public static void main(String[] args) throws IOException {
         RpcServer rpcServer = new RpcServer(WORKING_THREADS);
+        
         int port = 8091;
         if (args.length == 0) {
             rpcServer.setListenPort(port);
         }
 
         if (args.length > 0) {
-            port = Integer.parseInt(args[0]);
+            try {
+                port = Integer.parseInt(args[0]);
+            } catch (NumberFormatException e) {
+                System.err.println("Usage: sh fescar-server.sh $LISTEN_PORT $PATH_FOR_PERSISTENT_DATA");
+            }
             rpcServer.setListenPort(port);
         }
         
