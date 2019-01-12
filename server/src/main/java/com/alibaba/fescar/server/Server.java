@@ -45,6 +45,7 @@ public class Server {
                 port = Integer.parseInt(args[0]);
             } catch (NumberFormatException e) {
                 System.err.println("Usage: sh fescar-server.sh $LISTEN_PORT $PATH_FOR_PERSISTENT_DATA");
+                System.exit(0);
             }
             rpcServer.setListenPort(port);
         }
