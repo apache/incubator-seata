@@ -34,7 +34,7 @@ We say, a **Distributed Transaction** is a **Global Transaction** which is made 
 
 ![Global & Branch](https://cdn.nlark.com/lark/0/2018/png/18862/1545015454979-a18e16f6-ed41-44f1-9c7a-bd82c4d5ff99.png) 
 
-There are 3 basic components in FESACR: 
+There are 3 basic components in FESCAR: 
 
 - **Transaction Coordinator(TC):** Maintain status of global and branch transactions, drive the global commit or rollback.
 - **Transaction Manager(TM):** Define the scope of global transaction: begin a global transaction, commit or rollback a global transaction.
@@ -81,10 +81,7 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 
 ## Contact
 
-* [Gitter](https://gitter.im/alibaba/fescar): TBD. FESCAR's IM tool for community messaging, collaboration and discovery.
 * [Twitter](https://twitter.com/fescar): TBD. Follow along for latest FESCAR news on Twitter.
-* [Weibo](https://weibo.com/u/xxxxxxx): TBD. Follow along for latest FESCAR news on Weibo (Twitter of China version).
-* [Segmentfault](https://segmentfault.com/t/fescar): TBD. Get the latest notice and prompt help from Segmentfault.
 * Email Group:
      * TBD: FESCAR usage general discussion.
      * TBD: FESCAR developer discussion (APIs, feature design, etc).

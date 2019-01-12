@@ -107,8 +107,8 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
         sb.append("(");
 
         int paramPos = 0;
-        for (Class<?> claz : params) {
-            sb.append(claz.getName());
+        for (Class<?> clazz : params) {
+            sb.append(clazz.getName());
             if (++paramPos < params.length) {
                 sb.append(",");
             }

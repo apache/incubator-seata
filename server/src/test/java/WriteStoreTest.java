@@ -101,7 +101,7 @@ public class WriteStoreTest {
                 }
 
                 @Override
-                public List<GlobalSession> findGlobalSessions(SessionCondition condtion) {
+                public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
                     List<GlobalSession> globalSessions = new ArrayList<>();
                     int begin = 10000;
                     int num = 1000;

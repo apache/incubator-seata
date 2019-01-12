@@ -94,7 +94,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
 
         boolean isSuccess = false;
         try {
-            if (null == checkAuthHandler || null != checkAuthHandler && checkAuthHandler.regResourceManagerChecKAuth(
+            if (null == checkAuthHandler || null != checkAuthHandler && checkAuthHandler.regResourceManagerCheckAuth(
                 message)) {
                 ChannelManager.registerRMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());

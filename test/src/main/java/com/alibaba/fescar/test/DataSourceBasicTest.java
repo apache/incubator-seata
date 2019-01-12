@@ -27,7 +27,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public class DataSourceBasicTest {
-    public void runBussiness(JdbcTemplate jdbcTemplate) {
+    public void runBusiness(JdbcTemplate jdbcTemplate) {
 //        jdbcTemplate.update("insert into user0 (id, name, gmt) values (?, ?, ?)",
 //                new Object[] { 1, "xxx", new Date() });
         jdbcTemplate.update("update user0 set name = 'yyyy' where id = ?", new Object[] {1});
@@ -86,7 +86,7 @@ public class DataSourceBasicTest {
 //        directJdbcTemplate.execute("truncate table user0");
 
         RootContext.bind("test_xid");
-        clientTest.runBussiness(jdbcTemplate);
+        clientTest.runBusiness(jdbcTemplate);
 
         context.close();
         System.exit(0);
