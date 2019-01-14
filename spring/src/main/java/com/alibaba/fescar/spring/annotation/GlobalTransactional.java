@@ -37,6 +37,6 @@ public @interface GlobalTransactional {
      * Given name of the global transaction instance.
      * @return Given name.
      */
-    String name() default "default";
+    String name() default "";
 
 }
