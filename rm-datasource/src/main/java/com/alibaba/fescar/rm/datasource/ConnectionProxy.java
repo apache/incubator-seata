@@ -83,7 +83,12 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     public void prepareUndoLog(SQLType sqlType, String tableName, TableRecords beforeImage, TableRecords afterImage) throws SQLException {
-        TableRecords lockKeyRecords = afterImage;
+        
+    	if(beforeImage.getRows().size() == 0 && afterImage.getRows().size() == 0) {
+    		return;
+    	}
+    	
+    	TableRecords lockKeyRecords = afterImage;
         if (sqlType == SQLType.DELETE) {
             lockKeyRecords = beforeImage;
         }
@@ -124,30 +129,37 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void commit() throws SQLException {
+    	
         if (context.inGlobalTransaction()) {
-            try {
-                register();
-            } catch (TransactionException e) {
-                recognizeLockKeyConflictException(e);
-            }
+        	
+        	//when something changed,then we should register it
+        	if(context.hasUndoLog()) {
+                try {
+                    register();
+                } catch (TransactionException e) {
+                    recognizeLockKeyConflictException(e);
+                }
 
-            try {
-                if (context.hasUndoLog()) {
+                try {
                     UndoLogManager.flushUndoLogs(this);
+                    targetConnection.commit();
+                } catch (Throwable ex) {
+                    report(false);
+                    if (ex instanceof SQLException) {
+                        throw (SQLException) ex;
+                    } else {
+                        throw new SQLException(ex);
+                    }
+
                 }
+                report(true);
+                context.reset();
+        	} else {
+            	//when nothing changed we just release the connection
+        		LOGGER.warn("nothing changed in this local branch! context:" + context);
                 targetConnection.commit();
-            } catch (Throwable ex) {
-                report(false);
-                if (ex instanceof SQLException) {
-                    throw (SQLException) ex;
-                } else {
-                    throw new SQLException(ex);
-                }
-
-            }
-            report(true);
-            context.reset();
-
+        	}
+        	
         } else {
             targetConnection.commit();
         }
