@@ -157,7 +157,7 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
             leftLen -= resourceIdLen;
         }
 
-        int applicationDataLen = in.readShort();
+        int applicationDataLen = in.readInt();
         if (applicationDataLen > 0) {
             if (leftLen < applicationDataLen) {
                 return false;
