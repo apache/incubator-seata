@@ -158,6 +158,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             	//when nothing changed we just release the connection
         		LOGGER.warn("nothing changed in this local branch! context:" + context);
                 targetConnection.commit();
+                context.reset();
         	}
         	
         } else {
