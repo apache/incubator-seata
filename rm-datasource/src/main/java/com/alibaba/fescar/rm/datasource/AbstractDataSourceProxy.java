@@ -38,17 +38,17 @@ public abstract class AbstractDataSourceProxy implements DataSource {
     }
 
     @Override
-    public <T> T unwrap(Class<T> iface) throws SQLException {
+    public <T> T unwrap(Class<T> iface) {
         return targetDataSource.unwrap(iface);
     }
 
     @Override
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
+    public boolean isWrapperFor(Class<?> iface) {
         return targetDataSource.isWrapperFor(iface);
     }
 
     @Override
-    public PrintWriter getLogWriter() throws SQLException {
+    public PrintWriter getLogWriter() {
         return targetDataSource.getLogWriter();
     }
 
@@ -58,12 +58,12 @@ public abstract class AbstractDataSourceProxy implements DataSource {
     }
 
     @Override
-    public void setLoginTimeout(int seconds) throws SQLException {
+    public void setLoginTimeout(int seconds) {
         targetDataSource.setLoginTimeout(seconds);
     }
 
     @Override
-    public int getLoginTimeout() throws SQLException {
+    public int getLoginTimeout() {
         return targetDataSource.getLoginTimeout();
     }
 
