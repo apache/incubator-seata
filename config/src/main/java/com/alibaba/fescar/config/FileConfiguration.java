@@ -64,7 +64,7 @@ public class FileConfiguration implements Configuration {
     @Override
     public int getInt(String dataId, int defaultValue, long timeoutMills) {
         String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        return Integer.valueOf(result).intValue();
+        return Integer.parseInt(result);
     }
 
     @Override
@@ -80,7 +80,7 @@ public class FileConfiguration implements Configuration {
     @Override
     public long getLong(String dataId, long defaultValue, long timeoutMills) {
         String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        return Long.valueOf(result).longValue();
+        return Long.parseLong(result);
     }
 
     @Override
@@ -96,7 +96,7 @@ public class FileConfiguration implements Configuration {
     @Override
     public boolean getBoolean(String dataId, boolean defaultValue, long timeoutMills) {
         String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        return Boolean.valueOf(result).booleanValue();
+        return Boolean.parseBoolean(result);
     }
 
     @Override
