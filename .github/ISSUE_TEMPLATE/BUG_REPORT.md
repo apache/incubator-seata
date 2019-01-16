@@ -33,6 +33,6 @@ Just put your stack trace here!
 
 ### Ⅵ. Environment:
 
-- jdk version :
+- JDK version :
 - OS :
 - Others:
