@@ -21,7 +21,7 @@ public class ConfigurationKeys {
     public static final String SERVICE_PREFIX = "service.";
     public static final String SERVICE_GROUP_MAPPING_PREFIX = SERVICE_PREFIX + "vgroup_mapping.";
     public static final String GROUPLIST_POSTFIX = ".grouplist";
-    public static final String SERVER_NODE_SPLIT_CHAR = "\n";
+    public static final String SERVER_NODE_SPLIT_CHAR = System.getProperty("line.separator");
 
     public static final String ENABLE_DEGRADE_POSTFIX = "enableDegrade";
 
