@@ -30,4 +30,5 @@ distribution/*
 .DS_Store
 Thumbs.db
 *.orig
-
+*.class
+/distribution/*
