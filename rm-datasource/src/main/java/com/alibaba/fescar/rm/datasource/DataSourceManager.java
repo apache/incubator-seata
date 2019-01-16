@@ -159,9 +159,9 @@ public class DataSourceManager implements ResourceManager {
             UndoLogManager.undo(dataSourceProxy, xid, branchId);
         } catch (TransactionException te) {
             if (te.getCode() == TransactionExceptionCode.BranchRollbackFailed_Unretriable) {
-                return BranchStatus.PhaseTwo_RollbackFailed_Unretriable;
+                return BranchStatus.PhaseTwo_RollbackFailed_Unretryable;
             } else {
-                return BranchStatus.PhaseTwo_RollbackFailed_Retriable;
+                return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
             }
         }
         return BranchStatus.PhaseTwo_Rollbacked;
