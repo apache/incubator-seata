@@ -102,7 +102,7 @@ public class NettyBaseConfig {
     static {
         TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.valueOf(CONFIG.getConfig("transport.type"));
         String workerThreadSize = CONFIG.getConfig("transport.thread-factory.worker-thread-size");
-        if (StringUtils.isNotBlank(workerThreadSize) && StringUtils.isNumericSpace(workerThreadSize)) {
+        if (StringUtils.isNotBlank(workerThreadSize) && StringUtils.isNumeric(workerThreadSize)) {
             WORKER_THREAD_SIZE = Integer.parseInt(workerThreadSize);
         } else if (null != WorkThreadMode.getModeByName(workerThreadSize)) {
             WORKER_THREAD_SIZE = WorkThreadMode.getModeByName(workerThreadSize).getValue();
