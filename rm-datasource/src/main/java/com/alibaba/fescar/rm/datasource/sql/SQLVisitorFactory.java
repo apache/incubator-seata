@@ -54,16 +54,4 @@ public class SQLVisitorFactory {
         }
         return recognizer;
     }
-
-    public static void main(String[] args) throws Throwable {
-        String sql = "update material_inventory SET version = ? WHERE is_deleted = 0 and id = ? and version = ?";
-
-        for (int i=0; i<100; i++) {
-            long begin = System.currentTimeMillis();
-            SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-            long end = System.currentTimeMillis();
-            System.out.println(String.format("SQL:[%s] parser too slow, cost [%d] ms.", sql, (end - begin)));
-        }
-
-    }
 }
