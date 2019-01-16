@@ -15,7 +15,7 @@ about: If you would like to report a issue to Fescar, please use this template.
   If there is an exception, please attach the exception trace:
 
 ```
-Just put your stack trace here!
+Just paste your stack trace here!
 ```
 
 
