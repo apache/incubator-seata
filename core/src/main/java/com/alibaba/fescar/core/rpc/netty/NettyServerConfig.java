@@ -45,7 +45,7 @@ public class NettyServerConfig extends NettyBaseConfig {
     private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
     private boolean enableServerPooledByteBufAllocator = true;
     private int serverChannelMaxIdleTimeSeconds = 30;
-    private static final Configuration CONFIG =  ConfigurationFactory.getInstance();
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
     private static final String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
     private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
     private static final String NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";
@@ -60,18 +60,18 @@ public class NettyServerConfig extends NettyBaseConfig {
      * The constant DIRECT_BYTE_BUF_ALLOCATOR.
      */
     public static final PooledByteBufAllocator DIRECT_BYTE_BUF_ALLOCATOR =
-        new PooledByteBufAllocator(
-            true,
-            WORKER_THREAD_SIZE,
-            WORKER_THREAD_SIZE,
-            2048 * 64,
-            10,
-            512,
-            256,
-            64,
-            true,
-            0
-        );
+            new PooledByteBufAllocator(
+                    true,
+                    WORKER_THREAD_SIZE,
+                    WORKER_THREAD_SIZE,
+                    2048 * 64,
+                    10,
+                    512,
+                    256,
+                    64,
+                    true,
+                    0
+            );
 
     /**
      * Gets server selector threads.
@@ -98,7 +98,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public static boolean enableEpoll() {
         return NettyBaseConfig.SERVER_CHANNEL_CLAZZ.equals(EpollServerSocketChannel.class)
-            && Epoll.isAvailable();
+                && Epoll.isAvailable();
 
     }
 
@@ -280,7 +280,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public String getWorkerThreadPrefix() {
         return CONFIG.getConfig("transport.thread-factory.worker-thread-prefix",
-            enableEpoll() ? EPOLL_WORKER_THREAD_PREFIX : NIO_WORKER_THREAD_PREFIX);
+                enableEpoll() ? EPOLL_WORKER_THREAD_PREFIX : NIO_WORKER_THREAD_PREFIX);
     }
 
     /**
@@ -290,7 +290,7 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public String getExecutorThreadPrefix() {
         return CONFIG.getConfig("transport.thread-factory.server-executor-thread-prefix",
-            DEFAULT_EXECUTOR_THREAD_PREFIX);
+                DEFAULT_EXECUTOR_THREAD_PREFIX);
     }
 
     /**
