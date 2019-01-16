@@ -49,7 +49,7 @@ public class EnhancedServiceLoader {
     private static Map<Class, List<Class>> providers = new ConcurrentHashMap<Class, List<Class>>();
 
     /**
-     * 指定classloader加载server provider
+     * 指定classLoader加载server provider
      *
      * @param service
      * @param loader
@@ -83,7 +83,7 @@ public class EnhancedServiceLoader {
     }
 
     /**
-     * 指定classloader加载server provider
+     * 指定classLoader加载server provider
      *
      * @param service
      * @param loader

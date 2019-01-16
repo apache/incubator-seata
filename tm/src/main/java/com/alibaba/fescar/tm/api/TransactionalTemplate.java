@@ -28,7 +28,7 @@ public class TransactionalTemplate {
      *
      * @param business the business
      * @return the object
-     * @throws ExecutionException the execution exception
+     * @throws TransactionalExecutor.ExecutionException the execution exception
      */
     public Object execute(TransactionalExecutor business) throws TransactionalExecutor.ExecutionException {
 
