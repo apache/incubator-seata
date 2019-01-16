@@ -1,11 +1,10 @@
-<!-- 
-Please make sure you have read and understood the contributing guidelines; -->
+Please make sure you have read and understood the contributing guidelines
 
 ### Ⅰ. Describe what this PR did
 
 
 ### Ⅱ. Does this pull request fix one issue?
-<!--If that, add "fixes #xxx" below in the next line, for example, fixes #99. -->
+If that, add "fixes #xxx" below in the next line, for example, fixes #99.
 
 
 ### Ⅲ. Why don't you add test cases (unit test/integration test)? 
