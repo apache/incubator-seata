@@ -16,6 +16,7 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
+import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
 
@@ -178,7 +179,7 @@ public class NettyBaseConfig {
         /**
          * Busy pin work thread mode.
          */
-        busyPin(NettyRuntime.availableProcessors() + 1),
+        BusyPin(NettyRuntime.availableProcessors() + 1),
         /**
          * Default work thread mode.
          */
@@ -210,12 +211,12 @@ public class NettyBaseConfig {
                 return Auto;
             } else if (Pin.name().equalsIgnoreCase(name)) {
                 return Pin;
-            } else if (busyPin.name().equalsIgnoreCase(name)) {
-                return busyPin;
+            } else if (BusyPin.name().equalsIgnoreCase(name)) {
+                return BusyPin;
             } else if (Default.name().equalsIgnoreCase(name)) {
                 return Default;
             } else {
-                return null;
+                throw new ShouldNeverHappenException("incorrect workThreadMode.");
             }
         }
 
