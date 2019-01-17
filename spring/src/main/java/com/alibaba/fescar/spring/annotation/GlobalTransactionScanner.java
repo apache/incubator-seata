@@ -183,7 +183,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 PROXYED_SET.add(beanName);
                 Class<?> serviceInterface = findTargetClass(bean);
                 Method[] methods = serviceInterface.getMethods();
-                LinkedList<MethodDesc> methodDescList = new LinkedList<MethodDesc>();
+                LinkedList<MethodDesc> methodDescList = new LinkedList<>();
                 for (Method method : methods) {
                     GlobalTransactional anno = method.getAnnotation(GlobalTransactional.class);
                     if (anno != null) {
@@ -193,8 +193,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 if (methodDescList.isEmpty()) {
                     return bean;
                 }
-
-                interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
+                if (interceptor == null) {
+                    interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
+                }
                 if (!AopUtils.isAopProxy(bean)) {
                     bean = super.wrapIfNecessary(bean, beanName, cacheKey);
                 } else {
