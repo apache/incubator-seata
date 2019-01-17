@@ -30,7 +30,7 @@ import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDMLBaseExecutor.class);
-	
+    
     public AbstractDMLBaseExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
@@ -69,14 +69,13 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
                 }
             }
 
-        } catch(Exception e) {
-        	//when exception occur in finally,this exception will lost, so just print it here
-        	LOGGER.error("exception occur",e);
-        	throw e;
+        } catch (Exception e) {
+            // when exception occur in finally,this exception will lost, so just print it here
+            LOGGER.error("exception occur", e);
+            throw e;
         } 
         finally {
             connectionProxy.setAutoCommit(true);
-
         }
         return result;
     }

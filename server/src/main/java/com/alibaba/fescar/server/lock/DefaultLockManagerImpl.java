@@ -51,10 +51,10 @@ public class DefaultLockManagerImpl implements LockManager {
         
         String lockKey = branchSession.getLockKey();
         if(StringUtils.isEmpty(lockKey)) {
-        	return true;
+            return true;
         }
         
-		String[] tableGroupedLockKeys = lockKey.split(";");
+            String[] tableGroupedLockKeys = lockKey.split(";");
         for (String tableGroupedLockKey : tableGroupedLockKeys) {
             int idx = tableGroupedLockKey.indexOf(":");
             if (idx < 0) {
