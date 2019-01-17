@@ -342,24 +342,29 @@ public class ChannelManager {
                 RpcContext exactRpcContext = portMap.get(port);
                 if (exactRpcContext != null) {
                     if (exactRpcContext.getChannel().isActive()) {
-                        return exactRpcContext.getChannel();
+                        resultChannel = exactRpcContext.getChannel();
                     }
                 }
                 // The original channel was broken, try another one.
-                if (null != portMap && !portMap.isEmpty()) {
-                    for (ConcurrentMap.Entry<Integer, RpcContext> portMapEntry : portMap.entrySet()) {
-                        Channel channel = portMapEntry.getValue().getChannel();
-                        if (channel.isActive()) {
-                            resultChannel = channel;
-                            if (LOGGER.isInfoEnabled()) {
-                                LOGGER.info("Choose " + channel + " on the same IP[" + targetIP + "]  as alternative of " + clientId);
+                if (resultChannel == null) {
+                    if (null != portMap && !portMap.isEmpty()) {
+                        for (ConcurrentMap.Entry<Integer, RpcContext> portMapEntry : portMap.entrySet()) {
+                            Channel channel = portMapEntry.getValue().getChannel();
+                            if (channel.isActive()) {
+                                resultChannel = channel;
+                                if (LOGGER.isInfoEnabled()) {
+                                    LOGGER.info(
+                                        "Choose " + channel + " on the same IP[" + targetIP + "]  as alternative of "
+                                            + clientId);
+                                }
+                                break;
                             }
-                            break;
+                            portMap.remove(portMapEntry.getKey());
                         }
-                        portMap.remove(portMapEntry.getKey());
                     }
                 }
-                if (null == resultChannel) {
+                // No channel on the this app node, try another one.
+                if (resultChannel == null) {
                     for (ConcurrentMap.Entry<String, ConcurrentMap<Integer, RpcContext>> clientIpMapEntry : targetIPMap
                         .entrySet()) {
                         if (clientIpMapEntry.getKey().equals(targetIP)) { continue; }
@@ -382,9 +387,44 @@ public class ChannelManager {
                     }
                 }
             }
+
+            if (resultChannel == null) {
+                resultChannel = tryOtherApp(applicationIdMap, resourceId, applicationId, clientId);
+            }
         }
 
         return resultChannel;
+
+    }
+
+    private static Channel tryOtherApp(ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
+        RpcContext>>> applicationIdMap, String myResourceId, String myApplicationId, String myClientId) {
+        for (String applicationId : applicationIdMap.keySet()) {
+            if (applicationId.equals(myApplicationId)) {
+                continue;
+            }
+            ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> targetIPMap = applicationIdMap.get(applicationId);
+            if (targetIPMap == null || targetIPMap.isEmpty()) {
+                return null;
+            }
+            for (String targetIP : targetIPMap.keySet()) {
+                ConcurrentMap<Integer, RpcContext> portMap = targetIPMap.get(targetIP);
+                if (portMap == null || portMap.isEmpty()) {
+                    return null;
+                }
+                for (RpcContext rpcContext : portMap.values()) {
+                    if (rpcContext.getChannel().isActive()) {
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info(
+                                "Choose " + rpcContext.getChannel() + " on the same resource[" + myResourceId + "]  as alternative of "
+                                    + myClientId);
+                        }
+                        return rpcContext.getChannel();
+                    }
+                }
+            }
+        }
+        return null;
 
     }
 }
