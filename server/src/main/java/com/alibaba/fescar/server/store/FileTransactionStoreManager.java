@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -263,7 +265,8 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
         public void run() {
             while (!stopping) {
                 try {
-                    TransactionWriteFuture transactionWriteFuture = transactionWriteFutureQueue.poll(MAX_POOL_TIME_MILLS,
+                    TransactionWriteFuture transactionWriteFuture = transactionWriteFutureQueue.poll(
+                        MAX_POOL_TIME_MILLS,
                         TimeUnit.MILLISECONDS);
                     if (null == transactionWriteFuture) {
                         flushOnCondition();
@@ -350,12 +353,9 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                     }
                 }
                 currFileChannel.force(true);
-                File hisDataFile = new File(hisFullFileName);
-                if (hisDataFile.exists()) {
-                    hisDataFile.delete();
-                }
                 closeFile(currRaf, currFileChannel);
-                currDataFile.renameTo(new File(hisFullFileName));
+                Files.move(currDataFile.toPath(), new File(hisFullFileName).toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException exx) {
                 LOGGER.error("save history data file error," + exx.getMessage());
             } finally {
