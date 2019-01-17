@@ -180,7 +180,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 if (PROXYED_SET.contains(beanName)) {
                     return bean;
                 }
-                PROXYED_SET.add(beanName);
                 Class<?> serviceInterface = findTargetClass(bean);
                 Method[] methods = serviceInterface.getMethods();
                 LinkedList<MethodDesc> methodDescList = new LinkedList<>();
@@ -198,6 +197,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 }
                 if (!AopUtils.isAopProxy(bean)) {
                     bean = super.wrapIfNecessary(bean, beanName, cacheKey);
+                    PROXYED_SET.add(beanName);
                 } else {
                     AdvisedSupport advised = getAdvisedSupport(bean);
                     Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
