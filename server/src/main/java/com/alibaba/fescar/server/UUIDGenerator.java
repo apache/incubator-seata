@@ -28,14 +28,14 @@ public class UUIDGenerator {
 
     private static AtomicLong UUID = new AtomicLong(1000);
 
-    private static int UUID_INTERNAL = 200000000;
+    private static int UUID_INTERNAL = 2000000000;
 
     public static long generateUUID() {
         long id = UUID.incrementAndGet();
-        if (id > 2000000000) {
+        if (id > UUID_INTERNAL) {
             synchronized (UUID) {
                 if (UUID.get() >= id) {
-                    id -= 2000000000;
+                    id -= UUID_INTERNAL;
                     UUID.set(id);
                 }
             }
