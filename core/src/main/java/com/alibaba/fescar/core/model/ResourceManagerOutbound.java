@@ -23,7 +23,7 @@ import com.alibaba.fescar.core.exception.TransactionException;
  */
 public interface ResourceManagerOutbound {
 
-    Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys) throws
+    Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys,String branchApplicationId) throws
         TransactionException;
 
     void branchReport(String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException;

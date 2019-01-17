@@ -49,13 +49,13 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys) throws TransactionException {
+    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys,String branchApplicationId) throws TransactionException {
         GlobalSession globalSession = assertGlobalSession(XID.getTransactionId(xid), GlobalStatus.Begin);
 
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(XID.getTransactionId(xid));
         branchSession.setBranchId(UUIDGenerator.generateUUID());
-        branchSession.setApplicationId(globalSession.getApplicationId());
+        branchSession.setApplicationId(branchApplicationId);
         branchSession.setTxServiceGroup(globalSession.getTransactionServiceGroup());
         branchSession.setBranchType(branchType);
         branchSession.setResourceId(resourceId);

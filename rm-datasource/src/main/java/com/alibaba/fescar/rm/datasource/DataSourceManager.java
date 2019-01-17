@@ -47,7 +47,7 @@ public class DataSourceManager implements ResourceManager {
     }
 
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys) throws TransactionException {
+    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys,String branchApplicationId) throws TransactionException {
         try {
             BranchRegisterRequest request = new BranchRegisterRequest();
             request.setTransactionId(XID.getTransactionId(xid));

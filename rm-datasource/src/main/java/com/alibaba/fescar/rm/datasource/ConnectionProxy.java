@@ -67,7 +67,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         // Just check lock without requiring lock by now.
         String lockKeys = buildLockKey(records);
         try {
-            DataSourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(), null, context.getXid(), lockKeys);
+            DataSourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(), null, context.getXid(), lockKeys,null);
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e);
         }
@@ -155,7 +155,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private void register() throws TransactionException {
         Long branchId = DataSourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
-                null, context.getXid(), context.buildLockKeys());
+                null, context.getXid(), context.buildLockKeys(),null);
         context.setBranchId(branchId);
     }
 

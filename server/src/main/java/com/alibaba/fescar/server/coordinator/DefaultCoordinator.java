@@ -111,7 +111,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         response.setTransactionId(request.getTransactionId());
         response.setBranchId(
             core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
-                XID.generateXID(request.getTransactionId()), request.getLockKey()));
+                XID.generateXID(request.getTransactionId()), request.getLockKey(),rpcContext.getApplicationId()));
 
     }
 
@@ -145,7 +145,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             BranchSession branchSession = globalSession.getBranch(branchId);
 
             BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSynRequest(resourceId,
-                branchSession.getClientId(), globalSession.getApplicationId(), request);
+                branchSession.getClientId(), branchSession.getApplicationId(), request);
             return response.getBranchStatus();
         } catch (IOException e) {
             throw new TransactionException(FailedToSendBranchCommitRequest, branchId + "/" + xid, e);
@@ -169,7 +169,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             BranchSession branchSession = globalSession.getBranch(branchId);
 
             BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSynRequest(resourceId,
-                branchSession.getClientId(), globalSession.getApplicationId(), request);
+                branchSession.getClientId(), branchSession.getApplicationId(), request);
             return response.getBranchStatus();
         } catch (IOException e) {
             throw new TransactionException(FailedToSendBranchRollbackRequest, branchId + "/" + xid, e);
