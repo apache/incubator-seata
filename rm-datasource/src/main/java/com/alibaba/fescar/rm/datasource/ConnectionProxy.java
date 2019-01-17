@@ -132,34 +132,26 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     	
         if (context.inGlobalTransaction()) {
         	
-        	//when something changed,then we should register it
-        	if(context.hasUndoLog()) {
-                try {
-                    register();
-                } catch (TransactionException e) {
-                    recognizeLockKeyConflictException(e);
-                }
+            try {
+                register();
+            } catch (TransactionException e) {
+                recognizeLockKeyConflictException(e);
+            }
 
-                try {
-                    UndoLogManager.flushUndoLogs(this);
-                    targetConnection.commit();
-                } catch (Throwable ex) {
-                    report(false);
-                    if (ex instanceof SQLException) {
-                        throw (SQLException) ex;
-                    } else {
-                        throw new SQLException(ex);
-                    }
-
-                }
-                report(true);
-                context.reset();
-        	} else {
-            	//when nothing changed we just release the connection
-        		LOGGER.warn("nothing changed in this local branch! context:" + context);
+            try {
+                UndoLogManager.flushUndoLogs(this);
                 targetConnection.commit();
-                context.reset();
-        	}
+            } catch (Throwable ex) {
+                report(false);
+                if (ex instanceof SQLException) {
+                    throw (SQLException) ex;
+                } else {
+                    throw new SQLException(ex);
+                }
+
+            }
+            report(true);
+            context.reset();
         	
         } else {
             targetConnection.commit();
