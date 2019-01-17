@@ -19,8 +19,6 @@ package com.alibaba.fescar.core.rpc.netty;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
-import com.alibaba.fescar.common.exception.FrameworkErrorCode;
-import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.protocol.HeartbeatMessage;
 import com.alibaba.fescar.core.protocol.RegisterRMRequest;
@@ -183,62 +181,6 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
     }
 
     /**
-     * Send request.
-     * handle async branch commit and rollback
-     *
-     * @param dbKey         the db key
-     * @param clientIp      the client ip
-     * @param clientAppName the client app name
-     * @param msg           the msg
-     */
-    @Override
-    public void sendRequest(String dbKey, String clientIp, String clientAppName, Object msg) {
-        Channel clientChannel = ChannelManager.getChannel(dbKey, clientIp, clientAppName);
-        if (clientChannel == null) {
-            throw new FrameworkException("rm client is not connected. dbkey:" + dbKey
-                + ",clientIp:" + clientIp);
-        } else {
-            try {
-                super.sendRequest(clientChannel, msg);
-            } catch (FrameworkException e) {
-                if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable) {
-                    ChannelManager.releaseRpcContext(clientChannel);
-                    throw e;
-                }
-            }
-        }
-    }
-
-    /**
-     * Send response.
-     * redress,merge msg
-     *
-     * @param msgId         the msg id
-     * @param dbKey         the db key
-     * @param clientIp      the client ip
-     * @param clientAppName the client app name
-     * @param msg           the msg
-     */
-    @Override
-    public void sendResponse(long msgId, String dbKey, String clientIp, String clientAppName,
-                             Object msg) {
-        Channel clientChannel = ChannelManager.getChannel(dbKey, clientIp, clientAppName);
-        if (clientChannel != null) {
-            try {
-                super.sendResponse(msgId, clientChannel, msg);
-            } catch (FrameworkException e) {
-                if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable) {
-                    LOGGER.error("channel is not writeable,channel:" + clientChannel);
-                    ChannelManager.releaseRpcContext(clientChannel);
-                }
-                throw e;
-            }
-        } else {
-            throw new RuntimeException("channel is error. channel:" + clientChannel);
-        }
-    }
-
-    /**
      * Send response.
      * rm reg,rpc reg,inner response
      *
@@ -263,40 +205,38 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
      * Send request with response object.
      * send syn request for rm
      *
-     * @param dbKey         the db key
-     * @param clientIp      the client ip
-     * @param clientAppName the client app name
-     * @param msg           the msg
+     * @param resourceId         the db key
+     * @param clientId      the client ip
+     * @param message           the message
      * @param timeout       the timeout
      * @return the object
      * @throws TimeoutException the timeout exception
      */
     @Override
-    public Object sendSynRequest(String dbKey, String clientIp, String clientAppName, Object msg,
-                                 long timeout) throws TimeoutException {
-        Channel clientChannel = ChannelManager.getChannel(dbKey, clientIp, clientAppName);
-        if (clientChannel != null) {
-            return super.sendAsyncRequestWithResponse(null, clientChannel, msg, timeout);
-        } else {
-            throw new RuntimeException("rm client is not connected. dbkey:" + dbKey
-                + ",clientIp:" + clientIp);
+    public Object sendSyncRequest(String resourceId, String clientId, Object message,
+                                  long timeout) throws TimeoutException {
+        Channel clientChannel = ChannelManager.getChannel(resourceId, clientId);
+        if (clientChannel == null) {
+            throw new RuntimeException("rm client is not connected. dbkey:" + resourceId
+                + ",clientId:" + clientId);
+
         }
+        return sendAsyncRequestWithResponse(null, clientChannel, message, timeout);
     }
 
     /**
      * Send request with response object.
      *
-     * @param dbKey         the db key
-     * @param clientIp      the client ip
-     * @param clientAppName the client app name
-     * @param msg           the msg
+     * @param resourceId         the db key
+     * @param clientId      the client ip
+     * @param message           the msg
      * @return the object
      * @throws TimeoutException the timeout exception
      */
     @Override
-    public Object sendSynRequest(String dbKey, String clientIp, String clientAppName, Object msg)
+    public Object sendSyncRequest(String resourceId, String clientId, Object message)
         throws TimeoutException {
-        return sendSynRequest(dbKey, clientIp, clientAppName, msg, NettyServerConfig.getRpcRequestTimeout());
+        return sendSyncRequest(resourceId, clientId, message, NettyServerConfig.getRpcRequestTimeout());
     }
 
     /**
