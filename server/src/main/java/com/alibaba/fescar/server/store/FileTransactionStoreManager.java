@@ -175,7 +175,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
 
         } catch (IOException exx) {
         } finally {
-            closeFile(raf, null);
+            closeFile(raf);
         }
         return false;
     }
@@ -226,7 +226,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                         recoverCurrOffset = fileChannel.position();
                     }
                 }
-                closeFile(raf, fileChannel);
+                closeFile(raf);
             } catch (IOException exx) {
                 LOGGER.error("file close error," + exx.getMessage());
             }
@@ -239,12 +239,8 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
         return file.getName().endsWith(HIS_DATA_FILENAME_POSTFIX);
     }
 
-    private void closeFile(RandomAccessFile raf, FileChannel fileChannel) {
+    private void closeFile(RandomAccessFile raf) {
         try {
-            if (null != fileChannel) {
-                fileChannel.close();
-                fileChannel = null;
-            }
             if (null != raf) {
                 raf.close();
                 raf = null;
@@ -354,7 +350,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                 if (hisDataFile.exists()) {
                     hisDataFile.delete();
                 }
-                closeFile(currRaf, currFileChannel);
+                closeFile(currRaf);
                 currDataFile.renameTo(new File(hisFullFileName));
             } catch (IOException exx) {
                 LOGGER.error("save history data file error," + exx.getMessage());
