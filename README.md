@@ -1,8 +1,9 @@
 # FESCAR: Fast & Easy Commit And Rollback
 
-[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-
--------
+[![Build Status](https://travis-ci.org/alibaba/fescar.svg?branch=develop)](https://travis-ci.org/alibaba/fescar)
+[![codecov](https://codecov.io/gh/alibaba/fescar/branch/develop/graph/badge.svg)](https://codecov.io/gh/alibaba/fescar)
+![license](https://img.shields.io/github/license/alibaba/fescar.svg)
+[![](https://img.shields.io/twitter/follow/fescar.svg?label=Follow&style=social&logoWidth=0)](https://twitter.com/intent/follow?screen_name=fescar)
 
 ## What is FESCAR?
 
