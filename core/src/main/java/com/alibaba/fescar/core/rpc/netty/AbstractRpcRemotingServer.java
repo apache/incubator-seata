@@ -112,7 +112,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
             .channel(nettyServerConfig.SERVER_CHANNEL_CLAZZ)
             .option(ChannelOption.SO_BACKLOG, nettyServerConfig.getSoBackLogSize())
             .option(ChannelOption.SO_REUSEADDR, true)
-            .option(ChannelOption.SO_KEEPALIVE, true)
+            .childOption(ChannelOption.SO_KEEPALIVE, true)
             .childOption(ChannelOption.TCP_NODELAY, true)
             .childOption(ChannelOption.SO_SNDBUF, nettyServerConfig.getServerSocketSendBufSize())
             .childOption(ChannelOption.SO_RCVBUF, nettyServerConfig.getServerSocketResvBufSize())
