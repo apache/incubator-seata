@@ -44,6 +44,7 @@ public class BusinessServiceImpl implements BusinessService {
     public void purchase(String userId, String commodityCode, int orderCount) {
         storageService.deduct(commodityCode, orderCount);
         orderService.create(userId, commodityCode, orderCount);
+        throw new RuntimeException("xxx");
 
     }
 
