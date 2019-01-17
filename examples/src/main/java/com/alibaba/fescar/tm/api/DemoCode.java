@@ -42,7 +42,7 @@ public class DemoCode {
     }
 
     /**
-     * Demo code for High Level API (TransactionTemplate) usage.
+     * Demo code for High Level API (TransactionalTemplate) usage.
      *
      * @throws Throwable business exception
      */
