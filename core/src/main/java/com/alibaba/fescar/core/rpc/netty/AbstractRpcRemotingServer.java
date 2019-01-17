@@ -19,6 +19,9 @@ package com.alibaba.fescar.core.rpc.netty;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.core.rpc.RemotingServer;
 
@@ -34,8 +37,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Rpc remoting server.
@@ -56,6 +57,11 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     private int listenPort;
 
     public void setListenPort(int listenPort) {
+    	
+    	if(listenPort <= 0) {
+    		throw new IllegalArgumentException("listen port: " + listenPort +" is invalid!");
+    	}
+    	
         this.listenPort = listenPort;
     }
 
@@ -84,13 +90,15 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         super(messageExecutor);
         this.serverBootstrap = new ServerBootstrap();
         this.nettyServerConfig = nettyServerConfig;
-        this.eventLoopGroupBoss = new NioEventLoopGroup(nettyServerConfig.getBossThreadSize(),
-            new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
         if (NettyServerConfig.enableEpoll()) {
+            this.eventLoopGroupBoss = new EpollEventLoopGroup(nettyServerConfig.getBossThreadSize(),
+                new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
             this.eventLoopGroupWorker = new EpollEventLoopGroup(nettyServerConfig.getServerWorkerThreads(),
                 new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
                     nettyServerConfig.getServerWorkerThreads()));
         } else {
+            this.eventLoopGroupBoss = new NioEventLoopGroup(nettyServerConfig.getBossThreadSize(),
+                new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
             this.eventLoopGroupWorker = new NioEventLoopGroup(nettyServerConfig.getServerWorkerThreads(),
                 new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
                     nettyServerConfig.getServerWorkerThreads()));
@@ -98,7 +106,8 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         if (null != handlers) {
             channelHandlers = handlers;
         }
-
+        // init listenPort in constructor so that getListenPort() will always get the exact port
+        setListenPort(nettyServerConfig.getDefaultListenPort());
     }
 
     @Override
@@ -107,9 +116,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
             nettyServerConfig.getServerWorkerThreads(),
             new NamedThreadFactory(nettyServerConfig.getExecutorThreadPrefix(),
                 nettyServerConfig.getServerWorkerThreads()));
-        if (listenPort == 0) {
-            listenPort = nettyServerConfig.getDefaultListenPort();
-        }
+
         this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupWorker)
             .channel(nettyServerConfig.SERVER_CHANNEL_CLAZZ)
             .option(ChannelOption.SO_BACKLOG, nettyServerConfig.getSoBackLogSize())

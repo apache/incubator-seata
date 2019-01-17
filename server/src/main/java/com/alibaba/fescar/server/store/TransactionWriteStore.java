@@ -18,6 +18,7 @@ package com.alibaba.fescar.server.store;
 
 import java.nio.ByteBuffer;
 
+import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.server.session.BranchSession;
 import com.alibaba.fescar.server.session.GlobalSession;
 import com.alibaba.fescar.server.store.TransactionStoreManager.LogOperation;
@@ -124,7 +125,8 @@ public class TransactionWriteStore implements SessionStorable {
             case BRANCH_REMOVE:
                 sessionStorable = new BranchSession();
                 break;
-
+            default:
+                throw new ShouldNeverHappenException("incorrect logOperation");
         }
         return sessionStorable;
     }

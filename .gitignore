@@ -8,3 +8,6 @@ target
 /logs
 *.iml
 *.class
+/distribution/bin
+/distribution/conf
+/distribution/lib
