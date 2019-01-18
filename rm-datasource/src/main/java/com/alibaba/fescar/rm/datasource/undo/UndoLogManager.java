@@ -51,8 +51,8 @@ public final class UndoLogManager {
     private static final String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + "\n" +
             "\tWHERE branch_id = ? AND xid = ?";
 
-    private static final String SELECT_UNDO_LOG_SQL = "SELECT * FROM undo_log WHERE log_status = 0 AND branch_id = ? AND xid = ? FOR UPDATE";
-
+    private static final String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME + " WHERE log_status = 0 AND branch_id = ? AND xid = ? FOR UPDATE";
+  
     private UndoLogManager() {
 
     }
