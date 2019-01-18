@@ -83,6 +83,10 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     public void prepareUndoLog(SQLType sqlType, String tableName, TableRecords beforeImage, TableRecords afterImage) throws SQLException {
+        if(beforeImage.getRows().size() == 0 && afterImage.getRows().size() == 0) {
+            return;
+            }
+        
         TableRecords lockKeyRecords = afterImage;
         if (sqlType == SQLType.DELETE) {
             lockKeyRecords = beforeImage;
@@ -132,7 +136,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             }
 
             try {
-                if (context.hasUndoLog()) {
+                if (context.hasUndoLog()) { 
                     UndoLogManager.flushUndoLogs(this);
                 }
                 targetConnection.commit();
@@ -143,11 +147,10 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 } else {
                     throw new SQLException(ex);
                 }
-
             }
             report(true);
             context.reset();
-
+        	
         } else {
             targetConnection.commit();
         }

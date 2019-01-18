@@ -94,9 +94,13 @@ public class NettyBaseConfig {
      */
     protected static final TransportProtocolType TRANSPORT_PROTOCOL_TYPE;
 
-    protected static final int MAX_WRITE_IDLE_SECONDS = 0;
+    private static final int DEFAULT_WRITE_IDLE_SECONDS = 5;
 
-    protected static final int MAX_READ_IDLE_SECONDS = MAX_WRITE_IDLE_SECONDS * 3;
+    private static final int READIDLE_BASE_WRITEIDLE = 3;
+
+    protected static final int MAX_WRITE_IDLE_SECONDS;
+
+    protected static final int MAX_READ_IDLE_SECONDS;
 
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
 
@@ -154,6 +158,13 @@ public class NettyBaseConfig {
             default:
                 throw new IllegalArgumentException("unsupported.");
         }
+        boolean enableHeartbeat = CONFIG.getBoolean("transport.heartbeat", false);
+        if (enableHeartbeat) {
+            MAX_WRITE_IDLE_SECONDS = DEFAULT_WRITE_IDLE_SECONDS;
+        } else {
+            MAX_WRITE_IDLE_SECONDS = 0;
+        }
+        MAX_READ_IDLE_SECONDS = MAX_WRITE_IDLE_SECONDS * READIDLE_BASE_WRITEIDLE;
     }
 
     private static void raiseUnsupportedTransportError() throws RuntimeException {
