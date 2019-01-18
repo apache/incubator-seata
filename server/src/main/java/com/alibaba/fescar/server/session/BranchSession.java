@@ -17,8 +17,6 @@
 package com.alibaba.fescar.server.session;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -54,9 +52,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private String applicationData;
 
-    private ConcurrentHashMap<Map<String, Long>, Set<String>> lockHolder
-        = new ConcurrentHashMap<Map<String, Long>, Set<String>>();
-    ;
+    private ConcurrentHashMap<Map<String, Long>, Set<String>> lockHolder = new ConcurrentHashMap<Map<String, Long>, Set<String>>();
 
     public String getApplicationData() {
         return applicationData;
@@ -154,37 +150,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     @Override
     public int compareTo(BranchSession o) {
         return this.branchId < o.branchId ? -1 : (this.branchId > o.branchId ? 1 : 0);
-    }
-
-    public static void main(String[] args) throws Throwable {
-        BranchSession b1 = new BranchSession();
-        b1.setBranchId(1L);
-        BranchSession b2 = new BranchSession();
-        b2.setBranchId(2L);
-        BranchSession b3 = new BranchSession();
-        b3.setBranchId(3L);
-
-        ArrayList<BranchSession> list = new ArrayList<>();
-        list.add(b2);
-        list.add(b1);
-        list.add(b3);
-
-        for (BranchSession b : list) {
-            System.out.println(b);
-        }
-
-        Collections.sort(list);
-
-        for (BranchSession b : list) {
-            System.out.println(b);
-        }
-
-        Collections.reverse(list);
-
-        for (BranchSession b : list) {
-            System.out.println(b);
-        }
-
     }
 
     public ConcurrentHashMap<Map<String, Long>, Set<String>> getLockHolder() {
