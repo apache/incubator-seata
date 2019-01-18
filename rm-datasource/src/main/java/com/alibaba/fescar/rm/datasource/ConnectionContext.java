@@ -110,4 +110,12 @@ public class ConnectionContext {
     public List<SQLUndoLog> getUndoItems() {
         return sqlUndoItemsBuffer;
     }
+
+    @Override
+    public String toString() {
+        return "ConnectionContext [xid=" + xid + ", branchId=" + branchId + ", lockKeysBuffer=" + lockKeysBuffer
+                + ", sqlUndoItemsBuffer=" + sqlUndoItemsBuffer + "]";
+    }
+    
+    
 }

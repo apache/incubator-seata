@@ -18,6 +18,9 @@ package com.alibaba.fescar.core.model;
 
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Status of branch transaction.
  */
@@ -41,31 +44,40 @@ public enum BranchStatus {
     // Commit logic is successfully done at phase two.
     PhaseTwo_Committed,
 
-    // Commit logic is failed but retriable.
-    PhaseTwo_CommitFailed_Retriable,
+    // Commit logic is failed but retryable.
+    PhaseTwo_CommitFailed_Retryable,
 
-    // Commit logic is failed and NOT retriable.
-    PhaseTwo_CommitFailed_Unretriable,
+    // Commit logic is failed and NOT retryable.
+    PhaseTwo_CommitFailed_Unretryable,
 
     // Rollback logic is successfully done at phase two.
     PhaseTwo_Rollbacked,
 
-    // Rollback logic is failed but retriable.
-    PhaseTwo_RollbackFailed_Retriable,
+    // Rollback logic is failed but retryable.
+    PhaseTwo_RollbackFailed_Retryable,
 
-    // Rollback logic is failed but NOT retriable.
-    PhaseTwo_RollbackFailed_Unretriable;
+    // Rollback logic is failed but NOT retryable.
+    PhaseTwo_RollbackFailed_Unretryable;
+
+    private static final Map<Integer, BranchStatus> map = new HashMap<>(values().length);
+
+    static {
+        for (BranchStatus status : values()) {
+            map.put(status.ordinal(), status);
+        }
+    }
 
     public static BranchStatus get(byte ordinal) {
         return get((int) ordinal);
     }
 
     public static BranchStatus get(int ordinal) {
-        for (BranchStatus branchStatus : BranchStatus.values()) {
-            if (branchStatus.ordinal() == ordinal) {
-                return branchStatus;
-            }
+        BranchStatus status = map.get(ordinal);
+
+        if (null == status) {
+            throw new ShouldNeverHappenException("Unknown BranchStatus[" + ordinal + "]");
         }
-        throw new ShouldNeverHappenException("Unknown BranchStatus[" + ordinal + "]");
+
+        return status;
     }
 }

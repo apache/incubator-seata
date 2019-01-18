@@ -158,7 +158,7 @@ public class DefaultCore implements Core {
                     case PhaseTwo_Committed:
                         globalSession.removeBranch(branchSession);
                         continue;
-                    case PhaseTwo_CommitFailed_Unretriable:
+                    case PhaseTwo_CommitFailed_Unretryable:
                         if (globalSession.canBeCommittedAsync()) {
                             LOGGER.error("By [" + branchStatus + "], failed to commit branch " + branchSession);
                             continue;
@@ -262,7 +262,7 @@ public class DefaultCore implements Core {
                         globalSession.removeBranch(branchSession);
                         LOGGER.error("Successfully rolled back branch " + branchSession);
                         continue;
-                    case PhaseTwo_RollbackFailed_Unretriable:
+                    case PhaseTwo_RollbackFailed_Unretryable:
                         GlobalStatus currentStatus = globalSession.getStatus();
                         if (currentStatus.name().startsWith("Timeout")) {
                             globalSession.changeStatus(GlobalStatus.TimeoutRollbackFailed);
