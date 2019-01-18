@@ -44,7 +44,7 @@ public class PluginManager {
     public List<Plugin> getPlugins(String action) {
         List<Plugin> plugins = pluginMap.get(action);
         if (plugins == null) {
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         return plugins;
     }

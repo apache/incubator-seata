@@ -2,9 +2,8 @@ package com.alibaba.fescar.rm.datasource.plugin.context;
 
 import com.alibaba.fescar.rm.datasource.plugin.PluginConstants;
 import com.alibaba.fescar.rm.datasource.plugin.PluginContext;
-import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -30,7 +29,7 @@ public class SqlBuildAfterContext extends PluginContext {
     public List<String> getSqlHints() {
         List<String> sqlHints = (List<String>) this.args.get(ARG_KEY_SQL_HINTS);
         if (sqlHints == null) {
-            return Collections.emptyList();
+            return new ArrayList<>();
         }
         return sqlHints;
     }

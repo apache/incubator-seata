@@ -40,7 +40,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
     private final SQLSelectStatement ast;
 
     public MySQLSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
-        this(originalSQL,ast, Collections.emptyList());
+        this(originalSQL, ast, new ArrayList<>());
     }
 
     public MySQLSelectForUpdateRecognizer(String originalSQL, SQLStatement ast, List<String> sqlHints) {
@@ -107,7 +107,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
         SQLTableSource tableSource = selectQueryBlock.getFrom();
         StringBuffer sb = new StringBuffer();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        visitor.visit((SQLExprTableSource)tableSource);
+        visitor.visit((SQLExprTableSource) tableSource);
         return sb.toString();
     }
 
@@ -124,7 +124,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource)tableSource);
+        visitor.visit((SQLExprTableSource) tableSource);
         return sb.toString();
     }
 

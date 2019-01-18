@@ -37,7 +37,7 @@ public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRe
     private final MySqlInsertStatement ast;
 
     public MySQLInsertRecognizer(String originalSQL, SQLStatement ast) {
-        this(originalSQL,ast, Collections.emptyList());
+        this(originalSQL, ast, new ArrayList<>());
     }
 
     public MySQLInsertRecognizer(String originalSQL, SQLStatement ast, List<String> sqlHints) {

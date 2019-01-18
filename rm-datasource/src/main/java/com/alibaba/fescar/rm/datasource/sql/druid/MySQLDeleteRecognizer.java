@@ -36,7 +36,7 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
     private final MySqlDeleteStatement ast;
 
     public MySQLDeleteRecognizer(String originalSQL, SQLStatement ast) {
-        this(originalSQL,ast, Collections.emptyList());
+        this(originalSQL, ast, new ArrayList<>());
     }
 
     public MySQLDeleteRecognizer(String originalSQL, SQLStatement ast, List<String> sqlHints) {
@@ -53,7 +53,7 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
     public String getTableSource() {
         StringBuffer sb = new StringBuffer();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        visitor.visit((SQLExprTableSource)ast.getTableSource());
+        visitor.visit((SQLExprTableSource) ast.getTableSource());
         return sb.toString();
     }
 
@@ -68,7 +68,7 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource)ast.getTableSource());
+        visitor.visit((SQLExprTableSource) ast.getTableSource());
         return sb.toString();
     }
 
