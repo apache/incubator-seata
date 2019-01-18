@@ -71,7 +71,7 @@ You can view the full documentation from the wiki: [FESCAR wiki page](https://gi
 
 ## Reporting bugs
 
-Please follow the [template](https://github.com/TBD) for reporting any issues.
+Please follow the [template]() for reporting any issues.
 
 
 ## Contributing
