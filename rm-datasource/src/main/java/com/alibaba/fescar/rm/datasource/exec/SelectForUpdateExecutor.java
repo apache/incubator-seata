@@ -87,7 +87,9 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
                     }
 
                     TableRecords selectPKRows = TableRecords.buildRecords(getTableMeta(), rsPK);
-                    statementProxy.getConnectionProxy().checkLock(selectPKRows);
+                    if(!selectPKRows.getRows().isEmpty()) {
+                        statementProxy.getConnectionProxy().checkLock(selectPKRows);
+                    }
                     break;
 
                 } catch (LockConflictException lce) {
