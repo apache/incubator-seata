@@ -110,7 +110,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                                     RpcContext rpcContext) throws TransactionException {
         response.setTransactionId(request.getTransactionId());
         response.setBranchId(
-            core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
+            core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext,
                 XID.generateXID(request.getTransactionId()), request.getLockKey()));
 
     }
@@ -145,7 +145,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             BranchSession branchSession = globalSession.getBranch(branchId);
 
             BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSynRequest(resourceId,
-                branchSession.getClientId(), globalSession.getApplicationId(), request);
+                branchSession.getClientId(), branchSession.getApplicationId(), request);
             return response.getBranchStatus();
         } catch (IOException e) {
             throw new TransactionException(FailedToSendBranchCommitRequest, branchId + "/" + xid, e);

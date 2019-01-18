@@ -17,13 +17,14 @@
 package com.alibaba.fescar.core.model;
 
 import com.alibaba.fescar.core.exception.TransactionException;
+import com.alibaba.fescar.core.rpc.RpcContext;
 
 /**
  * Resource Manager: send outbound request to TC.
  */
 public interface ResourceManagerOutbound {
 
-    Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys) throws
+    Long branchRegister(BranchType branchType, String resourceId, RpcContext rpcContext, String xid, String lockKeys) throws
         TransactionException;
 
     void branchReport(String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException;

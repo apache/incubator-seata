@@ -21,6 +21,7 @@ import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.Resource;
+import com.alibaba.fescar.core.rpc.RpcContext;
 import com.alibaba.fescar.rm.datasource.DataSourceManager;
 
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -40,7 +41,7 @@ public class DataSourceBasicTest {
         DataSourceManager.set(new DataSourceManager() {
 
             @Override
-            public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys) throws TransactionException {
+            public Long branchRegister(BranchType branchType, String resourceId, RpcContext rpcContext, String xid, String lockKeys) throws TransactionException {
                 return 123456L;
             }
 

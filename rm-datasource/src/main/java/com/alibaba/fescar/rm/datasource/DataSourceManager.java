@@ -33,6 +33,7 @@ import com.alibaba.fescar.core.model.ResourceManagerInbound;
 import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.*;
 import com.alibaba.fescar.core.protocol.transaction.BranchRegisterRequest;
+import com.alibaba.fescar.core.rpc.RpcContext;
 import com.alibaba.fescar.core.rpc.netty.RmRpcClient;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
 
@@ -47,7 +48,7 @@ public class DataSourceManager implements ResourceManager {
     }
 
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys) throws TransactionException {
+    public Long branchRegister(BranchType branchType, String resourceId, RpcContext rpcContext, String xid, String lockKeys) throws TransactionException {
         try {
             BranchRegisterRequest request = new BranchRegisterRequest();
             request.setTransactionId(XID.getTransactionId(xid));

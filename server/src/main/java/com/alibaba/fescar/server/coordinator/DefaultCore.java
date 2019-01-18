@@ -23,6 +23,7 @@ import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.model.ResourceManagerInbound;
+import com.alibaba.fescar.core.rpc.RpcContext;
 import com.alibaba.fescar.server.UUIDGenerator;
 import com.alibaba.fescar.server.lock.LockManager;
 import com.alibaba.fescar.server.lock.LockManagerFactory;
@@ -49,18 +50,18 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys) throws TransactionException {
+    public Long branchRegister(BranchType branchType, String resourceId, RpcContext rpcContext, String xid, String lockKeys) throws TransactionException {
         GlobalSession globalSession = assertGlobalSession(XID.getTransactionId(xid), GlobalStatus.Begin);
 
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(XID.getTransactionId(xid));
         branchSession.setBranchId(UUIDGenerator.generateUUID());
-        branchSession.setApplicationId(globalSession.getApplicationId());
-        branchSession.setTxServiceGroup(globalSession.getTransactionServiceGroup());
+        branchSession.setApplicationId(rpcContext.getApplicationId());
+        branchSession.setTxServiceGroup(rpcContext.getTransactionServiceGroup());
         branchSession.setBranchType(branchType);
         branchSession.setResourceId(resourceId);
         branchSession.setLockKey(lockKeys);
-        branchSession.setClientId(clientId);
+        branchSession.setClientId(rpcContext.getClientId());
 
         if (!branchSession.lock()) {
             throw new TransactionException(LockKeyConflict);
