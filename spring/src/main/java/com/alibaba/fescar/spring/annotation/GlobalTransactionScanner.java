@@ -197,7 +197,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 }
                 if (!AopUtils.isAopProxy(bean)) {
                     bean = super.wrapIfNecessary(bean, beanName, cacheKey);
-                    PROXYED_SET.add(beanName);
                 } else {
                     AdvisedSupport advised = getAdvisedSupport(bean);
                     Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
@@ -205,6 +204,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                         advised.addAdvisor(0, avr);
                     }
                 }
+                PROXYED_SET.add(beanName);
                 return bean;
             }
         } catch (Exception exx) {
