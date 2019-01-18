@@ -339,19 +339,14 @@ public class RpcContext {
         this.clientId = clientId;
     }
 
-    /**
-     * To string string.
-     *
-     * @return the string
-     */
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("vgroup:" + transactionServiceGroup);
-        sb.append(",appname:" + applicationId);
-        sb.append(",channel:" + channel);
-        sb.append(",version:" + version);
-        sb.append(",type:" + clientRole.name());
-        return sb.toString();
+        return "RpcContext{" +
+            "applicationId='" + applicationId + '\'' +
+            ", transactionServiceGroup='" + transactionServiceGroup + '\'' +
+            ", clientId='" + clientId + '\'' +
+            ", channel=" + channel +
+            ", resourceSets=" + resourceSets +
+            '}';
     }
 }
