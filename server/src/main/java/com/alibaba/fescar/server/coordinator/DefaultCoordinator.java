@@ -144,8 +144,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
             BranchSession branchSession = globalSession.getBranch(branchId);
 
-            BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSynRequest(resourceId,
-                branchSession.getClientId(), globalSession.getApplicationId(), request);
+            BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
+                branchSession.getClientId(), request);
             return response.getBranchStatus();
         } catch (IOException e) {
             throw new TransactionException(FailedToSendBranchCommitRequest, branchId + "/" + xid, e);
@@ -168,8 +168,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
             BranchSession branchSession = globalSession.getBranch(branchId);
 
-            BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSynRequest(resourceId,
-                branchSession.getClientId(), globalSession.getApplicationId(), request);
+            BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSyncRequest(resourceId,
+                branchSession.getClientId(), request);
             return response.getBranchStatus();
         } catch (IOException e) {
             throw new TransactionException(FailedToSendBranchRollbackRequest, branchId + "/" + xid, e);
