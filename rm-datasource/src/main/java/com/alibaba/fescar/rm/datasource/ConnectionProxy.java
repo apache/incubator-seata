@@ -100,7 +100,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             }
 
             try {
-                if (context.hasUndoLog()) {
+                if (context.hasUndoLog()) { 
                     UndoLogManager.flushUndoLogs(this);
                 }
                 targetConnection.commit();
@@ -111,11 +111,10 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 } else {
                     throw new SQLException(ex);
                 }
-
             }
             report(true);
             context.reset();
-
+        	
         } else {
             targetConnection.commit();
         }

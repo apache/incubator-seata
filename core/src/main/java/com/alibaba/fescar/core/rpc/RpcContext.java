@@ -51,6 +51,8 @@ public class RpcContext {
 
     private String transactionServiceGroup;
 
+    private String clientId;
+
     private Channel channel;
 
     private Set<String> resourceSets;
@@ -175,7 +177,7 @@ public class RpcContext {
      * @return the get client id
      */
     public String getClientId() {
-        return getClientIp();
+        return clientId;
     }
 
     /**
@@ -277,20 +279,6 @@ public class RpcContext {
         return address;
     }
 
-    /**
-     * Gets get client ip.
-     *
-     * @return the get client ip
-     */
-    public String getClientIp() {
-        String address = getAddressFromChannel(channel);
-        String clientIp = address;
-        if (clientIp.contains(Constants.IP_PORT_SPLIT_CHAR)) {
-            clientIp = clientIp.substring(0, clientIp.lastIndexOf(Constants.IP_PORT_SPLIT_CHAR));
-        }
-        return clientIp;
-    }
-
     private static Integer getClientPortFromChannel(Channel channel) {
         String address = getAddressFromChannel(channel);
         Integer port = 0;
@@ -347,19 +335,18 @@ public class RpcContext {
         this.resourceSets.addAll(resource);
     }
 
-    /**
-     * To string string.
-     *
-     * @return the string
-     */
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
+
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("vgroup:" + transactionServiceGroup);
-        sb.append(",appname:" + applicationId);
-        sb.append(",channel:" + channel);
-        sb.append(",version:" + version);
-        sb.append(",type:" + clientRole.name());
-        return sb.toString();
+        return "RpcContext{" +
+            "applicationId='" + applicationId + '\'' +
+            ", transactionServiceGroup='" + transactionServiceGroup + '\'' +
+            ", clientId='" + clientId + '\'' +
+            ", channel=" + channel +
+            ", resourceSets=" + resourceSets +
+            '}';
     }
 }
