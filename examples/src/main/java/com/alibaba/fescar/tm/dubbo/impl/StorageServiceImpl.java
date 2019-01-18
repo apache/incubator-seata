@@ -45,6 +45,8 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public void deduct(String commodityCode, int count) {
         LOGGER.info("Storage Service Begin ... xid: " + RootContext.getXID());
+        LOGGER.info("Deducting inventory SQL: update storage_tbl set count = count - {} where commodity_code = {}",count,commodityCode);
+
         jdbcTemplate.update("update storage_tbl set count = count - ? where commodity_code = ?", new Object[] {count, commodityCode});
         LOGGER.info("Storage Service End ... ");
 
@@ -54,6 +56,8 @@ public class StorageServiceImpl implements StorageService {
 
         String applicationId = "dubbo-demo-storage-service";
         String txServiceGroup = "my_test_tx_group";
+
+        RMClientAT.init(applicationId, txServiceGroup);
 
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"dubbo-storage-service.xml"});
         context.getBean("service");
