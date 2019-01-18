@@ -81,7 +81,7 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 
 ## Contact
 
-* [Twitter](https://twitter.com/fescar): TBD. Follow along for latest FESCAR news on Twitter.
+* [Twitter](): TBD. Follow along for latest FESCAR news on Twitter.
 * Email Group:
      * dev.fescar@gmail.com: FESCAR developer discussion (APIs, feature design, etc).
 
