@@ -35,10 +35,6 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
 
     private final MySqlDeleteStatement ast;
 
-    public MySQLDeleteRecognizer(String originalSQL, SQLStatement ast) {
-        this(originalSQL, ast, new ArrayList<>());
-    }
-
     public MySQLDeleteRecognizer(String originalSQL, SQLStatement ast, List<String> sqlHints) {
         super(originalSQL, sqlHints);
         this.ast = (MySqlDeleteStatement) ast;

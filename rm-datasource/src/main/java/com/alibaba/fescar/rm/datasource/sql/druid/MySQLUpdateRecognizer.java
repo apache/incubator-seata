@@ -40,10 +40,6 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
 
     private MySqlUpdateStatement ast;
 
-    public MySQLUpdateRecognizer(String originalSQL, SQLStatement ast) {
-        this(originalSQL, ast, new ArrayList<>());
-    }
-
     public MySQLUpdateRecognizer(String originalSQL, SQLStatement ast, List<String> sqlHints) {
         super(originalSQL, sqlHints);
         this.ast = (MySqlUpdateStatement) ast;

@@ -39,10 +39,6 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
 
     private final SQLSelectStatement ast;
 
-    public MySQLSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
-        this(originalSQL, ast, new ArrayList<>());
-    }
-
     public MySQLSelectForUpdateRecognizer(String originalSQL, SQLStatement ast, List<String> sqlHints) {
         super(originalSQL, sqlHints);
         this.ast = (SQLSelectStatement) ast;
