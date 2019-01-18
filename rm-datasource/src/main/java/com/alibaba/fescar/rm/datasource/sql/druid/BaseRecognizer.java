@@ -18,6 +18,8 @@ package com.alibaba.fescar.rm.datasource.sql.druid;
 
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 
+import java.util.List;
+
 public abstract class BaseRecognizer implements SQLRecognizer {
 
     public static class VMarker {
@@ -30,9 +32,22 @@ public abstract class BaseRecognizer implements SQLRecognizer {
 
     protected String originalSQL;
 
+    protected List<String> sqlHints;
+
     public BaseRecognizer(String originalSQL) {
         this.originalSQL = originalSQL;
 
+    }
+
+    public BaseRecognizer(String originalSQL,List<String> sqlHints) {
+        this.originalSQL = originalSQL;
+        this.sqlHints=sqlHints;
+    }
+
+
+    @Override
+    public List<String> getSqlHints() {
+        return sqlHints;
     }
 
     @Override

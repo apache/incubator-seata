@@ -63,6 +63,8 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         selectSQLAppender.append(" FROM " + tmeta.getTableName() + " WHERE " + whereCondition + " FOR UPDATE");
         String selectSQL = selectSQLAppender.toString();
 
+        selectSQL = prepareSql(selectSQL);
+
         TableRecords beforeImage = null;
         PreparedStatement ps = null;
         Statement st = null;
@@ -73,7 +75,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 rs = st.executeQuery(selectSQL);
             } else {
                 ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                for (int i = 0; i< paramAppender.size(); i++) {
+                for (int i = 0; i < paramAppender.size(); i++) {
                     ps.setObject(i + 1, paramAppender.get(i));
                 }
                 rs = ps.executeQuery();

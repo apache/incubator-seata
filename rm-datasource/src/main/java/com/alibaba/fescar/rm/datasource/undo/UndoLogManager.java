@@ -30,6 +30,7 @@ import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.rm.datasource.ConnectionContext;
 import com.alibaba.fescar.rm.datasource.ConnectionProxy;
 import com.alibaba.fescar.rm.datasource.DataSourceProxy;
+import com.alibaba.fescar.rm.datasource.plugin.PluginManager;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMetaCache;
 
@@ -42,15 +43,15 @@ public final class UndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UndoLogManager.class);
 
-    private static String UNDO_LOG_TABLE_NAME = "undo_log";
+    private static final String UNDO_LOG_TABLE_NAME = "undo_log";
 
-    private static String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
+    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
             "\t(branch_id, xid, rollback_info, log_status, log_created, log_modified)\n" +
             "VALUES (?, ?, ?, 0, now(), now())";
-    private static String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + "\n" +
+    private static final String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + "\n" +
             "\tWHERE branch_id = ? AND xid = ?";
 
-    private static String SELECT_UNDO_LOG_SQL = "SELECT * FROM undo_log WHERE log_status = 0 AND branch_id = ? AND xid = ? FOR UPDATE";
+    private static final String SELECT_UNDO_LOG_SQL = "SELECT * FROM undo_log WHERE log_status = 0 AND branch_id = ? AND xid = ? FOR UPDATE";
 
     private UndoLogManager() {
 
@@ -110,6 +111,8 @@ public final class UndoLogManager {
         try {
             conn = dataSourceProxy.getPlainConnection();
 
+            PluginManager pluginManager = dataSourceProxy.getPluginManager();
+
             // The entire undo process should run in a local transaction.
             conn.setAutoCommit(false);
 
@@ -128,7 +131,7 @@ public final class UndoLogManager {
                     TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
                     sqlUndoLog.setTableMeta(tableMeta);
                     AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(dataSourceProxy.getDbType(), sqlUndoLog);
-                    undoExecutor.executeOn(conn);
+                    undoExecutor.executeOn(conn, pluginManager);
                 }
 
             }

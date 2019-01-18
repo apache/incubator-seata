@@ -16,14 +16,14 @@
 
 package com.alibaba.fescar.rm.datasource.sql;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLCommentHint;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
-import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
-import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
-import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
+import com.alibaba.druid.sql.ast.statement.*;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlHintStatement;
 import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fescar.rm.datasource.sql.druid.MySQLDeleteRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.druid.MySQLInsertRecognizer;
@@ -33,25 +33,55 @@ import com.alibaba.fescar.rm.datasource.sql.druid.MySQLUpdateRecognizer;
 public class SQLVisitorFactory {
 
     public static SQLRecognizer get(String sql, String dbType) {
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
-        if (asts == null || asts.size() != 1) {
-            throw new UnsupportedOperationException("xxx");
-        }
-        SQLRecognizer recognizer = null;
-        SQLStatement ast = asts.get(0);
-        if (JdbcConstants.MYSQL.equalsIgnoreCase(dbType)) {
-            if (ast instanceof SQLInsertStatement) {
-                recognizer = new MySQLInsertRecognizer(sql, ast);
-            } else if (ast instanceof SQLUpdateStatement) {
-                recognizer = new MySQLUpdateRecognizer(sql, ast);
-            } else if (ast instanceof SQLDeleteStatement) {
-                recognizer = new MySQLDeleteRecognizer(sql, ast);
-            } else if (ast instanceof SQLSelectStatement) {
-                recognizer = new MySQLSelectForUpdateRecognizer(sql, ast);
-            }
-        } else {
+        if (!JdbcConstants.MYSQL.equalsIgnoreCase(dbType)) {
             throw new UnsupportedOperationException("Just support MySQL by now!");
+        }
+
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
+        if (asts == null) {
+            throw new UnsupportedOperationException("invalid sql:" + sql);
+        }
+
+        SQLRecognizer recognizer = resolveMySQLRecognizer(sql, asts);
+        if (recognizer == null && asts.size() == 1) {
+            throw new UnsupportedOperationException("invalid sql:" + sql);
         }
         return recognizer;
     }
+
+
+    private static SQLRecognizer resolveMySQLRecognizer(String sql, List<SQLStatement> statements) {
+
+        // pop hint statements
+        List<String> sqlHints = new ArrayList<>();
+        for (Integer i = 0; i < statements.size(); i++) {
+            SQLStatement statement = statements.get(i);
+            if (statement instanceof MySqlHintStatement) {
+                MySqlHintStatement hintStatement = (MySqlHintStatement) statement;
+                for (SQLCommentHint hint : hintStatement.getHints()) {
+                    sqlHints.add(hint.getText());
+                }
+                statements.remove(statement);
+                i--;
+            }
+        }
+
+        if (statements.size() != 1) {
+            throw new UnsupportedOperationException("invalid sql:" + sql);
+        }
+
+        SQLStatement ast = statements.get(0);
+        SQLRecognizer recognizer = null;
+        if (ast instanceof SQLInsertStatement) {
+            recognizer = new MySQLInsertRecognizer(sql, ast, sqlHints);
+        } else if (ast instanceof SQLUpdateStatement) {
+            recognizer = new MySQLUpdateRecognizer(sql, ast, sqlHints);
+        } else if (ast instanceof SQLDeleteStatement) {
+            recognizer = new MySQLDeleteRecognizer(sql, ast, sqlHints);
+        } else if (ast instanceof SQLSelectStatement) {
+            recognizer = new MySQLSelectForUpdateRecognizer(sql, ast, sqlHints);
+        }
+        return recognizer;
+    }
+
 }

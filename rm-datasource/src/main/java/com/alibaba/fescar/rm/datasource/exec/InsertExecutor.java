@@ -93,7 +93,8 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 // specify Statement.RETURN_GENERATED_KEYS to
                 // Statement.executeUpdate() or Connection.prepareStatement().
                 if ("S1009".equalsIgnoreCase(e.getSQLState())) {
-                    genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
+                    String sql = prepareSql("SELECT LAST_INSERT_ID()");
+                    genKeys = statementProxy.getTargetStatement().executeQuery(sql);
                 } else {
                     throw e;
                 }
@@ -127,8 +128,10 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         PreparedStatement ps = null;
         ResultSet rs = null;
+
         try {
-            ps = statementProxy.getConnection().prepareStatement(selectSQLAppender.toString());
+            String sql=prepareSql(selectSQLAppender.toString());
+            ps = statementProxy.getConnection().prepareStatement(sql);
 
             for (int i = 1; i <= pkValues.size(); i++) {
                 ps.setObject(i, pkValues.get(i - 1));

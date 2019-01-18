@@ -17,6 +17,7 @@
 package com.alibaba.fescar.rm.datasource.sql.druid;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
@@ -40,7 +41,11 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
     private MySqlUpdateStatement ast;
 
     public MySQLUpdateRecognizer(String originalSQL, SQLStatement ast) {
-        super(originalSQL);
+        this(originalSQL,ast, Collections.emptyList());
+    }
+
+    public MySQLUpdateRecognizer(String originalSQL, SQLStatement ast, List<String> sqlHints) {
+        super(originalSQL, sqlHints);
         this.ast = (MySqlUpdateStatement) ast;
     }
 

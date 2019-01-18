@@ -60,7 +60,7 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
             selectSQLAppender.append(" WHERE " + whereCondition);
         }
         selectSQLAppender.append(" FOR UPDATE");
-        String selectPKSQL = selectSQLAppender.toString();
+        String selectPKSQL = prepareSql(selectSQLAppender.toString());
 
         try {
             if (originalAutoCommit) {
@@ -87,7 +87,8 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
                     }
 
                     TableRecords selectPKRows = TableRecords.buildRecords(getTableMeta(), rsPK);
-                    statementProxy.getConnectionProxy().checkLock(selectPKRows);
+                    String lockKey = buildLockKey(selectPKRows);
+                    statementProxy.getConnectionProxy().checkLock(lockKey);
                     break;
 
                 } catch (LockConflictException lce) {

@@ -17,6 +17,8 @@
 package com.alibaba.fescar.rm.datasource.sql.druid;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -34,7 +36,11 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
     private final MySqlDeleteStatement ast;
 
     public MySQLDeleteRecognizer(String originalSQL, SQLStatement ast) {
-        super(originalSQL);
+        this(originalSQL,ast, Collections.emptyList());
+    }
+
+    public MySQLDeleteRecognizer(String originalSQL, SQLStatement ast, List<String> sqlHints) {
+        super(originalSQL, sqlHints);
         this.ast = (MySqlDeleteStatement) ast;
     }
 
