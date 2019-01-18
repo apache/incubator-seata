@@ -34,6 +34,8 @@
         <module>dubbo</module>
         <module>test</module>
         <module>examples</module>
+        <module>transport-feign</module>
+        <module>transport-resttemplate</module>
     </modules>
     <packaging>pom</packaging>
 
