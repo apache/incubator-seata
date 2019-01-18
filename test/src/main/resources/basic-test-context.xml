@@ -20,9 +20,9 @@
 
 	<bean name="mysqlDataSource" class="com.alibaba.druid.pool.DruidDataSource"
 		  init-method="init" destroy-method="close">
-		<property name="url" value="jdbc:mysql://192.168.1.200:3306/demo"/>
-		<property name="username" value="wz_chain"/>
-		<property name="password" value="wz_chain@3c*111"/>
+		<property name="url" value="jdbc:mysql://XXXX:3306/demo"/>
+		<property name="username" value="XXXXX"/>
+		<property name="password" value="XXXX"/>
 		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
 		<property name="initialSize" value="0" />
 		<property name="maxActive" value="180" />
