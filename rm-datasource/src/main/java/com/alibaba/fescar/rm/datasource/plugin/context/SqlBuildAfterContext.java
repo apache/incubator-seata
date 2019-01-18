@@ -28,7 +28,11 @@ public class SqlBuildAfterContext extends PluginContext {
     }
 
     public List<String> getSqlHints() {
-        return (List<String>) this.args.getOrDefault(ARG_KEY_SQL_HINTS, Collections.emptyList());
+        List<String> sqlHints = (List<String>) this.args.get(ARG_KEY_SQL_HINTS);
+        if (sqlHints == null) {
+            return Collections.emptyList();
+        }
+        return sqlHints;
     }
 
     public void setSqlHints(List<String> sqlHints) {

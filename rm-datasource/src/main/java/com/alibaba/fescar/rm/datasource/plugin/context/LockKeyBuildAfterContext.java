@@ -30,7 +30,10 @@ public class LockKeyBuildAfterContext extends PluginContext {
     }
 
     public List<String> getSqlHints() {
-        List<String> sqlHints = (List<String>) this.args.getOrDefault(ARG_KEY_SQL_HINTS, Collections.emptyList());
+        List<String> sqlHints = (List<String>) this.args.get(ARG_KEY_SQL_HINTS);
+        if (sqlHints == null) {
+            return Collections.emptyList();
+        }
         return sqlHints;
     }
 

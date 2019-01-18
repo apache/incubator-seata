@@ -42,7 +42,11 @@ public class PluginManager {
      * @return
      */
     public List<Plugin> getPlugins(String action) {
-        return pluginMap.getOrDefault(action, Collections.emptyList());
+        List<Plugin> plugins = pluginMap.get(action);
+        if (plugins == null) {
+            return Collections.emptyList();
+        }
+        return plugins;
     }
 
 
