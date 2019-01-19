@@ -185,7 +185,7 @@
             <version>${junit.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.dubbo</groupId>
+            <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
             <version>${dubbo.version}</version>
         </dependency>
