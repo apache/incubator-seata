@@ -20,6 +20,7 @@ public class TransactionClientHttpRequestInterceptor implements ClientHttpReques
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
         String xid = RootContext.getXID();
         if (xid != null) {
+            LOGGER.info("set header xid={}", xid);
             request.getHeaders().add(RootContext.KEY_XID, xid);
         } else {
             LOGGER.debug("Cannot inject transaction ID, as the RootContext is null or cannot get the globalTxId.");

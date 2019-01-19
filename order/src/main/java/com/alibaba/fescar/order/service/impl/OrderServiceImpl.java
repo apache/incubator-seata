@@ -32,11 +32,14 @@ public class OrderServiceImpl implements IOrderService {
         OrderDO orderDO = new OrderDO();
         orderDO.setOrderCode(UUID.randomUUID().toString());
         orderDO.setOrderStatus((byte) 2);
+        orderDO.setCustomerCode("122");
         orderDOMapper.insert(orderDO);
 
         AccountVO account = new AccountVO();
         account.setMoney(order.getMoney());
         accountApiFeign.create(account);
-        return null;
+        //  throw new RuntimeException();
+        return String.valueOf(0);
+
     }
 }

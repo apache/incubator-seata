@@ -16,6 +16,7 @@ public class TransactionHandlerInterceptor implements HandlerInterceptor {
         if (xid == null) {
             LOGGER.debug("Cannot inject transaction ID, no such header: {}", RootContext.KEY_XID);
         } else {
+            LOGGER.info("TransactionHandlerInterceptor bind xid={}", xid);
             RootContext.bind(xid);
         }
         return true;
