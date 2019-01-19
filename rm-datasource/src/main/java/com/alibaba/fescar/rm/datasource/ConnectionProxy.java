@@ -18,6 +18,7 @@ package com.alibaba.fescar.rm.datasource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
@@ -51,9 +52,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         context.bind(xid);
     }
 
-    public void checkLock(TableRecords records) throws SQLException {
+    public void checkLock(String lockKeys) throws SQLException {
         // Just check lock without requiring lock by now.
-        String lockKeys = buildLockKey(records);
         try {
             boolean lockable = DataSourceManager.get().lockQuery(BranchType.AT, getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
             if (!lockable) {
@@ -63,9 +63,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             recognizeLockKeyConflictException(e);
         }
     }
-    public void register(TableRecords records) throws SQLException {
+
+    public void register(String lockKeys) throws SQLException {
         // Just check lock without requiring lock by now.
-        String lockKeys = buildLockKey(records);
         try {
             DataSourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(), null, context.getXid(), lockKeys);
         } catch (TransactionException e) {
@@ -82,48 +82,12 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     }
 
-    public void prepareUndoLog(SQLType sqlType, String tableName, TableRecords beforeImage, TableRecords afterImage) throws SQLException {
-        if(beforeImage.getRows().size() == 0 && afterImage.getRows().size() == 0) {
-            return;
-            }
-        
-        TableRecords lockKeyRecords = afterImage;
-        if (sqlType == SQLType.DELETE) {
-            lockKeyRecords = beforeImage;
-        }
-        String lockKeys = buildLockKey(lockKeyRecords);
-        context.appendLockKey(lockKeys);
-        SQLUndoLog sqlUndoLog = buildUndoItem(sqlType, tableName, beforeImage, afterImage);
+    public void appendLockKey(String lockKey) {
+        context.appendLockKey(lockKey);
+    }
+
+    public void appendUndoItem(SQLUndoLog sqlUndoLog) {
         context.appendUndoItem(sqlUndoLog);
-    }
-
-    private SQLUndoLog buildUndoItem(SQLType sqlType, String tableName, TableRecords beforeImage, TableRecords afterImage) {
-        SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        sqlUndoLog.setSqlType(sqlType);
-        sqlUndoLog.setTableName(tableName);
-        sqlUndoLog.setBeforeImage(beforeImage);
-        sqlUndoLog.setAfterImage(afterImage);
-        return sqlUndoLog;
-    }
-
-    private String buildLockKey(TableRecords rowsIncludingPK) {
-        if (rowsIncludingPK.size() == 0) {
-            return null;
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append(rowsIncludingPK.getTableMeta().getTableName());
-        sb.append(":");
-
-        boolean flag = false;
-        for (Field field : rowsIncludingPK.pkRows()) {
-            if (flag) {
-                sb.append(",");
-            } else {
-                flag = true;
-            }
-            sb.append(field.getValue());
-        }
-        return sb.toString();
     }
 
     @Override
@@ -168,8 +132,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (context.inGlobalTransaction()) {
             if (context.isBranchRegistered()) {
                 report(false);
-            }}
-            context.reset();
+            }
+        }
+        context.reset();
     }
 
     @Override

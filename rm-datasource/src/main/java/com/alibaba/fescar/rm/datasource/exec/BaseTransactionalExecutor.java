@@ -21,11 +21,19 @@ import java.sql.Statement;
 import java.util.List;
 
 import com.alibaba.fescar.core.context.RootContext;
+import com.alibaba.fescar.rm.datasource.ConnectionProxy;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
+import com.alibaba.fescar.rm.datasource.plugin.Plugin;
+import com.alibaba.fescar.rm.datasource.plugin.PluginContext;
+import com.alibaba.fescar.rm.datasource.plugin.PluginManager;
+import com.alibaba.fescar.rm.datasource.plugin.context.LockKeyBuildAfterContext;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
+import com.alibaba.fescar.rm.datasource.sql.SQLType;
 import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMetaCache;
+import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
+import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 
 public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor {
 
@@ -65,15 +73,74 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     protected TableMeta getTableMeta() {
-        return getTableMeta(sqlRecognizer.getTableName());
-    }
-
-    protected TableMeta getTableMeta(String tableName) {
         if (tableMeta != null) {
             return tableMeta;
         }
-        tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
+        String tableName = sqlRecognizer.getTableName();
+        List<String> sqlHints = sqlRecognizer.getSqlHints();
+        tableMeta = TableMetaCache.getTableMeta(sqlHints, tableName, statementProxy.getConnectionProxy().getDataSourceProxy());
         return tableMeta;
     }
+
+    protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) {
+        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+        SQLType sqlType = sqlRecognizer.getSQLType();
+
+        TableRecords lockKeyRecords = afterImage;
+        if (sqlType == SQLType.DELETE) {
+            lockKeyRecords = beforeImage;
+        }
+        String lockKeys = buildLockKey(lockKeyRecords);
+        connectionProxy.appendLockKey(lockKeys);
+
+        SQLUndoLog sqlUndoLog = new SQLUndoLog();
+        sqlUndoLog.setSqlType(sqlType);
+        sqlUndoLog.setSqlHints(sqlRecognizer.getSqlHints());
+        sqlUndoLog.setTableName(sqlRecognizer.getTableName());
+        sqlUndoLog.setBeforeImage(beforeImage);
+        sqlUndoLog.setAfterImage(afterImage);
+        connectionProxy.appendUndoItem(sqlUndoLog);
+    }
+
+    /**
+     * ${tableName}:${pkV1},${pkV2},...
+     *
+     * @param rowsIncludingPK
+     * @return
+     */
+    protected String buildLockKey(TableRecords rowsIncludingPK) {
+        if (rowsIncludingPK.size() == 0) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(rowsIncludingPK.getTableMeta().getTableName());
+        sb.append(":");
+
+        boolean flag = false;
+        for (Field field : rowsIncludingPK.pkRows()) {
+            if (flag) {
+                sb.append(",");
+            } else {
+                flag = true;
+            }
+            sb.append(field.getValue());
+        }
+        PluginManager pluginManager = getPluginManager();
+        String lockKeys = pluginManager.execLockKeyBuildAfter(sqlRecognizer.getSqlHints(), rowsIncludingPK, sb.toString());
+        return lockKeys;
+    }
+
+    protected PluginManager getPluginManager() {
+        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+        PluginManager pluginManager = connectionProxy.getDataSourceProxy().getPluginManager();
+        return pluginManager;
+    }
+
+    protected String prepareSql(String originSql) {
+        List<String> hints = sqlRecognizer.getSqlHints();
+        String sql = getPluginManager().execSqlBuildAfter(hints, originSql);
+        return sql;
+    }
+
 
 }

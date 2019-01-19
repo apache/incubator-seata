@@ -16,7 +16,15 @@
 
 package com.alibaba.fescar.rm.datasource.sql;
 
+import java.util.List;
+
 public interface SQLRecognizer {
+
+    /**
+     * Hint of SQL
+     * @return
+     */
+    List<String> getSqlHints();
 
     /**
      * Type of the SQL. INSERT/UPDATE/DELETE ...

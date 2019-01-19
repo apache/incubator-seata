@@ -44,14 +44,17 @@ import java.sql.Struct;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Calendar;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.Executor;
 
 import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fescar.rm.datasource.plugin.Plugin;
+import com.alibaba.fescar.rm.datasource.plugin.PluginConstants;
+import com.alibaba.fescar.rm.datasource.plugin.PluginContext;
+import com.alibaba.fescar.rm.datasource.plugin.PluginManager;
+import com.alibaba.fescar.rm.datasource.plugin.context.SqlBuildAfterContext;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
 import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.KeyType;
@@ -280,6 +283,101 @@ public class UndoExecutorTest {
             executor.executeOn(new MockConnection());
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testUpdateWithPlugin() {
+        SQLUndoLog SQLUndoLog = new SQLUndoLog();
+        SQLUndoLog.setTableName("my_test_table");
+        SQLUndoLog.setSqlHints(Arrays.asList("/*!mycat:schema=wz_buss_001*/"));
+        SQLUndoLog.setSqlType(SQLType.UPDATE);
+
+        TableRecords beforeImage = new TableRecords(new MockTableMeta("product", "id"));
+
+        Row beforeRow = new Row();
+
+        Field pkField = new Field();
+        pkField.setKeyType(KeyType.PrimaryKey);
+        pkField.setName("id");
+        pkField.setType(Types.INTEGER);
+        pkField.setValue(213);
+        beforeRow.add(pkField);
+
+        Field name = new Field();
+        name.setName("name");
+        name.setType(Types.VARCHAR);
+        name.setValue("FESCAR");
+        beforeRow.add(name);
+
+        Field since = new Field();
+        since.setName("since");
+        since.setType(Types.VARCHAR);
+        since.setValue("2014");
+        beforeRow.add(since);
+
+        beforeImage.add(beforeRow);
+
+        TableRecords afterImage = new TableRecords(new MockTableMeta("product", "id"));
+
+        Row afterRow = new Row();
+
+        Field pkField1 = new Field();
+        pkField1.setKeyType(KeyType.PrimaryKey);
+        pkField1.setName("id");
+        pkField1.setType(Types.INTEGER);
+        pkField1.setValue(213);
+        afterRow.add(pkField1);
+
+        Field name1 = new Field();
+        name1.setName("name");
+        name1.setType(Types.VARCHAR);
+        name1.setValue("GTS");
+        afterRow.add(name1);
+
+        Field since1 = new Field();
+        since1.setName("since");
+        since1.setType(Types.VARCHAR);
+        since1.setValue("2016");
+        afterRow.add(since1);
+
+        afterImage.add(afterRow);
+
+        SQLUndoLog.setBeforeImage(beforeImage);
+        SQLUndoLog.setAfterImage(afterImage);
+
+        AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
+
+        try {
+            PluginManager pluginManager = createPluginManager();
+            executor.executeOn(new MockConnection(), pluginManager);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public PluginManager createPluginManager() {
+        PluginManager pluginManager = new PluginManager();
+        pluginManager.addPlugins(new HintProcPlugin());
+        return pluginManager;
+    }
+
+    public static class HintProcPlugin implements Plugin {
+        @Override
+        public List<String> supportedActions() {
+            return Arrays.asList(PluginConstants.ACTION_SQL_BUILD_AFTER);
+        }
+
+        @Override
+        public Object proc(PluginContext context) {
+            SqlBuildAfterContext sqlBuildAfterContext = (SqlBuildAfterContext) context;
+            String originSql = (String) context.getResult();
+            List<String> hints = sqlBuildAfterContext.getSqlHints();
+            StringBuilder hintText = new StringBuilder();
+            for (Integer i = 0; i < hints.size(); i++) {
+                hintText.append(hints.get(i));
+            }
+            return hintText.toString() + " " + originSql;
         }
     }
 

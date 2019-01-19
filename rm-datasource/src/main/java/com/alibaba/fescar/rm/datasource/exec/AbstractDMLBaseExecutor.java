@@ -18,14 +18,20 @@ package com.alibaba.fescar.rm.datasource.exec;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.alibaba.fescar.rm.datasource.AbstractConnectionProxy;
+import com.alibaba.fescar.rm.datasource.ConnectionContext;
+import com.alibaba.fescar.rm.datasource.ConnectionProxy;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
+import com.alibaba.fescar.rm.datasource.sql.SQLType;
+import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
+import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 
 public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
 
@@ -49,7 +55,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         TableRecords beforeImage = beforeImage();
         T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
         TableRecords afterImage = afterImage(beforeImage);
-        statementProxy.getConnectionProxy().prepareUndoLog(sqlRecognizer.getSQLType(), sqlRecognizer.getTableName(), beforeImage, afterImage);
+        prepareUndoLog(beforeImage, afterImage);
         return result;
     }
 

@@ -18,9 +18,13 @@ package com.alibaba.fescar.rm.datasource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.*;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fescar.core.model.Resource;
+import com.alibaba.fescar.rm.datasource.plugin.Plugin;
+import com.alibaba.fescar.rm.datasource.plugin.PluginContext;
+import com.alibaba.fescar.rm.datasource.plugin.PluginManager;
 
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
 
@@ -28,12 +32,21 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private boolean managed = false;
 
+    private PluginManager pluginManager;
+
+    public PluginManager getPluginManager() {
+        return pluginManager;
+    }
+
     public DataSourceProxy(DruidDataSource targetDataSource) {
         super(targetDataSource);
+        pluginManager = new PluginManager(this);
     }
+
     public DataSourceProxy(DruidDataSource targetDataSource, String resourceGroupId) {
         super(targetDataSource);
         this.resourceGroupId = resourceGroupId;
+        pluginManager = new PluginManager(this);
     }
 
     private void assertManaged() {

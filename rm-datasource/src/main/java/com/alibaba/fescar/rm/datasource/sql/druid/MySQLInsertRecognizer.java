@@ -17,6 +17,7 @@
 package com.alibaba.fescar.rm.datasource.sql.druid;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
@@ -35,8 +36,8 @@ public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRe
 
     private final MySqlInsertStatement ast;
 
-    public MySQLInsertRecognizer(String originalSQL, SQLStatement ast) {
-        super(originalSQL);
+    public MySQLInsertRecognizer(String originalSQL, SQLStatement ast, List<String> sqlHints) {
+        super(originalSQL, sqlHints);
         this.ast = (MySqlInsertStatement) ast;
     }
 
@@ -96,7 +97,7 @@ public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRe
             rows.add(row);
             for (SQLExpr expr : valuesClause.getValues()) {
                 if (expr instanceof SQLValuableExpr) {
-                    row.add(((SQLValuableExpr)expr).getValue());
+                    row.add(((SQLValuableExpr) expr).getValue());
                 } else {
                     throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                 }

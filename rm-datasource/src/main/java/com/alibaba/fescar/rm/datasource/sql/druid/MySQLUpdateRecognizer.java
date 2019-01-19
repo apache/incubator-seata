@@ -17,6 +17,7 @@
 package com.alibaba.fescar.rm.datasource.sql.druid;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
@@ -39,8 +40,8 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
 
     private MySqlUpdateStatement ast;
 
-    public MySQLUpdateRecognizer(String originalSQL, SQLStatement ast) {
-        super(originalSQL);
+    public MySQLUpdateRecognizer(String originalSQL, SQLStatement ast, List<String> sqlHints) {
+        super(originalSQL, sqlHints);
         this.ast = (MySqlUpdateStatement) ast;
     }
 
@@ -57,11 +58,11 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
             SQLExpr expr = updateSetItem.getColumn();
             if (expr instanceof SQLIdentifierExpr) {
                 list.add(((SQLIdentifierExpr) expr).getName());
-            } else if (expr instanceof SQLPropertyExpr){
+            } else if (expr instanceof SQLPropertyExpr) {
                 // This is alias case, like UPDATE xxx_tbl a SET a.name = ? WHERE a.id = ?
                 SQLExpr owner = ((SQLPropertyExpr) expr).getOwner();
                 if (owner instanceof SQLIdentifierExpr) {
-                    list.add((((SQLIdentifierExpr)owner).getName() + "." + ((SQLPropertyExpr) expr).getName()));
+                    list.add((((SQLIdentifierExpr) owner).getName() + "." + ((SQLPropertyExpr) expr).getName()));
                 }
             } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
