@@ -37,6 +37,8 @@
         <module>transport-feign</module>
         <module>transport-resttemplate</module>
         <module>order</module>
+        <module>account</module>
+
     </modules>
     <packaging>pom</packaging>
 

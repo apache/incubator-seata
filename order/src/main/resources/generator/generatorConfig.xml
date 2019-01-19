@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration>
+
+    <classPathEntry location="target/classes"/>
+
+    <context id="mysqlTable" targetRuntime="MyBatis3">
+
+        <plugin type="org.mybatis.generator.plugins.CachePlugin"></plugin>
+        <plugin type="org.mybatis.generator.plugins.CaseInsensitiveLikePlugin"></plugin>
+        <plugin type="org.mybatis.generator.plugins.EqualsHashCodePlugin"></plugin>
+        <plugin type="org.mybatis.generator.plugins.FluentBuilderMethodsPlugin"></plugin>
+        <plugin type="org.mybatis.generator.plugins.MapperAnnotationPlugin"></plugin>
+        <plugin type="org.mybatis.generator.plugins.MapperConfigPlugin"></plugin>
+        <plugin type="org.mybatis.generator.plugins.RenameExampleClassPlugin"></plugin>
+        <plugin type="org.mybatis.generator.plugins.RowBoundsPlugin"></plugin>
+        <plugin type="org.mybatis.generator.plugins.SerializablePlugin"></plugin>
+        <plugin type="org.mybatis.generator.plugins.SqlMapConfigPlugin"></plugin>
+        <plugin type="org.mybatis.generator.plugins.ToStringPlugin"></plugin>
+        <plugin type="org.mybatis.generator.plugins.UnmergeableXmlMappersPlugin"></plugin>
+        <plugin type="org.mybatis.generator.plugins.VirtualPrimaryKeyPlugin"></plugin>
+
+        <commentGenerator>
+            <property name="suppressDate" value="true"/>
+            <property name="suppressAllComments" value="true"/>
+
+        </commentGenerator>
+
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://47.100.229.3:3306/oms"
+                        userId="root" password="WO86yanya"/>
+
+        <javaTypeResolver>
+            <property name="forceBigDecimals" value="true"/>
+        </javaTypeResolver>
+
+
+        <javaModelGenerator targetPackage="com.alibaba.fescar.order.model.dao" targetProject="src/main/java">
+            <property name="enableSubPackages" value="true"/>
+            <property name="trimStrings" value="true"/>
+        </javaModelGenerator>
+
+        <sqlMapGenerator targetPackage="mappers" targetProject="src/main/resources">
+            <property name="enableSubPackages" value="true"/>
+        </sqlMapGenerator>
+
+        <javaClientGenerator targetPackage="com.alibaba.fescar.order.mapper" targetProject="src/main/java"
+                             type="XMLMAPPER">
+            <property name="enableSubPackages" value="true"/>
+        </javaClientGenerator>
+
+        <table schema="public" tableName="oms_order" alias="order" domainObjectName="OrderDO">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+
+
+    </context>
+
+</generatorConfiguration>

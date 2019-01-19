@@ -1,0 +1,28 @@
+server:
+  port: 8092
+spring:
+  datasource:
+    url: jdbc:mysql://47.100.229.3:3306/oms?useUnicode=true&amp;characterEncoding=utf8&amp;autoReconnect=true&amp;
+    username: root
+    password: WO86yanya
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+  application:
+    name: order-server
+
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://127.0.0.1:8761/eureka/
+  instance:
+    prefer-ip-address: true
+logging:
+  file: ${spring.application.name}.log
+  level:
+    org.apache.servicecomb: debug
+    com.loki.springcloud: debug
+    org.mybatis: DEBUG
+
+mybatis:
+  mapper-locations: classpath:mappers/**/*.xml
