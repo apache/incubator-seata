@@ -38,5 +38,8 @@ public class SqlBuildAfterContext extends PluginContext {
         this.args.put(ARG_KEY_SQL_HINTS, sqlHints);
     }
 
+    public String getResultSql() {
+        return (String) getResult();
+    }
 
 }

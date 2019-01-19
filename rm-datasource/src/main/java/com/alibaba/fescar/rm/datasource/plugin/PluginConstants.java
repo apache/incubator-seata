@@ -6,4 +6,6 @@ public class PluginConstants {
 
     public static final String ACTION_LOCK_KEY_BUILD_AFTER = "lockKeyBuildAfter";
 
+    public static final String ACTION_TABLE_META_BEFORE = "tableMetaBeforeContext";
+
 }

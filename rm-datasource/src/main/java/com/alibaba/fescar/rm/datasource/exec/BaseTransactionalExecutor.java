@@ -73,14 +73,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     protected TableMeta getTableMeta() {
-        return getTableMeta(sqlRecognizer.getTableName());
-    }
-
-    protected TableMeta getTableMeta(String tableName) {
         if (tableMeta != null) {
             return tableMeta;
         }
-        tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
+        String tableName = sqlRecognizer.getTableName();
+        List<String> sqlHints = sqlRecognizer.getSqlHints();
+        tableMeta = TableMetaCache.getTableMeta(sqlHints, tableName, statementProxy.getConnectionProxy().getDataSourceProxy());
         return tableMeta;
     }
 

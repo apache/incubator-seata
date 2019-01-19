@@ -50,5 +50,8 @@ public class LockKeyBuildAfterContext extends PluginContext {
         this.args.put(ARG_KEY_TABLE_RECORDS, tableRecords);
     }
 
+    public String getResultLockKey() {
+        return (String) getResult();
+    }
 
 }

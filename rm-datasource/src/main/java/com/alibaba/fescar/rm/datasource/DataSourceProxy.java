@@ -32,7 +32,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private boolean managed = false;
 
-    private PluginManager pluginManager = new PluginManager();
+    private PluginManager pluginManager;
 
     public PluginManager getPluginManager() {
         return pluginManager;
@@ -40,11 +40,13 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     public DataSourceProxy(DruidDataSource targetDataSource) {
         super(targetDataSource);
+        pluginManager = new PluginManager(this);
     }
 
     public DataSourceProxy(DruidDataSource targetDataSource, String resourceGroupId) {
         super(targetDataSource);
         this.resourceGroupId = resourceGroupId;
+        pluginManager = new PluginManager(this);
     }
 
     private void assertManaged() {

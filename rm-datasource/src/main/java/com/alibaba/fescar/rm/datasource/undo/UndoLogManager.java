@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
@@ -52,7 +53,7 @@ public final class UndoLogManager {
             "\tWHERE branch_id = ? AND xid = ?";
 
     private static final String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME + " WHERE log_status = 0 AND branch_id = ? AND xid = ? FOR UPDATE";
-  
+
     private UndoLogManager() {
 
     }
@@ -128,7 +129,11 @@ public final class UndoLogManager {
                 BranchUndoLog branchUndoLog = UndoLogParserFactory.getInstance().decode(rollbackInfo);
 
                 for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
-                    TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
+
+                    List<String> sqlHints = sqlUndoLog.getSqlHints();
+                    String tableName = sqlUndoLog.getTableName();
+                    TableMeta tableMeta = TableMetaCache.getTableMeta(sqlHints, tableName, dataSourceProxy);
+
                     sqlUndoLog.setTableMeta(tableMeta);
                     AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(dataSourceProxy.getDbType(), sqlUndoLog);
                     undoExecutor.executeOn(conn, pluginManager);

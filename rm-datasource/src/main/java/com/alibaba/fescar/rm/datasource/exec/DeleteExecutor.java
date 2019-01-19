@@ -39,7 +39,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     @Override
     protected TableRecords beforeImage() throws SQLException {
         SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) sqlRecognizer;
-        TableMeta tmeta = getTableMeta(visitor.getTableName());
+        TableMeta tmeta = getTableMeta();
         List<String> columns = new ArrayList<>();
         for (String column : tmeta.getAllColumns().keySet()) {
             columns.add(column);

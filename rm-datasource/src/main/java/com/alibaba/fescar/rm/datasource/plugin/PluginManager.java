@@ -1,7 +1,10 @@
 package com.alibaba.fescar.rm.datasource.plugin;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fescar.rm.datasource.DataSourceProxy;
 import com.alibaba.fescar.rm.datasource.plugin.context.LockKeyBuildAfterContext;
 import com.alibaba.fescar.rm.datasource.plugin.context.SqlBuildAfterContext;
+import com.alibaba.fescar.rm.datasource.plugin.context.TableMetaBeforeContext;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 
 import java.util.*;
@@ -10,6 +13,28 @@ import java.util.*;
  * 插件管理类
  */
 public class PluginManager {
+
+    public PluginManager() {
+
+    }
+
+    public PluginManager(DataSourceProxy dataSourceProxy) {
+        this.setDataSourceProxy(dataSourceProxy);
+    }
+
+    /**
+     * dataSourceProxy
+     */
+    private DataSourceProxy dataSourceProxy;
+
+    public DataSourceProxy getDataSourceProxy() {
+        return dataSourceProxy;
+    }
+
+    public void setDataSourceProxy(DataSourceProxy dataSourceProxy) {
+        this.dataSourceProxy = dataSourceProxy;
+    }
+
     /**
      * plugins
      */
@@ -75,6 +100,21 @@ public class PluginManager {
         LockKeyBuildAfterContext context = new LockKeyBuildAfterContext(sqlHints, tableRecords, lockKey);
         Object result = execPlugin(context, PluginConstants.ACTION_LOCK_KEY_BUILD_AFTER);
         return (String) result;
+    }
+
+    /**
+     * table Meta构建前处理
+     *
+     * @param sqlHints            SqlHint列表
+     * @param tableName           目标表名
+     * @param defaultCacheKey     默认cacheKey
+     * @param defaultMetaQuerySql 默认metaQuerySql
+     * @return
+     */
+    public TableMetaBeforeContext execTableMetaBefore(List<String> sqlHints, String tableName, String defaultCacheKey, String defaultMetaQuerySql) {
+        TableMetaBeforeContext context = new TableMetaBeforeContext(sqlHints, tableName, defaultCacheKey, defaultMetaQuerySql);
+        execPlugin(context, PluginConstants.ACTION_TABLE_META_BEFORE);
+        return context;
     }
 
     /**
