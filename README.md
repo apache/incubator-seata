@@ -1,8 +1,8 @@
 # FESCAR: Fast & Easy Commit And Rollback
 
-[![License](https://img.shields.io/badge/license-Apache%202-4EB1BA.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
-
--------
+[![Build Status](https://travis-ci.org/alibaba/fescar.svg?branch=develop)](https://travis-ci.org/alibaba/fescar)
+[![codecov](https://codecov.io/gh/alibaba/fescar/branch/develop/graph/badge.svg)](https://codecov.io/gh/alibaba/fescar)
+![license](https://img.shields.io/github/license/alibaba/fescar.svg)
 
 ## What is FESCAR?
 
@@ -71,7 +71,7 @@ You can view the full documentation from the wiki: [FESCAR wiki page](https://gi
 
 ## Reporting bugs
 
-Please follow the [template](https://github.com/TBD) for reporting any issues.
+Please follow the [template]() for reporting any issues.
 
 
 ## Contributing
@@ -81,11 +81,9 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 
 ## Contact
 
-* [Twitter](https://twitter.com/fescar): TBD. Follow along for latest FESCAR news on Twitter.
+* [Twitter](): TBD. Follow along for latest FESCAR news on Twitter.
 * Email Group:
-     * TBD: FESCAR usage general discussion.
-     * TBD: FESCAR developer discussion (APIs, feature design, etc).
-     * TBD: Commits notice, very high frequency.
+     * dev.fescar@gmail.com: FESCAR developer discussion (APIs, feature design, etc).
 
 **Dingtalk**
 

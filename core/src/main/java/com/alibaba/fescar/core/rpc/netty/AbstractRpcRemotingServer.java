@@ -19,9 +19,6 @@ package com.alibaba.fescar.core.rpc.netty;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ThreadPoolExecutor;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.core.rpc.RemotingServer;
 
@@ -36,7 +33,8 @@ import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Rpc remoting server.
@@ -53,15 +51,13 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     private final EventLoopGroup eventLoopGroupWorker;
     private final EventLoopGroup eventLoopGroupBoss;
     private final NettyServerConfig nettyServerConfig;
-    private DefaultEventExecutorGroup defaultEventExecutorGroup;
     private int listenPort;
 
     public void setListenPort(int listenPort) {
-    	
-    	if(listenPort <= 0) {
-    		throw new IllegalArgumentException("listen port: " + listenPort +" is invalid!");
-    	}
-    	
+
+        if (listenPort <= 0) {
+            throw new IllegalArgumentException("listen port: " + listenPort + " is invalid!");
+        }
         this.listenPort = listenPort;
     }
 
@@ -90,13 +86,15 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         super(messageExecutor);
         this.serverBootstrap = new ServerBootstrap();
         this.nettyServerConfig = nettyServerConfig;
-        this.eventLoopGroupBoss = new NioEventLoopGroup(nettyServerConfig.getBossThreadSize(),
-            new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
         if (NettyServerConfig.enableEpoll()) {
+            this.eventLoopGroupBoss = new EpollEventLoopGroup(nettyServerConfig.getBossThreadSize(),
+                new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
             this.eventLoopGroupWorker = new EpollEventLoopGroup(nettyServerConfig.getServerWorkerThreads(),
                 new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
                     nettyServerConfig.getServerWorkerThreads()));
         } else {
+            this.eventLoopGroupBoss = new NioEventLoopGroup(nettyServerConfig.getBossThreadSize(),
+                new NamedThreadFactory(nettyServerConfig.getBossThreadPrefix(), nettyServerConfig.getBossThreadSize()));
             this.eventLoopGroupWorker = new NioEventLoopGroup(nettyServerConfig.getServerWorkerThreads(),
                 new NamedThreadFactory(nettyServerConfig.getWorkerThreadPrefix(),
                     nettyServerConfig.getServerWorkerThreads()));
@@ -110,16 +108,11 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
 
     @Override
     public void start() {
-        this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(
-            nettyServerConfig.getServerWorkerThreads(),
-            new NamedThreadFactory(nettyServerConfig.getExecutorThreadPrefix(),
-                nettyServerConfig.getServerWorkerThreads()));
-
         this.serverBootstrap.group(this.eventLoopGroupBoss, this.eventLoopGroupWorker)
             .channel(nettyServerConfig.SERVER_CHANNEL_CLAZZ)
             .option(ChannelOption.SO_BACKLOG, nettyServerConfig.getSoBackLogSize())
             .option(ChannelOption.SO_REUSEADDR, true)
-            .option(ChannelOption.SO_KEEPALIVE, true)
+            .childOption(ChannelOption.SO_KEEPALIVE, true)
             .childOption(ChannelOption.TCP_NODELAY, true)
             .childOption(ChannelOption.SO_SNDBUF, nettyServerConfig.getServerSocketSendBufSize())
             .childOption(ChannelOption.SO_RCVBUF, nettyServerConfig.getServerSocketResvBufSize())
@@ -144,7 +137,6 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         }
 
         try {
-            LOGGER.info("Server starting ... ");
             ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
             LOGGER.info("Server started ... ");
             future.channel().closeFuture().sync();
@@ -159,9 +151,6 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         try {
             this.eventLoopGroupBoss.shutdownGracefully();
             this.eventLoopGroupWorker.shutdownGracefully();
-            if (this.defaultEventExecutorGroup != null) {
-                this.defaultEventExecutorGroup.shutdownGracefully();
-            }
         } catch (Exception exx) {
             LOGGER.error(exx.getMessage());
         }
