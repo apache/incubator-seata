@@ -16,17 +16,13 @@
 
 package com.alibaba.fescar.tm.dubbo.impl;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.rm.RMClientAT;
-import com.alibaba.fescar.test.common.ApplicationKeeper;
+import com.alibaba.fescar.spring.annotation.GlobalTransactional;
 import com.alibaba.fescar.tm.dubbo.AccountService;
 import com.alibaba.fescar.tm.dubbo.Order;
 import com.alibaba.fescar.tm.dubbo.OrderService;
-
+import com.alibaba.fescar.tm.dubbo.StorageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -34,6 +30,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 /**
  * Please add the follow VM arguments:
@@ -45,10 +45,51 @@ public class OrderServiceImpl implements OrderService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
 
+    private StorageService storageService;
+
     private AccountService accountService;
 
     private JdbcTemplate jdbcTemplate;
 
+    public static void main(String[] args) throws Throwable {
+
+        String applicationId = "dubbo-demo-order-service";
+        String txServiceGroup = "my_test_tx_group";
+
+        RMClientAT.init(applicationId, txServiceGroup);
+
+        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"dubbo-order-service.xml"});
+        final OrderService orderService = (OrderService) context.getBean("service");
+        LOGGER.info("Main order begin ... xid: " + RootContext.getXID());
+        orderService.create("U100001", "C00321", 2);
+        LOGGER.info("Main order end ... xid: " + RootContext.getXID());
+    }
+
+    public AccountService getAccountService() {
+        return accountService;
+    }
+
+    public StorageService getStorageService() {
+        return storageService;
+    }
+
+    public void setStorageService(StorageService storageService) {
+        this.storageService = storageService;
+    }
+
+    public void setAccountService(AccountService accountService) {
+        this.accountService = accountService;
+    }
+
+    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    private int calculate(String commodityId, int orderCount) {
+        return 200 * orderCount;
+    }
+
+    @GlobalTransactional
     @Override
     public Order create(String userId, String commodityCode, int orderCount) {
         LOGGER.info("Order Service Begin ... xid: " + RootContext.getXID());
@@ -56,8 +97,6 @@ public class OrderServiceImpl implements OrderService {
         // 计算订单金额
         int orderMoney = calculate(commodityCode, orderCount);
 
-        // 从账户余额扣款
-        accountService.debit(userId, orderMoney);
 
         final Order order = new Order();
         order.userId = userId;
@@ -84,33 +123,14 @@ public class OrderServiceImpl implements OrderService {
 
         order.id = (long) keyHolder.getKey();
 
+        // 从账户余额扣款
+        accountService.debit(userId, orderMoney);
+
+        storageService.deduct(commodityCode, orderCount);
+
+
         LOGGER.info("Order Service End ... Created " + order);
 
         return order;
-    }
-
-    public void setAccountService(AccountService accountService) {
-        this.accountService = accountService;
-    }
-
-    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
-    private int calculate(String commodityId, int orderCount) {
-        return 200 * orderCount;
-    }
-
-    public static void main(String[] args) throws Throwable {
-
-        String applicationId = "dubbo-demo-order-service";
-        String txServiceGroup = "my_test_tx_group";
-
-        RMClientAT.init(applicationId, txServiceGroup);
-
-        ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"dubbo-order-service.xml"});
-        context.getBean("service");
-        JdbcTemplate jdbcTemplate = (JdbcTemplate) context.getBean("jdbcTemplate");
-        new ApplicationKeeper(context).keep();
     }
 }

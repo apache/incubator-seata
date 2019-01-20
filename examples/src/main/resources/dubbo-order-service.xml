@@ -22,9 +22,9 @@
 
     <bean name="orderDataSource" class="com.alibaba.druid.pool.DruidDataSource"
           init-method="init" destroy-method="close">
-        <property name="url" value="jdbc:mysql://xxx:3306/demo"/>
-        <property name="username" value="xxx"/>
-        <property name="password" value="xxx"/>
+        <property name="url" value="jdbc:mysql://47.100.229.3:3306/order"/>
+        <property name="username" value="root"/>
+        <property name="password" value="WO86yanya"/>
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
         <property name="initialSize" value="0"/>
         <property name="maxActive" value="180"/>
@@ -56,10 +56,12 @@
     <dubbo:service interface="com.alibaba.fescar.tm.dubbo.OrderService" ref="service" timeout="10000"/>
 
     <dubbo:reference id="accountService" check="false" interface="com.alibaba.fescar.tm.dubbo.AccountService"/>
+    <dubbo:reference id="storageService" check="false" interface="com.alibaba.fescar.tm.dubbo.StorageService"/>
 
     <bean id="service" class="com.alibaba.fescar.tm.dubbo.impl.OrderServiceImpl">
         <property name="jdbcTemplate" ref="jdbcTemplate"/>
         <property name="accountService" ref="accountService"/>
+        <property name="storageService" ref="storageService"/>
     </bean>
 
     <bean class="com.alibaba.fescar.spring.annotation.GlobalTransactionScanner">

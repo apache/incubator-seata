@@ -16,6 +16,15 @@
 
 package com.alibaba.fescar.rm.datasource.sql.struct;
 
+import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.util.StringUtils;
+import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
+import com.alibaba.fescar.core.context.RootContext;
+import com.alibaba.fescar.rm.datasource.AbstractConnectionProxy;
+import com.alibaba.fescar.rm.datasource.DataSourceProxy;
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSetMetaData;
@@ -23,16 +32,6 @@ import java.sql.SQLException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
-
-import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.util.StringUtils;
-import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
-import com.alibaba.fescar.core.context.RootContext;
-import com.alibaba.fescar.rm.datasource.AbstractConnectionProxy;
-import com.alibaba.fescar.rm.datasource.DataSourceProxy;
-
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 
 public class TableMetaCache {
 
@@ -48,9 +47,12 @@ public class TableMetaCache {
 	}
 
 	public static TableMeta getTableMeta(final DruidDataSource druidDataSource, final String tableName) {
+		System.out.println("xxxxxx");
+		/*
 		if (StringUtils.isEmpty(tableName)) {
 			throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
 		}
+		*/
 
 		String dataSourceKey = druidDataSource.getUrl();
 
@@ -64,6 +66,7 @@ public class TableMetaCache {
 				}
 			});
 		} catch (ExecutionException e) {
+			System.out.println(e);
 		}
 
 		if (tmeta == null) {

@@ -103,9 +103,11 @@
         </if>
     </delete>
     <insert id="insert" parameterType="com.alibaba.fescar.order.model.dao.OrderDO">
+        <!--
         <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
             SELECT LAST_INSERT_ID()
         </selectKey>
+        -->
         insert into oms_order (order_code, customer_code, order_status
         )
         values (#{orderCode,jdbcType=VARCHAR}, #{customerCode,jdbcType=VARCHAR}, #{orderStatus,jdbcType=TINYINT}

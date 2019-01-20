@@ -100,9 +100,11 @@
         </if>
     </delete>
     <insert id="insert" parameterType="com.alibaba.fescar.account.model.dao.AccountDO">
+        <!--
         <selectKey keyProperty="id" order="AFTER" resultType="java.lang.Long">
             SELECT LAST_INSERT_ID()
         </selectKey>
+        -->
         insert into account (money)
         values (#{money,jdbcType=DECIMAL})
     </insert>
