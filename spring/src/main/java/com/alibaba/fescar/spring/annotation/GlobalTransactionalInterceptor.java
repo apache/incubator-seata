@@ -34,12 +34,14 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
 
+    private static final FailureHandler DEFAULT_FAILURE_HANDLER = new DefaultFailureHandlerImpl();
+
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
     private final FailureHandler failureHandler;
 
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
         if (null == failureHandler) {
-            failureHandler = new DefaultFailureHandlerImpl();
+            failureHandler = DEFAULT_FAILURE_HANDLER;
         }
         this.failureHandler = failureHandler;
     }
