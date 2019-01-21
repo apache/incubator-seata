@@ -68,14 +68,14 @@ public class OrderServiceImpl implements OrderService {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        LOGGER.info("Order Service SQL: insert into order_tbl (user_id, commodity_code, count, money) values ({}, {}, {}, {})" ,userId ,commodityCode ,orderCount ,orderMoney );
+        LOGGER.info("Order Service SQL: insert into order_tbl (user_id, commodity_code, count, money) values ({}, {}, {}, {})", userId, commodityCode, orderCount, orderMoney);
 
         jdbcTemplate.update(new PreparedStatementCreator() {
 
             @Override
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
                 PreparedStatement pst = con.prepareStatement(
-                        "insert into order_tbl (user_id, commodity_code, count, money) values (?, ?, ?, ?)",
+                        "INSERT INTO order_tbl (user_id, commodity_code, count, money) VALUES (?, ?, ?, ?)",
                         PreparedStatement.RETURN_GENERATED_KEYS);
                 pst.setObject(1, order.userId);
                 pst.setObject(2, order.commodityCode);
@@ -85,7 +85,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }, keyHolder);
 
-        order.id = (long) keyHolder.getKey();
+        order.id = keyHolder.getKey().longValue();
 
         LOGGER.info("Order Service End ... Created " + order);
 

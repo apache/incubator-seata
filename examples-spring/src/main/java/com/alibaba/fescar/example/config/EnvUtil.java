@@ -7,13 +7,12 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * 环境配置实用类
@@ -69,7 +68,7 @@ public class EnvUtil implements ApplicationContextAware {
         RelaxedPropertyResolver propertyResolver = new RelaxedPropertyResolver(env, propPrefix);
         //解析${...}中引用的属性
         Map<String, Object> props = propertyResolver.getSubProperties("");
-        Map<String, Object> resolved = new HashMap<>();
+        Map<String, Object> resolved = new HashMap<String, Object>();
         resolved.putAll(props);
         for (Map.Entry<String, Object> entry : props.entrySet()) {
             if (entry.getValue() != null && entry.getValue() instanceof String) {
@@ -92,33 +91,21 @@ public class EnvUtil implements ApplicationContextAware {
         if (props == null) {
             return null;
         }
-        return props.values().stream().map(value -> value.toString()).collect(Collectors.toList());
+        List<String> result = new ArrayList<String>();
+        for (Object value : props.values()) {
+            result.add(value.toString());
+        }
+        return result;
     }
 
 
     private static String resolveProps(String props) {
-        String replaced = regReplace(props, propPattern, m -> {
-            String propName = m.group(1);
-            String value = env.getProperty(propName, propName);
-            return value;
-        });
-        return replaced;
-    }
-
-    /**
-     * 正则表达式替换
-     *
-     * @param text    需要处理的文本
-     * @param pattern 正则表达式匹配模式
-     * @param replace 替换函数
-     * @return
-     */
-    private static String regReplace(String text, Pattern pattern, Function<Matcher, String> replace) {
-        Matcher matcher = pattern.matcher(text);
+        Matcher matcher = propPattern.matcher(props);
         matcher.reset();
         StringBuffer buffer = new StringBuffer();
         while (matcher.find()) {
-            String target = replace.apply(matcher);
+            String propName = matcher.group(1);
+            String target = env.getProperty(propName, propName);
             matcher.appendReplacement(buffer, target);
         }
         matcher.appendTail(buffer);

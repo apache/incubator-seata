@@ -10,12 +10,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.core.env.Environment;
+import org.springframework.http.client.ClientHttpRequestInterceptor;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -51,8 +53,10 @@ public class RestConfig {
         dataBinder.setIgnoreUnknownFields(true);
         dataBinder.bind(paramsProps);
 
+        List<ClientHttpRequestInterceptor> interceptors = new ArrayList<ClientHttpRequestInterceptor>();
         TxRestTemplateInterceptor transactionInterceptor = new TxRestTemplateInterceptor();
-        template.setInterceptors(Collections.singletonList(transactionInterceptor));
+        interceptors.add(transactionInterceptor);
+        template.setInterceptors(interceptors);
         return template;
     }
 }
