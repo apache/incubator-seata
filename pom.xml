@@ -21,7 +21,7 @@
 
     <groupId>com.alibaba.fescar</groupId>
     <artifactId>fescar-all</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.2-SNAPSHOT</version>
     <modules>
         <module>config</module>
         <module>common</module>

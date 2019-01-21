@@ -160,12 +160,13 @@ public class DefaultCore implements Core {
                         continue;
                     case PhaseTwo_CommitFailed_Unretryable:
                         if (globalSession.canBeCommittedAsync()) {
-                            LOGGER.error("By [" + branchStatus + "], failed to commit branch " + branchSession);
+                            LOGGER.error("By [{}], failed to commit branch {}", branchStatus, branchSession);
                             continue;
                         } else {
                             globalSession.changeStatus(GlobalStatus.CommitFailed);
                             globalSession.end();
-                            LOGGER.error("Finally, failed to commit global[" + globalSession.getTransactionId() + "] since branch[" + branchSession.getBranchId() + "] commit failed");
+                            LOGGER.error("Finally, failed to commit global[{}] since branch[{}] commit failed",
+                                    globalSession.getTransactionId(), branchSession.getBranchId());
                             return;
                         }
                     default:
@@ -174,17 +175,18 @@ public class DefaultCore implements Core {
                             return;
                         }
                         if (globalSession.canBeCommittedAsync()) {
-                            LOGGER.error("By [" + branchStatus + "], failed to commit branch " + branchSession);
+                            LOGGER.error("By [{}], failed to commit branch {}", branchStatus, branchSession);
                             continue;
                         } else {
-                            LOGGER.error("Failed to commit global[" + globalSession.getTransactionId() + "] since branch[" + branchSession.getBranchId() + "] commit failed, will retry later.");
+                            LOGGER.error("Failed to commit global[{}] since branch[{}] commit failed, will retry later.",
+                                    globalSession.getTransactionId(), branchSession.getBranchId());
                             return;
                         }
 
                 }
 
             } catch (Exception ex) {
-                LOGGER.info("Exception committing branch " + branchSession, ex);
+                LOGGER.info("Exception committing branch {}", branchSession, ex);
                 if (!retrying) {
                     queueToRetryCommit(globalSession);
                     if (ex instanceof TransactionException) {
@@ -198,12 +200,12 @@ public class DefaultCore implements Core {
 
         }
         if (globalSession.hasBranch()) {
-            LOGGER.info("Global[" + globalSession.getTransactionId() + "] committing is NOT done.");
+            LOGGER.info("Global[{}] committing is NOT done.", globalSession.getTransactionId());
             return;
         }
         globalSession.changeStatus(GlobalStatus.Committed);
         globalSession.end();
-        LOGGER.info("Global[" + globalSession.getTransactionId() + "] committing is successfully done.");
+        LOGGER.info("Global[{}] committing is successfully done.", globalSession.getTransactionId());
     }
 
     private void asyncCommit(GlobalSession globalSession) throws TransactionException {
