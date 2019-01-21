@@ -34,6 +34,7 @@
         <module>dubbo</module>
         <module>test</module>
         <module>examples</module>
+        <module>examples-spring</module>
     </modules>
     <packaging>pom</packaging>
 

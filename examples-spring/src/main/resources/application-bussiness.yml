@@ -1,0 +1,13 @@
+spring.application:
+  name: fescar-example-spring-bussiness
+
+
+server.port: 8081
+
+
+
+
+
+
+
+

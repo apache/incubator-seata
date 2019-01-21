@@ -1,0 +1,16 @@
+spring.application:
+  name: fescar-example-spring-storage
+
+server.port: 8084
+app:
+  init-sql:
+    - delete from storage_tbl where commodity_code = 'C00321'
+    - insert into storage_tbl(commodity_code, count) values ('C00321', 100)
+
+
+
+
+
+
+
+
