@@ -22,9 +22,9 @@
 
     <bean name="storageDataSource" class="com.alibaba.druid.pool.DruidDataSource"
           init-method="init" destroy-method="close">
-        <property name="url" value="jdbc:mysql://xxx:3306/demo"/>
-        <property name="username" value="xxx"/>
-        <property name="password" value="xxx"/>
+        <property name="url" value="jdbc:mysql://localhost:3306/demo_fescar"/>
+        <property name="username" value="fescar"/>
+        <property name="password" value="fescar"/>
         <property name="driverClassName" value="com.mysql.jdbc.Driver" />
         <property name="initialSize" value="0" />
         <property name="maxActive" value="180" />
