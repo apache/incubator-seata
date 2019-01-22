@@ -22,7 +22,7 @@ public class PluginManagerTest {
     }
 
     @Test
-    public void testSqlBuildAfter() {
+    public void testSqlBuildAfter() { 
         String hint1 = "!mycat:schema=wz_buss_001";
         List<String> hints = Arrays.asList(hint1);
         String originSql = "select * from buss_user_info";
@@ -34,7 +34,7 @@ public class PluginManagerTest {
         pluginManager.addPlugins(new SqlBuildAfterPlugin());
         result = pluginManager.execSqlBuildAfter(hints, originSql);
         System.out.println(result);
-        Assert.assertTrue(result.startsWith("/*" + hint1 + "*/"));
+        Assert.assertTrue(result.startsWith("/*" + hint1 + "*/")); 
         Assert.assertTrue(result.endsWith(originSql));
     }
 
