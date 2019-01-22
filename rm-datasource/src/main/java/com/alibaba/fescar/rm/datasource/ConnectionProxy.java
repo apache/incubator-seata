@@ -129,16 +129,18 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     @Override
     public void commit() throws SQLException {
         if (context.inGlobalTransaction()) {
-            try {
-                register();
-            } catch (TransactionException e) {
-                recognizeLockKeyConflictException(e);
-            }
 
             try {
                 if (context.hasUndoLog()) { 
                     UndoLogManager.flushUndoLogs(this);
                 }
+
+                try {
+                    register();
+                } catch (TransactionException e) {
+                    recognizeLockKeyConflictException(e);
+                }
+
                 targetConnection.commit();
             } catch (Throwable ex) {
                 report(false);
