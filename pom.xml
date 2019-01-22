@@ -61,7 +61,7 @@
         <maven.compiler.target>1.7</maven.compiler.target>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <netty4.version>4.1.24.Final</netty4.version>
-        <org.springframework.spring.version>2.5.6.SEC03</org.springframework.spring.version>
+        <org.springframework.spring.version>4.3.18.RELEASE</org.springframework.spring.version>
         <junit.version>4.12</junit.version>
         <dubbo.version>2.5.3</dubbo.version>
     </properties>
