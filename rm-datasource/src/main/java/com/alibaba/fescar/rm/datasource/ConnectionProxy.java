@@ -16,9 +16,6 @@
 
 package com.alibaba.fescar.rm.datasource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
@@ -29,9 +26,11 @@ import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class ConnectionProxy extends AbstractConnectionProxy {
 
@@ -63,6 +62,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             recognizeLockKeyConflictException(e);
         }
     }
+
     public void register(TableRecords records) throws SQLException {
         // Just check lock without requiring lock by now.
         String lockKeys = buildLockKey(records);
@@ -83,10 +83,10 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     public void prepareUndoLog(SQLType sqlType, String tableName, TableRecords beforeImage, TableRecords afterImage) throws SQLException {
-        if(beforeImage.getRows().size() == 0 && afterImage.getRows().size() == 0) {
+        if (beforeImage.getRows().size() == 0 && afterImage.getRows().size() == 0) {
             return;
-            }
-        
+        }
+
         TableRecords lockKeyRecords = afterImage;
         if (sqlType == SQLType.DELETE) {
             lockKeyRecords = beforeImage;
@@ -131,17 +131,15 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (context.inGlobalTransaction()) {
 
             try {
-                if (context.hasUndoLog()) { 
+                if (context.hasUndoLog()) {
                     UndoLogManager.flushUndoLogs(this);
                 }
 
-                try {
-                    register();
-                } catch (TransactionException e) {
-                    recognizeLockKeyConflictException(e);
-                }
+                register();
 
                 targetConnection.commit();
+            } catch (TransactionException e) {
+                recognizeLockKeyConflictException(e);
             } catch (Throwable ex) {
                 report(false);
                 if (ex instanceof SQLException) {
@@ -152,7 +150,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             }
             report(true);
             context.reset();
-        	
+
         } else {
             targetConnection.commit();
         }
@@ -170,8 +168,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (context.inGlobalTransaction()) {
             if (context.isBranchRegistered()) {
                 report(false);
-            }}
-            context.reset();
+            }
+        }
+        context.reset();
     }
 
     @Override
