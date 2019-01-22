@@ -22,6 +22,9 @@
     <bean id="businessService" class="com.alibaba.fescar.spring.test.BusinessService">
     </bean>
 
+    <bean id="mycatBusinessService" class="com.alibaba.fescar.spring.test.MycatBusinessService">
+    </bean>
+
     <bean class="com.alibaba.fescar.spring.annotation.GlobalTransactionScanner">
         <constructor-arg value="dubbo-demo-app"/>
         <constructor-arg value="my_test_tx_group"/>

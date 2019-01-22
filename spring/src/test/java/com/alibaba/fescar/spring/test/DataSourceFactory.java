@@ -2,6 +2,7 @@ package com.alibaba.fescar.spring.test;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fescar.rm.datasource.DataSourceProxy;
+import com.alibaba.fescar.rm.datasource.plugin.PluginManager;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
@@ -71,6 +72,8 @@ public class DataSourceFactory {
         try {
             InputStream in = DataSourceFactory.class.getClassLoader().getResourceAsStream("datasource.properties");
             properties.load(in);
+            //datasource-local.properties的配置具有更高优先级
+            //通常可以将datasource-local.properties排除在版本管理中,以便开发者有自己的数据库配置
             InputStream localIn = DataSourceFactory.class.getClassLoader().getResourceAsStream("datasource-local.properties");
             if (localIn != null) {
                 properties.load(localIn);
@@ -129,6 +132,19 @@ public class DataSourceFactory {
     public static JdbcTemplate createRawJdbcTemplate() {
         DataSource dataSource = createDataSource();
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
+        return jdbcTemplate;
+    }
+
+
+    public static JdbcTemplate createMycatJdbcTemplate() {
+        //注意数据库连接配置应该连接mycat
+        DataSourceProxy dataSourceProxy = DataSourceFactory.createDataSourceProxy();
+        PluginManager pluginManager = dataSourceProxy.getPluginManager();
+        pluginManager.addPlugins(new MycatPlugins.LockKeyBuildAfterPlugin());
+        pluginManager.addPlugins(new MycatPlugins.SqlBuildAfterPlugin());
+        pluginManager.addPlugins(new MycatPlugins.TableMetaBeforePlugin());
+
+        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourceProxy);
         return jdbcTemplate;
     }
 

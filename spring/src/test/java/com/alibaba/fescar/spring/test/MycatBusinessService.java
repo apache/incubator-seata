@@ -2,6 +2,8 @@ package com.alibaba.fescar.spring.test;
 
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.rm.RMClientAT;
+import com.alibaba.fescar.rm.datasource.DataSourceProxy;
+import com.alibaba.fescar.rm.datasource.plugin.PluginManager;
 import com.alibaba.fescar.spring.annotation.GlobalTransactional;
 import com.alibaba.fescar.tm.TMClient;
 import org.slf4j.Logger;
@@ -17,18 +19,18 @@ import java.sql.SQLException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
-public class BusinessService {
+public class MycatBusinessService {
 
-    public static final Logger LOGGER = LoggerFactory.getLogger(BusinessService.class);
+    public static final Logger LOGGER = LoggerFactory.getLogger(MycatBusinessService.class);
 
-    @GlobalTransactional(timeoutMills = 300000, name = "spring-demo-mycat-tx")
+    @GlobalTransactional(timeoutMills = 300000, name = "spring-demo-tx")
     public void purchase(String userId, String commodityCode, int orderCount) {
         String xid = RootContext.getXID();
         doDeduct(xid, commodityCode, orderCount);
         doCreateOrder(xid, userId, commodityCode, orderCount);
     }
 
-    @GlobalTransactional(timeoutMills = 300000, name = "spring-demo-mycat-tx")
+    @GlobalTransactional(timeoutMills = 300000, name = "spring-demo-tx")
     public void purchaseRollback(String userId, String commodityCode, int orderCount) {
         String xid = RootContext.getXID();
         doDeduct(xid, commodityCode, orderCount);
@@ -40,7 +42,7 @@ public class BusinessService {
         Callable<Integer> callable = new Callable() {
             @Override
             public Integer call() {
-                return BusinessService.deduct(xid, commodityCode, count);
+                return MycatBusinessService.deduct(xid, commodityCode, count);
             }
         };
         FutureTask<Integer> task = new FutureTask(callable);
@@ -56,7 +58,7 @@ public class BusinessService {
         Callable<Order> callable = new Callable() {
             @Override
             public Order call() {
-                return BusinessService.createOrder(xid, userId, commodityCode, orderCount);
+                return MycatBusinessService.createOrder(xid, userId, commodityCode, orderCount);
             }
         };
         FutureTask<Order> task = new FutureTask(callable);
@@ -72,7 +74,7 @@ public class BusinessService {
         Callable<Order> callable = new Callable() {
             @Override
             public Integer call() {
-                return BusinessService.debit(xid, userId, money);
+                return MycatBusinessService.debit(xid, userId, money);
             }
         };
         FutureTask<Integer> task = new FutureTask(callable);
@@ -91,8 +93,8 @@ public class BusinessService {
         LOGGER.info("Storage Service Begin ... xid: " + RootContext.getXID());
         LOGGER.info("Deducting inventory SQL: update storage_tbl set count = count - {} where commodity_code = {}", count, commodityCode);
 
-        JdbcTemplate jdbcTemplate = DataSourceFactory.createJdbcTemplate();
-        int ret = jdbcTemplate.update("UPDATE storage_tbl SET count = count - ? WHERE commodity_code = ?", new Object[]{count, commodityCode});
+        JdbcTemplate jdbcTemplate = DataSourceFactory.createMycatJdbcTemplate();
+        int ret = jdbcTemplate.update("/*!mycat:schema=demo_storage*/ UPDATE storage_tbl SET count = count - ? WHERE commodity_code = ?", new Object[]{count, commodityCode});
 
         LOGGER.info("Storage Service End ... ");
 
@@ -105,7 +107,7 @@ public class BusinessService {
 
         LOGGER.info("Order Service Begin ... xid: " + RootContext.getXID());
 
-        JdbcTemplate jdbcTemplate = DataSourceFactory.createJdbcTemplate();
+        JdbcTemplate jdbcTemplate = DataSourceFactory.createMycatJdbcTemplate();
 
         // 计算订单金额
         int orderMoney = 200 * orderCount;
@@ -128,7 +130,7 @@ public class BusinessService {
             @Override
             public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
                 PreparedStatement pst = con.prepareStatement(
-                        "INSERT INTO order_tbl (user_id, commodity_code, count, money) VALUES (?, ?, ?, ?)",
+                        "/*!mycat:schema=demo_order*/ INSERT INTO order_tbl (user_id, commodity_code, count, money) VALUES (?, ?, ?, ?)",
                         PreparedStatement.RETURN_GENERATED_KEYS);
                 pst.setObject(1, order.userId);
                 pst.setObject(2, order.commodityCode);
@@ -151,8 +153,8 @@ public class BusinessService {
         LOGGER.info("Account Service Begin ... xid: " + RootContext.getXID());
         LOGGER.info("Deducting balance SQL: update account_tbl set money = money - {} where user_id = {}", money, userId);
 
-        JdbcTemplate jdbcTemplate = DataSourceFactory.createJdbcTemplate();
-        Integer ret = jdbcTemplate.update("UPDATE account_tbl SET money = money - ? WHERE user_id = ?", new Object[]{money, userId});
+        JdbcTemplate jdbcTemplate = DataSourceFactory.createMycatJdbcTemplate();
+        Integer ret = jdbcTemplate.update("/*!mycat:schema=demo_account*/ UPDATE account_tbl SET money = money - ? WHERE user_id = ?", new Object[]{money, userId});
         LOGGER.info("Account Service End ... ");
 
         return ret;
