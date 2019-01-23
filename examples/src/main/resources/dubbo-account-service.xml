@@ -26,10 +26,10 @@
 
     <bean name="accountDataSource" class="com.alibaba.druid.pool.DruidDataSource"
           init-method="init" destroy-method="close">
-        <property name="url" value="${jdbc.url}"/>
-        <property name="username" value="${jdbc.username}"/>
-        <property name="password" value="${jdbc.password}"/>
-        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="${jdbc.account.url}"/>
+        <property name="username" value="${jdbc.account.username}"/>
+        <property name="password" value="${jdbc.account.password}"/>
+        <property name="driverClassName" value="${jdbc.account.driver}" />
         <property name="initialSize" value="0" />
         <property name="maxActive" value="180" />
         <property name="minIdle" value="0" />
