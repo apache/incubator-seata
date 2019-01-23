@@ -141,16 +141,16 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
     public String toString() {
         StringBuilder result = new StringBuilder();
         result.append("transactionId=");
-        result.append(String.valueOf(transactionId));
+        result.append(transactionId);
         result.append(",");
         result.append("branchType=");
-        result.append(String.valueOf(branchType));
+        result.append(branchType);
         result.append(",");
         result.append("resourceId=");
-        result.append(String.valueOf(resourceId));
+        result.append(resourceId);
         result.append(",");
         result.append("lockKey=");
-        result.append(String.valueOf(lockKey));
+        result.append(lockKey);
 
         return result.toString();
     }
