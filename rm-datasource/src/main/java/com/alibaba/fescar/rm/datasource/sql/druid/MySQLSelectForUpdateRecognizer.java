@@ -122,4 +122,8 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
         return sb.toString();
     }
 
+    public String getTableAlias() {
+        SQLSelectQueryBlock selectQueryBlock = getSelect();
+		return selectQueryBlock.getFrom().computeAlias();
+	}
 }
