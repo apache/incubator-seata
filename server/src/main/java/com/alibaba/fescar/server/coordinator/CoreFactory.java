@@ -23,13 +23,13 @@ public class CoreFactory {
     }
 
     public static final Core get() {
-        return CoreFactory.SingletonHolder.INSTANCE;
+        return SingletonHolder.INSTANCE;
     }
 
     /**
      * Just for test mocking
      */
     public static void set(Core core) {
-        CoreFactory.SingletonHolder.INSTANCE = core;
+        SingletonHolder.INSTANCE = core;
     }
 }
