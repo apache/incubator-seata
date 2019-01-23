@@ -76,6 +76,8 @@ public class TableMetaCache {
             try {
                 tmeta = fetchSchemeInDefaultWay(druidDataSource, metaQuerySql);
             } catch (SQLException e) {
+                throw new ShouldNeverHappenException(String.format("[xid:%s]get table meta failed. key:%s, metaQuerySql:%s, ex:%s"
+                        , RootContext.getXID(), cacheKey, metaQuerySql, e.getMessage()));
             }
         }
 

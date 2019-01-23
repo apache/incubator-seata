@@ -29,8 +29,12 @@ import com.alibaba.fescar.rm.datasource.StatementProxy;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLSelectRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactionalExecutor<ResultSet, S> {
+
+    static final Logger LOGGER = LoggerFactory.getLogger(SelectForUpdateExecutor.class);
 
     public SelectForUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<ResultSet, S> statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
@@ -66,7 +70,12 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
             if (originalAutoCommit) {
                 conn.setAutoCommit(false);
             }
-            sp = conn.setSavepoint();
+            try {
+                sp = conn.setSavepoint();
+            } catch (Exception ex) {
+                conn.setAutoCommit(true);
+                LOGGER.debug("savepoint maybe not be supported");
+            }
             rs = statementCallback.execute(statementProxy.getTargetStatement(), args);
 
             while (true) {

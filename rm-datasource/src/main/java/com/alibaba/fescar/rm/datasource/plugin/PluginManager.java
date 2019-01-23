@@ -1,6 +1,5 @@
 package com.alibaba.fescar.rm.datasource.plugin;
 
-import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fescar.rm.datasource.DataSourceProxy;
 import com.alibaba.fescar.rm.datasource.plugin.context.LockKeyBuildAfterContext;
 import com.alibaba.fescar.rm.datasource.plugin.context.SqlBuildAfterContext;
