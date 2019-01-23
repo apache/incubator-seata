@@ -189,7 +189,7 @@
             <version>1.0</version>
         </dependency>
         <dependency>
-            <groupId>zkclient</groupId>
+            <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
             <version>${zkclient.version}</version>
         </dependency>
