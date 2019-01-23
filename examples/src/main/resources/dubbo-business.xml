@@ -23,7 +23,8 @@
 
     <dubbo:application name="dubbo-demo-app"  />
     <dubbo:registry address="multicast://224.5.6.7:1234?unicast=false" />
-
+    <!--support zk-->
+    <!--dubbo:registry address="zookeeper://zk.test1.com:1234?backup=zk.test2.com:1234,zk.test3.com:1234" /-->
     <dubbo:reference id="orderService" check="false" interface="com.alibaba.fescar.tm.dubbo.OrderService"/>
     <dubbo:reference id="storageService" check="false" interface="com.alibaba.fescar.tm.dubbo.StorageService"/>
 

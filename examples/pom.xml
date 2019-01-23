@@ -48,6 +48,10 @@
             <artifactId>fescar-dubbo</artifactId>
         </dependency>
         <dependency>
+            <groupId>zkclient</groupId>
+            <artifactId>zkclient</artifactId>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
