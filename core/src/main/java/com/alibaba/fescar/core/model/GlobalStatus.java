@@ -16,6 +16,9 @@
 
 package com.alibaba.fescar.core.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Status of global transaction.
  */
@@ -72,16 +75,25 @@ public enum GlobalStatus {
     // Not managed in session map any more
     Finished;
 
+    private static final Map<Integer, GlobalStatus> map = new HashMap<>(values().length);
+
+    static {
+        for (GlobalStatus status : values()) {
+            map.put(status.ordinal(), status);
+        }
+    }
+
     public static GlobalStatus get(byte ordinal) {
         return get((int) ordinal);
     }
 
     public static GlobalStatus get(int ordinal) {
-        for (GlobalStatus globalStatus : GlobalStatus.values()) {
-            if (globalStatus.ordinal() == ordinal) {
-                return globalStatus;
-            }
+        GlobalStatus status = map.get(ordinal);
+
+        if (null == status) {
+            throw new IllegalArgumentException("Unknown GlobalStatus[" + ordinal + "]");
         }
-        throw new IllegalArgumentException("Unknown GlobalStatus[" + ordinal + "]");
+
+        return status;
     }
 }

@@ -214,9 +214,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             try {
                 core.doGlobalRollback(rollbackingSession, true);
             } catch (TransactionException ex) {
-                LOGGER.info(
-                    "Failed to retry rollbacking [" + rollbackingSession.getTransactionId() + "] " + ex.getCode() + " "
-                        + ex.getMessage());
+
+            LOGGER.info("Failed to retry rollbacking [{}] {} {}",
+                        rollbackingSession.getTransactionId(), ex.getCode(), ex.getMessage());
+
             }
         }
     }
@@ -227,9 +228,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             try {
                 core.doGlobalCommit(committingSession, true);
             } catch (TransactionException ex) {
-                LOGGER.info(
-                    "Failed to retry committing [" + committingSession.getTransactionId() + "] " + ex.getCode() + " "
-                        + ex.getMessage());
+
+            LOGGER.info("Failed to retry committing [{}] {} {}",
+                        committingSession.getTransactionId(), ex.getCode(), ex.getMessage());
+
             }
         }
     }
@@ -241,9 +243,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             try {
                 core.doGlobalCommit(asyncCommittingSession, true);
             } catch (TransactionException ex) {
-                LOGGER.info(
-                    "Failed to async committing [" + asyncCommittingSession.getTransactionId() + "] " + ex.getCode()
-                        + " " + ex.getMessage());
+
+            LOGGER.info("Failed to async committing [{}] {} {}",
+                        asyncCommittingSession.getTransactionId(), ex.getCode(), ex.getMessage());
+
             }
         }
     }

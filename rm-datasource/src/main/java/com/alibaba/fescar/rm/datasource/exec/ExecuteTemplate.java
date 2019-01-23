@@ -48,22 +48,26 @@ public class ExecuteTemplate {
                     statementProxy.getConnectionProxy().getDbType());
         }
         Executor<T> executor = null;
-        switch (sqlRecognizer.getSQLType()) {
-            case INSERT:
-                executor = new InsertExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                break;
-            case UPDATE:
-                executor = new UpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                break;
-            case DELETE:
-                executor = new DeleteExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                break;
-            case SELECT_FOR_UPDATE:
-                executor = new SelectForUpdateExecutor(statementProxy, statementCallback, sqlRecognizer);
-                break;
-            default:
-                executor = new PlainExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                break;
+        if (sqlRecognizer == null) {
+            executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
+        } else {
+            switch (sqlRecognizer.getSQLType()) {
+                case INSERT:
+                    executor = new InsertExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                    break;
+                case UPDATE:
+                    executor = new UpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                    break;
+                case DELETE:
+                    executor = new DeleteExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                    break;
+                case SELECT_FOR_UPDATE:
+                    executor = new SelectForUpdateExecutor(statementProxy, statementCallback, sqlRecognizer);
+                    break;
+                default:
+                    executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
+                    break;
+            }
         }
         T rs = null;
         try {
