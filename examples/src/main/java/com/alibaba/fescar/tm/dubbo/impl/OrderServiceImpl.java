@@ -84,7 +84,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }, keyHolder);
 
-        order.id = (long) keyHolder.getKey();
+        order.id = keyHolder.getKey().longValue();
 
         LOGGER.info("Order Service End ... Created " + order);
 
