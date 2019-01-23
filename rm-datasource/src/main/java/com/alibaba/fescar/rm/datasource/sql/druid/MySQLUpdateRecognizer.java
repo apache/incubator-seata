@@ -145,5 +145,9 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
         visitor.visit(tableSource);
         return sb.toString();
     }
+    
+    public String getTableAlias() {
+		return ast.getFrom().computeAlias();
+	}
 
 }

@@ -17,79 +17,40 @@
 package com.alibaba.fescar.rm.datasource.sql.druid;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
-import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
-import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
-import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
+import com.alibaba.druid.sql.ast.statement.SQLSelect;
+import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
+import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
+import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import com.alibaba.fescar.rm.datasource.ParametersHolder;
 import com.alibaba.fescar.rm.datasource.sql.SQLParsingException;
+import com.alibaba.fescar.rm.datasource.sql.SQLSelectRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
-import com.alibaba.fescar.rm.datasource.sql.SQLUpdateRecognizer;
 
-public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRecognizer {
+public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQLSelectRecognizer {
 
-    private MySqlUpdateStatement ast;
+    private final SQLSelectStatement ast;
 
-    public MySQLUpdateRecognizer(String originalSQL, SQLStatement ast) {
+    public MySQLSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (MySqlUpdateStatement) ast;
+        this.ast = (SQLSelectStatement) ast;
     }
 
     @Override
     public SQLType getSQLType() {
-        return SQLType.UPDATE;
-    }
-
-    @Override
-    public List<String> getUpdateColumns() {
-        List<SQLUpdateSetItem> updateSetItems = ast.getItems();
-        List<String> list = new ArrayList<>(updateSetItems.size());
-        for (SQLUpdateSetItem updateSetItem : updateSetItems) {
-            SQLExpr expr = updateSetItem.getColumn();
-            if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr) expr).getName());
-            } else if (expr instanceof SQLPropertyExpr){
-                // This is alias case, like UPDATE xxx_tbl a SET a.name = ? WHERE a.id = ?
-                SQLExpr owner = ((SQLPropertyExpr) expr).getOwner();
-                if (owner instanceof SQLIdentifierExpr) {
-                    list.add((((SQLIdentifierExpr)owner).getName() + "." + ((SQLPropertyExpr) expr).getName()));
-                }
-            } else {
-                throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
-            }
-        }
-        return list;
-    }
-
-    @Override
-    public List<Object> getUpdateValues() {
-        List<SQLUpdateSetItem> updateSetItems = ast.getItems();
-        List<Object> list = new ArrayList<>(updateSetItems.size());
-        for (SQLUpdateSetItem updateSetItem : updateSetItems) {
-            SQLExpr expr = updateSetItem.getValue();
-            if (expr instanceof SQLValuableExpr) {
-                list.add(((SQLValuableExpr) expr).getValue());
-            } else if (expr instanceof SQLVariantRefExpr) {
-                list.add(new VMarker());
-            } else {
-                throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
-            }
-        }
-        return list;
+        return SQLType.SELECT_FOR_UPDATE;
     }
 
     @Override
     public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<Object> paramAppender) {
-        SQLExpr where = ast.getWhere();
+        SQLSelectQueryBlock selectQueryBlock = getSelect();
+        SQLExpr where = selectQueryBlock.getWhere();
         if (where == null) {
             return "";
         }
@@ -111,7 +72,8 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
 
     @Override
     public String getWhereCondition() {
-        SQLExpr where = ast.getWhere();
+        SQLSelectQueryBlock selectQueryBlock = getSelect();
+        SQLExpr where = selectQueryBlock.getWhere();
         if (where == null) {
             return "";
         }
@@ -121,17 +83,32 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
         return sb.toString();
     }
 
+    private SQLSelectQueryBlock getSelect() {
+        SQLSelect select = ast.getSelect();
+        if (select == null) {
+            throw new SQLParsingException("should never happen!");
+        }
+        SQLSelectQueryBlock selectQueryBlock = select.getQueryBlock();
+        if (selectQueryBlock == null) {
+            throw new SQLParsingException("should never happen!");
+        }
+        return selectQueryBlock;
+    }
+
     @Override
     public String getTableSource() {
+        SQLSelectQueryBlock selectQueryBlock = getSelect();
+        SQLTableSource tableSource = selectQueryBlock.getFrom();
         StringBuffer sb = new StringBuffer();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        SQLExprTableSource tableSource = (SQLExprTableSource) ast.getTableSource();
-        visitor.visit(tableSource);
+        visitor.visit((SQLExprTableSource)tableSource);
         return sb.toString();
     }
 
     @Override
     public String getTableName() {
+        SQLSelectQueryBlock selectQueryBlock = getSelect();
+        SQLTableSource tableSource = selectQueryBlock.getFrom();
         StringBuffer sb = new StringBuffer();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
 
@@ -141,13 +118,12 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
                 return false;
             }
         };
-        SQLExprTableSource tableSource = (SQLExprTableSource) ast.getTableSource();
-        visitor.visit(tableSource);
+        visitor.visit((SQLExprTableSource)tableSource);
         return sb.toString();
     }
-    
-    public String getTableAlias() {
-		return ast.getFrom().computeAlias();
-	}
 
+    public String getTableAlias() {
+        SQLSelectQueryBlock selectQueryBlock = getSelect();
+		return selectQueryBlock.getFrom().computeAlias();
+	}
 }
