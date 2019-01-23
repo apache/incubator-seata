@@ -45,6 +45,8 @@ public class StorageServiceImpl implements StorageService {
     @Override
     public void deduct(String commodityCode, int count) {
         LOGGER.info("Storage Service Begin ... xid: " + RootContext.getXID());
+        LOGGER.info("Deducting inventory SQL: update storage_tbl set count = count - {} where commodity_code = {}",count,commodityCode);
+
         jdbcTemplate.update("update storage_tbl set count = count - ? where commodity_code = ?", new Object[] {count, commodityCode});
         LOGGER.info("Storage Service End ... ");
 
