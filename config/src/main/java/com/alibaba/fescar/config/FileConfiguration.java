@@ -16,18 +16,17 @@
 
 package com.alibaba.fescar.config;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.config.ConfigFuture.ConfigOperation;
-
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type FileConfiguration.
@@ -198,19 +197,20 @@ public class FileConfiguration implements Configuration {
             if (null != configFuture) {
                 if (configFuture.isTimeout()) {
                     setFailResult(configFuture);
-                }
-                if (configFuture.getOperation() == ConfigOperation.GET) {
-                    String result = CONFIG.getString(configFuture.getDataId());
-                    configFuture.setResult(result == null ? configFuture.getContent() : result);
-                } else if (configFuture.getOperation() == ConfigOperation.PUT) {
-                    //todo
-                    configFuture.setResult(Boolean.TRUE);
-                } else if (configFuture.getOperation() == ConfigOperation.PUTIFABSENT) {
-                    //todo
-                    configFuture.setResult(Boolean.TRUE);
-                } else if (configFuture.getOperation() == ConfigOperation.REMOVE) {
-                    //todo
-                    configFuture.setResult(Boolean.TRUE);
+                }else{
+                    if (configFuture.getOperation() == ConfigOperation.GET) {
+                        String result = CONFIG.getString(configFuture.getDataId());
+                        configFuture.setResult(result == null ? configFuture.getContent() : result);
+                    } else if (configFuture.getOperation() == ConfigOperation.PUT) {
+                        //todo
+                        configFuture.setResult(Boolean.TRUE);
+                    } else if (configFuture.getOperation() == ConfigOperation.PUTIFABSENT) {
+                        //todo
+                        configFuture.setResult(Boolean.TRUE);
+                    } else if (configFuture.getOperation() == ConfigOperation.REMOVE) {
+                        //todo
+                        configFuture.setResult(Boolean.TRUE);
+                    }
                 }
             }
         }
