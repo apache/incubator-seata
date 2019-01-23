@@ -141,7 +141,7 @@ public class UndoExecutorTest {
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
 
         try {
-            executor.executeOn(new MockConnection(), false);
+            executor.executeOn(new MockConnection(), true);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -209,7 +209,7 @@ public class UndoExecutorTest {
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
 
         try {
-            executor.executeOn(new MockConnection(), false);
+            executor.executeOn(new MockConnection(), true);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -277,7 +277,7 @@ public class UndoExecutorTest {
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
 
         try {
-            executor.executeOn(new MockConnection(), false);
+            executor.executeOn(new MockConnection(), true);
         } catch (SQLException e) {
             e.printStackTrace();
         }
