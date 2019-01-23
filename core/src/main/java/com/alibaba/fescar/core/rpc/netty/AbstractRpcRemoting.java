@@ -476,7 +476,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
     }
 
     /**
-     * Destory channel.
+     * Destroy channel.
      *
      * @param channel the channel
      */
@@ -485,7 +485,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
     }
 
     /**
-     * Destory channel.
+     * Destroy channel.
      *
      * @param serverAddress the server address
      * @param channel       the channel

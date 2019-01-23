@@ -28,7 +28,7 @@ import java.lang.annotation.Target;
 public @interface GlobalTransactional {
 
     /**
-     * Global transacton timeoutMills in MILLISECONDS.
+     * Global transaction timeoutMills in MILLISECONDS.
      * @return timeoutMills in MILLISECONDS.
      */
     int timeoutMills() default 60000;

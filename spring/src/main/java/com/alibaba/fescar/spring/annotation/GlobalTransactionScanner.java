@@ -72,7 +72,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     private final FailureHandler failureHandlerHook;
 
     /**
-     * Instantiates a new Global transaction scaner.
+     * Instantiates a new Global transaction scanner.
      *
      * @param txServiceGroup the tx service group
      */
@@ -81,7 +81,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     }
 
     /**
-     * Instantiates a new Global transaction scaner.
+     * Instantiates a new Global transaction scanner.
      *
      * @param txServiceGroup the tx service group
      * @param mode           the mode
@@ -91,7 +91,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     }
 
     /**
-     * Instantiates a new Global transaction scaner.
+     * Instantiates a new Global transaction scanner.
      *
      * @param applicationId  the application id
      * @param txServiceGroup the default server group
@@ -101,7 +101,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     }
 
     /**
-     * Instantiates a new Global transaction scaner.
+     * Instantiates a new Global transaction scanner.
      *
      * @param applicationId  the application id
      * @param txServiceGroup the tx service group
