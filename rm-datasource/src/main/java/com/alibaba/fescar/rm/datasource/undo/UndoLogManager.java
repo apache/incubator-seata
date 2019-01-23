@@ -128,7 +128,7 @@ public final class UndoLogManager {
                     TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
                     sqlUndoLog.setTableMeta(tableMeta);
                     AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(dataSourceProxy.getDbType(), sqlUndoLog);
-                    undoExecutor.executeOn(conn, false);
+                    undoExecutor.executeOn(xid, branchId, conn, false);
                 }
 
             }

@@ -20,6 +20,11 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alibaba.fescar.common.exception.FrameworkErrorCode;
+import com.alibaba.fescar.common.exception.FrameworkException;
+import com.alibaba.fescar.core.exception.TransactionException;
+import com.alibaba.fescar.core.model.BranchStatus;
+import com.alibaba.fescar.rm.datasource.DataSourceManager;
 import com.alibaba.fescar.rm.datasource.sql.struct.*;
 
 public abstract class AbstractUndoExecutor {
@@ -32,9 +37,9 @@ public abstract class AbstractUndoExecutor {
         this.sqlUndoLog = sqlUndoLog;
     }
 
-    public void executeOn(Connection conn, boolean force) throws SQLException {
+    public void executeOn(String xid, long branchId, Connection conn, boolean force) throws SQLException, TransactionException {
         if (!force) {
-            dataValidation(conn);
+            dataValidation(xid, branchId, conn);
         }
 
         try {
@@ -88,19 +93,36 @@ public abstract class AbstractUndoExecutor {
     protected abstract TableRecords getUndoRows();
 
     // Validate if data is dirty.
-    protected void dataValidation(Connection conn) throws SQLException {
+    protected void dataValidation(String xid, long branchId, Connection conn) throws SQLException, TransactionException {
         String tableName = sqlUndoLog.getTableName();
         List<Field> pkRows = sqlUndoLog.getAfterImage().pkRows();
         String querySQL = buildQueryCurrentImageSQL(tableName, pkRows);
         TableRecords currentImage = getCurrentImage(conn, querySQL, pkRows);
         currentImage.setTableName(tableName);
-        if (!currentImage.equals(sqlUndoLog.getAfterImage()))
-            throw new RuntimeException("rollback failed! data is dirty!");
+        if (!currentImage.equals(sqlUndoLog.getAfterImage())) {
+            DataSourceManager.get().branchReport(xid, branchId, BranchStatus.PhaseTwo_RollbackFailed_Unretryable, FrameworkErrorCode.RollbackDirty.errMessage);
+            throw new FrameworkException(FrameworkErrorCode.RollbackDirty);
+        }
     }
 
     protected String buildQueryCurrentImageSQL(String tableName, List<Field> pkRows) {
-        StringBuilder sb = new StringBuilder("SELECT * FROM ");
-        sb.append(tableName).append(" WHERE ");
+        StringBuilder sb = new StringBuilder("SELECT ");
+        List<Row> rows = sqlUndoLog.getAfterImage().getRows();
+        if (rows.size() < 1) {
+            sb.append(" * ");   // deleteSQL afterImage is empty
+        } else {
+            Row row = rows.get(0);
+            boolean first = true;
+            for (Field field : row.getFields()) {
+                if (first) {
+                    first = false;
+                } else {
+                    sb.append(", ");
+                }
+                sb.append(field.getName());
+            }
+        }
+        sb.append(" FROM ").append(tableName).append(" WHERE ");
         buildWhereConditionByPKs(sb, pkRows);
         return sb.toString();
     }

@@ -51,6 +51,7 @@ public enum FrameworkErrorCode {
 
     ExceptionCaught("0318", "异常", ""),
     RegistRM("0304", "注册RM失败", ""),
+    RollbackDirty("0504", "RollbackFailed", "DirtyData"),
 
     /**
      * 未定义错误
