@@ -16,19 +16,19 @@
 
 package com.alibaba.fescar.rm.datasource.exec;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.alibaba.fescar.rm.datasource.ParametersHolder;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
 import com.alibaba.fescar.rm.datasource.sql.SQLDeleteRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
@@ -48,7 +48,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
 
         for (int i = 0; i < columns.size(); i++) {
-            selectSQLAppender.append(columns.get(i));
+            selectSQLAppender.append(getColumnNameInSQL(columns.get(i)));
             if (i < (columns.size() - 1)) {
                 selectSQLAppender.append(", ");
             }
@@ -60,7 +60,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         } else {
             whereCondition = visitor.getWhereCondition();
         }
-        selectSQLAppender.append(" FROM " + tmeta.getTableName() + " WHERE " + whereCondition + " FOR UPDATE");
+        selectSQLAppender.append(" FROM " + getFromTableInSQL() + " WHERE " + whereCondition + " FOR UPDATE");
         String selectSQL = selectSQLAppender.toString();
 
         selectSQL = prepareSql(selectSQL);

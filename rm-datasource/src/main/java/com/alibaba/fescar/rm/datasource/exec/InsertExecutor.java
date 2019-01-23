@@ -47,8 +47,8 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        SQLInsertRecognizer visitor = (SQLInsertRecognizer) sqlRecognizer;
-        List<String> insertColumns = visitor.getInsertColumns();
+        SQLInsertRecognizer recogizier = (SQLInsertRecognizer) sqlRecognizer;
+        List<String> insertColumns = recogizier.getInsertColumns();
         TableMeta tmeta = getTableMeta();
         TableRecords afterImage = null;
         if (tmeta.containsPK(insertColumns)) {
@@ -60,7 +60,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                     if (statementProxy instanceof PreparedStatementProxy) {
                         pkValues = ((PreparedStatementProxy) statementProxy).getParamsByIndex(paramIdx);
                     } else {
-                        List<List<Object>> insertRows = visitor.getInsertRows();
+                        List<List<Object>> insertRows = recogizier.getInsertRows();
                         pkValues = new ArrayList<>(insertRows.size());
                         for (List<Object> row : insertRows) {
                             pkValues.add(row.get(paramIdx));

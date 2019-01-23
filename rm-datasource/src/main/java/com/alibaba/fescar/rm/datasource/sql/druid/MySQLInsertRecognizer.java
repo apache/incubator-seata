@@ -47,11 +47,8 @@ public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRe
     }
 
     @Override
-    public String getTableSource() {
-        StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        visitor.visit(ast.getTableSource());
-        return sb.toString();
+    public String getTableAlias() {
+        return ast.getTableSource().getAlias();
     }
 
     @Override

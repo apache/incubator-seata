@@ -16,58 +16,39 @@
 
 package com.alibaba.fescar.rm.datasource.sql.druid;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
-import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDeleteStatement;
+import com.alibaba.druid.sql.ast.statement.*;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import com.alibaba.fescar.rm.datasource.ParametersHolder;
-import com.alibaba.fescar.rm.datasource.sql.SQLDeleteRecognizer;
+import com.alibaba.fescar.rm.datasource.sql.SQLParsingException;
+import com.alibaba.fescar.rm.datasource.sql.SQLSelectRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
 
-public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRecognizer {
+import java.util.ArrayList;
+import java.util.List;
 
-    private final MySqlDeleteStatement ast;
 
-    public MySQLDeleteRecognizer(String originalSQL, SQLStatement ast, List<String> sqlHints) {
+public class MySQLSelectRecognizer extends BaseRecognizer implements SQLSelectRecognizer {
+
+    private final SQLSelectStatement ast;
+
+    public MySQLSelectRecognizer(String originalSQL, SQLStatement ast, List<String> sqlHints) {
         super(originalSQL, sqlHints);
-        this.ast = (MySqlDeleteStatement) ast;
+        this.ast = (SQLSelectStatement) ast;
     }
 
     @Override
     public SQLType getSQLType() {
-        return SQLType.DELETE;
-    }
-
-    @Override
-    public String getTableAlias() {
-        return ast.getTableSource().getAlias();
-    }
-
-    @Override
-    public String getTableName() {
-        StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
-
-            @Override
-            public boolean visit(SQLExprTableSource x) {
-                printTableSourceExpr(x.getExpr());
-                return false;
-            }
-        };
-        visitor.visit((SQLExprTableSource) ast.getTableSource());
-        return sb.toString();
+        return SQLType.SELECT_FOR_UPDATE;
     }
 
     @Override
     public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<Object> paramAppender) {
-        SQLExpr where = ast.getWhere();
+        SQLSelectQueryBlock selectQueryBlock = getSelect();
+        SQLExpr where = selectQueryBlock.getWhere();
         if (where == null) {
             return "";
         }
@@ -89,7 +70,8 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
 
     @Override
     public String getWhereCondition() {
-        SQLExpr where = ast.getWhere();
+        SQLSelectQueryBlock selectQueryBlock = getSelect();
+        SQLExpr where = selectQueryBlock.getWhere();
         if (where == null) {
             return "";
         }
@@ -98,5 +80,42 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
     }
+
+    private SQLSelectQueryBlock getSelect() {
+        SQLSelect select = ast.getSelect();
+        if (select == null) {
+            throw new SQLParsingException("should never happen!");
+        }
+        SQLSelectQueryBlock selectQueryBlock = select.getQueryBlock();
+        if (selectQueryBlock == null) {
+            throw new SQLParsingException("should never happen!");
+        }
+        return selectQueryBlock;
+    }
+
+    @Override
+    public String getTableAlias() {
+        SQLSelectQueryBlock selectQueryBlock = getSelect();
+        SQLTableSource tableSource = selectQueryBlock.getFrom();
+        return tableSource.getAlias();
+    }
+
+    @Override
+    public String getTableName() {
+        SQLSelectQueryBlock selectQueryBlock = getSelect();
+        SQLTableSource tableSource = selectQueryBlock.getFrom();
+        StringBuffer sb = new StringBuffer();
+        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
+
+            @Override
+            public boolean visit(SQLExprTableSource x) {
+                printTableSourceExpr(x.getExpr());
+                return false;
+            }
+        };
+        visitor.visit((SQLExprTableSource) tableSource);
+        return sb.toString();
+    }
+
 
 }
