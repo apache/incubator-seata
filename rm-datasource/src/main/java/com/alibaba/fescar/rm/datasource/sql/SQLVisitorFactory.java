@@ -54,7 +54,6 @@ public class SQLVisitorFactory {
         } else {
             throw new UnsupportedOperationException("Just support MySQL by now!");
         }
-
         return recognizer;
     }
 }
