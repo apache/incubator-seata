@@ -55,4 +55,19 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
         branchStatus = BranchStatus.get(in.readByte());
         return true;
     }
+    
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("branchStatus=");
+        result.append(String.valueOf(branchStatus));
+        result.append(",");
+        result.append("result code =");
+        result.append(String.valueOf(getResultCode()));
+        result.append(",");
+        result.append("getMsg =");
+        result.append(String.valueOf(getMsg()));
+
+        return result.toString();
+    }
 }
