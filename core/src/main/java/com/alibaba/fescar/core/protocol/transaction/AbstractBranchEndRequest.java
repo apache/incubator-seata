@@ -175,19 +175,19 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
     public String toString() {
         StringBuilder result = new StringBuilder();
         result.append("xid=");
-        result.append(String.valueOf(xid));
+        result.append(xid);
         result.append(",");
         result.append("branchId=");
-        result.append(String.valueOf(branchId));
+        result.append(branchId);
         result.append(",");
         result.append("branchType=");
-        result.append(String.valueOf(branchType));
+        result.append(branchType);
         result.append(",");
         result.append("resourceId=");
-        result.append(String.valueOf(resourceId));
+        result.append(resourceId);
         result.append(",");
         result.append("applicationData=");
-        result.append(String.valueOf(applicationData));
+        result.append(applicationData);
 
         return result.toString();
     }
