@@ -26,12 +26,16 @@ import com.alibaba.fescar.rm.datasource.DataSourceManager;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import java.util.Date;
+
 public class DataSourceBasicTest {
     public void runBusiness(JdbcTemplate jdbcTemplate) {
-//        jdbcTemplate.update("insert into user0 (id, name, gmt) values (?, ?, ?)",
-//                new Object[] { 1, "xxx", new Date() });
-        jdbcTemplate.update("update user0 set name = 'yyyy' where id = ?", new Object[] {1});
-//        jdbcTemplate.update("delete from user0 where id = ?", new Object[] {1});
+        //jdbcTemplate.update("insert into user0 (id, name, gmt) values (?, ?, ?)",
+        //        new Object[] { 2, "xxx", new Date() });
+//        jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.id = ?", new Object[] {1});
+//        jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.name = ?", new Object[] {"yyyy"});
+//        jdbcTemplate.update("delete from user0 where id = ?", new Object[] {2});
+        jdbcTemplate.queryForRowSet("select a.name from user0 a where a.id = ? for update", new Object[] {1});
 
 
     }
