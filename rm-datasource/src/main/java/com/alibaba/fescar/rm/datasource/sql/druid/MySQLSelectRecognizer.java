@@ -42,7 +42,7 @@ public class MySQLSelectRecognizer extends BaseRecognizer implements SQLSelectRe
 
     @Override
     public SQLType getSQLType() {
-        return SQLType.SELECT_FOR_UPDATE;
+        return SQLType.SELECT;
     }
 
     @Override

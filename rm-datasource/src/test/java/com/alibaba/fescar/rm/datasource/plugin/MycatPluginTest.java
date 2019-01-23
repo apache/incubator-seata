@@ -67,7 +67,7 @@ public class MycatPluginTest {
         Integer money = Math.abs(new Random(System.currentTimeMillis()).nextInt());
         LOGGER.info("set money={}", money);
 
-        String sql = "/*!mycat:schema=demo_order*/UPDATE order_tbl SET money=? WHERE user_id='U_MycatPluginTest'";
+        String sql = "/*!mycat:schema=demo_order*/UPDATE order_tbl ord SET ord.money=? WHERE ord.user_id='U_MycatPluginTest'";
         PreparedStatement statement = dataSourceProxy.getConnection().prepareStatement(sql);
         statement.setInt(1, money);
         statement.execute();

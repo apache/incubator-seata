@@ -67,9 +67,8 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
         if (!StringUtils.isEmpty(whereCondition)) {
             selectSQLAppender.append(" WHERE " + whereCondition);
         }
-        if (!recognizer.hasForUpdate()) {
-            selectSQLAppender.append(" FOR UPDATE");
-        }
+
+        selectSQLAppender.append(" FOR UPDATE");
         String selectPKSQL = prepareSql(selectSQLAppender.toString());
 
         Boolean savepointSupport = isSavepointSupport(selectPKSQL);

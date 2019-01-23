@@ -24,11 +24,9 @@ import com.alibaba.druid.sql.ast.SQLCommentHint;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.*;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlHintStatement;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
 import com.alibaba.druid.util.JdbcConstants;
-import com.alibaba.fescar.rm.datasource.sql.druid.MySQLDeleteRecognizer;
-import com.alibaba.fescar.rm.datasource.sql.druid.MySQLInsertRecognizer;
-import com.alibaba.fescar.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
-import com.alibaba.fescar.rm.datasource.sql.druid.MySQLUpdateRecognizer;
+import com.alibaba.fescar.rm.datasource.sql.druid.*;
 
 public class SQLVisitorFactory {
 
@@ -79,7 +77,12 @@ public class SQLVisitorFactory {
         } else if (ast instanceof SQLDeleteStatement) {
             recognizer = new MySQLDeleteRecognizer(sql, ast, sqlHints);
         } else if (ast instanceof SQLSelectStatement) {
-            recognizer = new MySQLSelectForUpdateRecognizer(sql, ast, sqlHints);
+            MySqlSelectQueryBlock query = (MySqlSelectQueryBlock) (((SQLSelectStatement) ast).getSelect()).getQuery();
+            if (query.isForUpdate()) {
+                recognizer = new MySQLSelectForUpdateRecognizer(sql, ast, sqlHints);
+            } else {
+                recognizer = new MySQLSelectRecognizer(sql, ast, sqlHints);
+            }
         }
         return recognizer;
     }
