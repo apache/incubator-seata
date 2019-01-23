@@ -64,6 +64,7 @@
         <org.springframework.spring.version>2.5.6.SEC03</org.springframework.spring.version>
         <junit.version>4.12</junit.version>
         <dubbo.version>2.5.3</dubbo.version>
+        <zkclient.version>0.10</zkclient.version>
     </properties>
     <dependencyManagement>
     <dependencies>
@@ -191,6 +192,11 @@
             <groupId>aopalliance</groupId>
             <artifactId>aopalliance</artifactId>
             <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.101tec</groupId>
+            <artifactId>zkclient</artifactId>
+            <version>${zkclient.version}</version>
         </dependency>
     </dependencies>
     </dependencyManagement>
