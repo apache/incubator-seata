@@ -60,13 +60,13 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
     public String toString() {
         StringBuilder result = new StringBuilder();
         result.append("branchStatus=");
-        result.append(String.valueOf(branchStatus));
+        result.append(branchStatus);
         result.append(",");
         result.append("result code =");
-        result.append(String.valueOf(getResultCode()));
+        result.append(getResultCode());
         result.append(",");
         result.append("getMsg =");
-        result.append(String.valueOf(getMsg()));
+        result.append(getMsg());
 
         return result.toString();
     }
