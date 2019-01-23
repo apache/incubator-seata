@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * sql构建后处理插件,在构建业务sql后调用该插件获取最终执行sql
+ */
 public class SqlBuildAfterContext extends PluginContext {
 
     private static final String ARG_KEY_SQL_HINTS = "sqlHints";

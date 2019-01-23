@@ -8,4 +8,6 @@ public class PluginConstants {
 
     public static final String ACTION_TABLE_META_BEFORE = "tableMetaBeforeContext";
 
+    public static final String ACTION_ATTR_RESOLVE = "attrResolve";
+
 }

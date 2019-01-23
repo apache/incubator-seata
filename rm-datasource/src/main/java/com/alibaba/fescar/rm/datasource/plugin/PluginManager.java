@@ -1,6 +1,7 @@
 package com.alibaba.fescar.rm.datasource.plugin;
 
 import com.alibaba.fescar.rm.datasource.DataSourceProxy;
+import com.alibaba.fescar.rm.datasource.plugin.context.AttrResolveContext;
 import com.alibaba.fescar.rm.datasource.plugin.context.LockKeyBuildAfterContext;
 import com.alibaba.fescar.rm.datasource.plugin.context.SqlBuildAfterContext;
 import com.alibaba.fescar.rm.datasource.plugin.context.TableMetaBeforeContext;
@@ -83,8 +84,8 @@ public class PluginManager {
      */
     public String execSqlBuildAfter(List<String> sqlHints, String originSql) {
         SqlBuildAfterContext context = new SqlBuildAfterContext(sqlHints, originSql);
-        Object result = execPlugin(context, PluginConstants.ACTION_SQL_BUILD_AFTER);
-        return (String) result;
+        execPlugin(context, PluginConstants.ACTION_SQL_BUILD_AFTER);
+        return context.getResultSql();
     }
 
     /**
@@ -97,8 +98,8 @@ public class PluginManager {
      */
     public String execLockKeyBuildAfter(List<String> sqlHints, TableRecords tableRecords, String lockKey) {
         LockKeyBuildAfterContext context = new LockKeyBuildAfterContext(sqlHints, tableRecords, lockKey);
-        Object result = execPlugin(context, PluginConstants.ACTION_LOCK_KEY_BUILD_AFTER);
-        return (String) result;
+        execPlugin(context, PluginConstants.ACTION_LOCK_KEY_BUILD_AFTER);
+        return context.getResultLockKey();
     }
 
     /**
@@ -117,23 +118,33 @@ public class PluginManager {
     }
 
     /**
+     * 运行时特性解析
+     *
+     * @param sqlHints SqlHint列表
+     * @param sqlText  待执行的sql
+     * @return
+     */
+    public AttrResolveContext execAttrResolve(List<String> sqlHints, String sqlText) {
+        AttrResolveContext context = new AttrResolveContext(sqlHints, sqlText);
+        execPlugin(context, PluginConstants.ACTION_ATTR_RESOLVE);
+        return context;
+    }
+
+    /**
      * 执行特定action相关的处理
      *
      * @param context plugin上下文对象
      * @param action  插件相关的action
      * @return
      */
-    public Object execPlugin(PluginContext context, String action) {
+    public void execPlugin(PluginContext context, String action) {
         if (context.getDataSourceProxy() == null) {
             context.setDataSourceProxy(this.getDataSourceProxy());
         }
         List<Plugin> pluginList = getPlugins(action);
         for (Plugin plugin : pluginList) {
-            Object result = plugin.proc(context);
-            //本次执行结果传递到后续处理
-            context.setResult(result);
+            plugin.proc(context);
         }
-        return context.getResult();
     }
 
 }

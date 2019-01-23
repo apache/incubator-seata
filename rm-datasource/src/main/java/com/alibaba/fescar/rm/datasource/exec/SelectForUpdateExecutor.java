@@ -22,10 +22,14 @@ import java.sql.ResultSet;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
+import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.rm.datasource.ParametersHolder;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
+import com.alibaba.fescar.rm.datasource.plugin.context.AttrResolveContext;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLSelectRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
@@ -63,18 +67,18 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
         if (!StringUtils.isEmpty(whereCondition)) {
             selectSQLAppender.append(" WHERE " + whereCondition);
         }
-        selectSQLAppender.append(" FOR UPDATE");
+        if (!recognizer.hasForUpdate()) {
+            selectSQLAppender.append(" FOR UPDATE");
+        }
         String selectPKSQL = prepareSql(selectSQLAppender.toString());
 
+        Boolean savepointSupport = isSavepointSupport(selectPKSQL);
         try {
-            if (originalAutoCommit) {
-                conn.setAutoCommit(false);
-            }
-            try {
+            if (savepointSupport) {
+                if (originalAutoCommit) {
+                    conn.setAutoCommit(false);
+                }
                 sp = conn.setSavepoint();
-            } catch (Exception ex) {
-                conn.setAutoCommit(true);
-                LOGGER.debug("savepoint maybe not be supported");
             }
             rs = statementCallback.execute(statementProxy.getTargetStatement(), args);
 
@@ -101,7 +105,10 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
                     break;
 
                 } catch (LockConflictException lce) {
-                    conn.rollback(sp);
+                    if (savepointSupport) {
+                        conn.rollback(sp);
+                        sp = null;
+                    }
                     lockRetryController.sleep(lce);
 
                 } finally {
@@ -126,5 +133,12 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
             }
         }
         return rs;
+    }
+
+
+    private Boolean isSavepointSupport(String sqlText) {
+        List<String> hints = sqlRecognizer.getSqlHints();
+        AttrResolveContext context = getPluginManager().execAttrResolve(hints, sqlText);
+        return context.getAttrForSavepointSupport();
     }
 }

@@ -1,7 +1,8 @@
-package com.alibaba.fescar.rm.datasource.support;
+package com.alibaba.fescar.rm.datasource;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fescar.rm.datasource.ConnectionProxy;
+import com.alibaba.fescar.rm.datasource.ConnectionProxyForTest;
 import com.alibaba.fescar.rm.datasource.DataSourceProxy;
 
 import java.sql.Connection;

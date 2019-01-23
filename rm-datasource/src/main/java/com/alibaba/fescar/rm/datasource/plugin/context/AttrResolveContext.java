@@ -7,19 +7,19 @@ import com.alibaba.fescar.rm.datasource.plugin.PluginContext;
 import java.util.ArrayList;
 import java.util.List;
 
-
 /**
- * 表元数据查询前处理插件,调用该插件获取最终的缓存键和元数据查询sql
+ * 运行时特性解析插件
  */
-public class TableMetaBeforeContext extends PluginContext {
+public class AttrResolveContext extends PluginContext {
 
     private static final String ARG_KEY_SQL_HINTS = "sqlHints";
-    private static final String ARG_KEY_TABLE_NAME = "tableName";
+    private static final String ARG_KEY_SQL_Text = "sqlText";
+    private static final String ATTR_KEY_SAVEPOINT_SUPPORT = "savepoint_support";
 
-    public TableMetaBeforeContext(List<String> sqlHints, String tableName, String defaultCacheKey, String defaultMetaQuerySql) {
+    public AttrResolveContext(List<String> sqlHints, String sqlText) {
         this.setSqlHints(sqlHints);
-        this.setTableName(tableName);
-        this.setResultData(defaultCacheKey, defaultMetaQuerySql);
+        this.setSqlText(sqlText);
+        this.setResult(new JSONObject());
     }
 
     @Override
@@ -40,16 +40,16 @@ public class TableMetaBeforeContext extends PluginContext {
         return sqlHints;
     }
 
+    public void setSqlText(String sqlText) {
+        this.args.put(ARG_KEY_SQL_Text, sqlText);
+    }
+
+    public String getSqlText() {
+        return (String) this.args.get(ARG_KEY_SQL_Text);
+    }
+
     public void setSqlHints(List<String> sqlHints) {
         this.args.put(ARG_KEY_SQL_HINTS, sqlHints);
-    }
-
-    public void setTableName(String tableName) {
-        this.args.put(ARG_KEY_TABLE_NAME, tableName);
-    }
-
-    public String getTableName() {
-        return (String) this.args.get(ARG_KEY_TABLE_NAME);
     }
 
     @Override
@@ -60,21 +60,20 @@ public class TableMetaBeforeContext extends PluginContext {
         super.setResult(result);
     }
 
-    public void setResultData(String cacheKey, String metaQuerySql) {
+    public void setResultData(Boolean savepointSupport) {
         JSONObject resultObject = new JSONObject();
-        resultObject.fluentPut("cacheKey", cacheKey)
-                .fluentPut("metaQuerySql", metaQuerySql)
-        ;
+        resultObject.fluentPut(ATTR_KEY_SAVEPOINT_SUPPORT, savepointSupport);
         this.setResult(resultObject);
     }
 
-    public String getResultForCacheKey() {
+    /**
+     * 是否支持savepoint操作
+     *
+     * @return
+     */
+    public Boolean getAttrForSavepointSupport() {
         JSONObject resultObject = (JSONObject) this.getResult();
-        return resultObject.getString("cacheKey");
+        return resultObject.getBooleanValue(ATTR_KEY_SAVEPOINT_SUPPORT);
     }
 
-    public String getResultForMetaQuerySql() {
-        JSONObject resultObject = (JSONObject) this.getResult();
-        return resultObject.getString("metaQuerySql");
-    }
 }

@@ -17,5 +17,5 @@ public interface Plugin {
      * @param context
      * @return
      */
-    Object proc(PluginContext context);
+    void proc(PluginContext context);
 }

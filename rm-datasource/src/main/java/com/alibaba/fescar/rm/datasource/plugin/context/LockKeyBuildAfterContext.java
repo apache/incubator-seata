@@ -7,7 +7,9 @@ import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * 锁key前处理插件,调用该插件获取最终的锁key字符串
+ */
 public class LockKeyBuildAfterContext extends PluginContext {
 
     private static final String ARG_KEY_TABLE_RECORDS = "tableRecords";

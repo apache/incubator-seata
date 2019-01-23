@@ -17,4 +17,10 @@
 package com.alibaba.fescar.rm.datasource.sql;
 
 public interface SQLSelectRecognizer extends WhereRecognizer {
+    /**
+     * sql语句中是否有for update子句
+     *
+     * @return
+     */
+    Boolean hasForUpdate();
 }

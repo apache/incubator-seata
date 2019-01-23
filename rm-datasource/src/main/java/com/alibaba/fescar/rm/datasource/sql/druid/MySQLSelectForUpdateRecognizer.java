@@ -29,6 +29,7 @@ import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
+import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlSelectQueryBlock;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import com.alibaba.fescar.rm.datasource.ParametersHolder;
 import com.alibaba.fescar.rm.datasource.sql.SQLParsingException;
@@ -39,9 +40,13 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
 
     private final SQLSelectStatement ast;
 
+    private Boolean hasForUpdate;
+
     public MySQLSelectForUpdateRecognizer(String originalSQL, SQLStatement ast, List<String> sqlHints) {
         super(originalSQL, sqlHints);
         this.ast = (SQLSelectStatement) ast;
+        MySqlSelectQueryBlock query = (MySqlSelectQueryBlock) (this.ast.getSelect()).getQuery();
+        hasForUpdate = query.isForUpdate();
     }
 
     @Override
@@ -122,6 +127,16 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
         };
         visitor.visit((SQLExprTableSource) tableSource);
         return sb.toString();
+    }
+
+    /**
+     * sql语句中是否有for update子句
+     *
+     * @return
+     */
+    @Override
+    public Boolean hasForUpdate() {
+        return hasForUpdate;
     }
 
 }

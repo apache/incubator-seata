@@ -92,7 +92,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void commit() throws SQLException {
-        if (context.inGlobalTransaction()) {
+        if (this.getContext().inGlobalTransaction()) {
             try {
                 register();
             } catch (TransactionException e) {

@@ -369,7 +369,7 @@ public class UndoExecutorTest {
         }
 
         @Override
-        public Object proc(PluginContext context) {
+        public void proc(PluginContext context) {
             SqlBuildAfterContext sqlBuildAfterContext = (SqlBuildAfterContext) context;
             String originSql = (String) context.getResult();
             List<String> hints = sqlBuildAfterContext.getSqlHints();
@@ -377,7 +377,7 @@ public class UndoExecutorTest {
             for (Integer i = 0; i < hints.size(); i++) {
                 hintText.append(hints.get(i));
             }
-            return hintText.toString() + " " + originSql;
+            context.setResult(hintText.toString() + " " + originSql);
         }
     }
 
