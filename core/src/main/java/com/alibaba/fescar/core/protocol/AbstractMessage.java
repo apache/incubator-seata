@@ -115,21 +115,22 @@ public abstract class AbstractMessage implements MessageCodec, Serializable {
                 msgCodec = new BranchRollbackRequest();
                 break;
             default:
-                msgCodec = null;
                 break;
         }
+
         if (null != msgCodec) {
             return msgCodec;
-        } else {
-            try {
-                msgCodec = (MessageCodec)getMergeRequestInstanceByCode(typeCode);
-            } catch (Exception exx) {}
-            if (null != msgCodec) {
-                return msgCodec;
-            } else {
-                return (MessageCodec)getMergeResponseInstanceByCode(typeCode);
-            }
         }
+
+        try {
+            msgCodec = (MessageCodec) getMergeRequestInstanceByCode(typeCode);
+        } catch (Exception exx) {}
+
+        if (null != msgCodec) {
+            return msgCodec;
+        }
+
+        return (MessageCodec) getMergeResponseInstanceByCode(typeCode);
     }
 
     public static MergedMessage getMergeRequestInstanceByCode(int typeCode) {
@@ -149,7 +150,7 @@ public abstract class AbstractMessage implements MessageCodec, Serializable {
             case AbstractMessage.TYPE_BRANCH_STATUS_REPORT:
                 return new BranchReportRequest();
             default:
-                throw new RuntimeException("not support typeCode," + typeCode);
+                throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
     }
 
@@ -174,7 +175,7 @@ public abstract class AbstractMessage implements MessageCodec, Serializable {
             case AbstractMessage.TYPE_BRANCH_ROLLBACK_RESULT:
                 return new BranchRollbackResponse();
             default:
-                throw new RuntimeException("not support typeCode," + typeCode);
+                throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
     }
 }
