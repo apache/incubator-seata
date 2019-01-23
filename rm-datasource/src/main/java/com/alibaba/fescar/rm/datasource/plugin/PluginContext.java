@@ -1,9 +1,17 @@
 package com.alibaba.fescar.rm.datasource.plugin;
 
+import com.alibaba.fescar.rm.datasource.DataSourceProxy;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class PluginContext {
+
+    /**
+     * DataSourceProxy
+     */
+    protected DataSourceProxy dataSourceProxy;
+
     /**
      * 业务类型
      */
@@ -16,6 +24,15 @@ public class PluginContext {
      * proc执行前已经产生的业务结果对象
      */
     private Object result;
+
+
+    public DataSourceProxy getDataSourceProxy() {
+        return dataSourceProxy;
+    }
+
+    public void setDataSourceProxy(DataSourceProxy dataSourceProxy) {
+        this.dataSourceProxy = dataSourceProxy;
+    }
 
     public String getAction() {
         return action;

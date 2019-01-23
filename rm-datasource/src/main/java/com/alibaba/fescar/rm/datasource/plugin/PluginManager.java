@@ -125,6 +125,9 @@ public class PluginManager {
      * @return
      */
     public Object execPlugin(PluginContext context, String action) {
+        if (context.getDataSourceProxy() == null) {
+            context.setDataSourceProxy(this.getDataSourceProxy());
+        }
         List<Plugin> pluginList = getPlugins(action);
         for (Plugin plugin : pluginList) {
             Object result = plugin.proc(context);
