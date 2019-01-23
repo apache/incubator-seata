@@ -54,7 +54,7 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
 
 		if (sqlRecognizer instanceof MySQLSelectForUpdateRecognizer) {
 			MySQLSelectForUpdateRecognizer mySQLSelectForUpdateRecognizer = (MySQLSelectForUpdateRecognizer) sqlRecognizer;
-			selectSQLAppender.append(mySQLSelectForUpdateRecognizer.getTableAlias() + " ");
+			selectSQLAppender.append(" " +mySQLSelectForUpdateRecognizer.getTableAlias() + " ");
 		}
 		String whereCondition = null;
 		ArrayList<Object> paramAppender = new ArrayList<>();
