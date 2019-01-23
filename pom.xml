@@ -64,7 +64,7 @@
         <org.springframework.spring.version>2.5.6.SEC03</org.springframework.spring.version>
         <junit.version>4.12</junit.version>
         <dubbo.version>2.5.3</dubbo.version>
-        <zkclient.version>0.1</zkclient.version>
+        <zkclient.version>0.10</zkclient.version>
     </properties>
     <dependencyManagement>
     <dependencies>
