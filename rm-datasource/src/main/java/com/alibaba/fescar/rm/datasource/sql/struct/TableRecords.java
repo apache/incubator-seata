@@ -19,8 +19,7 @@ package com.alibaba.fescar.rm.datasource.sql.struct;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
@@ -145,5 +144,25 @@ public class TableRecords {
             records.add(row);
         }
         return records;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TableRecords that = (TableRecords) o;
+//        if (!tableName.equals(that.tableName)) return false;
+        if (rows.size() != that.rows.size()) return false;
+
+        for (int index = 0; index < this.rows.size(); index++) {
+            if (!rows.get(index).equals(that.rows.get(index))) return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(rows);
     }
 }

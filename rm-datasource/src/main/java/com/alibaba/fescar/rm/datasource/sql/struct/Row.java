@@ -16,8 +16,7 @@
 
 package com.alibaba.fescar.rm.datasource.sql.struct;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 
@@ -51,5 +50,43 @@ public class Row {
             throw new NotSupportYetException("Multi-PK");
         }
         return pkFields;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Row row = (Row) o;
+        int countSelf = 0, countOther = 0;
+        for (Field field : this.fields) {
+            if (field.getValue() == null) continue;
+            countSelf++;
+        }
+        for (Field field : row.fields) {
+            if (field.getValue() == null) continue;
+            countOther++;
+        }
+        if (countSelf != countOther) return false;
+
+        Map<String, Field> fieldMap = new HashMap<>(row.fields.size() << 1);
+        for (Field field : row.fields) {
+            fieldMap.put(field.getName(), field);
+        }
+        for (Field field : row.fields) {
+            Field otherField = fieldMap.get(field.getName());
+            if (otherField == null) {
+                if (field.getValue() != null) {
+                    return false;
+                }
+            } else if (!field.equals(otherField)){
+                return false;
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fields);
     }
 }
