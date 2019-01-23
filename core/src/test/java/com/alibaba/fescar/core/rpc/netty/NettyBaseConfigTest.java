@@ -24,12 +24,13 @@ import org.junit.Test;
  * @DateTime: 2019/1/7 2:04 PM
  * @FileName: NettyBaseConfigTest
  * @Description:
- * @date 2019/01/07
+ * @date 2019/01/07DefaultSessionManagerTest.java
  */
 public class NettyBaseConfigTest {
     @Test
     public void name() {
         NettyBaseConfig nettyBaseConfig = new NettyBaseConfig();
+
         System.out.print("test static .");
     }
 }
