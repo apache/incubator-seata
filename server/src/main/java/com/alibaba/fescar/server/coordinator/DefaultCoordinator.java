@@ -193,7 +193,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 continue;
             }
 
-            globalSession.close();
+            globalSession.closeAndClean();
             globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
             LOGGER.info(
                 "Global transaction[" + globalSession.getTransactionId() + "] is timeout and will be rolled back.");
