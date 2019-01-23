@@ -31,3 +31,6 @@ distribution/*
 Thumbs.db
 *.orig
 *.class
+*-local.properties
+*-local.yml
+*-local.xml
