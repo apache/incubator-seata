@@ -3,6 +3,7 @@ package com.alibaba.fescar.spring.test;
 import com.alibaba.fescar.rm.datasource.plugin.Plugin;
 import com.alibaba.fescar.rm.datasource.plugin.PluginConstants;
 import com.alibaba.fescar.rm.datasource.plugin.PluginContext;
+import com.alibaba.fescar.rm.datasource.plugin.context.AttrResolveContext;
 import com.alibaba.fescar.rm.datasource.plugin.context.LockKeyBuildAfterContext;
 import com.alibaba.fescar.rm.datasource.plugin.context.SqlBuildAfterContext;
 import com.alibaba.fescar.rm.datasource.plugin.context.TableMetaBeforeContext;
@@ -21,15 +22,15 @@ public class MycatPlugins {
         }
 
         @Override
-        public Object proc(PluginContext context) {
+        public void proc(PluginContext context) {
             LockKeyBuildAfterContext ctx = (LockKeyBuildAfterContext) context;
             List<String> sqlHints = ctx.getSqlHints();
             String schema = resolveSchema(sqlHints);
             String lockKey = ctx.getResultLockKey();
             if (schema != "") {
-                return schema + "." + lockKey;
+                ctx.setResult(schema + "." + lockKey);
             } else {
-                return lockKey;
+                ctx.setResult(lockKey);
             }
         }
 
@@ -56,7 +57,7 @@ public class MycatPlugins {
         }
 
         @Override
-        public Object proc(PluginContext context) {
+        public void proc(PluginContext context) {
             SqlBuildAfterContext ctx = (SqlBuildAfterContext) context;
             String originSql = ctx.getResultSql();
             List<String> sqlHints = ctx.getSqlHints();
@@ -64,7 +65,7 @@ public class MycatPlugins {
             for (Integer i = 0; i < sqlHints.size(); i++) {
                 sqlTxt.append("/*" + sqlHints.get(i) + "*/");
             }
-            return sqlTxt.toString() + " " + originSql;
+            ctx.setResult(sqlTxt.toString() + " " + originSql);
         }
     }
 
@@ -76,7 +77,7 @@ public class MycatPlugins {
         }
 
         @Override
-        public Object proc(PluginContext context) {
+        public void proc(PluginContext context) {
             TableMetaBeforeContext ctx = (TableMetaBeforeContext) context;
             String cacheKey = ctx.getResultForCacheKey();
             String metaQuerySql = ctx.getResultForMetaQuerySql();
@@ -94,7 +95,6 @@ public class MycatPlugins {
             }
 
             ctx.setResultData(cacheKey, metaQuerySql);
-            return ctx.getResult();
         }
 
         private String resolveSchema(List<String> sqlHints) {
@@ -109,6 +109,20 @@ public class MycatPlugins {
         }
 
         private static final Pattern pattern = Pattern.compile("schema=([0-9a-zA-Z_]{1,})");
+    }
+
+    static class AttrResolvePlugin implements Plugin {
+
+        @Override
+        public List<String> supportedActions() {
+            return Arrays.asList(PluginConstants.ACTION_ATTR_RESOLVE);
+        }
+
+        @Override
+        public void proc(PluginContext context) {
+            AttrResolveContext ctx = (AttrResolveContext) context;
+            ctx.setResultData(false);
+        }
     }
 
 }

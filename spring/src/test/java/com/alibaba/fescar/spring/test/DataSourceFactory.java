@@ -143,6 +143,7 @@ public class DataSourceFactory {
         pluginManager.addPlugins(new MycatPlugins.LockKeyBuildAfterPlugin());
         pluginManager.addPlugins(new MycatPlugins.SqlBuildAfterPlugin());
         pluginManager.addPlugins(new MycatPlugins.TableMetaBeforePlugin());
+        pluginManager.addPlugins(new MycatPlugins.AttrResolvePlugin());
 
         JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourceProxy);
         return jdbcTemplate;
