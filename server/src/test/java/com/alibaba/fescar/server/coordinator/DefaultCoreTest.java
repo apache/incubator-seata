@@ -23,10 +23,7 @@ import com.alibaba.fescar.server.session.BranchSession;
 import com.alibaba.fescar.server.session.GlobalSession;
 import com.alibaba.fescar.server.session.SessionHolder;
 import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.util.Collection;
 
@@ -57,7 +54,7 @@ public class DefaultCoreTest {
 
     private static final String applicationData = "{\"data\":\"test\"}";
 
-    @BeforeClass
+    @BeforeMethod
     public void initSessionManager() throws Exception {
         SessionHolder.init(null);
     }
@@ -129,7 +126,7 @@ public class DefaultCoreTest {
         return new Object[][]{{xid, branchId}};
     }
 
-    @AfterClass
+    @AfterMethod
     public void releaseSessionManager() throws Exception {
         Collection<GlobalSession> globalSessions = SessionHolder.getRootSessionManager().allSessions();
         Collection<GlobalSession> asyncGlobalSessions = SessionHolder.getAsyncCommittingSessionManager().allSessions();

@@ -44,13 +44,11 @@ public class DefaultLockManagerImplTest {
         branchSession.setTransactionId(transactionIdOne);
         boolean resultOne = lockManager.acquireLock(branchSession);
         Assert.assertTrue(resultOne);
-
         branchSession.unlock();
 
         branchSession.setTransactionId(transactionIdTwo);
         boolean resultTwo = lockManager.acquireLock(branchSession);
         Assert.assertFalse(resultTwo);
-
         branchSession.unlock();
     }
 
@@ -70,7 +68,7 @@ public class DefaultLockManagerImplTest {
         branchSession.setClientId("c1");
         branchSession.setResourceGroupId("my_test_tx_group");
         branchSession.setResourceId("tb_1");
-        branchSession.setLockKey("tb_1:11");
+        branchSession.setLockKey(lockKey);
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationId("demo-child-app");
         branchSession.setTxServiceGroup("my_test_tx_group");
