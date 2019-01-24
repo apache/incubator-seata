@@ -28,13 +28,14 @@ import com.alibaba.fescar.rm.datasource.sql.SQLSelectRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQLSelectRecognizer {
 
     private final SQLSelectStatement ast;
 
-    public MySQLSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
-        super(originalSQL);
+    public MySQLSelectForUpdateRecognizer(String originalSQL, SQLStatement ast, List<String> sqlHints) {
+        super(originalSQL, sqlHints);
         this.ast = (SQLSelectStatement) ast;
     }
 
@@ -111,7 +112,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource)tableSource);
+        visitor.visit((SQLExprTableSource) tableSource);
         return sb.toString();
     }
 
