@@ -35,17 +35,16 @@ public class DefaultLockManagerImplTest {
 
     private static final String resourceId = "tb_1";
 
-    private static final String lockKey = "tb_1:11";
+    private static final String lockKey = "tb_1:13";
 
     @Test(dataProvider = "branchSessionProvider")
     public void acquireLockTest(BranchSession branchSession) throws Exception {
-        branchSession.setTransactionId(transactionId);
-        boolean resultOne = lockManager.acquireLock(branchSession);
-        Assert.assertTrue(resultOne);
+        boolean result = lockManager.acquireLock(branchSession);
+        Assert.assertTrue(result);
         branchSession.unlock();
     }
 
-    @Test(dependsOnMethods = "acquireLockTest")
+    @Test
     public void isLockableTest() throws Exception {
         boolean resultOne = lockManager.isLockable(transactionId, resourceId, lockKey);
         Assert.assertTrue(resultOne);
