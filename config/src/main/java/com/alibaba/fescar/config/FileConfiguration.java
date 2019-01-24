@@ -212,7 +212,6 @@ public class FileConfiguration implements Configuration {
                     //todo
                     configFuture.setResult(Boolean.TRUE);
                 }
-
             }
         }
 
