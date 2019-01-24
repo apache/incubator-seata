@@ -265,12 +265,7 @@ public class DefaultCore implements Core {
                         LOGGER.error("Successfully rolled back branch " + branchSession);
                         continue;
                     case PhaseTwo_RollbackFailed_Unretryable:
-                        GlobalStatus currentStatus = globalSession.getStatus();
-                        if (currentStatus.name().startsWith("Timeout")) {
-                            globalSession.changeStatus(GlobalStatus.TimeoutRollbackFailed);
-                        } else {
-                            globalSession.changeStatus(GlobalStatus.RollbackFailed);
-                        }
+                        changeToRollbackFailedStatus(globalSession);
                         globalSession.end();
                         LOGGER.error("Failed to rollback global[" + globalSession.getTransactionId() + "] since branch[" + branchSession.getBranchId() + "] rollback failed");
                         return;
@@ -296,13 +291,30 @@ public class DefaultCore implements Core {
             }
 
         }
+        if (globalSession.hasBranch()) {
+            changeToRollbackFailedStatus(globalSession);
+        } else {
+            changeToRollbackedStatus(globalSession);
+        }
+        globalSession.end();
+    }
+
+    private void changeToRollbackedStatus(GlobalSession globalSession) throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
         if (currentStatus.name().startsWith("Timeout")) {
             globalSession.changeStatus(GlobalStatus.TimeoutRollbacked);
         } else {
             globalSession.changeStatus(GlobalStatus.Rollbacked);
         }
-        globalSession.end();
+    }
+
+    private void changeToRollbackFailedStatus(GlobalSession globalSession) throws TransactionException {
+        GlobalStatus currentStatus = globalSession.getStatus();
+        if (currentStatus.name().startsWith("Timeout")) {
+            globalSession.changeStatus(GlobalStatus.TimeoutRollbackFailed);
+        } else {
+            globalSession.changeStatus(GlobalStatus.RollbackFailed);
+        }
     }
 
     @Override
