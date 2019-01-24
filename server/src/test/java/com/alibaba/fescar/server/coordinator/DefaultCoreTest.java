@@ -54,7 +54,7 @@ public class DefaultCoreTest {
 
     private static final String applicationData = "{\"data\":\"test\"}";
 
-    @BeforeMethod
+    @BeforeTest
     public void initSessionManager() throws Exception {
         SessionHolder.init(null);
     }
@@ -126,7 +126,7 @@ public class DefaultCoreTest {
         return new Object[][]{{xid, branchId}};
     }
 
-    @AfterMethod
+    @AfterTest
     public void releaseSessionManager() throws Exception {
         Collection<GlobalSession> globalSessions = SessionHolder.getRootSessionManager().allSessions();
         Collection<GlobalSession> asyncGlobalSessions = SessionHolder.getAsyncCommittingSessionManager().allSessions();

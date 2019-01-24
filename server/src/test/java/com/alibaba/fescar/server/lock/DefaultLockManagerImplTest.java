@@ -31,9 +31,7 @@ public class DefaultLockManagerImplTest {
 
     private LockManager lockManager = new DefaultLockManagerImpl();
 
-    private static final long transactionIdOne = UUIDGenerator.generateUUID();
-
-    private static final long transactionIdTwo = UUIDGenerator.generateUUID();
+    private static final long transactionId = UUIDGenerator.generateUUID();
 
     private static final String resourceId = "tb_1";
 
@@ -41,7 +39,7 @@ public class DefaultLockManagerImplTest {
 
     @Test(dataProvider = "branchSessionProvider")
     public void acquireLockTest(BranchSession branchSession) throws Exception {
-        branchSession.setTransactionId(transactionIdOne);
+        branchSession.setTransactionId(transactionId);
         boolean resultOne = lockManager.acquireLock(branchSession);
         Assert.assertTrue(resultOne);
         branchSession.unlock();
@@ -49,20 +47,18 @@ public class DefaultLockManagerImplTest {
 
     @Test(dependsOnMethods = "acquireLockTest")
     public void isLockableTest() throws Exception {
-        boolean resultOne = lockManager.isLockable(transactionIdOne, resourceId, lockKey);
+        boolean resultOne = lockManager.isLockable(transactionId, resourceId, lockKey);
         Assert.assertTrue(resultOne);
-
-        boolean resultTwo = lockManager.isLockable(transactionIdTwo, resourceId, lockKey);
-        Assert.assertFalse(resultTwo);
     }
 
     @DataProvider
     public static Object[][] branchSessionProvider() {
         BranchSession branchSession = new BranchSession();
         branchSession.setBranchId(1L);
+        branchSession.setTransactionId(transactionId);
         branchSession.setClientId("c1");
         branchSession.setResourceGroupId("my_test_tx_group");
-        branchSession.setResourceId("tb_1");
+        branchSession.setResourceId(resourceId);
         branchSession.setLockKey(lockKey);
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationId("demo-child-app");
