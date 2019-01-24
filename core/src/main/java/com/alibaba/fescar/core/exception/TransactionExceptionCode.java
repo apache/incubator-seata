@@ -69,11 +69,11 @@ public enum TransactionExceptionCode {
 
     ;
 
-    private static final Map<Integer, TransactionExceptionCode> map = new HashMap<>(values().length);
+    private static final Map<Integer, TransactionExceptionCode> MAP = new HashMap<>(values().length);
 
     static {
         for (TransactionExceptionCode code : values()) {
-            map.put(code.ordinal(), code);
+            MAP.put(code.ordinal(), code);
         }
     }
 
@@ -82,7 +82,7 @@ public enum TransactionExceptionCode {
     }
 
     public static TransactionExceptionCode get(int ordinal) {
-        TransactionExceptionCode code = map.get(ordinal);
+        TransactionExceptionCode code = MAP.get(ordinal);
 
         if (null == code) {
             throw new IllegalArgumentException("Unknown TransactionExceptionCode[" + ordinal + "]");
