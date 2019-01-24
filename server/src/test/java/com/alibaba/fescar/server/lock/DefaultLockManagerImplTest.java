@@ -45,6 +45,8 @@ public class DefaultLockManagerImplTest {
         boolean resultOne = lockManager.acquireLock(branchSession);
         Assert.assertTrue(resultOne);
 
+        branchSession.unlock();
+
         branchSession.setTransactionId(transactionIdTwo);
         boolean resultTwo = lockManager.acquireLock(branchSession);
         Assert.assertFalse(resultTwo);
