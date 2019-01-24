@@ -16,16 +16,20 @@
   -->
 
 <beans xmlns="http://www.springframework.org/schema/beans"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations" value="classpath:jdbc.properties" />
+    </bean>
 
     <bean name="accountDataSource" class="com.alibaba.druid.pool.DruidDataSource"
           init-method="init" destroy-method="close">
-        <property name="url" value="jdbc:mysql://xxx:3306/demo"/>
-        <property name="username" value="xxx"/>
-        <property name="password" value="xxx"/>
-        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="${jdbc.account.url}"/>
+        <property name="username" value="${jdbc.account.username}"/>
+        <property name="password" value="${jdbc.account.password}"/>
+        <property name="driverClassName" value="${jdbc.account.driver}" />
         <property name="initialSize" value="0" />
         <property name="maxActive" value="180" />
         <property name="minIdle" value="0" />
@@ -52,6 +56,8 @@
 
     <dubbo:application name="dubbo-demo-account-service"  />
     <dubbo:registry address="multicast://224.5.6.7:1234?unicast=false" />
+    <!--support zk-->
+    <!--dubbo:registry address="zookeeper://test.zk1.cc:1234?backup=test.zk2.cc:1234,test.zk3.cc:1234" /-->
     <dubbo:protocol name="dubbo" port="20881" />
     <dubbo:service interface="com.alibaba.fescar.tm.dubbo.AccountService" ref="service" timeout="10000"/>
 
