@@ -39,7 +39,7 @@ public class TableMeta {
     }
 
     public ColumnMeta getColumnMeta(String colName) {
-        String s = colName.toUpperCase();
+        String s = colName;
         ColumnMeta col = allColumns.get(s);
         if (col == null) {
             if (colName.charAt(0) == '`') {
@@ -74,7 +74,7 @@ public class TableMeta {
             IndexMeta index = entry.getValue();
             if (index.getIndextype().value() == IndexType.PRIMARY.value()) {
                 for (ColumnMeta col : index.getValues()) {
-                    pk.put(col.getColumnName().toUpperCase(), col);
+                    pk.put(col.getColumnName(), col);
                 }
             }
         }
