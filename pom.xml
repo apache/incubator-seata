@@ -34,6 +34,7 @@
         <module>dubbo</module>
         <module>test</module>
         <module>examples</module>
+        <module>springcloud</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -65,6 +66,7 @@
         <junit.version>4.12</junit.version>
         <dubbo.version>2.5.3</dubbo.version>
         <zkclient.version>0.10</zkclient.version>
+        <spring-cloud.version>Edgware.RELEASE</spring-cloud.version>
     </properties>
     <dependencyManagement>
     <dependencies>
@@ -197,6 +199,13 @@
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
             <version>${zkclient.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-dependencies</artifactId>
+            <version>${spring-cloud.version}</version>
+            <type>pom</type>
+            <scope>import</scope>
         </dependency>
     </dependencies>
     </dependencyManagement>

@@ -57,7 +57,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     private static final int MT_MODE = 2;
 
     private static final int ORDER_NUM = 1024;
-    private static final int DEFAULT_MODE = AT_MODE;
+    public static final int DEFAULT_MODE = AT_MODE;
 
     private static final Set<String> PROXYED_SET = new HashSet<>();
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
