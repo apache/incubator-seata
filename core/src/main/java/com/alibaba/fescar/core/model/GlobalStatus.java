@@ -72,14 +72,14 @@ public enum GlobalStatus {
     // Finally: failed to rollback since timeout
     TimeoutRollbackFailed,
 
-    // Not managed in session map any more
+    // Not managed in session MAP any more
     Finished;
 
-    private static final Map<Integer, GlobalStatus> map = new HashMap<>(values().length);
+    private static final Map<Integer, GlobalStatus> MAP = new HashMap<>(values().length);
 
     static {
         for (GlobalStatus status : values()) {
-            map.put(status.ordinal(), status);
+            MAP.put(status.ordinal(), status);
         }
     }
 
@@ -88,7 +88,7 @@ public enum GlobalStatus {
     }
 
     public static GlobalStatus get(int ordinal) {
-        GlobalStatus status = map.get(ordinal);
+        GlobalStatus status = MAP.get(ordinal);
 
         if (null == status) {
             throw new IllegalArgumentException("Unknown GlobalStatus[" + ordinal + "]");
