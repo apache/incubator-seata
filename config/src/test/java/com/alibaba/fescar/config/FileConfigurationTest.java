@@ -16,6 +16,8 @@
 
 package com.alibaba.fescar.config;
 
+import org.junit.Assert;
+
 /**
  * @Author: jimin.jm@alibaba-inc.com
  * @Project: fescar-all
@@ -39,7 +41,6 @@ public class FileConfigurationTest {
 
     @org.junit.Test
     public void getConfig() throws Exception {
-
         String server = fileConfiguration.getConfig("transport.server");
         System.out.println(server);
         //TRANSPORT_SERVER_TYPE = TransportServerType.valueOf(CONFIG.getConfig("transport.server"));
@@ -52,13 +53,27 @@ public class FileConfigurationTest {
     }
 
     @org.junit.Test
-    public void getConfig2() throws Exception {
-
+    public void getConfigWithDefault() throws Exception {
+        String defaultValue = fileConfiguration.getConfig("not exist key","not exist");
+        Assert.assertTrue("not exist".equals(defaultValue));
     }
 
     @org.junit.Test
-    public void getConfig3() throws Exception {
+    public void getConfigBoolean() throws Exception {
+        boolean enableHeart=fileConfiguration.getBoolean("transport.heartbeat");
+        System.out.println(enableHeart);
+    }
 
+    @org.junit.Test
+    public void getConfigLong() throws Exception {
+        long bufferLimit=fileConfiguration.getLong("client.async.commit.buffer.limit");
+        System.out.println(bufferLimit);
+    }
+
+    @org.junit.Test
+    public void getConfigInt() throws Exception {
+        int bossThreadSize = fileConfiguration.getInt("transport.thread-factory.boss-thread-size");
+        System.out.println(bossThreadSize);
     }
 
     @org.junit.Test
@@ -93,7 +108,6 @@ public class FileConfigurationTest {
 
     @org.junit.Test
     public void addConfigListener() throws Exception {
-
     }
 
     @org.junit.Test
