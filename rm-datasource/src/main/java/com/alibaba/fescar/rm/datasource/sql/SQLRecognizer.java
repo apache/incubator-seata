@@ -28,18 +28,18 @@ public interface SQLRecognizer {
     /**
      * TableRecords source related in the SQL, including alias if any.
      * SELECT id, name FROM user u WHERE ...
-     * TableRecords source should be 'user u' for this SQL.
+     * Alias should be 'u' for this SQL.
      *
      * @return table source.
      */
-    String getTableSource();
+    String getTableAlias();
 
     /**
      * TableRecords name related in the SQL.
      * SELECT id, name FROM user u WHERE ...
      * TableRecords name should be 'user' for this SQL, without alias 'u'.
      *
-     * @see #getTableSource()
+     * @see #getTableAlias()
      * @return table name.
      */
     String getTableName();

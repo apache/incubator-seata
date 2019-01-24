@@ -27,12 +27,9 @@ public class PlainExecutor<T, S extends Statement> implements Executor {
 
     private StatementCallback<T, S> statementCallback;
 
-    private SQLRecognizer sqlRecognizer;
-
-    public PlainExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, SQLRecognizer sqlRecognizer) {
+    public PlainExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback) {
         this.statementProxy = statementProxy;
         this.statementCallback = statementCallback;
-        this.sqlRecognizer = sqlRecognizer;
     }
 
     @Override

@@ -44,11 +44,8 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
     }
 
     @Override
-    public String getTableSource() {
-        StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        visitor.visit((SQLExprTableSource)ast.getTableSource());
-        return sb.toString();
+    public String getTableAlias() {
+        return ast.getTableSource().getAlias();
     }
 
     @Override

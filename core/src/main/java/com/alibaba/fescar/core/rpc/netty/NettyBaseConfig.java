@@ -16,6 +16,7 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
+import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
 
@@ -93,9 +94,13 @@ public class NettyBaseConfig {
      */
     protected static final TransportProtocolType TRANSPORT_PROTOCOL_TYPE;
 
-    protected static final int MAX_WRITE_IDLE_SECONDS = 0;
+    private static final int DEFAULT_WRITE_IDLE_SECONDS = 5;
 
-    protected static final int MAX_READ_IDLE_SECONDS = MAX_WRITE_IDLE_SECONDS * 3;
+    private static final int READIDLE_BASE_WRITEIDLE = 3;
+
+    protected static final int MAX_WRITE_IDLE_SECONDS;
+
+    protected static final int MAX_READ_IDLE_SECONDS;
 
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
 
@@ -153,10 +158,17 @@ public class NettyBaseConfig {
             default:
                 throw new IllegalArgumentException("unsupported.");
         }
+        boolean enableHeartbeat = CONFIG.getBoolean("transport.heartbeat", false);
+        if (enableHeartbeat) {
+            MAX_WRITE_IDLE_SECONDS = DEFAULT_WRITE_IDLE_SECONDS;
+        } else {
+            MAX_WRITE_IDLE_SECONDS = 0;
+        }
+        MAX_READ_IDLE_SECONDS = MAX_WRITE_IDLE_SECONDS * READIDLE_BASE_WRITEIDLE;
     }
 
     private static void raiseUnsupportedTransportError() throws RuntimeException {
-        String errMsg = String.format("Unsupported provider type :[{}] for transport:[{}].", TRANSPORT_SERVER_TYPE,
+        String errMsg = String.format("Unsupported provider type :[%s] for transport:[%s].", TRANSPORT_SERVER_TYPE,
             TRANSPORT_PROTOCOL_TYPE);
         LOGGER.error(errMsg);
         throw new IllegalArgumentException(errMsg);
@@ -178,7 +190,7 @@ public class NettyBaseConfig {
         /**
          * Busy pin work thread mode.
          */
-        busyPin(NettyRuntime.availableProcessors() + 1),
+        BusyPin(NettyRuntime.availableProcessors() + 1),
         /**
          * Default work thread mode.
          */
@@ -210,12 +222,12 @@ public class NettyBaseConfig {
                 return Auto;
             } else if (Pin.name().equalsIgnoreCase(name)) {
                 return Pin;
-            } else if (busyPin.name().equalsIgnoreCase(name)) {
-                return busyPin;
+            } else if (BusyPin.name().equalsIgnoreCase(name)) {
+                return BusyPin;
             } else if (Default.name().equalsIgnoreCase(name)) {
                 return Default;
             } else {
-                return null;
+                throw new ShouldNeverHappenException("incorrect workThreadMode.");
             }
         }
 

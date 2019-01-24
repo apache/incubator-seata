@@ -46,11 +46,8 @@ public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRe
     }
 
     @Override
-    public String getTableSource() {
-        StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        visitor.visit(ast.getTableSource());
-        return sb.toString();
+    public String getTableAlias() {
+        return ast.getTableSource().getAlias();
     }
 
     @Override
@@ -78,7 +75,7 @@ public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRe
         List<String> list = new ArrayList<>(columnSQLExprs.size());
         for (SQLExpr expr : columnSQLExprs) {
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr) expr).getName().toUpperCase());
+                list.add(((SQLIdentifierExpr) expr).getName());
             } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
             }

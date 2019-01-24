@@ -21,7 +21,7 @@
 
     <groupId>com.alibaba.fescar</groupId>
     <artifactId>fescar-all</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.2-SNAPSHOT</version>
     <modules>
         <module>config</module>
         <module>common</module>
@@ -64,6 +64,7 @@
         <org.springframework.spring.version>2.5.6.SEC03</org.springframework.spring.version>
         <junit.version>4.12</junit.version>
         <dubbo.version>2.5.3</dubbo.version>
+        <zkclient.version>0.10</zkclient.version>
     </properties>
     <dependencyManagement>
     <dependencies>
@@ -173,6 +174,11 @@
             <version>${junit.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>6.4</version>
+        </dependency>
+        <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
             <version>${dubbo.version}</version>
@@ -187,6 +193,11 @@
             <artifactId>aopalliance</artifactId>
             <version>1.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.101tec</groupId>
+            <artifactId>zkclient</artifactId>
+            <version>${zkclient.version}</version>
+        </dependency>
     </dependencies>
     </dependencyManagement>
 
@@ -198,5 +209,29 @@
                 <version>1.5.0.Final</version>
             </extension>
         </extensions>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <formats>
+                        <format>html</format>
+                        <format>xml</format>
+                    </formats>
+                    <check />
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
+
 </project>

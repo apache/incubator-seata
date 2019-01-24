@@ -67,6 +67,8 @@ public class OrderServiceImpl implements OrderService {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
+        LOGGER.info("Order Service SQL: insert into order_tbl (user_id, commodity_code, count, money) values ({}, {}, {}, {})" ,userId ,commodityCode ,orderCount ,orderMoney );
+
         jdbcTemplate.update(new PreparedStatementCreator() {
 
             @Override
@@ -82,7 +84,7 @@ public class OrderServiceImpl implements OrderService {
             }
         }, keyHolder);
 
-        order.id = (long) keyHolder.getKey();
+        order.id = keyHolder.getKey().longValue();
 
         LOGGER.info("Order Service End ... Created " + order);
 
@@ -105,6 +107,8 @@ public class OrderServiceImpl implements OrderService {
 
         String applicationId = "dubbo-demo-order-service";
         String txServiceGroup = "my_test_tx_group";
+
+        RMClientAT.init(applicationId, txServiceGroup);
 
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"dubbo-order-service.xml"});
         context.getBean("service");
