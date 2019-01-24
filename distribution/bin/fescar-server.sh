@@ -14,13 +14,29 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 # ----------------------------------------------------------------------------
-
-#   Copyright (c) 2001-2002 The Apache Software Foundation.  All rights
+#
+#   Copyright (c) 2001-2006 The Apache Software Foundation.  All rights
 #   reserved.
 
-BASEDIR=`dirname $0`/..
-BASEDIR=`(cd "$BASEDIR"; pwd)`
 
+# resolve links - $0 may be a softlink
+PRG="$0"
+
+while [ -h "$PRG" ]; do
+  ls=`ls -ld "$PRG"`
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
+
+PRGDIR=`dirname "$PRG"`
+BASEDIR=`cd "$PRGDIR/.." >/dev/null; pwd`
+
+# Reset the REPO variable. If you need to influence this use the environment setup file.
+REPO=
 
 
 # OS specific support.  $var _must_ be set to either true or false.
@@ -34,9 +50,13 @@ case "`uname`" in
            else
              echo "Using Java version: $JAVA_VERSION"
            fi
-           if [ -z "$JAVA_HOME" ] ; then
-             JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/${JAVA_VERSION}/Home
-           fi
+		   if [ -z "$JAVA_HOME" ]; then
+		      if [ -x "/usr/libexec/java_home" ]; then
+			      JAVA_HOME=`/usr/libexec/java_home`
+			  else
+			      JAVA_HOME=/System/Library/Frameworks/JavaVM.framework/Versions/${JAVA_VERSION}/Home
+			  fi
+           fi       
            ;;
 esac
 
@@ -67,8 +87,8 @@ if [ -z "$JAVACMD" ] ; then
 fi
 
 if [ ! -x "$JAVACMD" ] ; then
-  echo "Error: JAVA_HOME is not defined correctly."
-  echo "  We cannot execute $JAVACMD"
+  echo "Error: JAVA_HOME is not defined correctly." 1>&2
+  echo "  We cannot execute $JAVACMD" 1>&2
   exit 1
 fi
 
@@ -77,8 +97,16 @@ then
   REPO="$BASEDIR"/lib
 fi
 
-CLASSPATH=$CLASSPATH_PREFIX:"$BASEDIR"/conf:"$REPO"/fescar-core-0.1.0-SNAPSHOT.jar:"$REPO"/fastjson-1.2.48.jar:"$REPO"/netty-all-4.1.24.Final.jar:"$REPO"/fescar-config-0.1.0-SNAPSHOT.jar:"$REPO"/config-1.2.1.jar:"$REPO"/netty-transport-native-epoll-4.1.24.Final-linux-x86_64.jar:"$REPO"/netty-common-4.1.24.Final.jar:"$REPO"/netty-buffer-4.1.24.Final.jar:"$REPO"/netty-transport-native-unix-common-4.1.24.Final.jar:"$REPO"/netty-transport-4.1.24.Final.jar:"$REPO"/netty-resolver-4.1.24.Final.jar:"$REPO"/netty-transport-native-kqueue-4.1.24.Final-osx-x86_64.jar:"$REPO"/slf4j-api-1.7.22.jar:"$REPO"/logback-classic-1.1.6.jar:"$REPO"/logback-core-1.1.6.jar:"$REPO"/junit-4.12.jar:"$REPO"/hamcrest-core-1.3.jar:"$REPO"/fescar-common-0.1.0-SNAPSHOT.jar:"$REPO"/commons-pool2-2.4.2.jar:"$REPO"/commons-pool-1.6.jar:"$REPO"/commons-lang-2.6.jar:"$REPO"/fescar-server-0.1.0-SNAPSHOT.jar
-EXTRA_JVM_ARGUMENTS=""
+CLASSPATH="$BASEDIR"/conf:"$REPO"/fescar-core-0.1.2-SNAPSHOT.jar:"$REPO"/fastjson-1.2.48.jar:"$REPO"/netty-all-4.1.24.Final.jar:"$REPO"/fescar-config-0.1.2-SNAPSHOT.jar:"$REPO"/config-1.2.1.jar:"$REPO"/slf4j-api-1.7.22.jar:"$REPO"/logback-classic-1.1.6.jar:"$REPO"/logback-core-1.1.6.jar:"$REPO"/fescar-common-0.1.2-SNAPSHOT.jar:"$REPO"/commons-pool2-2.4.2.jar:"$REPO"/commons-pool-1.6.jar:"$REPO"/commons-lang-2.6.jar:"$REPO"/junit-4.12.jar:"$REPO"/hamcrest-core-1.3.jar:"$REPO"/fescar-server-0.1.2-SNAPSHOT.jar
+
+ENDORSED_DIR=
+if [ -n "$ENDORSED_DIR" ] ; then
+  CLASSPATH=$BASEDIR/$ENDORSED_DIR/*:$CLASSPATH
+fi
+
+if [ -n "$CLASSPATH_PREFIX" ] ; then
+  CLASSPATH=$CLASSPATH_PREFIX:$CLASSPATH
+fi
 
 # For Cygwin, switch paths to Windows format before running java
 if $cygwin; then
@@ -89,12 +117,12 @@ if $cygwin; then
   [ -n "$REPO" ] && REPO=`cygpath --path --windows "$REPO"`
 fi
 
-exec "$JAVACMD" $JAVA_OPTS \
-  $EXTRA_JVM_ARGUMENTS \
+exec "$JAVACMD" $JAVA_OPTS -server -XX:MaxDirectMemorySize=1024M $EXTRA_JVM_ARGUMENTS \
   -classpath "$CLASSPATH" \
   -Dapp.name="fescar-server" \
   -Dapp.pid="$$" \
   -Dapp.repo="$REPO" \
+  -Dapp.home="$BASEDIR" \
   -Dbasedir="$BASEDIR" \
   com.alibaba.fescar.server.Server \
   "$@"

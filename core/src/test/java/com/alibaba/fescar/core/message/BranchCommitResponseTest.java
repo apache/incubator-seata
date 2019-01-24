@@ -13,38 +13,31 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package com.alibaba.fescar.core.message;
 
+import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.protocol.ResultCode;
-import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
+import com.alibaba.fescar.core.protocol.transaction.BranchCommitResponse;
 
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
+/**
+ * @author xiajun.0706@163.com
+ * @since 2019/1/23
+ */
+public class BranchCommitResponseTest {
+  @Test
+  public void toStringTest() throws Exception{
+    BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
 
-public class CodecTest {
+    branchCommitResponse.setBranchStatus(BranchStatus.PhaseOne_Done);
+    branchCommitResponse.setResultCode(ResultCode.Success);
+    branchCommitResponse.setMsg("");
 
-    @Test
-    public void testA() {
+    System.out.println(branchCommitResponse.toString());
 
-        long tid = 232323L;
-        long bid = 43554545L;
+    Assert.assertEquals("branchStatus=PhaseOne_Done,result code =Success,getMsg =", branchCommitResponse.toString());
 
-        BranchRegisterResponse response = new BranchRegisterResponse();
-        response.setResultCode(ResultCode.Failed);
-        response.setTransactionId(tid);
-        response.setBranchId(bid);
-
-        byte[] bytes = response.encode();
-
-        ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
-        byteBuffer.put(bytes);
-        byteBuffer.flip();
-
-        BranchRegisterResponse rs = new BranchRegisterResponse();
-        rs.decode(byteBuffer);
-
-        System.out.println(rs.getTransactionId());
-    }
+  }
 }
