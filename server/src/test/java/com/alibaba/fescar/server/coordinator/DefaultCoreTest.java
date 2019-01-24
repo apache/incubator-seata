@@ -23,9 +23,12 @@ import com.alibaba.fescar.server.session.BranchSession;
 import com.alibaba.fescar.server.session.GlobalSession;
 import com.alibaba.fescar.server.session.SessionHolder;
 import org.testng.Assert;
-import org.testng.annotations.BeforeTest;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.Collection;
 
 /**
  * @author zhimo.xiao@gmail.com
@@ -49,12 +52,12 @@ public class DefaultCoreTest {
     private static final String clientId = "c_1";
 
     private static final String lockKeys_1 = "tb_1:11";
-    
+
     private static final String lockKeys_2 = "tb_1:12";
 
     private static final String applicationData = "{\"data\":\"test\"}";
 
-    @BeforeTest
+    @BeforeClass
     public void initSessionManager() throws Exception {
         SessionHolder.init(null);
     }
@@ -124,6 +127,18 @@ public class DefaultCoreTest {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
         Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, lockKeys_2);
         return new Object[][]{{xid, branchId}};
+    }
+
+    @AfterClass
+    public void releaseSessionManager() throws Exception {
+        Collection<GlobalSession> globalSessions = SessionHolder.getRootSessionManager().allSessions();
+        Collection<GlobalSession> asyncGlobalSessions = SessionHolder.getAsyncCommittingSessionManager().allSessions();
+        for (GlobalSession asyncGlobalSession : asyncGlobalSessions) {
+            asyncGlobalSession.closeAndClean();
+        }
+        for (GlobalSession globalSession : globalSessions) {
+            globalSession.closeAndClean();
+        }
     }
 
 }
