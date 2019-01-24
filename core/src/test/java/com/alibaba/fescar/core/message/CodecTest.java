@@ -16,17 +16,16 @@
 
 package com.alibaba.fescar.core.message;
 
-import java.nio.ByteBuffer;
-
 import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
 
-import org.junit.Ignore;
 import org.junit.Test;
+
+import java.nio.ByteBuffer;
 
 public class CodecTest {
 
-    @Test @Ignore
+    @Test
     public void testA() {
 
         long tid = 232323L;
@@ -41,6 +40,7 @@ public class CodecTest {
 
         ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
         byteBuffer.put(bytes);
+        byteBuffer.flip();
 
         BranchRegisterResponse rs = new BranchRegisterResponse();
         rs.decode(byteBuffer);
