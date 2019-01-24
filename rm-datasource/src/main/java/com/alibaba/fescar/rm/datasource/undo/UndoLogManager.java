@@ -21,6 +21,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
@@ -30,6 +31,7 @@ import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.rm.datasource.ConnectionContext;
 import com.alibaba.fescar.rm.datasource.ConnectionProxy;
 import com.alibaba.fescar.rm.datasource.DataSourceProxy;
+import com.alibaba.fescar.rm.datasource.plugin.PluginManager;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMetaCache;
 
@@ -110,6 +112,8 @@ public final class UndoLogManager {
         try {
             conn = dataSourceProxy.getPlainConnection();
 
+            PluginManager pluginManager = dataSourceProxy.getPluginManager();
+
             // The entire undo process should run in a local transaction.
             conn.setAutoCommit(false);
 
@@ -125,10 +129,12 @@ public final class UndoLogManager {
                 BranchUndoLog branchUndoLog = UndoLogParserFactory.getInstance().decode(rollbackInfo);
 
                 for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
-                    TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
+                    List<String> sqlHints = sqlUndoLog.getSqlHints();
+                    String tableName = sqlUndoLog.getTableName();
+                    TableMeta tableMeta = TableMetaCache.getTableMeta(sqlHints, tableName, dataSourceProxy);
                     sqlUndoLog.setTableMeta(tableMeta);
                     AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(dataSourceProxy.getDbType(), sqlUndoLog);
-                    undoExecutor.executeOn(conn);
+                    undoExecutor.executeOn(conn, pluginManager);
                 }
 
             }

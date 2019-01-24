@@ -19,6 +19,9 @@ package com.alibaba.fescar.rm.datasource.exec;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.alibaba.fescar.rm.datasource.ConnectionProxy;
+import com.alibaba.fescar.rm.datasource.sql.SQLType;
+import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,7 +33,7 @@ import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractDMLBaseExecutor.class);
-    
+
     public AbstractDMLBaseExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
@@ -49,7 +52,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         TableRecords beforeImage = beforeImage();
         T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
         TableRecords afterImage = afterImage(beforeImage);
-        statementProxy.getConnectionProxy().prepareUndoLog(sqlRecognizer.getSQLType(), sqlRecognizer.getTableName(), beforeImage, afterImage);
+        prepareUndoLog(beforeImage, afterImage);
         return result;
     }
 
@@ -73,11 +76,30 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
             // when exception occur in finally,this exception will lost, so just print it here
             LOGGER.error("exception occur", e);
             throw e;
-        } 
-        finally {
+        } finally {
             connectionProxy.setAutoCommit(true);
         }
         return result;
+    }
+
+    protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) {
+        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+        SQLType sqlType = sqlRecognizer.getSQLType();
+
+        TableRecords lockKeyRecords = afterImage;
+        if (sqlType == SQLType.DELETE) {
+            lockKeyRecords = beforeImage;
+        }
+        String lockKeys = buildLockKey(lockKeyRecords);
+        connectionProxy.appendLockKey(lockKeys);
+
+        SQLUndoLog sqlUndoLog = new SQLUndoLog();
+        sqlUndoLog.setSqlType(sqlType);
+        sqlUndoLog.setSqlHints(sqlRecognizer.getSqlHints());
+        sqlUndoLog.setTableName(sqlRecognizer.getTableName());
+        sqlUndoLog.setBeforeImage(beforeImage);
+        sqlUndoLog.setAfterImage(afterImage);
+        connectionProxy.appendUndoItem(sqlUndoLog);
     }
 
     protected abstract TableRecords beforeImage() throws SQLException;

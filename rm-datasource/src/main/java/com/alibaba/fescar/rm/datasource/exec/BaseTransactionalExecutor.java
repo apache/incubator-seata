@@ -17,11 +17,16 @@
 package com.alibaba.fescar.rm.datasource.exec;
 
 import com.alibaba.fescar.core.context.RootContext;
+import com.alibaba.fescar.rm.datasource.ConnectionProxy;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
+import com.alibaba.fescar.rm.datasource.plugin.PluginManager;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
+import com.alibaba.fescar.rm.datasource.sql.SQLType;
 import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMetaCache;
+import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
+import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -84,15 +89,58 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     protected TableMeta getTableMeta() {
-        return getTableMeta(sqlRecognizer.getTableName());
+        return getTableMeta(this.sqlRecognizer);
     }
 
-    protected TableMeta getTableMeta(String tableName) {
+    protected TableMeta getTableMeta(SQLRecognizer sqlRecognizer) {
         if (tableMeta != null) {
             return tableMeta;
         }
-        tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
+        String tableName = sqlRecognizer.getTableName();
+        List<String> sqlHints = sqlRecognizer.getSqlHints();
+        tableMeta = TableMetaCache.getTableMeta(sqlHints, tableName, statementProxy.getConnectionProxy().getDataSourceProxy());
         return tableMeta;
+    }
+
+
+    /**
+     * ${tableName}:${pkV1},${pkV2},...
+     *
+     * @param rowsIncludingPK
+     * @return
+     */
+    protected String buildLockKey(TableRecords rowsIncludingPK) {
+        if (rowsIncludingPK.size() == 0) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(rowsIncludingPK.getTableMeta().getTableName());
+        sb.append(":");
+
+        boolean flag = false;
+        for (Field field : rowsIncludingPK.pkRows()) {
+            if (flag) {
+                sb.append(",");
+            } else {
+                flag = true;
+            }
+            sb.append(field.getValue());
+        }
+        PluginManager pluginManager = getPluginManager();
+        String lockKeys = pluginManager.execLockKeyBuildAfter(sqlRecognizer.getSqlHints(), rowsIncludingPK, sb.toString());
+        return lockKeys;
+    }
+
+    protected PluginManager getPluginManager() {
+        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+        PluginManager pluginManager = connectionProxy.getDataSourceProxy().getPluginManager();
+        return pluginManager;
+    }
+
+    protected String prepareSql(String originSql) {
+        List<String> hints = sqlRecognizer.getSqlHints();
+        String sql = getPluginManager().execSqlBuildAfter(hints, originSql);
+        return sql;
     }
 
 }

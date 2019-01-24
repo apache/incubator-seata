@@ -20,9 +20,13 @@ import com.alibaba.fescar.rm.datasource.sql.SQLType;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 
+import java.util.List;
+
 public class SQLUndoLog {
 
     private SQLType sqlType;
+
+    private List<String> sqlHints;
 
     private String tableName;
 
@@ -45,6 +49,14 @@ public class SQLUndoLog {
 
     public void setSqlType(SQLType sqlType) {
         this.sqlType = sqlType;
+    }
+
+    public List<String> getSqlHints() {
+        return sqlHints;
+    }
+
+    public void setSqlHints(List<String> sqlHints) {
+        this.sqlHints = sqlHints;
     }
 
     public String getTableName() {

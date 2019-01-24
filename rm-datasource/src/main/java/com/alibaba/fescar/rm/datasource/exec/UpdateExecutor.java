@@ -63,7 +63,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             whereCondition = recognizer.getWhereCondition();
         }
         selectSQLAppender.append(" FROM " + getFromTableInSQL() + " WHERE " + whereCondition + " FOR UPDATE");
-        String selectSQL = selectSQLAppender.toString();
+        String selectSQL = prepareSql(selectSQLAppender.toString());
 
         TableRecords beforeImage = null;
         PreparedStatement ps = null;
@@ -119,7 +119,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         List<Field> pkRows = beforeImage.pkRows();
         selectSQLAppender.append(" FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(pkRows) + " FOR UPDATE");
-        String selectSQL = selectSQLAppender.toString();
+        String selectSQL = prepareSql(selectSQLAppender.toString());
 
         TableRecords afterImage = null;
         PreparedStatement pst = null;

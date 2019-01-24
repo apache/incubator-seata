@@ -21,6 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import com.alibaba.fescar.rm.datasource.plugin.PluginManager;
 import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.KeyType;
 import com.alibaba.fescar.rm.datasource.sql.struct.Row;
@@ -37,10 +38,18 @@ public abstract class AbstractUndoExecutor {
     }
 
     public void executeOn(Connection conn) throws SQLException {
+        executeOn(conn, null);
+    }
+
+    public void executeOn(Connection conn, PluginManager pluginManager) throws SQLException {
         dataValidation(conn);
 
         try {
             String undoSQL = buildUndoSQL();
+
+            if (pluginManager != null) {
+                undoSQL = pluginManager.execSqlBuildAfter(sqlUndoLog.getSqlHints(), undoSQL);
+            }
 
             PreparedStatement undoPST = conn.prepareStatement(undoSQL);
 

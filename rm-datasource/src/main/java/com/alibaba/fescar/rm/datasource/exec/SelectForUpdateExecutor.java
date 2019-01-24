@@ -22,10 +22,12 @@ import java.sql.ResultSet;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.rm.datasource.ParametersHolder;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
+import com.alibaba.fescar.rm.datasource.plugin.context.AttrResolveContext;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLSelectRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
@@ -60,13 +62,16 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
             selectSQLAppender.append(" WHERE " + whereCondition);
         }
         selectSQLAppender.append(" FOR UPDATE");
-        String selectPKSQL = selectSQLAppender.toString();
+        String selectPKSQL = prepareSql(selectSQLAppender.toString());
 
+        Boolean savepointSupport = isSavepointSupport(selectPKSQL);
         try {
-            if (originalAutoCommit) {
-                conn.setAutoCommit(false);
+            if (savepointSupport) {
+                if (originalAutoCommit) {
+                    conn.setAutoCommit(false);
+                }
+                sp = conn.setSavepoint();
             }
-            sp = conn.setSavepoint();
             rs = statementCallback.execute(statementProxy.getTargetStatement(), args);
 
             while (true) {
@@ -87,7 +92,8 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
                     }
 
                     TableRecords selectPKRows = TableRecords.buildRecords(getTableMeta(), rsPK);
-                    statementProxy.getConnectionProxy().checkLock(selectPKRows);
+                    String lockKey = buildLockKey(selectPKRows);
+                    statementProxy.getConnectionProxy().checkLock(lockKey);
                     break;
 
                 } catch (LockConflictException lce) {
@@ -116,5 +122,11 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
             }
         }
         return rs;
+    }
+
+    private Boolean isSavepointSupport(String sqlText) {
+        List<String> hints = sqlRecognizer.getSqlHints();
+        AttrResolveContext context = getPluginManager().execAttrResolve(hints, sqlText);
+        return context.getAttrForSavepointSupport();
     }
 }
