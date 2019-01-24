@@ -95,32 +95,29 @@ public abstract class AbstractUndoExecutor {
     // Validate if data is dirty.
     protected void dataValidation(String xid, long branchId, Connection conn) throws SQLException, TransactionException {
         String tableName = sqlUndoLog.getTableName();
-        List<Field> pkRows = sqlUndoLog.getAfterImage().pkRows();
-        String querySQL = buildQueryCurrentImageSQL(tableName, pkRows);
+        TableRecords afterImage = sqlUndoLog.getAfterImage();
+        List<Row> rows = afterImage.getRows();
+        if (rows.size() < 1) return;
+        List<Field> pkRows = afterImage.pkRows();
+        String querySQL = buildQueryCurrentImageSQL(rows.get(0), tableName, pkRows);
         TableRecords currentImage = getCurrentImage(conn, querySQL, pkRows);
         currentImage.setTableName(tableName);
-        if (!currentImage.equals(sqlUndoLog.getAfterImage())) {
+        if (!currentImage.equals(afterImage)) {
             DataSourceManager.get().branchReport(xid, branchId, BranchStatus.PhaseTwo_RollbackFailed_Unretryable, FrameworkErrorCode.RollbackDirty.errMessage);
             throw new FrameworkException(FrameworkErrorCode.RollbackDirty);
         }
     }
 
-    protected String buildQueryCurrentImageSQL(String tableName, List<Field> pkRows) {
+    protected String buildQueryCurrentImageSQL(Row row, String tableName, List<Field> pkRows) {
         StringBuilder sb = new StringBuilder("SELECT ");
-        List<Row> rows = sqlUndoLog.getAfterImage().getRows();
-        if (rows.size() < 1) {
-            sb.append(" * ");   // deleteSQL afterImage is empty
-        } else {
-            Row row = rows.get(0);
-            boolean first = true;
-            for (Field field : row.getFields()) {
-                if (first) {
-                    first = false;
-                } else {
-                    sb.append(", ");
-                }
-                sb.append(field.getName());
+        boolean first = true;
+        for (Field field : row.getFields()) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append(", ");
             }
+            sb.append(field.getName());
         }
         sb.append(" FROM ").append(tableName).append(" WHERE ");
         buildWhereConditionByPKs(sb, pkRows);

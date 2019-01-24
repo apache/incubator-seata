@@ -151,7 +151,7 @@ public class TableRecords {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TableRecords that = (TableRecords) o;
-//        if (!tableName.equals(that.tableName)) return false;
+        if (!tableName.equals(that.tableName)) return false;
         if (rows.size() != that.rows.size()) return false;
 
         for (int index = 0; index < this.rows.size(); index++) {
