@@ -16,21 +16,47 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
-import com.alibaba.fescar.common.Constants;
-import com.alibaba.fescar.config.Configuration;
-import com.alibaba.fescar.config.ConfigurationFactory;
-
-import org.junit.Ignore;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
  * @Author: jimin.jm@alibaba-inc.com
+ * @Author: jxiajun.0706@163.com
  * @Project: fescar-all
- * @DateTime: 2018/12/26 14:32
+ * @DateTime: 2019/01/25 08:32
  * @FileName: TmRpcClientTest
  * @Description:
  */
 public class TmRpcClientTest {
+
+    @Test
+    public void testGetInstance() throws Exception {
+        String applicationId = "app 1";
+        String transactionServiceGroup = "group A";
+        TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
+
+        NettyClientConfig defaultNettyClientConfig = new NettyClientConfig();
+        GenericKeyedObjectPool.Config config = tmRpcClient.getNettyPoolConfig();
+        Assert.assertEquals(defaultNettyClientConfig.getMaxPoolActive(), config.maxActive);
+        Assert.assertEquals(defaultNettyClientConfig.getMinPoolIdle(), config.minIdle);
+        Assert.assertEquals(defaultNettyClientConfig.getMaxAcquireConnMills(), config.maxWait);
+        Assert.assertEquals(defaultNettyClientConfig.isPoolTestBorrow(), config.testOnBorrow);
+        Assert.assertEquals(defaultNettyClientConfig.isPoolTestReturn(), config.testOnReturn);
+        Assert.assertEquals(defaultNettyClientConfig.isPoolFifo(), config.lifo);
+    }
+
+    @Test
+    public void testInit() throws Exception {
+        String applicationId = "app 1";
+        String transactionServiceGroup = "group A";
+        TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
+
+        tmRpcClient.init();
+
+        //Assert.assertEquals(tmRpcClient.);
+    }
+
     @Test
     public void doConnect() throws Exception {
 
