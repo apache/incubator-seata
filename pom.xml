@@ -67,6 +67,7 @@
 
         <!-- Unit test settings properties -->
         <junit.version>4.12</junit.version>
+        <testng.version>6.14.3</testng.version>
     </properties>
     <dependencyManagement>
     <dependencies>
@@ -178,7 +179,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
-            <version>6.4</version>
+            <version>${testng.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
