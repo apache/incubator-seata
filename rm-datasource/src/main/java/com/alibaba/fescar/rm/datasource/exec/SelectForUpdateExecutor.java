@@ -47,8 +47,8 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
         boolean originalAutoCommit = conn.getAutoCommit();
 
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
-        selectSQLAppender.append(getTableMeta().getPkName());
-        selectSQLAppender.append(" FROM " + getTableMeta().getTableName());
+        selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
+        selectSQLAppender.append(" FROM " + getFromTableInSQL());
         String whereCondition = null;
         ArrayList<Object> paramAppender = new ArrayList<>();
         if (statementProxy instanceof ParametersHolder) {

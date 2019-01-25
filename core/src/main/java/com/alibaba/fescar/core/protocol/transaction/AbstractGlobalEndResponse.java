@@ -45,4 +45,18 @@ public abstract class AbstractGlobalEndResponse extends AbstractTransactionRespo
         globalStatus = GlobalStatus.get(byteBuffer.get());
     }
 
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("globalStatus=");
+        result.append(globalStatus);
+        result.append(",");
+        result.append("ResultCode=");
+        result.append(getResultCode());
+        result.append(",");
+        result.append("Msg=");
+        result.append(getMsg());
+
+        return result.toString();
+    }
 }

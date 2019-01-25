@@ -87,4 +87,16 @@ public class GlobalBeginRequest extends AbstractTransactionRequestToTC implement
     public AbstractTransactionResponse handle(RpcContext rpcContext) {
         return handler.handle(this, rpcContext);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("timeout=");
+        result.append(timeout);
+        result.append(",");
+        result.append("transactionName=");
+        result.append(transactionName);
+
+        return result.toString();
+    }
 }

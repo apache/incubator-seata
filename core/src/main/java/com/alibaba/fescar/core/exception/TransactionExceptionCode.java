@@ -16,6 +16,9 @@
 
 package com.alibaba.fescar.core.exception;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum TransactionExceptionCode {
 
     //
@@ -66,17 +69,26 @@ public enum TransactionExceptionCode {
 
     ;
 
+    private static final Map<Integer, TransactionExceptionCode> MAP = new HashMap<>(values().length);
+
+    static {
+        for (TransactionExceptionCode code : values()) {
+            MAP.put(code.ordinal(), code);
+        }
+    }
 
     public static TransactionExceptionCode get(byte ordinal) {
         return get((int) ordinal);
     }
+
     public static TransactionExceptionCode get(int ordinal) {
-        for (TransactionExceptionCode value : TransactionExceptionCode.values()) {
-            if (value.ordinal() == ordinal) {
-                return value;
-            }
+        TransactionExceptionCode code = MAP.get(ordinal);
+
+        if (null == code) {
+            throw new IllegalArgumentException("Unknown TransactionExceptionCode[" + ordinal + "]");
         }
-        throw new IllegalArgumentException("Unknown TransactionExceptionCode[" + ordinal + "]");
+
+        return code;
     }
 
 }
