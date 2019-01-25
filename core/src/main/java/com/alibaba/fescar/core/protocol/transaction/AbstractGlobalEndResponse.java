@@ -16,9 +16,9 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
 import com.alibaba.fescar.core.model.GlobalStatus;
+
+import java.nio.ByteBuffer;
 
 public abstract class AbstractGlobalEndResponse extends AbstractTransactionResponse {
 
@@ -45,4 +45,18 @@ public abstract class AbstractGlobalEndResponse extends AbstractTransactionRespo
         globalStatus = GlobalStatus.get(byteBuffer.get());
     }
 
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("globalStatus=");
+        result.append(globalStatus);
+        result.append(",");
+        result.append("ResultCode=");
+        result.append(getResultCode());
+        result.append(",");
+        result.append("Msg=");
+        result.append(getMsg());
+
+        return result.toString();
+    }
 }
