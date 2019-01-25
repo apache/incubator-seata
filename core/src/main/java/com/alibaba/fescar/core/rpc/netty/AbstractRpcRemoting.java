@@ -96,7 +96,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
     /**
      * The Is sending.
      */
-    protected boolean isSending = false;
+    protected volatile boolean isSending = false;
     private String group = "DEFAULT";
     /**
      * The Merge msg map.
