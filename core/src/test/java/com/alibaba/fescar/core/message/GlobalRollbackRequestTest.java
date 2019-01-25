@@ -15,13 +15,13 @@
  */
 package com.alibaba.fescar.core.message;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
 import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackRequest;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 /**
  * @author xiajun.0706@163.com
@@ -29,53 +29,54 @@ import java.util.Arrays;
  */
 public class GlobalRollbackRequestTest {
 
-  @Test
-  public void testToString() throws Exception{
-    GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
+    @Test
+    public void testToString() throws Exception {
+        GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
 
-    globalRollbackRequest.setTransactionId(1249853);
-    globalRollbackRequest.setExtraData("test_extra_data");
+        globalRollbackRequest.setTransactionId(1249853);
+        globalRollbackRequest.setExtraData("test_extra_data");
 
-    System.out.println(globalRollbackRequest.toString());
+        System.out.println(globalRollbackRequest.toString());
 
-    Assert.assertEquals("transactionId=1249853,extraData=test_extra_data", globalRollbackRequest.toString());
-  }
+        Assert.assertEquals("transactionId=1249853,extraData=test_extra_data", globalRollbackRequest.toString());
+    }
 
-  @Test
-  public void testEncode() throws Exception{
-    GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
+    @Test
+    public void testEncode() throws Exception {
+        GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
 
-    globalRollbackRequest.setTransactionId(1249853);
-    globalRollbackRequest.setExtraData("test_extra_data");
+        globalRollbackRequest.setTransactionId(1249853);
+        globalRollbackRequest.setExtraData("test_extra_data");
 
-    System.out.println(globalRollbackRequest.toString());
+        System.out.println(globalRollbackRequest.toString());
 
-    byte[] encodeResult = globalRollbackRequest.encode();
-    System.out.println(encodeResult);
-    String encodeResultStr = Arrays.toString(encodeResult);
-    System.out.println(encodeResultStr);
+        byte[] encodeResult = globalRollbackRequest.encode();
+        System.out.println(encodeResult);
+        String encodeResultStr = Arrays.toString(encodeResult);
+        System.out.println(encodeResultStr);
 
+        Assert.assertEquals(
+            "[0, 0, 0, 0, 0, 19, 18, 61, 0, 15, 116, 101, 115, 116, 95, 101, 120, 116, 114, 97, 95, 100, 97, 116, 97]",
+            encodeResultStr);
+    }
 
-    Assert.assertEquals("[0, 0, 0, 0, 0, 19, 18, 61, 0, 15, 116, 101, 115, 116, 95, 101, 120, 116, 114, 97, 95, 100, 97, 116, 97]", encodeResultStr);
-  }
+    @Test
+    public void testDecode() throws Exception {
+        GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
 
-  @Test
-  public void testDecode() throws Exception{
-    GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
+        globalRollbackRequest.setTransactionId(1249853L);
+        globalRollbackRequest.setExtraData("test_extra_data");
 
-    globalRollbackRequest.setTransactionId(1249853L);
-    globalRollbackRequest.setExtraData("test_extra_data");
+        byte[] encodeResult = globalRollbackRequest.encode();
 
-    byte[] encodeResult = globalRollbackRequest.encode();
+        ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
+        byteBuffer.put(encodeResult);
+        byteBuffer.flip();
 
-    ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
-    byteBuffer.put(encodeResult);
-    byteBuffer.flip();
-
-    GlobalRollbackRequest decodeGlobalRollbackRequest = new GlobalRollbackRequest();
-    decodeGlobalRollbackRequest.decode(byteBuffer);
-    System.out.println(decodeGlobalRollbackRequest);
-    Assert.assertEquals(globalRollbackRequest.getTransactionId(), decodeGlobalRollbackRequest.getTransactionId());
-    Assert.assertEquals(globalRollbackRequest.getExtraData(), decodeGlobalRollbackRequest.getExtraData());
-  }
+        GlobalRollbackRequest decodeGlobalRollbackRequest = new GlobalRollbackRequest();
+        decodeGlobalRollbackRequest.decode(byteBuffer);
+        System.out.println(decodeGlobalRollbackRequest);
+        Assert.assertEquals(globalRollbackRequest.getTransactionId(), decodeGlobalRollbackRequest.getTransactionId());
+        Assert.assertEquals(globalRollbackRequest.getExtraData(), decodeGlobalRollbackRequest.getExtraData());
+    }
 }

@@ -16,10 +16,10 @@
 
 package com.alibaba.fescar.core.model;
 
-import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 
 /**
  * Status of branch transaction.
