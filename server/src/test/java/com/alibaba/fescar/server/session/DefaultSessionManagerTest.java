@@ -15,16 +15,17 @@
  */
 package com.alibaba.fescar.server.session;
 
-import com.alibaba.fescar.core.model.BranchStatus;
-import com.alibaba.fescar.core.model.BranchType;
-import com.alibaba.fescar.core.model.GlobalStatus;
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+
+import com.alibaba.fescar.core.model.BranchStatus;
+import com.alibaba.fescar.core.model.BranchType;
+import com.alibaba.fescar.core.model.GlobalStatus;
+
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  * @author tianming.xm@gmail.com
@@ -36,158 +37,159 @@ public class DefaultSessionManagerTest {
     private SessionManager sessionManager = new DefaultSessionManager("test");
 
     @Test(dataProvider = "globalSessionProvider")
-    public void addGlobalSessionTest(GlobalSession globalSession) throws Exception{
+    public void addGlobalSessionTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
         sessionManager.removeGlobalSession(globalSession);
     }
 
     @Test(dataProvider = "globalSessionProvider")
-    public void findGlobalSessionTest(GlobalSession globalSession) throws Exception{
+    public void findGlobalSessionTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
-        GlobalSession expected =  sessionManager.findGlobalSession(globalSession.getTransactionId());
+        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getTransactionId());
         Assert.assertNotNull(expected);
-        Assert.assertEquals(expected.getTransactionId(),globalSession.getTransactionId());
-        Assert.assertEquals(expected.getApplicationId(),globalSession.getApplicationId());
-        Assert.assertEquals(expected.getTransactionServiceGroup(),globalSession.getTransactionServiceGroup());
-        Assert.assertEquals(expected.getTransactionName(),globalSession.getTransactionName());
-        Assert.assertEquals(expected.getTransactionId(),globalSession.getTransactionId());
-        Assert.assertEquals(expected.getStatus(),globalSession.getStatus());
+        Assert.assertEquals(expected.getTransactionId(), globalSession.getTransactionId());
+        Assert.assertEquals(expected.getApplicationId(), globalSession.getApplicationId());
+        Assert.assertEquals(expected.getTransactionServiceGroup(), globalSession.getTransactionServiceGroup());
+        Assert.assertEquals(expected.getTransactionName(), globalSession.getTransactionName());
+        Assert.assertEquals(expected.getTransactionId(), globalSession.getTransactionId());
+        Assert.assertEquals(expected.getStatus(), globalSession.getStatus());
         sessionManager.removeGlobalSession(globalSession);
     }
 
     @Test(dataProvider = "globalSessionProvider")
-    public void updateGlobalSessionStatusTest(GlobalSession globalSession) throws Exception{
+    public void updateGlobalSessionStatusTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
         globalSession.setStatus(GlobalStatus.Finished);
-        sessionManager.updateGlobalSessionStatus(globalSession,GlobalStatus.Finished);
-        GlobalSession expected =  sessionManager.findGlobalSession(globalSession.getTransactionId());
+        sessionManager.updateGlobalSessionStatus(globalSession, GlobalStatus.Finished);
+        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getTransactionId());
         Assert.assertNotNull(expected);
-        Assert.assertEquals(GlobalStatus.Finished,expected.getStatus());
+        Assert.assertEquals(GlobalStatus.Finished, expected.getStatus());
         sessionManager.removeGlobalSession(globalSession);
     }
 
     @Test(dataProvider = "globalSessionProvider")
-    public void removeGlobalSessionTest(GlobalSession globalSession) throws Exception{
+    public void removeGlobalSessionTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
         sessionManager.removeGlobalSession(globalSession);
-        GlobalSession expected =  sessionManager.findGlobalSession(globalSession.getTransactionId());
+        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getTransactionId());
         Assert.assertNull(expected);
 
     }
 
     @Test(dataProvider = "branchSessionProvider")
-    public void addBranchSessionTest(GlobalSession globalSession,BranchSession branchSession) throws Exception{
+    public void addBranchSessionTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
-        sessionManager.addBranchSession(globalSession,branchSession);
-        sessionManager.removeBranchSession(globalSession,branchSession);
+        sessionManager.addBranchSession(globalSession, branchSession);
+        sessionManager.removeBranchSession(globalSession, branchSession);
         sessionManager.removeGlobalSession(globalSession);
     }
 
     @Test(dataProvider = "branchSessionProvider")
-    public void updateBranchSessionStatusTest(GlobalSession globalSession,BranchSession branchSession) throws Exception{
+    public void updateBranchSessionStatusTest(GlobalSession globalSession, BranchSession branchSession)
+        throws Exception {
         sessionManager.addGlobalSession(globalSession);
-        sessionManager.addBranchSession(globalSession,branchSession);
+        sessionManager.addBranchSession(globalSession, branchSession);
         sessionManager.updateBranchSessionStatus(branchSession, BranchStatus.PhaseTwo_Committed);
-        sessionManager.removeBranchSession(globalSession,branchSession);
+        sessionManager.removeBranchSession(globalSession, branchSession);
         sessionManager.removeGlobalSession(globalSession);
     }
 
     @Test(dataProvider = "branchSessionProvider")
-    public void removeBranchSessionTest(GlobalSession globalSession,BranchSession branchSession) throws Exception{
+    public void removeBranchSessionTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
-        sessionManager.addBranchSession(globalSession,branchSession);
-        sessionManager.removeBranchSession(globalSession,branchSession);
+        sessionManager.addBranchSession(globalSession, branchSession);
+        sessionManager.removeBranchSession(globalSession, branchSession);
         sessionManager.removeGlobalSession(globalSession);
     }
 
     @Test(dataProvider = "globalSessionsProvider")
-    public void allSessionsTest(List<GlobalSession> globalSessions) throws Exception{
-        for(GlobalSession globalSession:globalSessions){
+    public void allSessionsTest(List<GlobalSession> globalSessions) throws Exception {
+        for (GlobalSession globalSession : globalSessions) {
             sessionManager.addGlobalSession(globalSession);
         }
-        Collection<GlobalSession> expectedGlobalSessions =  sessionManager.allSessions();
+        Collection<GlobalSession> expectedGlobalSessions = sessionManager.allSessions();
         Assert.assertNotNull(expectedGlobalSessions);
-        Assert.assertEquals(2,expectedGlobalSessions.size());
-        for(GlobalSession globalSession:globalSessions){
+        Assert.assertEquals(2, expectedGlobalSessions.size());
+        for (GlobalSession globalSession : globalSessions) {
             sessionManager.removeGlobalSession(globalSession);
         }
     }
 
     @Test(dataProvider = "globalSessionsProvider")
-    public void findGlobalSessionsTest(List<GlobalSession> globalSessions) throws Exception{
-        for(GlobalSession globalSession:globalSessions){
+    public void findGlobalSessionsTest(List<GlobalSession> globalSessions) throws Exception {
+        for (GlobalSession globalSession : globalSessions) {
             sessionManager.addGlobalSession(globalSession);
         }
-        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin,30*24*3600);
-        Collection<GlobalSession> expectedGlobalSessions =  sessionManager.findGlobalSessions(sessionCondition);
+        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin, 30 * 24 * 3600);
+        Collection<GlobalSession> expectedGlobalSessions = sessionManager.findGlobalSessions(sessionCondition);
         Assert.assertNotNull(expectedGlobalSessions);
-        Assert.assertEquals(2,expectedGlobalSessions.size());
-        for(GlobalSession globalSession:globalSessions){
+        Assert.assertEquals(2, expectedGlobalSessions.size());
+        for (GlobalSession globalSession : globalSessions) {
             sessionManager.removeGlobalSession(globalSession);
         }
     }
 
     @Test(dataProvider = "globalSessionProvider")
-    public void onBeginTest(GlobalSession globalSession) throws Exception{
+    public void onBeginTest(GlobalSession globalSession) throws Exception {
         sessionManager.onBegin(globalSession);
         sessionManager.onEnd(globalSession);
     }
 
     @Test(dataProvider = "globalSessionProvider")
-    public void onStatusChangeTest(GlobalSession globalSession) throws Exception{
+    public void onStatusChangeTest(GlobalSession globalSession) throws Exception {
         sessionManager.onBegin(globalSession);
-        sessionManager.onStatusChange(globalSession,GlobalStatus.Finished);
+        sessionManager.onStatusChange(globalSession, GlobalStatus.Finished);
         sessionManager.onEnd(globalSession);
     }
 
     @Test(dataProvider = "branchSessionProvider")
-    public void onBranchStatusChangeTest(GlobalSession globalSession,BranchSession branchSession) throws Exception{
+    public void onBranchStatusChangeTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.onBegin(globalSession);
-        sessionManager.onAddBranch(globalSession,branchSession);
-        sessionManager.onBranchStatusChange(globalSession,branchSession,BranchStatus.PhaseTwo_Committed);
+        sessionManager.onAddBranch(globalSession, branchSession);
+        sessionManager.onBranchStatusChange(globalSession, branchSession, BranchStatus.PhaseTwo_Committed);
     }
 
     @Test(dataProvider = "branchSessionProvider")
-    public void onAddBranchTest(GlobalSession globalSession,BranchSession branchSession) throws Exception{
+    public void onAddBranchTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.onBegin(globalSession);
-        sessionManager.onAddBranch(globalSession,branchSession);
+        sessionManager.onAddBranch(globalSession, branchSession);
     }
 
     @Test(dataProvider = "branchSessionProvider")
-    public void onRemoveBranchTest(GlobalSession globalSession,BranchSession branchSession) throws Exception{
+    public void onRemoveBranchTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.onBegin(globalSession);
-        sessionManager.onAddBranch(globalSession,branchSession);
-        sessionManager.onRemoveBranch(globalSession,branchSession);
+        sessionManager.onAddBranch(globalSession, branchSession);
+        sessionManager.onRemoveBranch(globalSession, branchSession);
     }
 
     @Test(dataProvider = "globalSessionProvider")
-    public void onCloseTest(GlobalSession globalSession) throws Exception{
+    public void onCloseTest(GlobalSession globalSession) throws Exception {
         sessionManager.onBegin(globalSession);
         sessionManager.onClose(globalSession);
     }
 
     @Test(dataProvider = "globalSessionProvider")
-    public void onEndTest(GlobalSession globalSession) throws Exception{
+    public void onEndTest(GlobalSession globalSession) throws Exception {
         sessionManager.onBegin(globalSession);
         sessionManager.onEnd(globalSession);
     }
 
     @DataProvider
     public static Object[][] globalSessionProvider() {
-        GlobalSession globalSession = new GlobalSession("demo-app","my_test_tx_group","test",6000);
-        return new Object[][] {{ globalSession}};
+        GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+        return new Object[][] {{globalSession}};
     }
 
     @DataProvider
     public static Object[][] globalSessionsProvider() {
-        GlobalSession globalSession1 = new GlobalSession("demo-app","my_test_tx_group","test",6000);
-        GlobalSession globalSession2 = new GlobalSession("demo-app","my_test_tx_group","test",6000);
-        return new Object[][] {{Arrays.asList(globalSession1,globalSession2)}};
+        GlobalSession globalSession1 = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+        GlobalSession globalSession2 = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+        return new Object[][] {{Arrays.asList(globalSession1, globalSession2)}};
     }
 
     @DataProvider
     public static Object[][] branchSessionProvider() {
-        GlobalSession globalSession = new GlobalSession("demo-app","my_test_tx_group","test",6000);
+        GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
@@ -198,6 +200,6 @@ public class DefaultSessionManagerTest {
         branchSession.setApplicationId("demo-child-app");
         branchSession.setTxServiceGroup("my_test_tx_group");
         branchSession.setApplicationData("{\"data\":\"test\"}");
-        return new Object[][] {{ globalSession,branchSession}};
+        return new Object[][] {{globalSession, branchSession}};
     }
 }

@@ -18,6 +18,7 @@ package com.alibaba.fescar.server.session;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.GlobalStatus;
+
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -29,70 +30,70 @@ import org.testng.annotations.Test;
 public class GlobalSessionTest {
 
     @Test(dataProvider = "branchSessionMTProvider")
-    public void canBeCommittedAsyncTest(GlobalSession globalSession){
+    public void canBeCommittedAsyncTest(GlobalSession globalSession) {
         Assert.assertFalse(globalSession.canBeCommittedAsync());
     }
 
     @Test(dataProvider = "globalSessionProvider")
-    public void beginTest(GlobalSession globalSession) throws Exception{
+    public void beginTest(GlobalSession globalSession) throws Exception {
         globalSession.begin();
     }
 
     @Test(dataProvider = "globalSessionProvider")
-    public void changeStatusTest(GlobalSession globalSession) throws Exception{
+    public void changeStatusTest(GlobalSession globalSession) throws Exception {
         globalSession.changeStatus(GlobalStatus.Committed);
     }
 
     @Test(dataProvider = "branchSessionProvider")
-    public void changeBranchStatusTest(GlobalSession globalSession,BranchSession branchSession) throws Exception{
+    public void changeBranchStatusTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseTwo_Committed);
     }
 
     @Test(dataProvider = "globalSessionProvider")
-    public void closeTest(GlobalSession globalSession) throws Exception{
+    public void closeTest(GlobalSession globalSession) throws Exception {
         globalSession.close();
     }
 
     @Test(dataProvider = "globalSessionProvider")
-    public void endTest(GlobalSession globalSession) throws Exception{
+    public void endTest(GlobalSession globalSession) throws Exception {
         globalSession.end();
     }
 
     @Test(dataProvider = "branchSessionProvider")
-    public void addBranchTest(GlobalSession globalSession,BranchSession branchSession) throws Exception{
+    public void addBranchTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         globalSession.addBranch(branchSession);
     }
 
     @Test(dataProvider = "branchSessionProvider")
-    public void removeBranchTest(GlobalSession globalSession,BranchSession branchSession) throws Exception{
+    public void removeBranchTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         globalSession.addBranch(branchSession);
         globalSession.removeBranch(branchSession);
     }
 
     @Test(dataProvider = "globalSessionProvider")
-    public void codecTest(GlobalSession globalSession){
+    public void codecTest(GlobalSession globalSession) {
         byte[] result = globalSession.encode();
         Assert.assertNotNull(result);
         GlobalSession expected = new GlobalSession();
         expected.decode(result);
-        Assert.assertEquals(expected.getTransactionId(),globalSession.getTransactionId());
-        Assert.assertEquals(expected.getTimeout(),globalSession.getTimeout());
-        Assert.assertEquals(expected.getApplicationId(),globalSession.getApplicationId());
-        Assert.assertEquals(expected.getTransactionServiceGroup(),globalSession.getTransactionServiceGroup());
-        Assert.assertEquals(expected.getTransactionName(),globalSession.getTransactionName());
+        Assert.assertEquals(expected.getTransactionId(), globalSession.getTransactionId());
+        Assert.assertEquals(expected.getTimeout(), globalSession.getTimeout());
+        Assert.assertEquals(expected.getApplicationId(), globalSession.getApplicationId());
+        Assert.assertEquals(expected.getTransactionServiceGroup(), globalSession.getTransactionServiceGroup());
+        Assert.assertEquals(expected.getTransactionName(), globalSession.getTransactionName());
     }
 
     @DataProvider
     public static Object[][] globalSessionProvider() {
-        GlobalSession globalSession = new GlobalSession("demo-app","my_test_tx_group","test",6000);
+        GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
         globalSession.setActive(true);
         globalSession.addSessionLifecycleListener(new DefaultSessionManager("default"));
-        return new Object[][] {{ globalSession}};
+        return new Object[][] {{globalSession}};
     }
 
     @DataProvider
     public static Object[][] branchSessionProvider() {
-        GlobalSession globalSession = new GlobalSession("demo-app","my_test_tx_group","test",6000);
+        GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
@@ -105,12 +106,12 @@ public class GlobalSessionTest {
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.AT);
         globalSession.add(branchSession);
-        return new Object[][] {{ globalSession,branchSession}};
+        return new Object[][] {{globalSession, branchSession}};
     }
 
     @DataProvider
     public static Object[][] branchSessionMTProvider() {
-        GlobalSession globalSession = new GlobalSession("demo-app","my_test_tx_group","test",6000);
+        GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
@@ -123,6 +124,6 @@ public class GlobalSessionTest {
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.MT);
         globalSession.add(branchSession);
-        return new Object[][] {{ globalSession}};
+        return new Object[][] {{globalSession}};
     }
 }

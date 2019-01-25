@@ -19,7 +19,6 @@ package com.alibaba.fescar.rm.datasource.exec;
 import java.sql.Statement;
 
 import com.alibaba.fescar.rm.datasource.StatementProxy;
-import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 
 public class PlainExecutor<T, S extends Statement> implements Executor {
 

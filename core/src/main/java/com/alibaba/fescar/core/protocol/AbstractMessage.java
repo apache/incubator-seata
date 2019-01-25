@@ -19,8 +19,24 @@ package com.alibaba.fescar.core.protocol;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 
-import com.alibaba.fescar.core.protocol.transaction.*;
+import com.alibaba.fescar.core.protocol.transaction.BranchCommitRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchCommitResponse;
+import com.alibaba.fescar.core.protocol.transaction.BranchRegisterRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
+import com.alibaba.fescar.core.protocol.transaction.BranchReportRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchReportResponse;
+import com.alibaba.fescar.core.protocol.transaction.BranchRollbackRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchRollbackResponse;
 import com.alibaba.fescar.core.protocol.transaction.GlobalBeginRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalBeginResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalCommitRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalCommitResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalStatusRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalStatusResponse;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -123,14 +139,14 @@ public abstract class AbstractMessage implements MessageCodec, Serializable {
         }
 
         try {
-            msgCodec = (MessageCodec) getMergeRequestInstanceByCode(typeCode);
+            msgCodec = (MessageCodec)getMergeRequestInstanceByCode(typeCode);
         } catch (Exception exx) {}
 
         if (null != msgCodec) {
             return msgCodec;
         }
 
-        return (MessageCodec) getMergeResponseInstanceByCode(typeCode);
+        return (MessageCodec)getMergeResponseInstanceByCode(typeCode);
     }
 
     public static MergedMessage getMergeRequestInstanceByCode(int typeCode) {

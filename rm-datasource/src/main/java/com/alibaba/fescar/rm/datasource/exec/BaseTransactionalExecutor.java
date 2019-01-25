@@ -16,16 +16,16 @@
 
 package com.alibaba.fescar.rm.datasource.exec;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMetaCache;
-
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
 
 public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor {
 

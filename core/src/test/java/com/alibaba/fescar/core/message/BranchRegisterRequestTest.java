@@ -26,18 +26,19 @@ import org.junit.Test;
  * @since 2019/1/23
  */
 public class BranchRegisterRequestTest {
-  @Test
-  public void toStringTest() throws Exception{
-    BranchRegisterRequest branchRegisterRequest = new BranchRegisterRequest();
+    @Test
+    public void toStringTest() throws Exception {
+        BranchRegisterRequest branchRegisterRequest = new BranchRegisterRequest();
 
-    branchRegisterRequest.setTransactionId(123456);
-    branchRegisterRequest.setBranchType(BranchType.AT);
-    branchRegisterRequest.setResourceId("resource1");
-    branchRegisterRequest.setLockKey("lock_key_1");
+        branchRegisterRequest.setTransactionId(123456);
+        branchRegisterRequest.setBranchType(BranchType.AT);
+        branchRegisterRequest.setResourceId("resource1");
+        branchRegisterRequest.setLockKey("lock_key_1");
 
-    System.out.println(branchRegisterRequest.toString());
+        System.out.println(branchRegisterRequest.toString());
 
-    Assert.assertEquals("transactionId=123456,branchType=AT,resourceId=resource1,lockKey=lock_key_1", branchRegisterRequest.toString());
+        Assert.assertEquals("transactionId=123456,branchType=AT,resourceId=resource1,lockKey=lock_key_1",
+            branchRegisterRequest.toString());
 
-  }
+    }
 }

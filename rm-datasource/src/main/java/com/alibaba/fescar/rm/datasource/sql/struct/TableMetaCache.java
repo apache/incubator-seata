@@ -95,7 +95,7 @@ public class TableMetaCache {
 			ResultSetMetaData rsmd = rs.getMetaData();
 			DatabaseMetaData dbmd = conn.getMetaData();
 
-			return resultSetMetaToSchema(rsmd, dbmd, tableName);
+            return resultSetMetaToSchema(rsmd, dbmd, tableName);
 		} catch (Exception e) {
 			if (e instanceof SQLException) {
 				throw ((SQLException) e);
@@ -123,7 +123,7 @@ public class TableMetaCache {
 		while (rs2.next()) {
 			ColumnMeta col = new ColumnMeta();
 			col.setTableName(tableName);
-			col.setColumnName(rs2.getString("COLUMN_NAME"));
+            col.setColumnName(rs2.getString("COLUMN_NAME"));
 			String datatype = rs2.getString("DATA_TYPE");
 			if (StringUtils.equalsIgnoreCase(datatype, "NUMBER")) {
 				col.setDataType(java.sql.Types.BIGINT);
@@ -149,7 +149,7 @@ public class TableMetaCache {
 							+ tableName + "'");
 			while (rs1.next()) {
 				String indexName = rs1.getString(1);
-				String colName = rs1.getString(2);
+                String colName = rs1.getString(2);
 				ColumnMeta col = tm.getAllColumns().get(colName);
 
 				if (tm.getAllIndexes().containsKey(indexName)) {
@@ -176,7 +176,8 @@ public class TableMetaCache {
 		return tm;
 	}
 
-	private static TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName) throws SQLException {
+    private static TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
+        throws SQLException {
 		String schemaName = rsmd.getSchemaName(1);
 		String catalogName = rsmd.getCatalogName(1);
 
@@ -189,7 +190,7 @@ public class TableMetaCache {
 			col.setTableCat(rs1.getString("TABLE_CAT"));
 			col.setTableSchemaName(rs1.getString("TABLE_SCHEM"));
 			col.setTableName(rs1.getString("TABLE_NAME"));
-			col.setColumnName(rs1.getString("COLUMN_NAME"));
+            col.setColumnName(rs1.getString("COLUMN_NAME"));
 			col.setDataType(rs1.getInt("DATA_TYPE"));
 			col.setDataTypeName(rs1.getString("TYPE_NAME"));
 			col.setColumnSize(rs1.getInt("COLUMN_SIZE"));
@@ -212,7 +213,7 @@ public class TableMetaCache {
 		String indexName = "";
 		while (rs2.next()) {
 			indexName = rs2.getString("INDEX_NAME");
-			String colName = rs2.getString("COLUMN_NAME");
+            String colName = rs2.getString("COLUMN_NAME");
 			ColumnMeta col = tm.getAllColumns().get(colName);
 
 			if (tm.getAllIndexes().containsKey(indexName)) {
