@@ -127,7 +127,7 @@ public class TableRecords {
         while (resultSet.next()) {
             List<Field> fields = new ArrayList<>(columnCount);
             for (int i = 1; i <= columnCount; i++) {
-                String colName = resultSetMetaData.getColumnName(i).toUpperCase();
+                String colName = resultSetMetaData.getColumnName(i);
                 ColumnMeta col = tmeta.getColumnMeta(colName);
                 Field field = new Field();
                 field.setName(col.getColumnName());
