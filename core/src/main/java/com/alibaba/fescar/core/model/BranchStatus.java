@@ -16,10 +16,10 @@
 
 package com.alibaba.fescar.core.model;
 
-import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 
 /**
  * Status of branch transaction.
@@ -59,11 +59,11 @@ public enum BranchStatus {
     // Rollback logic is failed but NOT retryable.
     PhaseTwo_RollbackFailed_Unretryable;
 
-    private static final Map<Integer, BranchStatus> map = new HashMap<>(values().length);
+    private static final Map<Integer, BranchStatus> MAP = new HashMap<>(values().length);
 
     static {
         for (BranchStatus status : values()) {
-            map.put(status.ordinal(), status);
+            MAP.put(status.ordinal(), status);
         }
     }
 
@@ -72,7 +72,7 @@ public enum BranchStatus {
     }
 
     public static BranchStatus get(int ordinal) {
-        BranchStatus status = map.get(ordinal);
+        BranchStatus status = MAP.get(ordinal);
 
         if (null == status) {
             throw new ShouldNeverHappenException("Unknown BranchStatus[" + ordinal + "]");
