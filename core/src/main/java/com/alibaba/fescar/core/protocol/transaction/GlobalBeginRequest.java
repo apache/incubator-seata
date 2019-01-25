@@ -16,10 +16,10 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
 import com.alibaba.fescar.core.protocol.MergedMessage;
 import com.alibaba.fescar.core.rpc.RpcContext;
+
+import java.nio.ByteBuffer;
 
 public class GlobalBeginRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 
@@ -86,5 +86,17 @@ public class GlobalBeginRequest extends AbstractTransactionRequestToTC implement
     @Override
     public AbstractTransactionResponse handle(RpcContext rpcContext) {
         return handler.handle(this, rpcContext);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("timeout=");
+        result.append(timeout);
+        result.append(",");
+        result.append("transactionName=");
+        result.append(transactionName);
+
+        return result.toString();
     }
 }
