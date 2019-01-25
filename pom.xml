@@ -34,6 +34,7 @@
         <module>dubbo</module>
         <module>test</module>
         <module>examples</module>
+        <module>examples-spring</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -210,6 +211,11 @@
             </extension>
         </extensions>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.19.1</version>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
