@@ -15,6 +15,9 @@
  */
 package com.alibaba.fescar.core.message;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.GlobalCommitResponse;
@@ -23,95 +26,91 @@ import org.apache.commons.lang.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
 /**
  * @author xiajun.0706@163.com
  * @since 2019/1/24
  */
 public class GlobalCommitResponseTest {
 
-  @Test
-  public void testToString() throws Exception{
-    GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
+    @Test
+    public void testToString() throws Exception {
+        GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
 
-    globalCommitResponse.setGlobalStatus(GlobalStatus.Committed);
-    globalCommitResponse.setResultCode(ResultCode.Success);
-    globalCommitResponse.setMsg("OK");
+        globalCommitResponse.setGlobalStatus(GlobalStatus.Committed);
+        globalCommitResponse.setResultCode(ResultCode.Success);
+        globalCommitResponse.setMsg("OK");
 
-    System.out.println(globalCommitResponse.toString());
+        System.out.println(globalCommitResponse.toString());
 
-    Assert.assertEquals("globalStatus=Committed,ResultCode=Success,Msg=OK", globalCommitResponse.toString());
-  }
+        Assert.assertEquals("globalStatus=Committed,ResultCode=Success,Msg=OK", globalCommitResponse.toString());
+    }
 
-  @Test
-  public void testEncode() throws Exception{
-    GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
+    @Test
+    public void testEncode() throws Exception {
+        GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
 
-    globalCommitResponse.setGlobalStatus(GlobalStatus.Committed);
-    globalCommitResponse.setResultCode(ResultCode.Success);
-    globalCommitResponse.setMsg("OK");
+        globalCommitResponse.setGlobalStatus(GlobalStatus.Committed);
+        globalCommitResponse.setResultCode(ResultCode.Success);
+        globalCommitResponse.setMsg("OK");
 
-    System.out.println(globalCommitResponse.toString());
+        System.out.println(globalCommitResponse.toString());
 
-    byte[] encodeResult = globalCommitResponse.encode();
-    System.out.println(encodeResult);
-    String encodeResultStr = Arrays.toString(encodeResult);
-    System.out.println(encodeResultStr);
+        byte[] encodeResult = globalCommitResponse.encode();
+        System.out.println(encodeResult);
+        String encodeResultStr = Arrays.toString(encodeResult);
+        System.out.println(encodeResultStr);
 
+        Assert.assertEquals("[1, 0, 8]", encodeResultStr);
+    }
 
-    Assert.assertEquals("[1, 0, 8]", encodeResultStr);
-  }
+    @Test
+    public void testDecodeNormal() throws Exception {
+        GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
 
-  @Test
-  public void testDecodeNormal() throws Exception{
-    GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
+        globalCommitResponse.setGlobalStatus(GlobalStatus.Committed);
+        globalCommitResponse.setResultCode(ResultCode.Success);
+        globalCommitResponse.setMsg("OK");
 
-    globalCommitResponse.setGlobalStatus(GlobalStatus.Committed);
-    globalCommitResponse.setResultCode(ResultCode.Success);
-    globalCommitResponse.setMsg("OK");
+        System.out.println(globalCommitResponse.toString());
 
-    System.out.println(globalCommitResponse.toString());
+        byte[] encodeResult = globalCommitResponse.encode();
 
-    byte[] encodeResult = globalCommitResponse.encode();
+        ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
+        byteBuffer.put(encodeResult);
+        byteBuffer.flip();
+        GlobalCommitResponse decodeGlobalCommitResponse = new GlobalCommitResponse();
+        decodeGlobalCommitResponse.decode(byteBuffer);
 
-    ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
-    byteBuffer.put(encodeResult);
-    byteBuffer.flip();
-    GlobalCommitResponse decodeGlobalCommitResponse = new GlobalCommitResponse();
-    decodeGlobalCommitResponse.decode(byteBuffer);
+        System.out.println(decodeGlobalCommitResponse.toString());
 
-    System.out.println(decodeGlobalCommitResponse.toString());
+        Assert.assertEquals(globalCommitResponse.getGlobalStatus(), decodeGlobalCommitResponse.getGlobalStatus());
+        Assert.assertEquals(globalCommitResponse.getResultCode(), decodeGlobalCommitResponse.getResultCode());
+        //success response do not have msg
+        Assert.assertTrue(StringUtils.isBlank(decodeGlobalCommitResponse.getMsg()));
+    }
 
-    Assert.assertEquals(globalCommitResponse.getGlobalStatus(), decodeGlobalCommitResponse.getGlobalStatus());
-    Assert.assertEquals(globalCommitResponse.getResultCode(), decodeGlobalCommitResponse.getResultCode());
-    //success response do not have msg
-    Assert.assertTrue(StringUtils.isBlank(decodeGlobalCommitResponse.getMsg()));
-  }
+    @Test
+    public void testDecodeException() throws Exception {
+        GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
 
-  @Test
-  public void testDecodeException() throws Exception{
-    GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
+        globalCommitResponse.setGlobalStatus(GlobalStatus.CommitFailed);
+        globalCommitResponse.setResultCode(ResultCode.Failed);
+        globalCommitResponse.setMsg("error happened");
 
-    globalCommitResponse.setGlobalStatus(GlobalStatus.CommitFailed);
-    globalCommitResponse.setResultCode(ResultCode.Failed);
-    globalCommitResponse.setMsg("error happened");
+        System.out.println(globalCommitResponse.toString());
 
-    System.out.println(globalCommitResponse.toString());
+        byte[] encodeResult = globalCommitResponse.encode();
 
-    byte[] encodeResult = globalCommitResponse.encode();
+        ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
+        byteBuffer.put(encodeResult);
+        byteBuffer.flip();
+        GlobalCommitResponse decodeGlobalCommitResponse = new GlobalCommitResponse();
+        decodeGlobalCommitResponse.decode(byteBuffer);
 
-    ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
-    byteBuffer.put(encodeResult);
-    byteBuffer.flip();
-    GlobalCommitResponse decodeGlobalCommitResponse = new GlobalCommitResponse();
-    decodeGlobalCommitResponse.decode(byteBuffer);
+        System.out.println(decodeGlobalCommitResponse.toString());
 
-    System.out.println(decodeGlobalCommitResponse.toString());
-
-    Assert.assertEquals(globalCommitResponse.getGlobalStatus(), decodeGlobalCommitResponse.getGlobalStatus());
-    Assert.assertEquals(globalCommitResponse.getResultCode(), decodeGlobalCommitResponse.getResultCode());
-    Assert.assertEquals(globalCommitResponse.getMsg(), decodeGlobalCommitResponse.getMsg());
-  }
+        Assert.assertEquals(globalCommitResponse.getGlobalStatus(), decodeGlobalCommitResponse.getGlobalStatus());
+        Assert.assertEquals(globalCommitResponse.getResultCode(), decodeGlobalCommitResponse.getResultCode());
+        Assert.assertEquals(globalCommitResponse.getMsg(), decodeGlobalCommitResponse.getMsg());
+    }
 }

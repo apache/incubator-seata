@@ -16,9 +16,9 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
-import com.alibaba.fescar.core.protocol.MergedMessage;
-
 import java.nio.ByteBuffer;
+
+import com.alibaba.fescar.core.protocol.MergedMessage;
 
 public abstract class AbstractGlobalEndRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 

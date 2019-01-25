@@ -15,6 +15,8 @@
  */
 package com.alibaba.fescar.server.coordinator;
 
+import java.util.Collection;
+
 import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
@@ -22,10 +24,12 @@ import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.server.session.BranchSession;
 import com.alibaba.fescar.server.session.GlobalSession;
 import com.alibaba.fescar.server.session.SessionHolder;
-import org.testng.Assert;
-import org.testng.annotations.*;
 
-import java.util.Collection;
+import org.testng.Assert;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
 /**
  * @author zhimo.xiao@gmail.com
@@ -116,14 +120,14 @@ public class DefaultCoreTest {
     @DataProvider
     public static Object[][] xidProvider() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        return new Object[][]{{xid}};
+        return new Object[][] {{xid}};
     }
 
     @DataProvider
     public static Object[][] xidAndBranchIdProvider() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
         Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, lockKeys_2);
-        return new Object[][]{{xid, branchId}};
+        return new Object[][] {{xid, branchId}};
     }
 
     @AfterTest

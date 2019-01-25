@@ -15,13 +15,13 @@
  */
 package com.alibaba.fescar.core.message;
 
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+
 import com.alibaba.fescar.core.protocol.transaction.GlobalBeginRequest;
 
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 /**
  * @author xiajun.0706@163.com
@@ -29,41 +29,41 @@ import java.util.Arrays;
  */
 public class GlobalBeginRequestTest {
 
-  @Test
-  public void testToString() throws Exception{
-    GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
-    globalBeginRequest.setTransactionName("tran 1");
-    System.out.println(globalBeginRequest.toString());
+    @Test
+    public void testToString() throws Exception {
+        GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
+        globalBeginRequest.setTransactionName("tran 1");
+        System.out.println(globalBeginRequest.toString());
 
-    Assert.assertEquals("timeout=60000,transactionName=tran 1", globalBeginRequest.toString());
-  }
+        Assert.assertEquals("timeout=60000,transactionName=tran 1", globalBeginRequest.toString());
+    }
 
-  @Test
-  public void testEncode() throws Exception{
-    GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
-    globalBeginRequest.setTransactionName("tran 1");
+    @Test
+    public void testEncode() throws Exception {
+        GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
+        globalBeginRequest.setTransactionName("tran 1");
 
-    byte[] encodeResult = globalBeginRequest.encode();
-    String encodeResultStr = Arrays.toString(encodeResult);
+        byte[] encodeResult = globalBeginRequest.encode();
+        String encodeResultStr = Arrays.toString(encodeResult);
 
-    Assert.assertEquals("[0, 0, -22, 96, 0, 6, 116, 114, 97, 110, 32, 49]", encodeResultStr);
-  }
+        Assert.assertEquals("[0, 0, -22, 96, 0, 6, 116, 114, 97, 110, 32, 49]", encodeResultStr);
+    }
 
-  @Test
-  public void testDecode() throws Exception{
-    GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
-    globalBeginRequest.setTransactionName("tran 1");
+    @Test
+    public void testDecode() throws Exception {
+        GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
+        globalBeginRequest.setTransactionName("tran 1");
 
-    byte[] encodeResult = globalBeginRequest.encode();
+        byte[] encodeResult = globalBeginRequest.encode();
 
-    ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
-    byteBuffer.put(encodeResult);
-    byteBuffer.flip();
+        ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
+        byteBuffer.put(encodeResult);
+        byteBuffer.flip();
 
-    GlobalBeginRequest decodeGlobalBeginRequest = new GlobalBeginRequest();
-    decodeGlobalBeginRequest.decode(byteBuffer);
-    System.out.println(decodeGlobalBeginRequest);
-    Assert.assertEquals(globalBeginRequest.getTimeout(), decodeGlobalBeginRequest.getTimeout());
-    Assert.assertEquals(globalBeginRequest.getTransactionName(), decodeGlobalBeginRequest.getTransactionName());
-  }
+        GlobalBeginRequest decodeGlobalBeginRequest = new GlobalBeginRequest();
+        decodeGlobalBeginRequest.decode(byteBuffer);
+        System.out.println(decodeGlobalBeginRequest);
+        Assert.assertEquals(globalBeginRequest.getTimeout(), decodeGlobalBeginRequest.getTimeout());
+        Assert.assertEquals(globalBeginRequest.getTransactionName(), decodeGlobalBeginRequest.getTransactionName());
+    }
 }

@@ -18,6 +18,7 @@ package com.alibaba.fescar.server.lock;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.server.UUIDGenerator;
 import com.alibaba.fescar.server.session.BranchSession;
+
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -64,7 +65,7 @@ public class DefaultLockManagerImplTest {
         branchSession.setTxServiceGroup("my_test_tx_group");
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.AT);
-        return new Object[][]{{branchSession}};
+        return new Object[][] {{branchSession}};
     }
 
 }

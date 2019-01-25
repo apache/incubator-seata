@@ -15,16 +15,17 @@
  */
 package com.alibaba.fescar.server.store;
 
+import java.util.List;
+
 import com.alibaba.fescar.server.session.FileBasedSessionManager;
 import com.alibaba.fescar.server.session.GlobalSession;
 import com.alibaba.fescar.server.session.SessionManager;
+
 import org.junit.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-
-import java.util.List;
 
 /**
  * @author tianming.xm@gmail.com
@@ -34,34 +35,35 @@ public class FileTransactionStoreManagerTest {
     private FileTransactionStoreManager fileTransactionStoreManager;
 
     @BeforeClass
-    public void setUp() throws Exception{
-        SessionManager sessionManager = new FileBasedSessionManager("default","root.data");
-        fileTransactionStoreManager = new FileTransactionStoreManager("root.data",sessionManager);
+    public void setUp() throws Exception {
+        SessionManager sessionManager = new FileBasedSessionManager("default", "root.data");
+        fileTransactionStoreManager = new FileTransactionStoreManager("root.data", sessionManager);
     }
 
     @AfterClass
-    public void tearDown(){
+    public void tearDown() {
         fileTransactionStoreManager.shutdown();
     }
 
     @Test(dataProvider = "sessionProvider")
-    public void writeSessionTest(GlobalSession globalSession){
-        boolean result = fileTransactionStoreManager.writeSession(TransactionStoreManager.LogOperation.GLOBAL_ADD,globalSession);
+    public void writeSessionTest(GlobalSession globalSession) {
+        boolean result = fileTransactionStoreManager.writeSession(TransactionStoreManager.LogOperation.GLOBAL_ADD,
+            globalSession);
         Assert.assertTrue(result);
     }
 
     @Test(dataProvider = "sessionProvider")
-    public void readWriteStoreFromFileTest(GlobalSession globalSession){
-        fileTransactionStoreManager.writeSession(TransactionStoreManager.LogOperation.GLOBAL_ADD,globalSession);
-        List<TransactionWriteStore> stores = fileTransactionStoreManager.readWriteStoreFromFile(100,false);
+    public void readWriteStoreFromFileTest(GlobalSession globalSession) {
+        fileTransactionStoreManager.writeSession(TransactionStoreManager.LogOperation.GLOBAL_ADD, globalSession);
+        List<TransactionWriteStore> stores = fileTransactionStoreManager.readWriteStoreFromFile(100, false);
         Assert.assertNotNull(stores);
         Assert.assertTrue(stores.size() > 0);
     }
 
     @DataProvider
     public static Object[][] sessionProvider() {
-        GlobalSession globalSession = new GlobalSession("demo-app","my_test_tx_group","test",6000);
-        return new Object[][] {{ globalSession}};
+        GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+        return new Object[][] {{globalSession}};
     }
 
 }

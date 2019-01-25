@@ -16,13 +16,14 @@
 
 package com.alibaba.fescar.rm.datasource.sql.druid;
 
-import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.fescar.rm.datasource.ParametersHolder;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.Collections;
+
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.fescar.rm.datasource.ParametersHolder;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
 
@@ -58,7 +59,7 @@ public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerT
             public ArrayList<Object>[] getParameters() {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add("id1");
-                return new ArrayList[]{idParam};
+                return new ArrayList[] {idParam};
             }
         }, paramAppender);
 
@@ -87,7 +88,7 @@ public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerT
                 id1Param.add("id1");
                 ArrayList<Object> id2Param = new ArrayList<>();
                 id2Param.add("id2");
-                return new ArrayList[]{id1Param, id2Param};
+                return new ArrayList[] {id1Param, id2Param};
             }
         }, paramAppender);
 

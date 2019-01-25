@@ -16,12 +16,13 @@
 
 package com.alibaba.fescar.rm.datasource.sql.druid;
 
-import com.alibaba.druid.sql.ast.SQLStatement;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.util.Arrays;
 import java.util.Collections;
+
+import com.alibaba.druid.sql.ast.SQLStatement;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * @author hanwen

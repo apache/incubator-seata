@@ -33,7 +33,11 @@ import com.alibaba.fescar.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.alibaba.fescar.core.exception.TransactionExceptionCode.*;
+import static com.alibaba.fescar.core.exception.TransactionExceptionCode.BranchTransactionNotExist;
+import static com.alibaba.fescar.core.exception.TransactionExceptionCode.FailedToAddBranch;
+import static com.alibaba.fescar.core.exception.TransactionExceptionCode.GlobalTransactionNotActive;
+import static com.alibaba.fescar.core.exception.TransactionExceptionCode.GlobalTransactionStatusInvalid;
+import static com.alibaba.fescar.core.exception.TransactionExceptionCode.LockKeyConflict;
 
 public class DefaultCore implements Core {
 
@@ -257,7 +261,7 @@ public class DefaultCore implements Core {
             }
             try {
                 BranchStatus branchStatus = resourceManagerInbound.branchRollback(XID.generateXID(branchSession.getTransactionId()), branchSession.getBranchId(),
-                        branchSession.getResourceId(), branchSession.getApplicationData());
+                    branchSession.getResourceId(), branchSession.getApplicationData());
 
                 switch (branchStatus) {
                     case PhaseTwo_Rollbacked:

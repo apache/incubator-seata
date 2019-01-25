@@ -16,13 +16,14 @@
 
 package com.alibaba.fescar.rm.datasource.sql.druid;
 
-import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.fescar.rm.datasource.ParametersHolder;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.Collections;
+
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.fescar.rm.datasource.ParametersHolder;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * @author hanwen
@@ -65,7 +66,7 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
                 idParam.add("id1");
                 ArrayList<Object> nameParam = new ArrayList<>();
                 nameParam.add("name1");
-                return new ArrayList[]{idParam, nameParam};
+                return new ArrayList[] {idParam, nameParam};
             }
         }, paramAppender);
 
