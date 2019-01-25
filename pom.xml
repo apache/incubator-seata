@@ -62,9 +62,11 @@
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <netty4.version>4.1.24.Final</netty4.version>
         <org.springframework.spring.version>2.5.6.SEC03</org.springframework.spring.version>
-        <junit.version>4.12</junit.version>
         <dubbo.version>2.5.3</dubbo.version>
         <zkclient.version>0.10</zkclient.version>
+
+        <!-- Unit test settings properties -->
+        <junit.version>4.12</junit.version>
     </properties>
     <dependencyManagement>
     <dependencies>
