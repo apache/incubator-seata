@@ -19,7 +19,7 @@ package com.alibaba.fescar.core.rpc.netty;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
-import com.alibaba.fescar.common.util.NetUtil;
+import com.alibaba.fescar.common.util.NetUtils;
 import com.alibaba.fescar.core.protocol.HeartbeatMessage;
 import com.alibaba.fescar.core.protocol.RegisterRMRequest;
 import com.alibaba.fescar.core.protocol.RegisterTMRequest;
@@ -284,7 +284,7 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
     }
 
     private void handleDisconnect(ChannelHandlerContext ctx) {
-        final String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
+        final String ipAndPort = NetUtils.toStringAddress(ctx.channel().remoteAddress());
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(ipAndPort + " to server channel inactive.");

@@ -31,7 +31,7 @@ import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.exception.FrameworkErrorCode;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
-import com.alibaba.fescar.common.util.NetUtil;
+import com.alibaba.fescar.common.util.NetUtils;
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.model.Resource;
 import com.alibaba.fescar.core.model.ResourceManager;
@@ -218,7 +218,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("channel inactive:" + ctx.channel());
         }
-        releaseChannel(ctx.channel(), NetUtil.toStringAddress(ctx.channel().remoteAddress()));
+        releaseChannel(ctx.channel(), NetUtils.toStringAddress(ctx.channel().remoteAddress()));
         super.channelInactive(ctx);
     }
 
@@ -387,7 +387,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         LOGGER.error(FrameworkErrorCode.ExceptionCaught.errCode,
-            NetUtil.toStringAddress(ctx.channel().remoteAddress()) + "connect exception. " + cause.getMessage(),
+            NetUtils.toStringAddress(ctx.channel().remoteAddress()) + "connect exception. " + cause.getMessage(),
             cause);
         releaseChannel(ctx.channel(), getAddressFromChannel(ctx.channel()));
         if (LOGGER.isInfoEnabled()) {

@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.alibaba.fescar.common.exception.FrameworkErrorCode;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
-import com.alibaba.fescar.common.util.NetUtil;
+import com.alibaba.fescar.common.util.NetUtils;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 import com.alibaba.fescar.core.protocol.HeartbeatMessage;
 import com.alibaba.fescar.core.protocol.MergeResultMessage;
@@ -312,7 +312,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     @Override
     public void dispatch(long msgId, ChannelHandlerContext ctx, Object msg) {
         if (clientMessageListener != null) {
-            String remoteAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
+            String remoteAddress = NetUtils.toStringAddress(ctx.channel().remoteAddress());
             clientMessageListener.onMessage(msgId, remoteAddress, msg, this);
         }
     }

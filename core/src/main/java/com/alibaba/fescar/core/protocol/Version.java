@@ -19,7 +19,7 @@ package com.alibaba.fescar.core.protocol;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.alibaba.fescar.common.util.NetUtil;
+import com.alibaba.fescar.common.util.NetUtils;
 
 import io.netty.channel.Channel;
 
@@ -34,11 +34,11 @@ public class Version {
     }
 
     public static void putChannelVersion(Channel c, String v) {
-        VERSION_MAP.put(NetUtil.toStringAddress(c.remoteAddress()), v);
+        VERSION_MAP.put(NetUtils.toStringAddress(c.remoteAddress()), v);
     }
 
     public static String getChannelVersion(Channel c) {
-        return VERSION_MAP.get(NetUtil.toStringAddress(c.remoteAddress()));
+        return VERSION_MAP.get(NetUtils.toStringAddress(c.remoteAddress()));
     }
 
     public static String checkVersion(String version) throws IncompatibleVersionException {

@@ -30,11 +30,11 @@ import org.slf4j.LoggerFactory;
  * @Author: jimin.jm@alibaba-inc.com
  * @Project: fescar-all
  * @DateTime: 2018/10/10 12:14
- * @FileName: NetUtil
+ * @FileName: NetUtils
  * @Description:
  */
-public class NetUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(NetUtil.class);
+public class NetUtils {
+    private static final Logger LOGGER = LoggerFactory.getLogger(NetUtils.class);
     private static final String LOCALHOST = "127.0.0.1";
 
     private static final String ANYHOST = "0.0.0.0";
@@ -118,16 +118,14 @@ public class NetUtil {
                     try {
                         NetworkInterface network = interfaces.nextElement();
                         Enumeration<InetAddress> addresses = network.getInetAddresses();
-                        if (addresses != null) {
-                            while (addresses.hasMoreElements()) {
-                                try {
-                                    InetAddress address = addresses.nextElement();
-                                    if (isValidAddress(address)) {
-                                        return address;
-                                    }
-                                } catch (Throwable e) {
-                                    LOGGER.warn("Failed to retrieving ip address, " + e.getMessage(), e);
+                        while (addresses.hasMoreElements()) {
+                            try {
+                                InetAddress address = addresses.nextElement();
+                                if (isValidAddress(address)) {
+                                    return address;
                                 }
+                            } catch (Throwable e) {
+                                LOGGER.warn("Failed to retrieving ip address, " + e.getMessage(), e);
                             }
                         }
                     } catch (Throwable e) {

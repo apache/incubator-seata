@@ -23,7 +23,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
-import com.alibaba.fescar.common.util.NetUtil;
+import com.alibaba.fescar.common.util.NetUtils;
 import com.alibaba.fescar.core.protocol.*;
 import com.alibaba.fescar.core.protocol.RegisterTMRequest;
 import com.alibaba.fescar.core.rpc.netty.RegisterCheckAuthHandler;
@@ -66,11 +66,11 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(
-                "server received:" + message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress())
+                "server received:" + message + ",clientIp:" + NetUtils.toIpAddress(ctx.channel().remoteAddress())
                     + ",vgroup:" + rpcContext.getTransactionServiceGroup());
         } else {
             messageStrings.offer(
-                message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:" + rpcContext
+                message + ",clientIp:" + NetUtils.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:" + rpcContext
                     .getTransactionServiceGroup());
         }
         if (!(message instanceof AbstractMessage)) { return; }
@@ -112,7 +112,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     @Override
     public void onRegTmMessage(long msgId, ChannelHandlerContext ctx, RegisterTMRequest message,
                                ServerMessageSender sender, RegisterCheckAuthHandler checkAuthHandler) {
-        String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
+        String ipAndPort = NetUtils.toStringAddress(ctx.channel().remoteAddress());
         Version.putChannelVersion(ctx.channel(), message.getVersion());
         boolean isSuccess = false;
         try {

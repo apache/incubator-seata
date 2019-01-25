@@ -19,7 +19,7 @@ package com.alibaba.fescar.core.rpc.netty;
 import java.net.InetSocketAddress;
 
 import com.alibaba.fescar.common.exception.FrameworkException;
-import com.alibaba.fescar.common.util.NetUtil;
+import com.alibaba.fescar.common.util.NetUtils;
 import com.alibaba.fescar.core.protocol.RegisterRMResponse;
 import com.alibaba.fescar.core.protocol.RegisterTMResponse;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
@@ -56,7 +56,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
 
     @Override
     public Channel makeObject(NettyPoolKey key) throws Exception {
-        InetSocketAddress address = NetUtil.toInetSocketAddress(key.getAddress());
+        InetSocketAddress address = NetUtils.toInetSocketAddress(key.getAddress());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("NettyPool create channel to " + key);
         }

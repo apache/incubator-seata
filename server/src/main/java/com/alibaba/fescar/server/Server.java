@@ -22,7 +22,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fescar.common.XID;
-import com.alibaba.fescar.common.util.NetUtil;
+import com.alibaba.fescar.common.util.NetUtils;
 import com.alibaba.fescar.core.rpc.netty.RpcServer;
 import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
 import com.alibaba.fescar.server.session.SessionHolder;
@@ -62,7 +62,7 @@ public class Server {
 
         UUIDGenerator.init(1);
 
-        XID.setIpAddress(NetUtil.getLocalIp());
+        XID.setIpAddress(NetUtils.getLocalIp());
         XID.setPort(rpcServer.getListenPort());
 
         rpcServer.init();
