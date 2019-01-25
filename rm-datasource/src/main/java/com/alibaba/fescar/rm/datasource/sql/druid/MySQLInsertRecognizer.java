@@ -75,7 +75,7 @@ public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRe
         List<String> list = new ArrayList<>(columnSQLExprs.size());
         for (SQLExpr expr : columnSQLExprs) {
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr) expr).getName());
+                list.add(((SQLIdentifierExpr)expr).getName());
             } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
             }

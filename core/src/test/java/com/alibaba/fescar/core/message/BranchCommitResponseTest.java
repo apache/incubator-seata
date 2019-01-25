@@ -27,17 +27,18 @@ import org.junit.Test;
  * @since 2019/1/23
  */
 public class BranchCommitResponseTest {
-  @Test
-  public void toStringTest() throws Exception{
-    BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
+    @Test
+    public void toStringTest() throws Exception {
+        BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
 
-    branchCommitResponse.setBranchStatus(BranchStatus.PhaseOne_Done);
-    branchCommitResponse.setResultCode(ResultCode.Success);
-    branchCommitResponse.setMsg("");
+        branchCommitResponse.setBranchStatus(BranchStatus.PhaseOne_Done);
+        branchCommitResponse.setResultCode(ResultCode.Success);
+        branchCommitResponse.setMsg("");
 
-    System.out.println(branchCommitResponse.toString());
+        System.out.println(branchCommitResponse.toString());
 
-    Assert.assertEquals("branchStatus=PhaseOne_Done,result code =Success,getMsg =", branchCommitResponse.toString());
+        Assert.assertEquals("branchStatus=PhaseOne_Done,result code =Success,getMsg =",
+            branchCommitResponse.toString());
 
-  }
+    }
 }
