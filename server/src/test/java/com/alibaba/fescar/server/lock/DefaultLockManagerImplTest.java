@@ -13,47 +13,53 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.alibaba.fescar.server.session;
+package com.alibaba.fescar.server.lock;
 
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.server.UUIDGenerator;
+import com.alibaba.fescar.server.session.BranchSession;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- * @author tianming.xm@gmail.com
+ * @author zhimo.xiao@gmail.com
  * @since 2019/1/23
  */
-public class BranchSessionTest {
+
+public class DefaultLockManagerImplTest {
+
+    private LockManager lockManager = new DefaultLockManagerImpl();
+
+    private static final long transactionId = UUIDGenerator.generateUUID();
+
+    private static final String resourceId = "tb_1";
+
+    private static final String lockKey = "tb_1:13";
 
     @Test(dataProvider = "branchSessionProvider")
-    public void codecTest(BranchSession branchSession) {
-        byte[] result = branchSession.encode();
-        Assert.assertNotNull(result);
-        BranchSession expected = new BranchSession();
-        expected.decode(result);
-        Assert.assertEquals(branchSession.getTransactionId(), expected.getTransactionId());
-        Assert.assertEquals(branchSession.getBranchId(), expected.getBranchId());
-        Assert.assertEquals(branchSession.getResourceId(), expected.getResourceId());
-        Assert.assertEquals(branchSession.getLockKey(), expected.getLockKey());
-        Assert.assertEquals(branchSession.getApplicationId(), expected.getApplicationId());
-        Assert.assertEquals(branchSession.getTxServiceGroup(), expected.getTxServiceGroup());
-        Assert.assertEquals(branchSession.getClientId(), expected.getClientId());
-        Assert.assertEquals(branchSession.getApplicationData(), expected.getApplicationData());
+    public void acquireLockTest(BranchSession branchSession) throws Exception {
+        boolean result = lockManager.acquireLock(branchSession);
+        Assert.assertTrue(result);
+        branchSession.unlock();
+    }
 
+    @Test
+    public void isLockableTest() throws Exception {
+        boolean resultOne = lockManager.isLockable(transactionId, resourceId, lockKey);
+        Assert.assertTrue(resultOne);
     }
 
     @DataProvider
     public static Object[][] branchSessionProvider() {
         BranchSession branchSession = new BranchSession();
-        branchSession.setTransactionId(UUIDGenerator.generateUUID());
         branchSession.setBranchId(1L);
+        branchSession.setTransactionId(transactionId);
         branchSession.setClientId("c1");
         branchSession.setResourceGroupId("my_test_tx_group");
-        branchSession.setResourceId("tb_1");
-        branchSession.setLockKey("t_1");
+        branchSession.setResourceId(resourceId);
+        branchSession.setLockKey(lockKey);
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationId("demo-child-app");
         branchSession.setTxServiceGroup("my_test_tx_group");
@@ -61,4 +67,5 @@ public class BranchSessionTest {
         branchSession.setBranchType(BranchType.AT);
         return new Object[][] {{branchSession}};
     }
+
 }

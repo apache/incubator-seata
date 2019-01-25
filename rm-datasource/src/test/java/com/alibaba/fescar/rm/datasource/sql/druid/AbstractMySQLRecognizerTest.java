@@ -14,32 +14,22 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.config;
+package com.alibaba.fescar.rm.datasource.sql.druid;
 
-import java.util.concurrent.ExecutorService;
+import java.util.List;
+
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLStatement;
 
 /**
- * The interface Config change listener.
- *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018 /12/20 14:41
- * @FileName: ConfigChangeListener
- * @Description:
+ * @author hanwen
+ * created at 2019-01-25
  */
-public interface ConfigChangeListener {
+public class AbstractMySQLRecognizerTest {
 
-    /**
-     * Gets executor.
-     *
-     * @return the executor
-     */
-    ExecutorService getExecutor();
+    public SQLStatement getSQLStatement(String sql) {
+        List<SQLStatement> stats = SQLUtils.parseStatements(sql, "mysql");
+        return stats.get(0);
+    }
 
-    /**
-     * Receive config info.
-     *
-     * @param configInfo the config info
-     */
-    void receiveConfigInfo(final String configInfo);
 }

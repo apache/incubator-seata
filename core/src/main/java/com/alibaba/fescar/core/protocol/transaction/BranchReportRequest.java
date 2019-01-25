@@ -146,4 +146,25 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
     public AbstractTransactionResponse handle(RpcContext rpcContext) {
         return handler.handle(this, rpcContext);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("transactionId=");
+        result.append(transactionId);
+        result.append(",");
+        result.append("branchId=");
+        result.append(branchId);
+        result.append(",");
+        result.append("resourceId=");
+        result.append(resourceId);
+        result.append(",");
+        result.append("status=");
+        result.append(status);
+        result.append(",");
+        result.append("applicationData=");
+        result.append(applicationData);
+
+        return result.toString();
+    }
 }

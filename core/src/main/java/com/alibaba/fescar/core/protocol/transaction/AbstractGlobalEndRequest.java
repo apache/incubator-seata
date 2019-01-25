@@ -72,4 +72,16 @@ public abstract class AbstractGlobalEndRequest extends AbstractTransactionReques
             this.setExtraData(new String(bs, UTF8));
         }
     }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("transactionId=");
+        result.append(transactionId);
+        result.append(",");
+        result.append("extraData=");
+        result.append(extraData);
+
+        return result.toString();
+    }
 }

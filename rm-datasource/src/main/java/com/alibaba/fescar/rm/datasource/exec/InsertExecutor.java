@@ -47,7 +47,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        SQLInsertRecognizer recogizier = (SQLInsertRecognizer) sqlRecognizer;
+        SQLInsertRecognizer recogizier = (SQLInsertRecognizer)sqlRecognizer;
         List<String> insertColumns = recogizier.getInsertColumns();
         TableMeta tmeta = getTableMeta();
         TableRecords afterImage = null;
