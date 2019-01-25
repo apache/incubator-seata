@@ -27,18 +27,18 @@ import org.junit.Test;
  */
 public class BranchCommitRequestTest {
 
-  @Test
-  public void toStringTest() throws Exception{
-    BranchCommitRequest branchCommitRequest = new BranchCommitRequest();
+    @Test
+    public void toStringTest() throws Exception {
+        BranchCommitRequest branchCommitRequest = new BranchCommitRequest();
 
-    branchCommitRequest.setXid("127.0.0.1:9999:39875642");
-    branchCommitRequest.setBranchId(1);
-    branchCommitRequest.setBranchType(BranchType.AT);
-    branchCommitRequest.setResourceId("resource1");
-    branchCommitRequest.setApplicationData("app1");
+        branchCommitRequest.setXid("127.0.0.1:9999:39875642");
+        branchCommitRequest.setBranchId(1);
+        branchCommitRequest.setBranchType(BranchType.AT);
+        branchCommitRequest.setResourceId("resource1");
+        branchCommitRequest.setApplicationData("app1");
 
-    Assert.assertEquals("xid=127.0.0.1:9999:39875642,branchId=1,branchType=AT,"
-                        + "resourceId=resource1,applicationData=app1", branchCommitRequest.toString());
+        Assert.assertEquals("xid=127.0.0.1:9999:39875642,branchId=1,branchType=AT,"
+            + "resourceId=resource1,applicationData=app1", branchCommitRequest.toString());
 
-  }
+    }
 }
