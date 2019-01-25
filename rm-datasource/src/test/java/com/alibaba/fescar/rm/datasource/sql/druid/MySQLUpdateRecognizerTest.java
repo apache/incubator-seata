@@ -24,7 +24,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest  {
+public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
 
     @Test
     public void updateRecognizerTest_0() {

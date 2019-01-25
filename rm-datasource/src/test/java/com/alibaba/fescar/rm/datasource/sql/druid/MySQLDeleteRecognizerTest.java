@@ -22,7 +22,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -31,46 +30,46 @@ import java.util.Collections;
  */
 public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
 
-  @Test
-  public void deleteRecognizerTest_0() {
+    @Test
+    public void deleteRecognizerTest_0() {
 
-    String sql = "DELETE FROM t1 WHERE id = 'id1'";
+        String sql = "DELETE FROM t1 WHERE id = 'id1'";
 
-    SQLStatement statement = getSQLStatement(sql);
+        SQLStatement statement = getSQLStatement(sql);
 
-    MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
+        MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
 
-    Assert.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
-    Assert.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
-    Assert.assertEquals("id = 'id1'", mySQLDeleteRecognizer.getWhereCondition());
-  }
+        Assert.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
+        Assert.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
+        Assert.assertEquals("id = 'id1'", mySQLDeleteRecognizer.getWhereCondition());
+    }
 
-  @Test
-  public void deleteRecognizerTest_1() {
+    @Test
+    public void deleteRecognizerTest_1() {
 
-    String sql = "DELETE FROM t1 WHERE id = ?";
+        String sql = "DELETE FROM t1 WHERE id = ?";
 
-    SQLStatement statement = getSQLStatement(sql);
+        SQLStatement statement = getSQLStatement(sql);
 
-    MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
+        MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
 
-    Assert.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
-    Assert.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
+        Assert.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
+        Assert.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
 
-    // test overflow parameters
-    ArrayList<Object> paramAppender = new ArrayList<>();
-    String whereCondition = mySQLDeleteRecognizer.getWhereCondition(new ParametersHolder() {
-      @Override
-      public ArrayList<Object>[] getParameters() {
-        ArrayList<Object> idParam = new ArrayList<>();
-        idParam.add("id1");
-        ArrayList<Object> nameParam = new ArrayList<>();
-        nameParam.add("name1");
-        return new ArrayList[]{idParam, nameParam};
-      }
-    }, paramAppender);
+        // test overflow parameters
+        ArrayList<Object> paramAppender = new ArrayList<>();
+        String whereCondition = mySQLDeleteRecognizer.getWhereCondition(new ParametersHolder() {
+            @Override
+            public ArrayList<Object>[] getParameters() {
+                ArrayList<Object> idParam = new ArrayList<>();
+                idParam.add("id1");
+                ArrayList<Object> nameParam = new ArrayList<>();
+                nameParam.add("name1");
+                return new ArrayList[]{idParam, nameParam};
+            }
+        }, paramAppender);
 
-    Assert.assertEquals(Collections.singletonList("id1"), paramAppender);
-    Assert.assertEquals("id = ?", whereCondition);
-  }
+        Assert.assertEquals(Collections.singletonList("id1"), paramAppender);
+        Assert.assertEquals("id = ?", whereCondition);
+    }
 }

@@ -24,7 +24,7 @@ import org.junit.Test;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerTest  {
+public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
 
     @Test
     public void selectForUpdateRecognizerTest_0() {
@@ -66,32 +66,32 @@ public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerT
         Assert.assertEquals("id = ?", whereCondition);
     }
 
-  @Test
-  public void selectForUpdateRecognizerTest_3() {
+    @Test
+    public void selectForUpdateRecognizerTest_3() {
 
-    String sql = "SELECT name1, name2 FROM t1 WHERE id1 = ? FOR UPDATE";
+        String sql = "SELECT name1, name2 FROM t1 WHERE id1 = ? FOR UPDATE";
 
-    SQLStatement statement = getSQLStatement(sql);
+        SQLStatement statement = getSQLStatement(sql);
 
-    MySQLSelectForUpdateRecognizer mySQLUpdateRecognizer = new MySQLSelectForUpdateRecognizer(sql, statement);
+        MySQLSelectForUpdateRecognizer mySQLUpdateRecognizer = new MySQLSelectForUpdateRecognizer(sql, statement);
 
-    Assert.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
-    Assert.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
+        Assert.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
+        Assert.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
 
-    // test overflow parameters
-    ArrayList<Object> paramAppender = new ArrayList<>();
-    String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
-      @Override
-      public ArrayList<Object>[] getParameters() {
-        ArrayList<Object> id1Param = new ArrayList<>();
-        id1Param.add("id1");
-        ArrayList<Object> id2Param = new ArrayList<>();
-        id2Param.add("id2");
-        return new ArrayList[]{id1Param, id2Param};
-      }
-    }, paramAppender);
+        // test overflow parameters
+        ArrayList<Object> paramAppender = new ArrayList<>();
+        String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
+            @Override
+            public ArrayList<Object>[] getParameters() {
+                ArrayList<Object> id1Param = new ArrayList<>();
+                id1Param.add("id1");
+                ArrayList<Object> id2Param = new ArrayList<>();
+                id2Param.add("id2");
+                return new ArrayList[]{id1Param, id2Param};
+            }
+        }, paramAppender);
 
-    Assert.assertEquals(Collections.singletonList("id1"), paramAppender);
-    Assert.assertEquals("id1 = ?", whereCondition);
-  }
+        Assert.assertEquals(Collections.singletonList("id1"), paramAppender);
+        Assert.assertEquals("id1 = ?", whereCondition);
+    }
 }
