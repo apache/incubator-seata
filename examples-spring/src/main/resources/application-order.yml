@@ -1,0 +1,13 @@
+spring.application:
+  name: fescar-example-spring-order
+
+server.port: 8083
+
+
+
+
+
+
+
+
+

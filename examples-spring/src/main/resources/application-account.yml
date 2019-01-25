@@ -1,0 +1,18 @@
+spring.application:
+  name: fescar-example-spring-account
+
+server.port: 8082
+
+app:
+  init-sql:
+    - delete from account_tbl where user_id = 'U100001'
+    - insert into account_tbl(user_id, money) values ('U100001', 999)
+
+
+
+
+
+
+
+
+

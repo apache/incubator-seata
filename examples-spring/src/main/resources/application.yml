@@ -1,0 +1,50 @@
+spring:
+  profiles:
+    include: local
+
+server.error.path: /error
+server.servlet-path: /
+server.port: 8080
+
+spring.application:
+  name: fescar-example-spring
+
+spring.datasource:
+  type: com.alibaba.druid.pool.DruidDataSource
+  driver-class-name: com.mysql.jdbc.Driver
+  url: jdbc:mysql://xxx:3306/demo
+  username: xxx
+  password: xxx
+  initialSize: 5
+  minIdle: 5
+  maxActive: 20
+  maxWait: 60000
+  timeBetweenEvictionRunsMillis: 60000
+  minEvictableIdleTimeMillis: 300000
+  #validationQuery: SELECT 1 FROM DUAL
+  testWhileIdle: true
+  testOnBorrow: false
+  testOnReturn: false
+  filters: stat,wall,log4j
+  logSlowSql: true
+
+app:
+  api:
+    bussiness: http://localhost:8081
+    account: http://localhost:8082
+    order: http://localhost:8083
+    storage: http://localhost:8084
+  fescar:
+    txServiceGroup: my_test_tx_group
+
+
+
+
+
+
+
+
+
+
+
+
