@@ -170,7 +170,7 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
 
         return true;
     }
-    
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();

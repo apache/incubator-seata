@@ -136,7 +136,7 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
     public AbstractTransactionResponse handle(RpcContext rpcContext) {
         return handler.handle(this, rpcContext);
     }
-    
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
