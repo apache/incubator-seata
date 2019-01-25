@@ -16,89 +16,166 @@
 
 package com.alibaba.fescar.config;
 
+import java.util.concurrent.ExecutorService;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
+
 /**
  * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/12/21 14:03
+ * @Project: feats-all
+ * @DateTime: 2019/1/24 1:31 PM
  * @FileName: FileConfigurationTest
  * @Description:
  */
 public class FileConfigurationTest {
+    private static final Config CONFIG = ConfigFactory.load();
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.getInstance();
+    private static final String INT_DATAID = "transport.thread-factory.client-selector-thread-size";
+    private static final String LONG_DATAID = "transport.thread-factory.worker-thread-size";
+    private static final String BOOLEAN_DATAID = "service.disable";
+    private static final String STRING_DATAID = "transport.type";
+    private static final String PUT_DATAID = "transport.mock";
+    private static final String NOT_EXIST_DATAID = "service.yyy.xxx";
 
-    FileConfiguration fileConfiguration = new FileConfiguration();
-
-    @org.junit.Test
-    public void isRunAsClientProxy() throws Exception {
-
+    @Test
+    public void testGetInt() {
+        Assert.assertEquals(FILE_CONFIG.getInt(INT_DATAID), CONFIG.getInt(INT_DATAID));
+        Assert.assertEquals(FILE_CONFIG.getInt(NOT_EXIST_DATAID), 0);
     }
 
-    @org.junit.Test
-    public void isRunAsServerProxy() throws Exception {
-
+    @Test
+    public void testGetInt1() {
+        Assert.assertEquals(FILE_CONFIG.getInt(INT_DATAID, 999), CONFIG.getInt(INT_DATAID));
+        Assert.assertEquals(FILE_CONFIG.getInt(NOT_EXIST_DATAID, 999), 999);
     }
 
-    @org.junit.Test
-    public void getConfig() throws Exception {
-
-        String server = fileConfiguration.getConfig("transport.server");
-        System.out.println(server);
-        //TRANSPORT_SERVER_TYPE = TransportServerType.valueOf(CONFIG.getConfig("transport.server"));
+    @Test
+    public void testGetInt2() {
+        Assert.assertEquals(FILE_CONFIG.getInt(INT_DATAID, 999, 1000), CONFIG.getInt(INT_DATAID));
+        Assert.assertEquals(FILE_CONFIG.getInt(NOT_EXIST_DATAID, 999, 1000), 999);
     }
 
-    @org.junit.Test
-    public void getConfig1() throws Exception {
-        String shareBossWorker = fileConfiguration.getConfig("transport.thread-factory.share-boss-worker");
-        System.out.println(shareBossWorker);
+    @Test
+    public void testGetLong() {
+        Assert.assertEquals(FILE_CONFIG.getLong(LONG_DATAID), CONFIG.getLong(LONG_DATAID));
+        Assert.assertEquals(FILE_CONFIG.getLong(NOT_EXIST_DATAID), 0);
     }
 
-    @org.junit.Test
-    public void getConfig2() throws Exception {
-
+    @Test
+    public void testGetLong1() {
+        Assert.assertEquals(FILE_CONFIG.getLong(LONG_DATAID, 999L), CONFIG.getLong(LONG_DATAID));
+        Assert.assertEquals(FILE_CONFIG.getLong(NOT_EXIST_DATAID, 999L), 999L);
     }
 
-    @org.junit.Test
-    public void getConfig3() throws Exception {
-
+    @Test
+    public void testGetLong2() {
+        Assert.assertEquals(FILE_CONFIG.getLong(LONG_DATAID, 999L, 1000), CONFIG.getLong(LONG_DATAID));
+        Assert.assertEquals(FILE_CONFIG.getLong(NOT_EXIST_DATAID, 999L, 1000), 999L);
     }
 
-    @org.junit.Test
-    public void putConfig() throws Exception {
-
+    @Test
+    public void testGetBoolean() {
+        Assert.assertEquals(FILE_CONFIG.getBoolean(BOOLEAN_DATAID), CONFIG.getBoolean(BOOLEAN_DATAID));
+        Assert.assertEquals(FILE_CONFIG.getBoolean(NOT_EXIST_DATAID), false);
     }
 
-    @org.junit.Test
-    public void putConfig1() throws Exception {
-
+    @Test
+    public void testGetBoolean1() {
+        Assert.assertEquals(FILE_CONFIG.getBoolean(BOOLEAN_DATAID, true), CONFIG.getBoolean(BOOLEAN_DATAID));
+        Assert.assertEquals(FILE_CONFIG.getBoolean(NOT_EXIST_DATAID, false), false);
     }
 
-    @org.junit.Test
-    public void putConfigIfAbsent() throws Exception {
-
+    @Test
+    public void testGetBoolean2() {
+        Assert.assertEquals(FILE_CONFIG.getBoolean(BOOLEAN_DATAID, true, 1000), CONFIG.getBoolean(BOOLEAN_DATAID));
+        Assert.assertEquals(FILE_CONFIG.getBoolean(NOT_EXIST_DATAID, false, 1000), false);
     }
 
-    @org.junit.Test
-    public void putConfigIfAbsent1() throws Exception {
-
+    @Test
+    public void testGetConfig() {
+        Assert.assertEquals(FILE_CONFIG.getConfig(STRING_DATAID), CONFIG.getString(STRING_DATAID));
+        Assert.assertEquals(FILE_CONFIG.getConfig(NOT_EXIST_DATAID), null);
     }
 
-    @org.junit.Test
-    public void removeConfig() throws Exception {
-
+    @Test
+    public void testGetConfig1() {
+        Assert.assertEquals(FILE_CONFIG.getConfig(STRING_DATAID, 1000), CONFIG.getString(STRING_DATAID));
+        Assert.assertEquals(FILE_CONFIG.getConfig(NOT_EXIST_DATAID, 1000), null);
     }
 
-    @org.junit.Test
-    public void removeConfig1() throws Exception {
-
+    @Test
+    public void testGetConfig2() {
+        Assert.assertEquals(FILE_CONFIG.getConfig(STRING_DATAID, "123"), CONFIG.getString(STRING_DATAID));
+        Assert.assertEquals(FILE_CONFIG.getConfig(NOT_EXIST_DATAID, "123"), "123");
     }
 
-    @org.junit.Test
-    public void addConfigListener() throws Exception {
-
+    @Test
+    public void testGetConfig3() {
+        Assert.assertEquals(FILE_CONFIG.getConfig(STRING_DATAID, "123", 1000), CONFIG.getString(STRING_DATAID));
+        Assert.assertEquals(FILE_CONFIG.getConfig(NOT_EXIST_DATAID, "123", 1000), "123");
     }
 
-    @org.junit.Test
-    public void removeConfigListener() throws Exception {
-
+    @Test
+    public void testPutConfig() {
+        Assert.assertTrue(FILE_CONFIG.putConfig(PUT_DATAID, "123"));
     }
 
+    @Test
+    public void testPutConfig1() {
+        Assert.assertTrue(FILE_CONFIG.putConfig(PUT_DATAID, "123", 5000));
+    }
+
+    @Test
+    public void testPutConfigIfAbsent() {
+        Assert.assertTrue(FILE_CONFIG.putConfigIfAbsent(PUT_DATAID, "123"));
+    }
+
+    @Test
+    public void testPutConfigIfAbsent1() {
+        Assert.assertTrue(FILE_CONFIG.putConfigIfAbsent(PUT_DATAID, "123", 5000));
+    }
+
+    @Test
+    public void testRemoveConfig() {
+        Assert.assertTrue(FILE_CONFIG.removeConfig(PUT_DATAID));
+    }
+
+    @Test
+    public void testRemoveConfig1() {
+        Assert.assertTrue(FILE_CONFIG.removeConfig(PUT_DATAID, 5000));
+    }
+
+    @Test(dataProvider = "listenerProvider")
+    public void testAddConfigListener(ConfigChangeListener listener) {
+        FILE_CONFIG.addConfigListener(INT_DATAID, listener);
+        Assert.assertEquals(FILE_CONFIG.getConfigListeners(INT_DATAID).size(), 1);
+    }
+
+    @Test(dataProvider = "listenerProvider")
+    public void testRemoveConfigListener(ConfigChangeListener listener) {
+        int currSize = FILE_CONFIG.getConfigListeners(INT_DATAID).size();
+        FILE_CONFIG.addConfigListener(INT_DATAID, listener);
+        FILE_CONFIG.removeConfigListener(INT_DATAID, listener);
+        Assert.assertEquals(FILE_CONFIG.getConfigListeners(INT_DATAID).size(), currSize);
+    }
+
+    @DataProvider
+    public static Object[][] listenerProvider() {
+        ConfigChangeListener listener = new ConfigChangeListener() {
+            @Override
+            public ExecutorService getExecutor() {
+                return null;
+            }
+
+            @Override
+            public void receiveConfigInfo(String configInfo) {
+                System.out.print(configInfo);
+            }
+        };
+        return new Object[][] {{listener}};
+    }
 }

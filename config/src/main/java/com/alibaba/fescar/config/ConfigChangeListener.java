@@ -16,7 +16,7 @@
 
 package com.alibaba.fescar.config;
 
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 /**
  * The interface Config change listener.
@@ -34,7 +34,7 @@ public interface ConfigChangeListener {
      *
      * @return the executor
      */
-    Executor getExecutor();
+    ExecutorService getExecutor();
 
     /**
      * Receive config info.

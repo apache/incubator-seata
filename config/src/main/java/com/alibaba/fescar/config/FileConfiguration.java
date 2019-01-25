@@ -16,6 +16,11 @@
 
 package com.alibaba.fescar.config;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -33,7 +38,7 @@ import org.slf4j.LoggerFactory;
  * The type FileConfiguration.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /9/10 11:34
  * @FileName: FileConfiguration
  * @Description:
@@ -46,11 +51,21 @@ public class FileConfiguration implements Configuration {
 
     private ExecutorService configOperateExecutor;
 
+    private ExecutorService configChangeExecutor;
+
     private static final int CORE_CONFIG_OPERATE_THREAD = 1;
+
+    private static final int CORE_CONFIG_CHANGE_THREAD = 1;
 
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
 
     private static final long DEFAULT_CONFIG_TIMEOUT = 5 * 1000;
+
+    private static final long LISTENER_CONFIG_INTERNAL = 1 * 1000;
+
+    private final ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = new ConcurrentHashMap<>();
+
+    private final ConcurrentMap<String, String> listenedConfigMap = new ConcurrentHashMap<>();
 
     /**
      * Instantiates a new File configuration.
@@ -58,7 +73,11 @@ public class FileConfiguration implements Configuration {
     public FileConfiguration() {
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
-            new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD, true));
+            new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD));
+        configChangeExecutor = new ThreadPoolExecutor(CORE_CONFIG_CHANGE_THREAD, CORE_CONFIG_CHANGE_THREAD,
+            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
+            new NamedThreadFactory("configChange", CORE_CONFIG_CHANGE_THREAD));
+        configChangeExecutor.submit(new ConfigChangeRunnable());
     }
 
     @Override
@@ -113,7 +132,7 @@ public class FileConfiguration implements Configuration {
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigOperation.GET, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (String)configFuture.get();
+        return (String)configFuture.get(timeoutMills, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -147,7 +166,7 @@ public class FileConfiguration implements Configuration {
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigOperation.PUTIFABSENT, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get();
+        return (Boolean)configFuture.get(timeoutMills, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -159,7 +178,7 @@ public class FileConfiguration implements Configuration {
     public boolean removeConfig(String dataId, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigOperation.REMOVE, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get();
+        return (Boolean)configFuture.get(timeoutMills, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -169,12 +188,36 @@ public class FileConfiguration implements Configuration {
 
     @Override
     public void addConfigListener(String dataId, ConfigChangeListener listener) {
-
+        configListenersMap.putIfAbsent(dataId, new ArrayList<ConfigChangeListener>());
+        configListenersMap.get(dataId).add(listener);
+        if (null != listener.getExecutor()) {
+            ConfigChangeRunnable configChangeTask = new ConfigChangeRunnable(dataId, listener);
+            listener.getExecutor().submit(configChangeTask);
+        }
     }
 
     @Override
     public void removeConfigListener(String dataId, ConfigChangeListener listener) {
+        List<ConfigChangeListener> configChangeListeners = getConfigListeners(dataId);
+        if (configChangeListeners == null) {
+            return;
+        }
+        List<ConfigChangeListener> newChangeListenerList = new ArrayList<>();
+        for (ConfigChangeListener changeListener : configChangeListeners) {
+            if (!changeListener.equals(listener)) {
+                newChangeListenerList.add(changeListener);
+            }
+        }
+        configListenersMap.put(dataId, newChangeListenerList);
+        if (null != listener.getExecutor()) {
+            listener.getExecutor().shutdownNow();
+        }
 
+    }
+
+    @Override
+    public List<ConfigChangeListener> getConfigListeners(String dataId) {
+        return configListenersMap.get(dataId);
     }
 
     /**
@@ -221,6 +264,83 @@ public class FileConfiguration implements Configuration {
                 configFuture.setResult(result);
             } else {
                 configFuture.setResult(Boolean.FALSE);
+            }
+        }
+
+    }
+
+    /**
+     * The type Config change runnable.
+     */
+    class ConfigChangeRunnable implements Runnable {
+
+        private String dataId;
+        private ConfigChangeListener listener;
+
+        /**
+         * Instantiates a new Config change runnable.
+         */
+        public ConfigChangeRunnable() {}
+
+        /**
+         * Instantiates a new Config change runnable.
+         *
+         * @param dataId   the data id
+         * @param listener the listener
+         */
+        public ConfigChangeRunnable(String dataId, ConfigChangeListener listener) {
+
+            if (null == listener.getExecutor()) {
+                throw new IllegalArgumentException("getExecutor is null.");
+            }
+            this.dataId = dataId;
+            this.listener = listener;
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    Map<String, List<ConfigChangeListener>> configListenerMap;
+                    if (null != dataId && null != listener) {
+                        configListenerMap = new ConcurrentHashMap<>();
+                        configListenerMap.put(dataId, new ArrayList<ConfigChangeListener>());
+                        configListenerMap.get(dataId).add(listener);
+                    } else {
+                        configListenerMap = configListenersMap;
+                    }
+                    for (Map.Entry<String, List<ConfigChangeListener>> entry : configListenerMap.entrySet()) {
+                        String configId = entry.getKey();
+                        String currentConfig = getConfig(configId);
+                        if (null != currentConfig && currentConfig.equals(listenedConfigMap.get(configId))) {
+                            listenedConfigMap.put(configId, currentConfig);
+                            notifyAllListener(configId, configListenerMap.get(configId));
+
+                        } else if (null == currentConfig && null != listenedConfigMap.get(configId)) {
+                            notifyAllListener(configId, configListenerMap.get(configId));
+                        }
+                    }
+                    Thread.sleep(LISTENER_CONFIG_INTERNAL);
+                } catch (Exception exx) {
+                    LOGGER.error(exx.getMessage());
+                }
+
+            }
+        }
+
+        private void notifyAllListener(String dataId, List<ConfigChangeListener> configChangeListeners) {
+            List<ConfigChangeListener> needNotifyListeners = new ArrayList<>();
+            if (null != dataId && null != listener) {
+                needNotifyListeners.addAll(configChangeListeners);
+            } else {
+                for (ConfigChangeListener configChangeListener : configChangeListeners) {
+                    if (null == configChangeListener.getExecutor()) {
+                        needNotifyListeners.add(configChangeListener);
+                    }
+                }
+            }
+            for (ConfigChangeListener configChangeListener : needNotifyListeners) {
+                configChangeListener.receiveConfigInfo(listenedConfigMap.get(dataId));
             }
         }
 
