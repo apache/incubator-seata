@@ -33,14 +33,13 @@ import org.slf4j.LoggerFactory;
 public class GlobalTransactionalInterceptor implements MethodInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
-    private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
 
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
     private final FailureHandler failureHandler;
 
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
         if (null == failureHandler) {
-            failureHandler = DEFAULT_FAIL_HANDLER;
+            failureHandler = new DefaultFailureHandlerImpl();
         }
         this.failureHandler = failureHandler;
     }
