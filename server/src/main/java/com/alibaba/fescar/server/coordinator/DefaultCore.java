@@ -170,7 +170,7 @@ public class DefaultCore implements Core {
                             globalSession.changeStatus(GlobalStatus.CommitFailed);
                             globalSession.end();
                             LOGGER.error("Finally, failed to commit global[{}] since branch[{}] commit failed",
-                                    globalSession.getTransactionId(), branchSession.getBranchId());
+                                globalSession.getTransactionId(), branchSession.getBranchId());
                             return;
                         }
                     default:
@@ -182,8 +182,9 @@ public class DefaultCore implements Core {
                             LOGGER.error("By [{}], failed to commit branch {}", branchStatus, branchSession);
                             continue;
                         } else {
-                            LOGGER.error("Failed to commit global[{}] since branch[{}] commit failed, will retry later.",
-                                    globalSession.getTransactionId(), branchSession.getBranchId());
+                            LOGGER.error(
+                                "Failed to commit global[{}] since branch[{}] commit failed, will retry later.",
+                                globalSession.getTransactionId(), branchSession.getBranchId());
                             return;
                         }
 
