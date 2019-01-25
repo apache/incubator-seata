@@ -71,6 +71,11 @@
         </dependency>
         <!--spock test dependency end -->
 
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <build>
         <extensions>
