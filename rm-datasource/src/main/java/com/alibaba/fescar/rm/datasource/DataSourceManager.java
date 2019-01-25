@@ -53,6 +53,7 @@ public class DataSourceManager implements ResourceManager {
             request.setTransactionId(XID.getTransactionId(xid));
             request.setLockKey(lockKeys);
             request.setResourceId(resourceId);
+            request.setBranchType(branchType);
 
             BranchRegisterResponse response = (BranchRegisterResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
             if (response.getResultCode() == ResultCode.Failed) {
