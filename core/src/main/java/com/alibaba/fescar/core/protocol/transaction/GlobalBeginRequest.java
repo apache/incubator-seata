@@ -16,10 +16,10 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
+import java.nio.ByteBuffer;
+
 import com.alibaba.fescar.core.protocol.MergedMessage;
 import com.alibaba.fescar.core.rpc.RpcContext;
-
-import java.nio.ByteBuffer;
 
 public class GlobalBeginRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 
