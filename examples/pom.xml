@@ -51,6 +51,14 @@
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
         </dependency>
+         <dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>dubbo-registry-nacos</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.alibaba.spring</groupId>
+			<artifactId>spring-context-support</artifactId>
+		</dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
