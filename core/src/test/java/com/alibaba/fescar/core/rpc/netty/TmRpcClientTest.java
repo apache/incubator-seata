@@ -27,6 +27,7 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ChannelFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.socket.nio.NioSocketChannel;
 
 /**
  * @Author: jimin.jm@alibaba-inc.com
@@ -62,7 +63,7 @@ public class TmRpcClientTest {
 
         tmRpcClient.init();
 
-        //check if has been set success
+        //check if attr of tmRpcClient object has been set success
         Field bootstrapField = getDeclaredField(tmRpcClient, "bootstrap");
         bootstrapField.setAccessible(true);
         Bootstrap bootstrap = (Bootstrap) bootstrapField.get(tmRpcClient);
@@ -84,6 +85,8 @@ public class TmRpcClientTest {
         ChannelFactory<? extends Channel>
             channelFactory = (ChannelFactory<? extends Channel>) channelFactoryField.get(bootstrap);
         System.out.println(channelFactory);
+        Assert.assertNotNull(channelFactory);
+        Assert.assertTrue(channelFactory.newChannel() instanceof NioSocketChannel);
 
     }
 
