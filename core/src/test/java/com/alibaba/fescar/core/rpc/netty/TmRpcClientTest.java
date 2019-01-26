@@ -21,6 +21,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Map;
 
 import io.netty.bootstrap.Bootstrap;
@@ -92,7 +93,18 @@ public class TmRpcClientTest {
 
     @Test
     public void doConnect() throws Exception {
+        String applicationId = "app 1";
+        String transactionServiceGroup = "group A";
+        TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
 
+        tmRpcClient.init();
+
+        Method doConnectMethod = TmRpcClient.class.getDeclaredMethod("doConnect", String.class);
+        doConnectMethod.setAccessible(true);
+        String serverAddress = "0.0.0.0:8091";
+        Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
+        System.out.print("channel = ");
+        System.out.println(channel);
     }
 
     @Test
