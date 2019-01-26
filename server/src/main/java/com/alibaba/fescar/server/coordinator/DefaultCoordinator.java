@@ -232,14 +232,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             try {
                 core.doGlobalCommit(committingSession, true);
             } catch (TransactionException ex) {
-<<<<<<< HEAD
-                LOGGER.info(
-                    "Failed to retry committing [" + committingSession.getTransactionId() + "] " + ex.getCode() + " "
-                        + ex.getMessage());
-=======
                 LOGGER.info("Failed to retry committing [{}] {} {}",
                         committingSession.getTransactionId(), ex.getCode(), ex.getMessage());
->>>>>>> 5357a7b94921baa86402c5e87c265d5c6a178f84
             }
         }
     }
