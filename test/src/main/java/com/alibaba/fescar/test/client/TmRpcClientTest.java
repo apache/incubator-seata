@@ -21,6 +21,7 @@ import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
 import com.alibaba.fescar.server.UUIDGenerator;
 import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -45,7 +46,7 @@ public class TmRpcClientTest {
                                                 new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
     /**
-     * Client rely server's start
+     * Client rely on server's starting first
      *
      * @throws Exception
      */
@@ -84,5 +85,6 @@ public class TmRpcClientTest {
         Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
         System.out.print("channel = ");
         System.out.println(channel);
+        Assert.assertNotNull(channel);
     }
 }

@@ -98,11 +98,6 @@ public class TmRpcClientTest {
     }
 
     @Test
-    public void doConnect() throws Exception {
-
-    }
-
-    @Test
     public void getApplicationId() throws Exception {
 
     }
