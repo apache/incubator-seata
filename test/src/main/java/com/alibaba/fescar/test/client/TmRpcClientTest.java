@@ -71,15 +71,11 @@ public class TmRpcClientTest {
 
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
-        TmRpcClient
-            tmRpcClient =
-            TmRpcClient.getInstance(applicationId, transactionServiceGroup);
+        TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
 
         tmRpcClient.init();
 
-        Method
-            doConnectMethod =
-            TmRpcClient.class.getDeclaredMethod("doConnect", String.class);
+        Method doConnectMethod = TmRpcClient.class.getDeclaredMethod("doConnect", String.class);
         doConnectMethod.setAccessible(true);
         String serverAddress = "0.0.0.0:8091";
         Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
