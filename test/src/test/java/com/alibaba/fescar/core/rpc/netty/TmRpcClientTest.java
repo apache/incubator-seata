@@ -49,7 +49,7 @@ public class TmRpcClientTest {
      * @throws Exception
      */
     @Test
-    public void doConnect() throws Exception {
+    public void testDoConnect() throws Exception {
 
         //start fescar server first
         workingThreads.submit(new Runnable() {
@@ -80,5 +80,40 @@ public class TmRpcClientTest {
         System.out.print("channel = ");
         System.out.println(channel);
         Assert.assertNotNull(channel);
+    }
+
+    /**
+     * Client rely on server's starting first
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testReconnect() throws Exception {
+
+        //start fescar server first
+        workingThreads.submit(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("testReconnect - start server ing");
+                RpcServer rpcServer = new RpcServer(workingThreads);
+                rpcServer.setHandler(new DefaultCoordinator(rpcServer));
+                UUIDGenerator.init(1);
+                rpcServer.init();
+            }
+        });
+
+        //then test client
+        Thread.sleep(3000);
+        System.out.println("testReconnect - start client ing");
+
+        String applicationId = "app 1";
+        String transactionServiceGroup = "my_test_tx_group";
+        TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
+
+        tmRpcClient.init();
+
+        Method doConnectMethod = TmRpcClient.class.getDeclaredMethod("reconnect");
+        doConnectMethod.setAccessible(true);
+        doConnectMethod.invoke(tmRpcClient);
     }
 }
