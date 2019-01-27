@@ -23,7 +23,6 @@ import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
 
 import org.junit.Test;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -85,37 +84,5 @@ public class TmRpcClientTest {
         Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
         System.out.print("channel = ");
         System.out.println(channel);
-    }
-
-    @Test
-    public void getApplicationId() throws Exception {
-
-    }
-
-    @Test
-    public void setApplicationId() throws Exception {
-
-    }
-
-    /**
-     * get private field in parent class
-     *
-     * @param object
-     * @param fieldName
-     * @return
-     */
-    public static Field getDeclaredField(Object object, String fieldName){
-        Field field = null ;
-        Class<?> clazz = object.getClass() ;
-        for(; clazz != Object.class ; clazz = clazz.getSuperclass()) {
-            try {
-                field = clazz.getDeclaredField(fieldName) ;
-                return field ;
-            } catch (Exception e) {
-
-            }
-        }
-
-        return null;
     }
 }
