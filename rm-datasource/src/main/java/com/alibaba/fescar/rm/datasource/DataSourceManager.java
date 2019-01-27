@@ -31,8 +31,12 @@ import com.alibaba.fescar.core.model.Resource;
 import com.alibaba.fescar.core.model.ResourceManager;
 import com.alibaba.fescar.core.model.ResourceManagerInbound;
 import com.alibaba.fescar.core.protocol.ResultCode;
-import com.alibaba.fescar.core.protocol.transaction.*;
 import com.alibaba.fescar.core.protocol.transaction.BranchRegisterRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
+import com.alibaba.fescar.core.protocol.transaction.BranchReportRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchReportResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryResponse;
 import com.alibaba.fescar.core.rpc.netty.RmRpcClient;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
 
@@ -53,6 +57,7 @@ public class DataSourceManager implements ResourceManager {
             request.setTransactionId(XID.getTransactionId(xid));
             request.setLockKey(lockKeys);
             request.setResourceId(resourceId);
+            request.setBranchType(branchType);
 
             BranchRegisterResponse response = (BranchRegisterResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
             if (response.getResultCode() == ResultCode.Failed) {

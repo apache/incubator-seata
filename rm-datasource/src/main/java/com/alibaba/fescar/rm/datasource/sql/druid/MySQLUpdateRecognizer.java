@@ -122,12 +122,8 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
     }
 
     @Override
-    public String getTableSource() {
-        StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        SQLExprTableSource tableSource = (SQLExprTableSource) ast.getTableSource();
-        visitor.visit(tableSource);
-        return sb.toString();
+    public String getTableAlias() {
+        return ast.getTableSource().getAlias();
     }
 
     @Override

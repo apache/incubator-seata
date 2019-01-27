@@ -16,6 +16,9 @@
 
 package com.alibaba.fescar.core.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Status of global transaction.
  */
@@ -69,19 +72,28 @@ public enum GlobalStatus {
     // Finally: failed to rollback since timeout
     TimeoutRollbackFailed,
 
-    // Not managed in session map any more
+    // Not managed in session MAP any more
     Finished;
+
+    private static final Map<Integer, GlobalStatus> MAP = new HashMap<>(values().length);
+
+    static {
+        for (GlobalStatus status : values()) {
+            MAP.put(status.ordinal(), status);
+        }
+    }
 
     public static GlobalStatus get(byte ordinal) {
         return get((int) ordinal);
     }
 
     public static GlobalStatus get(int ordinal) {
-        for (GlobalStatus globalStatus : GlobalStatus.values()) {
-            if (globalStatus.ordinal() == ordinal) {
-                return globalStatus;
-            }
+        GlobalStatus status = MAP.get(ordinal);
+
+        if (null == status) {
+            throw new IllegalArgumentException("Unknown GlobalStatus[" + ordinal + "]");
         }
-        throw new IllegalArgumentException("Unknown GlobalStatus[" + ordinal + "]");
+
+        return status;
     }
 }

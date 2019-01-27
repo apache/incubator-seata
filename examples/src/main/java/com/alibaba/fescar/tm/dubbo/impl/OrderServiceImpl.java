@@ -66,6 +66,8 @@ public class OrderServiceImpl implements OrderService {
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
+        LOGGER.info("Order Service SQL: insert into order_tbl (user_id, commodity_code, count, money) values ({}, {}, {}, {})" ,userId ,commodityCode ,orderCount ,orderMoney );
+
         jdbcTemplate.update(new PreparedStatementCreator() {
 
             @Override
@@ -100,14 +102,10 @@ public class OrderServiceImpl implements OrderService {
         return 200 * orderCount;
     }
 
-    public static void main(String[] args) throws Throwable {
-
-        String applicationId = "dubbo-demo-order-service";
-        String txServiceGroup = "my_test_tx_group";
+    public static void main(String[] args) {
 
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"dubbo-order-service.xml"});
         context.getBean("service");
-        JdbcTemplate jdbcTemplate = (JdbcTemplate) context.getBean("jdbcTemplate");
         new ApplicationKeeper(context).keep();
     }
 }

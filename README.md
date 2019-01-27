@@ -3,7 +3,6 @@
 [![Build Status](https://travis-ci.org/alibaba/fescar.svg?branch=develop)](https://travis-ci.org/alibaba/fescar)
 [![codecov](https://codecov.io/gh/alibaba/fescar/branch/develop/graph/badge.svg)](https://codecov.io/gh/alibaba/fescar)
 ![license](https://img.shields.io/github/license/alibaba/fescar.svg)
-[![](https://img.shields.io/twitter/follow/fescar.svg?label=Follow&style=social&logoWidth=0)](https://twitter.com/intent/follow?screen_name=fescar)
 
 ## What is FESCAR?
 
@@ -72,7 +71,7 @@ You can view the full documentation from the wiki: [FESCAR wiki page](https://gi
 
 ## Reporting bugs
 
-Please follow the [template](https://github.com/TBD) for reporting any issues.
+Please follow the [template]() for reporting any issues.
 
 
 ## Contributing
@@ -82,7 +81,7 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 
 ## Contact
 
-* [Twitter](https://twitter.com/fescar): TBD. Follow along for latest FESCAR news on Twitter.
+* [Twitter](): TBD. Follow along for latest FESCAR news on Twitter.
 * Email Group:
      * dev.fescar@gmail.com: FESCAR developer discussion (APIs, feature design, etc).
 

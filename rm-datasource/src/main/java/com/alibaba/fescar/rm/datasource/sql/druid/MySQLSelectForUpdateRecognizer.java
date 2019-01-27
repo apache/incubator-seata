@@ -96,13 +96,10 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
     }
 
     @Override
-    public String getTableSource() {
+    public String getTableAlias() {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLTableSource tableSource = selectQueryBlock.getFrom();
-        StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        visitor.visit((SQLExprTableSource)tableSource);
-        return sb.toString();
+        return tableSource.getAlias();
     }
 
     @Override

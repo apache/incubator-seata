@@ -39,6 +39,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     @Override
     protected TableRecords beforeImage() throws SQLException {
         SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) sqlRecognizer;
+
         TableMeta tmeta = getTableMeta(visitor.getTableName());
         List<String> columns = new ArrayList<>();
         for (String column : tmeta.getAllColumns().keySet()) {
@@ -48,7 +49,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
 
         for (int i = 0; i < columns.size(); i++) {
-            selectSQLAppender.append(columns.get(i));
+            selectSQLAppender.append(getColumnNameInSQL(columns.get(i)));
             if (i < (columns.size() - 1)) {
                 selectSQLAppender.append(", ");
             }
@@ -60,7 +61,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         } else {
             whereCondition = visitor.getWhereCondition();
         }
-        selectSQLAppender.append(" FROM " + tmeta.getTableName() + " WHERE " + whereCondition + " FOR UPDATE");
+        selectSQLAppender.append(" FROM " + getFromTableInSQL() + " WHERE " + whereCondition + " FOR UPDATE");
         String selectSQL = selectSQLAppender.toString();
 
         TableRecords beforeImage = null;
