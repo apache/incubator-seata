@@ -14,10 +14,8 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.test.client;
+package com.alibaba.fescar.core.rpc.netty;
 
-import com.alibaba.fescar.core.rpc.netty.RpcServer;
-import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
 import com.alibaba.fescar.server.UUIDGenerator;
 import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
 
