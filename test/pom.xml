@@ -50,6 +50,10 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
+            <artifactId>fescar-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
             <artifactId>fescar-rm-datasource</artifactId>
         </dependency>
         <dependency>
