@@ -19,7 +19,7 @@ public class BranchRegisterResponseTest {
 
     System.out.println(branchRegisterResponse.toString());
 
-    Assert.assertEquals("transactionId=123456,branchId=123457,result code =Success,getMsg =", branchRegisterResponse.toString());
+    Assert.assertEquals("BranchRegisterResponse: transactionId=123456,branchId=123457,result code =Success,getMsg =", branchRegisterResponse.toString());
 
   }
 }

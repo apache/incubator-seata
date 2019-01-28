@@ -16,6 +16,9 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
+import com.alibaba.fescar.core.protocol.ResultCode;
+import com.alibaba.fescar.core.protocol.transaction.BranchRegisterRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
 import com.alibaba.fescar.server.UUIDGenerator;
 import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
 
@@ -115,5 +118,55 @@ public class TmRpcClientTest {
         Method doConnectMethod = TmRpcClient.class.getDeclaredMethod("reconnect");
         doConnectMethod.setAccessible(true);
         doConnectMethod.invoke(tmRpcClient);
+    }
+
+    @Test
+    public void testSendMsgWithResponse() throws Exception {
+
+        //start fescar server first
+        workingThreads.submit(new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("testSendMsgWithResponse - start server ing");
+                RpcServer rpcServer = new RpcServer(workingThreads);
+                rpcServer.setHandler(new DefaultCoordinator(rpcServer));
+                UUIDGenerator.init(1);
+                rpcServer.init();
+            }
+        });
+
+        //then test client
+        Thread.sleep(3000);
+        System.out.println("testSendMsgWithResponse - start client ing");
+
+        String applicationId = "app 1";
+        String transactionServiceGroup = "my_test_tx_group";
+        TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
+
+        System.out.println("testSendMsgWithResponse - init tmRpcClient ing");
+        tmRpcClient.init();
+
+        Method doConnectMethod = TmRpcClient.class.getDeclaredMethod("doConnect", String.class);
+        doConnectMethod.setAccessible(true);
+        String serverAddress = "0.0.0.0:8091";
+        System.out.println("testSendMsgWithResponse - do connect ing");
+        Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
+        System.out.print("channel = " + channel);
+        System.out.println(channel);
+        Assert.assertNotNull(channel);
+
+        System.out.println("testSendMsgWithResponse - sendMsgWithResponse ing");
+        BranchRegisterRequest request = new BranchRegisterRequest();
+        request.setTransactionId(123456L);
+        request.setLockKey("lock key testSendMsgWithResponse");
+        request.setResourceId("resoutceId1");
+        BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse)tmRpcClient.sendMsgWithResponse(request);
+        Assert.assertNotNull(branchRegisterResponse);
+        //we have not init SessionManager
+        Assert.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
+        Assert.assertEquals("RuntimeException[SessionManager is NOT init!]",
+                            branchRegisterResponse.getMsg());
+        System.out.println(branchRegisterResponse);
+
     }
 }

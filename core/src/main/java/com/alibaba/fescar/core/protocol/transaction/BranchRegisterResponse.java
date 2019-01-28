@@ -68,7 +68,7 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append("transactionId=");
+        result.append("BranchRegisterResponse: transactionId=");
         result.append(transactionId);
         result.append(",");
         result.append("branchId=");
