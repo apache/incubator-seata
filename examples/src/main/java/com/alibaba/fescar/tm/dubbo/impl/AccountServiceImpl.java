@@ -53,11 +53,6 @@ public class AccountServiceImpl implements AccountService {
 
     public static void main(String[] args) throws Throwable {
 
-        String applicationId = "dubbo-demo-account-service";
-        String txServiceGroup = "my_test_tx_group";
-
-        RMClientAT.init(applicationId, txServiceGroup);
-
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"dubbo-account-service.xml"});
         context.getBean("service");
         JdbcTemplate jdbcTemplate = (JdbcTemplate) context.getBean("jdbcTemplate");
