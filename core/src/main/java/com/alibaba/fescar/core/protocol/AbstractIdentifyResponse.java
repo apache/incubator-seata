@@ -16,8 +16,6 @@
 
 package com.alibaba.fescar.core.protocol;
 
-import com.alibaba.fescar.common.Constants;
-
 import io.netty.buffer.ByteBuf;
 
 public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
@@ -88,5 +86,27 @@ public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
         }
 
         return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("version=");
+        result.append(String.valueOf(version));
+        result.append(",");
+        result.append("extraData=");
+        result.append(String.valueOf(extraData));
+        result.append(",");
+        result.append("identified=");
+        result.append(String.valueOf(identified));
+        result.append(",");
+        result.append("resultCode=");
+        result.append(String.valueOf(getResultCode()));
+        result.append(",");
+        result.append("msg=");
+        result.append(String.valueOf(getMsg()));
+
+
+        return result.toString();
     }
 }
