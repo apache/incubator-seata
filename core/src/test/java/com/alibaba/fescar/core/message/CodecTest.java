@@ -23,8 +23,14 @@ import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
 
 import org.junit.Test;
 
+/**
+ * The type Codec test.
+ */
 public class CodecTest {
 
+    /**
+     * Test a.
+     */
     @Test
     public void testA() {
 

@@ -24,8 +24,14 @@ import com.alibaba.fescar.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * The type Sql visitor factory test.
+ */
 public class SQLVisitorFactoryTest {
 
+    /**
+     * Test sql recognizing.
+     */
     @Test
     public void testSqlRecognizing() {
         String dbType = JdbcConstants.MYSQL;

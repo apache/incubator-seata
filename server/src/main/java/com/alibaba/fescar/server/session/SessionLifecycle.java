@@ -20,21 +20,69 @@ import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.GlobalStatus;
 
+/**
+ * The interface Session lifecycle.
+ */
 public interface SessionLifecycle {
 
+    /**
+     * Begin.
+     *
+     * @throws TransactionException the transaction exception
+     */
     void begin() throws TransactionException;
 
+    /**
+     * Change status.
+     *
+     * @param status the status
+     * @throws TransactionException the transaction exception
+     */
     void changeStatus(GlobalStatus status) throws TransactionException;
 
+    /**
+     * Change branch status.
+     *
+     * @param branchSession the branch session
+     * @param status        the status
+     * @throws TransactionException the transaction exception
+     */
     void changeBranchStatus(BranchSession branchSession, BranchStatus status) throws TransactionException;
 
+    /**
+     * Add branch.
+     *
+     * @param branchSession the branch session
+     * @throws TransactionException the transaction exception
+     */
     void addBranch(BranchSession branchSession) throws TransactionException;
 
+    /**
+     * Remove branch.
+     *
+     * @param branchSession the branch session
+     * @throws TransactionException the transaction exception
+     */
     void removeBranch(BranchSession branchSession) throws TransactionException;
 
+    /**
+     * Is active boolean.
+     *
+     * @return the boolean
+     */
     boolean isActive();
 
+    /**
+     * Close.
+     *
+     * @throws TransactionException the transaction exception
+     */
     void close() throws TransactionException;
 
+    /**
+     * End.
+     *
+     * @throws TransactionException the transaction exception
+     */
     void end() throws TransactionException;
 }

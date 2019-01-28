@@ -19,24 +19,42 @@ package com.alibaba.fescar.core.protocol;
 import java.io.Serializable;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/10/15 17:20
+ * The type Register tm request.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /10/15 17:20
  * @FileName: RegisterTMRequest
  * @Description:
  */
 public class RegisterTMRequest extends AbstractIdentifyRequest implements Serializable {
     private static final long serialVersionUID = -5929081344190543690L;
 
+    /**
+     * Instantiates a new Register tm request.
+     */
     public RegisterTMRequest() {
         this(null, null);
     }
 
+    /**
+     * Instantiates a new Register tm request.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     * @param extraData               the extra data
+     */
     public RegisterTMRequest(String applicationId, String transactionServiceGroup, String extraData) {
         super(applicationId, transactionServiceGroup, extraData);
 
     }
 
+    /**
+     * Instantiates a new Register tm request.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     */
     public RegisterTMRequest(String applicationId, String transactionServiceGroup) {
         super(applicationId, transactionServiceGroup);
     }

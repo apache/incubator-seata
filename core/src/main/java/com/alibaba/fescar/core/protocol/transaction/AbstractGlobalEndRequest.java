@@ -20,24 +20,53 @@ import java.nio.ByteBuffer;
 
 import com.alibaba.fescar.core.protocol.MergedMessage;
 
+/**
+ * The type Abstract global end request.
+ */
 public abstract class AbstractGlobalEndRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 
+    /**
+     * The Transaction id.
+     */
     protected long transactionId;
 
+    /**
+     * The Extra data.
+     */
     protected String extraData;
 
+    /**
+     * Gets transaction id.
+     *
+     * @return the transaction id
+     */
     public long getTransactionId() {
         return transactionId;
     }
 
+    /**
+     * Sets transaction id.
+     *
+     * @param transactionId the transaction id
+     */
     public void setTransactionId(long transactionId) {
         this.transactionId = transactionId;
     }
 
+    /**
+     * Gets extra data.
+     *
+     * @return the extra data
+     */
     public String getExtraData() {
         return extraData;
     }
 
+    /**
+     * Sets extra data.
+     *
+     * @param extraData the extra data
+     */
     public void setExtraData(String extraData) {
         this.extraData = extraData;
     }

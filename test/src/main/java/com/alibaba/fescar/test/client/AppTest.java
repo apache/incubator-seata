@@ -27,6 +27,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+/**
+ * The type App test.
+ */
 public class AppTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AppTest.class);
@@ -34,15 +37,20 @@ public class AppTest {
     private static final String APPLICATION_ID = "my_test_app";
     private static final String TX_SERVICE_GROUP = "my_test_tx_group";
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
         TMClient.init(APPLICATION_ID, TX_SERVICE_GROUP);
         RMClientAT.init(APPLICATION_ID, TX_SERVICE_GROUP);
 
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-                "basic-test-context.xml");
+            "basic-test-context.xml");
 
         final JdbcTemplate jdbcTemplate = (JdbcTemplate) context
-                .getBean("jdbcTemplate");
+            .getBean("jdbcTemplate");
 
         jdbcTemplate.update("delete from undo_log");
         jdbcTemplate.update("update user0 set name = 'yyy' where id = 1");
@@ -105,7 +113,7 @@ public class AppTest {
                 }
             });
 
-//            transactionalTemplate.execute(new TransactionalExecutor() {
+            //            transactionalTemplate.execute(new TransactionalExecutor() {
 //                @Override
 //                public Object execute() throws Throwable {
 //                    LOGGER.info("Timeout Business Begin ...");
@@ -147,14 +155,29 @@ public class AppTest {
 
         private String businessErrorCode;
 
+        /**
+         * Gets business error code.
+         *
+         * @return the business error code
+         */
         public String getBusinessErrorCode() {
             return businessErrorCode;
         }
 
+        /**
+         * Sets business error code.
+         *
+         * @param businessErrorCode the business error code
+         */
         public void setBusinessErrorCode(String businessErrorCode) {
             this.businessErrorCode = businessErrorCode;
         }
 
+        /**
+         * Instantiates a new My business exception.
+         *
+         * @param businessErrorCode the business error code
+         */
         public MyBusinessException(String businessErrorCode) {
             this.businessErrorCode = businessErrorCode;
         }

@@ -20,8 +20,18 @@ import java.io.IOException;
 
 import com.alibaba.fescar.server.store.FileTransactionStoreManager;
 
+/**
+ * The type File based session manager.
+ */
 public class FileBasedSessionManager extends AbstractSessionManager {
 
+    /**
+     * Instantiates a new File based session manager.
+     *
+     * @param name                 the name
+     * @param sessionStoreFilePath the session store file path
+     * @throws IOException the io exception
+     */
     public FileBasedSessionManager(String name, String sessionStoreFilePath) throws IOException {
         super(name);
         transactionStoreManager = new FileTransactionStoreManager(sessionStoreFilePath + name, this);
