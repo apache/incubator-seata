@@ -16,18 +16,48 @@
 
 package com.alibaba.fescar.core.service;
 
+/**
+ * The type Configuration keys.
+ */
 public class ConfigurationKeys {
 
+    /**
+     * The constant SERVICE_PREFIX.
+     */
     public static final String SERVICE_PREFIX = "service.";
+    /**
+     * The constant SERVICE_GROUP_MAPPING_PREFIX.
+     */
     public static final String SERVICE_GROUP_MAPPING_PREFIX = SERVICE_PREFIX + "vgroup_mapping.";
+    /**
+     * The constant GROUPLIST_POSTFIX.
+     */
     public static final String GROUPLIST_POSTFIX = ".grouplist";
+    /**
+     * The constant SERVER_NODE_SPLIT_CHAR.
+     */
     public static final String SERVER_NODE_SPLIT_CHAR = System.getProperty("line.separator");
 
+    /**
+     * The constant ENABLE_DEGRADE_POSTFIX.
+     */
     public static final String ENABLE_DEGRADE_POSTFIX = "enableDegrade";
 
+    /**
+     * The constant CLIENT_PREFIX.
+     */
     public static final String CLIENT_PREFIX = "client.";
 
+    /**
+     * The constant CLIENT_ASYNC_COMMIT_BUFFER_LIMIT.
+     */
     public static final String CLIENT_ASYNC_COMMIT_BUFFER_LIMIT = CLIENT_PREFIX + "async.commit.buffer.limit";
+    /**
+     * The constant CLIENT_LOCK_RETRY_TIMES.
+     */
     public static final String CLIENT_LOCK_RETRY_TIMES = CLIENT_PREFIX + "lock.retry.times";
+    /**
+     * The constant CLIENT_LOCK_RETRY_INTERNAL.
+     */
     public static final String CLIENT_LOCK_RETRY_INTERNAL = CLIENT_PREFIX + "lock.retry.internal";
 }

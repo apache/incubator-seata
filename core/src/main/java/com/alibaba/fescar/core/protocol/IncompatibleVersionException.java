@@ -16,8 +16,16 @@
 
 package com.alibaba.fescar.core.protocol;
 
+/**
+ * The type Incompatible version exception.
+ */
 public class IncompatibleVersionException extends Exception {
 
+    /**
+     * Instantiates a new Incompatible version exception.
+     *
+     * @param message the message
+     */
     public IncompatibleVersionException(String message) {
         super(message);
     }

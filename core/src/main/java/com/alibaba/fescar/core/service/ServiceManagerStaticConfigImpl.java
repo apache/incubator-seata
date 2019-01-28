@@ -25,6 +25,9 @@ import com.alibaba.fescar.config.ConfigurationFactory;
 import static com.alibaba.fescar.common.exception.FrameworkErrorCode.InvalidConfiguration;
 import static com.alibaba.fescar.core.service.ConfigurationKeys.SERVER_NODE_SPLIT_CHAR;
 
+/**
+ * The type Service manager static config.
+ */
 public class ServiceManagerStaticConfigImpl implements ServiceManager {
 
     private Configuration configuration = ConfigurationFactory.getInstance();

@@ -24,20 +24,39 @@ import java.util.Map.Entry;
 
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 
+/**
+ * The type Table meta.
+ */
 public class TableMeta {
     private String tableName;
 
     private Map<String, ColumnMeta> allColumns = new HashMap<String, ColumnMeta>();
     private Map<String, IndexMeta> allIndexes = new HashMap<String, IndexMeta>();
 
+    /**
+     * Gets table name.
+     *
+     * @return the table name
+     */
     public String getTableName() {
         return tableName;
     }
 
+    /**
+     * Sets table name.
+     *
+     * @param tableName the table name
+     */
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
 
+    /**
+     * Gets column meta.
+     *
+     * @param colName the col name
+     * @return the column meta
+     */
     public ColumnMeta getColumnMeta(String colName) {
         String s = colName;
         ColumnMeta col = allColumns.get(s);
@@ -49,14 +68,29 @@ public class TableMeta {
         return col;
     }
 
+    /**
+     * Gets all columns.
+     *
+     * @return the all columns
+     */
     public Map<String, ColumnMeta> getAllColumns() {
         return allColumns;
     }
 
+    /**
+     * Gets all indexes.
+     *
+     * @return the all indexes
+     */
     public Map<String, IndexMeta> getAllIndexes() {
         return allIndexes;
     }
 
+    /**
+     * Gets auto increase column.
+     *
+     * @return the auto increase column
+     */
     public ColumnMeta getAutoIncreaseColumn() {
         // TODO: how about auto increment but not pk?
         for (Entry<String, ColumnMeta> entry : allColumns.entrySet()) {
@@ -68,6 +102,11 @@ public class TableMeta {
         return null;
     }
 
+    /**
+     * Gets primary key map.
+     *
+     * @return the primary key map
+     */
     public Map<String, ColumnMeta> getPrimaryKeyMap() {
         Map<String, ColumnMeta> pk = new HashMap<String, ColumnMeta>();
         for (Entry<String, IndexMeta> entry : allIndexes.entrySet()) {
@@ -86,6 +125,11 @@ public class TableMeta {
         return pk;
     }
 
+    /**
+     * Gets primary key only name.
+     *
+     * @return the primary key only name
+     */
     @SuppressWarnings("serial")
     public List<String> getPrimaryKeyOnlyName() {
         return new ArrayList<String>() {
@@ -97,10 +141,21 @@ public class TableMeta {
         };
     }
 
+    /**
+     * Gets pk name.
+     *
+     * @return the pk name
+     */
     public String getPkName() {
         return getPrimaryKeyOnlyName().get(0);
     }
 
+    /**
+     * Contains pk boolean.
+     *
+     * @param cols the cols
+     * @return the boolean
+     */
     public boolean containsPK(List<String> cols) {
         if (cols == null) {
             return false;
@@ -114,6 +169,11 @@ public class TableMeta {
         return cols.containsAll(pk);
     }
 
+    /**
+     * Gets create table sql.
+     *
+     * @return the create table sql
+     */
     public String getCreateTableSQL() {
         StringBuilder sb = new StringBuilder("CREATE TABLE");
         sb.append(String.format(" `%s` ", getTableName()));

@@ -20,7 +20,7 @@ package com.alibaba.fescar.core.rpc.netty;
  * The enum Transport protocol type.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /9/10 14:32
  * @FileName: TransportProtocolType
  * @Description:

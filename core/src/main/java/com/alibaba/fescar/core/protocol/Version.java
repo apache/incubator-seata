@@ -23,24 +23,52 @@ import com.alibaba.fescar.common.util.NetUtil;
 
 import io.netty.channel.Channel;
 
+/**
+ * The type Version.
+ */
 public class Version {
 
+    /**
+     * The constant CURRENT.
+     */
     public static final String CURRENT = "0.1.2";
 
+    /**
+     * The constant VERSION_MAP.
+     */
     public static final Map<String, String> VERSION_MAP = new ConcurrentHashMap<String, String>();
 
     private Version() {
 
     }
 
+    /**
+     * Put channel version.
+     *
+     * @param c the c
+     * @param v the v
+     */
     public static void putChannelVersion(Channel c, String v) {
         VERSION_MAP.put(NetUtil.toStringAddress(c.remoteAddress()), v);
     }
 
+    /**
+     * Gets channel version.
+     *
+     * @param c the c
+     * @return the channel version
+     */
     public static String getChannelVersion(Channel c) {
         return VERSION_MAP.get(NetUtil.toStringAddress(c.remoteAddress()));
     }
 
+    /**
+     * Check version string.
+     *
+     * @param version the version
+     * @return the string
+     * @throws IncompatibleVersionException the incompatible version exception
+     */
     public static String checkVersion(String version) throws IncompatibleVersionException {
         // TODO: check
         return version;

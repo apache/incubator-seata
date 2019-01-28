@@ -23,21 +23,29 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * @author xiajun.0706@163.com
- * @since 2019/1/23
+ * The type Branch commit response test.
+ *
+ * @author xiajun.0706 @163.com
+ * @since 2019 /1/23
  */
 public class BranchCommitResponseTest {
-  @Test
-  public void toStringTest() throws Exception{
-    BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
+    /**
+     * To string test.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void toStringTest() throws Exception {
+        BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
 
-    branchCommitResponse.setBranchStatus(BranchStatus.PhaseOne_Done);
-    branchCommitResponse.setResultCode(ResultCode.Success);
-    branchCommitResponse.setMsg("");
+        branchCommitResponse.setBranchStatus(BranchStatus.PhaseOne_Done);
+        branchCommitResponse.setResultCode(ResultCode.Success);
+        branchCommitResponse.setMsg("");
 
-    System.out.println(branchCommitResponse.toString());
+        System.out.println(branchCommitResponse.toString());
 
-    Assert.assertEquals("branchStatus=PhaseOne_Done,result code =Success,getMsg =", branchCommitResponse.toString());
+        Assert.assertEquals("branchStatus=PhaseOne_Done,result code =Success,getMsg =",
+            branchCommitResponse.toString());
 
-  }
+    }
 }

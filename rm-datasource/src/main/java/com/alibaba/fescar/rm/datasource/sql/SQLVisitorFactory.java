@@ -30,8 +30,18 @@ import com.alibaba.fescar.rm.datasource.sql.druid.MySQLInsertRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.druid.MySQLUpdateRecognizer;
 
+/**
+ * The type Sql visitor factory.
+ */
 public class SQLVisitorFactory {
 
+    /**
+     * Get sql recognizer.
+     *
+     * @param sql    the sql
+     * @param dbType the db type
+     * @return the sql recognizer
+     */
     public static SQLRecognizer get(String sql, String dbType) {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
         if (asts == null || asts.size() != 1) {

@@ -18,6 +18,9 @@ package com.alibaba.fescar.core.protocol.transaction;
 
 import com.alibaba.fescar.core.rpc.RpcContext;
 
+/**
+ * The type Global status request.
+ */
 public class GlobalStatusRequest extends AbstractGlobalEndRequest {
 
     @Override

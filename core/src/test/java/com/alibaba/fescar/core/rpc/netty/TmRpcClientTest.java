@@ -33,6 +33,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 /**
+ * The type Tm rpc client test.
  * @Author: jimin.jm@alibaba-inc.com
  * @Author: xiajun.0706@163.com
  * @Project: fescar-all
@@ -62,6 +63,11 @@ public class TmRpcClientTest {
         Assert.assertEquals(defaultNettyClientConfig.isPoolFifo(), config.lifo);
     }
 
+    /**
+     * Do connect.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testInit() throws Exception {
         String applicationId = "app 1";
@@ -97,11 +103,21 @@ public class TmRpcClientTest {
 
     }
 
+    /**
+     * Gets application id.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void getApplicationId() throws Exception {
 
     }
 
+    /**
+     * Sets application id.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void setApplicationId() throws Exception {
 
