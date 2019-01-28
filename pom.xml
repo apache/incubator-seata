@@ -89,6 +89,7 @@
         <junit.version>4.12</junit.version>
         <dubbo.version>2.5.3</dubbo.version>
         <zkclient.version>0.10</zkclient.version>
+        <dubbo.registry.nacos>0.0.1</dubbo.registry.nacos>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -221,6 +222,16 @@
                 <groupId>com.101tec</groupId>
                 <artifactId>zkclient</artifactId>
                 <version>${zkclient.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>dubbo-registry-nacos</artifactId>
+                <version>${dubbo.registry.nacos}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.spring</groupId>
+                <artifactId>spring-context-support</artifactId>
+                <version>1.0.2</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

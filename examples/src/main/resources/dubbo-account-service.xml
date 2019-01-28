@@ -58,6 +58,8 @@
     <dubbo:registry address="multicast://224.5.6.7:1234?unicast=false" />
     <!--support zk-->
     <!--dubbo:registry address="zookeeper://test.zk1.cc:1234?backup=test.zk2.cc:1234,test.zk3.cc:1234" /-->
+    <!--support nacos-->
+    <!-- <dubbo:registry address="nacos://127.0.0.1:8848"/> -->
     <dubbo:protocol name="dubbo" port="20881" />
     <dubbo:service interface="com.alibaba.fescar.tm.dubbo.AccountService" ref="service" timeout="10000"/>
 
