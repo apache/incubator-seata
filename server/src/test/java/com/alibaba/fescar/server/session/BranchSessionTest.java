@@ -17,6 +17,7 @@ package com.alibaba.fescar.server.session;
 
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.server.UUIDGenerator;
+
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -28,21 +29,22 @@ import org.testng.annotations.Test;
 public class BranchSessionTest {
 
     @Test(dataProvider = "branchSessionProvider")
-    public void codecTest(BranchSession branchSession){
+    public void codecTest(BranchSession branchSession) {
         byte[] result = branchSession.encode();
         Assert.assertNotNull(result);
         BranchSession expected = new BranchSession();
         expected.decode(result);
-        Assert.assertEquals(branchSession.getTransactionId(),expected.getTransactionId());
-        Assert.assertEquals(branchSession.getBranchId(),expected.getBranchId());
-        Assert.assertEquals(branchSession.getResourceId(),expected.getResourceId());
-        Assert.assertEquals(branchSession.getLockKey(),expected.getLockKey());
-        Assert.assertEquals(branchSession.getApplicationId(),expected.getApplicationId());
-        Assert.assertEquals(branchSession.getTxServiceGroup(),expected.getTxServiceGroup());
-        Assert.assertEquals(branchSession.getClientId(),expected.getClientId());
-        Assert.assertEquals(branchSession.getApplicationData(),expected.getApplicationData());
+        Assert.assertEquals(branchSession.getTransactionId(), expected.getTransactionId());
+        Assert.assertEquals(branchSession.getBranchId(), expected.getBranchId());
+        Assert.assertEquals(branchSession.getResourceId(), expected.getResourceId());
+        Assert.assertEquals(branchSession.getLockKey(), expected.getLockKey());
+        Assert.assertEquals(branchSession.getApplicationId(), expected.getApplicationId());
+        Assert.assertEquals(branchSession.getTxServiceGroup(), expected.getTxServiceGroup());
+        Assert.assertEquals(branchSession.getClientId(), expected.getClientId());
+        Assert.assertEquals(branchSession.getApplicationData(), expected.getApplicationData());
 
     }
+
     @DataProvider
     public static Object[][] branchSessionProvider() {
         BranchSession branchSession = new BranchSession();
@@ -57,6 +59,6 @@ public class BranchSessionTest {
         branchSession.setTxServiceGroup("my_test_tx_group");
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.AT);
-        return new Object[][] {{ branchSession}};
+        return new Object[][] {{branchSession}};
     }
 }

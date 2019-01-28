@@ -55,7 +55,7 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
         branchStatus = BranchStatus.get(in.readByte());
         return true;
     }
-    
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();

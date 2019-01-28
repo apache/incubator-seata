@@ -18,6 +18,7 @@ package com.alibaba.fescar.server.lock;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.server.UUIDGenerator;
 import com.alibaba.fescar.server.session.BranchSession;
+
 import org.junit.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -29,26 +30,28 @@ import org.testng.annotations.Test;
 public class LockManagerTest {
 
     @Test(dataProvider = "branchSessionProvider")
-    public void acquireLock_success(BranchSession branchSession) throws Exception{
+    public void acquireLock_success(BranchSession branchSession) throws Exception {
         LockManager lockManager = LockManagerFactory.get();
         Assert.assertTrue(lockManager.acquireLock(branchSession));
     }
 
     @Test(dataProvider = "branchSessionsProvider")
-    public void acquireLock_failed(BranchSession branchSession1,BranchSession branchSession2) throws Exception{
+    public void acquireLock_failed(BranchSession branchSession1, BranchSession branchSession2) throws Exception {
         LockManager lockManager = LockManagerFactory.get();
         Assert.assertTrue(lockManager.acquireLock(branchSession1));
         Assert.assertFalse(lockManager.acquireLock(branchSession2));
     }
 
     @Test(dataProvider = "branchSessionProvider")
-    public void isLockableTest(BranchSession branchSession) throws Exception{
+    public void isLockableTest(BranchSession branchSession) throws Exception {
         branchSession.setLockKey("t:4");
         LockManager lockManager = LockManagerFactory.get();
-        Assert.assertTrue(lockManager.isLockable(branchSession.getTransactionId(),branchSession.getResourceId(),branchSession.getLockKey()));
+        Assert.assertTrue(lockManager
+            .isLockable(branchSession.getTransactionId(), branchSession.getResourceId(), branchSession.getLockKey()));
         lockManager.acquireLock(branchSession);
         branchSession.setTransactionId(UUIDGenerator.generateUUID());
-        Assert.assertFalse(lockManager.isLockable(branchSession.getTransactionId(),branchSession.getResourceId(),branchSession.getLockKey()));
+        Assert.assertFalse(lockManager
+            .isLockable(branchSession.getTransactionId(), branchSession.getResourceId(), branchSession.getLockKey()));
     }
 
     @DataProvider
@@ -65,7 +68,7 @@ public class LockManagerTest {
         branchSession.setTxServiceGroup("my_test_tx_group");
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.AT);
-        return new Object[][] {{ branchSession}};
+        return new Object[][] {{branchSession}};
     }
 
     @DataProvider
@@ -95,6 +98,6 @@ public class LockManagerTest {
         branchSession2.setTxServiceGroup("my_test_tx_group");
         branchSession2.setApplicationData("{\"data\":\"test\"}");
         branchSession2.setBranchType(BranchType.AT);
-        return new Object[][] {{ branchSession1,branchSession2}};
+        return new Object[][] {{branchSession1, branchSession2}};
     }
 }
