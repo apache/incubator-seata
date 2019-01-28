@@ -28,23 +28,38 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- * @author tianming.xm@gmail.com
- * @since 2019/1/25
+ * The type File transaction store manager test.
+ *
+ * @author tianming.xm @gmail.com
+ * @since 2019 /1/25
  */
 public class FileTransactionStoreManagerTest {
     private FileTransactionStoreManager fileTransactionStoreManager;
 
+    /**
+     * Sets up.
+     *
+     * @throws Exception the exception
+     */
     @BeforeClass
     public void setUp() throws Exception {
         SessionManager sessionManager = new FileBasedSessionManager("default", "root.data");
         fileTransactionStoreManager = new FileTransactionStoreManager("root.data", sessionManager);
     }
 
+    /**
+     * Tear down.
+     */
     @AfterClass
     public void tearDown() {
         fileTransactionStoreManager.shutdown();
     }
 
+    /**
+     * Write session test.
+     *
+     * @param globalSession the global session
+     */
     @Test(dataProvider = "sessionProvider")
     public void writeSessionTest(GlobalSession globalSession) {
         boolean result = fileTransactionStoreManager.writeSession(TransactionStoreManager.LogOperation.GLOBAL_ADD,
@@ -52,6 +67,11 @@ public class FileTransactionStoreManagerTest {
         Assert.assertTrue(result);
     }
 
+    /**
+     * Read write store from file test.
+     *
+     * @param globalSession the global session
+     */
     @Test(dataProvider = "sessionProvider")
     public void readWriteStoreFromFileTest(GlobalSession globalSession) {
         fileTransactionStoreManager.writeSession(TransactionStoreManager.LogOperation.GLOBAL_ADD, globalSession);
@@ -60,6 +80,11 @@ public class FileTransactionStoreManagerTest {
         Assert.assertTrue(stores.size() > 0);
     }
 
+    /**
+     * Session provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
     @DataProvider
     public static Object[][] sessionProvider() {
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);

@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
  * The type Abstract rpc remoting.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /9/12 16:21
  * @FileName: AbstractRpcRemoting
  * @Description:
@@ -168,7 +168,6 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
      * @param channel the channel
      * @param msg     the msg
      * @return the object
-     * @throws IOException the io exception
      * @throws TimeoutException the timeout exception
      */
     protected Object sendAsyncRequestWithResponse(String address, Channel channel, Object msg) throws TimeoutException {
@@ -183,7 +182,6 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
      * @param msg     the msg
      * @param timeout the timeout
      * @return the object
-     * @throws IOException the io exception
      * @throws TimeoutException the timeout exception
      */
     protected Object sendAsyncRequestWithResponse(String address, Channel channel, Object msg, long timeout) throws
@@ -201,7 +199,6 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
      * @param channel the channel
      * @param msg     the msg
      * @return the object
-     * @throws IOException the io exception
      * @throws TimeoutException the timeout exception
      */
     protected Object sendAsyncRequestWithoutResponse(String address, Channel channel, Object msg) throws

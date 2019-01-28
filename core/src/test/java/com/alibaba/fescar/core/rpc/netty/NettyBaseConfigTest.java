@@ -19,14 +19,19 @@ package com.alibaba.fescar.core.rpc.netty;
 import org.junit.Test;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: feats-all
- * @DateTime: 2019/1/7 2:04 PM
+ * The type Netty base config test.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: feats -all
+ * @DateTime: 2019 /1/7 2:04 PM
  * @FileName: NettyBaseConfigTest
  * @Description:
- * @date 2019/01/07
+ * @date 2019 /01/07
  */
 public class NettyBaseConfigTest {
+    /**
+     * Name.
+     */
     @Test
     public void name() {
         NettyBaseConfig nettyBaseConfig = new NettyBaseConfig();
