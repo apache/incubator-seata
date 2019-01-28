@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  * The type Netty base config.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /12/24 11:43
  * @FileName: NettyBaseConfig
  * @Description:
@@ -98,10 +98,19 @@ public class NettyBaseConfig {
 
     private static final int READIDLE_BASE_WRITEIDLE = 3;
 
+    /**
+     * The constant MAX_WRITE_IDLE_SECONDS.
+     */
     protected static final int MAX_WRITE_IDLE_SECONDS;
 
+    /**
+     * The constant MAX_READ_IDLE_SECONDS.
+     */
     protected static final int MAX_READ_IDLE_SECONDS;
 
+    /**
+     * The constant MAX_ALL_IDLE_SECONDS.
+     */
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
 
     static {

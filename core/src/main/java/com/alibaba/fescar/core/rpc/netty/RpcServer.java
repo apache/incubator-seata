@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
  * The type Abstract rpc server.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /10/15 16:35
  * @FileName: RpcServer
  * @Description:

@@ -23,28 +23,56 @@ import java.util.List;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 
+/**
+ * The type Connection context.
+ */
 public class ConnectionContext {
     private String xid;
     private Long branchId;
     private List<String> lockKeysBuffer = new ArrayList<>();
     private List<SQLUndoLog> sqlUndoItemsBuffer = new ArrayList<>();
 
+    /**
+     * Append lock key.
+     *
+     * @param lockKey the lock key
+     */
     void appendLockKey(String lockKey) {
         lockKeysBuffer.add(lockKey);
     }
 
+    /**
+     * Append undo item.
+     *
+     * @param sqlUndoLog the sql undo log
+     */
     void appendUndoItem(SQLUndoLog sqlUndoLog) {
         sqlUndoItemsBuffer.add(sqlUndoLog);
     }
 
+    /**
+     * In global transaction boolean.
+     *
+     * @return the boolean
+     */
     public boolean inGlobalTransaction() {
         return xid != null;
     }
 
+    /**
+     * Is branch registered boolean.
+     *
+     * @return the boolean
+     */
     public boolean isBranchRegistered() {
         return branchId != null;
     }
 
+    /**
+     * Bind.
+     *
+     * @param xid the xid
+     */
     void bind(String xid) {
         if (xid == null) {
             throw new IllegalArgumentException("xid should not be null");
@@ -58,26 +86,54 @@ public class ConnectionContext {
         }
     }
 
+    /**
+     * Has undo log boolean.
+     *
+     * @return the boolean
+     */
     public boolean hasUndoLog() {
         return sqlUndoItemsBuffer.size() > 0;
     }
 
+    /**
+     * Gets xid.
+     *
+     * @return the xid
+     */
     public String getXid() {
         return xid;
     }
 
+    /**
+     * Sets xid.
+     *
+     * @param xid the xid
+     */
     void setXid(String xid) {
         this.xid = xid;
     }
 
+    /**
+     * Gets branch id.
+     *
+     * @return the branch id
+     */
     public Long getBranchId() {
         return branchId;
     }
 
+    /**
+     * Sets branch id.
+     *
+     * @param branchId the branch id
+     */
     void setBranchId(Long branchId) {
         this.branchId = branchId;
     }
 
+    /**
+     * Reset.
+     */
     void reset() {
         xid = null;
         branchId = null;
@@ -85,6 +141,11 @@ public class ConnectionContext {
         sqlUndoItemsBuffer.clear();
     }
 
+    /**
+     * Reset.
+     *
+     * @param xid the xid
+     */
     void reset(String xid) {
         this.xid = xid;
         branchId = null;
@@ -92,6 +153,11 @@ public class ConnectionContext {
         sqlUndoItemsBuffer.clear();
     }
 
+    /**
+     * Build lock keys string.
+     *
+     * @return the string
+     */
     public String buildLockKeys() {
         if (lockKeysBuffer.isEmpty()) {
             return null;
@@ -107,6 +173,11 @@ public class ConnectionContext {
         return appender.toString();
     }
 
+    /**
+     * Gets undo items.
+     *
+     * @return the undo items
+     */
     public List<SQLUndoLog> getUndoItems() {
         return sqlUndoItemsBuffer;
     }
@@ -114,8 +185,7 @@ public class ConnectionContext {
     @Override
     public String toString() {
         return "ConnectionContext [xid=" + xid + ", branchId=" + branchId + ", lockKeysBuffer=" + lockKeysBuffer
-                + ", sqlUndoItemsBuffer=" + sqlUndoItemsBuffer + "]";
+            + ", sqlUndoItemsBuffer=" + sqlUndoItemsBuffer + "]";
     }
-    
-    
+
 }

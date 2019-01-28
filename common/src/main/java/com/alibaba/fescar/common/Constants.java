@@ -17,16 +17,30 @@
 package com.alibaba.fescar.common;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/10/9 17:14
+ * The type Constants.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /10/9 17:14
  * @FileName: Constants
  * @Description:
  */
 public class Constants {
+    /**
+     * The constant IP_PORT_SPLIT_CHAR.
+     */
     public static final String IP_PORT_SPLIT_CHAR = ":";
+    /**
+     * The constant CLIENT_ID_SPLIT_CHAR.
+     */
     public static final String CLIENT_ID_SPLIT_CHAR = ":";
+    /**
+     * The constant ENDPOINT_BEGIN_CHAR.
+     */
     public static final String ENDPOINT_BEGIN_CHAR = "/";
+    /**
+     * The constant DBKEYS_SPLIT_CHAR.
+     */
     public static final String DBKEYS_SPLIT_CHAR = ",";
 
 

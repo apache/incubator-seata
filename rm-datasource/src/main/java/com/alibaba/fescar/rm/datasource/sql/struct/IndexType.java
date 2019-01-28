@@ -16,32 +16,54 @@
 
 package com.alibaba.fescar.rm.datasource.sql.struct;
 
+/**
+ * The enum Index type.
+ */
 public enum IndexType {
-	/** */
-	PRIMARY(0),
-	/** */
-	Normal(1),
-	/** */
-	Unique(2),
-	/** */
-	FullText(3);
+    /**
+     * Primary index type.
+     */
+    PRIMARY(0),
+    /**
+     * Normal index type.
+     */
+    Normal(1),
+    /**
+     * Unique index type.
+     */
+    Unique(2),
+    /**
+     * Full text index type.
+     */
+    FullText(3);
 
-	private int i;
+    private int i;
 
-	IndexType(int i) {
-		this.i = i;
-	}
+    IndexType(int i) {
+        this.i = i;
+    }
 
-	public int value() {
-		return this.i;
-	}
+    /**
+     * Value int.
+     *
+     * @return the int
+     */
+    public int value() {
+        return this.i;
+    }
 
-	public static IndexType valueOf(int i) {
-		for (IndexType t : values()) {
-			if (t.value() == i) {
-				return t;
-			}
-		}
-		throw new IllegalArgumentException("Invalid IndexType:" + i);
-	}
+    /**
+     * Value of index type.
+     *
+     * @param i the
+     * @return the index type
+     */
+    public static IndexType valueOf(int i) {
+        for (IndexType t : values()) {
+            if (t.value() == i) {
+                return t;
+            }
+        }
+        throw new IllegalArgumentException("Invalid IndexType:" + i);
+    }
 }

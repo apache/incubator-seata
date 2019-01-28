@@ -25,8 +25,14 @@ import com.alibaba.fescar.rm.datasource.ParametersHolder;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * The type My sql update recognizer test.
+ */
 public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
 
+    /**
+     * Update recognizer test 0.
+     */
     @Test
     public void updateRecognizerTest_0() {
 
@@ -44,6 +50,9 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
         Assert.assertEquals("id = 'id1'", mySQLUpdateRecognizer.getWhereCondition());
     }
 
+    /**
+     * Update recognizer test 1.
+     */
     @Test
     public void updateRecognizerTest_1() {
 
@@ -63,6 +72,9 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
         Assert.assertEquals("id = 'id1'", mySQLUpdateRecognizer.getWhereCondition());
     }
 
+    /**
+     * Update recognizer test 2.
+     */
     @Test
     public void updateRecognizerTest_2() {
 

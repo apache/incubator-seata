@@ -20,12 +20,35 @@ import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.AbstractTransactionRequest;
 import com.alibaba.fescar.core.protocol.transaction.AbstractTransactionResponse;
 
+/**
+ * The type Abstract exception handler.
+ */
 public abstract class AbstractExceptionHandler {
 
+    /**
+     * The interface Callback.
+     *
+     * @param <T> the type parameter
+     * @param <S> the type parameter
+     */
     public interface Callback<T extends AbstractTransactionRequest, S extends AbstractTransactionResponse> {
+        /**
+         * Execute.
+         *
+         * @param request  the request
+         * @param response the response
+         * @throws TransactionException the transaction exception
+         */
         void execute(T request, S response) throws TransactionException;
     }
 
+    /**
+     * Exception handle template.
+     *
+     * @param callback the callback
+     * @param request  the request
+     * @param response the response
+     */
     public void exceptionHandleTemplate(Callback callback, AbstractTransactionRequest request, AbstractTransactionResponse response) {
         try {
             callback.execute(request, response);

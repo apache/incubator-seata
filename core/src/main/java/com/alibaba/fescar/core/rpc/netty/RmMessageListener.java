@@ -18,9 +18,10 @@ package com.alibaba.fescar.core.rpc.netty;
 
 import com.alibaba.fescar.common.exception.FrameworkErrorCode;
 import com.alibaba.fescar.core.protocol.ResultCode;
-import com.alibaba.fescar.core.protocol.transaction.*;
 import com.alibaba.fescar.core.protocol.transaction.BranchCommitRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchCommitResponse;
 import com.alibaba.fescar.core.protocol.transaction.BranchRollbackRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchRollbackResponse;
 import com.alibaba.fescar.core.rpc.ClientMessageListener;
 import com.alibaba.fescar.core.rpc.ClientMessageSender;
 import com.alibaba.fescar.core.rpc.TransactionMessageHandler;
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * The type Rm message listener.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /10/11 09:56
  * @FileName: RmMessageListener
  * @Description:
@@ -43,6 +44,11 @@ public class RmMessageListener implements ClientMessageListener {
 
     private TransactionMessageHandler handler;
 
+    /**
+     * Instantiates a new Rm message listener.
+     *
+     * @param handler the handler
+     */
     public RmMessageListener(TransactionMessageHandler handler) {
         this.handler = handler;
     }

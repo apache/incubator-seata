@@ -16,7 +16,19 @@
 
 package com.alibaba.fescar.rm.datasource.exec;
 
+/**
+ * The interface Executor.
+ *
+ * @param <T> the type parameter
+ */
 public interface Executor<T> {
 
+    /**
+     * Execute t.
+     *
+     * @param args the args
+     * @return the t
+     * @throws Throwable the throwable
+     */
     T execute(Object... args) throws Throwable;
 }

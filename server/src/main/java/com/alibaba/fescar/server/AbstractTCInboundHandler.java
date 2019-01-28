@@ -18,12 +18,27 @@ package com.alibaba.fescar.server;
 
 import com.alibaba.fescar.core.exception.AbstractExceptionHandler;
 import com.alibaba.fescar.core.exception.TransactionException;
-import com.alibaba.fescar.core.protocol.transaction.*;
+import com.alibaba.fescar.core.protocol.transaction.BranchRegisterRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
+import com.alibaba.fescar.core.protocol.transaction.BranchReportRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchReportResponse;
 import com.alibaba.fescar.core.protocol.transaction.GlobalBeginRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalBeginResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalCommitRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalCommitResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalStatusRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalStatusResponse;
+import com.alibaba.fescar.core.protocol.transaction.TCInboundHandler;
 import com.alibaba.fescar.core.rpc.RpcContext;
 
+/**
+ * The type Abstract tc inbound handler.
+ */
 public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler implements TCInboundHandler {
-
 
     @Override
     public GlobalBeginResponse handle(GlobalBeginRequest request, final RpcContext rpcContext) {
@@ -37,6 +52,14 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         return response;
     }
 
+    /**
+     * Do global begin.
+     *
+     * @param request    the request
+     * @param response   the response
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
     protected abstract void doGlobalBegin(GlobalBeginRequest request, GlobalBeginResponse response, RpcContext rpcContext) throws TransactionException;
 
     @Override
@@ -51,6 +74,14 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         return response;
     }
 
+    /**
+     * Do global commit.
+     *
+     * @param request    the request
+     * @param response   the response
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
     protected abstract void doGlobalCommit(GlobalCommitRequest request, GlobalCommitResponse response, RpcContext rpcContext) throws TransactionException;
 
     @Override
@@ -65,6 +96,14 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         return response;
     }
 
+    /**
+     * Do global rollback.
+     *
+     * @param request    the request
+     * @param response   the response
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
     protected abstract void doGlobalRollback(GlobalRollbackRequest request, GlobalRollbackResponse response, RpcContext rpcContext) throws TransactionException;
 
     @Override
@@ -79,6 +118,14 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         return response;
     }
 
+    /**
+     * Do branch register.
+     *
+     * @param request    the request
+     * @param response   the response
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
     protected abstract void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response, RpcContext rpcContext) throws TransactionException;
 
     @Override
@@ -93,6 +140,14 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         return response;
     }
 
+    /**
+     * Do branch report.
+     *
+     * @param request    the request
+     * @param response   the response
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
     protected abstract void doBranchReport(BranchReportRequest request, BranchReportResponse response, RpcContext rpcContext) throws TransactionException;
 
     @Override
@@ -107,6 +162,14 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         return response;
     }
 
+    /**
+     * Do lock check.
+     *
+     * @param request    the request
+     * @param response   the response
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
     protected abstract void doLockCheck(GlobalLockQueryRequest request, GlobalLockQueryResponse response, RpcContext rpcContext) throws TransactionException;
 
     @Override
@@ -121,7 +184,14 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         return response;
     }
 
+    /**
+     * Do global status.
+     *
+     * @param request    the request
+     * @param response   the response
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
     protected abstract void doGlobalStatus(GlobalStatusRequest request, GlobalStatusResponse response, RpcContext rpcContext) throws TransactionException;
-
 
 }

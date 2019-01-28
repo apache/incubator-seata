@@ -22,11 +22,33 @@ import com.alibaba.fescar.core.model.ResourceManagerOutbound;
 import com.alibaba.fescar.core.model.TransactionManager;
 import com.alibaba.fescar.server.session.GlobalSession;
 
+/**
+ * The interface Core.
+ */
 public interface Core extends TransactionManager, ResourceManagerOutbound {
 
+    /**
+     * Sets resource manager inbound.
+     *
+     * @param resourceManagerInbound the resource manager inbound
+     */
     void setResourceManagerInbound(ResourceManagerInbound resourceManagerInbound);
 
+    /**
+     * Do global commit.
+     *
+     * @param globalSession the global session
+     * @param retrying      the retrying
+     * @throws TransactionException the transaction exception
+     */
     void doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException;
 
+    /**
+     * Do global rollback.
+     *
+     * @param globalSession the global session
+     * @param retrying      the retrying
+     * @throws TransactionException the transaction exception
+     */
     void doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException;
 }

@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * The type Default channel pool handler.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /9/10 17:46
  * @FileName: DefaultChannelPoolHandler
  * @Description:

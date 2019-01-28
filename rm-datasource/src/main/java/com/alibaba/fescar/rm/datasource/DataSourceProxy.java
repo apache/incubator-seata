@@ -22,15 +22,30 @@ import java.sql.SQLException;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fescar.core.model.Resource;
 
+/**
+ * The type Data source proxy.
+ */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
 
     private String resourceGroupId = "DEFAULT";
 
     private boolean managed = false;
 
+    /**
+     * Instantiates a new Data source proxy.
+     *
+     * @param targetDataSource the target data source
+     */
     public DataSourceProxy(DruidDataSource targetDataSource) {
         super(targetDataSource);
     }
+
+    /**
+     * Instantiates a new Data source proxy.
+     *
+     * @param targetDataSource the target data source
+     * @param resourceGroupId  the resource group id
+     */
     public DataSourceProxy(DruidDataSource targetDataSource, String resourceGroupId) {
         super(targetDataSource);
         this.resourceGroupId = resourceGroupId;
@@ -43,10 +58,21 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         }
     }
 
+    /**
+     * Gets plain connection.
+     *
+     * @return the plain connection
+     * @throws SQLException the sql exception
+     */
     public Connection getPlainConnection() throws SQLException {
         return targetDataSource.getConnection();
     }
 
+    /**
+     * Gets db type.
+     *
+     * @return the db type
+     */
     public String getDbType() {
         return targetDataSource.getDbType();
     }

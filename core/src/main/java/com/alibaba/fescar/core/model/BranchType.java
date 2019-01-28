@@ -16,17 +16,39 @@
 
 package com.alibaba.fescar.core.model;
 
+/**
+ * The enum Branch type.
+ */
 public enum BranchType {
 
+    /**
+     * The At.
+     */
     // AT Branch
     AT,
 
+    /**
+     * The Mt.
+     */
     // MT Branch
     MT;
 
+    /**
+     * Get branch type.
+     *
+     * @param ordinal the ordinal
+     * @return the branch type
+     */
     public static BranchType get(byte ordinal) {
         return get((int) ordinal);
     }
+
+    /**
+     * Get branch type.
+     *
+     * @param ordinal the ordinal
+     * @return the branch type
+     */
     public static BranchType get(int ordinal) {
         for (BranchType branchType : BranchType.values()) {
             if (branchType.ordinal() == ordinal) {

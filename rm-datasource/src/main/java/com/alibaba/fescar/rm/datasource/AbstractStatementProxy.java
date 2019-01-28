@@ -25,32 +25,76 @@ import java.sql.Statement;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.core.context.RootContext;
 
+/**
+ * The type Abstract statement proxy.
+ *
+ * @param <T> the type parameter
+ */
 public abstract class AbstractStatementProxy<T extends Statement> implements Statement {
 
+    /**
+     * The Connection proxy.
+     */
     protected AbstractConnectionProxy connectionProxy;
 
+    /**
+     * The Target statement.
+     */
     protected T targetStatement;
 
+    /**
+     * The Target sql.
+     */
     protected String targetSQL;
 
+    /**
+     * Instantiates a new Abstract statement proxy.
+     *
+     * @param connectionProxy the connection proxy
+     * @param targetStatement the target statement
+     * @param targetSQL       the target sql
+     * @throws SQLException the sql exception
+     */
     public AbstractStatementProxy(AbstractConnectionProxy connectionProxy, T targetStatement, String targetSQL) throws SQLException {
         this.connectionProxy = connectionProxy;
         this.targetStatement = targetStatement;
         this.targetSQL = targetSQL;
     }
 
+    /**
+     * Instantiates a new Abstract statement proxy.
+     *
+     * @param connectionProxy the connection proxy
+     * @param targetStatement the target statement
+     * @throws SQLException the sql exception
+     */
     public AbstractStatementProxy(ConnectionProxy connectionProxy, T targetStatement) throws SQLException {
         this(connectionProxy, targetStatement, null);
     }
 
+    /**
+     * Gets connection proxy.
+     *
+     * @return the connection proxy
+     */
     public AbstractConnectionProxy getConnectionProxy() {
         return connectionProxy;
     }
 
+    /**
+     * Gets target statement.
+     *
+     * @return the target statement
+     */
     public T getTargetStatement() {
         return targetStatement;
     }
 
+    /**
+     * Gets target sql.
+     *
+     * @return the target sql
+     */
     public String getTargetSQL() {
         return targetSQL;
     }

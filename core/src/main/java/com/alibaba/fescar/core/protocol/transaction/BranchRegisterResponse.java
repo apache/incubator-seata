@@ -21,6 +21,9 @@ import java.nio.ByteBuffer;
 
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 
+/**
+ * The type Branch register response.
+ */
 public class BranchRegisterResponse extends AbstractTransactionResponse implements Serializable {
 
     private static final long serialVersionUID = 8317040433102745774L;
@@ -29,18 +32,38 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
 
     private long branchId;
 
+    /**
+     * Gets transaction id.
+     *
+     * @return the transaction id
+     */
     public long getTransactionId() {
         return transactionId;
     }
 
+    /**
+     * Sets transaction id.
+     *
+     * @param transactionId the transaction id
+     */
     public void setTransactionId(long transactionId) {
         this.transactionId = transactionId;
     }
 
+    /**
+     * Gets branch id.
+     *
+     * @return the branch id
+     */
     public long getBranchId() {
         return branchId;
     }
 
+    /**
+     * Sets branch id.
+     *
+     * @param branchId the branch id
+     */
     public void setBranchId(long branchId) {
         this.branchId = branchId;
     }

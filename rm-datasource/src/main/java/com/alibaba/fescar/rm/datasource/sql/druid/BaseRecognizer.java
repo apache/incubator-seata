@@ -18,8 +18,14 @@ package com.alibaba.fescar.rm.datasource.sql.druid;
 
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 
+/**
+ * The type Base recognizer.
+ */
 public abstract class BaseRecognizer implements SQLRecognizer {
 
+    /**
+     * The type V marker.
+     */
     public static class VMarker {
         @Override
         public String toString() {
@@ -28,8 +34,16 @@ public abstract class BaseRecognizer implements SQLRecognizer {
 
     }
 
+    /**
+     * The Original sql.
+     */
     protected String originalSQL;
 
+    /**
+     * Instantiates a new Base recognizer.
+     *
+     * @param originalSQL the original sql
+     */
     public BaseRecognizer(String originalSQL) {
         this.originalSQL = originalSQL;
 

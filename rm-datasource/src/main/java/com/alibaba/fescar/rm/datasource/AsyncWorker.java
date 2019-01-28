@@ -41,12 +41,23 @@ import org.slf4j.LoggerFactory;
 
 import static com.alibaba.fescar.core.service.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 
+/**
+ * The type Async worker.
+ */
 public class AsyncWorker implements ResourceManagerInbound {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncWorker.class);
 
     private static class Phase2Context {
 
+        /**
+         * Instantiates a new Phase 2 context.
+         *
+         * @param xid             the xid
+         * @param branchId        the branch id
+         * @param resourceId      the resource id
+         * @param applicationData the application data
+         */
         public Phase2Context(String xid, long branchId, String resourceId, String applicationData) {
             this.xid = xid;
             this.branchId = branchId;
@@ -54,9 +65,21 @@ public class AsyncWorker implements ResourceManagerInbound {
             this.applicationData = applicationData;
         }
 
+        /**
+         * The Xid.
+         */
         String xid;
+        /**
+         * The Branch id.
+         */
         long branchId;
+        /**
+         * The Resource id.
+         */
         String resourceId;
+        /**
+         * The Application data.
+         */
         String applicationData;
     }
 
@@ -77,6 +100,9 @@ public class AsyncWorker implements ResourceManagerInbound {
         return BranchStatus.PhaseTwo_Committed;
     }
 
+    /**
+     * Init.
+     */
     public synchronized void init() {
         LOGGER.info("Async Commit Buffer Limit: " + ASYNC_COMMIT_BUFFER_LIMIT);
         timerExecutor = new ScheduledThreadPoolExecutor(1,
@@ -87,7 +113,6 @@ public class AsyncWorker implements ResourceManagerInbound {
                 try {
 
                     doBranchCommits();
-
 
                 } catch (Throwable e) {
                     LOGGER.info("Failed at async committing ... " + e.getMessage());
@@ -146,9 +171,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                 }
             }
 
-
         }
-
 
     }
 

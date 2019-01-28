@@ -31,8 +31,21 @@ import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 
+/**
+ * The type Update executor.
+ *
+ * @param <T> the type parameter
+ * @param <S> the type parameter
+ */
 public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
+    /**
+     * Instantiates a new Update executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param sqlRecognizer     the sql recognizer
+     */
     public UpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
@@ -145,6 +158,5 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         return afterImage;
     }
-
 
 }

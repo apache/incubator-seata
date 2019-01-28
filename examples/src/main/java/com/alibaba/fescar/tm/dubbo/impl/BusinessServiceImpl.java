@@ -49,14 +49,29 @@ public class BusinessServiceImpl implements BusinessService {
 
     }
 
+    /**
+     * Sets storage service.
+     *
+     * @param storageService the storage service
+     */
     public void setStorageService(StorageService storageService) {
         this.storageService = storageService;
     }
 
+    /**
+     * Sets order service.
+     *
+     * @param orderService the order service
+     */
     public void setOrderService(OrderService orderService) {
         this.orderService = orderService;
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
             new String[] {"dubbo-business.xml"});

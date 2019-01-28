@@ -24,7 +24,7 @@ import io.netty.channel.EventLoopGroup;
  * The interface Rpc event loop group.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /9/12 14:16
  * @FileName: RpcEventLoopGroup
  * @Description:

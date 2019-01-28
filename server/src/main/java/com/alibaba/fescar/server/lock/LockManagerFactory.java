@@ -16,18 +16,28 @@
 
 package com.alibaba.fescar.server.lock;
 
+/**
+ * The type Lock manager factory.
+ */
 public class LockManagerFactory {
 
     private static class SingletonHolder {
         private static LockManager INSTANCE = new DefaultLockManagerImpl();
     }
 
+    /**
+     * Get lock manager.
+     *
+     * @return the lock manager
+     */
     public static final LockManager get() {
         return SingletonHolder.INSTANCE;
     }
 
     /**
      * Just for test mocking
+     *
+     * @param lockManager the lock manager
      */
     public static void set(LockManager lockManager) {
         SingletonHolder.INSTANCE = lockManager;

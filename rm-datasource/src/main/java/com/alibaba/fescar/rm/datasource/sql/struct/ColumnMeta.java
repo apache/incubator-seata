@@ -16,191 +16,371 @@
 
 package com.alibaba.fescar.rm.datasource.sql.struct;
 
+/**
+ * The type Column meta.
+ */
 public class ColumnMeta {
-	private String tableCat;
-	private String tableSchemaName;
-	private String tableName;
-	private String columnName;
-	private int dataType;
-	private String dataTypeName;
-	private int columnSize;
-	private int decimalDigits;
-	private int numPrecRadix;
-	private int nullAble;
-	private String remarks;
-	private String columnDef;
-	private int sqlDataType;
-	private int sqlDatetimeSub;
-	private int charOctetLength;
-	private int ordinalPosition;
-	private String isNullAble;
-	private String isAutoincrement;
+    private String tableCat;
+    private String tableSchemaName;
+    private String tableName;
+    private String columnName;
+    private int dataType;
+    private String dataTypeName;
+    private int columnSize;
+    private int decimalDigits;
+    private int numPrecRadix;
+    private int nullAble;
+    private String remarks;
+    private String columnDef;
+    private int sqlDataType;
+    private int sqlDatetimeSub;
+    private int charOctetLength;
+    private int ordinalPosition;
+    private String isNullAble;
+    private String isAutoincrement;
 
+    /**
+     * Instantiates a new Column meta.
+     */
+    public ColumnMeta() {
+    }
 
-	public ColumnMeta() {
-	}
+    @Override
+    public String toString() {
+        return "ColumnMeta{" +
+            "tableCat='" + tableCat + '\'' +
+            ", tableSchemaName='" + tableSchemaName + '\'' +
+            ", tableName='" + tableName + '\'' +
+            ", columnName='" + columnName + '\'' +
+            ", dataType=" + dataType +
+            ", dataTypeName='" + dataTypeName + '\'' +
+            ", columnSize=" + columnSize +
+            ", decimalDigits=" + decimalDigits +
+            ", numPrecRadix=" + numPrecRadix +
+            ", nullAble=" + nullAble +
+            ", remarks='" + remarks + '\'' +
+            ", columnDef='" + columnDef + '\'' +
+            ", sqlDataType=" + sqlDataType +
+            ", sqlDatetimeSub=" + sqlDatetimeSub +
+            ", charOctetLength=" + charOctetLength +
+            ", ordinalPosition=" + ordinalPosition +
+            ", isNullAble='" + isNullAble + '\'' +
+            ", isAutoincrement='" + isAutoincrement + '\'' +
+            '}';
+    }
 
-	@Override
-	public String toString() {
-		return "ColumnMeta{" +
-			"tableCat='" + tableCat + '\'' +
-			", tableSchemaName='" + tableSchemaName + '\'' +
-			", tableName='" + tableName + '\'' +
-			", columnName='" + columnName + '\'' +
-			", dataType=" + dataType +
-			", dataTypeName='" + dataTypeName + '\'' +
-			", columnSize=" + columnSize +
-			", decimalDigits=" + decimalDigits +
-			", numPrecRadix=" + numPrecRadix +
-			", nullAble=" + nullAble +
-			", remarks='" + remarks + '\'' +
-			", columnDef='" + columnDef + '\'' +
-			", sqlDataType=" + sqlDataType +
-			", sqlDatetimeSub=" + sqlDatetimeSub +
-			", charOctetLength=" + charOctetLength +
-			", ordinalPosition=" + ordinalPosition +
-			", isNullAble='" + isNullAble + '\'' +
-			", isAutoincrement='" + isAutoincrement + '\'' +
-			'}';
-	}
+    /**
+     * Is autoincrement boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isAutoincrement() {
+        return "YES".equalsIgnoreCase(isAutoincrement);
+    }
 
-	public boolean isAutoincrement() {
-		return "YES".equalsIgnoreCase(isAutoincrement);
-	}
+    /**
+     * Gets table cat.
+     *
+     * @return the table cat
+     */
+    public String getTableCat() {
+        return tableCat;
+    }
 
-	public String getTableCat() {
-		return tableCat;
-	}
+    /**
+     * Sets table cat.
+     *
+     * @param tableCat the table cat
+     */
+    public void setTableCat(String tableCat) {
+        this.tableCat = tableCat;
+    }
 
-	public void setTableCat(String tableCat) {
-		this.tableCat = tableCat;
-	}
+    /**
+     * Sets table schema name.
+     *
+     * @param tableSchemaName the table schema name
+     */
+    public void setTableSchemaName(String tableSchemaName) {
+        this.tableSchemaName = tableSchemaName;
+    }
 
-	public void setTableSchemaName(String tableSchemaName) {
-		this.tableSchemaName = tableSchemaName;
-	}
+    /**
+     * Sets table name.
+     *
+     * @param tableName the table name
+     */
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
+    }
 
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
-	}
+    /**
+     * Gets column name.
+     *
+     * @return the column name
+     */
+    public String getColumnName() {
+        return columnName;
+    }
 
-	public String getColumnName() {
-		return columnName;
-	}
+    /**
+     * Sets column name.
+     *
+     * @param columnName the column name
+     */
+    public void setColumnName(String columnName) {
+        this.columnName = columnName;
+    }
 
-	public void setColumnName(String columnName) {
-		this.columnName = columnName;
-	}
+    /**
+     * Gets data type.
+     *
+     * @return the data type
+     */
+    public int getDataType() {
+        return dataType;
+    }
 
-	public int getDataType() {
-		return dataType;
-	}
+    /**
+     * Sets data type.
+     *
+     * @param dataType the data type
+     */
+    public void setDataType(int dataType) {
+        this.dataType = dataType;
+    }
 
-	public void setDataType(int dataType) {
-		this.dataType = dataType;
-	}
+    /**
+     * Gets data type name.
+     *
+     * @return the data type name
+     */
+    public String getDataTypeName() {
+        return dataTypeName;
+    }
 
-	public String getDataTypeName() {
-		return dataTypeName;
-	}
+    /**
+     * Sets data type name.
+     *
+     * @param dataTypeName the data type name
+     */
+    public void setDataTypeName(String dataTypeName) {
+        this.dataTypeName = dataTypeName;
+    }
 
-	public void setDataTypeName(String dataTypeName) {
-		this.dataTypeName = dataTypeName;
-	}
+    /**
+     * Gets column size.
+     *
+     * @return the column size
+     */
+    public int getColumnSize() {
+        return columnSize;
+    }
 
-	public int getColumnSize() {
-		return columnSize;
-	}
+    /**
+     * Sets column size.
+     *
+     * @param columnSize the column size
+     */
+    public void setColumnSize(int columnSize) {
+        this.columnSize = columnSize;
+    }
 
-	public void setColumnSize(int columnSize) {
-		this.columnSize = columnSize;
-	}
+    /**
+     * Gets decimal digits.
+     *
+     * @return the decimal digits
+     */
+    public int getDecimalDigits() {
+        return decimalDigits;
+    }
 
-	public int getDecimalDigits() {
-		return decimalDigits;
-	}
+    /**
+     * Sets decimal digits.
+     *
+     * @param decimalDigits the decimal digits
+     */
+    public void setDecimalDigits(int decimalDigits) {
+        this.decimalDigits = decimalDigits;
+    }
 
-	public void setDecimalDigits(int decimalDigits) {
-		this.decimalDigits = decimalDigits;
-	}
+    /**
+     * Gets num prec radix.
+     *
+     * @return the num prec radix
+     */
+    public int getNumPrecRadix() {
+        return numPrecRadix;
+    }
 
-	public int getNumPrecRadix() {
-		return numPrecRadix;
-	}
+    /**
+     * Sets num prec radix.
+     *
+     * @param numPrecRadix the num prec radix
+     */
+    public void setNumPrecRadix(int numPrecRadix) {
+        this.numPrecRadix = numPrecRadix;
+    }
 
-	public void setNumPrecRadix(int numPrecRadix) {
-		this.numPrecRadix = numPrecRadix;
-	}
+    /**
+     * Gets null able.
+     *
+     * @return the null able
+     */
+    public int getNullAble() {
+        return nullAble;
+    }
 
-	public int getNullAble() {
-		return nullAble;
-	}
+    /**
+     * Sets null able.
+     *
+     * @param nullAble the null able
+     */
+    public void setNullAble(int nullAble) {
+        this.nullAble = nullAble;
+    }
 
-	public void setNullAble(int nullAble) {
-		this.nullAble = nullAble;
-	}
+    /**
+     * Gets remarks.
+     *
+     * @return the remarks
+     */
+    public String getRemarks() {
+        return remarks;
+    }
 
-	public String getRemarks() {
-		return remarks;
-	}
+    /**
+     * Sets remarks.
+     *
+     * @param remarks the remarks
+     */
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
+    }
 
-	public void setRemarks(String remarks) {
-		this.remarks = remarks;
-	}
+    /**
+     * Gets column def.
+     *
+     * @return the column def
+     */
+    public String getColumnDef() {
+        return columnDef;
+    }
 
-	public String getColumnDef() {
-		return columnDef;
-	}
+    /**
+     * Sets column def.
+     *
+     * @param columnDef the column def
+     */
+    public void setColumnDef(String columnDef) {
+        this.columnDef = columnDef;
+    }
 
-	public void setColumnDef(String columnDef) {
-		this.columnDef = columnDef;
-	}
+    /**
+     * Gets sql data type.
+     *
+     * @return the sql data type
+     */
+    public int getSqlDataType() {
+        return sqlDataType;
+    }
 
-	public int getSqlDataType() {
-		return sqlDataType;
-	}
+    /**
+     * Sets sql data type.
+     *
+     * @param sqlDataType the sql data type
+     */
+    public void setSqlDataType(int sqlDataType) {
+        this.sqlDataType = sqlDataType;
+    }
 
-	public void setSqlDataType(int sqlDataType) {
-		this.sqlDataType = sqlDataType;
-	}
+    /**
+     * Gets sql datetime sub.
+     *
+     * @return the sql datetime sub
+     */
+    public int getSqlDatetimeSub() {
+        return sqlDatetimeSub;
+    }
 
-	public int getSqlDatetimeSub() {
-		return sqlDatetimeSub;
-	}
+    /**
+     * Sets sql datetime sub.
+     *
+     * @param sqlDatetimeSub the sql datetime sub
+     */
+    public void setSqlDatetimeSub(int sqlDatetimeSub) {
+        this.sqlDatetimeSub = sqlDatetimeSub;
+    }
 
-	public void setSqlDatetimeSub(int sqlDatetimeSub) {
-		this.sqlDatetimeSub = sqlDatetimeSub;
-	}
+    /**
+     * Gets char octet length.
+     *
+     * @return the char octet length
+     */
+    public int getCharOctetLength() {
+        return charOctetLength;
+    }
 
-	public int getCharOctetLength() {
-		return charOctetLength;
-	}
+    /**
+     * Sets char octet length.
+     *
+     * @param charOctetLength the char octet length
+     */
+    public void setCharOctetLength(int charOctetLength) {
+        this.charOctetLength = charOctetLength;
+    }
 
-	public void setCharOctetLength(int charOctetLength) {
-		this.charOctetLength = charOctetLength;
-	}
+    /**
+     * Gets ordinal position.
+     *
+     * @return the ordinal position
+     */
+    public int getOrdinalPosition() {
+        return ordinalPosition;
+    }
 
-	public int getOrdinalPosition() {
-		return ordinalPosition;
-	}
+    /**
+     * Sets ordinal position.
+     *
+     * @param ordinalPosition the ordinal position
+     */
+    public void setOrdinalPosition(int ordinalPosition) {
+        this.ordinalPosition = ordinalPosition;
+    }
 
-	public void setOrdinalPosition(int ordinalPosition) {
-		this.ordinalPosition = ordinalPosition;
-	}
+    /**
+     * Gets is null able.
+     *
+     * @return the is null able
+     */
+    public String getIsNullAble() {
+        return isNullAble;
+    }
 
-	public String getIsNullAble() {
-		return isNullAble;
-	}
+    /**
+     * Sets is null able.
+     *
+     * @param isNullAble the is null able
+     */
+    public void setIsNullAble(String isNullAble) {
+        this.isNullAble = isNullAble;
+    }
 
-	public void setIsNullAble(String isNullAble) {
-		this.isNullAble = isNullAble;
-	}
+    /**
+     * Gets is autoincrement.
+     *
+     * @return the is autoincrement
+     */
+    public String getIsAutoincrement() {
+        return isAutoincrement;
+    }
 
-	public String getIsAutoincrement() {
-		return isAutoincrement;
-	}
-
-	public void setIsAutoincrement(String isAutoincrement) {
-		this.isAutoincrement = isAutoincrement;
-	}
+    /**
+     * Sets is autoincrement.
+     *
+     * @param isAutoincrement the is autoincrement
+     */
+    public void setIsAutoincrement(String isAutoincrement) {
+        this.isAutoincrement = isAutoincrement;
+    }
 }

@@ -27,6 +27,9 @@ import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.server.UUIDGenerator;
 import com.alibaba.fescar.server.store.SessionStorable;
 
+/**
+ * The type Global session.
+ */
 public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private long transactionId;
@@ -47,16 +50,33 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
+    /**
+     * Add boolean.
+     *
+     * @param branchSession the branch session
+     * @return the boolean
+     */
     public boolean add(BranchSession branchSession) {
         return branchSessions.add(branchSession);
     }
 
+    /**
+     * Remove boolean.
+     *
+     * @param branchSession the branch session
+     * @return the boolean
+     */
     public boolean remove(BranchSession branchSession) {
         return branchSessions.remove(branchSession);
     }
 
     private ArrayList<SessionLifecycleListener> lifecycleListeners = new ArrayList<>();
 
+    /**
+     * Can be committed async boolean.
+     *
+     * @return the boolean
+     */
     public boolean canBeCommittedAsync() {
         for (BranchSession branchSession : branchSessions) {
             if (branchSession.getBranchType() == BranchType.MT) {
@@ -66,6 +86,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return true;
     }
 
+    /**
+     * Is timeout boolean.
+     *
+     * @return the boolean
+     */
     public boolean isTimeout() {
         return (System.currentTimeMillis() - beginTime) > timeout;
     }
@@ -127,16 +152,31 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     }
 
+    /**
+     * Close and clean.
+     *
+     * @throws TransactionException the transaction exception
+     */
     public void closeAndClean() throws TransactionException {
         close();
         clean();
 
     }
 
+    /**
+     * Add session lifecycle listener.
+     *
+     * @param sessionLifecycleListener the session lifecycle listener
+     */
     public void addSessionLifecycleListener(SessionLifecycleListener sessionLifecycleListener) {
         lifecycleListeners.add(sessionLifecycleListener);
     }
 
+    /**
+     * Remove session lifecycle listener.
+     *
+     * @param sessionLifecycleListener the session lifecycle listener
+     */
     public void removeSessionLifecycleListener(SessionLifecycleListener sessionLifecycleListener) {
         lifecycleListeners.remove(sessionLifecycleListener);
     }
@@ -159,6 +199,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         remove(branchSession);
     }
 
+    /**
+     * Gets branch.
+     *
+     * @param branchId the branch id
+     * @return the branch
+     */
     public BranchSession getBranch(long branchId) {
         synchronized (branchSessions) {
             for (BranchSession branchSession : branchSessions) {
@@ -172,12 +218,22 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     }
 
+    /**
+     * Gets sorted branches.
+     *
+     * @return the sorted branches
+     */
     public ArrayList<BranchSession> getSortedBranches() {
         ArrayList<BranchSession> sorted = new ArrayList();
         sorted.addAll(branchSessions);
         return sorted;
     }
 
+    /**
+     * Gets reverse sorted branches.
+     *
+     * @return the reverse sorted branches
+     */
     public ArrayList<BranchSession> getReverseSortedBranches() {
         ArrayList<BranchSession> reversed = new ArrayList();
         reversed.addAll(branchSessions);
@@ -185,8 +241,19 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return reversed;
     }
 
+    /**
+     * Instantiates a new Global session.
+     */
     public GlobalSession() {}
 
+    /**
+     * Instantiates a new Global session.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     * @param transactionName         the transaction name
+     * @param timeout                 the timeout
+     */
     public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout) {
         this.transactionId = UUIDGenerator.generateUUID();
         this.status = GlobalStatus.Begin;
@@ -197,44 +264,98 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.timeout = timeout;
     }
 
+    /**
+     * Gets transaction id.
+     *
+     * @return the transaction id
+     */
     public long getTransactionId() {
         return transactionId;
     }
 
+    /**
+     * Gets status.
+     *
+     * @return the status
+     */
     public GlobalStatus getStatus() {
         return status;
     }
 
+    /**
+     * Sets status.
+     *
+     * @param status the status
+     */
     void setStatus(GlobalStatus status) {
         this.status = status;
     }
 
+    /**
+     * Gets application id.
+     *
+     * @return the application id
+     */
     public String getApplicationId() {
         return applicationId;
     }
 
+    /**
+     * Gets transaction service group.
+     *
+     * @return the transaction service group
+     */
     public String getTransactionServiceGroup() {
         return transactionServiceGroup;
     }
 
+    /**
+     * Gets transaction name.
+     *
+     * @return the transaction name
+     */
     public String getTransactionName() {
         return transactionName;
     }
 
+    /**
+     * Gets timeout.
+     *
+     * @return the timeout
+     */
     public int getTimeout() {
         return timeout;
     }
 
+    /**
+     * Gets begin time.
+     *
+     * @return the begin time
+     */
     public long getBeginTime() {
         return beginTime;
     }
 
+    /**
+     * Create global session global session.
+     *
+     * @param applicationId  the application id
+     * @param txServiceGroup the tx service group
+     * @param txName         the tx name
+     * @param timeout        the timeout
+     * @return the global session
+     */
     public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
                                                     int timeout) {
         GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout);
         return session;
     }
 
+    /**
+     * Sets active.
+     *
+     * @param active the active
+     */
     public void setActive(boolean active) {
         this.active = active;
     }
@@ -298,6 +419,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.beginTime = byteBuffer.getLong();
     }
 
+    /**
+     * Has branch boolean.
+     *
+     * @return the boolean
+     */
     public boolean hasBranch() {
         return branchSessions.size() > 0;
     }

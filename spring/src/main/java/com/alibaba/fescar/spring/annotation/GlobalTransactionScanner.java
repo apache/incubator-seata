@@ -114,6 +114,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
 
     /**
      * Instantiates a new Global transaction scanner.
+     *
      * @param applicationId      the application id
      * @param txServiceGroup     the tx service group
      * @param failureHandlerHook the failure handler hook

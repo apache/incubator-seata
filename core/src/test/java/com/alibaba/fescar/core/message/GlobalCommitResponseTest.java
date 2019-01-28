@@ -27,11 +27,18 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * @author xiajun.0706@163.com
- * @since 2019/1/24
+ * The type Global commit response test.
+ *
+ * @author xiajun.0706 @163.com
+ * @since 2019 /1/24
  */
 public class GlobalCommitResponseTest {
 
+    /**
+     * Test to string.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testToString() throws Exception {
         GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
@@ -45,6 +52,11 @@ public class GlobalCommitResponseTest {
         Assert.assertEquals("globalStatus=Committed,ResultCode=Success,Msg=OK", globalCommitResponse.toString());
     }
 
+    /**
+     * Test encode.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testEncode() throws Exception {
         GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
@@ -63,6 +75,11 @@ public class GlobalCommitResponseTest {
         Assert.assertEquals("[1, 0, 8]", encodeResultStr);
     }
 
+    /**
+     * Test decode normal.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testDecodeNormal() throws Exception {
         GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();
@@ -89,6 +106,11 @@ public class GlobalCommitResponseTest {
         Assert.assertTrue(StringUtils.isBlank(decodeGlobalCommitResponse.getMsg()));
     }
 
+    /**
+     * Test decode exception.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testDecodeException() throws Exception {
         GlobalCommitResponse globalCommitResponse = new GlobalCommitResponse();

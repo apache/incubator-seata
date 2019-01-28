@@ -28,8 +28,14 @@ import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * The type Branch undo log test.
+ */
 public class BranchUndoLogTest {
 
+    /**
+     * Test encode undo log.
+     */
     @Test
     public void testEncodeUndoLog() {
         BranchUndoLog branchUndoLog = new BranchUndoLog();
@@ -68,8 +74,6 @@ public class BranchUndoLogTest {
 
         BranchUndoLog decodeObj = UndoLogParserFactory.getInstance().decode(encodeString);
         Assert.assertEquals(decodeObj.getBranchId(), branchUndoLog.getBranchId());
-
-
 
     }
 }

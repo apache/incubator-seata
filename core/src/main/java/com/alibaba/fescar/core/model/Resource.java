@@ -29,7 +29,6 @@ public interface Resource {
      */
     String getResourceGroupId();
 
-
     /**
      * Get the resource id.
      * e.g. url of a data-source could be the id of the db data-source resource.

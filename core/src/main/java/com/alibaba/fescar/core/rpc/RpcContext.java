@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * The type rpc context.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /12/07 10:51
  * @FileName: RpcContext
  * @Description:
@@ -335,6 +335,11 @@ public class RpcContext {
         this.resourceSets.addAll(resource);
     }
 
+    /**
+     * Sets client id.
+     *
+     * @param clientId the client id
+     */
     public void setClientId(String clientId) {
         this.clientId = clientId;
     }

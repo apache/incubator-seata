@@ -24,11 +24,18 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * @author xiajun.0706@163.com
- * @since 2019/1/24
+ * The type Global begin request test.
+ *
+ * @author xiajun.0706 @163.com
+ * @since 2019 /1/24
  */
 public class GlobalBeginRequestTest {
 
+    /**
+     * Test to string.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testToString() throws Exception {
         GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
@@ -38,6 +45,11 @@ public class GlobalBeginRequestTest {
         Assert.assertEquals("timeout=60000,transactionName=tran 1", globalBeginRequest.toString());
     }
 
+    /**
+     * Test encode.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testEncode() throws Exception {
         GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
@@ -49,6 +61,11 @@ public class GlobalBeginRequestTest {
         Assert.assertEquals("[0, 0, -22, 96, 0, 6, 116, 114, 97, 110, 32, 49]", encodeResultStr);
     }
 
+    /**
+     * Test decode.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testDecode() throws Exception {
         GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();

@@ -22,18 +22,22 @@ import java.util.concurrent.TimeoutException;
 import io.netty.channel.Channel;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/10/15 16:56
+ * The interface Server message sender.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /10/15 16:56
  * @FileName: ServerMessageSender
  * @Description:
  */
 public interface ServerMessageSender {
 
     /**
-     * @param msgId
-     * @param channel
-     * @param msg
+     * Send response.
+     *
+     * @param msgId   the msg id
+     * @param channel the channel
+     * @param msg     the msg
      */
     void sendResponse(long msgId, Channel channel, Object msg);
 
@@ -41,23 +45,24 @@ public interface ServerMessageSender {
      * Sync call to RM with timeout.
      *
      * @param resourceId Resource ID
-     * @param clientId Client ID
-     * @param message Request message
-     * @param timeout timeout of the call
+     * @param clientId   Client ID
+     * @param message    Request message
+     * @param timeout    timeout of the call
      * @return Response message
      * @throws IOException .
+     * @throws TimeoutException the timeout exception
      */
     Object sendSyncRequest(String resourceId, String clientId, Object message, long timeout) throws IOException, TimeoutException;
 
     /**
      * Sync call to RM
      *
-     *
      * @param resourceId Resource ID
-     * @param clientId Client ID
-     * @param message Request message
+     * @param clientId   Client ID
+     * @param message    Request message
      * @return Response message
      * @throws IOException .
+     * @throws TimeoutException the timeout exception
      */
     Object sendSyncRequest(String resourceId, String clientId, Object message) throws IOException, TimeoutException;
 }

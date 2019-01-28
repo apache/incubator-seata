@@ -24,11 +24,18 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * @author xiajun.0706@163.com
- * @since 2019/1/24
+ * The type Global rollback request test.
+ *
+ * @author xiajun.0706 @163.com
+ * @since 2019 /1/24
  */
 public class GlobalRollbackRequestTest {
 
+    /**
+     * Test to string.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testToString() throws Exception {
         GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
@@ -41,6 +48,11 @@ public class GlobalRollbackRequestTest {
         Assert.assertEquals("transactionId=1249853,extraData=test_extra_data", globalRollbackRequest.toString());
     }
 
+    /**
+     * Test encode.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testEncode() throws Exception {
         GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
@@ -60,6 +72,11 @@ public class GlobalRollbackRequestTest {
             encodeResultStr);
     }
 
+    /**
+     * Test decode.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testDecode() throws Exception {
         GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();

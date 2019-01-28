@@ -16,5 +16,8 @@
 
 package com.alibaba.fescar.rm.datasource.sql;
 
+/**
+ * The interface Sql delete recognizer.
+ */
 public interface SQLDeleteRecognizer extends WhereRecognizer {
 }

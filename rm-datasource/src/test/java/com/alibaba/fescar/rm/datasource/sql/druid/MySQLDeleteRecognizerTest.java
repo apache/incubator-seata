@@ -26,11 +26,15 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * @author hanwen
- * created at 2019-01-25
+ * The type My sql delete recognizer test.
+ *
+ * @author hanwen  created at 2019-01-25
  */
 public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
 
+    /**
+     * Delete recognizer test 0.
+     */
     @Test
     public void deleteRecognizerTest_0() {
 
@@ -45,6 +49,9 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
         Assert.assertEquals("id = 'id1'", mySQLDeleteRecognizer.getWhereCondition());
     }
 
+    /**
+     * Delete recognizer test 1.
+     */
     @Test
     public void deleteRecognizerTest_1() {
 

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * The type Transaction write future.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /12/10 14:49
  * @FileName: TransactionWriteFuture
  * @Description:

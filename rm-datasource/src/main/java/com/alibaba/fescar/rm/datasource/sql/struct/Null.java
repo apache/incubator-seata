@@ -16,9 +16,17 @@
 
 package com.alibaba.fescar.rm.datasource.sql.struct;
 
+/**
+ * The type Null.
+ */
 public class Null {
     private static Null instance = new Null();
 
+    /**
+     * Get null.
+     *
+     * @return the null
+     */
     public static Null get() {
         return instance;
     }

@@ -25,9 +25,10 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.alibaba.fescar.common.Constants;
 import com.alibaba.fescar.common.exception.FrameworkException;
-import com.alibaba.fescar.core.protocol.*;
+import com.alibaba.fescar.core.protocol.IncompatibleVersionException;
 import com.alibaba.fescar.core.protocol.RegisterRMRequest;
 import com.alibaba.fescar.core.protocol.RegisterTMRequest;
+import com.alibaba.fescar.core.protocol.Version;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
 
 import io.netty.channel.Channel;
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * The type channel manager.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /12/07 10:50
  * @FileName: ChannelManager
  * @Description:
@@ -315,7 +316,7 @@ public class ChannelManager {
      * Gets get channel.
      *
      * @param resourceId Resource ID
-     * @param clientId Client ID - ApplicationId:IP:Port
+     * @param clientId   Client ID - ApplicationId:IP:Port
      * @return Corresponding channel, NULL if not found.
      */
     public static Channel getChannel(String resourceId, String clientId) {

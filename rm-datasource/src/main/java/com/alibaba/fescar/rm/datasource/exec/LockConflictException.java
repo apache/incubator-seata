@@ -18,8 +18,14 @@ package com.alibaba.fescar.rm.datasource.exec;
 
 import java.sql.SQLException;
 
+/**
+ * The type Lock conflict exception.
+ */
 public class LockConflictException extends SQLException {
 
+    /**
+     * Instantiates a new Lock conflict exception.
+     */
     public LockConflictException() {
     }
 }

@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
  * The type Config future.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /12/20 16:30
  * @FileName: ConfigFuture
  * @Description:

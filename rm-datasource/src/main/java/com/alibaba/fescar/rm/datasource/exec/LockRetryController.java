@@ -19,27 +19,39 @@ package com.alibaba.fescar.rm.datasource.exec;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.core.service.ConfigurationKeys;
 
+/**
+ * The type Lock retry controller.
+ */
 public class LockRetryController {
 
-	private static int LOCK_RETRY_INTERNAL =
-		ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERNAL, 10);
-	private static int LOCK_RETRY_TIMES =
-		ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, 30);
+    private static int LOCK_RETRY_INTERNAL =
+        ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_INTERNAL, 10);
+    private static int LOCK_RETRY_TIMES =
+        ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_LOCK_RETRY_TIMES, 30);
 
-	private int lockRetryInternal = LOCK_RETRY_INTERNAL;
-	private int lockRetryTimes = LOCK_RETRY_TIMES;
+    private int lockRetryInternal = LOCK_RETRY_INTERNAL;
+    private int lockRetryTimes = LOCK_RETRY_TIMES;
 
-	public LockRetryController() {
-	}
+    /**
+     * Instantiates a new Lock retry controller.
+     */
+    public LockRetryController() {
+    }
 
-	public void sleep(Exception e) throws LockWaitTimeoutException {
-		if (--lockRetryTimes < 0) {
-			throw new LockWaitTimeoutException("Global lock wait timeout", e);
-		}
+    /**
+     * Sleep.
+     *
+     * @param e the e
+     * @throws LockWaitTimeoutException the lock wait timeout exception
+     */
+    public void sleep(Exception e) throws LockWaitTimeoutException {
+        if (--lockRetryTimes < 0) {
+            throw new LockWaitTimeoutException("Global lock wait timeout", e);
+        }
 
-		try {
-			Thread.sleep(lockRetryInternal);
-		} catch (InterruptedException ignore) {
-		}
-	}
+        try {
+            Thread.sleep(lockRetryInternal);
+        } catch (InterruptedException ignore) {
+        }
+    }
 }

@@ -25,6 +25,9 @@ import java.util.List;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 
+/**
+ * The type Table records.
+ */
 public class TableRecords {
 
     @JSONField(serialize = false)
@@ -34,30 +37,63 @@ public class TableRecords {
 
     private List<Row> rows = new ArrayList<Row>();
 
+    /**
+     * Gets table name.
+     *
+     * @return the table name
+     */
     public String getTableName() {
         return tableName;
     }
 
+    /**
+     * Sets table name.
+     *
+     * @param tableName the table name
+     */
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
 
+    /**
+     * Gets rows.
+     *
+     * @return the rows
+     */
     public List<Row> getRows() {
         return rows;
     }
 
+    /**
+     * Sets rows.
+     *
+     * @param rows the rows
+     */
     public void setRows(List<Row> rows) {
         this.rows = rows;
     }
 
+    /**
+     * Instantiates a new Table records.
+     */
     public TableRecords() {
 
     }
 
+    /**
+     * Instantiates a new Table records.
+     *
+     * @param tableMeta the table meta
+     */
     public TableRecords(TableMeta tableMeta) {
         setTableMeta(tableMeta);
     }
 
+    /**
+     * Sets table meta.
+     *
+     * @param tableMeta the table meta
+     */
     public void setTableMeta(TableMeta tableMeta) {
         if (this.tableMeta != null) {
             throw new ShouldNeverHappenException();
@@ -66,14 +102,29 @@ public class TableRecords {
         this.tableName = tableMeta.getTableName();
     }
 
+    /**
+     * Size int.
+     *
+     * @return the int
+     */
     public int size() {
         return rows.size();
     }
 
+    /**
+     * Add.
+     *
+     * @param row the row
+     */
     public void add(Row row) {
         rows.add(row);
     }
 
+    /**
+     * Pk rows list.
+     *
+     * @return the list
+     */
     public List<Field> pkRows() {
         final String pkName = getTableMeta().getPkName();
         return new ArrayList<Field>() {
@@ -91,10 +142,21 @@ public class TableRecords {
         };
     }
 
+    /**
+     * Gets table meta.
+     *
+     * @return the table meta
+     */
     public TableMeta getTableMeta() {
         return tableMeta;
     }
 
+    /**
+     * Empty table records.
+     *
+     * @param tableMeta the table meta
+     * @return the table records
+     */
     public static TableRecords empty(TableMeta tableMeta) {
         return new TableRecords(tableMeta) {
             @Override
@@ -119,6 +181,14 @@ public class TableRecords {
         };
     }
 
+    /**
+     * Build records table records.
+     *
+     * @param tmeta     the tmeta
+     * @param resultSet the result set
+     * @return the table records
+     * @throws SQLException the sql exception
+     */
     public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet) throws SQLException {
         TableRecords records = new TableRecords(tmeta);
         ResultSetMetaData resultSetMetaData = resultSet.getMetaData();

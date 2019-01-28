@@ -28,20 +28,33 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- * @author tianming.xm@gmail.com
- * @since 2019/1/22
+ * The type Default session manager test.
+ *
+ * @author tianming.xm @gmail.com
+ * @since 2019 /1/22
  */
-
 public class DefaultSessionManagerTest {
 
     private SessionManager sessionManager = new DefaultSessionManager("test");
 
+    /**
+     * Add global session test.
+     *
+     * @param globalSession the global session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "globalSessionProvider")
     public void addGlobalSessionTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
         sessionManager.removeGlobalSession(globalSession);
     }
 
+    /**
+     * Find global session test.
+     *
+     * @param globalSession the global session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "globalSessionProvider")
     public void findGlobalSessionTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
@@ -56,6 +69,12 @@ public class DefaultSessionManagerTest {
         sessionManager.removeGlobalSession(globalSession);
     }
 
+    /**
+     * Update global session status test.
+     *
+     * @param globalSession the global session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "globalSessionProvider")
     public void updateGlobalSessionStatusTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
@@ -67,6 +86,12 @@ public class DefaultSessionManagerTest {
         sessionManager.removeGlobalSession(globalSession);
     }
 
+    /**
+     * Remove global session test.
+     *
+     * @param globalSession the global session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "globalSessionProvider")
     public void removeGlobalSessionTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
@@ -76,6 +101,13 @@ public class DefaultSessionManagerTest {
 
     }
 
+    /**
+     * Add branch session test.
+     *
+     * @param globalSession the global session
+     * @param branchSession the branch session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "branchSessionProvider")
     public void addBranchSessionTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
@@ -84,6 +116,13 @@ public class DefaultSessionManagerTest {
         sessionManager.removeGlobalSession(globalSession);
     }
 
+    /**
+     * Update branch session status test.
+     *
+     * @param globalSession the global session
+     * @param branchSession the branch session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "branchSessionProvider")
     public void updateBranchSessionStatusTest(GlobalSession globalSession, BranchSession branchSession)
         throws Exception {
@@ -94,6 +133,13 @@ public class DefaultSessionManagerTest {
         sessionManager.removeGlobalSession(globalSession);
     }
 
+    /**
+     * Remove branch session test.
+     *
+     * @param globalSession the global session
+     * @param branchSession the branch session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "branchSessionProvider")
     public void removeBranchSessionTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
@@ -102,6 +148,12 @@ public class DefaultSessionManagerTest {
         sessionManager.removeGlobalSession(globalSession);
     }
 
+    /**
+     * All sessions test.
+     *
+     * @param globalSessions the global sessions
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "globalSessionsProvider")
     public void allSessionsTest(List<GlobalSession> globalSessions) throws Exception {
         for (GlobalSession globalSession : globalSessions) {
@@ -115,6 +167,12 @@ public class DefaultSessionManagerTest {
         }
     }
 
+    /**
+     * Find global sessions test.
+     *
+     * @param globalSessions the global sessions
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "globalSessionsProvider")
     public void findGlobalSessionsTest(List<GlobalSession> globalSessions) throws Exception {
         for (GlobalSession globalSession : globalSessions) {
@@ -129,12 +187,24 @@ public class DefaultSessionManagerTest {
         }
     }
 
+    /**
+     * On begin test.
+     *
+     * @param globalSession the global session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "globalSessionProvider")
     public void onBeginTest(GlobalSession globalSession) throws Exception {
         sessionManager.onBegin(globalSession);
         sessionManager.onEnd(globalSession);
     }
 
+    /**
+     * On status change test.
+     *
+     * @param globalSession the global session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "globalSessionProvider")
     public void onStatusChangeTest(GlobalSession globalSession) throws Exception {
         sessionManager.onBegin(globalSession);
@@ -142,6 +212,13 @@ public class DefaultSessionManagerTest {
         sessionManager.onEnd(globalSession);
     }
 
+    /**
+     * On branch status change test.
+     *
+     * @param globalSession the global session
+     * @param branchSession the branch session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "branchSessionProvider")
     public void onBranchStatusChangeTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.onBegin(globalSession);
@@ -149,12 +226,26 @@ public class DefaultSessionManagerTest {
         sessionManager.onBranchStatusChange(globalSession, branchSession, BranchStatus.PhaseTwo_Committed);
     }
 
+    /**
+     * On add branch test.
+     *
+     * @param globalSession the global session
+     * @param branchSession the branch session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "branchSessionProvider")
     public void onAddBranchTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.onBegin(globalSession);
         sessionManager.onAddBranch(globalSession, branchSession);
     }
 
+    /**
+     * On remove branch test.
+     *
+     * @param globalSession the global session
+     * @param branchSession the branch session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "branchSessionProvider")
     public void onRemoveBranchTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.onBegin(globalSession);
@@ -162,24 +253,46 @@ public class DefaultSessionManagerTest {
         sessionManager.onRemoveBranch(globalSession, branchSession);
     }
 
+    /**
+     * On close test.
+     *
+     * @param globalSession the global session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "globalSessionProvider")
     public void onCloseTest(GlobalSession globalSession) throws Exception {
         sessionManager.onBegin(globalSession);
         sessionManager.onClose(globalSession);
     }
 
+    /**
+     * On end test.
+     *
+     * @param globalSession the global session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "globalSessionProvider")
     public void onEndTest(GlobalSession globalSession) throws Exception {
         sessionManager.onBegin(globalSession);
         sessionManager.onEnd(globalSession);
     }
 
+    /**
+     * Global session provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
     @DataProvider
     public static Object[][] globalSessionProvider() {
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
         return new Object[][] {{globalSession}};
     }
 
+    /**
+     * Global sessions provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
     @DataProvider
     public static Object[][] globalSessionsProvider() {
         GlobalSession globalSession1 = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
@@ -187,6 +300,11 @@ public class DefaultSessionManagerTest {
         return new Object[][] {{Arrays.asList(globalSession1, globalSession2)}};
     }
 
+    /**
+     * Branch session provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
     @DataProvider
     public static Object[][] branchSessionProvider() {
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);

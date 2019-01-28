@@ -29,10 +29,19 @@ import com.alibaba.fescar.rm.datasource.ParametersHolder;
 import com.alibaba.fescar.rm.datasource.sql.SQLDeleteRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
 
+/**
+ * The type My sql delete recognizer.
+ */
 public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRecognizer {
 
     private final MySqlDeleteStatement ast;
 
+    /**
+     * Instantiates a new My sql delete recognizer.
+     *
+     * @param originalSQL the original sql
+     * @param ast         the ast
+     */
     public MySQLDeleteRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
         this.ast = (MySqlDeleteStatement) ast;

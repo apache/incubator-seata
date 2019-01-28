@@ -26,15 +26,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/10/9 16:55
+ * The type Merged warp message.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /10/9 16:55
  * @FileName: MergedWarpMessage
  * @Description:
  */
 public class MergedWarpMessage extends AbstractMessage implements Serializable,MergeMessage {
     private static final long serialVersionUID = -5758802337446717090L;
+    /**
+     * The Msgs.
+     */
     public List<AbstractMessage> msgs = new ArrayList<AbstractMessage>();
+    /**
+     * The Msg ids.
+     */
     public List<Long> msgIds = new ArrayList<Long>();
     private static final Logger LOGGER = LoggerFactory.getLogger(MergedWarpMessage.class);
 

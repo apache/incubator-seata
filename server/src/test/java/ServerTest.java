@@ -23,9 +23,11 @@ import com.alibaba.fescar.server.UUIDGenerator;
 import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/12/4 19:34
+ * The type Server test.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /12/4 19:34
  * @FileName: ServerTest
  * @Description:
  */
@@ -34,6 +36,11 @@ public class ServerTest {
     private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
             new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
 
         RpcServer rpcServer = new RpcServer(workingThreads);

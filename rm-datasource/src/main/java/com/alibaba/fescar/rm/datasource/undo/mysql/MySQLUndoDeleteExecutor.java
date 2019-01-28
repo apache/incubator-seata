@@ -26,8 +26,16 @@ import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 import com.alibaba.fescar.rm.datasource.undo.AbstractUndoExecutor;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 
+/**
+ * The type My sql undo delete executor.
+ */
 public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
 
+    /**
+     * Instantiates a new My sql undo delete executor.
+     *
+     * @param sqlUndoLog the sql undo log
+     */
     public MySQLUndoDeleteExecutor(SQLUndoLog sqlUndoLog) {
         super(sqlUndoLog);
     }

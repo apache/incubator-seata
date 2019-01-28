@@ -34,8 +34,21 @@ import com.alibaba.fescar.rm.datasource.sql.struct.ColumnMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 
+/**
+ * The type Insert executor.
+ *
+ * @param <T> the type parameter
+ * @param <S> the type parameter
+ */
 public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
+    /**
+     * Instantiates a new Insert executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param sqlRecognizer     the sql recognizer
+     */
     public InsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }

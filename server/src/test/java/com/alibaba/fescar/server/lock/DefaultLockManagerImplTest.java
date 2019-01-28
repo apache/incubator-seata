@@ -24,10 +24,11 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- * @author zhimo.xiao@gmail.com
- * @since 2019/1/23
+ * The type Default lock manager impl test.
+ *
+ * @author zhimo.xiao @gmail.com
+ * @since 2019 /1/23
  */
-
 public class DefaultLockManagerImplTest {
 
     private LockManager lockManager = new DefaultLockManagerImpl();
@@ -38,6 +39,12 @@ public class DefaultLockManagerImplTest {
 
     private static final String lockKey = "tb_1:13";
 
+    /**
+     * Acquire lock test.
+     *
+     * @param branchSession the branch session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "branchSessionProvider")
     public void acquireLockTest(BranchSession branchSession) throws Exception {
         boolean result = lockManager.acquireLock(branchSession);
@@ -45,12 +52,22 @@ public class DefaultLockManagerImplTest {
         branchSession.unlock();
     }
 
+    /**
+     * Is lockable test.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void isLockableTest() throws Exception {
         boolean resultOne = lockManager.isLockable(transactionId, resourceId, lockKey);
         Assert.assertTrue(resultOne);
     }
 
+    /**
+     * Branch session provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
     @DataProvider
     public static Object[][] branchSessionProvider() {
         BranchSession branchSession = new BranchSession();

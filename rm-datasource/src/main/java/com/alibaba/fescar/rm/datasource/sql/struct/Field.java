@@ -21,56 +21,121 @@ package com.alibaba.fescar.rm.datasource.sql.struct;
  */
 public class Field {
 
-	public String name;
+    /**
+     * The Name.
+     */
+    public String name;
 
 	private KeyType keyType = KeyType.NULL;
 
-	public int type;
+    /**
+     * The Type.
+     */
+    public int type;
 
-	public Object value;
+    /**
+     * The Value.
+     */
+    public Object value;
 
-	public Field() {
-	}
+    /**
+     * Instantiates a new Field.
+     */
+    public Field() {
+    }
 
-	public Field(String name, int type, Object value) {
+    /**
+     * Instantiates a new Field.
+     *
+     * @param name  the name
+     * @param type  the type
+     * @param value the value
+     */
+    public Field(String name, int type, Object value) {
 		this.name = name;
 		this.type = type;
 		this.value = value;
 	}
 
-	public String getName() {
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
+    public String getName() {
 		return name;
 	}
 
-	public void setName(String attrName) {
+    /**
+     * Sets name.
+     *
+     * @param attrName the attr name
+     */
+    public void setName(String attrName) {
 		this.name = attrName;
 	}
 
-	public KeyType getKeyType() {
+    /**
+     * Gets key type.
+     *
+     * @return the key type
+     */
+    public KeyType getKeyType() {
 		return keyType;
 	}
 
-	public void setKeyType(KeyType keyType) {
+    /**
+     * Sets key type.
+     *
+     * @param keyType the key type
+     */
+    public void setKeyType(KeyType keyType) {
 		this.keyType = keyType;
 	}
 
-	public int getType() {
+    /**
+     * Gets type.
+     *
+     * @return the type
+     */
+    public int getType() {
 		return type;
 	}
 
-	public void setType(int attrType) {
+    /**
+     * Sets type.
+     *
+     * @param attrType the attr type
+     */
+    public void setType(int attrType) {
 		this.type = attrType;
 	}
 
-	public Object getValue() {
+    /**
+     * Gets value.
+     *
+     * @return the value
+     */
+    public Object getValue() {
 		return value;
 	}
 
-	public void setValue(Object value) {
+    /**
+     * Sets value.
+     *
+     * @param value the value
+     */
+    public void setValue(Object value) {
 		this.value = value;
 	}
 
-	public boolean isKey(String pkname) {
+    /**
+     * Is key boolean.
+     *
+     * @param pkname the pkname
+     * @return the boolean
+     */
+    public boolean isKey(String pkname) {
 		return name.equalsIgnoreCase(pkname);
 	}
 

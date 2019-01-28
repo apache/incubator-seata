@@ -21,9 +21,11 @@ import java.nio.ByteBuffer;
 import io.netty.buffer.ByteBuf;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/9/14 17:07
+ * The type Abstract result message.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /9/14 17:07
  * @FileName: AbstractResultMessage
  * @Description:
  */
@@ -32,26 +34,52 @@ public abstract class AbstractResultMessage extends AbstractMessage implements M
 
     private ResultCode resultCode;
 
+    /**
+     * The Byte buffer.
+     */
     public ByteBuffer byteBuffer = ByteBuffer.allocate(512);
 
+    /**
+     * Gets result code.
+     *
+     * @return the result code
+     */
     public ResultCode getResultCode() {
         return resultCode;
     }
 
+    /**
+     * Sets result code.
+     *
+     * @param resultCode the result code
+     */
     public void setResultCode(ResultCode resultCode) {
         this.resultCode = resultCode;
     }
 
     private String msg;
 
+    /**
+     * Gets msg.
+     *
+     * @return the msg
+     */
     public String getMsg() {
         return msg;
     }
 
+    /**
+     * Sets msg.
+     *
+     * @param msg the msg
+     */
     public void setMsg(String msg) {
         this.msg = msg;
     }
 
+    /**
+     * Do encode.
+     */
     protected void doEncode() {
         byteBuffer.put((byte) resultCode.ordinal());
         if (resultCode == ResultCode.Failed) {

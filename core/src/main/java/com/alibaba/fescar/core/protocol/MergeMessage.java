@@ -17,9 +17,11 @@
 package com.alibaba.fescar.core.protocol;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/10/9 16:31
+ * The interface Merge message.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /10/9 16:31
  * @FileName: MergeMessage
  * @Description:
  */
