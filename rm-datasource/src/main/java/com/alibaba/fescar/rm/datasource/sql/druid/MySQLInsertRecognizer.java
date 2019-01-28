@@ -31,10 +31,19 @@ import com.alibaba.fescar.rm.datasource.sql.SQLInsertRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLParsingException;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
 
+/**
+ * The type My sql insert recognizer.
+ */
 public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRecognizer {
 
     private final MySqlInsertStatement ast;
 
+    /**
+     * Instantiates a new My sql insert recognizer.
+     *
+     * @param originalSQL the original sql
+     * @param ast         the ast
+     */
     public MySQLInsertRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
         this.ast = (MySqlInsertStatement) ast;
@@ -75,7 +84,7 @@ public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRe
         List<String> list = new ArrayList<>(columnSQLExprs.size());
         for (SQLExpr expr : columnSQLExprs) {
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr) expr).getName());
+                list.add(((SQLIdentifierExpr)expr).getName());
             } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
             }

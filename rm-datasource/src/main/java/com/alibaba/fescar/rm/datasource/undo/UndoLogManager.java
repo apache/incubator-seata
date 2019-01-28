@@ -38,6 +38,9 @@ import org.slf4j.LoggerFactory;
 
 import static com.alibaba.fescar.core.exception.TransactionExceptionCode.BranchRollbackFailed_Retriable;
 
+/**
+ * The type Undo log manager.
+ */
 public final class UndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UndoLogManager.class);
@@ -45,10 +48,10 @@ public final class UndoLogManager {
     private static String UNDO_LOG_TABLE_NAME = "undo_log";
 
     private static String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
-            "\t(branch_id, xid, rollback_info, log_status, log_created, log_modified)\n" +
-            "VALUES (?, ?, ?, 0, now(), now())";
+        "\t(branch_id, xid, rollback_info, log_status, log_created, log_modified)\n" +
+        "VALUES (?, ?, ?, 0, now(), now())";
     private static String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + "\n" +
-            "\tWHERE branch_id = ? AND xid = ?";
+        "\tWHERE branch_id = ? AND xid = ?";
 
     private static String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME + " WHERE log_status = 0 AND branch_id = ? AND xid = ? FOR UPDATE";
 
@@ -56,6 +59,12 @@ public final class UndoLogManager {
 
     }
 
+    /**
+     * Flush undo logs.
+     *
+     * @param cp the cp
+     * @throws SQLException the sql exception
+     */
     public static void flushUndoLogs(ConnectionProxy cp) throws SQLException {
         assertDbSupport(cp.getDbType());
 
@@ -101,6 +110,14 @@ public final class UndoLogManager {
         }
     }
 
+    /**
+     * Undo.
+     *
+     * @param dataSourceProxy the data source proxy
+     * @param xid             the xid
+     * @param branchId        the branch id
+     * @throws TransactionException the transaction exception
+     */
     public static void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {
         assertDbSupport(dataSourceProxy.getTargetDataSource().getDbType());
 
@@ -164,6 +181,14 @@ public final class UndoLogManager {
 
     }
 
+    /**
+     * Delete undo log.
+     *
+     * @param xid      the xid
+     * @param branchId the branch id
+     * @param conn     the conn
+     * @throws SQLException the sql exception
+     */
     public static void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
         PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
         deletePST.setLong(1, branchId);

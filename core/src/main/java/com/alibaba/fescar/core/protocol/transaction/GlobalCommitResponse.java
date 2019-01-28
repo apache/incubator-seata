@@ -16,6 +16,9 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
+/**
+ * The type Global commit response.
+ */
 public class GlobalCommitResponse extends AbstractGlobalEndResponse {
 
     @Override

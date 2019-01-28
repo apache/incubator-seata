@@ -19,6 +19,9 @@ package com.alibaba.fescar.core.protocol.transaction;
 import com.alibaba.fescar.core.protocol.MergedMessage;
 import com.alibaba.fescar.core.rpc.RpcContext;
 
+/**
+ * The type Global lock query request.
+ */
 public class GlobalLockQueryRequest extends BranchRegisterRequest implements MergedMessage {
 
     @Override

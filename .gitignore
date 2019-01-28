@@ -24,7 +24,10 @@ target/
 *.diff
 *.patch
 *.tmp
-distribution/*
+/distribution/bin
+/distribution/conf
+/distribution/lib
+server/*root.*
 
 # system ignore
 .DS_Store

@@ -16,31 +16,43 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
-import com.alibaba.fescar.common.Constants;
-import com.alibaba.fescar.config.Configuration;
-import com.alibaba.fescar.config.ConfigurationFactory;
-
-import org.junit.Ignore;
 import org.junit.Test;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/12/26 14:32
+ * The type Tm rpc client test.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /12/26 14:32
  * @FileName: TmRpcClientTest
  * @Description:
  */
 public class TmRpcClientTest {
+    /**
+     * Do connect.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void doConnect() throws Exception {
 
     }
 
+    /**
+     * Gets application id.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void getApplicationId() throws Exception {
 
     }
 
+    /**
+     * Sets application id.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void setApplicationId() throws Exception {
 

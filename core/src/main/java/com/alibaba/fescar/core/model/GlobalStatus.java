@@ -24,71 +24,122 @@ import java.util.Map;
  */
 public enum GlobalStatus {
 
+    /**
+     * Un known global status.
+     */
     // Unknown
     UnKnown,
 
+    /**
+     * The Begin.
+     */
     // PHASE 1: can accept new branch registering.
     Begin,
 
-
-    /** PHASE 2: Running Status: may be changed any time. */
-
+    /**
+     * PHASE 2: Running Status: may be changed any time.
+     */
     // Committing.
     Committing,
 
+    /**
+     * The Commit retrying.
+     */
     // Retrying commit after a recoverable failure.
     CommitRetrying,
 
+    /**
+     * Rollbacking global status.
+     */
     // Rollbacking
     Rollbacking,
 
+    /**
+     * The Rollback retrying.
+     */
     // Retrying rollback after a recoverable failure.
     RollbackRetrying,
 
+    /**
+     * The Timeout rollbacking.
+     */
     // Rollbacking since timeout
     TimeoutRollbacking,
 
+    /**
+     * The Timeout rollback retrying.
+     */
     // Retrying rollback (since timeout) after a recoverable failure.
     TimeoutRollbackRetrying,
 
-
-    /** PHASE 2: Final Status: will NOT change any more. */
-
+    /**
+     * PHASE 2: Final Status: will NOT change any more.
+     */
     // Finally: global transaction is successfully committed.
     Committed,
 
+    /**
+     * The Commit failed.
+     */
     // Finally: failed to commit
     CommitFailed,
 
+    /**
+     * The Rollbacked.
+     */
     // Finally: global transaction is successfully rollbacked.
     Rollbacked,
 
+    /**
+     * The Rollback failed.
+     */
     // Finally: failed to rollback
     RollbackFailed,
 
+    /**
+     * The Timeout rollbacked.
+     */
     // Finally: global transaction is successfully rollbacked since timeout.
     TimeoutRollbacked,
 
+    /**
+     * The Timeout rollback failed.
+     */
     // Finally: failed to rollback since timeout
     TimeoutRollbackFailed,
 
-    // Not managed in session map any more
+    /**
+     * The Finished.
+     */
+    // Not managed in session MAP any more
     Finished;
 
-    private static final Map<Integer, GlobalStatus> map = new HashMap<>(values().length);
+    private static final Map<Integer, GlobalStatus> MAP = new HashMap<>(values().length);
 
     static {
         for (GlobalStatus status : values()) {
-            map.put(status.ordinal(), status);
+            MAP.put(status.ordinal(), status);
         }
     }
 
+    /**
+     * Get global status.
+     *
+     * @param ordinal the ordinal
+     * @return the global status
+     */
     public static GlobalStatus get(byte ordinal) {
         return get((int) ordinal);
     }
 
+    /**
+     * Get global status.
+     *
+     * @param ordinal the ordinal
+     * @return the global status
+     */
     public static GlobalStatus get(int ordinal) {
-        GlobalStatus status = map.get(ordinal);
+        GlobalStatus status = MAP.get(ordinal);
 
         if (null == status) {
             throw new IllegalArgumentException("Unknown GlobalStatus[" + ordinal + "]");

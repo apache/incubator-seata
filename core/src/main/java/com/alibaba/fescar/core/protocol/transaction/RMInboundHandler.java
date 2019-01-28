@@ -16,9 +16,24 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
+/**
+ * The interface Rm inbound handler.
+ */
 public interface RMInboundHandler {
 
+    /**
+     * Handle branch commit response.
+     *
+     * @param request the request
+     * @return the branch commit response
+     */
     BranchCommitResponse handle(BranchCommitRequest request);
 
+    /**
+     * Handle branch rollback response.
+     *
+     * @param request the request
+     * @return the branch rollback response
+     */
     BranchRollbackResponse handle(BranchRollbackRequest request);
 }
