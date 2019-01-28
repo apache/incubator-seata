@@ -71,6 +71,10 @@ public class GlobalTransactionContext {
         return tx;
     }
 
+    public static boolean isExistingTransaction() {
+        return getCurrent() != null;
+    }
+
     /**
      * Clean context.
      */

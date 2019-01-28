@@ -33,6 +33,7 @@ public class TransactionalTemplate {
     public Object execute(TransactionalExecutor business) throws TransactionalExecutor.ExecutionException {
 
         // 1. get or create a transaction
+        boolean isExistingTransaction = GlobalTransactionContext.isExistingTransaction();
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
 
         // 2. begin transaction
@@ -55,6 +56,9 @@ public class TransactionalTemplate {
 
             // 3. any business exception, rollback.
             try {
+                if (!isExistingTransaction) {
+                    GlobalTransactionContext.clean();
+                }
                 tx.rollback();
 
                 // 3.1 Successfully rolled back
@@ -71,6 +75,9 @@ public class TransactionalTemplate {
 
         // 4. everything is fine, commit.
         try {
+            if (!isExistingTransaction) {
+                GlobalTransactionContext.clean();
+            }
             tx.commit();
 
         } catch (TransactionException txe) {
