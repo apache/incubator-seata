@@ -16,13 +16,6 @@
 
 package com.alibaba.fescar.rm.datasource.exec;
 
-import com.alibaba.fescar.rm.datasource.ParametersHolder;
-import com.alibaba.fescar.rm.datasource.StatementProxy;
-import com.alibaba.fescar.rm.datasource.sql.SQLDeleteRecognizer;
-import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
-import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
-import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,8 +23,28 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alibaba.fescar.rm.datasource.ParametersHolder;
+import com.alibaba.fescar.rm.datasource.StatementProxy;
+import com.alibaba.fescar.rm.datasource.sql.SQLDeleteRecognizer;
+import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
+import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
+import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
+
+/**
+ * The type Delete executor.
+ *
+ * @param <T> the type parameter
+ * @param <S> the type parameter
+ */
 public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
+    /**
+     * Instantiates a new Delete executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param sqlRecognizer     the sql recognizer
+     */
     public DeleteExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }

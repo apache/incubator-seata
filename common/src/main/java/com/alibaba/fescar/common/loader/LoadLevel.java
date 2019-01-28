@@ -23,9 +23,11 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/10/10 14:26
+ * The interface Load level.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /10/10 14:26
  * @FileName: LoadLevel
  * @Description:
  */
@@ -33,7 +35,17 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface LoadLevel {
+    /**
+     * Name string.
+     *
+     * @return the string
+     */
     String name();
 
+    /**
+     * Order int.
+     *
+     * @return the int
+     */
     int order();
 }

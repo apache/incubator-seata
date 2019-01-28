@@ -35,9 +35,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/10/10 14:28
+ * The type Enhanced service loader.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /10/10 14:28
  * @FileName: EnhancedServiceLoader
  * @Description:
  */
@@ -51,10 +53,11 @@ public class EnhancedServiceLoader {
     /**
      * 指定classLoader加载server provider
      *
-     * @param service
-     * @param loader
-     * @return
-     * @throws EnhancedServiceNotFoundException
+     * @param <S>     the type parameter
+     * @param service the service
+     * @param loader  the loader
+     * @return s
+     * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service, ClassLoader loader) throws EnhancedServiceNotFoundException {
         return loadFile(service, null, loader);
@@ -63,9 +66,10 @@ public class EnhancedServiceLoader {
     /**
      * 加载server provider
      *
-     * @param service
-     * @return
-     * @throws EnhancedServiceNotFoundException
+     * @param <S>     the type parameter
+     * @param service the service
+     * @return s
+     * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service) throws EnhancedServiceNotFoundException {
         return loadFile(service, null, findClassLoader());
@@ -74,9 +78,11 @@ public class EnhancedServiceLoader {
     /**
      * 加载server provider
      *
-     * @param service
-     * @return
-     * @throws EnhancedServiceNotFoundException
+     * @param <S>          the type parameter
+     * @param service      the service
+     * @param activateName the activate name
+     * @return s
+     * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service, String activateName) throws EnhancedServiceNotFoundException {
         return loadFile(service, activateName, findClassLoader());
@@ -85,10 +91,12 @@ public class EnhancedServiceLoader {
     /**
      * 指定classLoader加载server provider
      *
-     * @param service
-     * @param loader
-     * @return
-     * @throws EnhancedServiceNotFoundException
+     * @param <S>          the type parameter
+     * @param service      the service
+     * @param activateName the activate name
+     * @param loader       the loader
+     * @return s
+     * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service, String activateName, ClassLoader loader) throws EnhancedServiceNotFoundException {
         return loadFile(service, activateName, loader);
@@ -97,7 +105,9 @@ public class EnhancedServiceLoader {
     /**
      * 获取所有的扩展类，按照{@linkplain LoadLevel}定义的order顺序进行排序
      *
-     * @return
+     * @param <S>     the type parameter
+     * @param service the service
+     * @return all extension class
      */
     @SuppressWarnings("rawtypes")
     public static <S> List<Class> getAllExtensionClass(Class<S> service) {
@@ -107,7 +117,10 @@ public class EnhancedServiceLoader {
     /**
      * 获取所有的扩展类，按照{@linkplain LoadLevel}定义的order顺序进行排序
      *
-     * @return
+     * @param <S>     the type parameter
+     * @param service the service
+     * @param loader  the loader
+     * @return all extension class
      */
     @SuppressWarnings("rawtypes")
     public static <S> List<Class> getAllExtensionClass(Class<S> service, ClassLoader loader) {

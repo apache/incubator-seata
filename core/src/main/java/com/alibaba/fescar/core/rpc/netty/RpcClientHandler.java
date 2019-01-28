@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * The type Rpc client handler.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /9/12 17:10
  * @FileName: RpcClientHandler
  * @Description:

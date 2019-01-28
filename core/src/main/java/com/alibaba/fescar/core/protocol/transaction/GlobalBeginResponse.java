@@ -20,6 +20,9 @@ import java.nio.ByteBuffer;
 
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 
+/**
+ * The type Global begin response.
+ */
 public class GlobalBeginResponse extends AbstractTransactionResponse {
 
     private static final long serialVersionUID = -5947172130577163908L;
@@ -28,18 +31,38 @@ public class GlobalBeginResponse extends AbstractTransactionResponse {
 
     private String extraData;
 
+    /**
+     * Gets xid.
+     *
+     * @return the xid
+     */
     public String getXid() {
         return xid;
     }
 
+    /**
+     * Sets xid.
+     *
+     * @param xid the xid
+     */
     public void setXid(String xid) {
         this.xid = xid;
     }
 
+    /**
+     * Gets extra data.
+     *
+     * @return the extra data
+     */
     public String getExtraData() {
         return extraData;
     }
 
+    /**
+     * Sets extra data.
+     *
+     * @param extraData the extra data
+     */
     public void setExtraData(String extraData) {
         this.extraData = extraData;
     }
