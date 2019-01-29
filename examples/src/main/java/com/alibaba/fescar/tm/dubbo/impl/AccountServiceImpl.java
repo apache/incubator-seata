@@ -34,7 +34,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class AccountServiceImpl implements AccountService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccountService.class);
 
     private JdbcTemplate jdbcTemplate;
 
