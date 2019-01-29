@@ -65,6 +65,8 @@ public class TransactionalTemplate {
                 throw new TransactionalExecutor.ExecutionException(tx, txe,
                     TransactionalExecutor.Code.RollbackFailure, ex);
 
+            } finally {
+                GlobalTransactionContext.clean();
             }
 
         }
@@ -78,6 +80,8 @@ public class TransactionalTemplate {
             throw new TransactionalExecutor.ExecutionException(tx, txe,
                 TransactionalExecutor.Code.CommitFailure);
 
+        } finally {
+            GlobalTransactionContext.clean();
         }
         return rs;
     }
