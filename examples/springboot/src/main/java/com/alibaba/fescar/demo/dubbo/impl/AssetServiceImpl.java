@@ -13,10 +13,6 @@ import com.alibaba.fescar.demo.dubbo.AssetService;
 import com.alibaba.fescar.demo.sys.domain.Asset;
 import com.alibaba.fescar.demo.sys.repository.AssetRepository;
 
-/**
- * @Description
- * @author 张国豪
- */
 @Service(interfaceClass = AssetService.class, timeout = 10000)
 @Component
 public class AssetServiceImpl implements AssetService {

@@ -6,12 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import com.alibaba.fescar.demo.sys.domain.Asset;
 
-/**
- * 用户表操作Repository
- *
- * @author 张国豪
- * @Description
- */
 @Repository
 public interface AssetRepository extends PagingAndSortingRepository<Asset, String>, JpaSpecificationExecutor<Asset> {
 }

@@ -15,12 +15,6 @@ import org.springframework.context.annotation.Primary;
 
 import javax.sql.DataSource;
 
-/**
- * Druid数据源配置
- * 
- * @Description
- * @author 张国豪
- */
 @Configuration
 public class DruidConfiguration {
 
