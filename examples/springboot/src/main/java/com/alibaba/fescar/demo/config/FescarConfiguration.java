@@ -6,12 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * fescar配置
- * 
- * @Description
- * @author 张国豪
- */
 @Configuration
 public class FescarConfiguration {
 

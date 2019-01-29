@@ -5,13 +5,13 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 DROP TABLE IF EXISTS `t_asset_assign`;
 CREATE TABLE `t_asset_assign`  (
-  `id` varchar(32) NOT NULL COMMENT '主键',
-  `asset_id` varchar(32) NOT NULL COMMENT '原凭证ID',
-  `desc` varchar(255)  NULL DEFAULT NULL COMMENT '描述',
-  `status` char(2)  NOT NULL COMMENT '状态',
-  `create_user` varchar(32)  NOT NULL COMMENT '创建人ID,对应df_system.t_user.id',
+  `id` varchar(32) NOT NULL COMMENT '',
+  `asset_id` varchar(32) NOT NULL COMMENT '',
+  `desc` varchar(255)  NULL DEFAULT NULL COMMENT '',
+  `status` char(2)  NOT NULL COMMENT '',
+  `create_user` varchar(32)  NOT NULL COMMENT '',
   `create_time` datetime(0) NOT NULL,
-  `update_user` varchar(32)  NOT NULL COMMENT '更新人ID,对应df_system.t_user.id',
+  `update_user` varchar(32)  NOT NULL COMMENT '',
   `update_time` datetime(0) NOT NULL,
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB;
@@ -26,9 +26,9 @@ INSERT INTO `t_asset_assign` VALUES ('14070e0e3cfe403098fa9ca37e8e7e76', 'e2d1c4
 -- ----------------------------
 DROP TABLE IF EXISTS `t_asset`;
 CREATE TABLE `t_asset`  (
-  `id` varchar(32)  NOT NULL COMMENT '主键',
-  `voucher_code` varchar(100)   NOT NULL COMMENT '凭证编号',
-  `amount` decimal(12, 0) NOT NULL COMMENT '凭证金额，单位为分',
+  `id` varchar(32)  NOT NULL COMMENT '',
+  `voucher_code` varchar(100)   NOT NULL COMMENT '',
+  `amount` decimal(12, 0) NOT NULL COMMENT '',
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB;
 

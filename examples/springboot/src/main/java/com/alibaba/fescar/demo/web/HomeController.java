@@ -7,14 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.fescar.demo.dubbo.AssetService;
 
-/**   
-* @Description
-* @author 张国豪
-*/
-/**
- * @Description
- * @author 张国豪
- */
 @Controller
 @RequestMapping
 public class HomeController {
