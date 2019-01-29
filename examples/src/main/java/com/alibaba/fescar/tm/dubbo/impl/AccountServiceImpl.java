@@ -19,7 +19,6 @@ package com.alibaba.fescar.tm.dubbo.impl;
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.test.common.ApplicationKeeper;
 import com.alibaba.fescar.tm.dubbo.AccountService;
-import com.alibaba.fescar.tm.dubbo.OrderService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
