@@ -39,6 +39,9 @@ import static com.alibaba.fescar.core.exception.TransactionExceptionCode.GlobalT
 import static com.alibaba.fescar.core.exception.TransactionExceptionCode.GlobalTransactionStatusInvalid;
 import static com.alibaba.fescar.core.exception.TransactionExceptionCode.LockKeyConflict;
 
+/**
+ * The type Default core.
+ */
 public class DefaultCore implements Core {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCore.class);
@@ -118,7 +121,7 @@ public class DefaultCore implements Core {
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout) throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession(
-                applicationId, transactionServiceGroup, name, timeout);
+            applicationId, transactionServiceGroup, name, timeout);
         session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
 
         session.begin();
@@ -156,7 +159,7 @@ public class DefaultCore implements Core {
             }
             try {
                 BranchStatus branchStatus = resourceManagerInbound.branchCommit(XID.generateXID(branchSession.getTransactionId()), branchSession.getBranchId(),
-                        branchSession.getResourceId(), branchSession.getApplicationData());
+                    branchSession.getResourceId(), branchSession.getApplicationData());
 
                 switch (branchStatus) {
                     case PhaseTwo_Committed:

@@ -34,10 +34,15 @@ import org.springframework.jdbc.core.JdbcTemplate;
  */
 public class AccountServiceImpl implements AccountService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AccountService.class);
 
     private JdbcTemplate jdbcTemplate;
 
+    /**
+     * Sets jdbc template.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -51,6 +56,11 @@ public class AccountServiceImpl implements AccountService {
         LOGGER.info("Account Service End ... ");
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"dubbo-account-service.xml"});
         context.getBean("service");

@@ -23,25 +23,85 @@ import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.GlobalStatus;
 
-
+/**
+ * The interface Session manager.
+ */
 public interface SessionManager extends SessionLifecycleListener {
 
+    /**
+     * Add global session.
+     *
+     * @param session the session
+     * @throws TransactionException the transaction exception
+     */
     void addGlobalSession(GlobalSession session) throws TransactionException;
 
+    /**
+     * Find global session global session.
+     *
+     * @param transactionId the transaction id
+     * @return the global session
+     * @throws TransactionException the transaction exception
+     */
     GlobalSession findGlobalSession(Long transactionId) throws TransactionException;
 
+    /**
+     * Update global session status.
+     *
+     * @param session the session
+     * @param status  the status
+     * @throws TransactionException the transaction exception
+     */
     void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException;
 
+    /**
+     * Remove global session.
+     *
+     * @param session the session
+     * @throws TransactionException the transaction exception
+     */
     void removeGlobalSession(GlobalSession session) throws TransactionException;
 
+    /**
+     * Add branch session.
+     *
+     * @param globalSession the global session
+     * @param session       the session
+     * @throws TransactionException the transaction exception
+     */
     void addBranchSession(GlobalSession globalSession, BranchSession session) throws TransactionException;
 
+    /**
+     * Update branch session status.
+     *
+     * @param session the session
+     * @param status  the status
+     * @throws TransactionException the transaction exception
+     */
     void updateBranchSessionStatus(BranchSession session, BranchStatus status) throws TransactionException;
 
+    /**
+     * Remove branch session.
+     *
+     * @param globalSession the global session
+     * @param session       the session
+     * @throws TransactionException the transaction exception
+     */
     void removeBranchSession(GlobalSession globalSession, BranchSession session) throws TransactionException;
 
+    /**
+     * All sessions collection.
+     *
+     * @return the collection
+     */
     Collection<GlobalSession> allSessions();
 
+    /**
+     * Find global sessions list.
+     *
+     * @param condition the condition
+     * @return the list
+     */
     List<GlobalSession> findGlobalSessions(SessionCondition condition);
 
 

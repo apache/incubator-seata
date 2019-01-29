@@ -37,6 +37,11 @@ public class StorageServiceImpl implements StorageService {
 
     private JdbcTemplate jdbcTemplate;
 
+    /**
+     * Sets jdbc template.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -53,6 +58,11 @@ public class StorageServiceImpl implements StorageService {
 
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
             new String[] {"dubbo-storage-service.xml"});

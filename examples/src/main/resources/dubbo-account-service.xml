@@ -17,8 +17,8 @@
 
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://code.alibabatech.com/schema/dubbo http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+       xmlns:dubbo="http://dubbo.apache.org/schema/dubbo"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://dubbo.apache.org/schema/dubbo http://dubbo.apache.org/schema/dubbo/dubbo.xsd">
 
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations" value="classpath:jdbc.properties"/>
@@ -58,6 +58,8 @@
     <dubbo:registry address="multicast://224.5.6.7:1234?unicast=false" />
     <!--support zk-->
     <!--dubbo:registry address="zookeeper://test.zk1.cc:1234?backup=test.zk2.cc:1234,test.zk3.cc:1234" /-->
+    <!--support nacos-->
+    <!-- <dubbo:registry address="nacos://127.0.0.1:8848"/> -->
     <dubbo:protocol name="dubbo" port="20881" />
     <dubbo:service interface="com.alibaba.fescar.tm.dubbo.AccountService" ref="service" timeout="10000"/>
 

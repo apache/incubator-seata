@@ -90,10 +90,20 @@ public class OrderServiceImpl implements OrderService {
         return order;
     }
 
+    /**
+     * Sets account service.
+     *
+     * @param accountService the account service
+     */
     public void setAccountService(AccountService accountService) {
         this.accountService = accountService;
     }
 
+    /**
+     * Sets jdbc template.
+     *
+     * @param jdbcTemplate the jdbc template
+     */
     public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
@@ -102,6 +112,11 @@ public class OrderServiceImpl implements OrderService {
         return 200 * orderCount;
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
 
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(new String[]{"dubbo-order-service.xml"});

@@ -22,56 +22,124 @@ import com.alibaba.fescar.core.model.BranchType;
 
 import io.netty.buffer.ByteBuf;
 
+/**
+ * The type Abstract branch end request.
+ */
 public abstract class AbstractBranchEndRequest extends AbstractTransactionRequestToRM {
 
     private static final long serialVersionUID = 5083828939317068713L;
 
+    /**
+     * The Xid.
+     */
     protected String xid;
 
+    /**
+     * The Branch id.
+     */
     protected long branchId;
 
+    /**
+     * The Branch type.
+     */
     protected BranchType branchType = BranchType.AT;
 
+    /**
+     * The Resource id.
+     */
     protected String resourceId;
 
+    /**
+     * The Application data.
+     */
     protected String applicationData;
 
+    /**
+     * Gets xid.
+     *
+     * @return the xid
+     */
     public String getXid() {
         return xid;
     }
 
+    /**
+     * Sets xid.
+     *
+     * @param xid the xid
+     */
     public void setXid(String xid) {
         this.xid = xid;
     }
 
+    /**
+     * Gets branch id.
+     *
+     * @return the branch id
+     */
     public long getBranchId() {
         return branchId;
     }
 
+    /**
+     * Sets branch id.
+     *
+     * @param branchId the branch id
+     */
     public void setBranchId(long branchId) {
         this.branchId = branchId;
     }
 
+    /**
+     * Gets branch type.
+     *
+     * @return the branch type
+     */
     public BranchType getBranchType() {
         return branchType;
     }
 
+    /**
+     * Sets branch type.
+     *
+     * @param branchType the branch type
+     */
     public void setBranchType(BranchType branchType) {
         this.branchType = branchType;
     }
 
+    /**
+     * Gets resource id.
+     *
+     * @return the resource id
+     */
     public String getResourceId() {
         return resourceId;
     }
 
+    /**
+     * Sets resource id.
+     *
+     * @param resourceId the resource id
+     */
     public void setResourceId(String resourceId) {
         this.resourceId = resourceId;
     }
 
+    /**
+     * Gets application data.
+     *
+     * @return the application data
+     */
     public String getApplicationData() {
         return applicationData;
     }
 
+    /**
+     * Sets application data.
+     *
+     * @param applicationData the application data
+     */
     public void setApplicationData(String applicationData) {
         this.applicationData = applicationData;
     }

@@ -22,11 +22,18 @@ import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 
 /**
- * @author hanwen
- * created at 2019-01-25
+ * The type Abstract my sql recognizer test.
+ *
+ * @author hanwen  created at 2019-01-25
  */
 public class AbstractMySQLRecognizerTest {
 
+    /**
+     * Gets sql statement.
+     *
+     * @param sql the sql
+     * @return the sql statement
+     */
     public SQLStatement getSQLStatement(String sql) {
         List<SQLStatement> stats = SQLUtils.parseStatements(sql, "mysql");
         return stats.get(0);

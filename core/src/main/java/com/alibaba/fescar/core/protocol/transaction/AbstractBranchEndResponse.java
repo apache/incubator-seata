@@ -22,14 +22,30 @@ import com.alibaba.fescar.core.model.BranchStatus;
 
 import io.netty.buffer.ByteBuf;
 
+/**
+ * The type Abstract branch end response.
+ */
 public abstract class AbstractBranchEndResponse extends AbstractTransactionResponse {
 
+    /**
+     * The Branch status.
+     */
     protected BranchStatus branchStatus;
 
+    /**
+     * Gets branch status.
+     *
+     * @return the branch status
+     */
     public BranchStatus getBranchStatus() {
         return branchStatus;
     }
 
+    /**
+     * Sets branch status.
+     *
+     * @param branchStatus the branch status
+     */
     public void setBranchStatus(BranchStatus branchStatus) {
         this.branchStatus = branchStatus;
     }

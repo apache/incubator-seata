@@ -25,7 +25,7 @@ import io.netty.util.concurrent.FastThreadLocalThread;
  * The type Named thread factory.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /9/12 14:24
  * @FileName: NamedThreadFactory
  * @Description:

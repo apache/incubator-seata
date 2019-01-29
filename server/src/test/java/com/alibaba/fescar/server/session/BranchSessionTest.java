@@ -23,11 +23,18 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- * @author tianming.xm@gmail.com
- * @since 2019/1/23
+ * The type Branch session test.
+ *
+ * @author tianming.xm @gmail.com
+ * @since 2019 /1/23
  */
 public class BranchSessionTest {
 
+    /**
+     * Codec test.
+     *
+     * @param branchSession the branch session
+     */
     @Test(dataProvider = "branchSessionProvider")
     public void codecTest(BranchSession branchSession) {
         byte[] result = branchSession.encode();
@@ -45,6 +52,11 @@ public class BranchSessionTest {
 
     }
 
+    /**
+     * Branch session provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
     @DataProvider
     public static Object[][] branchSessionProvider() {
         BranchSession branchSession = new BranchSession();

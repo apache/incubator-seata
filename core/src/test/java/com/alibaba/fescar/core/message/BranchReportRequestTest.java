@@ -25,11 +25,18 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * @author xiajun.0706@163.com
- * @since 2019/1/24
+ * The type Branch report request test.
+ *
+ * @author xiajun.0706 @163.com
+ * @since 2019 /1/24
  */
 public class BranchReportRequestTest {
 
+    /**
+     * Test to string.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testToString() throws Exception {
         BranchReportRequest branchReportRequest = new BranchReportRequest();
@@ -46,6 +53,11 @@ public class BranchReportRequestTest {
             branchReportRequest.toString());
     }
 
+    /**
+     * Test encode.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testEncode() throws Exception {
         BranchReportRequest branchReportRequest = new BranchReportRequest();
@@ -67,6 +79,11 @@ public class BranchReportRequestTest {
             encodeResultStr);
     }
 
+    /**
+     * Test decode.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testDecode() throws Exception {
         BranchReportRequest branchReportRequest = new BranchReportRequest();
