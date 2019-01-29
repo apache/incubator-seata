@@ -37,7 +37,7 @@ public interface TransactionMessageHandler {
      * On a response received.
      *
      * @param response received response message
-     * @param context context of the RPC
+     * @param context  context of the RPC
      */
     void onResponse(AbstractResultMessage response, RpcContext context);
 

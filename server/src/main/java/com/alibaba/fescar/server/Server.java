@@ -27,14 +27,23 @@ import com.alibaba.fescar.core.rpc.netty.RpcServer;
 import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
 import com.alibaba.fescar.server.session.SessionHolder;
 
+/**
+ * The type Server.
+ */
 public class Server {
 
     private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
-            new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+        new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     * @throws IOException the io exception
+     */
     public static void main(String[] args) throws IOException {
         RpcServer rpcServer = new RpcServer(WORKING_THREADS);
-        
+
         int port = 8091;
         if (args.length == 0) {
             rpcServer.setListenPort(port);
@@ -49,7 +58,7 @@ public class Server {
             }
             rpcServer.setListenPort(port);
         }
-        
+
         String dataDir = null;
         if (args.length > 1) {
             dataDir = args[1];

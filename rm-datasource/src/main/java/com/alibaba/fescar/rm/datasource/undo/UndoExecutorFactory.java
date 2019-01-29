@@ -24,8 +24,18 @@ import com.alibaba.fescar.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
 import com.alibaba.fescar.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
 import com.alibaba.fescar.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
 
+/**
+ * The type Undo executor factory.
+ */
 public class UndoExecutorFactory {
 
+    /**
+     * Gets undo executor.
+     *
+     * @param dbType     the db type
+     * @param sqlUndoLog the sql undo log
+     * @return the undo executor
+     */
     public static AbstractUndoExecutor getUndoExecutor(String dbType, SQLUndoLog sqlUndoLog) {
         if (!dbType.equals(JdbcConstants.MYSQL)) {
             throw new NotSupportYetException(dbType);

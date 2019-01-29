@@ -19,16 +19,24 @@ package com.alibaba.fescar.core.protocol;
 import java.io.Serializable;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/9/14 15:32
+ * The type Heartbeat message.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /9/14 15:32
  * @FileName: HeartbeatMessage
  * @Description:
  */
 public class HeartbeatMessage implements Serializable {
     private static final long serialVersionUID = -985316399527884899L;
     private boolean pingOrPong = true;
+    /**
+     * The constant PING.
+     */
     public static HeartbeatMessage PING = new HeartbeatMessage(true);
+    /**
+     * The constant PONG.
+     */
     public static HeartbeatMessage PONG = new HeartbeatMessage(false);
 
     private HeartbeatMessage(boolean pingOrPong) {

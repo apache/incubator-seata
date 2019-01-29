@@ -19,20 +19,28 @@ package com.alibaba.fescar.rm.datasource.exec;
 import java.sql.Statement;
 
 import com.alibaba.fescar.rm.datasource.StatementProxy;
-import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 
+/**
+ * The type Plain executor.
+ *
+ * @param <T> the type parameter
+ * @param <S> the type parameter
+ */
 public class PlainExecutor<T, S extends Statement> implements Executor {
 
     private StatementProxy<S> statementProxy;
 
     private StatementCallback<T, S> statementCallback;
 
-    private SQLRecognizer sqlRecognizer;
-
-    public PlainExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, SQLRecognizer sqlRecognizer) {
+    /**
+     * Instantiates a new Plain executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     */
+    public PlainExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback) {
         this.statementProxy = statementProxy;
         this.statementCallback = statementCallback;
-        this.sqlRecognizer = sqlRecognizer;
     }
 
     @Override

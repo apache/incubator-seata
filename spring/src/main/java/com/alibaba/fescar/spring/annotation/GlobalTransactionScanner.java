@@ -26,6 +26,7 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.rm.RMClientAT;
 import com.alibaba.fescar.tm.TMClient;
+import com.alibaba.fescar.tm.api.DefaultFailureHandlerImpl;
 import com.alibaba.fescar.tm.api.FailureHandler;
 
 import org.apache.commons.lang.StringUtils;
@@ -56,8 +57,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     private static final int MT_MODE = 2;
 
     private static final int ORDER_NUM = 1024;
+    private static final int DEFAULT_MODE = AT_MODE;
 
     private static final Set<String> PROXYED_SET = new HashSet<>();
+    private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
 
     private GlobalTransactionalInterceptor interceptor;
 
@@ -66,8 +69,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     private final int mode;
     private final boolean disableGlobalTransaction =
         ConfigurationFactory.getInstance().getBoolean("service.disableGlobalTransaction", false);
-
-    private static final int DEFAULT_MODE = AT_MODE;
 
     private final FailureHandler failureHandlerHook;
 
@@ -108,11 +109,12 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
      * @param mode           the mode
      */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode) {
-        this(applicationId, txServiceGroup, mode, null);
+        this(applicationId, txServiceGroup, mode, DEFAULT_FAIL_HANDLER);
     }
 
     /**
      * Instantiates a new Global transaction scanner.
+     *
      * @param applicationId      the application id
      * @param txServiceGroup     the tx service group
      * @param failureHandlerHook the failure handler hook
@@ -180,10 +182,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 if (PROXYED_SET.contains(beanName)) {
                     return bean;
                 }
-                PROXYED_SET.add(beanName);
                 Class<?> serviceInterface = findTargetClass(bean);
                 Method[] methods = serviceInterface.getMethods();
-                LinkedList<MethodDesc> methodDescList = new LinkedList<MethodDesc>();
+                LinkedList<MethodDesc> methodDescList = new LinkedList<>();
                 for (Method method : methods) {
                     GlobalTransactional anno = method.getAnnotation(GlobalTransactional.class);
                     if (anno != null) {
@@ -193,8 +194,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 if (methodDescList.isEmpty()) {
                     return bean;
                 }
-
-                interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
+                if (interceptor == null) {
+                    interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
+                }
                 if (!AopUtils.isAopProxy(bean)) {
                     bean = super.wrapIfNecessary(bean, beanName, cacheKey);
                 } else {
@@ -204,6 +206,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                         advised.addAdvisor(0, avr);
                     }
                 }
+                PROXYED_SET.add(beanName);
                 return bean;
             }
         } catch (Exception exx) {

@@ -18,7 +18,15 @@ package com.alibaba.fescar.rm.datasource;
 
 import java.util.ArrayList;
 
+/**
+ * The interface Parameters holder.
+ */
 public interface ParametersHolder {
 
+    /**
+     * Get parameters array list [ ].
+     *
+     * @return the array list [ ]
+     */
     ArrayList<Object>[] getParameters();
 }

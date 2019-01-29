@@ -42,27 +42,40 @@ public class BusinessServiceImpl implements BusinessService {
     @Override
     @GlobalTransactional(timeoutMills = 300000, name = "dubbo-demo-tx")
     public void purchase(String userId, String commodityCode, int orderCount) {
+        LOGGER.info("purchase begin ... xid: " + RootContext.getXID());
         storageService.deduct(commodityCode, orderCount);
         orderService.create(userId, commodityCode, orderCount);
         throw new RuntimeException("xxx");
 
     }
 
+    /**
+     * Sets storage service.
+     *
+     * @param storageService the storage service
+     */
     public void setStorageService(StorageService storageService) {
         this.storageService = storageService;
     }
 
+    /**
+     * Sets order service.
+     *
+     * @param orderService the order service
+     */
     public void setOrderService(OrderService orderService) {
         this.orderService = orderService;
     }
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
             new String[] {"dubbo-business.xml"});
         final BusinessService business = (BusinessService)context.getBean("business");
-
-        LOGGER.info("Main business begin ... xid: " + RootContext.getXID());
         business.purchase("U100001", "C00321", 2);
-        LOGGER.info("Main business end ... xid: " + RootContext.getXID());
     }
 }

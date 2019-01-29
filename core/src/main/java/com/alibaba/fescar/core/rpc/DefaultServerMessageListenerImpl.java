@@ -24,8 +24,16 @@ import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.common.util.NetUtil;
-import com.alibaba.fescar.core.protocol.*;
+import com.alibaba.fescar.core.protocol.AbstractMessage;
+import com.alibaba.fescar.core.protocol.AbstractResultMessage;
+import com.alibaba.fescar.core.protocol.HeartbeatMessage;
+import com.alibaba.fescar.core.protocol.MergeResultMessage;
+import com.alibaba.fescar.core.protocol.MergedWarpMessage;
+import com.alibaba.fescar.core.protocol.RegisterRMRequest;
+import com.alibaba.fescar.core.protocol.RegisterRMResponse;
 import com.alibaba.fescar.core.protocol.RegisterTMRequest;
+import com.alibaba.fescar.core.protocol.RegisterTMResponse;
+import com.alibaba.fescar.core.protocol.Version;
 import com.alibaba.fescar.core.rpc.netty.RegisterCheckAuthHandler;
 
 import io.netty.channel.ChannelHandlerContext;
@@ -36,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * The type Default server message listener.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /10/18 14:31
  * @FileName: DefaultServerMessageListenerImpl
  * @Description:
@@ -94,8 +102,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
 
         boolean isSuccess = false;
         try {
-            if (null == checkAuthHandler || null != checkAuthHandler && checkAuthHandler.regResourceManagerCheckAuth(
-                message)) {
+            if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
                 ChannelManager.registerRMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
@@ -117,8 +124,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         Version.putChannelVersion(ctx.channel(), message.getVersion());
         boolean isSuccess = false;
         try {
-            if (null == checkAuthHandler || null != checkAuthHandler && checkAuthHandler.regTransactionManagerCheckAuth(
-                message)) {
+            if (null == checkAuthHandler || checkAuthHandler.regTransactionManagerCheckAuth(message)) {
                 ChannelManager.registerTMChannel(message, ctx.channel());
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;

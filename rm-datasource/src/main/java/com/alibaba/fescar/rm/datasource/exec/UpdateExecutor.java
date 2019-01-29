@@ -31,22 +31,36 @@ import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 
+/**
+ * The type Update executor.
+ *
+ * @param <T> the type parameter
+ * @param <S> the type parameter
+ */
 public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
+    /**
+     * Instantiates a new Update executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param sqlRecognizer     the sql recognizer
+     */
     public UpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
     @Override
     protected TableRecords beforeImage() throws SQLException {
-        SQLUpdateRecognizer visitor = (SQLUpdateRecognizer) sqlRecognizer;
+        SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
+
         TableMeta tmeta = getTableMeta();
-        List<String> updateColumns = visitor.getUpdateColumns();
+        List<String> updateColumns = recognizer.getUpdateColumns();
 
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
         if (!tmeta.containsPK(updateColumns)) {
             // PK should be included.
-            selectSQLAppender.append(tmeta.getPkName() + ", ");
+            selectSQLAppender.append(getColumnNameInSQL(tmeta.getPkName()) + ", ");
         }
         for (int i = 0; i < updateColumns.size(); i++) {
             selectSQLAppender.append(updateColumns.get(i));
@@ -57,11 +71,11 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         String whereCondition = null;
         ArrayList<Object> paramAppender = new ArrayList<>();
         if (statementProxy instanceof ParametersHolder) {
-            whereCondition = visitor.getWhereCondition((ParametersHolder) statementProxy, paramAppender);
+            whereCondition = recognizer.getWhereCondition((ParametersHolder)statementProxy, paramAppender);
         } else {
-            whereCondition = visitor.getWhereCondition();
+            whereCondition = recognizer.getWhereCondition();
         }
-        selectSQLAppender.append(" FROM " + tmeta.getTableName() + " WHERE " + whereCondition + " FOR UPDATE");
+        selectSQLAppender.append(" FROM " + getFromTableInSQL() + " WHERE " + whereCondition + " FOR UPDATE");
         String selectSQL = selectSQLAppender.toString();
 
         TableRecords beforeImage = null;
@@ -97,17 +111,18 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        SQLUpdateRecognizer visitor = (SQLUpdateRecognizer) sqlRecognizer;
+        SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
+
         TableMeta tmeta = getTableMeta();
         if (beforeImage == null || beforeImage.size() == 0) {
             return TableRecords.empty(getTableMeta());
         }
-        List<String> updateColumns = visitor.getUpdateColumns();
+        List<String> updateColumns = recognizer.getUpdateColumns();
 
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
         if (!tmeta.containsPK(updateColumns)) {
             // PK should be included.
-            selectSQLAppender.append(tmeta.getPkName() + ", ");
+            selectSQLAppender.append(getColumnNameInSQL(tmeta.getPkName()) + ", ");
         }
         for (int i = 0; i < updateColumns.size(); i++) {
             selectSQLAppender.append(updateColumns.get(i));
@@ -116,7 +131,8 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             }
         }
         List<Field> pkRows = beforeImage.pkRows();
-        selectSQLAppender.append(" FROM " + tmeta.getTableName() + " WHERE " + buildWhereConditionByPKs(pkRows) + " FOR UPDATE");
+        selectSQLAppender.append(
+            " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(pkRows) + " FOR UPDATE");
         String selectSQL = selectSQLAppender.toString();
 
         TableRecords afterImage = null;
@@ -142,6 +158,5 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         return afterImage;
     }
-
 
 }

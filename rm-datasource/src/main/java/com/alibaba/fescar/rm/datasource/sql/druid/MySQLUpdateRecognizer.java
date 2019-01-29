@@ -35,10 +35,19 @@ import com.alibaba.fescar.rm.datasource.sql.SQLParsingException;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
 import com.alibaba.fescar.rm.datasource.sql.SQLUpdateRecognizer;
 
+/**
+ * The type My sql update recognizer.
+ */
 public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRecognizer {
 
     private MySqlUpdateStatement ast;
 
+    /**
+     * Instantiates a new My sql update recognizer.
+     *
+     * @param originalSQL the original sql
+     * @param ast         the ast
+     */
     public MySQLUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
         this.ast = (MySqlUpdateStatement) ast;
@@ -122,12 +131,8 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
     }
 
     @Override
-    public String getTableSource() {
-        StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        SQLExprTableSource tableSource = (SQLExprTableSource) ast.getTableSource();
-        visitor.visit(tableSource);
-        return sb.toString();
+    public String getTableAlias() {
+        return ast.getTableSource().getAlias();
     }
 
     @Override

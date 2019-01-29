@@ -16,18 +16,39 @@
 
 package com.alibaba.fescar.core.rpc;
 
+/**
+ * The enum Client type.
+ */
 public enum ClientType {
 
+    /**
+     * The Tm.
+     */
     // Transaction Manager client
     TM,
 
+    /**
+     * The Rm.
+     */
     // Resource Manager client
     RM;
 
+    /**
+     * Get client type.
+     *
+     * @param ordinal the ordinal
+     * @return the client type
+     */
     public static ClientType get(byte ordinal) {
         return get((int) ordinal);
     }
 
+    /**
+     * Get client type.
+     *
+     * @param ordinal the ordinal
+     * @return the client type
+     */
     public static ClientType get(int ordinal) {
         for (ClientType clientType : ClientType.values()) {
             if (clientType.ordinal() == ordinal) {

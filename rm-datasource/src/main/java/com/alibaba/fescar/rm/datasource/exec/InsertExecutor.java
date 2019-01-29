@@ -34,8 +34,21 @@ import com.alibaba.fescar.rm.datasource.sql.struct.ColumnMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 
+/**
+ * The type Insert executor.
+ *
+ * @param <T> the type parameter
+ * @param <S> the type parameter
+ */
 public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
+    /**
+     * Instantiates a new Insert executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param sqlRecognizer     the sql recognizer
+     */
     public InsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
@@ -47,8 +60,8 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        SQLInsertRecognizer visitor = (SQLInsertRecognizer) sqlRecognizer;
-        List<String> insertColumns = visitor.getInsertColumns();
+        SQLInsertRecognizer recogizier = (SQLInsertRecognizer)sqlRecognizer;
+        List<String> insertColumns = recogizier.getInsertColumns();
         TableMeta tmeta = getTableMeta();
         TableRecords afterImage = null;
         if (tmeta.containsPK(insertColumns)) {
@@ -60,7 +73,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                     if (statementProxy instanceof PreparedStatementProxy) {
                         pkValues = ((PreparedStatementProxy) statementProxy).getParamsByIndex(paramIdx);
                     } else {
-                        List<List<Object>> insertRows = visitor.getInsertRows();
+                        List<List<Object>> insertRows = recogizier.getInsertRows();
                         pkValues = new ArrayList<>(insertRows.size());
                         for (List<Object> row : insertRows) {
                             pkValues.add(row.get(paramIdx));
