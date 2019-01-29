@@ -21,9 +21,9 @@
 	<name>fescar-examples-springboot ${project.version}</name>
 
 	<properties>
-		<java.version>1.7</java.version>
-		<maven.compiler.source>1.7</maven.compiler.source>
-		<maven.compiler.target>1.7</maven.compiler.target>
+		<java.version>1.8</java.version>
+		<maven.compiler.source>1.8</maven.compiler.source>
+		<maven.compiler.target>1.8</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<spring.version>5.0.8.RELEASE</spring.version>
 		<springboot.version>2.0.4.RELEASE</springboot.version>
