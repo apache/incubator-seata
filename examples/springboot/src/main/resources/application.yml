@@ -1,0 +1,45 @@
+server:
+    port: 9999
+    servlet:
+        context-path: /demo
+spring:
+    application:
+        name: defang-template
+    http:
+        encoding:
+        charset: UTF-8
+        enabled: true
+        force: true
+    datasource:
+        driverClassName: com.mysql.jdbc.Driver
+        url: jdbc:mysql://123.123.123:3060/your_schema?useSSL=false
+        username: your_username
+        password: yout_password
+        poolPingConnectionsNotUsedFor: 60000
+        removeAbandoned: true
+        connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+        minIdle: 1
+        validationQuery: SELECT 1 FROM DUAL
+        initialSize: 5
+        maxWait: 60000
+        poolPreparedStatements: false
+        filters: stat,wall
+        testOnBorrow: false
+        testWhileIdle: true
+        minEvictableIdleTimeMillis: 300000
+        timeBetweenEvictionRunsMillis: 60000
+        testOnReturn: false
+        maxActive: 50
+        druid:
+            user: admin
+            password: admin
+
+    jpa: 
+        hibernate:
+            ddl-auto: none
+        show-sql: true
+    dubbo:
+        server: true
+        registry: multicast://224.5.6.7:1234?unicast=false
+        provider:
+            port: 20999
