@@ -26,6 +26,7 @@
         <module>config</module>
         <module>common</module>
         <module>server</module>
+        <module>distribution</module>
         <module>core</module>
         <module>rm-datasource</module>
         <module>tm</module>
