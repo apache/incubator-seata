@@ -14,15 +14,29 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.tm.dubbo;
+package com.alibaba.fescar.rm.datasource.sql.druid;
 
-public interface AccountService {
+import java.util.List;
+
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLStatement;
+
+/**
+ * The type Abstract my sql recognizer test.
+ *
+ * @author hanwen  created at 2019-01-25
+ */
+public class AbstractMySQLRecognizerTest {
 
     /**
-     * 余额扣款
+     * Gets sql statement.
      *
-     * @param userId 用户ID
-     * @param money 扣款金额
+     * @param sql the sql
+     * @return the sql statement
      */
-    void debit(String userId, int money);
+    public SQLStatement getSQLStatement(String sql) {
+        List<SQLStatement> stats = SQLUtils.parseStatements(sql, "mysql");
+        return stats.get(0);
+    }
+
 }

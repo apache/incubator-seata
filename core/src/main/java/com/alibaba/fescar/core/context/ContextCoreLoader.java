@@ -18,6 +18,9 @@ package com.alibaba.fescar.core.context;
 
 import com.alibaba.fescar.common.loader.EnhancedServiceLoader;
 
+/**
+ * The type Context core loader.
+ */
 public class ContextCoreLoader {
 
     private static class ContextCoreHolder {
@@ -33,6 +36,11 @@ public class ContextCoreLoader {
         }
     }
 
+    /**
+     * Load context core.
+     *
+     * @return the context core
+     */
     public static ContextCore load() {
         return ContextCoreHolder.INSTANCE;
     }

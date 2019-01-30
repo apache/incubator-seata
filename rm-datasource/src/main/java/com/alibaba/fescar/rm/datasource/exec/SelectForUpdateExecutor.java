@@ -30,8 +30,20 @@ import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLSelectRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 
+/**
+ * The type Select for update executor.
+ *
+ * @param <S> the type parameter
+ */
 public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactionalExecutor<ResultSet, S> {
 
+    /**
+     * Instantiates a new Select for update executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param sqlRecognizer     the sql recognizer
+     */
     public SelectForUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<ResultSet, S> statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }

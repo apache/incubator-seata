@@ -16,10 +16,11 @@
 
 package com.alibaba.fescar.core.protocol;
 
-import com.alibaba.fescar.common.Constants;
-
 import io.netty.buffer.ByteBuf;
 
+/**
+ * The type Abstract identify response.
+ */
 public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
 
     private String version = Version.CURRENT;;
@@ -28,29 +29,60 @@ public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
 
     private boolean identified;
 
+    /**
+     * Gets version.
+     *
+     * @return the version
+     */
     public String getVersion() {
         return version;
     }
 
+    /**
+     * Sets version.
+     *
+     * @param version the version
+     */
     public void setVersion(String version) {
         this.version = version;
     }
 
+    /**
+     * Gets extra data.
+     *
+     * @return the extra data
+     */
     public String getExtraData() {
         return extraData;
     }
 
+    /**
+     * Sets extra data.
+     *
+     * @param extraData the extra data
+     */
     public void setExtraData(String extraData) {
         this.extraData = extraData;
     }
 
+    /**
+     * Is identified boolean.
+     *
+     * @return the boolean
+     */
     public boolean isIdentified() {
         return identified;
     }
 
+    /**
+     * Sets identified.
+     *
+     * @param identified the identified
+     */
     public void setIdentified(boolean identified) {
         this.identified = identified;
     }
+
     @Override
     public void doEncode() {
 //        super.doEncode();

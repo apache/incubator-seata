@@ -35,7 +35,7 @@ public class GlobalTransactionContext {
     private static GlobalTransaction createNew() {
         GlobalTransaction tx = new DefaultGlobalTransaction();
         THREAD_TRANSACTION_CONTEXT.set(tx);
-        return THREAD_TRANSACTION_CONTEXT.get();
+        return tx;
     }
 
     /**
@@ -54,7 +54,7 @@ public class GlobalTransactionContext {
         }
         tx = new DefaultGlobalTransaction(xid);
         THREAD_TRANSACTION_CONTEXT.set(tx);
-        return THREAD_TRANSACTION_CONTEXT.get();
+        return tx;
     }
 
     /**

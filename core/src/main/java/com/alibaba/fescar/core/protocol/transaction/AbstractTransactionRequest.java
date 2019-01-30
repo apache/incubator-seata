@@ -21,9 +21,21 @@ import java.nio.ByteBuffer;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 import com.alibaba.fescar.core.rpc.RpcContext;
 
+/**
+ * The type Abstract transaction request.
+ */
 public abstract class AbstractTransactionRequest extends AbstractMessage {
 
+    /**
+     * The Byte buffer.
+     */
     protected ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
 
+    /**
+     * Handle abstract transaction response.
+     *
+     * @param rpcContext the rpc context
+     * @return the abstract transaction response
+     */
     public abstract AbstractTransactionResponse handle(RpcContext rpcContext);
 }

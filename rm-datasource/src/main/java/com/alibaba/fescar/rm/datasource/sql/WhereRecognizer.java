@@ -20,9 +20,24 @@ import java.util.ArrayList;
 
 import com.alibaba.fescar.rm.datasource.ParametersHolder;
 
+/**
+ * The interface Where recognizer.
+ */
 public interface WhereRecognizer extends SQLRecognizer {
 
+    /**
+     * Gets where condition.
+     *
+     * @param parametersHolder the parameters holder
+     * @param paramAppender    the param appender
+     * @return the where condition
+     */
     String getWhereCondition(ParametersHolder parametersHolder, ArrayList<Object> paramAppender);
 
+    /**
+     * Gets where condition.
+     *
+     * @return the where condition
+     */
     String getWhereCondition();
 }
