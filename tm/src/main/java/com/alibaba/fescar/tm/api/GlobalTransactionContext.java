@@ -44,7 +44,17 @@ public class GlobalTransactionContext {
      * @return null if no transaction context there.
      */
     public static GlobalTransaction getCurrent() {
-        return THREAD_TRANSACTION_CONTEXT.get();
+        GlobalTransaction tx = THREAD_TRANSACTION_CONTEXT.get();
+        if (tx != null) {
+            return tx;
+        }
+        String xid = RootContext.getXID();
+        if (xid == null) {
+            return null;
+        }
+        tx = new DefaultGlobalTransaction(xid);
+        THREAD_TRANSACTION_CONTEXT.set(tx);
+        return tx;
     }
 
     /**
