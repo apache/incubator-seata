@@ -41,6 +41,9 @@ public class GlobalTransactionContext {
     /**
      * Get GlobalTransaction instance bind on current thread.
      *
+     * Warning!!! If there is a xid in context, which means someone has already start a global transaction, GlobalTransaction will automaticlly
+     * be put into conext. You need to call com.alibaba.fescar.tm.api.GlobalTransactionContext#clean yourself if you are using something like threadpool.
+     *
      * @return null if no transaction context there.
      */
     public static GlobalTransaction getCurrent() {
