@@ -30,12 +30,12 @@ public class GlobalTransactionContext {
 
     /**
      * Try to create a new GlobalTransaction.
-     * @return
+     * @return the newly created GlobalTransaction
      */
-    private static GlobalTransaction createNew() {
+    public static GlobalTransaction createNew() {
         GlobalTransaction tx = new DefaultGlobalTransaction();
         THREAD_TRANSACTION_CONTEXT.set(tx);
-        return THREAD_TRANSACTION_CONTEXT.get();
+        return tx;
     }
 
     /**
@@ -44,35 +44,7 @@ public class GlobalTransactionContext {
      * @return null if no transaction context there.
      */
     public static GlobalTransaction getCurrent() {
-        GlobalTransaction tx = THREAD_TRANSACTION_CONTEXT.get();
-        if (tx != null) {
-            return tx;
-        }
-        String xid = RootContext.getXID();
-        if (xid == null) {
-            return null;
-        }
-        tx = new DefaultGlobalTransaction(xid);
-        THREAD_TRANSACTION_CONTEXT.set(tx);
         return THREAD_TRANSACTION_CONTEXT.get();
-    }
-
-    /**
-     * Get GlobalTransaction instance bind on current thread.
-     * Create a new on if no existing there.
-     *
-     * @return new context if no existing there.
-     */
-    public static GlobalTransaction getCurrentOrCreate() {
-        GlobalTransaction tx = getCurrent();
-        if (tx == null) {
-            return createNew();
-        }
-        return tx;
-    }
-
-    public static boolean isExistingTransaction() {
-        return getCurrent() != null;
     }
 
     /**

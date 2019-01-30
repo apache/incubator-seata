@@ -16,6 +16,7 @@
 
 package com.alibaba.fescar.tm.api;
 
+import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.exception.TransactionException;
 
 /**
@@ -28,63 +29,68 @@ public class TransactionalTemplate {
      *
      * @param business the business
      * @return the object
-     * @throws ExecutionException the execution exception
+     * @throws Throwable the execution exception, maybe business exception OR com.alibaba.fescar.tm.api.TransactionalExecutor.ExecutionException
      */
-    public Object execute(TransactionalExecutor business) throws TransactionalExecutor.ExecutionException {
+    public Object execute(TransactionalExecutor business) throws Throwable {
 
-        // 1. get or create a transaction
-        boolean isExistingTransaction = GlobalTransactionContext.isExistingTransaction();
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
-
-        // 2. begin transaction
-        try {
-            tx.begin(business.timeout(), business.name());
-
-        } catch (TransactionException txe) {
-            throw new TransactionalExecutor.ExecutionException(tx, txe,
-                TransactionalExecutor.Code.BeginFailure);
-
-        }
-
-        Object rs = null;
-        try {
-
-            // Do Your Business
+        Object rs;
+        // someone has already start a global transaction, just execute business
+        if (null != RootContext.getXID()) {
             rs = business.execute();
+        } else {
+            if(null != GlobalTransactionContext.getCurrent()) {
+                throw new Exception("GlobalTransactionContext ThreadLocal variables was leaked!");
+            }
+            // 1. bind a transaction to current thread
+            GlobalTransaction tx = GlobalTransactionContext.createNew();
 
-        } catch (Throwable ex) {
-
-            // 3. any business exception, rollback.
+            // 2. begin transaction
             try {
-                if (!isExistingTransaction) {
-                    GlobalTransactionContext.clean();
-                }
-                tx.rollback();
-
-                // 3.1 Successfully rolled back
-                throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
+                tx.begin(business.timeout(), business.name());
 
             } catch (TransactionException txe) {
-                // 3.2 Failed to rollback
                 throw new TransactionalExecutor.ExecutionException(tx, txe,
-                    TransactionalExecutor.Code.RollbackFailure, ex);
+                    TransactionalExecutor.Code.BeginFailure);
 
             }
 
-        }
+            try {
 
-        // 4. everything is fine, commit.
-        try {
-            if (!isExistingTransaction) {
+                // Do Your Business
+                rs = business.execute();
+
+            } catch (Throwable ex) {
+
+                // 3. any business exception, rollback.
+                try {
+                    tx.rollback();
+
+                    // 3.1 Successfully rolled back
+                    throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
+
+                } catch (TransactionException txe) {
+                    // 3.2 Failed to rollback
+                    throw new TransactionalExecutor.ExecutionException(tx, txe,
+                        TransactionalExecutor.Code.RollbackFailure, ex);
+
+                } finally {
+                    GlobalTransactionContext.clean();
+                }
+
+            }
+
+            // 4. everything is fine, commit.
+            try {
+                tx.commit();
+
+            } catch (TransactionException txe) {
+                // 4.1 Failed to commit
+                throw new TransactionalExecutor.ExecutionException(tx, txe,
+                    TransactionalExecutor.Code.CommitFailure);
+
+            } finally {
                 GlobalTransactionContext.clean();
             }
-            tx.commit();
-
-        } catch (TransactionException txe) {
-            // 4.1 Failed to commit
-            throw new TransactionalExecutor.ExecutionException(tx, txe,
-                TransactionalExecutor.Code.CommitFailure);
-
         }
         return rs;
     }
