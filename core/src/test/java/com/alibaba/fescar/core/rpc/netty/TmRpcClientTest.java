@@ -80,13 +80,11 @@ public class TmRpcClientTest {
         Field bootstrapField = getDeclaredField(tmRpcClient, "bootstrap");
         bootstrapField.setAccessible(true);
         Bootstrap bootstrap = (Bootstrap) bootstrapField.get(tmRpcClient);
-        System.out.println(bootstrap);
 
         Assert.assertNotNull(bootstrap);
         Field optionsField = getDeclaredField(bootstrap, "options");
         optionsField.setAccessible(true);
         Map<ChannelOption<?>, Object> options = (Map<ChannelOption<?>, Object>) optionsField.get(bootstrap);
-        System.out.println(options);
         Assert.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.TCP_NODELAY)));
         Assert.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.SO_KEEPALIVE)));
         Assert.assertEquals(10000, options.get(ChannelOption.CONNECT_TIMEOUT_MILLIS));
@@ -97,7 +95,6 @@ public class TmRpcClientTest {
         channelFactoryField.setAccessible(true);
         ChannelFactory<? extends Channel>
             channelFactory = (ChannelFactory<? extends Channel>) channelFactoryField.get(bootstrap);
-        System.out.println(channelFactory);
         Assert.assertNotNull(channelFactory);
         Assert.assertTrue(channelFactory.newChannel() instanceof NioSocketChannel);
 

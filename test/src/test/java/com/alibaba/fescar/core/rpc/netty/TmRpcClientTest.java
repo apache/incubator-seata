@@ -58,7 +58,6 @@ public class TmRpcClientTest {
         workingThreads.submit(new Runnable() {
             @Override
             public void run() {
-                System.out.println("doConnect - start server ing");
                 RpcServer rpcServer = new RpcServer(workingThreads);
                 rpcServer.setHandler(new DefaultCoordinator(rpcServer));
                 UUIDGenerator.init(1);
@@ -68,7 +67,6 @@ public class TmRpcClientTest {
 
         //then test client
         Thread.sleep(3000);
-        System.out.println("doConnect - start client ing");
 
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
@@ -81,7 +79,6 @@ public class TmRpcClientTest {
         String serverAddress = "0.0.0.0:8091";
         Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
         System.out.print("channel = ");
-        System.out.println(channel);
         Assert.assertNotNull(channel);
     }
 
@@ -97,7 +94,6 @@ public class TmRpcClientTest {
         workingThreads.submit(new Runnable() {
             @Override
             public void run() {
-                System.out.println("testReconnect - start server ing");
                 RpcServer rpcServer = new RpcServer(workingThreads);
                 rpcServer.setHandler(new DefaultCoordinator(rpcServer));
                 UUIDGenerator.init(1);
@@ -107,7 +103,6 @@ public class TmRpcClientTest {
 
         //then test client
         Thread.sleep(3000);
-        System.out.println("testReconnect - start client ing");
 
         String applicationId = "app 1";
         String transactionServiceGroup = "my_test_tx_group";
@@ -127,7 +122,6 @@ public class TmRpcClientTest {
         workingThreads.submit(new Runnable() {
             @Override
             public void run() {
-                System.out.println("testSendMsgWithResponse - start server ing");
                 RpcServer rpcServer = new RpcServer(workingThreads);
                 rpcServer.setHandler(new DefaultCoordinator(rpcServer));
                 UUIDGenerator.init(1);
@@ -137,25 +131,20 @@ public class TmRpcClientTest {
 
         //then test client
         Thread.sleep(3000);
-        System.out.println("testSendMsgWithResponse - start client ing");
 
         String applicationId = "app 1";
         String transactionServiceGroup = "my_test_tx_group";
         TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
 
-        System.out.println("testSendMsgWithResponse - init tmRpcClient ing");
         tmRpcClient.init();
 
         Method doConnectMethod = TmRpcClient.class.getDeclaredMethod("doConnect", String.class);
         doConnectMethod.setAccessible(true);
         String serverAddress = "0.0.0.0:8091";
-        System.out.println("testSendMsgWithResponse - do connect ing");
         Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
         System.out.print("channel = " + channel);
-        System.out.println(channel);
         Assert.assertNotNull(channel);
 
-        System.out.println("testSendMsgWithResponse - sendMsgWithResponse ing");
         BranchRegisterRequest request = new BranchRegisterRequest();
         request.setTransactionId(123456L);
         request.setLockKey("lock key testSendMsgWithResponse");
@@ -166,7 +155,5 @@ public class TmRpcClientTest {
         Assert.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
         Assert.assertEquals("RuntimeException[SessionManager is NOT init!]",
                             branchRegisterResponse.getMsg());
-        System.out.println(branchRegisterResponse);
-
     }
 }

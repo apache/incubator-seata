@@ -31,9 +31,6 @@ public class BranchRegisterResponseTest {
     branchRegisterResponse.setBranchId(123457L);
     branchRegisterResponse.setResultCode(ResultCode.Success);
     branchRegisterResponse.setMsg("");
-
-    System.out.println(branchRegisterResponse.toString());
-
     Assert.assertEquals("BranchRegisterResponse: transactionId=123456,branchId=123457,result code =Success,getMsg =", branchRegisterResponse.toString());
 
   }
