@@ -13,7 +13,7 @@ cache:
 install: true
 
 script:
-  - mvn clean cobertura:cobertura package
+  - mvn clean package
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
