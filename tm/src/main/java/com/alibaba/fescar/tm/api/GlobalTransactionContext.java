@@ -58,6 +58,20 @@ public class GlobalTransactionContext {
     }
 
     /**
+     * Get GlobalTransaction instance bind on current thread.
+     * Create a new on if no existing there.
+     *
+     * @return new context if no existing there.
+     */
+    public static GlobalTransaction getCurrentOrCreate() {
+        GlobalTransaction tx = getCurrent();
+        if (tx == null) {
+            return createNew();
+        }
+        return tx;
+    }
+
+    /**
      * Clean context.
      */
     public static void clean() {

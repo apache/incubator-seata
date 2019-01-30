@@ -41,7 +41,7 @@ public class TransactionalTemplate {
             if(null != GlobalTransactionContext.getCurrent()) {
                 throw new Exception("GlobalTransactionContext ThreadLocal variables was leaked!");
             }
-            // 1. bind a transaction to current thread
+            // 1. bind a new transaction to current thread
             GlobalTransaction tx = GlobalTransactionContext.createNew();
 
             // 2. begin transaction
