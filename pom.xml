@@ -33,7 +33,6 @@
         <module>spring</module>
         <module>dubbo</module>
         <module>test</module>
-        <module>examples</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -153,11 +152,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>fescar-test</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-examples</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
