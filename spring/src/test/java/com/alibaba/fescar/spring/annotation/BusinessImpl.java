@@ -16,11 +16,16 @@
 
 package com.alibaba.fescar.spring.annotation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class BusinessImpl implements Business {
+    Logger logger = LoggerFactory.getLogger(BusinessImpl.class);
+
     @Override
     @GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
     public String doBiz(String msg) {
-        System.out.println("Business doBiz");
+        logger.info("Business doBiz");
         return "hello " + msg;
     }
 }
