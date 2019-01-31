@@ -82,9 +82,8 @@ public class Server {
 
         // Initialise Coordinator
         DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
-        //TODO replacement: rpcServer.setHandler(coordinator); -- Unable to test if works correctly
+        rpcServer.setHandler(coordinator);
         coordinator.init();
-        rpcServer.setHandler(new DefaultCoordinator(rpcServer)); // TODO Remove if tests work correctly.
 
         // Initialise Universally Unique Identifier Generator
         UUIDGenerator.init(1);
