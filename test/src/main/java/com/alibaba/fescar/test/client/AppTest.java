@@ -145,7 +145,7 @@ public class AppTest {
                 cause.printStackTrace();
 
             }
-        }catch (Throwable t) {
+        } catch (Throwable t) {
             t.printStackTrace();
         }
 
