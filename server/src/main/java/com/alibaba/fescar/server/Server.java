@@ -31,9 +31,21 @@ import com.alibaba.fescar.server.session.SessionHolder;
  * The type Server.
  */
 public class Server {
+    // Default Values
+    private static final int
+            default_port = 8091;
+    private static final String
+            default_data_directory = null;
 
-    private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
-        new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+    // Thread Pool Executor
+    private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(
+            100, // Core Pool Size
+            500, // Max Pool Size
+            500, // Time to keep alive
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(20000),
+            new ThreadPoolExecutor.CallerRunsPolicy()
+    );
 
     /**
      * The entry point of application.
@@ -42,40 +54,55 @@ public class Server {
      * @throws IOException the io exception
      */
     public static void main(String[] args) throws IOException {
-        RpcServer rpcServer = new RpcServer(WORKING_THREADS);
+        // Init Values
+        int port = default_port;
+        String data_directory = default_data_directory;
 
-        int port = 8091;
-        if (args.length == 0) {
-            rpcServer.setListenPort(port);
-        }
-
-        if (args.length > 0) {
+        // Get port from argument 0
+        if (args.length > 0)
             try {
                 port = Integer.parseInt(args[0]);
             } catch (NumberFormatException e) {
-                System.err.println("Usage: sh fescar-server.sh $LISTEN_PORT $PATH_FOR_PERSISTENT_DATA");
-                System.exit(0);
+                exitWithMessage("Usage: sh fescar-server.sh $LISTEN_PORT $PATH_FOR_PERSISTENT_DATA");
             }
-            rpcServer.setListenPort(port);
-        }
+        // If port is invalid, exit
+        if (port < 0 || port > 65535)
+            exitWithMessage("Invalid port. Please use a port number between 0-65535.");
 
-        String dataDir = null;
-        if (args.length > 1) {
-            dataDir = args[1];
-        }
-        SessionHolder.init(dataDir);
+        // Get data dir from argument 1
+        if (args.length > 1)
+            data_directory = args[1];
 
+        // Initialise RPC Server
+        RpcServer rpcServer = new RpcServer(WORKING_THREADS);
+        rpcServer.setListenPort(port);
+
+        // Initialise Session Holder
+        SessionHolder.init(data_directory);
+
+        // Initialise Coordinator
         DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
+        //TODO replacement: rpcServer.setHandler(coordinator); -- Unable to test if works correctly
         coordinator.init();
-        rpcServer.setHandler(new DefaultCoordinator(rpcServer));
+        rpcServer.setHandler(new DefaultCoordinator(rpcServer)); // TODO Remove if tests work correctly.
 
+        // Initialise Universally Unique Identifier Generator
         UUIDGenerator.init(1);
 
+        // Initialise XID
         XID.setIpAddress(NetUtil.getLocalIp());
         XID.setPort(rpcServer.getListenPort());
 
+        // Start RPC Server
         rpcServer.init();
+        // RPC Server Closed
 
+        // Exit Code
+        exitWithMessage("RPC Server Closed");
+    }
+
+    private static void exitWithMessage(String message) {
+        System.err.println(message);
         System.exit(0);
     }
 }
