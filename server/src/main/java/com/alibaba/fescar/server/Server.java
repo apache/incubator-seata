@@ -43,7 +43,7 @@ public class Server {
             500, // Max Pool Size
             500, // Time to keep alive
             TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(20000),
+            new LinkedBlockingQueue(20000),
             new ThreadPoolExecutor.CallerRunsPolicy()
     );
 
