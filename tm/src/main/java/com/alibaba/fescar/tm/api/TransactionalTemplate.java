@@ -35,7 +35,7 @@ public class TransactionalTemplate {
 
         Object rs;
         // someone has already start a global transaction, just execute business
-        if (null != RootContext.getXID()) {
+        if (RootContext.inGlobalTransaction()) {
             rs = business.execute();
         } else {
             if(null != GlobalTransactionContext.getCurrent()) {

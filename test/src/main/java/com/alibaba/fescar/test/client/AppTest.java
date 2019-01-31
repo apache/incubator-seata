@@ -145,6 +145,8 @@ public class AppTest {
                 cause.printStackTrace();
 
             }
+        }catch (Throwable t) {
+            t.printStackTrace();
         }
 
         new ApplicationKeeper(context).keep();
