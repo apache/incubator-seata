@@ -133,4 +133,13 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
 
     }
+
+    @Override public String toString() {
+        return "DefaultGlobalTransaction{" +
+            "transactionManager=" + transactionManager +
+            ", xid='" + xid + '\'' +
+            ", status=" + status +
+            ", role=" + role +
+            '}';
+    }
 }
