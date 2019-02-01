@@ -18,6 +18,9 @@ package com.alibaba.fescar.rm.datasource.undo;
 
 import java.util.List;
 
+/**
+ * The type Branch undo log.
+ */
 public class BranchUndoLog {
 
     private String xid;
@@ -26,26 +29,56 @@ public class BranchUndoLog {
 
     private List<SQLUndoLog> sqlUndoLogs;
 
+    /**
+     * Gets xid.
+     *
+     * @return the xid
+     */
     public String getXid() {
         return xid;
     }
 
+    /**
+     * Sets xid.
+     *
+     * @param xid the xid
+     */
     public void setXid(String xid) {
         this.xid = xid;
     }
 
+    /**
+     * Gets branch id.
+     *
+     * @return the branch id
+     */
     public long getBranchId() {
         return branchId;
     }
 
+    /**
+     * Sets branch id.
+     *
+     * @param branchId the branch id
+     */
     public void setBranchId(long branchId) {
         this.branchId = branchId;
     }
 
+    /**
+     * Gets sql undo logs.
+     *
+     * @return the sql undo logs
+     */
     public List<SQLUndoLog> getSqlUndoLogs() {
         return sqlUndoLogs;
     }
 
+    /**
+     * Sets sql undo logs.
+     *
+     * @param sqlUndoLogs the sql undo logs
+     */
     public void setSqlUndoLogs(List<SQLUndoLog> sqlUndoLogs) {
         this.sqlUndoLogs = sqlUndoLogs;
     }

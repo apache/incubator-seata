@@ -21,6 +21,9 @@ import java.nio.ByteBuffer;
 import com.alibaba.fescar.core.protocol.MergedMessage;
 import com.alibaba.fescar.core.rpc.RpcContext;
 
+/**
+ * The type Global begin request.
+ */
 public class GlobalBeginRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 
     private static final long serialVersionUID = 7236162274218388376L;
@@ -29,18 +32,38 @@ public class GlobalBeginRequest extends AbstractTransactionRequestToTC implement
 
     private String transactionName;
 
+    /**
+     * Gets timeout.
+     *
+     * @return the timeout
+     */
     public int getTimeout() {
         return timeout;
     }
 
+    /**
+     * Sets timeout.
+     *
+     * @param timeout the timeout
+     */
     public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
 
+    /**
+     * Gets transaction name.
+     *
+     * @return the transaction name
+     */
     public String getTransactionName() {
         return transactionName;
     }
 
+    /**
+     * Sets transaction name.
+     *
+     * @param transactionName the transaction name
+     */
     public void setTransactionName(String transactionName) {
         this.transactionName = transactionName;
     }

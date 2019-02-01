@@ -24,17 +24,32 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- * @author tianming.xm@gmail.com
- * @since 2019/1/23
+ * The type Lock manager test.
+ *
+ * @author tianming.xm @gmail.com
+ * @since 2019 /1/23
  */
 public class LockManagerTest {
 
+    /**
+     * Acquire lock success.
+     *
+     * @param branchSession the branch session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "branchSessionProvider")
     public void acquireLock_success(BranchSession branchSession) throws Exception {
         LockManager lockManager = LockManagerFactory.get();
         Assert.assertTrue(lockManager.acquireLock(branchSession));
     }
 
+    /**
+     * Acquire lock failed.
+     *
+     * @param branchSession1 the branch session 1
+     * @param branchSession2 the branch session 2
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "branchSessionsProvider")
     public void acquireLock_failed(BranchSession branchSession1, BranchSession branchSession2) throws Exception {
         LockManager lockManager = LockManagerFactory.get();
@@ -42,6 +57,12 @@ public class LockManagerTest {
         Assert.assertFalse(lockManager.acquireLock(branchSession2));
     }
 
+    /**
+     * Is lockable test.
+     *
+     * @param branchSession the branch session
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "branchSessionProvider")
     public void isLockableTest(BranchSession branchSession) throws Exception {
         branchSession.setLockKey("t:4");
@@ -54,6 +75,11 @@ public class LockManagerTest {
             .isLockable(branchSession.getTransactionId(), branchSession.getResourceId(), branchSession.getLockKey()));
     }
 
+    /**
+     * Branch session provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
     @DataProvider
     public static Object[][] branchSessionProvider() {
         BranchSession branchSession = new BranchSession();
@@ -71,6 +97,11 @@ public class LockManagerTest {
         return new Object[][] {{branchSession}};
     }
 
+    /**
+     * Branch sessions provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
     @DataProvider
     public static Object[][] branchSessionsProvider() {
         BranchSession branchSession1 = new BranchSession();

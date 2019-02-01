@@ -35,15 +35,15 @@ import com.alibaba.fescar.server.store.TransactionStoreManager.LogOperation;
 import com.alibaba.fescar.server.store.TransactionWriteStore;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/12/13 10:21
+ * The type Write store test.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /12/13 10:21
  * @FileName: WriteStoreTest
- * @Description:c
- * write cost:87281,read cost:158922   65535*5  1000 per open  init 1024
- * write cost:86454,read cost:160541   65535*5  2000 per open  init 1024
- * write cost:82953,read cost:157736   65535*5  2000 per open  init 65535*5*9
- * write cost:115079,read cost:163664   65535*5  2000 per open  init 65535*5*9  schedule flush 10||2s
+ * @Description:c write  cost:87281,read cost:158922   65535*5  1000 per open  init 1024 write cost:86454,read
+ * cost:160541   65535*5  2000 per open  init 1024 write cost:82953,read cost:157736   65535*5  2000 per open  init
+ * 65535*5*9 write cost:115079,read cost:163664   65535*5  2000 per open  init 65535*5*9  schedule flush 10||2s
  */
 public class WriteStoreTest {
     private static String vgroup = "vgroupMock";
@@ -52,6 +52,13 @@ public class WriteStoreTest {
     private static int trx_num = 65535 * 5;
     private static int trx_begin = 0;
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     * @throws InterruptedException the interrupted exception
+     * @throws IOException the io exception
+     */
     public static void main(String[] args) throws InterruptedException, IOException {
         TransactionStoreManager transactionStoreManager = new FileTransactionStoreManager(
             "/Users/min.ji/Documents/test/data",

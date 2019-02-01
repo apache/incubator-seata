@@ -23,21 +23,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/10/10 14:55
+ * The type Merge result message.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /10/10 14:55
  * @FileName: MergeResultMessage
  * @Description:
  */
 public class MergeResultMessage extends AbstractMessage implements MergeMessage {
     private static final long serialVersionUID = -7719219648774528552L;
+    /**
+     * The Msgs.
+     */
     public AbstractResultMessage[] msgs;
     private static final Logger LOGGER = LoggerFactory.getLogger(MergeResultMessage.class);
 
+    /**
+     * Get msgs abstract result message [ ].
+     *
+     * @return the abstract result message [ ]
+     */
     public AbstractResultMessage[] getMsgs() {
         return msgs;
     }
 
+    /**
+     * Sets msgs.
+     *
+     * @param msgs the msgs
+     */
     public void setMsgs(AbstractResultMessage[] msgs) {
         this.msgs = msgs;
     }
@@ -86,6 +101,11 @@ public class MergeResultMessage extends AbstractMessage implements MergeMessage 
         return true;
     }
 
+    /**
+     * Decode.
+     *
+     * @param byteBuffer the byte buffer
+     */
     public void decode(ByteBuffer byteBuffer) {
         short msgNum = byteBuffer.getShort();
         msgs = new AbstractResultMessage[msgNum];

@@ -21,9 +21,11 @@ import java.io.Serializable;
 import io.netty.buffer.ByteBuf;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/10/10 14:43
+ * The type Register rm request.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /10/10 14:43
  * @FileName: RegisterRMRequest
  * @Description:
  */
@@ -32,18 +34,37 @@ public class RegisterRMRequest extends AbstractIdentifyRequest implements Serial
 
     private String resourceIds;
 
+    /**
+     * Instantiates a new Register rm request.
+     */
     public RegisterRMRequest() {
         this(null, null);
     }
 
+    /**
+     * Instantiates a new Register rm request.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     */
     public RegisterRMRequest(String applicationId, String transactionServiceGroup) {
         super(applicationId, transactionServiceGroup);
     }
 
+    /**
+     * Gets resource ids.
+     *
+     * @return the resource ids
+     */
     public String getResourceIds() {
         return resourceIds;
     }
 
+    /**
+     * Sets resource ids.
+     *
+     * @param resourceIds the resource ids
+     */
     public void setResourceIds(String resourceIds) {
         this.resourceIds = resourceIds;
     }

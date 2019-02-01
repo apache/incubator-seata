@@ -40,8 +40,14 @@ import java.util.List;
 
 import com.alibaba.fescar.rm.datasource.sql.struct.Null;
 
+/**
+ * The type Abstract prepared statement proxy.
+ */
 public abstract class AbstractPreparedStatementProxy extends StatementProxy<PreparedStatement> implements PreparedStatement {
 
+    /**
+     * The Parameters.
+     */
     protected ArrayList<Object>[] parameters;
 
     private void initParameterHolder() throws SQLException {
@@ -52,20 +58,47 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
         }
     }
 
+    /**
+     * Instantiates a new Abstract prepared statement proxy.
+     *
+     * @param connectionProxy the connection proxy
+     * @param targetStatement the target statement
+     * @param targetSQL       the target sql
+     * @throws SQLException the sql exception
+     */
     public AbstractPreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement, String targetSQL) throws SQLException {
         super(connectionProxy, targetStatement, targetSQL);
         initParameterHolder();
     }
 
+    /**
+     * Instantiates a new Abstract prepared statement proxy.
+     *
+     * @param connectionProxy the connection proxy
+     * @param targetStatement the target statement
+     * @throws SQLException the sql exception
+     */
     public AbstractPreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement) throws SQLException {
         super(connectionProxy, targetStatement);
         initParameterHolder();
     }
 
+    /**
+     * Gets params by index.
+     *
+     * @param index the index
+     * @return the params by index
+     */
     public List<Object> getParamsByIndex(int index) {
         return parameters[index];
     }
 
+    /**
+     * Sets param by index.
+     *
+     * @param index the index
+     * @param x     the x
+     */
     protected void setParamByIndex(int index, Object x) {
         parameters[--index].add(x);
     }

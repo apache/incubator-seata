@@ -28,7 +28,7 @@ public class TransactionalTemplate {
      *
      * @param business the business
      * @return the object
-     * @throws TransactionalExecutor.ExecutionException the execution exception
+     * @throws ExecutionException the execution exception
      */
     public Object execute(TransactionalExecutor business) throws TransactionalExecutor.ExecutionException {
 
@@ -65,6 +65,8 @@ public class TransactionalTemplate {
                 throw new TransactionalExecutor.ExecutionException(tx, txe,
                     TransactionalExecutor.Code.RollbackFailure, ex);
 
+            } finally {
+                GlobalTransactionContext.clean();
             }
 
         }
@@ -78,6 +80,8 @@ public class TransactionalTemplate {
             throw new TransactionalExecutor.ExecutionException(tx, txe,
                 TransactionalExecutor.Code.CommitFailure);
 
+        } finally {
+            GlobalTransactionContext.clean();
         }
         return rs;
     }

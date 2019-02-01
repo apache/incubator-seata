@@ -17,15 +17,22 @@
 package com.alibaba.fescar.config;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/12/24 10:54
+ * The type Configuration factory.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /12/24 10:54
  * @FileName: ConfigurationFactory
  * @Description:
  */
 public final class ConfigurationFactory {
     private static final Configuration FILE_INSTANCE = new FileConfiguration();
 
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     public static Configuration getInstance() {
         return FILE_INSTANCE;
     }

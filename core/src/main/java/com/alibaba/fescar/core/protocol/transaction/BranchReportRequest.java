@@ -22,6 +22,9 @@ import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.protocol.MergedMessage;
 import com.alibaba.fescar.core.rpc.RpcContext;
 
+/**
+ * The type Branch report request.
+ */
 public class BranchReportRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 
     private long transactionId;
@@ -34,42 +37,92 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
 
     private String applicationData;
 
+    /**
+     * Gets transaction id.
+     *
+     * @return the transaction id
+     */
     public long getTransactionId() {
         return transactionId;
     }
 
+    /**
+     * Sets transaction id.
+     *
+     * @param transactionId the transaction id
+     */
     public void setTransactionId(long transactionId) {
         this.transactionId = transactionId;
     }
 
+    /**
+     * Gets branch id.
+     *
+     * @return the branch id
+     */
     public long getBranchId() {
         return branchId;
     }
 
+    /**
+     * Sets branch id.
+     *
+     * @param branchId the branch id
+     */
     public void setBranchId(long branchId) {
         this.branchId = branchId;
     }
 
+    /**
+     * Gets resource id.
+     *
+     * @return the resource id
+     */
     public String getResourceId() {
         return resourceId;
     }
 
+    /**
+     * Sets resource id.
+     *
+     * @param resourceId the resource id
+     */
     public void setResourceId(String resourceId) {
         this.resourceId = resourceId;
     }
 
+    /**
+     * Gets status.
+     *
+     * @return the status
+     */
     public BranchStatus getStatus() {
         return status;
     }
 
+    /**
+     * Sets status.
+     *
+     * @param status the status
+     */
     public void setStatus(BranchStatus status) {
         this.status = status;
     }
 
+    /**
+     * Gets application data.
+     *
+     * @return the application data
+     */
     public String getApplicationData() {
         return applicationData;
     }
 
+    /**
+     * Sets application data.
+     *
+     * @param applicationData the application data
+     */
     public void setApplicationData(String applicationData) {
         this.applicationData = applicationData;
     }

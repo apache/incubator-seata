@@ -16,15 +16,34 @@
 
 package com.alibaba.fescar.rm.datasource.sql;
 
+/**
+ * The type Sql parsing exception.
+ */
 public class SQLParsingException extends RuntimeException {
+    /**
+     * Instantiates a new Sql parsing exception.
+     *
+     * @param message the message
+     */
     public SQLParsingException(String message) {
         super(message);
     }
 
+    /**
+     * Instantiates a new Sql parsing exception.
+     *
+     * @param message the message
+     * @param cause   the cause
+     */
     public SQLParsingException(String message, Throwable cause) {
         super(message, cause);
     }
 
+    /**
+     * Instantiates a new Sql parsing exception.
+     *
+     * @param cause the cause
+     */
     public SQLParsingException(Throwable cause) {
         super(cause);
     }

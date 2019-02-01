@@ -40,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * The type Rpc remoting server.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /9/12 11:25
  * @FileName: AbstractRpcRemotingServer
  * @Description:
@@ -53,6 +53,11 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     private final NettyServerConfig nettyServerConfig;
     private int listenPort;
 
+    /**
+     * Sets listen port.
+     *
+     * @param listenPort the listen port
+     */
     public void setListenPort(int listenPort) {
 
         if (listenPort <= 0) {
@@ -61,6 +66,11 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         this.listenPort = listenPort;
     }
 
+    /**
+     * Gets listen port.
+     *
+     * @return the listen port
+     */
     public int getListenPort() {
         return listenPort;
     }

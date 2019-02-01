@@ -81,6 +81,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
      *
      * @param fullFileName   the dir path
      * @param sessionManager the session manager
+     * @throws IOException the io exception
      */
     public FileTransactionStoreManager(String fullFileName, SessionManager sessionManager) throws IOException {
         initFile(fullFileName);

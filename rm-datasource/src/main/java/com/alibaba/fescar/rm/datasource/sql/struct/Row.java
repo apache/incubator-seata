@@ -21,25 +21,51 @@ import java.util.List;
 
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 
+/**
+ * The type Row.
+ */
 public class Row {
 
     private List<Field> fields = new ArrayList<Field>();
 
+    /**
+     * Instantiates a new Row.
+     */
     public Row() {
     }
 
+    /**
+     * Gets fields.
+     *
+     * @return the fields
+     */
     public List<Field> getFields() {
         return fields;
     }
 
+    /**
+     * Sets fields.
+     *
+     * @param fields the fields
+     */
     public void setFields(List<Field> fields) {
         this.fields = fields;
     }
 
+    /**
+     * Add.
+     *
+     * @param field the field
+     */
     public void add(Field field) {
         fields.add(field);
     }
 
+    /**
+     * Primary keys list.
+     *
+     * @return the list
+     */
     public List<Field> primaryKeys() {
         List<Field> pkFields = new ArrayList<>();
         for (Field field : fields) {

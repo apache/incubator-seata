@@ -22,7 +22,7 @@ import io.netty.channel.Channel;
  * The interface Channel event listener.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /9/12 14:01
  * @FileName: ChannelEventListener
  * @Description:
