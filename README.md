@@ -100,6 +100,7 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 
 **Dingtalk**
 
+<img src="https://upload-images.jianshu.io/upload_images/4420767-4e95b186a1a1bfba.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240"  height="200" width="200">
 ![dingding.png](https://upload-images.jianshu.io/upload_images/4420767-4e95b186a1a1bfba.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ## Fescar ecosystem
