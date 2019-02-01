@@ -105,9 +105,9 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 ## Fescar ecosystem
 
 * [Fescar Ecosystem Entry](https://github.com/fescar-group) - A GitHub group `fescar-group` to gather all Fescar relevant projects not appropriate in [alibaba](https://github.com/alibaba) group yet
-* [Dubbo Samples](https://github.com/fescar-group/fescar-samples) - Samples for Fescar
-* [Dubbo Docker](https://github.com/fescar-group/fescar-docker) - Fescar integration with docker
-* [Dubbo K8s](https://github.com/fescar-group/fescar-k8s) - Fescar integration with k8s
+* [Fescar Samples](https://github.com/fescar-group/fescar-samples) - Samples for Fescar
+* [Fescar Docker](https://github.com/fescar-group/fescar-docker) - Fescar integration with docker
+* [Fescar K8s](https://github.com/fescar-group/fescar-k8s) - Fescar integration with k8s
 * [Awesome Fescar](https://github.com/fescar-group/awesome-fescar) - Description of Fescar related projects 
 * [Fescar Website](https://github.com/fescar-group/fescar.io) - Fescar official website （***In the process of design***）
 
