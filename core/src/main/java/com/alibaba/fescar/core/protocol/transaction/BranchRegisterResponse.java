@@ -16,6 +16,8 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
+import com.alibaba.fescar.core.protocol.AbstractMessage;
+
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 
@@ -86,5 +88,23 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
         super.decode(byteBuffer);
         this.transactionId = byteBuffer.getLong();
         this.branchId = byteBuffer.getLong();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("BranchRegisterResponse: transactionId=");
+        result.append(transactionId);
+        result.append(",");
+        result.append("branchId=");
+        result.append(branchId);
+        result.append(",");
+        result.append("result code =");
+        result.append(getResultCode());
+        result.append(",");
+        result.append("getMsg =");
+        result.append(getMsg());
+
+        return result.toString();
     }
 }

@@ -71,7 +71,11 @@ public class Server {
 
         UUIDGenerator.init(1);
 
-        XID.setIpAddress(NetUtil.getLocalIp());
+        if (args.length > 2) {
+            XID.setIpAddress(args[2]);
+        } else {
+            XID.setIpAddress(NetUtil.getLocalIp());
+        }
         XID.setPort(rpcServer.getListenPort());
 
         rpcServer.init();
