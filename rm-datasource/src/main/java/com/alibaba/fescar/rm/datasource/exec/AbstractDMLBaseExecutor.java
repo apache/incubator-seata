@@ -92,6 +92,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
                     connectionProxy.commit();
                     break;
                 } catch (LockConflictException lockConflict) {
+                    connectionProxy.getTargetConnection().rollback();
                     lockRetryController.sleep(lockConflict);
                 }
             }
