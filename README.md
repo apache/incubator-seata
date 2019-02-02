@@ -112,6 +112,11 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 * [Awesome Fescar](https://github.com/fescar-group/awesome-fescar) - Description of Fescar related projects 
 * [Fescar Website](https://github.com/fescar-group/fescar.io) - Fescar official website （***In the process of design***）
 
+## Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="https://github.com/alibaba/fescar/graphs/contributors"><img src="https://opencollective.com/fescar/contributors.svg?width=890&button=false" /></a>
+
 ## License
 
 FESCAR is under the Apache 2.0 license. See the [LICENSE](https://github.com/alibaba/fescar/blob/master/LICENSE) file for details.
