@@ -41,15 +41,15 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private String xid;
 
-    private GlobalStatus status = GlobalStatus.UnKnown;
+    private GlobalStatus status;
 
-    private GlobalTransactionRole role = GlobalTransactionRole.Launcher;
+    private GlobalTransactionRole role;
 
     /**
      * Instantiates a new Default global transaction.
      */
     DefaultGlobalTransaction() {
-        this(null);
+        this(null, GlobalStatus.UnKnown, GlobalTransactionRole.Launcher);
     }
 
     /**
@@ -57,13 +57,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
      *
      * @param xid the xid
      */
-    DefaultGlobalTransaction(String xid) {
+    DefaultGlobalTransaction(String xid, GlobalStatus status, GlobalTransactionRole role) {
         this.transactionManager = DefaultTransactionManager.get();
         this.xid = xid;
-        if (xid != null) {
-            status = GlobalStatus.Begin;
-            role = GlobalTransactionRole.Participant;
-        }
+        this.status = status;
+        this.role = role;
     }
 
     @Override
@@ -78,46 +76,77 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout, String name) throws TransactionException {
-        if (xid == null && role == GlobalTransactionRole.Launcher) {
-            xid = transactionManager.begin(null, null, name, timeout);
-            status = GlobalStatus.Begin;
-            RootContext.bind(xid);
-        } else {
-            if (xid == null) {
-                throw new ShouldNeverHappenException(role + " is NOT in a global transaction context.");
+        if (role != GlobalTransactionRole.Launcher) {
+            check();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Ignore Begin(): just involved in global transaction [" + xid + "]");
             }
-            LOGGER.info(role + " is already in global transaction " + xid);
+            return;
+        }
+        if (xid != null) {
+            throw new IllegalStateException();
+        }
+        if (RootContext.getXID() != null) {
+            throw new IllegalStateException();
+        }
+        xid = transactionManager.begin(null, null, name, timeout);
+        status = GlobalStatus.Begin;
+        RootContext.bind(xid);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Begin a NEW global transaction [" + xid + "]");
         }
 
     }
 
     @Override
     public void commit() throws TransactionException {
-        check();
-        RootContext.unbind();
         if (role == GlobalTransactionRole.Participant) {
             // Participant has no responsibility of committing
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Ignore Commit(): just involved in global transaction [" + xid + "]");
+            }
             return;
         }
+        if (xid == null) {
+            throw new IllegalStateException();
+        }
+
         status = transactionManager.commit(xid);
+        if (RootContext.getXID() != null) {
+            if (xid.equals(RootContext.getXID())) {
+                RootContext.unbind();
+            }
+        }
 
     }
 
     @Override
     public void rollback() throws TransactionException {
-        check();
-        RootContext.unbind();
         if (role == GlobalTransactionRole.Participant) {
             // Participant has no responsibility of committing
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Ignore Rollback(): just involved in global transaction [" + xid + "]");
+            }
             return;
         }
+        if (xid == null) {
+            throw new IllegalStateException();
+        }
+
         status = transactionManager.rollback(xid);
+        if (RootContext.getXID() != null) {
+            if (xid.equals(RootContext.getXID())) {
+                RootContext.unbind();
+            }
+        }
 
     }
 
     @Override
     public GlobalStatus getStatus() throws TransactionException {
-        check();
+        if (xid == null) {
+            return GlobalStatus.UnKnown;
+        }
         status = transactionManager.getStatus(xid);
         return status;
     }

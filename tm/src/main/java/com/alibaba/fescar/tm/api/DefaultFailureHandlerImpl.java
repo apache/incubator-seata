@@ -43,6 +43,6 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
 
     @Override
     public void onRollbackFailure(GlobalTransaction tx, Throwable cause) {
-        LOGGER.warn("Failed to begin transaction[" + tx.getXid() + "]", cause);
+        LOGGER.warn("Failed to rollback transaction[" + tx.getXid() + "]", cause);
     }
 }
