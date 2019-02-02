@@ -1,8 +1,11 @@
+<img src="https://github.com/fescar-group/fescar-samples/blob/master/doc/img/fescar.png"  height="100" width="426">
+
 # FESCAR: Fast & Easy Commit And Rollback
 
 [![Build Status](https://travis-ci.org/alibaba/fescar.svg?branch=develop)](https://travis-ci.org/alibaba/fescar)
 [![codecov](https://codecov.io/gh/alibaba/fescar/branch/develop/graph/badge.svg)](https://codecov.io/gh/alibaba/fescar)
 ![license](https://img.shields.io/github/license/alibaba/fescar.svg)
+![maven](https://img.shields.io/maven-central/v/com.alibaba.fescar/fescar-all.svg)
 
 ## What is FESCAR?
 
@@ -60,7 +63,17 @@ For more details about principle and design, please go to [FESCAR wiki page](htt
 - **GTS**: Global Transaction Service. TXC as an Aliyun middleware product with new name GTS was published since 2016.
 - **FESCAR**: we start the open source project FESCAR based on TXC/GTS since 2019 to work closely with the community in the future.
 
+## Maven dependency
+```xml
+<fescar.version>0.1.3</fescar.version>
 
+<dependency>
+    <groupId>com.alibaba.fescar</groupId>
+    <artifactId>fescar-all</artifactId>
+    <version>${fescar.version}</version>
+</dependency>
+
+```
 ## Quick Start
 
 [Quick Start](https://github.com/alibaba/fescar/wiki/Quick-Start)
@@ -87,7 +100,22 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 
 **Dingtalk**
 
-![dingding.png](https://upload-images.jianshu.io/upload_images/4420767-4e95b186a1a1bfba.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+<img src="https://upload-images.jianshu.io/upload_images/4420767-4e95b186a1a1bfba.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240"  height="300" width="300">
+
+
+## Fescar ecosystem
+
+* [Fescar Ecosystem Entry](https://github.com/fescar-group) - A GitHub group `fescar-group` to gather all Fescar relevant projects not appropriate in [alibaba](https://github.com/alibaba) group yet
+* [Fescar Samples](https://github.com/fescar-group/fescar-samples) - Samples for Fescar
+* [Fescar Docker](https://github.com/fescar-group/fescar-docker) - Fescar integration with docker
+* [Fescar K8s](https://github.com/fescar-group/fescar-k8s) - Fescar integration with k8s
+* [Awesome Fescar](https://github.com/fescar-group/awesome-fescar) - Description of Fescar related projects 
+* [Fescar Website](https://github.com/fescar-group/fescar.io) - Fescar official website （***In the process of design***）
+
+## Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="https://github.com/alibaba/fescar/graphs/contributors"><img src="https://opencollective.com/fescar/contributors.svg?width=890&button=false" /></a>
 
 ## License
 
