@@ -16,6 +16,11 @@
 
 package com.alibaba.fescar.config;
 
+import com.alibaba.fescar.common.exception.NotSupportYetException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The type Configuration factory.
  *
@@ -26,7 +31,14 @@ package com.alibaba.fescar.config;
  * @Description:
  */
 public final class ConfigurationFactory {
-    private static final Configuration FILE_INSTANCE = new FileConfiguration();
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
+    private static final String REGISTRY_CONF = "registry.conf";
+    public static final Configuration FILE_INSTANCE = new FileConfiguration(REGISTRY_CONF);
+    private static final String FILE_ROOT_REGISTRY = "registry";
+    private static final String FILE_ROOT_TYPE = "type";
+    private static final String FILE_CONFIG_SPLIT_CHAR = ".";
+    private static final String NAME_KEY = "name";
+    private static final String FILE_TYPE = "file";
 
     /**
      * Gets instance.
@@ -34,6 +46,27 @@ public final class ConfigurationFactory {
      * @return the instance
      */
     public static Configuration getInstance() {
-        return FILE_INSTANCE;
+        ConfigType configType = null;
+        try {
+            configType = ConfigType.getType(
+                FILE_INSTANCE.getConfig(FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_TYPE));
+        } catch (Exception exx) {
+            LOGGER.error(exx.getMessage());
+        }
+        Configuration configuration;
+        switch (configType) {
+            case Nacos:
+                configuration = new NacosConfiguration();
+                break;
+            case File:
+                String pathDataId = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + FILE_TYPE + FILE_CONFIG_SPLIT_CHAR
+                    + NAME_KEY;
+                String name = FILE_INSTANCE.getConfig(pathDataId);
+                configuration = new FileConfiguration(name);
+                break;
+            default:
+                throw new NotSupportYetException("not support register type:" + configType);
+        }
+        return configuration;
     }
 }

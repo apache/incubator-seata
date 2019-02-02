@@ -235,6 +235,11 @@
                 <artifactId>spring-context-support</artifactId>
                 <version>${spring-context-support.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.alibaba.nacos</groupId>
+                <artifactId>nacos-client</artifactId>
+                <version>0.8.0</version>
+            </dependency>
         </dependencies>
 
     </dependencyManagement>
