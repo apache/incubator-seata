@@ -27,10 +27,7 @@
     <artifactId>fescar-rm-datasource</artifactId>
     <packaging>jar</packaging>
     <name>fescar-rm-datasource ${project.version}</name>
-    <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-    </properties>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
