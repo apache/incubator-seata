@@ -84,7 +84,7 @@ You can view the full documentation from the wiki: [FESCAR wiki page](https://gi
 
 ## Reporting bugs
 
-Please follow the [template]() for reporting any issues.
+Please follow the [template](https://github.com/alibaba/fescar/blob/develop/.github/ISSUE_TEMPLATE/BUG_REPORT.md) for reporting any issues.
 
 
 ## Contributing
