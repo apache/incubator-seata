@@ -1,13 +1,13 @@
 <img src="https://github.com/fescar-group/fescar-samples/blob/master/doc/img/fescar.png"  height="100" width="426">
 
-# FESCAR: Fast & Easy Commit And Rollback
+# Fescar: Fast & Easy Commit And Rollback
 
 [![Build Status](https://travis-ci.org/alibaba/fescar.svg?branch=develop)](https://travis-ci.org/alibaba/fescar)
 [![codecov](https://codecov.io/gh/alibaba/fescar/branch/develop/graph/badge.svg)](https://codecov.io/gh/alibaba/fescar)
 ![license](https://img.shields.io/github/license/alibaba/fescar.svg)
 ![maven](https://img.shields.io/maven-central/v/com.alibaba.fescar/fescar-all.svg)
 
-## What is FESCAR?
+## What is Fescar?
 
 A **distributed transaction solution** with high performance and ease of use for **microservices** architecture.
 
@@ -25,9 +25,9 @@ Things have changed in microservices architecture. The 3 modules mentioned above
 
 ![Microservices Problem](https://cdn.nlark.com/lark/0/2018/png/18862/1545296781231-4029da9c-8803-43a4-ac2f-6c8b1e2ea448.png) 
 
-### How FESCAR do?
+### How Fescar do?
 
-FESCAR is just a solution to the problem mentioned above. 
+Fescar is just a solution to the problem mentioned above. 
 
 ![FESCAR solution](https://cdn.nlark.com/lark/0/2018/png/18862/1545296791074-3bce7bce-025e-45c3-9386-7b95135dade8.png)
 
@@ -37,7 +37,7 @@ We say, a **Distributed Transaction** is a **Global Transaction** which is made 
 
 ![Global & Branch](https://cdn.nlark.com/lark/0/2018/png/18862/1545015454979-a18e16f6-ed41-44f1-9c7a-bd82c4d5ff99.png) 
 
-There are 3 basic components in FESCAR: 
+There are 3 basic components in Fescar: 
 
 - **Transaction Coordinator(TC):** Maintain status of global and branch transactions, drive the global commit or rollback.
 - **Transaction Manager(TM):** Define the scope of global transaction: begin a global transaction, commit or rollback a global transaction.
