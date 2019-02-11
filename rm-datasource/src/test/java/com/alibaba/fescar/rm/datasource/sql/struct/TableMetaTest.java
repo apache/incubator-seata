@@ -1,15 +1,42 @@
+/*
+ *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package com.alibaba.fescar.rm.datasource.sql.struct;
+
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.RowIdLifetime;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
 
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.mock.handler.MockExecuteHandler;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
 import com.alibaba.fescar.rm.datasource.DataSourceProxy;
+
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.sql.*;
-import java.util.*;
 
 /**
  * The table meta fetch test.
@@ -19,18 +46,21 @@ import java.util.*;
 public class TableMetaTest {
 
     private static Object[][] columnMetas =
-            new Object[][]{
-                    new Object[]{"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-                    new Object[]{"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-                    new Object[]{"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
-                    new Object[]{"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"}
-            };
+        new Object[][] {
+            new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+            new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES",
+                "NO"},
+            new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES",
+                "NO"},
+            new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
+                "NO"}
+        };
 
     private static Object[][] indexMetas =
-            new Object[][]{
-                    new Object[]{"PRIMARY", "id", false, "", 3, 1, "A", 34},
-                    new Object[]{"name1", "name1", false, "", 3, 1, "A", 34}
-            };
+        new Object[][] {
+            new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
+            new Object[] {"name1", "name1", false, "", 3, 1, "A", 34}
+        };
 
     /**
      * The table meta fetch test.
@@ -109,7 +139,7 @@ public class TableMetaTest {
     private void assertIndexMetaEquals(Object[] expected, IndexMeta actual) {
         Assert.assertEquals(expected[0], actual.getIndexName());
         Assert.assertEquals(expected[3], actual.getIndexQualifier());
-        Assert.assertEquals(expected[4], (int) actual.getType());
+        Assert.assertEquals(expected[4], (int)actual.getType());
         Assert.assertEquals(expected[5], actual.getOrdinalPosition());
         Assert.assertEquals(expected[6], actual.getAscOrDesc());
         Assert.assertEquals(expected[7], actual.getCardinality());
@@ -118,7 +148,8 @@ public class TableMetaTest {
     private class MockDriver extends com.alibaba.druid.mock.MockDriver {
 
         @Override
-        public MockConnection createMockConnection(com.alibaba.druid.mock.MockDriver driver, String url, Properties connectProperties) {
+        public MockConnection createMockConnection(com.alibaba.druid.mock.MockDriver driver, String url,
+                                                   Properties connectProperties) {
             return new MockConnection(this, url, connectProperties);
         }
     }
@@ -150,26 +181,27 @@ public class TableMetaTest {
             return new DatabaseMetaData() {
 
                 @Override
-                public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
+                public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern,
+                                            String columnNamePattern) throws SQLException {
                     List<String> columnLabels = Arrays.asList(
-                            "TABLE_CAT",
-                            "TABLE_SCHEM",
-                            "TABLE_NAME",
-                            "COLUMN_NAME",
-                            "DATA_TYPE",
-                            "TYPE_NAME",
-                            "COLUMN_SIZE",
-                            "DECIMAL_DIGITS",
-                            "NUM_PREC_RADIX",
-                            "NULLABLE",
-                            "REMARKS",
-                            "COLUMN_DEF",
-                            "SQL_DATA_TYPE",
-                            "SQL_DATETIME_SUB",
-                            "CHAR_OCTET_LENGTH",
-                            "ORDINAL_POSITION",
-                            "IS_NULLABLE",
-                            "IS_AUTOINCREMENT"
+                        "TABLE_CAT",
+                        "TABLE_SCHEM",
+                        "TABLE_NAME",
+                        "COLUMN_NAME",
+                        "DATA_TYPE",
+                        "TYPE_NAME",
+                        "COLUMN_SIZE",
+                        "DECIMAL_DIGITS",
+                        "NUM_PREC_RADIX",
+                        "NULLABLE",
+                        "REMARKS",
+                        "COLUMN_DEF",
+                        "SQL_DATA_TYPE",
+                        "SQL_DATETIME_SUB",
+                        "CHAR_OCTET_LENGTH",
+                        "ORDINAL_POSITION",
+                        "IS_NULLABLE",
+                        "IS_AUTOINCREMENT"
                     );
 
                     MockResultSet resultSet = new MockResultSet(createStatement(), columnLabels);
@@ -189,19 +221,19 @@ public class TableMetaTest {
                     return resultSet;
                 }
 
-
                 @Override
-                public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate) throws SQLException {
+                public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique,
+                                              boolean approximate) throws SQLException {
 
                     List<String> columnLabels = Arrays.asList(
-                            "INDEX_NAME",
-                            "COLUMN_NAME",
-                            "NON_UNIQUE",
-                            "INDEX_QUALIFIER",
-                            "TYPE",
-                            "ORDINAL_POSITION",
-                            "ASC_OR_DESC",
-                            "CARDINALITY"
+                        "INDEX_NAME",
+                        "COLUMN_NAME",
+                        "NON_UNIQUE",
+                        "INDEX_QUALIFIER",
+                        "TYPE",
+                        "ORDINAL_POSITION",
+                        "ASC_OR_DESC",
+                        "CARDINALITY"
                     );
 
                     MockResultSet resultSet = new MockResultSet(createStatement(), columnLabels);
@@ -810,17 +842,20 @@ public class TableMetaTest {
                 }
 
                 @Override
-                public ResultSet getProcedures(String catalog, String schemaPattern, String procedureNamePattern) throws SQLException {
+                public ResultSet getProcedures(String catalog, String schemaPattern, String procedureNamePattern)
+                    throws SQLException {
                     return null;
                 }
 
                 @Override
-                public ResultSet getProcedureColumns(String catalog, String schemaPattern, String procedureNamePattern, String columnNamePattern) throws SQLException {
+                public ResultSet getProcedureColumns(String catalog, String schemaPattern, String procedureNamePattern,
+                                                     String columnNamePattern) throws SQLException {
                     return null;
                 }
 
                 @Override
-                public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern, String[] types) throws SQLException {
+                public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern,
+                                           String[] types) throws SQLException {
                     return null;
                 }
 
@@ -840,17 +875,20 @@ public class TableMetaTest {
                 }
 
                 @Override
-                public ResultSet getColumnPrivileges(String catalog, String schema, String table, String columnNamePattern) throws SQLException {
+                public ResultSet getColumnPrivileges(String catalog, String schema, String table,
+                                                     String columnNamePattern) throws SQLException {
                     return null;
                 }
 
                 @Override
-                public ResultSet getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
+                public ResultSet getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern)
+                    throws SQLException {
                     return null;
                 }
 
                 @Override
-                public ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope, boolean nullable) throws SQLException {
+                public ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope,
+                                                      boolean nullable) throws SQLException {
                     return null;
                 }
 
@@ -875,7 +913,9 @@ public class TableMetaTest {
                 }
 
                 @Override
-                public ResultSet getCrossReference(String parentCatalog, String parentSchema, String parentTable, String foreignCatalog, String foreignSchema, String foreignTable) throws SQLException {
+                public ResultSet getCrossReference(String parentCatalog, String parentSchema, String parentTable,
+                                                   String foreignCatalog, String foreignSchema, String foreignTable)
+                    throws SQLException {
                     return null;
                 }
 
@@ -945,7 +985,8 @@ public class TableMetaTest {
                 }
 
                 @Override
-                public ResultSet getUDTs(String catalog, String schemaPattern, String typeNamePattern, int[] types) throws SQLException {
+                public ResultSet getUDTs(String catalog, String schemaPattern, String typeNamePattern, int[] types)
+                    throws SQLException {
                     return null;
                 }
 
@@ -975,17 +1016,20 @@ public class TableMetaTest {
                 }
 
                 @Override
-                public ResultSet getSuperTypes(String catalog, String schemaPattern, String typeNamePattern) throws SQLException {
+                public ResultSet getSuperTypes(String catalog, String schemaPattern, String typeNamePattern)
+                    throws SQLException {
                     return null;
                 }
 
                 @Override
-                public ResultSet getSuperTables(String catalog, String schemaPattern, String tableNamePattern) throws SQLException {
+                public ResultSet getSuperTables(String catalog, String schemaPattern, String tableNamePattern)
+                    throws SQLException {
                     return null;
                 }
 
                 @Override
-                public ResultSet getAttributes(String catalog, String schemaPattern, String typeNamePattern, String attributeNamePattern) throws SQLException {
+                public ResultSet getAttributes(String catalog, String schemaPattern, String typeNamePattern,
+                                               String attributeNamePattern) throws SQLException {
                     return null;
                 }
 
@@ -1060,17 +1104,20 @@ public class TableMetaTest {
                 }
 
                 @Override
-                public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern) throws SQLException {
+                public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern)
+                    throws SQLException {
                     return null;
                 }
 
                 @Override
-                public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern, String columnNamePattern) throws SQLException {
+                public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern,
+                                                    String columnNamePattern) throws SQLException {
                     return null;
                 }
 
                 @Override
-                public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern) throws SQLException {
+                public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern,
+                                                  String columnNamePattern) throws SQLException {
                     return null;
                 }
 

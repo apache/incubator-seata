@@ -16,10 +16,6 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -31,6 +27,9 @@ import io.netty.bootstrap.ChannelFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * The type Tm rpc client test.
@@ -45,7 +44,7 @@ public class TmRpcClientTest {
 
     private static final ThreadPoolExecutor
         workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
-                                                new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+        new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
     @Test
     public void testGetInstance() throws Exception {
@@ -79,12 +78,12 @@ public class TmRpcClientTest {
         //check if attr of tmRpcClient object has been set success
         Field bootstrapField = getDeclaredField(tmRpcClient, "bootstrap");
         bootstrapField.setAccessible(true);
-        Bootstrap bootstrap = (Bootstrap) bootstrapField.get(tmRpcClient);
+        Bootstrap bootstrap = (Bootstrap)bootstrapField.get(tmRpcClient);
 
         Assert.assertNotNull(bootstrap);
         Field optionsField = getDeclaredField(bootstrap, "options");
         optionsField.setAccessible(true);
-        Map<ChannelOption<?>, Object> options = (Map<ChannelOption<?>, Object>) optionsField.get(bootstrap);
+        Map<ChannelOption<?>, Object> options = (Map<ChannelOption<?>, Object>)optionsField.get(bootstrap);
         Assert.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.TCP_NODELAY)));
         Assert.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.SO_KEEPALIVE)));
         Assert.assertEquals(10000, options.get(ChannelOption.CONNECT_TIMEOUT_MILLIS));
@@ -94,7 +93,7 @@ public class TmRpcClientTest {
         Field channelFactoryField = getDeclaredField(bootstrap, "channelFactory");
         channelFactoryField.setAccessible(true);
         ChannelFactory<? extends Channel>
-            channelFactory = (ChannelFactory<? extends Channel>) channelFactoryField.get(bootstrap);
+            channelFactory = (ChannelFactory<? extends Channel>)channelFactoryField.get(bootstrap);
         Assert.assertNotNull(channelFactory);
         Assert.assertTrue(channelFactory.newChannel() instanceof NioSocketChannel);
 
@@ -127,13 +126,13 @@ public class TmRpcClientTest {
      * @param fieldName
      * @return
      */
-    public static Field getDeclaredField(Object object, String fieldName){
-        Field field = null ;
-        Class<?> clazz = object.getClass() ;
-        for(; clazz != Object.class ; clazz = clazz.getSuperclass()) {
+    public static Field getDeclaredField(Object object, String fieldName) {
+        Field field = null;
+        Class<?> clazz = object.getClass();
+        for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
             try {
-                field = clazz.getDeclaredField(fieldName) ;
-                return field ;
+                field = clazz.getDeclaredField(fieldName);
+                return field;
             } catch (Exception e) {
 
             }

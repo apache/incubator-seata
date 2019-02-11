@@ -140,7 +140,6 @@ public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
         result.append("msg=");
         result.append(String.valueOf(getMsg()));
 
-
         return result.toString();
     }
 }

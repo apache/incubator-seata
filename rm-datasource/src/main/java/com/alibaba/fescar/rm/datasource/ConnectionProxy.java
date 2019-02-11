@@ -24,9 +24,6 @@ import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.rm.datasource.exec.LockConflictException;
-import com.alibaba.fescar.rm.datasource.sql.SQLType;
-import com.alibaba.fescar.rm.datasource.sql.struct.Field;
-import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
 
