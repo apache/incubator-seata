@@ -77,7 +77,6 @@
                                 <extraArguments>
                                     <extraArgument>-server</extraArgument>
                                     <extraArgument>-XX:MaxDirectMemorySize=1024M</extraArgument>
-                                    <extraArgument>$EXTRA_JVM_ARGUMENTS</extraArgument>
                                 </extraArguments>
                             </jvmSettings>
                         </program>
