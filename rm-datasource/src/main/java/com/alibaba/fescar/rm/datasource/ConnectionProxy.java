@@ -160,7 +160,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private void register() throws TransactionException {
         Long branchId = DataSourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
-            null, context.getXid(), context.buildLockKeys());
+                null, context.getXid(), context.buildLockKeys());
         context.setBranchId(branchId);
     }
 
@@ -189,7 +189,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         while (retry > 0) {
             try {
                 DataSourceManager.get().branchReport(context.getXid(), context.getBranchId(),
-                    (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
+                        (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done [" + commitDone + "] Retry Countdown: " + retry);
