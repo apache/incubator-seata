@@ -14,18 +14,18 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.tm.dubbo;
+package com.alibaba.fescar.spring.annotation;
 
-/**
- * The interface Account service.
- */
-public interface AccountService {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    /**
-     * 余额扣款
-     *
-     * @param userId 用户ID
-     * @param money  扣款金额
-     */
-    void debit(String userId, int money);
+public class BusinessImpl implements Business {
+    Logger logger = LoggerFactory.getLogger(BusinessImpl.class);
+
+    @Override
+    @GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
+    public String doBiz(String msg) {
+        logger.info("Business doBiz");
+        return "hello " + msg;
+    }
 }

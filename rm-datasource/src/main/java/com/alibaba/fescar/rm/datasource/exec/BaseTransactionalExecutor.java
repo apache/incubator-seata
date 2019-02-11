@@ -21,11 +21,18 @@ import java.sql.Statement;
 import java.util.List;
 
 import com.alibaba.fescar.core.context.RootContext;
+import com.alibaba.fescar.core.exception.TransactionException;
+import com.alibaba.fescar.core.model.BranchType;
+import com.alibaba.fescar.rm.datasource.ConnectionProxy;
+import com.alibaba.fescar.rm.datasource.DataSourceManager;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
+import com.alibaba.fescar.rm.datasource.sql.SQLType;
 import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMetaCache;
+import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
+import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 
 /**
  * The type Base transactional executor.
@@ -151,6 +158,73 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         }
         tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
         return tableMeta;
+    }
+
+    /**
+     * prepare undo log.
+     *
+     * @param beforeImage the before image
+     * @param afterImage  the after image
+     * @throws SQLException the sql exception
+     */
+    protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
+        if (beforeImage.getRows().size() == 0 && afterImage.getRows().size() == 0) {
+            return;
+        }
+
+        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+
+        TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;
+        String lockKeys = buildLockKey(lockKeyRecords);
+        connectionProxy.appendLockKey(lockKeys);
+
+        SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
+        connectionProxy.appendUndoLog(sqlUndoLog);
+    }
+
+
+    /**
+     * build lockKey
+     *
+     * @param rowsIncludingPK the records
+     */
+    protected String buildLockKey(TableRecords rowsIncludingPK) {
+        if (rowsIncludingPK.size() == 0) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(rowsIncludingPK.getTableMeta().getTableName());
+        sb.append(":");
+
+        boolean flag = false;
+        for (Field field : rowsIncludingPK.pkRows()) {
+            if (flag) {
+                sb.append(",");
+            } else {
+                flag = true;
+            }
+            sb.append(field.getValue());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * build a SQLUndoLog
+     *
+     * @param beforeImage
+     * @param afterImage
+     * @return
+     */
+    protected SQLUndoLog buildUndoItem(TableRecords beforeImage, TableRecords afterImage) {
+        SQLType sqlType = sqlRecognizer.getSQLType();
+        String tableName = sqlRecognizer.getTableName();
+
+        SQLUndoLog sqlUndoLog = new SQLUndoLog();
+        sqlUndoLog.setSqlType(sqlType);
+        sqlUndoLog.setTableName(tableName);
+        sqlUndoLog.setBeforeImage(beforeImage);
+        sqlUndoLog.setAfterImage(afterImage);
+        return sqlUndoLog;
     }
 
 }
