@@ -17,16 +17,15 @@
 package com.alibaba.fescar.tm.api;
 
 import com.alibaba.fescar.core.context.RootContext;
-
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.model.TransactionManager;
 import com.alibaba.fescar.tm.DefaultTransactionManager;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  * The type Api test.

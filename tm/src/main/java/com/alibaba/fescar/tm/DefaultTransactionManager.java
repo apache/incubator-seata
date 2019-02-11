@@ -55,6 +55,7 @@ public class DefaultTransactionManager implements TransactionManager {
 
     /**
      * Set a TM instance.
+     *
      * @param mock commonly used for test mocking
      */
     public static void set(TransactionManager mock) {

@@ -19,7 +19,6 @@ package com.alibaba.fescar.tm.api;
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.GlobalStatus;
-import com.alibaba.fescar.core.model.TransactionManager;
 
 /**
  * GlobalTransaction API

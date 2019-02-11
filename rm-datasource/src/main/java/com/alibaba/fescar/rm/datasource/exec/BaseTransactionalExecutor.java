@@ -21,10 +21,7 @@ import java.sql.Statement;
 import java.util.List;
 
 import com.alibaba.fescar.core.context.RootContext;
-import com.alibaba.fescar.core.exception.TransactionException;
-import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.rm.datasource.ConnectionProxy;
-import com.alibaba.fescar.rm.datasource.DataSourceManager;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
@@ -181,7 +178,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
         connectionProxy.appendUndoLog(sqlUndoLog);
     }
-
 
     /**
      * build lockKey

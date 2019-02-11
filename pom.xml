@@ -79,7 +79,7 @@
 
         <!-- Maven properties -->
         <maven.test.skip>false</maven.test.skip>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <!--<maven.javadoc.skip>true</maven.javadoc.skip>-->
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
