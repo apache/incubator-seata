@@ -27,10 +27,6 @@
     <artifactId>fescar-core</artifactId>
     <packaging>jar</packaging>
     <name>fescar-core ${project.version}</name>
-    <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -44,10 +40,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>fescar-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>fescar-common</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

@@ -41,7 +41,7 @@ import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
 public class DefaultTransactionManager implements TransactionManager {
 
     private static class SingletonHolder {
-        private static final TransactionManager INSTANCE = new DefaultTransactionManager();
+        private static TransactionManager INSTANCE = new DefaultTransactionManager();
     }
 
     /**
@@ -51,6 +51,14 @@ public class DefaultTransactionManager implements TransactionManager {
      */
     public static TransactionManager get() {
         return SingletonHolder.INSTANCE;
+    }
+
+    /**
+     * Set a TM instance.
+     * @param mock commonly used for test mocking
+     */
+    public static void set(TransactionManager mock) {
+        SingletonHolder.INSTANCE = mock;
     }
 
     private DefaultTransactionManager() {
