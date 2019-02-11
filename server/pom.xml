@@ -20,7 +20,7 @@
     <parent>
         <artifactId>fescar-all</artifactId>
         <groupId>com.alibaba.fescar</groupId>
-        <version>0.1.4-SNAPSHOT</version>
+        <version>0.1.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>fescar-server</artifactId>
@@ -77,7 +77,6 @@
                                 <extraArguments>
                                     <extraArgument>-server</extraArgument>
                                     <extraArgument>-XX:MaxDirectMemorySize=1024M</extraArgument>
-                                    <extraArgument>$EXTRA_JVM_ARGUMENTS</extraArgument>
                                 </extraArguments>
                             </jvmSettings>
                         </program>
