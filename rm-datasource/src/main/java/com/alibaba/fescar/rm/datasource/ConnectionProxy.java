@@ -74,12 +74,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     /**
      * Check lock.
      *
-     * @param records the records
+     * @param lockKeys the lockKeys
      * @throws SQLException the sql exception
      */
-    public void checkLock(TableRecords records) throws SQLException {
+    public void checkLock(String lockKeys) throws SQLException {
         // Just check lock without requiring lock by now.
-        String lockKeys = buildLockKey(records);
         try {
             boolean lockable = DataSourceManager.get().lockQuery(BranchType.AT, getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
             if (!lockable) {
@@ -93,12 +92,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     /**
      * Register.
      *
-     * @param records the records
+     * @param lockKeys the lockKeys
      * @throws SQLException the sql exception
      */
-    public void register(TableRecords records) throws SQLException {
+    public void register(String lockKeys) throws SQLException {
         // Just check lock without requiring lock by now.
-        String lockKeys = buildLockKey(records);
         try {
             DataSourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(), null, context.getXid(), lockKeys);
         } catch (TransactionException e) {
@@ -116,56 +114,21 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     /**
-     * Prepare undo log.
+     * append sqlUndoLog
      *
-     * @param sqlType     the sql type
-     * @param tableName   the table name
-     * @param beforeImage the before image
-     * @param afterImage  the after image
-     * @throws SQLException the sql exception
+     * @param sqlUndoLog
      */
-    public void prepareUndoLog(SQLType sqlType, String tableName, TableRecords beforeImage, TableRecords afterImage) throws SQLException {
-        if(beforeImage.getRows().size() == 0 && afterImage.getRows().size() == 0) {
-            return;
-        }
-
-        TableRecords lockKeyRecords = afterImage;
-        if (sqlType == SQLType.DELETE) {
-            lockKeyRecords = beforeImage;
-        }
-        String lockKeys = buildLockKey(lockKeyRecords);
-        context.appendLockKey(lockKeys);
-        SQLUndoLog sqlUndoLog = buildUndoItem(sqlType, tableName, beforeImage, afterImage);
+    public void appendUndoLog(SQLUndoLog sqlUndoLog) {
         context.appendUndoItem(sqlUndoLog);
     }
 
-    private SQLUndoLog buildUndoItem(SQLType sqlType, String tableName, TableRecords beforeImage, TableRecords afterImage) {
-        SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        sqlUndoLog.setSqlType(sqlType);
-        sqlUndoLog.setTableName(tableName);
-        sqlUndoLog.setBeforeImage(beforeImage);
-        sqlUndoLog.setAfterImage(afterImage);
-        return sqlUndoLog;
-    }
-
-    private String buildLockKey(TableRecords rowsIncludingPK) {
-        if (rowsIncludingPK.size() == 0) {
-            return null;
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append(rowsIncludingPK.getTableMeta().getTableName());
-        sb.append(":");
-
-        boolean flag = false;
-        for (Field field : rowsIncludingPK.pkRows()) {
-            if (flag) {
-                sb.append(",");
-            } else {
-                flag = true;
-            }
-            sb.append(field.getValue());
-        }
-        return sb.toString();
+    /**
+     * append lockKey
+     *
+     * @param lockKey
+     */
+    public void appendLockKey(String lockKey) {
+        context.appendLockKey(lockKey);
     }
 
     @Override
@@ -200,7 +163,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private void register() throws TransactionException {
         Long branchId = DataSourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
-            null, context.getXid(), context.buildLockKeys());
+                null, context.getXid(), context.buildLockKeys());
         context.setBranchId(branchId);
     }
 
@@ -210,7 +173,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (context.inGlobalTransaction()) {
             if (context.isBranchRegistered()) {
                 report(false);
-            }}
+            }
+        }
         context.reset();
     }
 
@@ -228,7 +192,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         while (retry > 0) {
             try {
                 DataSourceManager.get().branchReport(context.getXid(), context.getBranchId(),
-                    (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
+                        (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done [" + commitDone + "] Retry Countdown: " + retry);

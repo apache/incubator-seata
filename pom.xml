@@ -21,7 +21,7 @@
 
     <groupId>com.alibaba.fescar</groupId>
     <artifactId>fescar-all</artifactId>
-    <version>0.1.3</version>
+    <version>0.1.4</version>
     <modules>
         <module>config</module>
         <module>common</module>
@@ -33,7 +33,6 @@
         <module>spring</module>
         <module>dubbo</module>
         <module>test</module>
-        <module>examples</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -82,8 +81,8 @@
         <maven.test.skip>false</maven.test.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <!-- Compiler settings properties -->
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
         <netty4.version>4.1.24.Final</netty4.version>
         <org.springframework.spring.version>2.5.6.SEC03</org.springframework.spring.version>
@@ -102,6 +101,7 @@
         <dubbo.registry.nacos>0.0.1</dubbo.registry.nacos>
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <testng.version>6.4</testng.version>
+        <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -113,11 +113,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>fescar-config</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -153,11 +148,6 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>fescar-test</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-examples</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -334,16 +324,23 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.7</version>
-                <configuration>
-                    <formats>
-                        <format>html</format>
-                        <format>xml</format>
-                    </formats>
-                    <check/>
-                </configuration>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>test</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

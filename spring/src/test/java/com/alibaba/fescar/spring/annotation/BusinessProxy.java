@@ -14,19 +14,28 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.tm.dubbo;
+package com.alibaba.fescar.spring.annotation;
 
-/**
- * The interface Business service.
- */
-public interface BusinessService {
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
 
-    /**
-     * 用户订购商品
-     *
-     * @param userId        用户ID
-     * @param commodityCode 商品编号
-     * @param orderCount    订购数量
-     */
-    void purchase(String userId, String commodityCode, int orderCount);
+public class BusinessProxy implements InvocationHandler {
+    private Object proxy;
+
+    public BusinessProxy(Object proxy) {
+        this.proxy = proxy;
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        System.out.println("before");
+        Object result = null;
+        try {
+            result = method.invoke(proxy, args);
+        } catch (Exception e) {
+
+        }
+        System.out.println("after");
+        return result;
+    }
 }
