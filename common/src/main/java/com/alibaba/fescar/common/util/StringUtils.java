@@ -24,17 +24,32 @@ import java.sql.SQLException;
 
 import javax.sql.rowset.serial.SerialBlob;
 
+/**
+ * The type String utils.
+ */
 public class StringUtils {
 
     private StringUtils() {
 
     }
 
+    /**
+     * Is empty boolean.
+     *
+     * @param str the str
+     * @return the boolean
+     */
     public static final boolean isEmpty(String str) {
         return (str == null) || (str.isEmpty());
     }
 
-
+    /**
+     * String 2 blob blob.
+     *
+     * @param str the str
+     * @return the blob
+     * @throws SQLException the sql exception
+     */
     public static Blob string2blob(String str) throws SQLException {
         if (str == null) {
             return null;
@@ -42,6 +57,13 @@ public class StringUtils {
         return new SerialBlob(str.getBytes());
     }
 
+    /**
+     * Blob 2 string string.
+     *
+     * @param blob the blob
+     * @return the string
+     * @throws SQLException the sql exception
+     */
     public static String blob2string(Blob blob) throws SQLException {
         if (blob == null) {
             return null;
@@ -50,6 +72,13 @@ public class StringUtils {
         return new String(blob.getBytes((long) 1, (int) blob.length()));
     }
 
+    /**
+     * Input stream 2 string string.
+     *
+     * @param is the is
+     * @return the string
+     * @throws IOException the io exception
+     */
     public static String inputStream2String(InputStream is) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int i = -1;

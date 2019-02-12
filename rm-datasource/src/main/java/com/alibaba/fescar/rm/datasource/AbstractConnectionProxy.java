@@ -37,28 +37,62 @@ import java.util.concurrent.Executor;
 
 import com.alibaba.fescar.core.context.RootContext;
 
+/**
+ * The type Abstract connection proxy.
+ */
 public abstract class AbstractConnectionProxy implements Connection {
 
+    /**
+     * The Data source proxy.
+     */
     protected DataSourceProxy dataSourceProxy;
 
+    /**
+     * The Target connection.
+     */
     protected Connection targetConnection;
 
+    /**
+     * The Db type.
+     */
     protected String dbType;
 
+    /**
+     * Instantiates a new Abstract connection proxy.
+     *
+     * @param dataSourceProxy  the data source proxy
+     * @param targetConnection the target connection
+     * @param dbType           the db type
+     */
     public AbstractConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection, String dbType) {
         this.dataSourceProxy = dataSourceProxy;
         this.targetConnection = targetConnection;
         this.dbType = dbType;
     }
 
+    /**
+     * Gets data source proxy.
+     *
+     * @return the data source proxy
+     */
     public DataSourceProxy getDataSourceProxy() {
         return dataSourceProxy;
     }
 
+    /**
+     * Gets target connection.
+     *
+     * @return the target connection
+     */
     public Connection getTargetConnection() {
         return targetConnection;
     }
 
+    /**
+     * Gets db type.
+     *
+     * @return the db type
+     */
     public String getDbType() {
         return dbType;
     }

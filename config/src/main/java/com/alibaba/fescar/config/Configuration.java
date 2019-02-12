@@ -16,11 +16,13 @@
 
 package com.alibaba.fescar.config;
 
+import java.util.List;
+
 /**
  * The interface Configuration.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /12/20 14:22
  * @FileName: Configuration
  * @Description:
@@ -214,5 +216,13 @@ public interface Configuration {
      * @param listener the listener
      */
     void removeConfigListener(String dataId, ConfigChangeListener listener);
+
+    /**
+     * Gets config listeners.
+     *
+     * @param dataId the data id
+     * @return the config listeners
+     */
+    List<ConfigChangeListener> getConfigListeners(String dataId);
 
 }

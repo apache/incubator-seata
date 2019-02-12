@@ -16,20 +16,30 @@
 
 package com.alibaba.fescar.server.coordinator;
 
+/**
+ * The type Core factory.
+ */
 public class CoreFactory {
 
     private static class SingletonHolder {
         private static Core INSTANCE = new DefaultCore();
     }
 
+    /**
+     * Get core.
+     *
+     * @return the core
+     */
     public static final Core get() {
-        return CoreFactory.SingletonHolder.INSTANCE;
+        return SingletonHolder.INSTANCE;
     }
 
     /**
      * Just for test mocking
+     *
+     * @param core the core
      */
     public static void set(Core core) {
-        CoreFactory.SingletonHolder.INSTANCE = core;
+        SingletonHolder.INSTANCE = core;
     }
 }

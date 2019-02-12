@@ -20,16 +20,12 @@
     <parent>
         <artifactId>fescar-all</artifactId>
         <groupId>com.alibaba.fescar</groupId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.1.4</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>fescar-config</artifactId>
     <packaging>jar</packaging>
     <name>fescar-config ${project.version}</name>
-    <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -39,16 +35,6 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>fescar-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-transport-native-epoll</artifactId>
-            <classifier>linux-x86_64</classifier>
-        </dependency>
-        <dependency>
-            <groupId>io.netty</groupId>
-            <artifactId>netty-transport-native-kqueue</artifactId>
-            <classifier>osx-x86_64</classifier>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -61,6 +47,12 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

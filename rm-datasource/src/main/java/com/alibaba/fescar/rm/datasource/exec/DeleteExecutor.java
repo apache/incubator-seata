@@ -30,8 +30,21 @@ import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 
+/**
+ * The type Delete executor.
+ *
+ * @param <T> the type parameter
+ * @param <S> the type parameter
+ */
 public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
+    /**
+     * Instantiates a new Delete executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param sqlRecognizer     the sql recognizer
+     */
     public DeleteExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
@@ -39,6 +52,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     @Override
     protected TableRecords beforeImage() throws SQLException {
         SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) sqlRecognizer;
+
         TableMeta tmeta = getTableMeta(visitor.getTableName());
         List<String> columns = new ArrayList<>();
         for (String column : tmeta.getAllColumns().keySet()) {
@@ -48,7 +62,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
 
         for (int i = 0; i < columns.size(); i++) {
-            selectSQLAppender.append(columns.get(i));
+            selectSQLAppender.append(getColumnNameInSQL(columns.get(i)));
             if (i < (columns.size() - 1)) {
                 selectSQLAppender.append(", ");
             }
@@ -60,7 +74,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         } else {
             whereCondition = visitor.getWhereCondition();
         }
-        selectSQLAppender.append(" FROM " + tmeta.getTableName() + " WHERE " + whereCondition + " FOR UPDATE");
+        selectSQLAppender.append(" FROM " + getFromTableInSQL() + " WHERE " + whereCondition + " FOR UPDATE");
         String selectSQL = selectSQLAppender.toString();
 
         TableRecords beforeImage = null;

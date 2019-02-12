@@ -24,18 +24,26 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 
+/**
+ * The type Uuid generator.
+ */
 public class UUIDGenerator {
 
     private static AtomicLong UUID = new AtomicLong(1000);
 
-    private static int UUID_INTERNAL = 200000000;
+    private static int UUID_INTERNAL = 2000000000;
 
+    /**
+     * Generate uuid long.
+     *
+     * @return the long
+     */
     public static long generateUUID() {
         long id = UUID.incrementAndGet();
-        if (id > 2000000000) {
+        if (id > UUID_INTERNAL) {
             synchronized (UUID) {
                 if (UUID.get() >= id) {
-                    id -= 2000000000;
+                    id -= UUID_INTERNAL;
                     UUID.set(id);
                 }
             }
@@ -43,6 +51,11 @@ public class UUIDGenerator {
         return id;
     }
 
+    /**
+     * Init.
+     *
+     * @param serverNodeId the server node id
+     */
     public static void init(int serverNodeId) {
         try {
             UUID.set(UUID_INTERNAL * serverNodeId);

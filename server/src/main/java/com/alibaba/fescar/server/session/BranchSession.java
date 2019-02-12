@@ -17,8 +17,6 @@
 package com.alibaba.fescar.server.session;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -30,6 +28,9 @@ import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.server.lock.LockManagerFactory;
 import com.alibaba.fescar.server.store.SessionStorable;
 
+/**
+ * The type Branch session.
+ */
 public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable {
 
     private long transactionId;
@@ -54,94 +55,202 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private String applicationData;
 
-    private ConcurrentHashMap<Map<String, Long>, Set<String>> lockHolder
-        = new ConcurrentHashMap<Map<String, Long>, Set<String>>();
-    ;
+    private ConcurrentHashMap<Map<String, Long>, Set<String>> lockHolder = new ConcurrentHashMap<Map<String, Long>, Set<String>>();
 
+    /**
+     * Gets application data.
+     *
+     * @return the application data
+     */
     public String getApplicationData() {
         return applicationData;
     }
 
+    /**
+     * Sets application data.
+     *
+     * @param applicationData the application data
+     */
     public void setApplicationData(String applicationData) {
         this.applicationData = applicationData;
     }
 
+    /**
+     * Gets resource group id.
+     *
+     * @return the resource group id
+     */
     public String getResourceGroupId() {
         return resourceGroupId;
     }
 
+    /**
+     * Sets resource group id.
+     *
+     * @param resourceGroupId the resource group id
+     */
     public void setResourceGroupId(String resourceGroupId) {
         this.resourceGroupId = resourceGroupId;
     }
 
+    /**
+     * Gets application id.
+     *
+     * @return the application id
+     */
     public String getApplicationId() {
         return applicationId;
     }
 
+    /**
+     * Sets application id.
+     *
+     * @param applicationId the application id
+     */
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
 
+    /**
+     * Gets tx service group.
+     *
+     * @return the tx service group
+     */
     public String getTxServiceGroup() {
         return txServiceGroup;
     }
 
+    /**
+     * Sets tx service group.
+     *
+     * @param txServiceGroup the tx service group
+     */
     public void setTxServiceGroup(String txServiceGroup) {
         this.txServiceGroup = txServiceGroup;
     }
 
+    /**
+     * Gets client id.
+     *
+     * @return the client id
+     */
     public String getClientId() {
         return clientId;
     }
 
+    /**
+     * Sets client id.
+     *
+     * @param clientId the client id
+     */
     public void setClientId(String clientId) {
         this.clientId = clientId;
     }
 
+    /**
+     * Gets resource id.
+     *
+     * @return the resource id
+     */
     public String getResourceId() {
         return resourceId;
     }
 
+    /**
+     * Sets resource id.
+     *
+     * @param resourceId the resource id
+     */
     public void setResourceId(String resourceId) {
         this.resourceId = resourceId;
     }
 
+    /**
+     * Gets lock key.
+     *
+     * @return the lock key
+     */
     public String getLockKey() {
         return lockKey;
     }
 
+    /**
+     * Sets lock key.
+     *
+     * @param lockKey the lock key
+     */
     public void setLockKey(String lockKey) {
         this.lockKey = lockKey;
     }
 
+    /**
+     * Gets branch type.
+     *
+     * @return the branch type
+     */
     public BranchType getBranchType() {
         return branchType;
     }
 
+    /**
+     * Sets branch type.
+     *
+     * @param branchType the branch type
+     */
     public void setBranchType(BranchType branchType) {
         this.branchType = branchType;
     }
 
+    /**
+     * Gets status.
+     *
+     * @return the status
+     */
     public BranchStatus getStatus() {
         return status;
     }
 
+    /**
+     * Sets status.
+     *
+     * @param status the status
+     */
     void setStatus(BranchStatus status) {
         this.status = status;
     }
 
+    /**
+     * Gets transaction id.
+     *
+     * @return the transaction id
+     */
     public long getTransactionId() {
         return transactionId;
     }
 
+    /**
+     * Sets transaction id.
+     *
+     * @param transactionId the transaction id
+     */
     public void setTransactionId(long transactionId) {
         this.transactionId = transactionId;
     }
 
+    /**
+     * Gets branch id.
+     *
+     * @return the branch id
+     */
     public long getBranchId() {
         return branchId;
     }
 
+    /**
+     * Sets branch id.
+     *
+     * @param branchId the branch id
+     */
     public void setBranchId(long branchId) {
         this.branchId = branchId;
     }
@@ -156,37 +265,11 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         return this.branchId < o.branchId ? -1 : (this.branchId > o.branchId ? 1 : 0);
     }
 
-    public static void main(String[] args) throws Throwable {
-        BranchSession b1 = new BranchSession();
-        b1.setBranchId(1L);
-        BranchSession b2 = new BranchSession();
-        b2.setBranchId(2L);
-        BranchSession b3 = new BranchSession();
-        b3.setBranchId(3L);
-
-        ArrayList<BranchSession> list = new ArrayList<>();
-        list.add(b2);
-        list.add(b1);
-        list.add(b3);
-
-        for (BranchSession b : list) {
-            System.out.println(b);
-        }
-
-        Collections.sort(list);
-
-        for (BranchSession b : list) {
-            System.out.println(b);
-        }
-
-        Collections.reverse(list);
-
-        for (BranchSession b : list) {
-            System.out.println(b);
-        }
-
-    }
-
+    /**
+     * Gets lock holder.
+     *
+     * @return the lock holder
+     */
     public ConcurrentHashMap<Map<String, Long>, Set<String>> getLockHolder() {
         return lockHolder;
     }
