@@ -1,13 +1,13 @@
 <img src="https://github.com/fescar-group/fescar-samples/blob/master/doc/img/fescar.png"  height="100" width="426">
 
-# FESCAR: Fast & Easy Commit And Rollback
+# Fescar: Fast & Easy Commit And Rollback
 
 [![Build Status](https://travis-ci.org/alibaba/fescar.svg?branch=develop)](https://travis-ci.org/alibaba/fescar)
 [![codecov](https://codecov.io/gh/alibaba/fescar/branch/develop/graph/badge.svg)](https://codecov.io/gh/alibaba/fescar)
 ![license](https://img.shields.io/github/license/alibaba/fescar.svg)
 ![maven](https://img.shields.io/maven-central/v/com.alibaba.fescar/fescar-all.svg)
 
-## What is FESCAR?
+## What is Fescar?
 
 A **distributed transaction solution** with high performance and ease of use for **microservices** architecture.
 
@@ -25,11 +25,11 @@ Things have changed in microservices architecture. The 3 modules mentioned above
 
 ![Microservices Problem](https://cdn.nlark.com/lark/0/2018/png/18862/1545296781231-4029da9c-8803-43a4-ac2f-6c8b1e2ea448.png) 
 
-### How FESCAR do?
+### How Fescar do?
 
-FESCAR is just a solution to the problem mentioned above. 
+Fescar is just a solution to the problem mentioned above. 
 
-![FESCAR solution](https://cdn.nlark.com/lark/0/2018/png/18862/1545296791074-3bce7bce-025e-45c3-9386-7b95135dade8.png)
+![Fescar solution](https://cdn.nlark.com/lark/0/2018/png/18862/1545296791074-3bce7bce-025e-45c3-9386-7b95135dade8.png)
 
 Firstly, how to define a **Distributed Transaction**?
 
@@ -37,7 +37,7 @@ We say, a **Distributed Transaction** is a **Global Transaction** which is made 
 
 ![Global & Branch](https://cdn.nlark.com/lark/0/2018/png/18862/1545015454979-a18e16f6-ed41-44f1-9c7a-bd82c4d5ff99.png) 
 
-There are 3 basic components in FESCAR: 
+There are 3 basic components in Fescar: 
 
 - **Transaction Coordinator(TC):** Maintain status of global and branch transactions, drive the global commit or rollback.
 - **Transaction Manager(TM):** Define the scope of global transaction: begin a global transaction, commit or rollback a global transaction.
@@ -45,7 +45,7 @@ There are 3 basic components in FESCAR:
 
 ![Model](https://cdn.nlark.com/lark/0/2018/png/18862/1545013915286-4a90f0df-5fda-41e1-91e0-2aa3d331c035.png) 
 
-A typical lifecycle of FESCAR managed distributed transaction:
+A typical lifecycle of Fescar managed distributed transaction:
 
 1. TM asks TC to begin a new global transaction. TC generates an XID representing the global transaction.
 2. XID is propagated through microservices' invoke chain.
@@ -55,17 +55,17 @@ A typical lifecycle of FESCAR managed distributed transaction:
 
 ![Typical Process](https://cdn.nlark.com/lark/0/2018/png/18862/1545296917881-26fabeb9-71fa-4f3e-8a7a-fc317d3389f4.png) 
 
-For more details about principle and design, please go to [FESCAR wiki page](https://github.com/alibaba/fescar/wiki). 
+For more details about principle and design, please go to [Fescar wiki page](https://github.com/alibaba/fescar/wiki). 
 
 ### History
 
 - **TXC**: Taobao Transaction Constructor. Alibaba middleware team start this project since 2014 to meet distributed transaction problem caused by application architecture change from monolithic to microservices.
 - **GTS**: Global Transaction Service. TXC as an Aliyun middleware product with new name GTS was published since 2016.
-- **FESCAR**: we start the open source project FESCAR based on TXC/GTS since 2019 to work closely with the community in the future.
+- **Fescar**: we start the open source project Fescar based on TXC/GTS since 2019 to work closely with the community in the future.
 
 ## Maven dependency
 ```xml
-<fescar.version>0.1.3</fescar.version>
+<fescar.version>0.1.4</fescar.version>
 
 <dependency>
     <groupId>com.alibaba.fescar</groupId>
@@ -80,7 +80,7 @@ For more details about principle and design, please go to [FESCAR wiki page](htt
 
 ## Documentation
 
-You can view the full documentation from the wiki: [FESCAR wiki page](https://github.com/alibaba/fescar/wiki).
+You can view the full documentation from the wiki: [Fescar wiki page](https://github.com/alibaba/fescar/wiki).
 
 ## Reporting bugs
 
@@ -94,9 +94,9 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 
 ## Contact
 
-* [Twitter](): TBD. Follow along for latest FESCAR news on Twitter.
+* [Twitter](): TBD. Follow along for latest Fescar news on Twitter.
 * Email Group:
-     * dev.fescar@gmail.com: FESCAR developer discussion (APIs, feature design, etc).
+     * dev.fescar@gmail.com: Fescar developer discussion (APIs, feature design, etc).
 
 **Dingtalk**
 
@@ -119,4 +119,4 @@ This project exists thanks to all the people who contribute. [[Contribute](CONTR
 
 ## License
 
-FESCAR is under the Apache 2.0 license. See the [LICENSE](https://github.com/alibaba/fescar/blob/master/LICENSE) file for details.
+Fescar is under the Apache 2.0 license. See the [LICENSE](https://github.com/alibaba/fescar/blob/master/LICENSE) file for details.
