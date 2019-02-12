@@ -30,8 +30,8 @@ import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 public class UUIDGenerator {
 
     private static AtomicLong UUID = new AtomicLong(1000);
-
-    private static int UUID_INTERNAL = 2000000000;
+    private static int serverNodeId = 1;
+    private static final long UUID_INTERNAL = 2000000000;
 
     /**
      * Generate uuid long.
@@ -40,7 +40,7 @@ public class UUIDGenerator {
      */
     public static long generateUUID() {
         long id = UUID.incrementAndGet();
-        if (id > UUID_INTERNAL) {
+        if (id > UUID_INTERNAL * serverNodeId) {
             synchronized (UUID) {
                 if (UUID.get() >= id) {
                     id -= UUID_INTERNAL;
@@ -58,6 +58,7 @@ public class UUIDGenerator {
      */
     public static void init(int serverNodeId) {
         try {
+            UUIDGenerator.serverNodeId = serverNodeId;
             UUID.set(UUID_INTERNAL * serverNodeId);
             SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
             Calendar cal = Calendar.getInstance();
