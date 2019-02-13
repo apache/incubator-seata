@@ -352,6 +352,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         } else {
             byteBuffer.putInt(0);
         }
+        byteBuffer.put((byte)status.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
@@ -399,6 +400,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             byteBuffer.get(byApplicationData);
             this.applicationData = new String(byApplicationData);
         }
+        this.status = BranchStatus.get(byteBuffer.get());
 
     }
 

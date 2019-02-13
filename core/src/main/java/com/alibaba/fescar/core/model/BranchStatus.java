@@ -30,97 +30,107 @@ public enum BranchStatus {
      * Unknown branch status.
      */
     // Unknown
-    Unknown,
+    Unknown(0),
 
     /**
      * The Registered.
      */
     // Registered to TC.
-    Registered,
+    Registered(1),
 
     /**
      * The Phase one done.
      */
     // Branch logic is successfully done at phase one.
-    PhaseOne_Done,
+    PhaseOne_Done(2),
 
     /**
      * The Phase one failed.
      */
     // Branch logic is failed at phase one.
-    PhaseOne_Failed,
+    PhaseOne_Failed(3),
 
     /**
      * The Phase one timeout.
      */
     // Branch logic is NOT reported for a timeout.
-    PhaseOne_Timeout,
+    PhaseOne_Timeout(4),
 
     /**
      * The Phase two committed.
      */
     // Commit logic is successfully done at phase two.
-    PhaseTwo_Committed,
+    PhaseTwo_Committed(5),
 
     /**
      * The Phase two commit failed retryable.
      */
     // Commit logic is failed but retryable.
-    PhaseTwo_CommitFailed_Retryable,
+    PhaseTwo_CommitFailed_Retryable(6),
 
     /**
      * The Phase two commit failed unretryable.
      */
     // Commit logic is failed and NOT retryable.
-    PhaseTwo_CommitFailed_Unretryable,
+    PhaseTwo_CommitFailed_Unretryable(7),
 
     /**
      * The Phase two rollbacked.
      */
     // Rollback logic is successfully done at phase two.
-    PhaseTwo_Rollbacked,
+    PhaseTwo_Rollbacked(8),
 
     /**
      * The Phase two rollback failed retryable.
      */
     // Rollback logic is failed but retryable.
-    PhaseTwo_RollbackFailed_Retryable,
+    PhaseTwo_RollbackFailed_Retryable(9),
 
     /**
      * The Phase two rollback failed unretryable.
      */
     // Rollback logic is failed but NOT retryable.
-    PhaseTwo_RollbackFailed_Unretryable;
+    PhaseTwo_RollbackFailed_Unretryable(10);
+
+    private int code;
+
+    BranchStatus(int code) {
+        this.code = code;
+    }
+
+    public int getCode() {
+        return code;
+    }
 
     private static final Map<Integer, BranchStatus> MAP = new HashMap<>(values().length);
 
     static {
         for (BranchStatus status : values()) {
-            MAP.put(status.ordinal(), status);
+            MAP.put(status.getCode(), status);
         }
     }
 
     /**
      * Get branch status.
      *
-     * @param ordinal the ordinal
+     * @param code the code
      * @return the branch status
      */
-    public static BranchStatus get(byte ordinal) {
-        return get((int) ordinal);
+    public static BranchStatus get(byte code) {
+        return get((int) code);
     }
 
     /**
      * Get branch status.
      *
-     * @param ordinal the ordinal
+     * @param code the code
      * @return the branch status
      */
-    public static BranchStatus get(int ordinal) {
-        BranchStatus status = MAP.get(ordinal);
+    public static BranchStatus get(int code) {
+        BranchStatus status = MAP.get(code);
 
         if (null == status) {
-            throw new ShouldNeverHappenException("Unknown BranchStatus[" + ordinal + "]");
+            throw new ShouldNeverHappenException("Unknown BranchStatus[" + code + "]");
         }
 
         return status;

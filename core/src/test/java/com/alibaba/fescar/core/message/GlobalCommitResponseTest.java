@@ -72,7 +72,7 @@ public class GlobalCommitResponseTest {
         String encodeResultStr = Arrays.toString(encodeResult);
         System.out.println(encodeResultStr);
 
-        Assert.assertEquals("[1, 0, 8]", encodeResultStr);
+        Assert.assertEquals("[1, 0, 9]", encodeResultStr);
     }
 
     /**

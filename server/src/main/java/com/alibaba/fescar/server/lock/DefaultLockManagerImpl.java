@@ -142,4 +142,9 @@ public class DefaultLockManagerImpl implements LockManager {
         }
         return true;
     }
+
+    @Override
+    public void cleanAllLocks() throws TransactionException {
+        LOCK_MAP.clear();
+    }
 }
