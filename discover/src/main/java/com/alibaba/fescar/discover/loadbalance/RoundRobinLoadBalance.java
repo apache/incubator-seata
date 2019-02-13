@@ -14,19 +14,18 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.config.registry;
+package com.alibaba.fescar.discover.loadbalance;
+
+import java.util.List;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2019/2/1 5:57 PM
- * @FileName: RegistryFactory
- * @Description:
+ * @author: jimin.jm@alibaba-inc.com
+ * @date 2019/02/12
  */
-public class RegistryFactory {
-    private static final RegistryService REGISTRY_SERVICE = new NacosRegistryServiceImpl();
-
-    public static RegistryService getInstance() {
-        return REGISTRY_SERVICE;
+public class RoundRobinLoadBalance extends AbstractLoadBalance {
+    @Override
+    protected <T> T doSelect(List<T> invokers) {
+        //todo
+        return invokers.get(0);
     }
 }

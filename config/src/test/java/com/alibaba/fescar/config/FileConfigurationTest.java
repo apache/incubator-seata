@@ -35,7 +35,7 @@ import org.testng.annotations.Test;
  */
 public class FileConfigurationTest {
     private final Config config;
-    private final Configuration fileConfig = ConfigurationFactory.getInstance();
+    private final Configuration fileConfig = new FileConfiguration("file.conf");
     private static final String INT_DATAID = "transport.thread-factory.client-selector-thread-size";
     private static final String LONG_DATAID = "transport.thread-factory.worker-thread-size";
     private static final String BOOLEAN_DATAID = "service.disable";

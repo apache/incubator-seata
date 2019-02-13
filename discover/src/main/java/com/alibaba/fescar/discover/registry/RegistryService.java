@@ -14,9 +14,10 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.config.registry;
+package com.alibaba.fescar.discover.registry;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 
 /**
  * The interface Registry service.
@@ -29,6 +30,10 @@ import java.net.InetSocketAddress;
  * @Description:
  */
 public interface RegistryService<T> {
+
+    String PREFIX_SERVICE_MAPPING = "vgroup_mapping.";
+    String PREFIX_SERVICE_ROOT = "service";
+    String CONFIG_SPLIT_CHAR = ".";
 
     /**
      * Register.
@@ -63,4 +68,13 @@ public interface RegistryService<T> {
      * @throws Exception the exception
      */
     void unsubscribe(String cluster, T listener) throws Exception;
+
+    /**
+     * Lookup list.
+     *
+     * @param key the key
+     * @return the list
+     * @throws Exception the exception
+     */
+    List<InetSocketAddress> lookup(String key) throws Exception;
 }

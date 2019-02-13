@@ -17,6 +17,7 @@
 package com.alibaba.fescar.config;
 
 import com.alibaba.fescar.common.exception.NotSupportYetException;
+import com.alibaba.nacos.api.exception.NacosException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,11 +35,11 @@ public final class ConfigurationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
     private static final String REGISTRY_CONF = "registry.conf";
     public static final Configuration FILE_INSTANCE = new FileConfiguration(REGISTRY_CONF);
-    private static final String FILE_ROOT_REGISTRY = "registry";
-    private static final String FILE_ROOT_TYPE = "type";
-    private static final String FILE_CONFIG_SPLIT_CHAR = ".";
+    public static final String FILE_ROOT_REGISTRY = "registry";
+    public static final String FILE_ROOT_TYPE = "type";
+    public static final String FILE_CONFIG_SPLIT_CHAR = ".";
     private static final String NAME_KEY = "name";
-    private static final String FILE_TYPE = "file";
+    public static final String FILE_TYPE = "file";
 
     /**
      * Gets instance.
@@ -56,7 +57,11 @@ public final class ConfigurationFactory {
         Configuration configuration;
         switch (configType) {
             case Nacos:
-                configuration = new NacosConfiguration();
+                try {
+                    configuration = new NacosConfiguration();
+                } catch (NacosException e) {
+                    throw new RuntimeException(e);
+                }
                 break;
             case File:
                 String pathDataId = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + FILE_TYPE + FILE_CONFIG_SPLIT_CHAR

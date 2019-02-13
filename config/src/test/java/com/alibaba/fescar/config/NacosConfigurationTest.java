@@ -16,9 +16,6 @@
 
 package com.alibaba.fescar.config;
 
-import com.alibaba.nacos.api.exception.NacosException;
-
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
@@ -29,12 +26,7 @@ import org.testng.annotations.Test;
  * @Description:
  */
 public class NacosConfigurationTest {
-    private static final Configuration CONFIGURATION = new NacosConfiguration();
-
-    @Test
-    public void testGetConfigInstance() throws NacosException {
-        Assert.assertNotNull(NacosConfiguration.getConfigInstance());
-    }
+    //private static final Configuration CONFIGURATION = new NacosConfiguration();
 
     @Test
     public void testGetConfig() {

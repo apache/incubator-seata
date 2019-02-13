@@ -14,18 +14,24 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.config.registry;
+package com.alibaba.fescar.discover.registry;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
+import com.alibaba.nacos.api.naming.listener.Event;
 import com.alibaba.nacos.api.naming.listener.EventListener;
+import com.alibaba.nacos.api.naming.listener.NamingEvent;
+import com.alibaba.nacos.api.naming.pojo.Instance;
+import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
 /**
  * The type Nacos registry service.
@@ -46,8 +52,24 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
     private static final String REGISTRY_TYPE = "nacos";
     private static final String REGISTRY_CLUSTER = "cluster";
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.getInstance();
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
     private static volatile NamingService naming;
+    private static final ConcurrentMap<String, List<EventListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
+    private static volatile NacosRegistryServiceImpl instance;
+
+    private NacosRegistryServiceImpl() {}
+
+    public static NacosRegistryServiceImpl getInstance() {
+        if (null == instance) {
+            synchronized (NacosRegistryServiceImpl.class) {
+                if (null == instance) {
+                    instance = new NacosRegistryServiceImpl();
+                }
+            }
+        }
+        return instance;
+    }
 
     @Override
     public void register(InetSocketAddress address) throws Exception {
@@ -67,6 +89,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     public void subscribe(String cluster, EventListener listener) throws Exception {
         List<String> clusters = new ArrayList<>();
         clusters.add(cluster);
+        LISTENER_SERVICE_MAP.putIfAbsent(cluster, new ArrayList<>());
+        LISTENER_SERVICE_MAP.get(cluster).add(listener);
         getNamingInstance().subscribe(PRO_SERVER_ADDR_KEY, clusters, listener);
     }
 
@@ -74,7 +98,58 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     public void unsubscribe(String cluster, EventListener listener) throws Exception {
         List<String> clusters = new ArrayList<>();
         clusters.add(cluster);
+        List<EventListener> subscribeList = LISTENER_SERVICE_MAP.get(cluster);
+        if (null != subscribeList) {
+            List<EventListener> newSubscribeList = new ArrayList<>();
+            for (EventListener eventListener : subscribeList) {
+                if (!eventListener.equals(listener)) {
+                    newSubscribeList.add(eventListener);
+                }
+            }
+            LISTENER_SERVICE_MAP.put(cluster, newSubscribeList);
+        }
         getNamingInstance().unsubscribe(PRO_SERVER_ADDR_KEY, clusters, listener);
+    }
+
+    @Override
+    public List<InetSocketAddress> lookup(String key) throws Exception {
+        Configuration config = ConfigurationFactory.getInstance();
+        String clusterName = config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
+        if (null == clusterName) {
+            return null;
+        }
+        if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
+            List<String> clusters = new ArrayList<>();
+            clusters.add(clusterName);
+            List<Instance> firstAllInstances = getNamingInstance().getAllInstances(PRO_SERVER_ADDR_KEY, clusters);
+            if (null != firstAllInstances) {
+                List<InetSocketAddress> newAddressList = new ArrayList<>();
+                for (Instance instance : firstAllInstances) {
+                    if (instance.isEnabled() && instance.isHealthy()) {
+                        newAddressList.add(new InetSocketAddress(instance.getIp(), instance.getPort()));
+                    }
+                }
+                CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+            }
+            subscribe(clusterName, new EventListener() {
+                @Override
+                public void onEvent(Event event) {
+                    List<Instance> instances = ((NamingEvent)event).getInstances();
+                    if (null == instances && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
+                        CLUSTER_ADDRESS_MAP.remove(clusterName);
+                    } else if (!CollectionUtils.isEmpty(instances)) {
+                        List<InetSocketAddress> newAddressList = new ArrayList<>();
+                        for (Instance instance : instances) {
+                            if (instance.isEnabled() && instance.isHealthy()) {
+                                newAddressList.add(new InetSocketAddress(instance.getIp(), instance.getPort()));
+                            }
+                        }
+                        CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+                    }
+                }
+            });
+        }
+        return CLUSTER_ADDRESS_MAP.get(clusterName);
     }
 
     private void validAddress(InetSocketAddress address) {

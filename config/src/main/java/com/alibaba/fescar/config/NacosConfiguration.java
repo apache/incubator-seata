@@ -46,28 +46,17 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
     private static volatile ConfigService configService;
 
-    /**
-     * Gets config instance.
-     *
-     * @return the config instance
-     * @throws NacosException the nacos exception
-     */
-    public static ConfigService getConfigInstance() throws NacosException {
+    public NacosConfiguration() throws NacosException {
         if (null == configService) {
-            synchronized (NacosConfiguration.class) {
-                if (null == configService) {
-                    configService = NacosFactory.createConfigService(getConfigProperties());
-                }
-            }
+            configService = NacosFactory.createConfigService(getConfigProperties());
         }
-        return configService;
     }
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
         String value;
         try {
-            value = getConfigInstance().getConfig(dataId, FESCAR_GROUP, timeoutMills);
+            value = configService.getConfig(dataId, FESCAR_GROUP, timeoutMills);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
             value = defaultValue;
@@ -79,7 +68,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         boolean result = false;
         try {
-            result = getConfigInstance().publishConfig(dataId, FESCAR_GROUP, content);
+            result = configService.publishConfig(dataId, FESCAR_GROUP, content);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -95,7 +84,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     public boolean removeConfig(String dataId, long timeoutMills) {
         boolean result = false;
         try {
-            result = getConfigInstance().removeConfig(dataId, FESCAR_GROUP);
+            result = configService.removeConfig(dataId, FESCAR_GROUP);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -105,7 +94,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     @Override
     public void addConfigListener(String dataId, Listener listener) {
         try {
-            getConfigInstance().addListener(dataId, FESCAR_GROUP, listener);
+            configService.addListener(dataId, FESCAR_GROUP, listener);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -113,11 +102,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
 
     @Override
     public void removeConfigListener(String dataId, Listener listener) {
-        try {
-            getConfigInstance().removeListener(dataId, FESCAR_GROUP, listener);
-        } catch (NacosException exx) {
-            LOGGER.error(exx.getErrMsg());
-        }
+        configService.removeListener(dataId, FESCAR_GROUP, listener);
     }
 
     @Override
