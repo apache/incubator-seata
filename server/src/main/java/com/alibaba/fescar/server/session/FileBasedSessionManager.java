@@ -17,10 +17,7 @@
 package com.alibaba.fescar.server.session;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.config.ConfigurationFactory;
@@ -37,7 +34,7 @@ import com.alibaba.fescar.server.store.TransactionWriteStore;
  */
 public class FileBasedSessionManager extends AbstractSessionManager implements Reloadable {
 
-    private static int READ_SIZE = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.SERVICE_SESSION_RELOAD_READ_SIZE, 100);
+    private static final int READ_SIZE = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.SERVICE_SESSION_RELOAD_READ_SIZE, 100);
 
     /**
      * Instantiates a new File based session manager.
@@ -57,8 +54,32 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
     }
 
     private void restoreSessions() {
-        restoreSessions(true);
-        restoreSessions(false);
+        Map<Long, BranchSession> unhandledBranchBuffer = new HashMap<>();
+
+        restoreSessions(true, unhandledBranchBuffer);
+        restoreSessions(false, unhandledBranchBuffer);
+
+        if (!unhandledBranchBuffer.isEmpty()) {
+            unhandledBranchBuffer.values().forEach(branchSession -> {
+                long tid = branchSession.getTransactionId();
+                long bid = branchSession.getBranchId();
+                GlobalSession found = sessionMap.get(tid);
+                if (found == null) {
+                    // Ignore
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("GlobalSession Does Not Exists For BranchSession [" + bid + "/" + tid + "]");
+                    }
+                } else {
+                    BranchSession existingBranch = found.getBranch(branchSession.getBranchId());
+                    if (existingBranch == null) {
+                        found.add(branchSession);
+                    } else {
+                        existingBranch.setStatus(branchSession.getStatus());
+                    }
+                }
+
+            });
+        }
     }
 
     private void washSessions() {
@@ -87,97 +108,87 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
         }
     }
 
-    private void restoreSessions(boolean isHistory) {
+    private void restoreSessions(boolean isHistory, Map<Long, BranchSession> unhandledBranchBuffer) {
         while (transactionStoreManager.hasRemaining(isHistory)) {
             List<TransactionWriteStore> stores = transactionStoreManager.readWriteStoreFromFile(READ_SIZE, isHistory);
-            restore(stores);
+            restore(stores, unhandledBranchBuffer);
         }
     }
 
-    private void restore(List<TransactionWriteStore> stores) {
+    private void restore(List<TransactionWriteStore> stores, Map<Long, BranchSession> unhandledBranchSessions) {
         for (TransactionWriteStore store : stores) {
-            restore(store);
+            TransactionStoreManager.LogOperation logOperation = store.getOperate();
+            SessionStorable sessionStorable = store.getSessionRequest();
+            switch (logOperation) {
+                case GLOBAL_ADD:
+                case GLOBAL_UPDATE: {
+                    GlobalSession globalSession = (GlobalSession)sessionStorable;
+                    long tid = globalSession.getTransactionId();
+                    GlobalSession foundGlobalSession = sessionMap.get(tid);
+                    if (foundGlobalSession == null) {
+                        sessionMap.put(globalSession.getTransactionId(), globalSession);
+                    } else {
+                        foundGlobalSession.setStatus(globalSession.getStatus());
+                    }
+                    break;
+                }
+                case GLOBAL_REMOVE: {
+                    GlobalSession globalSession = (GlobalSession)sessionStorable;
+                    long tid = globalSession.getTransactionId();
+                    if (sessionMap.remove(tid) == null) {
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info("GlobalSession To Be Removed Does Not Exists [" + tid + "]");
+                        }
+                    }
+                    break;
+                }
+                case BRANCH_ADD:
+                case BRANCH_UPDATE: {
+                    BranchSession branchSession = (BranchSession)sessionStorable;
+                    long tid = branchSession.getTransactionId();
+                    GlobalSession foundGlobalSession = sessionMap.get(tid);
+                    if (foundGlobalSession == null) {
+                        unhandledBranchSessions.put(branchSession.getBranchId(), branchSession);
+                    } else {
+                        BranchSession existingBranch = foundGlobalSession.getBranch(branchSession.getBranchId());
+                        if (existingBranch == null) {
+                            foundGlobalSession.add(branchSession);
+                        } else {
+                            existingBranch.setStatus(branchSession.getStatus());
+                        }
+                    }
+                    break;
+                }
+                case BRANCH_REMOVE: {
+                    BranchSession branchSession = (BranchSession)sessionStorable;
+                    long tid = branchSession.getTransactionId();
+                    long bid = branchSession.getBranchId();
+                    GlobalSession found = sessionMap.get(tid);
+                    if (found == null) {
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info("GlobalSession To Be Updated (Remove Branch) Does Not Exists [" + bid + "/" + tid + "]");
+                        }
+                    } else {
+                        BranchSession theBranch = found.getBranch(bid);
+                        if (theBranch == null) {
+                            if (LOGGER.isInfoEnabled()) {
+                                LOGGER.info("BranchSession To Be Updated Does Not Exists [" + bid + "/" + tid + "]");
+                            }
+                        } else {
+                            found.remove(theBranch);
+                        }
+                    }
+                    break;
+                }
+
+                default:
+                    throw new ShouldNeverHappenException("Unknown Operation: " + logOperation);
+
+            }
         }
 
     }
 
     private void restore(TransactionWriteStore store) {
-        TransactionStoreManager.LogOperation logOperation = store.getOperate();
-        SessionStorable sessionStorable = store.getSessionRequest();
-        switch (logOperation) {
-            case GLOBAL_ADD: {
-                GlobalSession globalSession = (GlobalSession)sessionStorable;
-                sessionMap.put(globalSession.getTransactionId(), globalSession);
-                break;
-            }
-            case GLOBAL_UPDATE: {
-                GlobalSession globalSession = (GlobalSession)sessionStorable;
-                long tid = globalSession.getTransactionId();
-                GlobalSession found = sessionMap.get(tid);
-                if (found == null) {
-                    throw new ShouldNeverHappenException("GlobalSession To Be Updated Does Not Exists [" + tid + "]");
-                }
-                found.setStatus(globalSession.getStatus());
-                break;
-            }
-            case GLOBAL_REMOVE:{
-                GlobalSession globalSession = (GlobalSession)sessionStorable;
-                long tid = globalSession.getTransactionId();
-                if (sessionMap.remove(tid) == null) {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("GlobalSession To Be Removed Does Not Exists [" + tid + "]");
-                    }
-                }
-                break;
-            }
-            case BRANCH_ADD: {
-                BranchSession branchSession = (BranchSession)sessionStorable;
-                long tid = branchSession.getTransactionId();
-                GlobalSession found = sessionMap.get(tid);
-                if (found == null) {
-                    throw new ShouldNeverHappenException("GlobalSession To Be Updated (Add Branch) Does Not Exists [" + tid + "]");
-                }
-                found.add(branchSession);
-                break;
-            }
-            case BRANCH_UPDATE: {
-                BranchSession branchSession = (BranchSession)sessionStorable;
-                long tid = branchSession.getTransactionId();
-                long bid = branchSession.getBranchId();
-                GlobalSession found = sessionMap.get(tid);
-                if (found == null) {
-                    throw new ShouldNeverHappenException("GlobalSession To Be Updated (Update Branch) Does Not Exists [" + bid + "/" + tid + "]");
-                }
-                BranchSession theBranch = found.getBranch(bid);
-                if (theBranch == null) {
-                    throw new ShouldNeverHappenException("BranchSession To Be Updated Does Not Exists [" + bid + "/" + tid + "]");
-                }
-                theBranch.setStatus(branchSession.getStatus());
-                break;
-            }
-            case BRANCH_REMOVE: {
-                BranchSession branchSession = (BranchSession)sessionStorable;
-                long tid = branchSession.getTransactionId();
-                long bid = branchSession.getBranchId();
-                GlobalSession found = sessionMap.get(tid);
-                if (found == null) {
-                    throw new ShouldNeverHappenException("GlobalSession To Be Updated (Remove Branch) Does Not Exists [" + bid + "/" + tid + "]");
-                }
-                BranchSession theBranch = found.getBranch(bid);
-                if (theBranch == null) {
-                    throw new ShouldNeverHappenException("BranchSession To Be Updated Does Not Exists [" + bid + "/" + tid + "]");
-                }
-                if (!found.remove(branchSession)) {
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("BranchSession To Be Removed Does Not Exists [" + bid + "/" + tid + "]");
-                    }
-                }
-                break;
-            }
-
-            default:
-                throw new ShouldNeverHappenException("Unknown Operation: " + logOperation);
-
-        }
     }
 }
