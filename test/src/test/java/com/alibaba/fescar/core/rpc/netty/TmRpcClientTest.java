@@ -29,6 +29,7 @@ import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
 
 import io.netty.channel.Channel;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 /**
@@ -39,6 +40,7 @@ import org.junit.Test;
  * @FileName: TmRpcClientTest
  * @Description:
  */
+@Ignore
 public class TmRpcClientTest {
 
     private static final ThreadPoolExecutor

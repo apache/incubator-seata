@@ -19,8 +19,10 @@ package com.alibaba.fescar.core.rpc.netty;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.core.rpc.RemotingServer;
+import com.alibaba.fescar.discovery.registry.RegistryFactory;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -149,8 +151,9 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         try {
             ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
             LOGGER.info("Server started ... ");
+            RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             future.channel().closeFuture().sync();
-        } catch (InterruptedException exx) {
+        } catch (Exception exx) {
             throw new RuntimeException(exx);
         }
 

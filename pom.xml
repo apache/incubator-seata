@@ -21,7 +21,7 @@
 
     <groupId>com.alibaba.fescar</groupId>
     <artifactId>fescar-all</artifactId>
-    <version>0.1.4</version>
+    <version>0.2.0</version>
     <modules>
         <module>config</module>
         <module>common</module>
@@ -32,6 +32,7 @@
         <module>tm</module>
         <module>spring</module>
         <module>dubbo</module>
+        <module>discovery</module>
         <module>test</module>
     </modules>
     <packaging>pom</packaging>
@@ -147,6 +148,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>fescar-discovery</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>fescar-test</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -234,6 +240,11 @@
                 <groupId>com.alibaba.spring</groupId>
                 <artifactId>spring-context-support</artifactId>
                 <version>${spring-context-support.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.nacos</groupId>
+                <artifactId>nacos-client</artifactId>
+                <version>0.8.0</version>
             </dependency>
         </dependencies>
 
