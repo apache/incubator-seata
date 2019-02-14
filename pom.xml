@@ -32,8 +32,8 @@
         <module>tm</module>
         <module>spring</module>
         <module>dubbo</module>
+        <module>discovery</module>
         <module>test</module>
-        <module>discover</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -148,7 +148,7 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discover</artifactId>
+                <artifactId>fescar-discovery</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

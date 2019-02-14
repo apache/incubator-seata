@@ -14,18 +14,21 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.discover.loadbalance;
+package com.alibaba.fescar.discovery.loadbalance;
 
-import java.util.List;
+import java.util.ServiceLoader;
 
 /**
  * @author: jimin.jm@alibaba-inc.com
  * @date 2019/02/12
  */
-public class RoundRobinLoadBalance extends AbstractLoadBalance {
-    @Override
-    protected <T> T doSelect(List<T> invokers) {
-        //todo
-        return invokers.get(0);
+public class LoadBalanceFactory {
+
+    public static LoadBalance getInstance() {
+        ServiceLoader<LoadBalance> serviceLoader = ServiceLoader.load(LoadBalance.class);
+        for (LoadBalance loadBalance : serviceLoader) {
+            return loadBalance;
+        }
+        return null;
     }
 }
