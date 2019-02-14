@@ -61,7 +61,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
             LOGGER.error(exx.getErrMsg());
             value = defaultValue;
         }
-        return value;
+        return value == null ? defaultValue : value;
     }
 
     @Override
