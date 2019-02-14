@@ -16,6 +16,8 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
+import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -41,6 +43,9 @@ import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.GlobalBeginResponse;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
 import com.alibaba.fescar.core.service.ConfigurationKeys;
+import com.alibaba.fescar.discover.loadbalance.LoadBalanceFactory;
+import com.alibaba.fescar.discover.registry.RegistryFactory;
+import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -168,15 +173,24 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     }
 
     private void reconnect() {
-        for (String serverAddress : serviceManager.lookup(transactionServiceGroup)) {
+        List<String> availList = null;
+        try {
+            availList = getAvailServerList(transactionServiceGroup);
+        } catch (Exception exx) {
+            LOGGER.error(exx.getMessage());
+        }
+        if (CollectionUtils.isEmpty(availList)) {
+            LOGGER.error("no available server to connect.");
+            return;
+        }
+        for (String serverAddress : availList) {
             try {
                 connect(serverAddress);
             } catch (Exception e) {
                 LOGGER.error(FrameworkErrorCode.NetConnect.errCode,
-                    "can not connect to " + serverAddress + " cause:" + e.getMessage());
+                    "can not connect to " + serverAddress + " cause:" + e.getMessage(), e);
             }
         }
-
     }
 
     @Override
@@ -206,12 +220,18 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     }
 
     private String loadBalance() {
-        String[] addresses = serviceManager.lookup(transactionServiceGroup);
-        if (addresses == null || addresses.length == 0) {
+        InetSocketAddress address = null;
+        try {
+            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(
+                transactionServiceGroup);
+            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
+        } catch (Exception ignore) {
+            LOGGER.error(ignore.getMessage());
+        }
+        if (address == null) {
             throw new FrameworkException(NoAvailableService);
         }
-        // Just single server node
-        return addresses[0];
+        return NetUtil.toStringAddress(address);
     }
 
     @Override
