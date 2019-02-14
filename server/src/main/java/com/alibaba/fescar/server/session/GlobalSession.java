@@ -107,20 +107,20 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void changeStatus(GlobalStatus status) throws TransactionException {
+        this.status = status;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, status);
         }
-        this.status = status;
 
     }
 
     @Override
     public void changeBranchStatus(BranchSession branchSession, BranchStatus status)
         throws TransactionException {
+        branchSession.setStatus(status);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBranchStatusChange(this, branchSession, status);
         }
-        branchSession.setStatus(status);
     }
 
     @Override
@@ -139,6 +139,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void end() throws TransactionException {
+        // Clean locks first
+        clean();
+
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onEnd(this);
         }
@@ -387,6 +390,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             byteBuffer.putShort((short)0);
         }
         byteBuffer.putLong(beginTime);
+        byteBuffer.put((byte)status.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
@@ -417,6 +421,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             this.transactionName = new String(byTxName);
         }
         this.beginTime = byteBuffer.getLong();
+        this.status = GlobalStatus.get(byteBuffer.get());
     }
 
     /**

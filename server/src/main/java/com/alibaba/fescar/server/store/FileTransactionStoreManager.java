@@ -70,8 +70,8 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
     private File currDataFile;
     private RandomAccessFile currRaf;
     private FileChannel currFileChannel;
-    private static long recoverCurrOffset = 0;
-    private static long recoverHisOffset = 0;
+    private long recoverCurrOffset = 0;
+    private long recoverHisOffset = 0;
     private SessionManager sessionManager;
     private String currFullFileName;
     private String hisFullFileName;

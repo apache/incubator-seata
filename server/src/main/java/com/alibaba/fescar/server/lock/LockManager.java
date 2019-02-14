@@ -43,4 +43,10 @@ public interface LockManager {
      * @throws TransactionException the transaction exception
      */
     boolean isLockable(long transactionId, String resourceId, String lockKey) throws TransactionException;
+
+    /**
+     * Clean all locks.
+     * @throws TransactionException the transaction exception
+     */
+    void cleanAllLocks() throws TransactionException;
 }
