@@ -315,8 +315,6 @@ public class DefaultSessionManagerTest {
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
-        branchSession.setApplicationId("demo-child-app");
-        branchSession.setTxServiceGroup("my_test_tx_group");
         branchSession.setApplicationData("{\"data\":\"test\"}");
         return new Object[][] {{globalSession, branchSession}};
     }

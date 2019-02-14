@@ -47,10 +47,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private BranchStatus status = BranchStatus.Unknown;
 
-    private String applicationId;
-
-    private String txServiceGroup;
-
     private String clientId;
 
     private String applicationData;
@@ -91,42 +87,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      */
     public void setResourceGroupId(String resourceGroupId) {
         this.resourceGroupId = resourceGroupId;
-    }
-
-    /**
-     * Gets application id.
-     *
-     * @return the application id
-     */
-    public String getApplicationId() {
-        return applicationId;
-    }
-
-    /**
-     * Sets application id.
-     *
-     * @param applicationId the application id
-     */
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
-    }
-
-    /**
-     * Gets tx service group.
-     *
-     * @return the tx service group
-     */
-    public String getTxServiceGroup() {
-        return txServiceGroup;
-    }
-
-    /**
-     * Sets tx service group.
-     *
-     * @param txServiceGroup the tx service group
-     */
-    public void setTxServiceGroup(String txServiceGroup) {
-        this.txServiceGroup = txServiceGroup;
     }
 
     /**
@@ -324,20 +284,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         } else {
             byteBuffer.putInt(0);
         }
-        if (null != applicationId) {
-            byte[] applicationIdBytes = applicationId.getBytes();
-            byteBuffer.putShort((short)applicationIdBytes.length);
-            byteBuffer.put(applicationIdBytes);
-        } else {
-            byteBuffer.putShort((short)0);
-        }
-        if (null != txServiceGroup) {
-            byte[] txServiceGroupBytes = txServiceGroup.getBytes();
-            byteBuffer.putShort((short)txServiceGroupBytes.length);
-            byteBuffer.put(txServiceGroupBytes);
-        } else {
-            byteBuffer.putShort((short)0);
-        }
         if (null != clientId) {
             byte[] clientIdBytes = clientId.getBytes();
             byteBuffer.putShort((short)clientIdBytes.length);
@@ -375,18 +321,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             byte[] byLockKey = new byte[lockKeyLen];
             byteBuffer.get(byLockKey);
             this.lockKey = new String(byLockKey);
-        }
-        short applicationIdLen = byteBuffer.getShort();
-        if (applicationIdLen > 0) {
-            byte[] byApplicationId = new byte[applicationIdLen];
-            byteBuffer.get(byApplicationId);
-            this.applicationId = new String(byApplicationId);
-        }
-        short txServiceGroupLen = byteBuffer.getShort();
-        if (txServiceGroupLen > 0) {
-            byte[] byServiceGroup = new byte[txServiceGroupLen];
-            byteBuffer.get(byServiceGroup);
-            this.txServiceGroup = new String(byServiceGroup);
         }
         short clientIdLen = byteBuffer.getShort();
         if (clientIdLen > 0) {
