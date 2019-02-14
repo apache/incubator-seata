@@ -14,14 +14,14 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.discover.loadbalance;
+package com.alibaba.fescar.discovery.loadbalance;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.alibaba.fescar.discover.registry.RegistryFactory;
-import com.alibaba.fescar.discover.registry.RegistryService;
+import com.alibaba.fescar.discovery.registry.RegistryFactory;
+import com.alibaba.fescar.discovery.registry.RegistryService;
 
 import org.junit.Assert;
 import org.junit.Ignore;
