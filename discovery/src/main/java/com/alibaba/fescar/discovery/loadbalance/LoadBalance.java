@@ -14,28 +14,25 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.discover.loadbalance;
+package com.alibaba.fescar.discovery.loadbalance;
 
 import java.util.List;
 
-import com.alibaba.nacos.client.naming.utils.CollectionUtils;
-
 /**
- * @author: jimin.jm@alibaba-inc.com
- * @date 2019/02/12
+ * The interface Load balance.
+ *
+ * @author: jimin.jm @alibaba-inc.com
+ * @date 2019 /02/12
  */
-public abstract class AbstractLoadBalance implements LoadBalance {
+public interface LoadBalance {
 
-    @Override
-    public <T> T select(List<T> invokers) {
-        if (CollectionUtils.isEmpty(invokers)) {
-            return null;
-        }
-        if (invokers.size() == 1) {
-            return invokers.get(0);
-        }
-        return doSelect(invokers);
-    }
-
-    protected abstract <T> T doSelect(List<T> invokers);
+    /**
+     * Select t.
+     *
+     * @param <T>      the type parameter
+     * @param invokers the invokers
+     * @return the t
+     * @throws Exception the exception
+     */
+    <T> T select(List<T> invokers) throws Exception;
 }

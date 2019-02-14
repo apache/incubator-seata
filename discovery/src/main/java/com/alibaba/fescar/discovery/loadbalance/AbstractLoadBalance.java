@@ -14,21 +14,28 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.discover.loadbalance;
+package com.alibaba.fescar.discovery.loadbalance;
 
-import java.util.ServiceLoader;
+import java.util.List;
+
+import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
 /**
  * @author: jimin.jm@alibaba-inc.com
  * @date 2019/02/12
  */
-public class LoadBalanceFactory {
+public abstract class AbstractLoadBalance implements LoadBalance {
 
-    public static LoadBalance getInstance() {
-        ServiceLoader<LoadBalance> serviceLoader = ServiceLoader.load(LoadBalance.class);
-        for (LoadBalance loadBalance : serviceLoader) {
-            return loadBalance;
+    @Override
+    public <T> T select(List<T> invokers) {
+        if (CollectionUtils.isEmpty(invokers)) {
+            return null;
         }
-        return null;
+        if (invokers.size() == 1) {
+            return invokers.get(0);
+        }
+        return doSelect(invokers);
     }
+
+    protected abstract <T> T doSelect(List<T> invokers);
 }
