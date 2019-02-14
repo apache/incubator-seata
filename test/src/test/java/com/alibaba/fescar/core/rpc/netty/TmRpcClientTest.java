@@ -16,21 +16,21 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
+import java.lang.reflect.Method;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.BranchRegisterRequest;
 import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
 import com.alibaba.fescar.server.UUIDGenerator;
 import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
 
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.lang.reflect.Method;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import io.netty.channel.Channel;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
 
 /**
  * @Author: jimin.jm@alibaba-inc.com
@@ -40,6 +40,7 @@ import io.netty.channel.Channel;
  * @FileName: TmRpcClientTest
  * @Description:
  */
+@Ignore
 public class TmRpcClientTest {
 
     private static final ThreadPoolExecutor

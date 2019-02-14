@@ -39,7 +39,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>fescar-config</artifactId>
+            <artifactId>fescar-discover</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

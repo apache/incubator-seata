@@ -17,6 +17,8 @@
 package com.alibaba.fescar.core.rpc.netty;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -38,6 +40,8 @@ import com.alibaba.fescar.core.rpc.RemotingService;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
 import com.alibaba.fescar.core.service.ServiceManager;
 import com.alibaba.fescar.core.service.ServiceManagerStaticConfigImpl;
+import com.alibaba.fescar.discover.registry.RegistryFactory;
+import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -318,6 +322,18 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             String remoteAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
             clientMessageListener.onMessage(msgId, remoteAddress, msg, this);
         }
+    }
+
+    protected List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
+        List<String> availList = new ArrayList<>();
+        List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance().lookup(
+            transactionServiceGroup);
+        if (!CollectionUtils.isEmpty(availInetSocketAddressList)) {
+            for (InetSocketAddress address : availInetSocketAddressList) {
+                availList.add(NetUtil.toStringAddress(address));
+            }
+        }
+        return availList;
     }
 
     /**

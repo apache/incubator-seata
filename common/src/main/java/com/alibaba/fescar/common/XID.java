@@ -88,4 +88,12 @@ public class XID {
         int idx = xid.lastIndexOf(":");
         return xid.substring(0, idx);
     }
+
+    public static int getPort() {
+        return port;
+    }
+
+    public static String getIpAddress() {
+        return ipAddress;
+    }
 }
