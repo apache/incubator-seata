@@ -43,8 +43,8 @@ import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.GlobalBeginResponse;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
 import com.alibaba.fescar.core.service.ConfigurationKeys;
-import com.alibaba.fescar.discover.loadbalance.LoadBalanceFactory;
-import com.alibaba.fescar.discover.registry.RegistryFactory;
+import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
+import com.alibaba.fescar.discovery.registry.RegistryFactory;
 import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
 import io.netty.channel.Channel;
