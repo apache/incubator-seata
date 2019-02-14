@@ -88,7 +88,7 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
             if (ipAndPort.length != 2) {
                 throw new IllegalArgumentException("endpoint format should like ip:port");
             }
-            inetSocketAddresses.add(new InetSocketAddress(ipAndPort[0], Integer.valueOf(ipAndPort[1])));
+            inetSocketAddresses.add(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])));
         }
         return inetSocketAddresses;
     }
