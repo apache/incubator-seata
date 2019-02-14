@@ -21,13 +21,14 @@ import java.util.List;
 /**
  * The interface Configuration.
  *
+ * @param <T> the type parameter
  * @Author: jimin.jm @alibaba-inc.com
  * @Project: fescar -all
  * @DateTime: 2018 /12/20 14:22
  * @FileName: Configuration
  * @Description:
  */
-public interface Configuration {
+public interface Configuration<T> {
 
     /**
      * Gets int.
@@ -207,7 +208,7 @@ public interface Configuration {
      * @param dataId   the data id
      * @param listener the listener
      */
-    void addConfigListener(String dataId, ConfigChangeListener listener);
+    void addConfigListener(String dataId, T listener);
 
     /**
      * Remove config listener.
@@ -215,7 +216,7 @@ public interface Configuration {
      * @param dataId   the data id
      * @param listener the listener
      */
-    void removeConfigListener(String dataId, ConfigChangeListener listener);
+    void removeConfigListener(String dataId, T listener);
 
     /**
      * Gets config listeners.
@@ -223,6 +224,6 @@ public interface Configuration {
      * @param dataId the data id
      * @return the config listeners
      */
-    List<ConfigChangeListener> getConfigListeners(String dataId);
+    List<T> getConfigListeners(String dataId);
 
 }

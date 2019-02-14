@@ -43,11 +43,11 @@ import org.slf4j.LoggerFactory;
  * @FileName: FileConfiguration
  * @Description:
  */
-public class FileConfiguration implements Configuration {
+public class FileConfiguration extends AbstractConfiguration<ConfigChangeListener> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfiguration.class);
 
-    private static final Config CONFIG = ConfigFactory.load();
+    private final Config CONFIG;
 
     private ExecutorService configOperateExecutor;
 
@@ -59,9 +59,9 @@ public class FileConfiguration implements Configuration {
 
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
 
-    private static final long DEFAULT_CONFIG_TIMEOUT = 5 * 1000;
-
     private static final long LISTENER_CONFIG_INTERNAL = 1 * 1000;
+
+    private static final String REGISTRY_TYPE = "file";
 
     private final ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = new ConcurrentHashMap<>();
 
@@ -71,6 +71,20 @@ public class FileConfiguration implements Configuration {
      * Instantiates a new File configuration.
      */
     public FileConfiguration() {
+        this(null);
+    }
+
+    /**
+     * Instantiates a new File configuration.
+     *
+     * @param name the name
+     */
+    public FileConfiguration(String name) {
+        if (null == name) {
+            CONFIG = ConfigFactory.load();
+        } else {
+            CONFIG = ConfigFactory.load(name);
+        }
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
             new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD));
@@ -81,73 +95,10 @@ public class FileConfiguration implements Configuration {
     }
 
     @Override
-    public int getInt(String dataId, int defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        return Integer.valueOf(result).intValue();
-    }
-
-    @Override
-    public int getInt(String dataId, int defaultValue) {
-        return getInt(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
-    }
-
-    @Override
-    public int getInt(String dataId) {
-        return getInt(dataId, 0);
-    }
-
-    @Override
-    public long getLong(String dataId, long defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        return Long.valueOf(result).longValue();
-    }
-
-    @Override
-    public long getLong(String dataId, long defaultValue) {
-        return getLong(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
-    }
-
-    @Override
-    public long getLong(String dataId) {
-        return getLong(dataId, 0L);
-    }
-
-    @Override
-    public boolean getBoolean(String dataId, boolean defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
-        return Boolean.valueOf(result).booleanValue();
-    }
-
-    @Override
-    public boolean getBoolean(String dataId, boolean defaultValue) {
-        return getBoolean(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
-    }
-
-    @Override
-    public boolean getBoolean(String dataId) {
-        return getBoolean(dataId, false);
-    }
-
-    @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigOperation.GET, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
         return (String)configFuture.get(timeoutMills, TimeUnit.MILLISECONDS);
-    }
-
-    @Override
-    public String getConfig(String dataId, String defaultValue) {
-        return getConfig(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
-    }
-
-    @Override
-    public String getConfig(String dataId, long timeoutMills) {
-        return getConfig(dataId, null, timeoutMills);
-    }
-
-    @Override
-    public String getConfig(String dataId) {
-        return getConfig(dataId, DEFAULT_CONFIG_TIMEOUT);
     }
 
     @Override
@@ -158,11 +109,6 @@ public class FileConfiguration implements Configuration {
     }
 
     @Override
-    public boolean putConfig(String dataId, String content) {
-        return putConfig(dataId, content, DEFAULT_CONFIG_TIMEOUT);
-    }
-
-    @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigOperation.PUTIFABSENT, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
@@ -170,20 +116,10 @@ public class FileConfiguration implements Configuration {
     }
 
     @Override
-    public boolean putConfigIfAbsent(String dataId, String content) {
-        return putConfigIfAbsent(dataId, content, DEFAULT_CONFIG_TIMEOUT);
-    }
-
-    @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigOperation.REMOVE, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
         return (Boolean)configFuture.get(timeoutMills, TimeUnit.MILLISECONDS);
-    }
-
-    @Override
-    public boolean removeConfig(String dataId) {
-        return removeConfig(dataId, DEFAULT_CONFIG_TIMEOUT);
     }
 
     @Override
@@ -218,6 +154,11 @@ public class FileConfiguration implements Configuration {
     @Override
     public List<ConfigChangeListener> getConfigListeners(String dataId) {
         return configListenersMap.get(dataId);
+    }
+
+    @Override
+    public String getTypeName() {
+        return REGISTRY_TYPE;
     }
 
     /**
