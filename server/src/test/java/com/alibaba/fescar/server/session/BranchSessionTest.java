@@ -45,8 +45,6 @@ public class BranchSessionTest {
         Assert.assertEquals(branchSession.getBranchId(), expected.getBranchId());
         Assert.assertEquals(branchSession.getResourceId(), expected.getResourceId());
         Assert.assertEquals(branchSession.getLockKey(), expected.getLockKey());
-        Assert.assertEquals(branchSession.getApplicationId(), expected.getApplicationId());
-        Assert.assertEquals(branchSession.getTxServiceGroup(), expected.getTxServiceGroup());
         Assert.assertEquals(branchSession.getClientId(), expected.getClientId());
         Assert.assertEquals(branchSession.getApplicationData(), expected.getApplicationData());
 
@@ -67,8 +65,6 @@ public class BranchSessionTest {
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
-        branchSession.setApplicationId("demo-child-app");
-        branchSession.setTxServiceGroup("my_test_tx_group");
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.AT);
         return new Object[][] {{branchSession}};
