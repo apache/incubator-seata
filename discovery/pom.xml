@@ -25,8 +25,8 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
-    <artifactId>fescar-discover</artifactId>
-    <name>fescar-discover ${project.version}</name>
+    <artifactId>fescar-discovery</artifactId>
+    <name>fescar-discovery ${project.version}</name>
 
     <dependencies>
         <dependency>

@@ -22,7 +22,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.core.rpc.RemotingServer;
-import com.alibaba.fescar.discover.registry.RegistryFactory;
+import com.alibaba.fescar.discovery.registry.RegistryFactory;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;

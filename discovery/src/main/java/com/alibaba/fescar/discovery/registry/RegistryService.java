@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.discover.registry;
+package com.alibaba.fescar.discovery.registry;
 
 import java.net.InetSocketAddress;
 import java.util.List;
