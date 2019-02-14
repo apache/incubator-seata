@@ -90,8 +90,6 @@ public class LockManagerTest {
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t:0");
         branchSession.setBranchType(BranchType.AT);
-        branchSession.setApplicationId("demo-child-app");
-        branchSession.setTxServiceGroup("my_test_tx_group");
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.AT);
         return new Object[][] {{branchSession}};
@@ -112,8 +110,6 @@ public class LockManagerTest {
         branchSession1.setResourceId("tb_1");
         branchSession1.setLockKey("t:1,2");
         branchSession1.setBranchType(BranchType.AT);
-        branchSession1.setApplicationId("demo-child-app");
-        branchSession1.setTxServiceGroup("my_test_tx_group");
         branchSession1.setApplicationData("{\"data\":\"test\"}");
         branchSession1.setBranchType(BranchType.AT);
 
@@ -125,8 +121,6 @@ public class LockManagerTest {
         branchSession2.setResourceId("tb_1");
         branchSession2.setLockKey("t:1,2");
         branchSession2.setBranchType(BranchType.AT);
-        branchSession2.setApplicationId("demo-child-app");
-        branchSession2.setTxServiceGroup("my_test_tx_group");
         branchSession2.setApplicationData("{\"data\":\"test\"}");
         branchSession2.setBranchType(BranchType.AT);
         return new Object[][] {{branchSession1, branchSession2}};

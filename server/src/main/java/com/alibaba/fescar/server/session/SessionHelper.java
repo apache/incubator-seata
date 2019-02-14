@@ -1,6 +1,5 @@
 package com.alibaba.fescar.server.session;
 
-import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.GlobalStatus;
@@ -15,8 +14,6 @@ public class SessionHelper {
 
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(UUIDGenerator.generateUUID());
-        branchSession.setApplicationId(globalSession.getApplicationId());
-        branchSession.setTxServiceGroup(globalSession.getTransactionServiceGroup());
         branchSession.setBranchType(branchType);
         branchSession.setResourceId(resourceId);
         branchSession.setLockKey(lockKeys);

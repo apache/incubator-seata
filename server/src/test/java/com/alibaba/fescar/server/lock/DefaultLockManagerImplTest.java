@@ -78,8 +78,6 @@ public class DefaultLockManagerImplTest {
         branchSession.setResourceId(resourceId);
         branchSession.setLockKey(lockKey);
         branchSession.setBranchType(BranchType.AT);
-        branchSession.setApplicationId("demo-child-app");
-        branchSession.setTxServiceGroup("my_test_tx_group");
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.AT);
         return new Object[][] {{branchSession}};
