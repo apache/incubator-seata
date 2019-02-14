@@ -106,10 +106,10 @@ public class NetUtil {
         InetSocketAddress ad = toInetSocketAddress(address);
         String[] ip = ad.getAddress().getHostAddress().split("\\.");
         long r = 0;
-        r = r | (Long.valueOf(ip[0]) << 40);
-        r = r | (Long.valueOf(ip[1]) << 32);
-        r = r | (Long.valueOf(ip[2]) << 24);
-        r = r | (Long.valueOf(ip[3]) << 16);
+        r = r | (Long.parseLong(ip[0]) << 40);
+        r = r | (Long.parseLong(ip[1]) << 32);
+        r = r | (Long.parseLong(ip[2]) << 24);
+        r = r | (Long.parseLong(ip[3]) << 16);
         r = r | ad.getPort();
         return r;
     }
