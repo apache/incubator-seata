@@ -213,7 +213,6 @@ public abstract class AbstractIdentifyRequest extends AbstractMessage {
 
     @Override
     public boolean decode(ByteBuf in) {
-        int i = in.readableBytes();
         try {
             short len = in.readShort();
             if (len > 0) {
