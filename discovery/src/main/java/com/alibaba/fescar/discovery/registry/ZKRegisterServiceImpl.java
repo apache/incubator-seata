@@ -1,5 +1,6 @@
 package com.alibaba.fescar.discovery.registry;
 
+import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 
 import java.net.InetSocketAddress;
@@ -9,7 +10,7 @@ import java.util.List;
  * @author crazier.huang
  * @date 2019/2/15
  */
-public class ZKRegisterServiceImpl implements RegistryService<Object> {
+public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> {
 
     private static volatile ZKRegisterServiceImpl instance;
     private static ZkClient zkClient;
@@ -21,7 +22,7 @@ public class ZKRegisterServiceImpl implements RegistryService<Object> {
             synchronized (ZKRegisterServiceImpl.class) {
                 if (null == instance) {
                     instance = new ZKRegisterServiceImpl();
-                    zkClient = new ZkClient("10.29.23.74:2181");
+
                 }
             }
         }
@@ -29,8 +30,9 @@ public class ZKRegisterServiceImpl implements RegistryService<Object> {
     }
     @Override
     public void register(InetSocketAddress address) throws Exception {
-        String path = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING ;
+
 //        zkClient.exists()
+        zkClient = new ZkClient("10.29.23.74:2181");
     }
 
     @Override
@@ -39,17 +41,18 @@ public class ZKRegisterServiceImpl implements RegistryService<Object> {
     }
 
     @Override
-    public void subscribe(String cluster, Object listener) throws Exception {
+    public void subscribe(String cluster, IZkChildListener listener) throws Exception {
 
     }
 
     @Override
-    public void unsubscribe(String cluster, Object listener) throws Exception {
+    public void unsubscribe(String cluster, IZkChildListener listener) throws Exception {
 
     }
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
+
         return null;
     }
 }
