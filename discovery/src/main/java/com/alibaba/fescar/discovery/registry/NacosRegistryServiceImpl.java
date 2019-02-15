@@ -101,6 +101,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         List<EventListener> subscribeList = LISTENER_SERVICE_MAP.get(cluster);
         if (null != subscribeList) {
             List<EventListener> newSubscribeList = new ArrayList<>();
+
+
             for (EventListener eventListener : subscribeList) {
                 if (!eventListener.equals(listener)) {
                     newSubscribeList.add(eventListener);
