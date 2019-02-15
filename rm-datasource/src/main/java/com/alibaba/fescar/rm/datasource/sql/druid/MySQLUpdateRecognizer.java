@@ -21,13 +21,10 @@ import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
-import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
-import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
-import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
+import com.alibaba.druid.sql.ast.expr.*;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
+import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import com.alibaba.fescar.rm.datasource.ParametersHolder;
@@ -124,9 +121,19 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
         if (where == null) {
             return "";
         }
+
+
         StringBuffer sb = new StringBuffer();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        visitor.visit((SQLBinaryOpExpr) where);
+
+        if(where instanceof SQLBetweenExpr){
+            visitor.visit((SQLBetweenExpr) where);
+        }else if(where instanceof SQLInListExpr){
+            visitor.visit((SQLInListExpr) where);
+        }else{
+            visitor.visit((SQLBinaryOpExpr) where);
+        }
+
         return sb.toString();
     }
 
