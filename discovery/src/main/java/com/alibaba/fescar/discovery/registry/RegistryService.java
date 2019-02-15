@@ -31,8 +31,17 @@ import java.util.List;
  */
 public interface RegistryService<T> {
 
+    /**
+     * The constant PREFIX_SERVICE_MAPPING.
+     */
     String PREFIX_SERVICE_MAPPING = "vgroup_mapping.";
+    /**
+     * The constant PREFIX_SERVICE_ROOT.
+     */
     String PREFIX_SERVICE_ROOT = "service";
+    /**
+     * The constant CONFIG_SPLIT_CHAR.
+     */
     String CONFIG_SPLIT_CHAR = ".";
 
     /**
