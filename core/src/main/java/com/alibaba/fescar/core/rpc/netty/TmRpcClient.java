@@ -83,7 +83,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private String applicationId;
     private String transactionServiceGroup;
-    private final NettyClientConfig nettyClientConfig;
+    private final NettyClientConfig tmClientConfig;
     private final ConcurrentMap<String, NettyPoolKey> poolKeyMap
         = new ConcurrentHashMap<String, NettyPoolKey>();
     /**
@@ -95,7 +95,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
                         EventExecutorGroup eventExecutorGroup,
                         ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor);
-        this.nettyClientConfig = nettyClientConfig;
+        this.tmClientConfig = nettyClientConfig;
     }
 
     /**
@@ -357,12 +357,12 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     @Override
     protected Config getNettyPoolConfig() {
         Config poolConfig = new Config();
-        poolConfig.maxActive = nettyClientConfig.getMaxPoolActive();
-        poolConfig.minIdle = nettyClientConfig.getMinPoolIdle();
-        poolConfig.maxWait = nettyClientConfig.getMaxAcquireConnMills();
-        poolConfig.testOnBorrow = nettyClientConfig.isPoolTestBorrow();
-        poolConfig.testOnReturn = nettyClientConfig.isPoolTestReturn();
-        poolConfig.lifo = nettyClientConfig.isPoolFifo();
+        poolConfig.maxActive = tmClientConfig.getMaxPoolActive();
+        poolConfig.minIdle = tmClientConfig.getMinPoolIdle();
+        poolConfig.maxWait = tmClientConfig.getMaxAcquireConnMills();
+        poolConfig.testOnBorrow = tmClientConfig.isPoolTestBorrow();
+        poolConfig.testOnReturn = tmClientConfig.isPoolTestReturn();
+        poolConfig.lifo = tmClientConfig.isPoolLifo();
         return poolConfig;
     }
 
