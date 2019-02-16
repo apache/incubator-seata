@@ -22,14 +22,30 @@ import com.alibaba.fescar.core.model.BranchStatus;
 
 import io.netty.buffer.ByteBuf;
 
+/**
+ * The type Abstract branch end response.
+ */
 public abstract class AbstractBranchEndResponse extends AbstractTransactionResponse {
 
+    /**
+     * The Branch status.
+     */
     protected BranchStatus branchStatus;
 
+    /**
+     * Gets branch status.
+     *
+     * @return the branch status
+     */
     public BranchStatus getBranchStatus() {
         return branchStatus;
     }
 
+    /**
+     * Sets branch status.
+     *
+     * @param branchStatus the branch status
+     */
     public void setBranchStatus(BranchStatus branchStatus) {
         this.branchStatus = branchStatus;
     }
@@ -37,7 +53,7 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
     @Override
     protected void doEncode() {
         super.doEncode();
-        byteBuffer.put((byte) branchStatus.ordinal());
+        byteBuffer.put((byte) branchStatus.getCode());
     }
 
     @Override
@@ -54,5 +70,20 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
         }
         branchStatus = BranchStatus.get(in.readByte());
         return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("branchStatus=");
+        result.append(branchStatus);
+        result.append(",");
+        result.append("result code =");
+        result.append(getResultCode());
+        result.append(",");
+        result.append("getMsg =");
+        result.append(getMsg());
+
+        return result.toString();
     }
 }

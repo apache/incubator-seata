@@ -27,21 +27,43 @@ import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.rm.datasource.DataSourceManager;
 import com.alibaba.fescar.rm.datasource.sql.struct.*;
 
+/**
+ * The type Abstract undo executor.
+ */
 public abstract class AbstractUndoExecutor {
 
+    /**
+     * The Sql undo log.
+     */
     protected SQLUndoLog sqlUndoLog;
 
+    /**
+     * Build undo sql string.
+     *
+     * @return the string
+     */
     protected abstract String buildUndoSQL();
 
+    /**
+     * Instantiates a new Abstract undo executor.
+     *
+     * @param sqlUndoLog the sql undo log
+     */
     public AbstractUndoExecutor(SQLUndoLog sqlUndoLog) {
         this.sqlUndoLog = sqlUndoLog;
     }
 
+    /**
+     * Execute on.
+     *
+     * @param conn the conn
+     * @throws SQLException the sql exception
+     */
     public void executeOn(String xid, long branchId, Connection conn, boolean force) throws SQLException, TransactionException {
         if (!force) {
             dataValidation(xid, branchId, conn);
         }
-
+      
         try {
             String undoSQL = buildUndoSQL();
 
@@ -76,6 +98,14 @@ public abstract class AbstractUndoExecutor {
 
     }
 
+    /**
+     * Undo prepare.
+     *
+     * @param undoPST    the undo pst
+     * @param undoValues the undo values
+     * @param pkValue    the pk value
+     * @throws SQLException the sql exception
+     */
     protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue) throws SQLException {
         int undoIndex = 0;
         for (Field undoValue : undoValues) {
@@ -90,9 +120,21 @@ public abstract class AbstractUndoExecutor {
         undoPST.setObject(undoIndex, pkValue.getValue(), pkValue.getType());
     }
 
+    /**
+     * Gets undo rows.
+     *
+     * @return the undo rows
+     */
     protected abstract TableRecords getUndoRows();
 
-    // Validate if data is dirty.
+    /**
+     * Data validation.
+     *
+     * @param xid the xid
+     * @param branchId branchId
+     * @param conn the conn
+     * @throws SQLException the sql exception
+     */
     protected void dataValidation(String xid, long branchId, Connection conn) throws SQLException, TransactionException {
         String tableName = sqlUndoLog.getTableName();
         TableRecords afterImage = sqlUndoLog.getAfterImage();

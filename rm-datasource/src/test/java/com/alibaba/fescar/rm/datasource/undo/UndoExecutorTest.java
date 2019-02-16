@@ -62,8 +62,14 @@ import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 
 import org.junit.Test;
 
+/**
+ * The type Undo executor test.
+ */
 public class UndoExecutorTest {
 
+    /**
+     * Test field.
+     */
     @Test
     public void testField() {
         Field f = new Field();
@@ -80,6 +86,9 @@ public class UndoExecutorTest {
         System.out.println(fd.getKeyType());
     }
 
+    /**
+     * Test update.
+     */
     @Test
     public void testUpdate() {
         SQLUndoLog SQLUndoLog = new SQLUndoLog();
@@ -148,6 +157,9 @@ public class UndoExecutorTest {
         }
     }
 
+    /**
+     * Test insert.
+     */
     @Test
     public void testInsert() {
         SQLUndoLog SQLUndoLog = new SQLUndoLog();
@@ -206,7 +218,6 @@ public class UndoExecutorTest {
         SQLUndoLog.setBeforeImage(beforeImage);
         SQLUndoLog.setAfterImage(afterImage);
 
-
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
 
         try {
@@ -216,6 +227,9 @@ public class UndoExecutorTest {
         }
     }
 
+    /**
+     * Test delete.
+     */
     @Test
     public void testDelete() {
         SQLUndoLog SQLUndoLog = new SQLUndoLog();
@@ -274,7 +288,6 @@ public class UndoExecutorTest {
         SQLUndoLog.setAfterImage(afterImage);
         SQLUndoLog.setBeforeImage(beforeImage);
 
-
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
 
         try {
@@ -284,10 +297,19 @@ public class UndoExecutorTest {
         }
     }
 
+    /**
+     * The type Mock table meta.
+     */
     public static class MockTableMeta extends TableMeta {
 
         private String mockPK;
 
+        /**
+         * Instantiates a new Mock table meta.
+         *
+         * @param tableName the table name
+         * @param pkName    the pk name
+         */
         public MockTableMeta(String tableName, String pkName) {
             setTableName(tableName);
             this.mockPK = pkName;
@@ -305,6 +327,9 @@ public class UndoExecutorTest {
         }
     }
 
+    /**
+     * The type Mock connection.
+     */
     public static class MockConnection implements Connection {
 
         @Override

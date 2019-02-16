@@ -30,12 +30,22 @@ import com.alibaba.fescar.rm.datasource.sql.druid.MySQLInsertRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.druid.MySQLUpdateRecognizer;
 
+/**
+ * The type Sql visitor factory.
+ */
 public class SQLVisitorFactory {
 
+    /**
+     * Get sql recognizer.
+     *
+     * @param sql    the sql
+     * @param dbType the db type
+     * @return the sql recognizer
+     */
     public static SQLRecognizer get(String sql, String dbType) {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
         if (asts == null || asts.size() != 1) {
-            throw new UnsupportedOperationException("xxx");
+            throw new UnsupportedOperationException("Unsupported SQL: " + sql);
         }
         SQLRecognizer recognizer = null;
         SQLStatement ast = asts.get(0);
@@ -47,7 +57,9 @@ public class SQLVisitorFactory {
             } else if (ast instanceof SQLDeleteStatement) {
                 recognizer = new MySQLDeleteRecognizer(sql, ast);
             } else if (ast instanceof SQLSelectStatement) {
-                recognizer = new MySQLSelectForUpdateRecognizer(sql, ast);
+                if (((SQLSelectStatement)ast).getSelect().getQueryBlock().isForUpdate()) {
+                    recognizer = new MySQLSelectForUpdateRecognizer(sql, ast);
+                }
             }
         } else {
             throw new UnsupportedOperationException("Just support MySQL by now!");

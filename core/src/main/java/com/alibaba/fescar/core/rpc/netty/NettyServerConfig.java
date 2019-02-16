@@ -16,8 +16,6 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
-import com.alibaba.fescar.config.Configuration;
-import com.alibaba.fescar.config.ConfigurationFactory;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
@@ -27,7 +25,7 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
  * The type Netty server config.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /9/12 11:35
  * @FileName: NettyServerConfig
  * @Description:
@@ -45,7 +43,6 @@ public class NettyServerConfig extends NettyBaseConfig {
     private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
     private boolean enableServerPooledByteBufAllocator = true;
     private int serverChannelMaxIdleTimeSeconds = 30;
-    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
     private static final String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
     private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
     private static final String NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";

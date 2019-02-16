@@ -24,14 +24,40 @@ import com.alibaba.fescar.rm.datasource.StatementProxy;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLVisitorFactory;
 
+/**
+ * The type Execute template.
+ */
 public class ExecuteTemplate {
 
+    /**
+     * Execute t.
+     *
+     * @param <T>               the type parameter
+     * @param <S>               the type parameter
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param args              the args
+     * @return the t
+     * @throws SQLException the sql exception
+     */
     public static <T, S extends Statement> T execute(StatementProxy<S> statementProxy,
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
         return execute(null, statementProxy, statementCallback, args);
     }
 
+    /**
+     * Execute t.
+     *
+     * @param <T>               the type parameter
+     * @param <S>               the type parameter
+     * @param sqlRecognizer     the sql recognizer
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param args              the args
+     * @return the t
+     * @throws SQLException the sql exception
+     */
     public static <T, S extends Statement> T execute(SQLRecognizer sqlRecognizer,
                                                      StatementProxy<S> statementProxy,
                                                      StatementCallback<T, S> statementCallback,
@@ -44,26 +70,30 @@ public class ExecuteTemplate {
 
         if (sqlRecognizer == null) {
             sqlRecognizer = SQLVisitorFactory.get(
-                    statementProxy.getTargetSQL(),
-                    statementProxy.getConnectionProxy().getDbType());
+                statementProxy.getTargetSQL(),
+                statementProxy.getConnectionProxy().getDbType());
         }
         Executor<T> executor = null;
-        switch (sqlRecognizer.getSQLType()) {
-            case INSERT:
-                executor = new InsertExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                break;
-            case UPDATE:
-                executor = new UpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                break;
-            case DELETE:
-                executor = new DeleteExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                break;
-            case SELECT_FOR_UPDATE:
-                executor = new SelectForUpdateExecutor(statementProxy, statementCallback, sqlRecognizer);
-                break;
-            default:
-                executor = new PlainExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                break;
+        if (sqlRecognizer == null) {
+            executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
+        } else {
+            switch (sqlRecognizer.getSQLType()) {
+                case INSERT:
+                    executor = new InsertExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                    break;
+                case UPDATE:
+                    executor = new UpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                    break;
+                case DELETE:
+                    executor = new DeleteExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                    break;
+                case SELECT_FOR_UPDATE:
+                    executor = new SelectForUpdateExecutor(statementProxy, statementCallback, sqlRecognizer);
+                    break;
+                default:
+                    executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
+                    break;
+            }
         }
         T rs = null;
         try {

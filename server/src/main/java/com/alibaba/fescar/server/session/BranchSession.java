@@ -28,6 +28,9 @@ import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.server.lock.LockManagerFactory;
 import com.alibaba.fescar.server.store.SessionStorable;
 
+/**
+ * The type Branch session.
+ */
 public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable {
 
     private long transactionId;
@@ -44,100 +47,170 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private BranchStatus status = BranchStatus.Unknown;
 
-    private String applicationId;
-
-    private String txServiceGroup;
-
     private String clientId;
 
     private String applicationData;
 
     private ConcurrentHashMap<Map<String, Long>, Set<String>> lockHolder = new ConcurrentHashMap<Map<String, Long>, Set<String>>();
 
+    /**
+     * Gets application data.
+     *
+     * @return the application data
+     */
     public String getApplicationData() {
         return applicationData;
     }
 
+    /**
+     * Sets application data.
+     *
+     * @param applicationData the application data
+     */
     public void setApplicationData(String applicationData) {
         this.applicationData = applicationData;
     }
 
+    /**
+     * Gets resource group id.
+     *
+     * @return the resource group id
+     */
     public String getResourceGroupId() {
         return resourceGroupId;
     }
 
+    /**
+     * Sets resource group id.
+     *
+     * @param resourceGroupId the resource group id
+     */
     public void setResourceGroupId(String resourceGroupId) {
         this.resourceGroupId = resourceGroupId;
     }
 
-    public String getApplicationId() {
-        return applicationId;
-    }
-
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
-    }
-
-    public String getTxServiceGroup() {
-        return txServiceGroup;
-    }
-
-    public void setTxServiceGroup(String txServiceGroup) {
-        this.txServiceGroup = txServiceGroup;
-    }
-
+    /**
+     * Gets client id.
+     *
+     * @return the client id
+     */
     public String getClientId() {
         return clientId;
     }
 
+    /**
+     * Sets client id.
+     *
+     * @param clientId the client id
+     */
     public void setClientId(String clientId) {
         this.clientId = clientId;
     }
 
+    /**
+     * Gets resource id.
+     *
+     * @return the resource id
+     */
     public String getResourceId() {
         return resourceId;
     }
 
+    /**
+     * Sets resource id.
+     *
+     * @param resourceId the resource id
+     */
     public void setResourceId(String resourceId) {
         this.resourceId = resourceId;
     }
 
+    /**
+     * Gets lock key.
+     *
+     * @return the lock key
+     */
     public String getLockKey() {
         return lockKey;
     }
 
+    /**
+     * Sets lock key.
+     *
+     * @param lockKey the lock key
+     */
     public void setLockKey(String lockKey) {
         this.lockKey = lockKey;
     }
 
+    /**
+     * Gets branch type.
+     *
+     * @return the branch type
+     */
     public BranchType getBranchType() {
         return branchType;
     }
 
+    /**
+     * Sets branch type.
+     *
+     * @param branchType the branch type
+     */
     public void setBranchType(BranchType branchType) {
         this.branchType = branchType;
     }
 
+    /**
+     * Gets status.
+     *
+     * @return the status
+     */
     public BranchStatus getStatus() {
         return status;
     }
 
+    /**
+     * Sets status.
+     *
+     * @param status the status
+     */
     void setStatus(BranchStatus status) {
         this.status = status;
     }
 
+    /**
+     * Gets transaction id.
+     *
+     * @return the transaction id
+     */
     public long getTransactionId() {
         return transactionId;
     }
 
+    /**
+     * Sets transaction id.
+     *
+     * @param transactionId the transaction id
+     */
     public void setTransactionId(long transactionId) {
         this.transactionId = transactionId;
     }
 
+    /**
+     * Gets branch id.
+     *
+     * @return the branch id
+     */
     public long getBranchId() {
         return branchId;
     }
 
+    /**
+     * Sets branch id.
+     *
+     * @param branchId the branch id
+     */
     public void setBranchId(long branchId) {
         this.branchId = branchId;
     }
@@ -152,6 +225,11 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         return this.branchId < o.branchId ? -1 : (this.branchId > o.branchId ? 1 : 0);
     }
 
+    /**
+     * Gets lock holder.
+     *
+     * @return the lock holder
+     */
     public ConcurrentHashMap<Map<String, Long>, Set<String>> getLockHolder() {
         return lockHolder;
     }
@@ -206,20 +284,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         } else {
             byteBuffer.putInt(0);
         }
-        if (null != applicationId) {
-            byte[] applicationIdBytes = applicationId.getBytes();
-            byteBuffer.putShort((short)applicationIdBytes.length);
-            byteBuffer.put(applicationIdBytes);
-        } else {
-            byteBuffer.putShort((short)0);
-        }
-        if (null != txServiceGroup) {
-            byte[] txServiceGroupBytes = txServiceGroup.getBytes();
-            byteBuffer.putShort((short)txServiceGroupBytes.length);
-            byteBuffer.put(txServiceGroupBytes);
-        } else {
-            byteBuffer.putShort((short)0);
-        }
         if (null != clientId) {
             byte[] clientIdBytes = clientId.getBytes();
             byteBuffer.putShort((short)clientIdBytes.length);
@@ -234,6 +298,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         } else {
             byteBuffer.putInt(0);
         }
+        byteBuffer.put((byte)status.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
@@ -257,18 +322,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             byteBuffer.get(byLockKey);
             this.lockKey = new String(byLockKey);
         }
-        short applicationIdLen = byteBuffer.getShort();
-        if (applicationIdLen > 0) {
-            byte[] byApplicationId = new byte[applicationIdLen];
-            byteBuffer.get(byApplicationId);
-            this.applicationId = new String(byApplicationId);
-        }
-        short txServiceGroupLen = byteBuffer.getShort();
-        if (txServiceGroupLen > 0) {
-            byte[] byServiceGroup = new byte[txServiceGroupLen];
-            byteBuffer.get(byServiceGroup);
-            this.txServiceGroup = new String(byServiceGroup);
-        }
         short clientIdLen = byteBuffer.getShort();
         if (clientIdLen > 0) {
             byte[] byClientId = new byte[clientIdLen];
@@ -281,6 +334,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             byteBuffer.get(byApplicationData);
             this.applicationData = new String(byApplicationData);
         }
+        this.status = BranchStatus.get(byteBuffer.get());
 
     }
 

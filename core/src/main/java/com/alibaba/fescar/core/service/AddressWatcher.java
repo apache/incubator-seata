@@ -21,5 +21,10 @@ package com.alibaba.fescar.core.service;
  */
 public interface AddressWatcher {
 
+    /**
+     * On change.
+     *
+     * @param serverAddressArray the server address array
+     */
     void onChange(String[] serverAddressArray);
 }

@@ -20,23 +20,38 @@ import java.nio.ByteBuffer;
 
 import com.alibaba.fescar.core.model.GlobalStatus;
 
+/**
+ * The type Abstract global end response.
+ */
 public abstract class AbstractGlobalEndResponse extends AbstractTransactionResponse {
 
+    /**
+     * The Global status.
+     */
     protected GlobalStatus globalStatus;
 
+    /**
+     * Gets global status.
+     *
+     * @return the global status
+     */
     public GlobalStatus getGlobalStatus() {
         return globalStatus;
     }
 
+    /**
+     * Sets global status.
+     *
+     * @param globalStatus the global status
+     */
     public void setGlobalStatus(GlobalStatus globalStatus) {
         this.globalStatus = globalStatus;
     }
 
-
     @Override
     protected void doEncode() {
         super.doEncode();
-        byteBuffer.put((byte) globalStatus.ordinal());
+        byteBuffer.put((byte) globalStatus.getCode());
     }
 
     @Override
@@ -45,4 +60,18 @@ public abstract class AbstractGlobalEndResponse extends AbstractTransactionRespo
         globalStatus = GlobalStatus.get(byteBuffer.get());
     }
 
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("globalStatus=");
+        result.append(globalStatus);
+        result.append(",");
+        result.append("ResultCode=");
+        result.append(getResultCode());
+        result.append(",");
+        result.append("Msg=");
+        result.append(getMsg());
+
+        return result.toString();
+    }
 }

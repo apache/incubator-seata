@@ -16,15 +16,22 @@
 
 package com.alibaba.fescar.rm.datasource.undo;
 
+/**
+ * The type Undo log parser factory.
+ */
 public class UndoLogParserFactory {
 
     private static class SingletonHolder {
         private static final UndoLogParser INSTANCE = new JSONBasedUndoLogParser();
     }
 
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     public static final UndoLogParser getInstance() {
         return SingletonHolder.INSTANCE;
     }
-
 
 }

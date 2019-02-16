@@ -33,10 +33,20 @@ import com.alibaba.fescar.rm.datasource.sql.SQLParsingException;
 import com.alibaba.fescar.rm.datasource.sql.SQLSelectRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
 
+/**
+ * The type My sql select for update recognizer.
+ */
+
 public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQLSelectRecognizer {
 
     private final SQLSelectStatement ast;
 
+    /**
+     * Instantiates a new My sql select for update recognizer.
+     *
+     * @param originalSQL the original sql
+     * @param ast         the ast
+     */
     public MySQLSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
         this.ast = (SQLSelectStatement) ast;
@@ -96,13 +106,10 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
     }
 
     @Override
-    public String getTableSource() {
+    public String getTableAlias() {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLTableSource tableSource = selectQueryBlock.getFrom();
-        StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        visitor.visit((SQLExprTableSource)tableSource);
-        return sb.toString();
+        return tableSource.getAlias();
     }
 
     @Override
