@@ -190,7 +190,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         poolConfig.maxWait = rmClientConfig.getMaxAcquireConnMills();
         poolConfig.testOnBorrow = rmClientConfig.isPoolTestBorrow();
         poolConfig.testOnReturn = rmClientConfig.isPoolTestReturn();
-        poolConfig.lifo = rmClientConfig.isPoolFifo();
+        poolConfig.lifo = rmClientConfig.isPoolLifo();
         return poolConfig;
     }
 

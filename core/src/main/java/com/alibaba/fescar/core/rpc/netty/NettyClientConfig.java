@@ -51,7 +51,7 @@ public class NettyClientConfig extends NettyBaseConfig {
     private static final int DEFAULT_MIN_POOL_IDLE = 0;
     private static final boolean DEFAULT_POOL_TEST_BORROW = true;
     private static final boolean DEFAULT_POOL_TEST_RETURN = true;
-    private static final boolean DEFAULT_POOL_FIFO = true;
+    private static final boolean DEFAULT_POOL_LIFO = true;
 
     /**
      * Gets connect timeout millis.
@@ -423,8 +423,8 @@ public class NettyClientConfig extends NettyBaseConfig {
      *
      * @return the boolean
      */
-    public boolean isPoolFifo() {
-        return DEFAULT_POOL_FIFO;
+    public boolean isPoolLifo() {
+        return DEFAULT_POOL_LIFO;
     }
 
     /**
