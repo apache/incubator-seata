@@ -27,8 +27,10 @@ import com.alibaba.fescar.config.ConfigurationFactory;
 import org.apache.commons.lang.StringUtils;
 
 /**
- * @author: jimin.jm@alibaba-inc.com
- * @date 2019/02/12
+ * The type File registry service.
+ *
+ * @author: jimin.jm @alibaba-inc.com
+ * @date 2019 /02/12
  */
 public class FileRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
     private static volatile FileRegistryServiceImpl instance;
@@ -39,6 +41,11 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private FileRegistryServiceImpl() {}
 
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     public static FileRegistryServiceImpl getInstance() {
         if (null == instance) {
             synchronized (FileRegistryServiceImpl.class) {

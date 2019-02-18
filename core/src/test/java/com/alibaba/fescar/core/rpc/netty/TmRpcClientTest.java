@@ -59,7 +59,7 @@ public class TmRpcClientTest {
         Assert.assertEquals(defaultNettyClientConfig.getMaxAcquireConnMills(), config.maxWait);
         Assert.assertEquals(defaultNettyClientConfig.isPoolTestBorrow(), config.testOnBorrow);
         Assert.assertEquals(defaultNettyClientConfig.isPoolTestReturn(), config.testOnReturn);
-        Assert.assertEquals(defaultNettyClientConfig.isPoolFifo(), config.lifo);
+        Assert.assertEquals(defaultNettyClientConfig.isPoolLifo(), config.lifo);
     }
 
     /**
