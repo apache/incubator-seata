@@ -21,7 +21,7 @@
 
     <groupId>com.alibaba.fescar</groupId>
     <artifactId>fescar-all</artifactId>
-    <version>0.2.0</version>
+    <version>0.2.1</version>
     <modules>
         <module>config</module>
         <module>common</module>
@@ -34,6 +34,7 @@
         <module>dubbo</module>
         <module>discovery</module>
         <module>test</module>
+        <module>dubbo-alibaba</module>
     </modules>
     <packaging>pom</packaging>
 
