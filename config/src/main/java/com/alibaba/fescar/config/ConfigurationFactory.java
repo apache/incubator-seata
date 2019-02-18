@@ -55,7 +55,6 @@ public final class ConfigurationFactory {
             LOGGER.error(exx.getMessage());
         }
         Configuration configuration;
-        configType = ConfigType.getType("file");
         switch (configType) {
             case Nacos:
                 try {
