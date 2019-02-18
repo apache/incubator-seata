@@ -17,6 +17,7 @@
 package com.alibaba.fescar.config;
 
 import com.alibaba.fescar.common.exception.NotSupportYetException;
+import com.alibaba.fescar.config.zookeeper.ZKConfiguration;
 import com.alibaba.nacos.api.exception.NacosException;
 
 import org.slf4j.Logger;
@@ -68,6 +69,13 @@ public final class ConfigurationFactory {
                     + NAME_KEY;
                 String name = FILE_INSTANCE.getConfig(pathDataId);
                 configuration = new FileConfiguration(name);
+                break;
+            case ZK:
+                try {
+                    configuration = new ZKConfiguration();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
                 break;
             default:
                 throw new NotSupportYetException("not support register type:" + configType);
