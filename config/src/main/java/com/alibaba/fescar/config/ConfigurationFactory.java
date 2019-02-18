@@ -55,6 +55,7 @@ public final class ConfigurationFactory {
             LOGGER.error(exx.getMessage());
         }
         Configuration configuration;
+        configType = ConfigType.getType("file");
         switch (configType) {
             case Nacos:
                 try {
@@ -68,6 +69,13 @@ public final class ConfigurationFactory {
                     + NAME_KEY;
                 String name = FILE_INSTANCE.getConfig(pathDataId);
                 configuration = new FileConfiguration(name);
+                break;
+            case Eureka:
+                try {
+                    configuration = new EurekaConfiguration();
+                } catch (RuntimeException e) {
+                    throw new RuntimeException(e);
+                }
                 break;
             default:
                 throw new NotSupportYetException("not support register type:" + configType);

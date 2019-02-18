@@ -35,7 +35,11 @@ public enum ConfigType {
     /**
      * Nacos config type.
      */
-    Nacos;
+    Nacos,
+    /**
+     * Eureka config type.
+     */
+    Eureka;
 
     /**
      * Gets type.
@@ -48,6 +52,8 @@ public enum ConfigType {
             return File;
         } else if (Nacos.name().equalsIgnoreCase(name)) {
             return Nacos;
+        } else if (Eureka.name().equalsIgnoreCase(name)) {
+            return Eureka;
         } else {
             throw new NotSupportYetException("unsupport type:" + name);
         }
