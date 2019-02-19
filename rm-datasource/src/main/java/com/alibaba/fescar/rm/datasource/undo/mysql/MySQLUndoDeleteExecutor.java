@@ -16,9 +16,16 @@
 
 package com.alibaba.fescar.rm.datasource.undo.mysql;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
+import com.alibaba.fescar.common.exception.FrameworkErrorCode;
+import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
+import com.alibaba.fescar.core.exception.TransactionException;
+import com.alibaba.fescar.core.model.BranchStatus;
+import com.alibaba.fescar.rm.datasource.DataSourceManager;
 import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.KeyType;
 import com.alibaba.fescar.rm.datasource.sql.struct.Row;
@@ -85,4 +92,28 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
     protected TableRecords getUndoRows() {
         return sqlUndoLog.getBeforeImage();
     }
+
+    /**
+     * Data validation.
+     *
+     * @param xid the xid
+     * @param branchId branchId
+     * @param conn the conn
+     * @throws SQLException the sql exception
+     */
+    protected void dataValidation(String xid, long branchId, Connection conn) throws SQLException, TransactionException {
+        String tableName = sqlUndoLog.getTableName();
+        TableRecords beforeImage = sqlUndoLog.getBeforeImage();
+        List<Row> rows = beforeImage.getRows();
+        if (rows.size() < 1) return;
+        List<Field> pkRows = beforeImage.pkRows();
+        String querySQL = buildQueryCurrentImageSQL(rows.get(0), tableName, pkRows);
+        TableRecords currentImage = getCurrentImage(conn, querySQL, pkRows);
+        currentImage.setTableName(tableName);
+        if (currentImage.getRows().size() > 0) {
+            DataSourceManager.get().branchReport(xid, branchId, BranchStatus.PhaseTwo_RollbackFailed_Unretryable, FrameworkErrorCode.RollbackDirty.errMessage);
+            throw new FrameworkException(FrameworkErrorCode.RollbackDirty);
+        }
+    }
+
 }

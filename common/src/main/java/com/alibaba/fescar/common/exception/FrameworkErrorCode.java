@@ -94,6 +94,7 @@ public enum FrameworkErrorCode {
      * Regist rm framework error code.
      */
     RegistRM("0304", "注册RM失败", ""),
+    RollbackDirty("0504", "RollbackFailed", "DirtyData"),
 
     /**
      * 未定义错误

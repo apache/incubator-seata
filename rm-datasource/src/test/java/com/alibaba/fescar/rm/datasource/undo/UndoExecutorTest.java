@@ -52,6 +52,7 @@ import java.util.concurrent.Executor;
 import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
 import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.KeyType;
@@ -150,8 +151,8 @@ public class UndoExecutorTest {
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
 
         try {
-            executor.executeOn(new MockConnection());
-        } catch (SQLException e) {
+            executor.executeOn("xid", System.currentTimeMillis(), new MockConnection(), true);
+        } catch (SQLException | TransactionException e) {
             e.printStackTrace();
         }
     }
@@ -220,8 +221,8 @@ public class UndoExecutorTest {
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
 
         try {
-            executor.executeOn(new MockConnection());
-        } catch (SQLException e) {
+            executor.executeOn("xid", System.currentTimeMillis(), new MockConnection(), true);
+        } catch (SQLException | TransactionException e) {
             e.printStackTrace();
         }
     }
@@ -290,8 +291,8 @@ public class UndoExecutorTest {
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
 
         try {
-            executor.executeOn(new MockConnection());
-        } catch (SQLException e) {
+            executor.executeOn("xid", System.currentTimeMillis(), new MockConnection(), true);
+        } catch (SQLException | TransactionException e) {
             e.printStackTrace();
         }
     }

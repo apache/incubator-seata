@@ -16,15 +16,16 @@
 
 package com.alibaba.fescar.rm.datasource.undo;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
+import java.util.List;
 
-import com.alibaba.fescar.rm.datasource.sql.struct.Field;
-import com.alibaba.fescar.rm.datasource.sql.struct.KeyType;
-import com.alibaba.fescar.rm.datasource.sql.struct.Row;
-import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
+import com.alibaba.fescar.common.exception.FrameworkErrorCode;
+import com.alibaba.fescar.common.exception.FrameworkException;
+import com.alibaba.fescar.core.exception.TransactionException;
+import com.alibaba.fescar.core.model.BranchStatus;
+import com.alibaba.fescar.rm.datasource.DataSourceManager;
+import com.alibaba.fescar.rm.datasource.sql.struct.*;
 
 /**
  * The type Abstract undo executor.
@@ -58,9 +59,11 @@ public abstract class AbstractUndoExecutor {
      * @param conn the conn
      * @throws SQLException the sql exception
      */
-    public void executeOn(Connection conn) throws SQLException {
-        dataValidation(conn);
-
+    public void executeOn(String xid, long branchId, Connection conn, boolean force) throws SQLException, TransactionException {
+        if (!force) {
+            dataValidation(xid, branchId, conn);
+        }
+      
         try {
             String undoSQL = buildUndoSQL();
 
@@ -127,10 +130,87 @@ public abstract class AbstractUndoExecutor {
     /**
      * Data validation.
      *
+     * @param xid the xid
+     * @param branchId branchId
      * @param conn the conn
      * @throws SQLException the sql exception
      */
-    protected void dataValidation(Connection conn) throws SQLException {
-        // Validate if data is dirty.
+    protected void dataValidation(String xid, long branchId, Connection conn) throws SQLException, TransactionException {
+        String tableName = sqlUndoLog.getTableName();
+        TableRecords afterImage = sqlUndoLog.getAfterImage();
+        List<Row> rows = afterImage.getRows();
+        if (rows.size() < 1) return;
+        List<Field> pkRows = afterImage.pkRows();
+        String querySQL = buildQueryCurrentImageSQL(rows.get(0), tableName, pkRows);
+        TableRecords currentImage = getCurrentImage(conn, querySQL, pkRows);
+        currentImage.setTableName(tableName);
+        if (!currentImage.equals(afterImage)) {
+            DataSourceManager.get().branchReport(xid, branchId, BranchStatus.PhaseTwo_RollbackFailed_Unretryable, FrameworkErrorCode.RollbackDirty.errMessage);
+            throw new FrameworkException(FrameworkErrorCode.RollbackDirty);
+        }
     }
+
+    protected String buildQueryCurrentImageSQL(Row row, String tableName, List<Field> pkRows) {
+        StringBuilder sb = new StringBuilder("SELECT ");
+        boolean first = true;
+        for (Field field : row.getFields()) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append(", ");
+            }
+            sb.append(field.getName());
+        }
+        sb.append(" FROM ").append(tableName).append(" WHERE ");
+        buildWhereConditionByPKs(sb, pkRows);
+        return sb.toString();
+    }
+
+    protected void buildWhereConditionByPKs(StringBuilder sb, List<Field> pkRows) {
+        for (int index = 0; index < pkRows.size(); index++) {
+            Field field = pkRows.get(index);
+            sb.append(field.getName() + " = ?");
+            if (index < (pkRows.size() - 1)) {
+                sb.append(" OR ");
+            }
+        }
+    }
+
+    protected TableRecords getCurrentImage(Connection conn, String querySQL,
+                                           List<Field> paramList) throws SQLException {
+        if (paramList == null || paramList.isEmpty()) {
+            return new TableRecords();
+        }
+
+        TableRecords currentRecords;
+        try (PreparedStatement ps = conn.prepareStatement(querySQL)) {
+            for (int i = 0; i < paramList.size(); i++) {
+                ps.setObject((i + 1), paramList.get(i));
+            }
+            ResultSet rs = ps.executeQuery();
+            currentRecords = buildTableRecordsFromResultSet(rs);
+        }
+
+        return currentRecords;
+    }
+
+    private TableRecords buildTableRecordsFromResultSet(ResultSet rs) throws SQLException {
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int columnCount = rsmd.getColumnCount();
+        TableRecords tableRecords = new TableRecords();
+        while (rs.next()) {
+            Row row = new Row();
+            for (int index = 1; index <= columnCount; ++index) {
+                String name = rsmd.getCatalogName(index).toUpperCase();
+                int type = rsmd.getColumnType(index);
+                Object value = rs.getObject(name);
+                if (value == null) continue;    // skip Null
+                Field field = new Field(name, type, value);
+                row.add(field);
+            }
+            tableRecords.add(row);
+        }
+        return tableRecords;
+    }
+
 }
