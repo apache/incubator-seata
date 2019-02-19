@@ -50,6 +50,9 @@ public class RegistryFactory {
             case Nacos:
                 registryService = NacosRegistryServiceImpl.getInstance();
                 break;
+            case Eureka:
+                registryService = EurekaRegistryServiceImpl.getInstance();
+                break;
             case File:
                 registryService = FileRegistryServiceImpl.getInstance();
                 break;
