@@ -32,6 +32,11 @@ public enum ConfigType {
     /**
      * Nacos config type.
      */
+
+    /**
+     * Eureka config type.
+     */
+    Eureka;
     Nacos,
     /**
      * Apollo config type.
@@ -52,7 +57,9 @@ public enum ConfigType {
             return Nacos;
         } else if (Apollo.name().equalsIgnoreCase(name)) {
             return Apollo;
-        }else {
+        } else if (Eureka.name().equalsIgnoreCase(name)) {
+            return Eureka;
+        } else {
             throw new NotSupportYetException("unsupport type:" + name);
         }
     }
