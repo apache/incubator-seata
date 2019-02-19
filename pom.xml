@@ -34,6 +34,7 @@
         <module>dubbo</module>
         <module>discovery</module>
         <module>test</module>
+        <module>metrics</module>
     </modules>
     <packaging>pom</packaging>
 
