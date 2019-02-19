@@ -1,4 +1,4 @@
-package com.alibaba.fescar.discovery.registry;
+package com.alibaba.fescar.discovery.registry.zookeeper;
 
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.IZkDataListener;

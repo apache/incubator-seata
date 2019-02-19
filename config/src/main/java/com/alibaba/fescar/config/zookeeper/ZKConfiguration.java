@@ -23,7 +23,8 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     private static final String REGISTRY_TYPE = "zk";
     private static final String ZK_PATH_SPLIT_CHAR = "/";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
-    private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY;
+    private static final String FILE_ROOT_CONFIG = "config";
+    private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_CONFIG;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
 
 
@@ -91,6 +92,9 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
         return null;
     }
 
+    public ZkClient getZkClient(){
+        return zkClient;
+    }
 
 
     private static String getZKAddrFileKey() {
