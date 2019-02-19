@@ -35,6 +35,7 @@
         <module>discovery</module>
         <module>test</module>
         <module>dubbo-alibaba</module>
+        <module>metrics</module>
     </modules>
     <packaging>pom</packaging>
 
