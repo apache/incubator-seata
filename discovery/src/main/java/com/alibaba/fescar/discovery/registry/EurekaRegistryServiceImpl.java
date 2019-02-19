@@ -1,5 +1,6 @@
 package com.alibaba.fescar.discovery.registry;
 
+import com.alibaba.fescar.common.exception.EurekaRegistryException;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.netflix.appinfo.ApplicationInfoManager;
@@ -10,6 +11,8 @@ import com.netflix.discovery.DefaultEurekaClientConfig;
 import com.netflix.discovery.DiscoveryClient;
 import com.netflix.discovery.EurekaClient;
 import com.netflix.discovery.EurekaEventListener;
+import com.netflix.discovery.shared.Application;
+import org.apache.commons.lang3.StringUtils;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,15 +36,18 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
     private static final String REGISTRY_TYPE = "eureka";
     private static final String REGISTRY_APPLICATION= "application";
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
+    private static final String REGISTRY_WEIGHT = "weight";
     private static final String EUREKA_CONFIG_SERVER_URL_KEY = "eureka.serviceUrl.default";
+    private static final String EUREKA_CONFIG_REFRESH_KEY = "eureka.client.refresh.interval";
+    private static final String EUREKA_CONFIG_METADATA_WEIGHT = "eureka.metadata.weight";
+    private static final int EUREKA_REFRESH_INTERVAL = 5;
+    private static final String DEFAULT_WEIGHT = "1";
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
 
     private static ApplicationInfoManager applicationInfoManager;
     private static CustomEurekaInstanceConfig instanceConfig;
-    private static InstanceInfo instanceInfo;
     private static EurekaRegistryServiceImpl instance;
     private static EurekaClient eurekaClient;
-    private static Properties eurekaProperties;
 
     private EurekaRegistryServiceImpl() {}
 
@@ -73,49 +79,69 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
 
     @Override
     public void unregister(InetSocketAddress address) throws Exception {
-        validAddress(address);
+        if (eurekaClient == null) {
+            return;
+        }
         applicationInfoManager.setInstanceStatus(InstanceInfo.InstanceStatus.DOWN);
-        getEurekaClient().shutdown();
+        eurekaClient.shutdown();
         close();
     }
 
     @Override
     public void subscribe(String cluster, EurekaEventListener listener) throws Exception {
-        getEurekaClient().registerEventListener(listener);
+        assertEureka();
+        eurekaClient.registerEventListener(listener);
     }
 
     @Override
     public void unsubscribe(String cluster, EurekaEventListener listener) throws Exception {
-        getEurekaClient().unregisterEventListener(listener);
+        assertEureka();
+        eurekaClient.unregisterEventListener(listener);
     }
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
-        List<InstanceInfo> instances = getEurekaClient().getApplication(key.toUpperCase()).getInstances();
+        assertEureka();
         List<InetSocketAddress> inetSocketAddressList = new ArrayList<>();
+
+        Application application = eurekaClient.getApplication(key.toUpperCase());
+        if (application == null){
+            return inetSocketAddressList;
+        }
+
+        List<InstanceInfo> instances = application.getInstances();
+        if (instances == null){
+            return inetSocketAddressList;
+        }
+
         for (InstanceInfo instanceInfo : instances){
             inetSocketAddressList.add(new InetSocketAddress(instanceInfo.getIPAddr(),instanceInfo.getPort()));
         }
+
         return inetSocketAddressList;
     }
 
     private static void close() {
         applicationInfoManager = null;
         instanceConfig = null;
-        instanceInfo = null;
-        eurekaProperties = null;
         eurekaClient = null;
     }
 
     private static Properties getEurekaProperties() {
-        if (eurekaProperties != null) {
-            return eurekaProperties;
-        }
-        eurekaProperties = new Properties();
-        eurekaProperties.setProperty("eureka.shouldEnforceRegistrationAtInit", "true");
+        Properties eurekaProperties = new Properties();
+        eurekaProperties.setProperty(EUREKA_CONFIG_REFRESH_KEY,String.valueOf(EUREKA_REFRESH_INTERVAL));
+
         String url = FILE_CONFIG.getConfig(getEurekaServerUrlFileKey());
-        if (url != null) {
-            eurekaProperties.setProperty(EUREKA_CONFIG_SERVER_URL_KEY, url);
+        if (StringUtils.isBlank(url)) {
+            throw new EurekaRegistryException("eureka server url can not be null!");
+        }
+        eurekaProperties.setProperty(EUREKA_CONFIG_SERVER_URL_KEY, url);
+
+        String weight = FILE_CONFIG.getConfig(getEurekaInstanceWeightFileKey());
+        if (StringUtils.isNotBlank(weight)){
+            eurekaProperties.setProperty(EUREKA_CONFIG_METADATA_WEIGHT, weight);
+        } else {
+            eurekaProperties.setProperty(EUREKA_CONFIG_METADATA_WEIGHT, DEFAULT_WEIGHT);
         }
 
         return eurekaProperties;
@@ -132,11 +158,16 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static EurekaClient getEurekaClient() throws Exception {
         if (eurekaClient == null){
             synchronized (EurekaRegistryServiceImpl.class) {
-                if (eurekaClient == null){
-                    ConfigurationManager.loadProperties(getEurekaProperties());
-                    instanceInfo = new EurekaConfigBasedInstanceInfoProvider(instanceConfig).get();
-                    applicationInfoManager = new ApplicationInfoManager(instanceConfig, instanceInfo);
-                    eurekaClient = new DiscoveryClient(applicationInfoManager, new DefaultEurekaClientConfig());
+                try {
+                    if (eurekaClient == null){
+                        ConfigurationManager.loadProperties(getEurekaProperties());
+                        InstanceInfo instanceInfo = new EurekaConfigBasedInstanceInfoProvider(instanceConfig).get();
+                        applicationInfoManager = new ApplicationInfoManager(instanceConfig, instanceInfo);
+                        eurekaClient = new DiscoveryClient(applicationInfoManager, new DefaultEurekaClientConfig());
+                    }
+                } catch (Exception e) {
+                    close();
+                    throw new EurekaRegistryException("register eureka is error!",e);
                 }
             }
         }
@@ -146,6 +177,12 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private void validAddress(InetSocketAddress address) {
         if (null == address.getHostName() || 0 == address.getPort()) {
             throw new IllegalArgumentException("invalid address:" + address);
+        }
+    }
+
+    private static void assertEureka(){
+        if (eurekaClient == null) {
+            throw new EurekaRegistryException("eureka client is not register,do this operation had to be register!");
         }
     }
 
@@ -161,5 +198,10 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static String getEurekaApplicationFileKey() {
         return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
                 + REGISTRY_APPLICATION;
+    }
+
+    private static String getEurekaInstanceWeightFileKey() {
+         return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
+                 + REGISTRY_WEIGHT;
     }
 }
