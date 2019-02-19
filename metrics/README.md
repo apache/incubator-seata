@@ -117,3 +117,15 @@ fescar.transaction(role=tm,name={GlobalTransactionalName},meter=gauge,status=act
 
 稍后实现，包括诸如：
 fescar.transaction(role=rm,name={BranchTransactionalName},mode=at/mt,meter=gauge,status=active/committed/rollback)：以BranchTransactionalName为维度以及AT/MT维度区分不同分支Transactional的状态。
+
+#### 如何扩展
+如果有下面几种情况：
+1. 您不是使用Prometheus作为运维监控系统，但希望能够将Fescar的Metrics数据集成进Dashboard中；
+2. 您需要更复杂强大的度量器类型，这些度量器在其他Metrics实现库中已有，希望集成这些第三方依赖直接使用；
+3. 您需要改变默认Metric的Measurement输出，例如在Timer中增加一个`min`或`sd`(方差)；
+4. ...
+
+那么需要自行扩展Metrics的实现，请创建新的模块项目例如`fescar-metrics-xxxx`，之后：
+- 针对1：您需要实现新的Exporter；
+- 针对2：您可以改变默认Registry的实现，返回第三方的Meter计量器实现；
+- 针对3：您可以修改对应Meter的实现，包括`measure()`方法返回的Measurement列表。
