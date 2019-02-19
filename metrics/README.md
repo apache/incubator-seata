@@ -1,14 +1,15 @@
 ### Metrics
 #### 设计思路
-1. Fescar作为一个被集成的一致性框架，Metrics模块将尽可能少的使用第三方依赖以降低冲突风险；
-2. Metrics模块将竭力争取更高的度量性能和更低的资源开销，以降低开启后带来的副作用；
-3. 插件式——Metrics是否激活、如何发布，去取决于是否引入了对应的依赖，例如在TC Server中引入`fescar-metrics-prometheus`，则自动启用并将度量数据发布到[Prometheus](https://github.com/prometheus)；
+1. Fescar作为一个被集成的数据一致性框架，Metrics模块将尽可能少的使用第三方依赖以降低发生冲突的风险；
+2. Metrics模块将竭力争取更高的度量性能和更低的资源开销，尽可能降低开启后带来的副作用；
+3. 插件式——Metrics是否激活、数据如何发布，去取决于是否引入了对应的依赖，例如在TC Server中引入`fescar-metrics-prometheus`，则自动启用并将度量数据发布到[Prometheus](https://github.com/prometheus)；
 4. 不使用Spring，使用SPI（Service Provider Interface）加载扩展；
-5. 初始仅发布核心Transaction相关的指标，之后结合社区的需求，逐步完善运维方面的所有其他指标。
+5. 初始仅发布核心Transaction相关指标，之后结合社区的需求，逐步完善运维方面的所有其他指标。
 
 #### 模块说明
 由1个核心API模块`fescar-metrics-api`和N个对接实现模块如`fescar-metrics-prometheus`构成：
-- fescar-metrics-api 模块
+- fescar-metrics-api模块
+
 此模块是Metrics的核心，将作为Fescar基础架构的一部分被TC、TM和RM引用，它内部**没有任何具体实现代码**，仅包含接口定义，定义的内容包括：
 1. Meter类接口：`Gauge`、`Counter`、`Timer`...
 2. 注册容器接口`Registry`
@@ -18,10 +19,13 @@
 >1. [Netflix-Spectator](https://github.com/Netflix/spectator)
 >2. [Dropwizard-Metrics](https://github.com/dropwizard/metrics)
 >3. [Dubbo-Metrics](https://github.com/dubbo/dubbo-metrics)
+
 >它们有的轻而敏捷，有的重而强大，由于也是“实现”，因此不会纳入`fescar-metrics-api`中，避免实现绑定。
 
-- fescar-metrics-prometheus 模块
+- fescar-metrics-prometheus模块
+
 这是我们默认提供的Metrics实现，不使用其它Metrics开源实现，并轻量级的实现了以下三个Meter：
+
 | Meter类型 | 描述                                                  |
 | --------- | ------------------------------------------------------------ |
 | Gauge     | 单一最新值度量器，例如个数                                   |
@@ -105,9 +109,11 @@ scrape_configs:
 >提示：fescar.transaction(role=tc,meter=counter,statistic=count,status=committed/rollback)和fescar.transaction(role=tc,meter=timer,statistic=count,status=committed/rollback)的值可能相同，但它们来源于两个不同的度量器。
 
 - TM：
+
 稍后实现，包括诸如：
 fescar.transaction(role=tm,name={GlobalTransactionalName},meter=gauge,status=active/committed/rollback) : 以GlobalTransactionalName为维度区分不同Transactional的状态。
 
 - RM：
+
 稍后实现，包括诸如：
 fescar.transaction(role=rm,name={BranchTransactionalName},mode=at/mt,meter=gauge,status=active/committed/rollback)：以BranchTransactionalName为维度以及AT/MT维度区分不同分支Transactional的状态。
