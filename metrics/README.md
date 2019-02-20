@@ -3,7 +3,7 @@
 1. Fescar作为一个被集成的数据一致性框架，Metrics模块将尽可能少的使用第三方依赖以降低发生冲突的风险；
 2. Metrics模块将竭力争取更高的度量性能和更低的资源开销，尽可能降低开启后带来的副作用；
 3. 插件式——Metrics是否激活、数据如何发布，去取决于是否引入了对应的依赖，例如在TC Server中引入`fescar-metrics-prometheus`，则自动启用并将度量数据发布到[Prometheus](https://github.com/prometheus)；
-4. 不使用Spring，使用SPI（Service Provider Interface）加载扩展；
+4. 不使用Spring，使用SPI(Service Provider Interface)加载扩展；
 5. 初始仅发布核心Transaction相关指标，之后结合社区的需求，逐步完善运维方面的所有其他指标。
 
 #### 模块说明
@@ -26,11 +26,12 @@
 
 这是我们默认提供的Metrics实现，不使用其它Metrics开源实现，并轻量级的实现了以下三个Meter：
 
-| Meter类型 | 描述                                                  |
+| Meter类型  | 描述                                                                                                                         |
 | --------- | ------------------------------------------------------------ |
-| Gauge     | 单一最新值度量器，例如个数                                   |
-| Counter   | 多Measurement输出计数器，将输出`total`（合计）, `count`（计数）, `max`（最大）, `average`（合计/计数）和`tps`（合计/时间间隔） |
-| Timer     | 多Measurement输出计时器，将输出`total`（合计）, `count`（计数）, `max`（最大）, `average`（合计/计数），支持微妙为单位累计 |
+| Gauge     | 单一最新值度量器                                                                                                                |
+| Counter   | 单一累加度量器，可增可减                                                                                                         |
+| Summary   | 多Measurement输出计数器，将输出`total`(合计)、`count`(计数)、`max`(最大)、`average`(合计/计数)和`tps`(合计/时间间隔)，无单位  |
+| Timer     | 多Measurement输出计时器，将输出`total`(合计)、`count`(计数)、`max`(最大)和`average`(合计/计数)，支持微秒为单位累计              |
 
 >说明：
 >1. 未来可能增加更丰富复杂的度量器例如Histogram，这是一种可以本地统计聚合75th, 90th, 95th, 98th, 99th,99.9th...的度量器，适合某些场合，但需要更多内存。
@@ -98,25 +99,25 @@ scrape_configs:
 
 | Metrics    | 描述    |
 | ------ | --------- |
-| fescar.transaction(role=tc,meter=gauge,status=active/committed/rollback) | 当前活动中/已提交/已回滚的事务总数  |
-| fescar.transaction(role=tc,meter=counter,statistic=count,status=committed/rollback) | 当前周期内提交/回滚的事务数  |
-| fescar.transaction(role=tc,meter=counter,statistic=tps,status=committed/rollback) | 当前周期内提交/回滚的事务TPS（transaction per second） |
+| fescar.transaction(role=tc,meter=counter,status=active/committed/rollback) | 当前活动中/已提交/已回滚的事务总数  |
+| fescar.transaction(role=tc,meter=summary,statistic=count,status=committed/rollback) | 当前周期内提交/回滚的事务数  |
+| fescar.transaction(role=tc,meter=summary,statistic=tps,status=committed/rollback) | 当前周期内提交/回滚的事务TPS(transaction per second) |
 | fescar.transaction(role=tc,meter=timer,statistic=total,status=committed/rollback) | 当前周期内提交/回滚的事务耗时总和 |
 | fescar.transaction(role=tc,meter=timer,statistic=count,status=committed/rollback) | 当前周期内提交/回滚的事务数  |
 | fescar.transaction(role=tc,meter=timer,statistic=average,status=committed/rollback) | 当前周期内提交/回滚的事务平均耗时   |
 | fescar.transaction(role=tc,meter=timer,statistic=max,status=committed/rollback) | 当前周期内提交/回滚的事务最大耗时 |
 
->提示：fescar.transaction(role=tc,meter=counter,statistic=count,status=committed/rollback)和fescar.transaction(role=tc,meter=timer,statistic=count,status=committed/rollback)的值可能相同，但它们来源于两个不同的度量器。
+>提示：fescar.transaction(role=tc,meter=summary,statistic=count,status=committed/rollback)和fescar.transaction(role=tc,meter=timer,statistic=count,status=committed/rollback)的值可能相同，但它们来源于两个不同的度量器。
 
 - TM：
 
 稍后实现，包括诸如：
-fescar.transaction(role=tm,name={GlobalTransactionalName},meter=gauge,status=active/committed/rollback) : 以GlobalTransactionalName为维度区分不同Transactional的状态。
+fescar.transaction(role=tm,name={GlobalTransactionalName},meter=counter,status=active/committed/rollback) : 以GlobalTransactionalName为维度区分不同Transactional的状态。
 
 - RM：
 
 稍后实现，包括诸如：
-fescar.transaction(role=rm,name={BranchTransactionalName},mode=at/mt,meter=gauge,status=active/committed/rollback)：以BranchTransactionalName为维度以及AT/MT维度区分不同分支Transactional的状态。
+fescar.transaction(role=rm,name={BranchTransactionalName},mode=at/mt,meter=counter,status=active/committed/rollback)：以BranchTransactionalName为维度以及AT/MT维度区分不同分支Transactional的状态。
 
 #### 如何扩展
 如果有下面几种情况：
