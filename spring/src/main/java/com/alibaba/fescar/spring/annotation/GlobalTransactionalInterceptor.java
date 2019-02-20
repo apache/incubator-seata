@@ -113,6 +113,8 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
 				case RollbackFailure:
 					failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
 					throw e.getCause();
+				case RollbackIgnore:
+					throw e.getCause();
 				default:
 					throw new ShouldNeverHappenException("Unknown TransactionalExecutor.Code: " + code);
 
