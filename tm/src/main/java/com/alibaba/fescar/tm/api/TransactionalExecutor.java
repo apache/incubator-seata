@@ -70,7 +70,23 @@ public interface TransactionalExecutor {
          * Rollback done code.
          */
         //
-        RollbackDone
+        RollbackDone,
+        
+        /**
+         * Rollback ignore code.
+         */
+        //
+        RollbackIgnore
+    }
+
+    /**
+     * The type Execution Ignore exception.
+     * if thrown ,fescar framework will ignore the business error and will not cause roll back
+     */
+    class ExecutionIgnoreException extends Exception {
+    	public ExecutionIgnoreException(Throwable cause) {
+    		super(cause);
+		}
     }
 
     /**

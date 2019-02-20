@@ -51,7 +51,9 @@ public class TransactionalTemplate {
             // Do Your Business
             rs = business.execute();
 
-        } catch (Throwable ex) {
+        } catch (TransactionalExecutor.ExecutionIgnoreException e) {
+            throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackIgnore, e);
+		} catch (Throwable ex) {
 
             // 3. any business exception, rollback.
             try {

@@ -44,4 +44,11 @@ public @interface GlobalTransactional {
      */
     String name() default "";
 
+    /**
+     * If set and not empty, roll back on specified exception types
+     * 
+     * @return Roll back exception types
+     */
+    public Class<?>[] rollbackOn() default {};
+
 }

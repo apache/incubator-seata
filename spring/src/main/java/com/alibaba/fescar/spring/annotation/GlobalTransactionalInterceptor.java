@@ -35,96 +35,117 @@ import org.slf4j.LoggerFactory;
  */
 public class GlobalTransactionalInterceptor implements MethodInterceptor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
-    private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
+	private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
+	private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
 
-    private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
-    private final FailureHandler failureHandler;
+	private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
+	private final FailureHandler failureHandler;
 
-    /**
-     * Instantiates a new Global transactional interceptor.
-     *
-     * @param failureHandler the failure handler
-     */
-    public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
-        if (null == failureHandler) {
-            failureHandler = DEFAULT_FAIL_HANDLER;
-        }
-        this.failureHandler = failureHandler;
-    }
+	/**
+	 * Instantiates a new Global transactional interceptor.
+	 *
+	 * @param failureHandler the failure handler
+	 */
+	public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
+		if (null == failureHandler) {
+			failureHandler = DEFAULT_FAIL_HANDLER;
+		}
+		this.failureHandler = failureHandler;
+	}
 
-    @Override
-    public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
-        final GlobalTransactional anno = getAnnotation(methodInvocation.getMethod());
-        if (anno != null) {
-            try {
-                return transactionalTemplate.execute(new TransactionalExecutor() {
-                    @Override
-                    public Object execute() throws Throwable {
-                        return methodInvocation.proceed();
-                    }
+	@Override
+	public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
+		final GlobalTransactional anno = getAnnotation(methodInvocation.getMethod());
+		if (anno != null) {
+			try {
+				return transactionalTemplate.execute(new TransactionalExecutor() {
+					@Override
+					public Object execute() throws Throwable {
+						try {
+							return methodInvocation.proceed();
+						} catch (Throwable e) {
+							if (isIgnoreError(e,anno.rollbackOn())) {
+								throw new TransactionalExecutor.ExecutionIgnoreException(e);
+							}else {
+								throw e;
+							}
+						}
+					}
+					
+					private boolean isIgnoreError(Throwable e,Class<?>[] rollbackOnTypes) {
+						if (rollbackOnTypes != null && rollbackOnTypes.length > 0) {
+							for (Class<?> exClass : rollbackOnTypes) {
+								if (exClass.isAssignableFrom(e.getClass())) {
+									return false;
+								}
+							}
+							return true;
+						}else {
+							return false;
+						}
+					}
 
-                    @Override
-                    public int timeout() {
-                        return anno.timeoutMills();
-                    }
+					@Override
+					public int timeout() {
+						return anno.timeoutMills();
+					}
 
-                    @Override
-                    public String name() {
-                        String name = anno.name();
-                        if (!StringUtils.isEmpty(name)) {
-                            return name;
-                        }
-                        return formatMethod(methodInvocation.getMethod());
-                    }
-                });
-            } catch (TransactionalExecutor.ExecutionException e) {
-                TransactionalExecutor.Code code = e.getCode();
-                switch (code) {
-                    case RollbackDone:
-                        throw e.getOriginalException();
-                    case BeginFailure:
-                        failureHandler.onBeginFailure(e.getTransaction(), e.getCause());
-                        throw e.getCause();
-                    case CommitFailure:
-                        failureHandler.onCommitFailure(e.getTransaction(), e.getCause());
-                        throw e.getCause();
-                    case RollbackFailure:
-                        failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
-                        throw e.getCause();
-                    default:
-                        throw new ShouldNeverHappenException("Unknown TransactionalExecutor.Code: " + code);
+					@Override
+					public String name() {
+						String name = anno.name();
+						if (!StringUtils.isEmpty(name)) {
+							return name;
+						}
+						return formatMethod(methodInvocation.getMethod());
+					}
+				});
+			} catch (TransactionalExecutor.ExecutionException e) {
+				TransactionalExecutor.Code code = e.getCode();
+				switch (code) {
+				case RollbackDone:
+					throw e.getOriginalException();
+				case BeginFailure:
+					failureHandler.onBeginFailure(e.getTransaction(), e.getCause());
+					throw e.getCause();
+				case CommitFailure:
+					failureHandler.onCommitFailure(e.getTransaction(), e.getCause());
+					throw e.getCause();
+				case RollbackFailure:
+					failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
+					throw e.getCause();
+				default:
+					throw new ShouldNeverHappenException("Unknown TransactionalExecutor.Code: " + code);
 
-                }
-            }
+				}
+			}
 
-        }
-        return methodInvocation.proceed();
-    }
+		}
+		return methodInvocation.proceed();
+	}
 
-    private GlobalTransactional getAnnotation(Method method) {
-        if (method == null) {
-            return null;
-        }
-        return method.getAnnotation(GlobalTransactional.class);
-    }
+	private GlobalTransactional getAnnotation(Method method) {
+		if (method == null) {
+			return null;
+		}
+		return method.getAnnotation(GlobalTransactional.class);
+	}
 
-    private String formatMethod(Method method) {
-        StringBuilder sb = new StringBuilder();
+	private String formatMethod(Method method) {
+		StringBuilder sb = new StringBuilder();
 
-        String methodName = method.getName();
-        Class<?>[] params = method.getParameterTypes();
-        sb.append(methodName);
-        sb.append("(");
+		String methodName = method.getName();
+		Class<?>[] params = method.getParameterTypes();
+		sb.append(methodName);
+		sb.append("(");
 
-        int paramPos = 0;
-        for (Class<?> clazz : params) {
-            sb.append(clazz.getName());
-            if (++paramPos < params.length) {
-                sb.append(",");
-            }
-        }
-        sb.append(")");
-        return sb.toString();
-    }
+		int paramPos = 0;
+		for (Class<?> clazz : params) {
+			sb.append(clazz.getName());
+			if (++paramPos < params.length) {
+				sb.append(",");
+			}
+		}
+		sb.append(")");
+		return sb.toString();
+	}
 }
