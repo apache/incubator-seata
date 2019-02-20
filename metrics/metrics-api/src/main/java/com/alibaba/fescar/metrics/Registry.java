@@ -19,6 +19,8 @@ package com.alibaba.fescar.metrics;
 public interface Registry {
   <T extends Number> Gauge<T> getGauge(Id id);
 
+  <T extends Number> Counter<T> getCounter(Id id);
+
   Summary getSummary(Id id);
 
   Timer getTimer(Id id);
