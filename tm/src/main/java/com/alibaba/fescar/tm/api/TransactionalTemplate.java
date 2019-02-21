@@ -23,70 +23,69 @@ import com.alibaba.fescar.core.exception.TransactionException;
  */
 public class TransactionalTemplate {
 
-    /**
-     * Execute object.
-     *
-     * @param business the business
-     * @return the object
-     * @throws TransactionalExecutor.ExecutionException the execution exception
-     */
-    public Object execute(TransactionalExecutor business) throws TransactionalExecutor.ExecutionException {
+	/**
+	 * Execute object.
+	 *
+	 * @param business the business
+	 * @return the object
+	 * @throws TransactionalExecutor.ExecutionException the execution exception
+	 */
+	public Object execute(TransactionalExecutor business) throws TransactionalExecutor.ExecutionException {
 
-        // 1. get or create a transaction
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+		// 1. get or create a transaction
+		GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
 
-        // 2. begin transaction
-        try {
-            tx.begin(business.timeout(), business.name());
+		// 2. begin transaction
+		try {
+			tx.begin(business.timeout(), business.name());
 
-        } catch (TransactionException txe) {
-            throw new TransactionalExecutor.ExecutionException(tx, txe,
-                TransactionalExecutor.Code.BeginFailure);
+		} catch (TransactionException txe) {
+			throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.BeginFailure);
 
-        }
+		}
 
-        Object rs = null;
-        TransactionalExecutor.ExecutionException rollbackIgnoreException = null;
-        try {
+		Object rs = null;
+		TransactionalExecutor.ExecutionException rollbackIgnoreException = null;
+		try {
 
-            // Do Your Business
-            rs = business.execute();
+			// Do Your Business
+			rs = business.execute();
 
-        } catch (TransactionalExecutor.ExecutionIgnoreException e) {
-        	rollbackIgnoreException = new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackIgnore, e);
+		} catch (TransactionalExecutor.ExecutionIgnoreException e) {
+			rollbackIgnoreException = new TransactionalExecutor.ExecutionException(tx,
+					TransactionalExecutor.Code.RollbackIgnore, e.getCause());
 		} catch (Throwable ex) {
 
-            // 3. any business exception, rollback.
-            try {
-                tx.rollback();
+			// 3. any business exception, rollback.
+			try {
+				tx.rollback();
 
-                // 3.1 Successfully rolled back
-                throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
+				// 3.1 Successfully rolled back
+				throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
 
-            } catch (TransactionException txe) {
-                // 3.2 Failed to rollback
-                throw new TransactionalExecutor.ExecutionException(tx, txe,
-                    TransactionalExecutor.Code.RollbackFailure, ex);
+			} catch (TransactionException txe) {
+				// 3.2 Failed to rollback
+				throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.RollbackFailure,
+						ex);
 
-            }
+			}
 
-        }
-
-        // 4. everything is fine, commit.
-        try {
-            tx.commit();
-
-        } catch (TransactionException txe) {
-            // 4.1 Failed to commit
-            throw new TransactionalExecutor.ExecutionException(tx, txe,
-                TransactionalExecutor.Code.CommitFailure);
-
-        }
-        
-        if (rollbackIgnoreException != null) {
-            throw rollbackIgnoreException;
 		}
-        return rs;
-    }
+
+		// 4. everything is fine, commit.
+		try {
+			tx.commit();
+
+		} catch (TransactionException txe) {
+			// 4.1 Failed to commit
+			throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.CommitFailure);
+
+		}
+
+		if (rollbackIgnoreException != null) {
+			throw rollbackIgnoreException;
+		}
+		return rs;
+	}
 
 }
