@@ -26,8 +26,6 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
 
     private static volatile ZKRegisterServiceImpl instance;
     private static final String ZK_PATH_SPLIT_CHAR = "/";
-    private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
-    private static final String REGISTRY_TYPE = "zk";
     private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY;;
 
     private ZKRegisterServiceImpl() {}
