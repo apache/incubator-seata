@@ -46,13 +46,14 @@ public class TransactionalTemplate {
         }
 
         Object rs = null;
+        TransactionalExecutor.ExecutionException rollbackIgnoreException = null;
         try {
 
             // Do Your Business
             rs = business.execute();
 
         } catch (TransactionalExecutor.ExecutionIgnoreException e) {
-            throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackIgnore, e);
+        	rollbackIgnoreException = new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackIgnore, e);
 		} catch (Throwable ex) {
 
             // 3. any business exception, rollback.
@@ -81,6 +82,10 @@ public class TransactionalTemplate {
                 TransactionalExecutor.Code.CommitFailure);
 
         }
+        
+        if (rollbackIgnoreException != null) {
+            throw rollbackIgnoreException;
+		}
         return rs;
     }
 
