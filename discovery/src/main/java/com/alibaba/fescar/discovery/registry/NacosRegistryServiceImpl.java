@@ -60,6 +60,11 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     private NacosRegistryServiceImpl() {}
 
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     public static NacosRegistryServiceImpl getInstance() {
         if (null == instance) {
             synchronized (NacosRegistryServiceImpl.class) {

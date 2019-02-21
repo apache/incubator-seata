@@ -29,15 +29,22 @@ import static com.alibaba.fescar.config.ConfigurationFactory.FILE_ROOT_REGISTRY;
 import static com.alibaba.fescar.config.ConfigurationFactory.FILE_ROOT_TYPE;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2019/2/1 5:57 PM
+ * The type Registry factory.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2019 /2/1 5:57 PM
  * @FileName: RegistryFactory
  * @Description:
  */
 public class RegistryFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistryFactory.class);
 
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     public static RegistryService getInstance() {
         ConfigType configType = null;
         try {

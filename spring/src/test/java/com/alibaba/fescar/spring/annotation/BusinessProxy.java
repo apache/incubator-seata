@@ -31,7 +31,7 @@ public class BusinessProxy implements InvocationHandler {
         System.out.println("before");
         Object result = null;
         try {
-            result = method.invoke(proxy, args);
+            result = method.invoke(this.proxy, args);
         } catch (Exception e) {
 
         }
