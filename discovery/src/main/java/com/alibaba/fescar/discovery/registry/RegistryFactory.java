@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
  */
 public class RegistryFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistryFactory.class);
-
     /**
      * Gets instance.
      *
@@ -54,6 +53,9 @@ public class RegistryFactory {
         switch (registryType) {
             case Nacos:
                 registryService = NacosRegistryServiceImpl.getInstance();
+                break;
+            case Redis:
+                registryService = RedisRegistryServiceImpl.getInstance();
                 break;
             case File:
                 registryService = FileRegistryServiceImpl.getInstance();

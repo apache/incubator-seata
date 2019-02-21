@@ -104,6 +104,8 @@
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <testng.version>6.4</testng.version>
         <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
+        <apollo-client.version>1.1.0</apollo-client.version>
+        <redis-clients.version>2.9.0</redis-clients.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -246,6 +248,16 @@
                 <groupId>com.alibaba.nacos</groupId>
                 <artifactId>nacos-client</artifactId>
                 <version>0.8.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.framework.apollo</groupId>
+                <artifactId>apollo-client</artifactId>
+                <version>${apollo-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>${redis-clients.version}</version>
             </dependency>
         </dependencies>
 
