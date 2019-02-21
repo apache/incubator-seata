@@ -83,9 +83,9 @@ public interface TransactionalExecutor {
      * The type Execution Ignore exception.
      * if thrown ,fescar framework will ignore the business error and will not cause roll back
      */
-    class ExecutionIgnoreException extends Exception {
+    class ExecutionIgnoreException extends ExecutionException {
     	public ExecutionIgnoreException(Throwable cause) {
-    		super(cause);
+    		super(null,cause,Code.RollbackIgnore);
 		}
     }
 
