@@ -50,6 +50,7 @@ public class LoadBalanceFactoryTest {
     }
 
     @Test
+    @Ignore
     public void testUnRegistry() throws Exception {
         RegistryService registryService = RegistryFactory.getInstance();
         InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
@@ -57,6 +58,7 @@ public class LoadBalanceFactoryTest {
     }
 
     @Test(dataProvider = "instanceProvider")
+    @Ignore
     public void testSubscribe(LoadBalance loadBalance) throws Exception {
         Assert.assertNotNull(loadBalance);
         RegistryService registryService = RegistryFactory.getInstance();
