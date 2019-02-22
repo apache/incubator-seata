@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
  * @author crazier.huang
  * @date 2019/2/18
  */
-public class ZKConfigListener implements IZkDataListener {
+public class ZKDataConfigListener implements IZkDataListener {
     public static Logger logger = LoggerFactory.getLogger("ZKConfigListener");
 
     @Override

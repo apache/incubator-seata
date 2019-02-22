@@ -14,12 +14,19 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.config;
+package com.alibaba.fescar.config.zk;
 
+import com.alibaba.fescar.config.Configuration;
+import com.alibaba.fescar.config.zookeeper.ZKConfigListener;
 import com.alibaba.fescar.config.zookeeper.ZKConfiguration;
+import com.alibaba.fescar.config.zookeeper.ZKDataConfigListener;
+import org.I0Itec.zkclient.IZkChildListener;
+import org.I0Itec.zkclient.IZkDataListener;
 import org.junit.Assert;
 import org.junit.Before;
 import org.testng.annotations.Test;
+
+import java.util.List;
 
 /**
  * @Author: jimin.jm@alibaba-inc.com
@@ -38,7 +45,7 @@ public class ZKConfigurationTest {
     private static final String PUT_DATAID = "transport.mock";
     private static final String NOT_EXIST_DATAID = "service.yyy.xxx";
 
-    private  Configuration configuration = new ZKConfiguration();
+    private Configuration configuration = new ZKConfiguration();
 
     @Test
     public void testPutConfig() {
@@ -65,14 +72,29 @@ public class ZKConfigurationTest {
 
     @Test
     public void testAddConfigListener() {
+        configuration.addConfigListener(INT_DATAID,new ZKDataConfigListener());
+        configuration.addConfigListener(INT_DATAID,new ZKConfigListener());
+        List<IZkDataListener> zkDataListeners =  configuration.getConfigListeners(INT_DATAID);
+        Assert.assertEquals(2,zkDataListeners.size());
+
     }
 
     @Test
     public void testRemoveConfigListener() {
+        IZkDataListener listener = new ZKDataConfigListener();
+        configuration.addConfigListener(INT_DATAID,listener);
+        configuration.addConfigListener(INT_DATAID,new ZKConfigListener());
+        List<IZkDataListener> zkDataListeners =  configuration.getConfigListeners("22");
+        System.out.println(zkDataListeners.size());
+
+        configuration.removeConfigListener("22",listener);
+        Assert.assertEquals(1,zkDataListeners.size());
     }
 
     @Test
     public void testGetConfigListeners() {
+        List<IZkDataListener> zkDataListeners =  configuration.getConfigListeners(INT_DATAID);
+        Assert.assertEquals(2,zkDataListeners.size());
     }
 
     @Test

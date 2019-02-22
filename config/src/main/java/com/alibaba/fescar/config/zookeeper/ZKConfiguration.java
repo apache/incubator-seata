@@ -81,14 +81,18 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
 
     @Override
     public void addConfigListener(String dataId, IZkDataListener listener) {
+
         String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
+        if(!zkClient.exists(path)) return;
         zkClient.subscribeDataChanges(path, listener);
     }
 
     @Override
     public void removeConfigListener(String dataId, IZkDataListener listener) {
+
         String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
-        zkClient.unsubscribeDataChanges(path,listener);
+        if(!zkClient.exists(path)) return;
+        zkClient.unsubscribeDataChanges(path, listener);
     }
 
     @Override
