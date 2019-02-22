@@ -37,11 +37,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Enhanced service loader.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /10/10 14:28
- * @FileName: EnhancedServiceLoader
- * @Description:
+ * @author: jimin.jm @alibaba-inc.com
+ * @date: 2018/10/10
  */
 public class EnhancedServiceLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancedServiceLoader.class);
@@ -98,7 +95,8 @@ public class EnhancedServiceLoader {
      * @return s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
-    public static <S> S load(Class<S> service, String activateName, ClassLoader loader) throws EnhancedServiceNotFoundException {
+    public static <S> S load(Class<S> service, String activateName, ClassLoader loader)
+        throws EnhancedServiceNotFoundException {
         return loadFile(service, activateName, loader);
     }
 
@@ -151,7 +149,7 @@ public class EnhancedServiceLoader {
                 for (int i = 0; i < extensions.size(); i++) {
                     Class clz = extensions.get(i);
                     @SuppressWarnings("unchecked")
-                    LoadLevel activate = (LoadLevel) clz.getAnnotation(LoadLevel.class);
+                    LoadLevel activate = (LoadLevel)clz.getAnnotation(LoadLevel.class);
                     if (activate != null && activateName.equals(activate.name())) {
                         activateExtensions.add(clz);
                     }
@@ -161,21 +159,24 @@ public class EnhancedServiceLoader {
             }
 
             if (extensions.isEmpty()) {
-                throw new EnhancedServiceNotFoundException("not found service provider for : " + service.getName() + "[" + activateName
-                    + "] and classloader : " + ObjectUtils.toString(loader));
+                throw new EnhancedServiceNotFoundException(
+                    "not found service provider for : " + service.getName() + "[" + activateName
+                        + "] and classloader : " + ObjectUtils.toString(loader));
             }
-            Class<?> extension = extensions.get(extensions.size() - 1);// 最大的一个
+            Class<?> extension = extensions.get(extensions.size() - 1);
             S result = service.cast(extension.newInstance());
             if (!foundFromCache && LOGGER.isInfoEnabled()) {
-                LOGGER.info("load " + service.getSimpleName() + "[" + activateName + "] extension by class[" + extension.getName() + "]");
+                LOGGER.info("load " + service.getSimpleName() + "[" + activateName + "] extension by class[" + extension
+                    .getName() + "]");
             }
             return result;
         } catch (Throwable e) {
             if (e instanceof EnhancedServiceNotFoundException) {
-                throw (EnhancedServiceNotFoundException) e;
+                throw (EnhancedServiceNotFoundException)e;
             } else {
                 throw new EnhancedServiceNotFoundException(
-                    "not found service provider for : " + service.getName() + " caused by " + ExceptionUtils.getFullStackTrace(e));
+                    "not found service provider for : " + service.getName() + " caused by " + ExceptionUtils
+                        .getFullStackTrace(e));
             }
         }
     }
@@ -193,17 +194,15 @@ public class EnhancedServiceLoader {
         if (extensions.isEmpty()) {
             return extensions;
         }
-
-        // 做一下排序
         Collections.sort(extensions, new Comparator<Class>() {
             @Override
             public int compare(Class c1, Class c2) {
                 Integer o1 = 0;
                 Integer o2 = 0;
                 @SuppressWarnings("unchecked")
-                LoadLevel a1 = (LoadLevel) c1.getAnnotation(LoadLevel.class);
+                LoadLevel a1 = (LoadLevel)c1.getAnnotation(LoadLevel.class);
                 @SuppressWarnings("unchecked")
-                LoadLevel a2 = (LoadLevel) c2.getAnnotation(LoadLevel.class);
+                LoadLevel a2 = (LoadLevel)c2.getAnnotation(LoadLevel.class);
 
                 if (a1 != null) {
                     o1 = a1.order();
@@ -222,7 +221,8 @@ public class EnhancedServiceLoader {
     }
 
     @SuppressWarnings("rawtypes")
-    private static void loadFile(Class<?> service, String dir, ClassLoader classLoader, List<Class> extensions) throws IOException {
+    private static void loadFile(Class<?> service, String dir, ClassLoader classLoader, List<Class> extensions)
+        throws IOException {
         String fileName = dir + service.getName();
         Enumeration<URL> urls;
         if (classLoader != null) {
@@ -249,16 +249,14 @@ public class EnhancedServiceLoader {
                         }
                     }
                 } catch (ClassNotFoundException e) {
-                    // ignore
                 } catch (Throwable e) {
-                    LOGGER.warn(e.getMessage()); // 记录一下失败日志
+                    LOGGER.warn(e.getMessage());
                 } finally {
                     try {
                         if (reader != null) {
                             reader.close();
                         }
                     } catch (IOException ioe) {
-                        // ignore
                     }
                 }
             }
