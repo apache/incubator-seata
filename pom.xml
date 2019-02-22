@@ -277,6 +277,7 @@
                         <version>3.0.0</version>
                         <configuration>
                             <charset>UTF-8</charset>
+                            <failOnError>false</failOnError>
                         </configuration>
                         <executions>
                             <execution>
