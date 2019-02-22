@@ -45,7 +45,6 @@ import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
 import com.alibaba.fescar.core.service.ConfigurationKeys;
 import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
-import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -164,45 +163,12 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
             @Override
             public void run() {
                 try {
-                    reconnect();
+                    reconnect(transactionServiceGroup);
                 } catch (Exception ignore) {
                     LOGGER.error(ignore.getMessage());
                 }
             }
         }, healthCheckDelay, healthCheckPeriod, TimeUnit.SECONDS);
-    }
-
-    private void reconnect() {
-        List<String> availList = null;
-        try {
-            availList = getAvailServerList(transactionServiceGroup);
-        } catch (Exception exx) {
-            LOGGER.error(exx.getMessage());
-        }
-        if (CollectionUtils.isEmpty(availList)) {
-            LOGGER.error("no available server to connect.");
-            return;
-        }
-        for (String serverAddress : availList) {
-            try {
-                connect(serverAddress);
-            } catch (Exception e) {
-                LOGGER.error(FrameworkErrorCode.NetConnect.errCode,
-                    "can not connect to " + serverAddress + " cause:" + e.getMessage(), e);
-            }
-        }
-    }
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        if (messageExecutor.isShutdown()) {
-            return;
-        }
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("channel inactive:" + ctx.channel());
-        }
-        releaseChannel(ctx.channel(), NetUtil.toStringAddress(ctx.channel().remoteAddress()));
-        super.channelInactive(ctx);
     }
 
     @Override
@@ -275,13 +241,8 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
 
     }
 
-    /**
-     * Release channel.
-     *
-     * @param channel       the channel
-     * @param serverAddress the server address
-     */
-    public void releaseChannel(Channel channel, String serverAddress) {
+    @Override
+    protected void releaseChannel(Channel channel, String serverAddress) {
         if (null == channel || null == serverAddress) { return; }
         try {
             Object connectLock = channelLocks.get(serverAddress);
@@ -305,12 +266,6 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
         }
     }
 
-    /**
-     * Connect channel.
-     *
-     * @param serverAddress the server address
-     * @return the channel
-     */
     @Override
     protected Channel connect(String serverAddress) {
         Channel channelToServer = channels.get(serverAddress);

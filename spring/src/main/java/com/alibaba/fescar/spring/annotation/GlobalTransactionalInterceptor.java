@@ -16,19 +16,19 @@
 
 package com.alibaba.fescar.spring.annotation;
 
-import java.lang.reflect.Method;
-
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.tm.api.DefaultFailureHandlerImpl;
 import com.alibaba.fescar.tm.api.FailureHandler;
 import com.alibaba.fescar.tm.api.TransactionalExecutor;
 import com.alibaba.fescar.tm.api.TransactionalTemplate;
-
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Method;
+import java.util.Arrays;
 
 /**
  * The type Global transactional interceptor.
@@ -56,50 +56,50 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
     @Override
     public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
         final GlobalTransactional anno = getAnnotation(methodInvocation.getMethod());
-        if (anno != null) {
-            try {
-                return transactionalTemplate.execute(new TransactionalExecutor() {
-                    @Override
-                    public Object execute() throws Throwable {
-                        return methodInvocation.proceed();
-                    }
-
-                    @Override
-                    public int timeout() {
-                        return anno.timeoutMills();
-                    }
-
-                    @Override
-                    public String name() {
-                        String name = anno.name();
-                        if (!StringUtils.isEmpty(name)) {
-                            return name;
-                        }
-                        return formatMethod(methodInvocation.getMethod());
-                    }
-                });
-            } catch (TransactionalExecutor.ExecutionException e) {
-                TransactionalExecutor.Code code = e.getCode();
-                switch (code) {
-                    case RollbackDone:
-                        throw e.getOriginalException();
-                    case BeginFailure:
-                        failureHandler.onBeginFailure(e.getTransaction(), e.getCause());
-                        throw e.getCause();
-                    case CommitFailure:
-                        failureHandler.onCommitFailure(e.getTransaction(), e.getCause());
-                        throw e.getCause();
-                    case RollbackFailure:
-                        failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
-                        throw e.getCause();
-                    default:
-                        throw new ShouldNeverHappenException("Unknown TransactionalExecutor.Code: " + code);
-
-                }
-            }
-
+        if (anno == null) {
+            return methodInvocation.proceed();
         }
-        return methodInvocation.proceed();
+
+        try {
+            return transactionalTemplate.execute(new TransactionalExecutor() {
+                @Override
+                public Object execute() throws Throwable {
+                    return methodInvocation.proceed();
+                }
+
+                @Override
+                public int timeout() {
+                    return anno.timeoutMills();
+                }
+
+                @Override
+                public String name() {
+                    String name = anno.name();
+                    if (!StringUtils.isEmpty(name)) {
+                        return name;
+                    }
+                    return formatMethod(methodInvocation.getMethod());
+                }
+            });
+        } catch (TransactionalExecutor.ExecutionException e) {
+            TransactionalExecutor.Code code = e.getCode();
+            switch (code) {
+                case RollbackDone:
+                    throw e.getOriginalException();
+                case BeginFailure:
+                    failureHandler.onBeginFailure(e.getTransaction(), e.getCause());
+                    throw e.getCause();
+                case CommitFailure:
+                    failureHandler.onCommitFailure(e.getTransaction(), e.getCause());
+                    throw e.getCause();
+                case RollbackFailure:
+                    failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
+                    throw e.getCause();
+                default:
+                    throw new ShouldNeverHappenException("Unknown TransactionalExecutor.Code: " + code);
+
+            }
+        }
     }
 
     private GlobalTransactional getAnnotation(Method method) {
@@ -110,21 +110,10 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
     }
 
     private String formatMethod(Method method) {
-        StringBuilder sb = new StringBuilder();
-
-        String methodName = method.getName();
-        Class<?>[] params = method.getParameterTypes();
-        sb.append(methodName);
-        sb.append("(");
-
-        int paramPos = 0;
-        for (Class<?> clazz : params) {
-            sb.append(clazz.getName());
-            if (++paramPos < params.length) {
-                sb.append(",");
-            }
-        }
-        sb.append(")");
-        return sb.toString();
+        String paramTypes = Arrays.stream(method.getParameterTypes())
+                .map(Class::getName)
+                .reduce((p1, p2) -> String.format("%s, %s", p1, p2))
+                .orElse("");
+        return method.getName() + "(" + paramTypes + ")";
     }
 }
