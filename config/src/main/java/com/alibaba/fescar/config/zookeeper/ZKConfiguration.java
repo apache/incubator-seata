@@ -4,6 +4,7 @@ import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.config.AbstractConfiguration;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
+import com.google.common.collect.Lists;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.zookeeper.CreateMode;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author crazier.huang
@@ -28,10 +30,10 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
 
 
-    private static volatile ZkClient zkClient;
+    private static volatile ZkClientUtil zkClient;
     public ZKConfiguration() {
         if(zkClient == null){
-            zkClient = new ZkClient(FILE_CONFIG.getConfig(getZKAddrFileKey()));
+            zkClient = new ZkClientUtil(FILE_CONFIG.getConfig(getZKAddrFileKey()));
             if(!zkClient.exists(ROOT_PATH)){
                 zkClient.create(ROOT_PATH,null, CreateMode.PERSISTENT);
             }
@@ -47,7 +49,9 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
         String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
         String value = zkClient.readData(path);
-        if(StringUtils.isEmpty(value)) return defaultValue;
+        if(StringUtils.isEmpty(value)) {
+            return defaultValue;
+        }
 
         return value;
     }
@@ -77,19 +81,20 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
 
     @Override
     public void addConfigListener(String dataId, IZkDataListener listener) {
-        // TODO: 2019/2/18
+        String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
+        zkClient.subscribeDataChanges(path, listener);
     }
 
     @Override
     public void removeConfigListener(String dataId, IZkDataListener listener) {
-        // TODO: 2019/2/18
+        String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
+        zkClient.unsubscribeDataChanges(path,listener);
     }
 
     @Override
     public List<IZkDataListener> getConfigListeners(String dataId) {
-        // TODO: 2019/2/18
-
-        return null;
+        String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
+        return Lists.newArrayList(zkClient.getDataListener(path));
     }
 
     public ZkClient getZkClient(){
