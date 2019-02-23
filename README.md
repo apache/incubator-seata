@@ -65,7 +65,7 @@ For more details about principle and design, please go to [Fescar wiki page](htt
 
 ## Maven dependency
 ```xml
-<fescar.version>0.2.1</fescar.version>
+<fescar.version>0.2.2</fescar.version>
 
 <dependency>
     <groupId>com.alibaba.fescar</groupId>
