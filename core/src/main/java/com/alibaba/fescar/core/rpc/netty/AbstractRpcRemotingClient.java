@@ -17,6 +17,8 @@
 package com.alibaba.fescar.core.rpc.netty;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -36,9 +38,11 @@ import com.alibaba.fescar.core.rpc.ClientMessageListener;
 import com.alibaba.fescar.core.rpc.ClientMessageSender;
 import com.alibaba.fescar.core.rpc.RemotingService;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
-
 import com.alibaba.fescar.core.service.ServiceManager;
 import com.alibaba.fescar.core.service.ServiceManagerStaticConfigImpl;
+import com.alibaba.fescar.discovery.registry.RegistryFactory;
+import com.alibaba.nacos.client.naming.utils.CollectionUtils;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -68,7 +72,7 @@ import org.slf4j.LoggerFactory;
  * The type Rpc remoting client.
  *
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /9/12 11:30
  * @FileName: AbstractRpcRemotingClient
  * @Description:
@@ -89,6 +93,9 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     private static final int MAX_MERGE_SEND_MILLS = 1;
     private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
 
+    /**
+     * The Service manager.
+     */
     protected ServiceManager serviceManager;
 
     /**
@@ -315,6 +322,18 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             String remoteAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
             clientMessageListener.onMessage(msgId, remoteAddress, msg, this);
         }
+    }
+
+    protected List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
+        List<String> availList = new ArrayList<>();
+        List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance().lookup(
+            transactionServiceGroup);
+        if (!CollectionUtils.isEmpty(availInetSocketAddressList)) {
+            for (InetSocketAddress address : availInetSocketAddressList) {
+                availList.add(NetUtil.toStringAddress(address));
+            }
+        }
+        return availList;
     }
 
     /**

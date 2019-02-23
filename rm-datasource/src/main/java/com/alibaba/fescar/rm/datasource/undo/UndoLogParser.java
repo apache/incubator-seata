@@ -16,9 +16,24 @@
 
 package com.alibaba.fescar.rm.datasource.undo;
 
+/**
+ * The interface Undo log parser.
+ */
 public interface UndoLogParser {
 
+    /**
+     * Encode string.
+     *
+     * @param branchUndoLog the branch undo log
+     * @return the string
+     */
     String encode(BranchUndoLog branchUndoLog);
 
+    /**
+     * Decode branch undo log.
+     *
+     * @param text the text
+     * @return the branch undo log
+     */
     BranchUndoLog decode(String text);
 }

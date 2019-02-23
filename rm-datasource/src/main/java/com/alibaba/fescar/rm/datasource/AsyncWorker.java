@@ -18,12 +18,7 @@ package com.alibaba.fescar.rm.datasource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -41,12 +36,23 @@ import org.slf4j.LoggerFactory;
 
 import static com.alibaba.fescar.core.service.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 
+/**
+ * The type Async worker.
+ */
 public class AsyncWorker implements ResourceManagerInbound {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncWorker.class);
 
     private static class Phase2Context {
 
+        /**
+         * Instantiates a new Phase 2 context.
+         *
+         * @param xid             the xid
+         * @param branchId        the branch id
+         * @param resourceId      the resource id
+         * @param applicationData the application data
+         */
         public Phase2Context(String xid, long branchId, String resourceId, String applicationData) {
             this.xid = xid;
             this.branchId = branchId;
@@ -54,9 +60,21 @@ public class AsyncWorker implements ResourceManagerInbound {
             this.applicationData = applicationData;
         }
 
+        /**
+         * The Xid.
+         */
         String xid;
+        /**
+         * The Branch id.
+         */
         long branchId;
+        /**
+         * The Resource id.
+         */
         String resourceId;
+        /**
+         * The Application data.
+         */
         String applicationData;
     }
 
@@ -77,6 +95,9 @@ public class AsyncWorker implements ResourceManagerInbound {
         return BranchStatus.PhaseTwo_Committed;
     }
 
+    /**
+     * Init.
+     */
     public synchronized void init() {
         LOGGER.info("Async Commit Buffer Limit: " + ASYNC_COMMIT_BUFFER_LIMIT);
         timerExecutor = new ScheduledThreadPoolExecutor(1,
@@ -87,7 +108,6 @@ public class AsyncWorker implements ResourceManagerInbound {
                 try {
 
                     doBranchCommits();
-
 
                 } catch (Throwable e) {
                     LOGGER.info("Failed at async committing ... " + e.getMessage());
@@ -116,40 +136,35 @@ public class AsyncWorker implements ResourceManagerInbound {
 
         }
 
-        for (String resourceId : mappedContexts.keySet()) {
-            Connection conn = null;
-            try {
-                try {
-                    DataSourceProxy dataSourceProxy = DataSourceManager.get().get(resourceId);
-                    conn = dataSourceProxy.getPlainConnection();
-                } catch (SQLException sqle) {
-                    LOGGER.warn("Failed to get connection for async committing on " + resourceId, sqle);
-                    continue;
-                }
+       for( Map.Entry<String, List<Phase2Context>> entry:mappedContexts.entrySet()){
+           Connection conn = null;
+           try {
+               try {
+                   DataSourceProxy dataSourceProxy = DataSourceManager.get().get(entry.getKey());
+                   conn = dataSourceProxy.getPlainConnection();
+               } catch (SQLException sqle) {
+                   LOGGER.warn("Failed to get connection for async committing on " + entry.getKey(), sqle);
+                   continue;
+               }
+               List<Phase2Context> contextsGroupedByResourceId=entry.getValue();
+               for (Phase2Context commitContext : contextsGroupedByResourceId) {
+                   try {
+                       UndoLogManager.deleteUndoLog(commitContext.xid, commitContext.branchId, conn);
+                   } catch (Exception ex) {
+                       LOGGER.warn("Failed to delete undo log [" + commitContext.branchId + "/" + commitContext.xid + "]", ex);
+                   }
+               }
 
-                List<Phase2Context> contextsGroupedByResourceId = mappedContexts.get(resourceId);
-                for (Phase2Context commitContext : contextsGroupedByResourceId) {
-                    try {
-                        UndoLogManager.deleteUndoLog(commitContext.xid, commitContext.branchId, conn);
-                    } catch (Exception ex) {
-                        LOGGER.warn("Failed to delete undo log [" + commitContext.branchId + "/" + commitContext.xid + "]", ex);
-                    }
-                }
-
-            } finally {
-                if (conn != null) {
-                    try {
-                        conn.close();
-                    } catch (SQLException closeEx) {
-                        LOGGER.warn("Failed to close JDBC resource while deleting undo_log ", closeEx);
-                    }
-                }
-            }
-
-
-        }
-
-
+           } finally {
+               if (conn != null) {
+                   try {
+                       conn.close();
+                   } catch (SQLException closeEx) {
+                       LOGGER.warn("Failed to close JDBC resource while deleting undo_log ", closeEx);
+                   }
+               }
+           }
+       }
     }
 
     @Override

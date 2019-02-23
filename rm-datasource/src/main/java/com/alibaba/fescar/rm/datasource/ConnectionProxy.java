@@ -33,27 +33,52 @@ import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The type Connection proxy.
+ */
 public class ConnectionProxy extends AbstractConnectionProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProxy.class);
 
     private ConnectionContext context = new ConnectionContext();
 
+    /**
+     * Instantiates a new Connection proxy.
+     *
+     * @param dataSourceProxy  the data source proxy
+     * @param targetConnection the target connection
+     * @param dbType           the db type
+     */
     public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection, String dbType) {
         super(dataSourceProxy, targetConnection, dbType);
     }
 
+    /**
+     * Gets context.
+     *
+     * @return the context
+     */
     public ConnectionContext getContext() {
         return context;
     }
 
+    /**
+     * Bind.
+     *
+     * @param xid the xid
+     */
     public void bind(String xid) {
         context.bind(xid);
     }
 
-    public void checkLock(TableRecords records) throws SQLException {
+    /**
+     * Check lock.
+     *
+     * @param lockKeys the lockKeys
+     * @throws SQLException the sql exception
+     */
+    public void checkLock(String lockKeys) throws SQLException {
         // Just check lock without requiring lock by now.
-        String lockKeys = buildLockKey(records);
         try {
             boolean lockable = DataSourceManager.get().lockQuery(BranchType.AT, getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
             if (!lockable) {
@@ -63,9 +88,15 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             recognizeLockKeyConflictException(e);
         }
     }
-    public void register(TableRecords records) throws SQLException {
+
+    /**
+     * Register.
+     *
+     * @param lockKeys the lockKeys
+     * @throws SQLException the sql exception
+     */
+    public void register(String lockKeys) throws SQLException {
         // Just check lock without requiring lock by now.
-        String lockKeys = buildLockKey(records);
         try {
             DataSourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(), null, context.getXid(), lockKeys);
         } catch (TransactionException e) {
@@ -82,48 +113,22 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     }
 
-    public void prepareUndoLog(SQLType sqlType, String tableName, TableRecords beforeImage, TableRecords afterImage) throws SQLException {
-        if(beforeImage.getRows().size() == 0 && afterImage.getRows().size() == 0) {
-            return;
-            }
-        
-        TableRecords lockKeyRecords = afterImage;
-        if (sqlType == SQLType.DELETE) {
-            lockKeyRecords = beforeImage;
-        }
-        String lockKeys = buildLockKey(lockKeyRecords);
-        context.appendLockKey(lockKeys);
-        SQLUndoLog sqlUndoLog = buildUndoItem(sqlType, tableName, beforeImage, afterImage);
+    /**
+     * append sqlUndoLog
+     *
+     * @param sqlUndoLog
+     */
+    public void appendUndoLog(SQLUndoLog sqlUndoLog) {
         context.appendUndoItem(sqlUndoLog);
     }
 
-    private SQLUndoLog buildUndoItem(SQLType sqlType, String tableName, TableRecords beforeImage, TableRecords afterImage) {
-        SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        sqlUndoLog.setSqlType(sqlType);
-        sqlUndoLog.setTableName(tableName);
-        sqlUndoLog.setBeforeImage(beforeImage);
-        sqlUndoLog.setAfterImage(afterImage);
-        return sqlUndoLog;
-    }
-
-    private String buildLockKey(TableRecords rowsIncludingPK) {
-        if (rowsIncludingPK.size() == 0) {
-            return null;
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append(rowsIncludingPK.getTableMeta().getTableName());
-        sb.append(":");
-
-        boolean flag = false;
-        for (Field field : rowsIncludingPK.pkRows()) {
-            if (flag) {
-                sb.append(",");
-            } else {
-                flag = true;
-            }
-            sb.append(field.getValue());
-        }
-        return sb.toString();
+    /**
+     * append lockKey
+     *
+     * @param lockKey
+     */
+    public void appendLockKey(String lockKey) {
+        context.appendLockKey(lockKey);
     }
 
     @Override
@@ -136,7 +141,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             }
 
             try {
-                if (context.hasUndoLog()) { 
+                if (context.hasUndoLog()) {
                     UndoLogManager.flushUndoLogs(this);
                 }
                 targetConnection.commit();
@@ -150,7 +155,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             }
             report(true);
             context.reset();
-        	
+
         } else {
             targetConnection.commit();
         }
@@ -168,8 +173,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (context.inGlobalTransaction()) {
             if (context.isBranchRegistered()) {
                 report(false);
-            }}
-            context.reset();
+            }
+        }
+        context.reset();
     }
 
     @Override

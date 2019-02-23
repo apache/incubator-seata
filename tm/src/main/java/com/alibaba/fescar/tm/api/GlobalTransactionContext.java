@@ -17,25 +17,26 @@
 package com.alibaba.fescar.tm.api;
 
 import com.alibaba.fescar.core.context.RootContext;
+import com.alibaba.fescar.core.exception.TransactionException;
+import com.alibaba.fescar.core.model.GlobalStatus;
+import com.alibaba.fescar.core.model.TransactionManager;
 
 /**
- * Context of global transaction on current thread.
+ * GlobalTransaction API
  */
 public class GlobalTransactionContext {
-
-    private static final ThreadLocal<GlobalTransaction> THREAD_TRANSACTION_CONTEXT = new ThreadLocal<>();
 
     private GlobalTransactionContext() {
     }
 
     /**
      * Try to create a new GlobalTransaction.
+     *
      * @return
      */
     private static GlobalTransaction createNew() {
         GlobalTransaction tx = new DefaultGlobalTransaction();
-        THREAD_TRANSACTION_CONTEXT.set(tx);
-        return THREAD_TRANSACTION_CONTEXT.get();
+        return tx;
     }
 
     /**
@@ -43,23 +44,16 @@ public class GlobalTransactionContext {
      *
      * @return null if no transaction context there.
      */
-    public static GlobalTransaction getCurrent() {
-        GlobalTransaction tx = THREAD_TRANSACTION_CONTEXT.get();
-        if (tx != null) {
-            return tx;
-        }
+    private static GlobalTransaction getCurrent() {
         String xid = RootContext.getXID();
         if (xid == null) {
             return null;
         }
-        tx = new DefaultGlobalTransaction(xid);
-        THREAD_TRANSACTION_CONTEXT.set(tx);
-        return THREAD_TRANSACTION_CONTEXT.get();
+        return new DefaultGlobalTransaction(xid, GlobalStatus.Begin, GlobalTransactionRole.Participant);
     }
 
     /**
-     * Get GlobalTransaction instance bind on current thread.
-     * Create a new on if no existing there.
+     * Get GlobalTransaction instance bind on current thread. Create a new on if no existing there.
      *
      * @return new context if no existing there.
      */
@@ -72,10 +66,17 @@ public class GlobalTransactionContext {
     }
 
     /**
-     * Clean context.
+     * Reload GlobalTransaction instance according to the given XID
+     *
+     * @return reloaded transaction instance.
      */
-    public static void clean() {
-        THREAD_TRANSACTION_CONTEXT.remove();
-        RootContext.unbind();
+    public static GlobalTransaction reload(String xid) throws TransactionException {
+        GlobalTransaction tx = new DefaultGlobalTransaction(xid, GlobalStatus.UnKnown, GlobalTransactionRole.Launcher) {
+            @Override
+            public void begin(int timeout, String name) throws TransactionException {
+                throw new IllegalStateException("Never BEGIN on a RELOADED GlobalTransaction. ");
+            }
+        };
+        return tx;
     }
 }

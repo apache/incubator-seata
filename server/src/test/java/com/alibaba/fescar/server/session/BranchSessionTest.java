@@ -23,11 +23,18 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- * @author tianming.xm@gmail.com
- * @since 2019/1/23
+ * The type Branch session test.
+ *
+ * @author tianming.xm @gmail.com
+ * @since 2019 /1/23
  */
 public class BranchSessionTest {
 
+    /**
+     * Codec test.
+     *
+     * @param branchSession the branch session
+     */
     @Test(dataProvider = "branchSessionProvider")
     public void codecTest(BranchSession branchSession) {
         byte[] result = branchSession.encode();
@@ -38,13 +45,16 @@ public class BranchSessionTest {
         Assert.assertEquals(branchSession.getBranchId(), expected.getBranchId());
         Assert.assertEquals(branchSession.getResourceId(), expected.getResourceId());
         Assert.assertEquals(branchSession.getLockKey(), expected.getLockKey());
-        Assert.assertEquals(branchSession.getApplicationId(), expected.getApplicationId());
-        Assert.assertEquals(branchSession.getTxServiceGroup(), expected.getTxServiceGroup());
         Assert.assertEquals(branchSession.getClientId(), expected.getClientId());
         Assert.assertEquals(branchSession.getApplicationData(), expected.getApplicationData());
 
     }
 
+    /**
+     * Branch session provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
     @DataProvider
     public static Object[][] branchSessionProvider() {
         BranchSession branchSession = new BranchSession();
@@ -55,8 +65,6 @@ public class BranchSessionTest {
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
-        branchSession.setApplicationId("demo-child-app");
-        branchSession.setTxServiceGroup("my_test_tx_group");
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.AT);
         return new Object[][] {{branchSession}};

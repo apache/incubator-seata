@@ -42,46 +42,133 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/9/14 16:54
+ * The type Abstract message.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /9/14 16:54
  * @FileName: AbstractMessage
  * @Description:
  */
 public abstract class AbstractMessage implements MessageCodec, Serializable {
     private static final long serialVersionUID = -1441020418526899889L;
 
+    /**
+     * The constant TYPE_GLOBAL_BEGIN.
+     */
     public static final short TYPE_GLOBAL_BEGIN = 1;
+    /**
+     * The constant TYPE_GLOBAL_BEGIN_RESULT.
+     */
     public static final short TYPE_GLOBAL_BEGIN_RESULT = 2;
+    /**
+     * The constant TYPE_GLOBAL_COMMIT.
+     */
     public static final short TYPE_GLOBAL_COMMIT = 7;
+    /**
+     * The constant TYPE_GLOBAL_COMMIT_RESULT.
+     */
     public static final short TYPE_GLOBAL_COMMIT_RESULT = 8;
+    /**
+     * The constant TYPE_GLOBAL_ROLLBACK.
+     */
     public static final short TYPE_GLOBAL_ROLLBACK = 9;
+    /**
+     * The constant TYPE_GLOBAL_ROLLBACK_RESULT.
+     */
     public static final short TYPE_GLOBAL_ROLLBACK_RESULT = 10;
+    /**
+     * The constant TYPE_GLOBAL_STATUS.
+     */
     public static final short TYPE_GLOBAL_STATUS = 15;
+    /**
+     * The constant TYPE_GLOBAL_STATUS_RESULT.
+     */
     public static final short TYPE_GLOBAL_STATUS_RESULT = 16;
+    /**
+     * The constant TYPE_GLOBAL_LOCK_QUERY.
+     */
     public static final short TYPE_GLOBAL_LOCK_QUERY = 21;
+    /**
+     * The constant TYPE_GLOBAL_LOCK_QUERY_RESULT.
+     */
     public static final short TYPE_GLOBAL_LOCK_QUERY_RESULT = 22;
 
+    /**
+     * The constant TYPE_BRANCH_COMMIT.
+     */
     public static final short TYPE_BRANCH_COMMIT = 3;
+    /**
+     * The constant TYPE_BRANCH_COMMIT_RESULT.
+     */
     public static final short TYPE_BRANCH_COMMIT_RESULT = 4;
+    /**
+     * The constant TYPE_BRANCH_ROLLBACK.
+     */
     public static final short TYPE_BRANCH_ROLLBACK = 5;
+    /**
+     * The constant TYPE_BRANCH_ROLLBACK_RESULT.
+     */
     public static final short TYPE_BRANCH_ROLLBACK_RESULT = 6;
+    /**
+     * The constant TYPE_BRANCH_REGISTER.
+     */
     public static final short TYPE_BRANCH_REGISTER = 11;
+    /**
+     * The constant TYPE_BRANCH_REGISTER_RESULT.
+     */
     public static final short TYPE_BRANCH_REGISTER_RESULT = 12;
+    /**
+     * The constant TYPE_BRANCH_STATUS_REPORT.
+     */
     public static final short TYPE_BRANCH_STATUS_REPORT = 13;
+    /**
+     * The constant TYPE_BRANCH_STATUS_REPORT_RESULT.
+     */
     public static final short TYPE_BRANCH_STATUS_REPORT_RESULT = 14;
 
+    /**
+     * The constant TYPE_FESCAR_MERGE.
+     */
     public static final short TYPE_FESCAR_MERGE = 59;
+    /**
+     * The constant TYPE_FESCAR_MERGE_RESULT.
+     */
     public static final short TYPE_FESCAR_MERGE_RESULT = 60;
 
+    /**
+     * The constant TYPE_REG_CLT.
+     */
     public static final short TYPE_REG_CLT = 101;
+    /**
+     * The constant TYPE_REG_CLT_RESULT.
+     */
     public static final short TYPE_REG_CLT_RESULT = 102;
+    /**
+     * The constant TYPE_REG_RM.
+     */
     public static final short TYPE_REG_RM = 103;
+    /**
+     * The constant TYPE_REG_RM_RESULT.
+     */
     public static final short TYPE_REG_RM_RESULT = 104;
 
+    /**
+     * The constant UTF8.
+     */
     protected static final Charset UTF8 = Charset.forName("utf-8");
+    /**
+     * The Ctx.
+     */
     protected ChannelHandlerContext ctx;
 
+    /**
+     * Bytes to int int.
+     *
+     * @param bytes  the bytes
+     * @param offset the offset
+     * @return the int
+     */
     public static int bytesToInt(byte[] bytes, int offset) {
         int ret = 0;
         for (int i = 0; i < 4 && i + offset < bytes.length; i++) {
@@ -91,6 +178,13 @@ public abstract class AbstractMessage implements MessageCodec, Serializable {
         return ret;
     }
 
+    /**
+     * Int to bytes.
+     *
+     * @param i      the
+     * @param bytes  the bytes
+     * @param offset the offset
+     */
     public static void intToBytes(int i, byte[] bytes, int offset) {
         bytes[offset] = (byte)((i >> 24) & 0xFF);
         bytes[offset + 1] = (byte)((i >> 16) & 0xFF);
@@ -103,6 +197,12 @@ public abstract class AbstractMessage implements MessageCodec, Serializable {
         return false;
     }
 
+    /**
+     * Gets msg instance by code.
+     *
+     * @param typeCode the type code
+     * @return the msg instance by code
+     */
     public static MessageCodec getMsgInstanceByCode(short typeCode) {
         MessageCodec msgCodec = null;
         switch (typeCode) {
@@ -149,6 +249,12 @@ public abstract class AbstractMessage implements MessageCodec, Serializable {
         return (MessageCodec)getMergeResponseInstanceByCode(typeCode);
     }
 
+    /**
+     * Gets merge request instance by code.
+     *
+     * @param typeCode the type code
+     * @return the merge request instance by code
+     */
     public static MergedMessage getMergeRequestInstanceByCode(int typeCode) {
         switch (typeCode) {
             case AbstractMessage.TYPE_GLOBAL_BEGIN:
@@ -170,6 +276,12 @@ public abstract class AbstractMessage implements MessageCodec, Serializable {
         }
     }
 
+    /**
+     * Gets merge response instance by code.
+     *
+     * @param typeCode the type code
+     * @return the merge response instance by code
+     */
     public static MergedMessage getMergeResponseInstanceByCode(int typeCode) {
         switch (typeCode) {
             case AbstractMessage.TYPE_GLOBAL_BEGIN_RESULT:
