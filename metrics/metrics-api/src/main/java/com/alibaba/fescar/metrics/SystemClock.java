@@ -20,7 +20,7 @@ public class SystemClock implements Clock {
   public static final Clock INSTANCE = new SystemClock();
 
   @Override
-  public long getTimestamp() {
+  public double getCurrentMilliseconds() {
     return System.currentTimeMillis();
   }
 }

@@ -16,10 +16,12 @@
 
 package com.alibaba.fescar.metrics;
 
-public interface Registry {
-  <T extends Number> Gauge<T> getGauge(Id id);
+import java.util.function.Supplier;
 
-  <T extends Number> Counter<T> getCounter(Id id);
+public interface Registry {
+  <T extends Number> Gauge<T> getGauge(Id id, Supplier<T> supplier);
+
+  Counter getCounter(Id id);
 
   Summary getSummary(Id id);
 
