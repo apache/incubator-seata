@@ -16,7 +16,6 @@
 
 package com.alibaba.fescar.metrics;
 
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -45,19 +44,39 @@ public class Id {
     return tags.size();
   }
 
-  public Id(String name, Map<String, String> tags) {
+  public Id(String name) {
     this.id = UUID.randomUUID();
     this.name = name;
     this.tags = new TreeMap<>();
-    if (tags != null) {
-      for (Entry<String, String> tag : tags.entrySet()) {
-        tags.put(tag.getKey(), tag.getValue());
-      }
-    }
   }
 
   public Id withTag(String name, String value) {
     this.tags.put(name, value);
     return this;
+  }
+
+  public Id withTag(Iterable<Entry<String, String>> tags) {
+    if (tags != null) {
+      for (Entry<String, String> tag : tags) {
+        this.tags.put(tag.getKey(), tag.getValue());
+      }
+    }
+    return this;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder builder = new StringBuilder(name);
+    builder.append("(");
+    if (tags.size() == 0) {
+      builder.append(")");
+      return builder.toString();
+    }
+    for (Entry<String, String> tag : tags.entrySet()) {
+      builder.append(String.format("%s=%s,", tag.getKey(), tag.getValue()));
+    }
+    builder.delete(builder.length() - 1, builder.length());
+    builder.append(")");
+    return builder.toString();
   }
 }

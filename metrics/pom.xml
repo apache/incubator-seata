@@ -30,6 +30,7 @@
   <name>fescar-metrics ${project.version}</name>
   <modules>
     <module>metrics-api</module>
+    <module>metrics-prometheus</module>
   </modules>
 
 </project>

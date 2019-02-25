@@ -17,11 +17,11 @@
 package com.alibaba.fescar.metrics;
 
 public interface Summary extends Meter {
-  default long increase() {
-    return increase(1);
+  default void increase() {
+    increase(1);
   }
 
-  long increase(long value);
+  void increase(long value);
 
   long total();
 
