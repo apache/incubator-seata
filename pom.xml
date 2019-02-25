@@ -250,18 +250,7 @@
         </dependencies>
 
     </dependencyManagement>
-    <repositories>
-        <repository>
-            <id>deploymentRepo</id>
-            <url>http://10.29.23.9/nexus/repository/mvn-group/</url>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
+
 
     <profiles>
         <profile>

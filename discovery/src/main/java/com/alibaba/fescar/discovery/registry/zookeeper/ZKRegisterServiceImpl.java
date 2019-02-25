@@ -24,9 +24,14 @@ import static com.alibaba.fescar.config.ConfigurationFactory.FILE_ROOT_REGISTRY;
  */
 public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> {
 
+
     private static volatile ZKRegisterServiceImpl instance;
     private static final String ZK_PATH_SPLIT_CHAR = "/";
-    private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY;;
+    private static final String FILE_ROOT_REGISTRY = "/registry";
+    private static final String FILE_CONFIG_SPLIT_CHAR = ".";
+    private static final String REGISTRY_CLUSTER = "default";
+    private static final String REGISTRY_TYPE = "zk";
+    private static final String ROOT_PATH = FILE_ROOT_REGISTRY+ZK_PATH_SPLIT_CHAR + REGISTRY_TYPE+ZK_PATH_SPLIT_CHAR;
 
     private ZKRegisterServiceImpl() {}
 
@@ -47,9 +52,6 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
         getClientInstance().create(path,null, CreateMode.EPHEMERAL);
     }
 
-
-
-
     @Override
     public void unregister(InetSocketAddress address) throws Exception {
         String path = ROOT_PATH + getClusterName()+ZK_PATH_SPLIT_CHAR+getIPAndPort(address);
@@ -58,55 +60,59 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
 
     @Override
     public void subscribe(String cluster, IZkChildListener listener) throws Exception {
-
+        String path = ROOT_PATH  + cluster + ZK_PATH_SPLIT_CHAR;
+        getClientInstance().subscribeChildChanges(path,listener);
     }
 
     @Override
     public void unsubscribe(String cluster, IZkChildListener listener) throws Exception {
+        String path = ROOT_PATH + cluster+ ZK_PATH_SPLIT_CHAR;
+        getClientInstance().unsubscribeChildChanges(path,listener);
 
     }
 
+    /**
+     * 1. 根据key找到groupName -- key：service.vgroup_mapping.my_test_tx_group
+     * 2. 根据groupName找到对应child
+     * @param key the key
+     * @return
+     * @throws Exception
+     */
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
-        String clusterName = getClusterName();
-        String rootPath = ROOT_PATH+ZK_PATH_SPLIT_CHAR+clusterName;
+        Configuration config = ConfigurationFactory.getInstance();
+        String clusterName = config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
+        if (null == clusterName) {
+            return null;
+        }
+        List<String> childPath = getClientInstance().getChildren(ROOT_PATH);
+        if(!childPath.contains(clusterName)){
+            return null;
+        }
         List<InetSocketAddress> interSocketAddresses = new ArrayList<>();
-        if(StringUtils.isEmpty(clusterName)){
-            return null;
-        }
-        List<String> pathList = getClientInstance().getChildren(rootPath);
-        if(CollectionUtils.isEmpty(pathList)){
-            return null;
-        }
-        pathList.forEach(path->{
+        List<String> childClusterPath = getClientInstance().getChildren(ROOT_PATH+ZK_PATH_SPLIT_CHAR+clusterName);
+        childClusterPath.forEach(path->{
             String[] ipAndPort = path.split(IP_PORT_SPLIT_CHAR);
             if (ipAndPort.length != 2) {
                 throw new IllegalArgumentException("endpoint format should like ip:port");
             }
             interSocketAddresses.add(new InetSocketAddress(ipAndPort[0], Integer.valueOf(ipAndPort[1])));
         });
-
-
         return interSocketAddresses;
     }
 
     private ZkClient getClientInstance() {
-        // TODO: 2019/2/19zookeeper 的client try catch
         ZKConfiguration configuration = (ZKConfiguration) ConfigurationFactory.getInstance();
-
         return configuration.getZkClient();
     }
 
     private String getClusterName() {
-        // TODO: 2019/2/19 获取集群名称
-        return null;
+        String clusterConfigName =  FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
+                + REGISTRY_CLUSTER;
+        return clusterConfigName;
     }
 
     private String getIPAndPort(InetSocketAddress address) {
-        if (null == address.getHostName() || 0 == address.getPort()) {
-            throw new IllegalArgumentException("invalid address:" + address);
-        }
-
         String addr = address.getHostName() + IP_PORT_SPLIT_CHAR + address.getPort();
         return addr;
     }
