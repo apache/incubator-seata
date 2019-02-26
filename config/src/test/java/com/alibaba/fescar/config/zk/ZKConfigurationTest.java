@@ -70,42 +70,29 @@ public class ZKConfigurationTest {
 
     @Test
     public void testAddConfigListener() throws InterruptedException {
-        configuration.addConfigListener(INT_DATAID, new IZkDataListener() {
-            @Override
-            public void handleDataChange(String dataPath, Object data) throws Exception {
-                System.out.println("dataPath");
-            }
-
-            @Override
-            public void handleDataDeleted(String dataPath) throws Exception {
-
-            }
-        });
-
-        Thread.sleep(2000000);
-//        configuration.addConfigListener(INT_DATAID,new ZKConfigListener());
-//        List<IZkDataListener> zkDataListeners =  configuration.getConfigListeners(INT_DATAID);
-//        Assert.assertEquals(2,zkDataListeners.size());
+        configuration.addConfigListener(INT_DATAID,new ZKDataConfigListener());
+        configuration.addConfigListener(INT_DATAID,new ZKConfigListener());
+        configuration.putConfig(INT_DATAID,"11");
+        Thread.sleep(1000);
+        configuration.removeConfig(INT_DATAID);
+        Thread.sleep(1000);
 
     }
 
     @Test
-    public void testRemoveConfigListener() {
+    public void testRemoveConfigListener() throws InterruptedException {
         IZkDataListener listener = new ZKDataConfigListener();
         configuration.addConfigListener(INT_DATAID,listener);
         configuration.addConfigListener(INT_DATAID,new ZKConfigListener());
-        List<IZkDataListener> zkDataListeners =  configuration.getConfigListeners("22");
-        System.out.println(zkDataListeners.size());
-
-        configuration.removeConfigListener("22",listener);
-        Assert.assertEquals(1,zkDataListeners.size());
+        configuration.putConfig(INT_DATAID,"22");
+        Thread.sleep(2000);
+        configuration.removeConfigListener(INT_DATAID,listener);
+        configuration.putConfig(INT_DATAID,"33");
+        Thread.sleep(2000);
     }
 
     @Test
     public void testGetConfigListeners() throws InterruptedException {
-        Thread.sleep(2000);
-        List<IZkDataListener> zkDataListeners =  configuration.getConfigListeners(INT_DATAID);
-        Assert.assertEquals(1,zkDataListeners.size());
     }
 
     @Test

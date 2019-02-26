@@ -13,11 +13,11 @@ public class ZKDataConfigListener implements IZkDataListener {
 
     @Override
     public void handleDataChange(String dataPath, Object data) throws Exception {
-        logger.info("dataPath {} info {}",dataPath,data.toString());
+        logger.info("ZKDataConfigListener handleDataChange dataPath {} info {}",dataPath,data.toString());
     }
 
     @Override
     public void handleDataDeleted(String dataPath) throws Exception {
-
+        logger.info("ZKDataConfigListener handleDataDeleted  dataPath {}",dataPath);
     }
 }

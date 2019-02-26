@@ -1,19 +1,25 @@
 package com.alibaba.fescar.config.zookeeper;
 
+import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.config.AbstractConfiguration;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 import com.google.common.collect.Lists;
 import org.I0Itec.zkclient.IZkDataListener;
+import org.I0Itec.zkclient.IZkStateListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.ZooDefs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
  * @author crazier.huang
@@ -29,11 +35,10 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_CONFIG;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
 
-
-    private static volatile ZkClientUtil zkClient;
+    private static volatile ZkClient zkClient;
     public ZKConfiguration() {
         if(zkClient == null){
-            zkClient = new ZkClientUtil(FILE_CONFIG.getConfig(getZKAddrFileKey()));
+            zkClient = new ZkClient(FILE_CONFIG.getConfig(getZKAddrFileKey()));
             if(!zkClient.exists(ROOT_PATH)){
                 zkClient.create(ROOT_PATH,null, CreateMode.PERSISTENT);
             }
@@ -83,22 +88,22 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     public void addConfigListener(String dataId, IZkDataListener listener) {
 
         String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
-        if(!zkClient.exists(path,true)) return;
-        zkClient.subscribeDataChanges(path, listener);
+        if(zkClient.exists(path)) {
+            zkClient.subscribeDataChanges(path, listener);
+        }
     }
 
     @Override
     public void removeConfigListener(String dataId, IZkDataListener listener) {
-
         String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
-        if(!zkClient.exists(path,true)) return;
-        zkClient.unsubscribeDataChanges(path, listener);
+        if (zkClient.exists(path)) {
+            zkClient.unsubscribeDataChanges(path, listener);
+        }
     }
 
     @Override
     public List<IZkDataListener> getConfigListeners(String dataId) {
-        String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
-        return Lists.newArrayList(zkClient.getDataListener(path));
+        throw new NotSupportYetException("not support putConfigIfAbsent");
     }
 
     public ZkClient getZkClient(){
