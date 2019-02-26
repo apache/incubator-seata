@@ -18,14 +18,11 @@ package com.alibaba.fescar.discovery.registry;
 
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.config.ConfigType;
+import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.config.ConfigurationKeys;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.alibaba.fescar.config.ConfigurationFactory.FILE_CONFIG_SPLIT_CHAR;
-import static com.alibaba.fescar.config.ConfigurationFactory.FILE_INSTANCE;
-import static com.alibaba.fescar.config.ConfigurationFactory.FILE_ROOT_REGISTRY;
-import static com.alibaba.fescar.config.ConfigurationFactory.FILE_ROOT_TYPE;
 
 /**
  * The type Registry factory.
@@ -48,7 +45,9 @@ public class RegistryFactory {
         ConfigType configType = null;
         try {
             configType = ConfigType.getType(
-                FILE_INSTANCE.getConfig(FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_TYPE));
+                ConfigurationFactory.FILE_INSTANCE.getConfig(
+                    ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                        + ConfigurationKeys.FILE_ROOT_TYPE));
         } catch (Exception exx) {
             LOGGER.error(exx.getMessage());
         }

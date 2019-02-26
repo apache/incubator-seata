@@ -124,7 +124,8 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     }
 
     private static String getNacosAddrFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
+        return ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
+            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
             + PRO_SERVER_ADDR_KEY;
     }
 
