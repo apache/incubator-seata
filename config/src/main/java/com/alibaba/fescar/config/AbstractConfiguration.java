@@ -32,8 +32,6 @@ public abstract class AbstractConfiguration<T> implements Configuration<T> {
      * The constant DEFAULT_CONFIG_TIMEOUT.
      */
     protected static final long DEFAULT_CONFIG_TIMEOUT = 5 * 1000;
-    protected static final String FILE_ROOT_REGISTRY = "registry";
-    protected static final String FILE_CONFIG_SPLIT_CHAR = ".";
 
     @Override
     public int getInt(String dataId, int defaultValue, long timeoutMills) {
