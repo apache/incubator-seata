@@ -83,7 +83,7 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     public void addConfigListener(String dataId, IZkDataListener listener) {
 
         String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
-        if(!zkClient.exists(path)) return;
+        if(!zkClient.exists(path,true)) return;
         zkClient.subscribeDataChanges(path, listener);
     }
 
@@ -91,7 +91,7 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     public void removeConfigListener(String dataId, IZkDataListener listener) {
 
         String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
-        if(!zkClient.exists(path)) return;
+        if(!zkClient.exists(path,true)) return;
         zkClient.unsubscribeDataChanges(path, listener);
     }
 

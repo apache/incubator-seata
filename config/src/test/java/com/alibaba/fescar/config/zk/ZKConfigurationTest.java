@@ -49,7 +49,7 @@ public class ZKConfigurationTest {
 
     @Test
     public void testPutConfig() {
-        configuration.putConfig(INT_DATAID,"22");
+        configuration.putConfig(INT_DATAID,"55");
     }
 
     @Test
@@ -68,14 +68,24 @@ public class ZKConfigurationTest {
     public void testPutConfigIfAbsent() {
     }
 
-
-
     @Test
-    public void testAddConfigListener() {
-        configuration.addConfigListener(INT_DATAID,new ZKDataConfigListener());
-        configuration.addConfigListener(INT_DATAID,new ZKConfigListener());
-        List<IZkDataListener> zkDataListeners =  configuration.getConfigListeners(INT_DATAID);
-        Assert.assertEquals(2,zkDataListeners.size());
+    public void testAddConfigListener() throws InterruptedException {
+        configuration.addConfigListener(INT_DATAID, new IZkDataListener() {
+            @Override
+            public void handleDataChange(String dataPath, Object data) throws Exception {
+                System.out.println("dataPath");
+            }
+
+            @Override
+            public void handleDataDeleted(String dataPath) throws Exception {
+
+            }
+        });
+
+        Thread.sleep(2000000);
+//        configuration.addConfigListener(INT_DATAID,new ZKConfigListener());
+//        List<IZkDataListener> zkDataListeners =  configuration.getConfigListeners(INT_DATAID);
+//        Assert.assertEquals(2,zkDataListeners.size());
 
     }
 
@@ -92,9 +102,10 @@ public class ZKConfigurationTest {
     }
 
     @Test
-    public void testGetConfigListeners() {
+    public void testGetConfigListeners() throws InterruptedException {
+        Thread.sleep(2000);
         List<IZkDataListener> zkDataListeners =  configuration.getConfigListeners(INT_DATAID);
-        Assert.assertEquals(2,zkDataListeners.size());
+        Assert.assertEquals(1,zkDataListeners.size());
     }
 
     @Test

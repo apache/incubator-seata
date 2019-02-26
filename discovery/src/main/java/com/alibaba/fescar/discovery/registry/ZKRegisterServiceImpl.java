@@ -1,22 +1,17 @@
-package com.alibaba.fescar.discovery.registry.zookeeper;
+package com.alibaba.fescar.discovery.registry;
 
-import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.config.zookeeper.ZKConfiguration;
-import com.alibaba.fescar.discovery.registry.RegistryService;
-import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.zookeeper.CreateMode;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static com.alibaba.fescar.common.Constants.IP_PORT_SPLIT_CHAR;
-import static com.alibaba.fescar.config.ConfigurationFactory.FILE_ROOT_REGISTRY;
 
 /**
  * @author crazier.huang
@@ -29,7 +24,7 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
     private static final String ZK_PATH_SPLIT_CHAR = "/";
     private static final String FILE_ROOT_REGISTRY = "/registry";
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
-    private static final String REGISTRY_CLUSTER = "default";
+    private static final String REGISTRY_CLUSTER = "cluster";
     private static final String REGISTRY_TYPE = "zk";
     private static final String ROOT_PATH = FILE_ROOT_REGISTRY+ZK_PATH_SPLIT_CHAR + REGISTRY_TYPE+ZK_PATH_SPLIT_CHAR;
 
@@ -107,6 +102,7 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
     }
 
     private String getClusterName() {
+        // TODO: 2019/2/26 1.  FILE_ROOT_REGISTRY error  2. file getConfig
         String clusterConfigName =  FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
                 + REGISTRY_CLUSTER;
         return clusterConfigName;

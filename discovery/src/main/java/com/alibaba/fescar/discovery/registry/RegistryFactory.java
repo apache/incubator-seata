@@ -19,7 +19,6 @@ package com.alibaba.fescar.discovery.registry;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.config.ConfigType;
 
-import com.alibaba.fescar.discovery.registry.zookeeper.ZKRegisterServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
