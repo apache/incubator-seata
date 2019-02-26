@@ -19,11 +19,8 @@ package com.alibaba.fescar.config;
 import org.testng.annotations.Test;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: feats-all
- * @DateTime: 2019/2/1 7:16 PM
- * @FileName: NacosConfigurationTest
- * @Description:
+ * @author: jimin.jm@alibaba-inc.com
+ * @date: 2019/2/1
  */
 public class NacosConfigurationTest {
     //private static final Configuration CONFIGURATION = new NacosConfiguration();

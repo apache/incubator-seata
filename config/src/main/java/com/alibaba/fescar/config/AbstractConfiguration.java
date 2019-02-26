@@ -20,11 +20,8 @@ package com.alibaba.fescar.config;
  * The type Abstract configuration.
  *
  * @param <T> the type parameter
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2019 /2/1 2:18 PM
- * @FileName: AbstractConfiguration
- * @Description:
+ * @author: jimin.jm @alibaba-inc.com
+ * @date: 2019 /2/1
  */
 public abstract class AbstractConfiguration<T> implements Configuration<T> {
 

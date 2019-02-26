@@ -25,11 +25,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Configuration factory.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /12/24 10:54
- * @FileName: ConfigurationFactory
- * @Description:
+ * @author: jimin.jm @alibaba-inc.com
+ * @date: 2018 /12/24
  */
 public final class ConfigurationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);

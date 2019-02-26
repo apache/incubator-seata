@@ -21,11 +21,8 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
 /**
  * The enum Config type.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: feats -all
- * @DateTime: 2019 /2/1 3:57 PM
- * @FileName: ConfigType
- * @Description:
+ * @author: jimin.jm @alibaba-inc.com
+ * @date: 2019 /2/1
  */
 public enum ConfigType {
     /**
