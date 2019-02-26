@@ -14,15 +14,37 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.config;
+package com.alibaba.fescar.discovery.registry;
+
+import com.alibaba.fescar.common.exception.NotSupportYetException;
 
 /**
  * @author: jimin.jm@alibaba-inc.com
  * @date 2019/02/26
  */
-public final class ConfigurationKeys {
-    public static final String FILE_ROOT_REGISTRY = "registry";
-    public static final String FILE_ROOT_CONFIG = "config";
-    public static final String FILE_CONFIG_SPLIT_CHAR = ".";
-    public static final String FILE_ROOT_TYPE = "type";
+public enum RegistryType {
+    /**
+     * File config type.
+     */
+    File,
+    /**
+     * Nacos config type.
+     */
+    Nacos;
+
+    /**
+     * Gets type.
+     *
+     * @param name the name
+     * @return the type
+     */
+    public static RegistryType getType(String name) {
+        if (File.name().equalsIgnoreCase(name)) {
+            return File;
+        } else if (Nacos.name().equalsIgnoreCase(name)) {
+            return Nacos;
+        } else {
+            throw new NotSupportYetException("unsupport type:" + name);
+        }
+    }
 }
