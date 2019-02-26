@@ -31,11 +31,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Nacos configuration.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2019 /2/1 1:53 PM
- * @FileName: NacosConfiguration
- * @Description:
+ * @author: jimin.jm @alibaba-inc.com
+ * @date: 2019 /2/1
  */
 public class NacosConfiguration extends AbstractConfiguration<Listener> {
 
