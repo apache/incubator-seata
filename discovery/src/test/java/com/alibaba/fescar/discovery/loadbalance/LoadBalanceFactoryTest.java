@@ -63,6 +63,7 @@ public class LoadBalanceFactoryTest {
      * @param loadBalance the load balance
      * @throws Exception the exception
      */
+
     @Test
     @Ignore
     public void testUnRegistry() throws Exception {

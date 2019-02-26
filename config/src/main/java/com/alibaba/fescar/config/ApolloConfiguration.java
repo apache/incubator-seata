@@ -81,11 +81,11 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
         return REGISTRY_TYPE;
     }
     private static String getApolloMetaFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
+        return FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
                 + APOLLO_META;
     }
     private static String getApolloAppIdFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
+        return FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
                 + APP_ID;
     }
 }

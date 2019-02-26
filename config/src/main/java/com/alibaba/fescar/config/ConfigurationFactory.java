@@ -36,6 +36,7 @@ public final class ConfigurationFactory {
     private static final String NAME_KEY = "name";
     private static final String FILE_TYPE = "file";
 
+
     /**
      * Gets instance.
      *

@@ -38,6 +38,7 @@ public enum ConfigType {
      */
     Apollo;
 
+
     /**
      * Gets type.
      *
