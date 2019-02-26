@@ -21,11 +21,8 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
 /**
  * The enum Config type.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: feats -all
- * @DateTime: 2019 /2/1 3:57 PM
- * @FileName: ConfigType
- * @Description:
+ * @author: jimin.jm @alibaba-inc.com
+ * @date: 2019 /2/1
  */
 public enum ConfigType {
     /**
@@ -39,11 +36,8 @@ public enum ConfigType {
     /**
      * Apollo config type.
      */
-    Apollo,
-    /**
-     * Redis config type.
-     */
-    Redis;
+    Apollo;
+
 
     /**
      * Gets type.
@@ -58,8 +52,6 @@ public enum ConfigType {
             return Nacos;
         } else if (Apollo.name().equalsIgnoreCase(name)) {
             return Apollo;
-        }else if (Redis.name().equalsIgnoreCase(name)) {
-            return Redis;
         }else {
             throw new NotSupportYetException("unsupport type:" + name);
         }

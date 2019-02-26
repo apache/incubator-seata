@@ -26,22 +26,16 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Configuration factory.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /12/24 10:54
- * @FileName: ConfigurationFactory
- * @Description:
+ * @author: jimin.jm @alibaba-inc.com
+ * @date: 2018 /12/24
  */
 public final class ConfigurationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
     private static final String REGISTRY_CONF = "registry.conf";
     public static final Configuration FILE_INSTANCE = new FileConfiguration(REGISTRY_CONF);
-    public static final String FILE_ROOT_REGISTRY = "registry";
-    public static final String FILE_ROOT_TYPE = "type";
-    public static final String FILE_CONFIG_SPLIT_CHAR = ".";
     private static final String NAME_KEY = "name";
-    public static final String FILE_TYPE = "file";
-    private static volatile Configuration configuration;
+    private static final String FILE_TYPE = "file";
+
 
     /**
      * Gets instance.
@@ -49,49 +43,39 @@ public final class ConfigurationFactory {
      * @return the instance
      */
     public static Configuration getInstance() {
-        if (null == configuration) {
-            synchronized (ConfigurationFactory.class) {
-                if (null == configuration) {
-                    ConfigType configType = null;
-                    try {
-                        configType = ConfigType.getType(
-                                FILE_INSTANCE.getConfig(FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_TYPE));
-                    } catch (Exception exx) {
-                        LOGGER.error(exx.getMessage());
-                    }
-                    switch (configType) {
-                        case Nacos:
-                            try {
-                                configuration = new NacosConfiguration();
-                            } catch (NacosException e) {
-                                throw new RuntimeException(e);
-                            }
-                            break;
-                        case Apollo:
-                            try {
-                                configuration = new ApolloConfiguration();
-                            } catch (ApolloConfigException e) {
-                                throw new RuntimeException(e);
-                            }
-                            break;
-                        case Redis:
-                            try {
-                                configuration = new ApolloConfiguration();
-                            } catch (ApolloConfigException e) {
-                                throw new RuntimeException(e);
-                            }
-                            break;
-                        case File:
-                            String pathDataId = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + FILE_TYPE + FILE_CONFIG_SPLIT_CHAR
-                                    + NAME_KEY;
-                            String name = FILE_INSTANCE.getConfig(pathDataId);
-                            configuration = new FileConfiguration(name);
-                            break;
-                        default:
-                            throw new NotSupportYetException("not support register type:" + configType);
-                    }
+        ConfigType configType = null;
+        try {
+            configType = ConfigType.getType(
+                FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                    + ConfigurationKeys.FILE_ROOT_TYPE));
+        } catch (Exception exx) {
+            LOGGER.error(exx.getMessage());
+        }
+        Configuration configuration;
+        switch (configType) {
+            case Nacos:
+                try {
+                    configuration = new NacosConfiguration();
+                } catch (NacosException e) {
+                    throw new RuntimeException(e);
                 }
-            }
+                break;
+            case Apollo:
+                try {
+                    configuration = new ApolloConfiguration();
+                } catch (ApolloConfigException e) {
+                    throw new RuntimeException(e);
+                }
+                break;
+            case File:
+                String pathDataId = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                    + FILE_TYPE + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                    + NAME_KEY;
+                String name = FILE_INSTANCE.getConfig(pathDataId);
+                configuration = new FileConfiguration(name);
+                break;
+            default:
+                throw new NotSupportYetException("not support register type:" + configType);
         }
         return configuration;
     }

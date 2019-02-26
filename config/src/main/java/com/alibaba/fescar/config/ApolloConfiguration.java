@@ -4,9 +4,7 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.ConfigChangeListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import static com.alibaba.fescar.config.ConfigurationKeys.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -83,11 +81,11 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
         return REGISTRY_TYPE;
     }
     private static String getApolloMetaFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
+        return FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
                 + APOLLO_META;
     }
     private static String getApolloAppIdFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
+        return FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
                 + APP_ID;
     }
 }
