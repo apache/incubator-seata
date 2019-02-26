@@ -103,7 +103,6 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
     }
 
     private String getClusterName() {
-        // TODO: 2019/2/26 1.  FILE_ROOT_REGISTRY error  2. file getConfig
         String clusterConfigName =  FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
                 + REGISTRY_CLUSTER;
         return FILE_CONFIG.getConfig(clusterConfigName);
