@@ -24,11 +24,15 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
  */
 public enum RegistryType {
     /**
-     * File config type.
+     * File registry type.
      */
     File,
     /**
-     * Nacos config type.
+     * Redis registry type.
+     */
+    Redis,
+    /**
+     * Nacos registry type.
      */
     Nacos;
 
@@ -43,7 +47,9 @@ public enum RegistryType {
             return File;
         } else if (Nacos.name().equalsIgnoreCase(name)) {
             return Nacos;
-        } else {
+        } else if (Redis.name().equalsIgnoreCase(name)) {
+            return Redis;
+        }else {
             throw new NotSupportYetException("unsupport type:" + name);
         }
     }

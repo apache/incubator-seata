@@ -55,11 +55,15 @@ public class RegistryFactory {
             case Nacos:
                 registryService = NacosRegistryServiceImpl.getInstance();
                 break;
+            case Redis:
+                registryService = RedisRegistryServiceImpl.getInstance();
+                break;
             case File:
                 registryService = FileRegistryServiceImpl.getInstance();
                 break;
             default:
                 throw new NotSupportYetException("not support register type:" + registryType);
+
         }
         return registryService;
     }
