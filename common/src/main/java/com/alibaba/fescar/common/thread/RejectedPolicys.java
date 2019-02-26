@@ -39,9 +39,12 @@ public final class RejectedPolicys {
                 }
                 BlockingQueue<Runnable> workQueue=executor.getQueue();
                 Runnable firstWork=workQueue.poll();
-                workQueue.offer(r);
+                boolean newTaskAdd=workQueue.offer(r);
                 if (firstWork != null) {
                     firstWork.run();
+                }
+                if (!newTaskAdd) {
+                    executor.execute(r);
                 }
             }
         };
