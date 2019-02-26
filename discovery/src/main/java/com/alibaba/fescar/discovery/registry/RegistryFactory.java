@@ -37,24 +37,34 @@ import static com.alibaba.fescar.config.ConfigurationFactory.FILE_ROOT_TYPE;
 public class RegistryFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistryFactory.class);
 
+    private static volatile RegistryService registryService;
+
     public static RegistryService getInstance() {
-        ConfigType configType = null;
-        try {
-            configType = ConfigType.getType(
-                FILE_INSTANCE.getConfig(FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_TYPE));
-        } catch (Exception exx) {
-            LOGGER.error(exx.getMessage());
-        }
-        RegistryService registryService;
-        switch (configType) {
-            case Nacos:
-                registryService = NacosRegistryServiceImpl.getInstance();
-                break;
-            case File:
-                registryService = FileRegistryServiceImpl.getInstance();
-                break;
-            default:
-                throw new NotSupportYetException("not support register type:" + configType);
+        if (null == registryService) {
+            synchronized (RegistryFactory.class) {
+                if (null == registryService) {
+                    ConfigType configType = null;
+                    try {
+                        configType = ConfigType.getType(
+                                FILE_INSTANCE.getConfig(FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_TYPE));
+                    } catch (Exception exx) {
+                        LOGGER.error(exx.getMessage());
+                    }
+                    switch (configType) {
+                        case Nacos:
+                            registryService = NacosRegistryServiceImpl.getInstance();
+                            break;
+                        case Redis:
+                            registryService = RedisRegistryServiceImpl.getInstance();
+                            break;
+                        case File:
+                            registryService = FileRegistryServiceImpl.getInstance();
+                            break;
+                        default:
+                            throw new NotSupportYetException("not support register type:" + configType);
+                    }
+                }
+            }
         }
         return registryService;
     }

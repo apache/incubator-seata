@@ -35,7 +35,15 @@ public enum ConfigType {
     /**
      * Nacos config type.
      */
-    Nacos;
+    Nacos,
+    /**
+     * Apollo config type.
+     */
+    Apollo,
+    /**
+     * Redis config type.
+     */
+    Redis;
 
     /**
      * Gets type.
@@ -48,7 +56,11 @@ public enum ConfigType {
             return File;
         } else if (Nacos.name().equalsIgnoreCase(name)) {
             return Nacos;
-        } else {
+        } else if (Apollo.name().equalsIgnoreCase(name)) {
+            return Apollo;
+        }else if (Redis.name().equalsIgnoreCase(name)) {
+            return Redis;
+        }else {
             throw new NotSupportYetException("unsupport type:" + name);
         }
     }
