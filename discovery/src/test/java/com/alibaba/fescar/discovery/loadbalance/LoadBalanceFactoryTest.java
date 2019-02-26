@@ -81,7 +81,7 @@ public class LoadBalanceFactoryTest {
         List<InetSocketAddress> addressList = registryService.lookup("my_test_tx_group");
         InetSocketAddress balanceAddress = loadBalance.select(addressList);
         Assert.assertNotNull(balanceAddress);
-        TimeUnit.SECONDS.sleep(30);//等待testUnRegistry事件触发
+        TimeUnit.SECONDS.sleep(10);//等待testUnRegistry事件触发
         List<InetSocketAddress> addressList1 = registryService.lookup("my_test_tx_group");
         Assert.assertEquals(1, addressList1.size());
     }
