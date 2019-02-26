@@ -1,4 +1,4 @@
-package com.alibaba.fescar.config.zookeeper;
+package com.alibaba.fescar.config.zk;
 
 import org.I0Itec.zkclient.IZkDataListener;
 import org.slf4j.Logger;

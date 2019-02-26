@@ -17,16 +17,10 @@
 package com.alibaba.fescar.config.zk;
 
 import com.alibaba.fescar.config.Configuration;
-import com.alibaba.fescar.config.zookeeper.ZKConfigListener;
 import com.alibaba.fescar.config.zookeeper.ZKConfiguration;
-import com.alibaba.fescar.config.zookeeper.ZKDataConfigListener;
-import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.IZkDataListener;
 import org.junit.Assert;
-import org.junit.Before;
 import org.testng.annotations.Test;
-
-import java.util.List;
 
 /**
  * @Author: jimin.jm@alibaba-inc.com
@@ -97,5 +91,6 @@ public class ZKConfigurationTest {
 
     @Test
     public void testGetTypeName() {
+
     }
 }

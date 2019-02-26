@@ -1,4 +1,4 @@
-package com.alibaba.fescar.config.zookeeper;/**
+package com.alibaba.fescar.config.zk;/**
  * @author JiaWenQing
  * @date 2019-2-21
  */
