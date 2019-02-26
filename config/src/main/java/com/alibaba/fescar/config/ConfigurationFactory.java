@@ -35,9 +35,6 @@ public final class ConfigurationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
     private static final String REGISTRY_CONF = "registry.conf";
     public static final Configuration FILE_INSTANCE = new FileConfiguration(REGISTRY_CONF);
-    public static final String FILE_ROOT_REGISTRY = "registry";
-    public static final String FILE_ROOT_TYPE = "type";
-    public static final String FILE_CONFIG_SPLIT_CHAR = ".";
     private static final String NAME_KEY = "name";
     public static final String FILE_TYPE = "file";
 
@@ -50,7 +47,8 @@ public final class ConfigurationFactory {
         ConfigType configType = null;
         try {
             configType = ConfigType.getType(
-                FILE_INSTANCE.getConfig(FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_TYPE));
+                FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                    + ConfigurationKeys.FILE_ROOT_TYPE));
         } catch (Exception exx) {
             LOGGER.error(exx.getMessage());
         }
@@ -64,7 +62,8 @@ public final class ConfigurationFactory {
                 }
                 break;
             case File:
-                String pathDataId = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + FILE_TYPE + FILE_CONFIG_SPLIT_CHAR
+                String pathDataId = ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                    + FILE_TYPE + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                     + NAME_KEY;
                 String name = FILE_INSTANCE.getConfig(pathDataId);
                 configuration = new FileConfiguration(name);
