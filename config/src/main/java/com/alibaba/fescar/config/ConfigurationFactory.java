@@ -47,7 +47,7 @@ public final class ConfigurationFactory {
         ConfigType configType = null;
         try {
             configType = ConfigType.getType(
-                FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                     + ConfigurationKeys.FILE_ROOT_TYPE));
         } catch (Exception exx) {
             LOGGER.error(exx.getMessage());
@@ -62,7 +62,7 @@ public final class ConfigurationFactory {
                 }
                 break;
             case File:
-                String pathDataId = ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                String pathDataId = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                     + FILE_TYPE + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                     + NAME_KEY;
                 String name = FILE_INSTANCE.getConfig(pathDataId);
