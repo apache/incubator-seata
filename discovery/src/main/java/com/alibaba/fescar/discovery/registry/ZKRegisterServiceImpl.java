@@ -21,12 +21,13 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
 
 
     private static volatile ZKRegisterServiceImpl instance;
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
     private static final String ZK_PATH_SPLIT_CHAR = "/";
-    private static final String FILE_ROOT_REGISTRY = "/registry";
+    private static final String FILE_ROOT_REGISTRY = "registry";
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
     private static final String REGISTRY_CLUSTER = "cluster";
     private static final String REGISTRY_TYPE = "zk";
-    private static final String ROOT_PATH = FILE_ROOT_REGISTRY+ZK_PATH_SPLIT_CHAR + REGISTRY_TYPE+ZK_PATH_SPLIT_CHAR;
+    private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR+FILE_ROOT_REGISTRY+ZK_PATH_SPLIT_CHAR + REGISTRY_TYPE+ZK_PATH_SPLIT_CHAR;
 
     private ZKRegisterServiceImpl() {}
 
@@ -102,10 +103,10 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
     }
 
     private String getClusterName() {
-        // TODO: 2019/2/26 1.  FILE_ROOT_REGISTRY error  2. file getConfig
         String clusterConfigName =  FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
                 + REGISTRY_CLUSTER;
-        return clusterConfigName;
+        return FILE_CONFIG.getConfig(clusterConfigName);
+
     }
 
     private String getIPAndPort(InetSocketAddress address) {
