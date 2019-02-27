@@ -21,7 +21,7 @@
 
     <groupId>com.alibaba.fescar</groupId>
     <artifactId>fescar-all</artifactId>
-    <version>0.2.0-SNAPSHOT</version>
+    <version>0.2.3-SNAPSHOT</version>
     <modules>
         <module>config</module>
         <module>common</module>
@@ -34,6 +34,7 @@
         <module>dubbo</module>
         <module>discovery</module>
         <module>test</module>
+        <module>dubbo-alibaba</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -92,7 +93,7 @@
         <fastjson.version>1.2.48</fastjson.version>
         <config.version>1.2.1</config.version>
         <slf4j-api.version>1.7.22</slf4j-api.version>
-        <logback-classic.version>1.1.6</logback-classic.version>
+        <logback-classic.version>1.2.0</logback-classic.version>
         <commons-lang.version>2.6</commons-lang.version>
         <commons-pool2.version>2.4.2</commons-pool2.version>
         <commons-pool.version>1.6</commons-pool.version>
