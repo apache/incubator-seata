@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static com.alibaba.fescar.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
+import static com.alibaba.fescar.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
+
 /**
  * @author crazier.huang
  * @date 2019/2/18

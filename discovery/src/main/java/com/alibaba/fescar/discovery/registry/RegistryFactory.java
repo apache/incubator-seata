@@ -58,6 +58,9 @@ public class RegistryFactory {
             case File:
                 registryService = FileRegistryServiceImpl.getInstance();
                 break;
+            case ZK:
+                registryService = ZKRegisterServiceImpl.getInstance();
+                break;
             default:
                 throw new NotSupportYetException("not support register type:" + registryType);
         }

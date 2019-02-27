@@ -28,6 +28,10 @@ public enum RegistryType {
      */
     File,
     /**
+     * zookeeper config type.
+     */
+    ZK,
+    /**
      * Nacos config type.
      */
     Nacos;
