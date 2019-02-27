@@ -22,9 +22,10 @@ package com.alibaba.fescar.discovery.registry;
  *  @author: kl @kailing.pub
  *  @date: 2019/2/27
  */
-public  interface RedisListener {
+public interface RedisListener {
     String REGISTER = "register";
     String UN_REGISTER = "unregister";
+
 
     /**
      * 用于订阅redis事件
