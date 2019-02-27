@@ -14,6 +14,7 @@ import java.util.List;
 import static com.alibaba.fescar.common.Constants.IP_PORT_SPLIT_CHAR;
 
 /**
+ * zookeeper路径如下/registry/zk/
  * @author crazier.huang
  * @date 2019/2/15
  */
@@ -45,7 +46,7 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
     @Override
     public void register(InetSocketAddress address) throws Exception {
         String path = ROOT_PATH + getClusterName()+ZK_PATH_SPLIT_CHAR+getIPAndPort(address);
-        getClientInstance().create(path,null, CreateMode.EPHEMERAL);
+        getClientInstance().createPersistent(path,true);
     }
 
     @Override
@@ -56,13 +57,23 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
 
     @Override
     public void subscribe(String cluster, IZkChildListener listener) throws Exception {
-        String path = ROOT_PATH  + cluster + ZK_PATH_SPLIT_CHAR;
+        String clusterName = getServiceGroup(cluster);
+        if (null == clusterName) {
+            return ;
+        }
+        String path = ROOT_PATH  + clusterName;
+        if(!getClientInstance().exists(path)) return;
         getClientInstance().subscribeChildChanges(path,listener);
     }
 
     @Override
     public void unsubscribe(String cluster, IZkChildListener listener) throws Exception {
-        String path = ROOT_PATH + cluster+ ZK_PATH_SPLIT_CHAR;
+        String clusterName = getServiceGroup(cluster);
+        if (null == clusterName) {
+            return ;
+        }
+        String path = ROOT_PATH + clusterName;
+        if(!getClientInstance().exists(path)) return;
         getClientInstance().unsubscribeChildChanges(path,listener);
 
     }
@@ -76,17 +87,16 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
      */
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
-        Configuration config = ConfigurationFactory.getInstance();
-        String clusterName = config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
+        String clusterName = getServiceGroup(key);
         if (null == clusterName) {
             return null;
         }
-        List<String> childPath = getClientInstance().getChildren(ROOT_PATH);
-        if(!childPath.contains(clusterName)){
+        Boolean exist = getClientInstance().exists(ROOT_PATH+clusterName);
+        if(!exist){
             return null;
         }
         List<InetSocketAddress> interSocketAddresses = new ArrayList<>();
-        List<String> childClusterPath = getClientInstance().getChildren(ROOT_PATH+ZK_PATH_SPLIT_CHAR+clusterName);
+        List<String> childClusterPath = getClientInstance().getChildren(ROOT_PATH+clusterName);
         childClusterPath.forEach(path->{
             String[] ipAndPort = path.split(IP_PORT_SPLIT_CHAR);
             if (ipAndPort.length != 2) {
@@ -106,7 +116,12 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
         String clusterConfigName =  FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
                 + REGISTRY_CLUSTER;
         return FILE_CONFIG.getConfig(clusterConfigName);
+    }
 
+    private String getServiceGroup(String key){
+        Configuration configuration = ConfigurationFactory.getInstance();
+        String clusterName = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
+        return configuration.getConfig(clusterName);
     }
 
     private String getIPAndPort(InetSocketAddress address) {

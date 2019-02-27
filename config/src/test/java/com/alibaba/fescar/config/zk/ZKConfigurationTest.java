@@ -34,6 +34,7 @@ public class ZKConfigurationTest {
 
     private static final String INT_DATAID = "transport.thread-factory.client-selector-thread-size";
     private static final String LONG_DATAID = "transport.thread-factory.worker-thread-size";
+    private static final String INIT_SERVICE_DATA="service.vgroup_mapping.my_test_tx_group";
     private static final String BOOLEAN_DATAID = "service.disable";
     private static final String STRING_DATAID = "transport.type";
     private static final String PUT_DATAID = "transport.mock";
@@ -43,7 +44,7 @@ public class ZKConfigurationTest {
 
     @Test
     public void testPutConfig() {
-        configuration.putConfig(INT_DATAID,"55");
+        configuration.putConfig(INIT_SERVICE_DATA,"localRgroup");
     }
 
     @Test
