@@ -169,6 +169,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>fescar-metrics-prometheus</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>fescar-test</artifactId>
                 <version>${project.version}</version>
             </dependency>

@@ -33,9 +33,20 @@
             <artifactId>fescar-core</artifactId>
         </dependency>
         <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>fescar-metrics-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
         </dependency>
+
+        <!--NOTICE:If want enable metrics and publish them to prometheus, you only need enable this dependency-->
+        <!--<dependency>-->
+            <!--<groupId>${project.groupId}</groupId>-->
+            <!--<artifactId>fescar-metrics-prometheus</artifactId>-->
+        <!--</dependency>-->
+
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
