@@ -75,7 +75,7 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
-        return false;
+        throw new NotSupportYetException("not support putConfigIfAbsent");
     }
 
     @Override
