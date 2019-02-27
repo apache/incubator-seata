@@ -33,6 +33,10 @@ public enum ConfigType {
      */
     File,
     /**
+     * zookeeper config type.
+     */
+    ZK,
+    /**
      * Nacos config type.
      */
     Nacos;
@@ -48,6 +52,8 @@ public enum ConfigType {
             return File;
         } else if (Nacos.name().equalsIgnoreCase(name)) {
             return Nacos;
+        } else if (ZK.name().equalsIgnoreCase(name)) {
+            return ZK;
         } else {
             throw new NotSupportYetException("unsupport type:" + name);
         }
