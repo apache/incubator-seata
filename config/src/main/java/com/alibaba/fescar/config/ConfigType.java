@@ -21,17 +21,18 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
 /**
  * The enum Config type.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: feats -all
- * @DateTime: 2019 /2/1 3:57 PM
- * @FileName: ConfigType
- * @Description:
+ * @author: jimin.jm @alibaba-inc.com
+ * @date: 2019 /2/1
  */
 public enum ConfigType {
     /**
      * File config type.
      */
     File,
+    /**
+     * zookeeper config type.
+     */
+    ZK,
     /**
      * Nacos config type.
      */
@@ -48,6 +49,8 @@ public enum ConfigType {
             return File;
         } else if (Nacos.name().equalsIgnoreCase(name)) {
             return Nacos;
+        } else if (ZK.name().equalsIgnoreCase(name)) {
+            return ZK;
         } else {
             throw new NotSupportYetException("unsupport type:" + name);
         }

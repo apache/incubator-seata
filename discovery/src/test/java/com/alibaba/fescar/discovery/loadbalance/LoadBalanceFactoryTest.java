@@ -29,11 +29,19 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- * @author: jimin.jm@alibaba-inc.com
- * @date 2019/02/12
+ * The type Load balance factory test.
+ *
+ * @author: jimin.jm @alibaba-inc.com
+ * @date 2019 /02/12
  */
 public class LoadBalanceFactoryTest {
 
+    /**
+     * Test get registry.
+     *
+     * @param loadBalance the load balance
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "instanceProvider")
     @Ignore
     public void testGetRegistry(LoadBalance loadBalance) throws Exception {
@@ -48,6 +56,12 @@ public class LoadBalanceFactoryTest {
         Assert.assertNotNull(balanceAddress);
     }
 
+    /**
+     * Test get address.
+     *
+     * @param loadBalance the load balance
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "instanceProvider")
     public void testGetAddress(LoadBalance loadBalance) throws Exception {
         Assert.assertNotNull(loadBalance);
@@ -58,6 +72,11 @@ public class LoadBalanceFactoryTest {
         Assert.assertEquals(address, balanceAddress);
     }
 
+    /**
+     * Instance provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
     @DataProvider
     public static Object[][] instanceProvider() {
         LoadBalance loadBalance = LoadBalanceFactory.getInstance();

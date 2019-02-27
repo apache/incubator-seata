@@ -16,37 +16,22 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.exception.FrameworkErrorCode;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
+import com.alibaba.fescar.common.thread.RejectedPolicys;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.core.context.RootContext;
-import com.alibaba.fescar.core.protocol.AbstractMessage;
-import com.alibaba.fescar.core.protocol.HeartbeatMessage;
-import com.alibaba.fescar.core.protocol.RegisterTMRequest;
-import com.alibaba.fescar.core.protocol.RegisterTMResponse;
-import com.alibaba.fescar.core.protocol.ResultCode;
+import com.alibaba.fescar.core.protocol.*;
 import com.alibaba.fescar.core.protocol.transaction.GlobalBeginResponse;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
 import com.alibaba.fescar.core.service.ConfigurationKeys;
 import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
 import com.alibaba.nacos.client.naming.utils.CollectionUtils;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -56,6 +41,11 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.alibaba.fescar.common.exception.FrameworkErrorCode.NoAvailableService;
 
@@ -83,7 +73,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private String applicationId;
     private String transactionServiceGroup;
-    private final NettyClientConfig nettyClientConfig;
+    private final NettyClientConfig tmClientConfig;
     private final ConcurrentMap<String, NettyPoolKey> poolKeyMap
         = new ConcurrentHashMap<String, NettyPoolKey>();
     /**
@@ -95,7 +85,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
                         EventExecutorGroup eventExecutorGroup,
                         ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor);
-        this.nettyClientConfig = nettyClientConfig;
+        this.tmClientConfig = nettyClientConfig;
     }
 
     /**
@@ -128,7 +118,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
                         new LinkedBlockingQueue(MAX_QUEUE_SIZE),
                         new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()),
-                        new ThreadPoolExecutor.CallerRunsPolicy());
+                            RejectedPolicys.runsOldestTaskPolicy());
                     instance = new TmRpcClient(nettyClientConfig, null, threadPoolExecutor);
                 }
             }
@@ -357,12 +347,12 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     @Override
     protected Config getNettyPoolConfig() {
         Config poolConfig = new Config();
-        poolConfig.maxActive = nettyClientConfig.getMaxPoolActive();
-        poolConfig.minIdle = nettyClientConfig.getMinPoolIdle();
-        poolConfig.maxWait = nettyClientConfig.getMaxAcquireConnMills();
-        poolConfig.testOnBorrow = nettyClientConfig.isPoolTestBorrow();
-        poolConfig.testOnReturn = nettyClientConfig.isPoolTestReturn();
-        poolConfig.lifo = nettyClientConfig.isPoolFifo();
+        poolConfig.maxActive = tmClientConfig.getMaxPoolActive();
+        poolConfig.minIdle = tmClientConfig.getMinPoolIdle();
+        poolConfig.maxWait = tmClientConfig.getMaxAcquireConnMills();
+        poolConfig.testOnBorrow = tmClientConfig.isPoolTestBorrow();
+        poolConfig.testOnReturn = tmClientConfig.isPoolTestReturn();
+        poolConfig.lifo = tmClientConfig.isPoolLifo();
         return poolConfig;
     }
 
