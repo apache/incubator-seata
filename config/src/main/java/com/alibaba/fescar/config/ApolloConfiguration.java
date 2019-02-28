@@ -46,8 +46,9 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
     private static final int CORE_CONFIG_OPERATE_THREAD = 1;
     private static final ConcurrentMap<String, ConfigChangeListener> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
+    private static volatile ApolloConfiguration instance;
 
-    ApolloConfiguration() {
+    private ApolloConfiguration() {
         readyApolloConfig();
         if (null == config) {
             synchronized (ApolloConfiguration.class) {
@@ -69,6 +70,17 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
                 }
             }
         }
+    }
+
+    public static ApolloConfiguration getInstance() {
+        if (null == instance) {
+            synchronized (ApolloConfiguration.class) {
+                if (null == instance) {
+                    instance = new ApolloConfiguration();
+                }
+            }
+        }
+        return instance;
     }
 
     @Override

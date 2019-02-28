@@ -22,6 +22,7 @@ import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
+import com.google.common.collect.Lists;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +33,7 @@ import redis.clients.jedis.Protocol;
 
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -54,7 +53,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     private static final String REDIS_DB = "db";
     private static final String REDIS_PASSWORD = "password";
     private static final ConcurrentMap<String, List<RedisListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
-    private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Set<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static volatile RedisRegistryServiceImpl instance;
     private static volatile JedisPool jedisPool;
     private ExecutorService threadPoolExecutor = new ScheduledThreadPoolExecutor(1,
@@ -64,36 +63,45 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         this.clusterName = fescarConfig.getConfig(REDIS_FILEKEY_PREFIX + REGISTRY_CLUSTER_KEY, DEFAULT_CLUSTER);
         String password = fescarConfig.getConfig(getRedisPasswordFileKey());
         String serverAddr = fescarConfig.getConfig(getRedisAddrFileKey());
-        String host = serverAddr.split(":")[0];
-        int port = Integer.valueOf(serverAddr.split(":")[1]);
+        String[] serverArr = serverAddr.split(":");
+        String host = serverArr[0];
+        int port = Integer.valueOf(serverArr[1]);
         int db = fescarConfig.getInt(getRedisDbFileKey());
         GenericObjectPoolConfig redisConfig = new GenericObjectPoolConfig();
         redisConfig.setTestOnBorrow(fescarConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.borrow", true));
         redisConfig.setTestOnReturn(fescarConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.return", false));
         redisConfig.setTestWhileIdle(fescarConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.while.idle", false));
-        if (fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.idle", 0) > 0) {
-            redisConfig.setMaxIdle(fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.idle", 0));
+        int maxIdle = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.idle", 0);
+        if (maxIdle > 0) {
+            redisConfig.setMaxIdle(maxIdle);
         }
-        if (fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "min.idle", 0) > 0) {
-            redisConfig.setMinIdle(fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "min.idle", 0));
+        int minIdle = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "min.idle", 0);
+        if (minIdle > 0) {
+            redisConfig.setMinIdle(minIdle);
         }
-        if (fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.active", 0) > 0) {
-            redisConfig.setMaxTotal(fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.active", 0));
+        int maxActive = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.active", 0);
+        if (maxActive > 0) {
+            redisConfig.setMaxTotal(maxActive);
         }
-        if (fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.total", 0) > 0) {
-            redisConfig.setMaxTotal(fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.total", 0));
+        int maxTotal = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.total", 0);
+        if (maxTotal > 0) {
+            redisConfig.setMaxTotal(maxTotal);
         }
-        if (fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.wait", fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0)) > 0) {
-            redisConfig.setMaxWaitMillis(fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.wait", fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0)));
+        int maxWait = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.wait", fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0));
+        if (maxWait > 0) {
+            redisConfig.setMaxWaitMillis(maxWait);
         }
-        if (fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "num.tests.per.eviction.run", 0) > 0) {
-            redisConfig.setNumTestsPerEvictionRun(fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "num.tests.per.eviction.run", 0));
+        int numTestsPerEvictionRun = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "num.tests.per.eviction.run", 0);
+        if (numTestsPerEvictionRun > 0) {
+            redisConfig.setNumTestsPerEvictionRun(numTestsPerEvictionRun);
         }
-        if (fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "time.between.eviction.runs.millis", 0) > 0) {
-            redisConfig.setTimeBetweenEvictionRunsMillis(fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "time.between.eviction.runs.millis", 0));
+        int timeBetweenEvictionRunsMillis = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "time.between.eviction.runs.millis", 0);
+        if (timeBetweenEvictionRunsMillis > 0) {
+            redisConfig.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
         }
-        if (fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "min.evictable.idle.time.millis", 0) > 0) {
-            redisConfig.setMinEvictableIdleTimeMillis(fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "min.evictable.idle.time.millis", 0));
+        int minEvictableIdleTimeMillis = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "min.evictable.idle.time.millis", 0);
+        if (minEvictableIdleTimeMillis > 0) {
+            redisConfig.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
         }
         if (StringUtils.isEmpty(password)) {
             jedisPool = new JedisPool(redisConfig, host, port, Protocol.DEFAULT_TIMEOUT, null, db);
@@ -163,7 +171,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             Jedis jedis = jedisPool.getResource();
             Map<String, String> instances = jedis.hgetAll(getRedisRegistryKey());
             if (null != instances) {
-                List<InetSocketAddress> newAddressList = new ArrayList<>();
+                Set<InetSocketAddress> newAddressList = new HashSet<>();
                 for (Map.Entry<String, String> instance : instances.entrySet()) {
                     String serverAddr = instance.getKey();
                     newAddressList.add(NetUtil.toInetSocketAddress(serverAddr));
@@ -173,8 +181,9 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             subscribe(clusterName, new RedisListener() {
                 @Override
                 public void onEvent(String msg) {
-                    String serverAddr = msg.split("-")[0];
-                    String eventType = msg.split("-")[1];
+                    String[] msgr = msg.split("-");
+                    String serverAddr =msgr[0];
+                    String eventType = msgr[1];
                     switch (eventType) {
                         case RedisListener.REGISTER:
                             CLUSTER_ADDRESS_MAP.get(clusterName).add(NetUtil.toInetSocketAddress(serverAddr));
@@ -188,7 +197,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 }
             });
         }
-        return CLUSTER_ADDRESS_MAP.get(clusterName);
+        return Lists.newArrayList(CLUSTER_ADDRESS_MAP.get(clusterName));
     }
 
     private class NotifySub extends JedisPubSub {
