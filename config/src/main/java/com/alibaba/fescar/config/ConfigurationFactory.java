@@ -62,7 +62,7 @@ public final class ConfigurationFactory {
                 break;
             case Apollo:
                 try {
-                    configuration = new ApolloConfiguration();
+                    configuration = ApolloConfiguration.getInstance();
                 } catch (ApolloConfigException e) {
                     throw new RuntimeException(e);
                 }

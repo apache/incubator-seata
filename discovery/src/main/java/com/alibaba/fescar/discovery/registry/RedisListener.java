@@ -17,12 +17,19 @@
 package com.alibaba.fescar.discovery.registry;
 
 /**
- * Created by kl on 2019/2/19.
- * Content :
+ *  The RedisListener
+ *
+ *  @author: kl @kailing.pub
+ *  @date: 2019/2/27
  */
 public interface RedisListener {
     String REGISTER = "register";
     String UN_REGISTER = "unregister";
 
+
+    /**
+     * 用于订阅redis事件
+     * @param event
+     */
     void onEvent(String event);
 }
