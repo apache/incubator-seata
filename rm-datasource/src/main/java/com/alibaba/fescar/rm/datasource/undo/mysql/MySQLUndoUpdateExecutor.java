@@ -44,14 +44,14 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
         boolean first = true;
         for (Field field : row.getFields()) {
             if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(field.getName() + " = ?");
+                where.append("`"+field.getName() +"` = ?");
             } else {
                 if (first) {
                     first = false;
                 } else {
                     mainSQL.append(", ");
                 }
-                mainSQL.append(field.getName() + " = ?");
+                mainSQL.append("`"+field.getName() +"` = ?");
             }
 
         }

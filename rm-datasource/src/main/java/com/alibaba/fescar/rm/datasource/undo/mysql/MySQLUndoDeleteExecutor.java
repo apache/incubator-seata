@@ -64,7 +64,7 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
                     insertColumns.append(", ");
                     insertValues.append(", ");
                 }
-                insertColumns.append(field.getName());
+                insertColumns.append("`").append(field.getName()).append("`");
                 insertValues.append("?");
             }
 
@@ -75,7 +75,7 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
             insertColumns.append(", ");
             insertValues.append(", ");
         }
-        insertColumns.append(pkField.getName());
+        insertColumns.append("`").append(pkField.getName()).append("`");
         insertValues.append("?");
 
         return "INSERT INTO " + sqlUndoLog.getTableName() + "(" + insertColumns.toString() + ") VALUES (" + insertValues.toString() + ")";
