@@ -89,8 +89,8 @@ public class DefaultTimer implements Timer {
     TimerValue value = this.value;
     this.value = new TimerValue();
     return Arrays.asList(new Measurement(countId, time, value.getCount()),
-        new Measurement(totalId, time, value.getTotal()),
-        new Measurement(maxId, time, value.getMax()),
-        new Measurement(averageId, time, value.getAverage()));
+        new Measurement(totalId, time, value.getTotal() * 0.001),
+        new Measurement(maxId, time, value.getMax() * 0.001),
+        new Measurement(averageId, time, value.getAverage() * 0.001));
   }
 }

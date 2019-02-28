@@ -25,19 +25,14 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>fescar-metrics-prometheus</artifactId>
+  <artifactId>fescar-metrics-core</artifactId>
   <packaging>jar</packaging>
-  <name>fescar-metrics-prometheus ${project.version}</name>
+  <name>fescar-metrics-core ${project.version}</name>
 
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
-      <artifactId>fescar-metrics-core</artifactId>
-    </dependency>
-
-    <dependency>
-      <groupId>io.prometheus</groupId>
-      <artifactId>simpleclient_httpserver</artifactId>
+      <artifactId>fescar-metrics-api</artifactId>
     </dependency>
 
     <dependency>

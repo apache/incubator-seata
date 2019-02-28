@@ -36,15 +36,15 @@ public class TestDefaultTimer {
 
     measurement = measurements.get("test_timer(statistic=total,x=a,y=b)");
     Assert.assertEquals(1000, measurement.getTimestamp(), 0);
-    Assert.assertEquals(3 * 1000 * 1000 + 3, measurement.getValue(), 0);
+    Assert.assertEquals(3000.003, measurement.getValue(), 0);
 
     measurement = measurements.get("test_timer(statistic=max,x=a,y=b)");
     Assert.assertEquals(1000, measurement.getTimestamp(), 0);
-    Assert.assertEquals(1000 * 1000 + 3, measurement.getValue(), 0);
+    Assert.assertEquals(1000.003, measurement.getValue(), 0);
 
     measurement = measurements.get("test_timer(statistic=average,x=a,y=b)");
     Assert.assertEquals(1000, measurement.getTimestamp(), 0);
-    Assert.assertEquals(1000 * 1000 + 1, measurement.getValue(), 0);
+    Assert.assertEquals(1000.001, measurement.getValue(), 0);
 
     //measure again
 
@@ -61,14 +61,14 @@ public class TestDefaultTimer {
 
     measurement = measurements.get("test_timer(statistic=total,x=a,y=b)");
     Assert.assertEquals(2000, measurement.getTimestamp(), 0);
-    Assert.assertEquals(1 * 1000 * 1000, measurement.getValue(), 0);
+    Assert.assertEquals(1000.0, measurement.getValue(), 0);
 
     measurement = measurements.get("test_timer(statistic=max,x=a,y=b)");
     Assert.assertEquals(2000, measurement.getTimestamp(), 0);
-    Assert.assertEquals(1 * 1000 * 1000, measurement.getValue(), 0);
+    Assert.assertEquals(1000.0, measurement.getValue(), 0);
 
     measurement = measurements.get("test_timer(statistic=average,x=a,y=b)");
     Assert.assertEquals(2000, measurement.getTimestamp(), 0);
-    Assert.assertEquals(1 * 1000 * 1000, measurement.getValue(), 0);
+    Assert.assertEquals(1000.0, measurement.getValue(), 0);
   }
 }

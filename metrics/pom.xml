@@ -30,7 +30,18 @@
   <name>fescar-metrics ${project.version}</name>
   <modules>
     <module>metrics-api</module>
+    <module>metrics-core</module>
     <module>metrics-prometheus</module>
   </modules>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>io.prometheus</groupId>
+        <artifactId>simpleclient_httpserver</artifactId>
+        <version>0.6.0</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
 </project>

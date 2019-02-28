@@ -22,8 +22,10 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fescar.common.XID;
+import com.alibaba.fescar.common.loader.EnhancedServiceLoader;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.rpc.netty.RpcServer;
+import com.alibaba.fescar.metrics.Publisher;
 import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
 import com.alibaba.fescar.server.session.SessionHolder;
 
@@ -42,6 +44,9 @@ public class Server {
      * @throws IOException the io exception
      */
     public static void main(String[] args) throws IOException {
+        //try to load metrics publisher
+        EnhancedServiceLoader.load(Publisher.class);
+
         RpcServer rpcServer = new RpcServer(WORKING_THREADS);
 
         int port = 8091;
