@@ -2,6 +2,8 @@ package com.alibaba.fescar.common;
 
 
 import com.alibaba.fescar.common.util.NetUtil;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -88,7 +90,7 @@ public class NetUtilTest {
     }
 
     @DataProvider
-    public Object[][] inetAddress() {
-        return new Object[][]{{new InetSocketAddress("localhost", 3902), new InetSocketAddress("::1", 3904)}};
+    public Object[][] inetAddress() throws UnknownHostException {
+        return new Object[][]{{new InetSocketAddress(Inet4Address.getLocalHost().getHostName(), 3902), new InetSocketAddress(Inet6Address.getLocalHost().getHostName(), 3904)}};
     }
 }
