@@ -188,7 +188,11 @@ public class NetUtil {
         LOGGER.error("Could not get local host ip address, will use 127.0.0.1 instead.");
         return localAddress;
     }
-
+    public static void validAddress(InetSocketAddress address) {
+        if (null == address.getHostName() || 0 == address.getPort()) {
+            throw new IllegalArgumentException("invalid address:" + address);
+        }
+    }
     private static boolean isValidAddress(InetAddress address) {
         if (address == null || address.isLoopbackAddress()) {
             return false;

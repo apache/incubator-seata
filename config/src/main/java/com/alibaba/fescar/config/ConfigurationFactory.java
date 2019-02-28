@@ -19,6 +19,7 @@ package com.alibaba.fescar.config;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.nacos.api.exception.NacosException;
 
+import com.ctrip.framework.apollo.exceptions.ApolloConfigException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +34,8 @@ public final class ConfigurationFactory {
     private static final String REGISTRY_CONF = "registry.conf";
     public static final Configuration FILE_INSTANCE = new FileConfiguration(REGISTRY_CONF);
     private static final String NAME_KEY = "name";
-    public static final String FILE_TYPE = "file";
+    private static final String FILE_TYPE = "file";
+
 
     /**
      * Gets instance.
@@ -55,6 +57,13 @@ public final class ConfigurationFactory {
                 try {
                     configuration = new NacosConfiguration();
                 } catch (NacosException e) {
+                    throw new RuntimeException(e);
+                }
+                break;
+            case Apollo:
+                try {
+                    configuration = ApolloConfiguration.getInstance();
+                } catch (ApolloConfigException e) {
                     throw new RuntimeException(e);
                 }
                 break;
