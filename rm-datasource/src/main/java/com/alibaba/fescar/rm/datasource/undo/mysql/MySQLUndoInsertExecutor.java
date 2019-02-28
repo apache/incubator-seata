@@ -47,7 +47,7 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
         boolean first = true;
         for (Field field : row.getFields()) {
             if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(field.getName() + " = ? ");
+                where.append("`"+field.getName() +"` = ?");
             }
 
         }
