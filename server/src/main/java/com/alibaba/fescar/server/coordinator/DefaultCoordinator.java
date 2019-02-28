@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import com.alibaba.fescar.common.XID;
+import com.alibaba.fescar.common.loader.EnhancedServiceLoader;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
@@ -53,7 +54,9 @@ import com.alibaba.fescar.core.protocol.transaction.GlobalStatusResponse;
 import com.alibaba.fescar.core.rpc.RpcContext;
 import com.alibaba.fescar.core.rpc.ServerMessageSender;
 import com.alibaba.fescar.core.rpc.TransactionMessageHandler;
+import com.alibaba.fescar.metrics.Registry;
 import com.alibaba.fescar.server.AbstractTCInboundHandler;
+import com.alibaba.fescar.server.metrics.MeterIdConstants;
 import com.alibaba.fescar.server.session.BranchSession;
 import com.alibaba.fescar.server.session.GlobalSession;
 import com.alibaba.fescar.server.session.SessionHolder;
@@ -76,6 +79,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
     private Core core = CoreFactory.get();
 
+    private final Registry registry;
+
     /**
      * Instantiates a new Default coordinator.
      *
@@ -84,6 +89,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     public DefaultCoordinator(ServerMessageSender messageSender) {
         this.messageSender = messageSender;
         core.setResourceManagerInbound(this);
+
+        this.registry = EnhancedServiceLoader.load(Registry.class);
     }
 
     @Override
@@ -91,20 +98,40 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         throws TransactionException {
         response.setXid(core.begin(rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(),
             request.getTransactionName(), request.getTimeout()));
+
+        if (registry != null) {
+            registry.getCounter(MeterIdConstants.COUNTER_ACTIVE).increase(1);
+        }
     }
 
     @Override
     protected void doGlobalCommit(GlobalCommitRequest request, GlobalCommitResponse response, RpcContext rpcContext)
         throws TransactionException {
+        GlobalSession globalSession = SessionHolder.findGlobalSession(request.getTransactionId());
         response.setGlobalStatus(core.commit(XID.generateXID(request.getTransactionId())));
+        long duration = System.currentTimeMillis() - globalSession.getBeginTime();
 
+        if (registry != null) {
+            registry.getCounter(MeterIdConstants.COUNTER_ACTIVE).decrease(1);
+            registry.getCounter(MeterIdConstants.COUNTER_COMMITTED).increase(1);
+            registry.getSummary(MeterIdConstants.SUMMARY_COMMITTED).increase(1);
+            registry.getTimer(MeterIdConstants.TIMER_COMMITTED).record(duration,TimeUnit.MILLISECONDS);
+        }
     }
 
     @Override
     protected void doGlobalRollback(GlobalRollbackRequest request, GlobalRollbackResponse response,
                                     RpcContext rpcContext) throws TransactionException {
+        GlobalSession globalSession = SessionHolder.findGlobalSession(request.getTransactionId());
         response.setGlobalStatus(core.rollback(XID.generateXID(request.getTransactionId())));
+        long duration = System.currentTimeMillis() - globalSession.getBeginTime();
 
+        if (registry != null) {
+            registry.getCounter(MeterIdConstants.COUNTER_ACTIVE).decrease(1);
+            registry.getCounter(MeterIdConstants.COUNTER_ROLLBACK).increase(1);
+            registry.getSummary(MeterIdConstants.SUMMARY_ROLLBACK).increase(1);
+            registry.getTimer(MeterIdConstants.TIMER_ROLLBACK).record(duration,TimeUnit.MILLISECONDS);
+        }
     }
 
     @Override
