@@ -16,27 +16,13 @@
 
 package com.alibaba.fescar.config;
 
-import java.util.concurrent.ExecutorService;
-
 /**
- * The interface Config change listener.
- *
- * @author: jimin.jm @alibaba-inc.com
- * @date: 2018 /12/20
+ * @author: jimin.jm@alibaba-inc.com
+ * @date 2019/02/26
  */
-public interface ConfigChangeListener {
-
-    /**
-     * Gets executor.
-     *
-     * @return the executor
-     */
-    ExecutorService getExecutor();
-
-    /**
-     * Receive config info.
-     *
-     * @param configInfo the config info
-     */
-    void receiveConfigInfo(final String configInfo);
+public final class ConfigurationKeys {
+    public static final String FILE_ROOT_REGISTRY = "registry";
+    public static final String FILE_ROOT_CONFIG = "config";
+    public static final String FILE_CONFIG_SPLIT_CHAR = ".";
+    public static final String FILE_ROOT_TYPE = "type";
 }
