@@ -13,13 +13,14 @@ public class KeywordCheckerFactory {
 
     /**
      * get keyword checker
+     *
      * @param dbType
      * @return
      */
     public static KeywordChecker getKeywordChecker(String dbType) {
         if (dbType.equals(JdbcConstants.MYSQL)) {
             return new MySQLKeywordChecker();
-        }else{
+        } else {
             throw new NotSupportYetException(dbType);
         }
 

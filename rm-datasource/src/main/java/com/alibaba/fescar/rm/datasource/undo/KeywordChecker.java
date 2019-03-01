@@ -1,4 +1,5 @@
 package com.alibaba.fescar.rm.datasource.undo;
+
 /**
  * @author Wu
  * xingfudeshi@gmail.com
@@ -7,6 +8,7 @@ package com.alibaba.fescar.rm.datasource.undo;
 public interface KeywordChecker {
     /**
      * check whether given field name and table name use keywords
+     *
      * @param fieldOrTableName
      * @return
      */
@@ -14,6 +16,7 @@ public interface KeywordChecker {
 
     /**
      * check whether given field name and table name use keywords and,if so,will add "`" to the name.
+     *
      * @param fieldOrTableName
      * @return
      */
