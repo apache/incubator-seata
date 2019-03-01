@@ -14,25 +14,22 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.discovery.loadbalance;
-
-import com.alibaba.fescar.common.loader.EnhancedServiceLoader;
+package com.alibaba.fescar.discovery.registry;
 
 /**
- * The type Load balance factory.
+ *  The RedisListener
  *
- * @author: jimin.jm @alibaba-inc.com
- * @date 2019 /02/12
+ *  @author: kl @kailing.pub
+ *  @date: 2019/2/27
  */
-public class LoadBalanceFactory {
+public interface RedisListener {
+    String REGISTER = "register";
+    String UN_REGISTER = "unregister";
+
 
     /**
-     * Gets instance.
-     *
-     * @return the instance
+     * 用于订阅redis事件
+     * @param event
      */
-    public static LoadBalance getInstance() {
-        LoadBalance loadBalance = EnhancedServiceLoader.load(LoadBalance.class);
-        return loadBalance;
-    }
+    void onEvent(String event);
 }
