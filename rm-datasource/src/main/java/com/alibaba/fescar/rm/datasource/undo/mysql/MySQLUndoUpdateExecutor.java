@@ -25,6 +25,7 @@ import com.alibaba.fescar.rm.datasource.sql.struct.Row;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 import com.alibaba.fescar.rm.datasource.undo.AbstractUndoExecutor;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
+import com.alibaba.fescar.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
 
 /**
  * The type My sql undo update executor.
@@ -33,25 +34,26 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
+        MySQLKeywordChecker mySQLKeywordChecker=new MySQLKeywordChecker();
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (beforeImageRows == null || beforeImageRows.size() == 0) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG"); // TODO
         }
         Row row = beforeImageRows.get(0);
-        StringBuffer mainSQL = new StringBuffer("UPDATE " + sqlUndoLog.getTableName() + " SET ");
+        StringBuffer mainSQL = new StringBuffer("UPDATE " + mySQLKeywordChecker.checkAndReplace(sqlUndoLog.getTableName()) + " SET ");
         StringBuffer where = new StringBuffer(" WHERE ");
         boolean first = true;
         for (Field field : row.getFields()) {
             if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append("`"+field.getName() +"` = ?");
+                where.append(mySQLKeywordChecker.checkAndReplace(field.getName()) +" = ?");
             } else {
                 if (first) {
                     first = false;
                 } else {
                     mainSQL.append(", ");
                 }
-                mainSQL.append("`"+field.getName() +"` = ?");
+                mainSQL.append(mySQLKeywordChecker.checkAndReplace(field.getName()) +" = ?");
             }
 
         }

@@ -28,6 +28,7 @@ import com.alibaba.fescar.rm.datasource.sql.struct.Row;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 import com.alibaba.fescar.rm.datasource.undo.AbstractUndoExecutor;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
+import com.alibaba.fescar.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
 
 /**
  * The type My sql undo insert executor.
@@ -36,18 +37,19 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
+        MySQLKeywordChecker mySQLKeywordChecker=new MySQLKeywordChecker();
         TableRecords afterImage = sqlUndoLog.getAfterImage();
         List<Row> afterImageRows = afterImage.getRows();
         if (afterImageRows == null || afterImageRows.size() == 0) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = afterImageRows.get(0);
-        StringBuffer mainSQL = new StringBuffer("DELETE FROM " + sqlUndoLog.getTableName());
+        StringBuffer mainSQL = new StringBuffer("DELETE FROM " + mySQLKeywordChecker.checkAndReplace(sqlUndoLog.getTableName()));
         StringBuffer where = new StringBuffer(" WHERE ");
         boolean first = true;
         for (Field field : row.getFields()) {
             if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append("`"+field.getName() +"` = ?");
+                where.append(mySQLKeywordChecker.checkAndReplace(field.getName()) +" = ?");
             }
 
         }
