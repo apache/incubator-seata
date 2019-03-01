@@ -14,25 +14,15 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.discovery.loadbalance;
-
-import com.alibaba.fescar.common.loader.EnhancedServiceLoader;
+package com.alibaba.fescar.config;
 
 /**
- * The type Load balance factory.
- *
- * @author: jimin.jm @alibaba-inc.com
- * @date 2019 /02/12
+ * @author: jimin.jm@alibaba-inc.com
+ * @date 2019/02/26
  */
-public class LoadBalanceFactory {
-
-    /**
-     * Gets instance.
-     *
-     * @return the instance
-     */
-    public static LoadBalance getInstance() {
-        LoadBalance loadBalance = EnhancedServiceLoader.load(LoadBalance.class);
-        return loadBalance;
-    }
+public final class ConfigurationKeys {
+    public static final String FILE_ROOT_REGISTRY = "registry";
+    public static final String FILE_ROOT_CONFIG = "config";
+    public static final String FILE_CONFIG_SPLIT_CHAR = ".";
+    public static final String FILE_ROOT_TYPE = "type";
 }

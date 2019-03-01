@@ -21,7 +21,7 @@
     <parent>
         <artifactId>fescar-all</artifactId>
         <groupId>com.alibaba.fescar</groupId>
-        <version>0.2.2-SNAPSHOT</version>
+        <version>0.2.3</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <packaging>jar</packaging>
@@ -32,6 +32,10 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>fescar-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>

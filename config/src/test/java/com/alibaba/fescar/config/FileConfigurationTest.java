@@ -27,11 +27,8 @@ import org.testng.annotations.Test;
 /**
  * The type File configuration test.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: feats -all
- * @DateTime: 2019 /1/24 1:31 PM
- * @FileName: FileConfigurationTest
- * @Description:
+ * @author: jimin.jm @alibaba-inc.com
+ * @date: 2019 /1/24
  */
 public class FileConfigurationTest {
     private final Config config;
