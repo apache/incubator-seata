@@ -36,7 +36,12 @@ public enum ConfigType {
     /**
      * Nacos config type.
      */
-    Nacos;
+    Nacos,
+    /**
+     * Apollo config type.
+     */
+    Apollo;
+
 
     /**
      * Gets type.
@@ -49,6 +54,8 @@ public enum ConfigType {
             return File;
         } else if (Nacos.name().equalsIgnoreCase(name)) {
             return Nacos;
+        } else if (Apollo.name().equalsIgnoreCase(name)) {
+            return Apollo;
         } else if (ZK.name().equalsIgnoreCase(name)) {
             return ZK;
         } else {

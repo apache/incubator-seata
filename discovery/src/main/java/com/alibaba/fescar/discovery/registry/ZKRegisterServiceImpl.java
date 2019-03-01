@@ -61,7 +61,7 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
             return ;
         }
         String path = ROOT_PATH  + clusterName;
-        if(!getClientInstance().exists(path)) return;
+        if(!getClientInstance().exists(path)) {return;}
         getClientInstance().subscribeChildChanges(path,listener);
     }
 
@@ -72,7 +72,7 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
             return ;
         }
         String path = ROOT_PATH + clusterName;
-        if(!getClientInstance().exists(path)) return;
+        if(!getClientInstance().exists(path)) {return;}
         getClientInstance().unsubscribeChildChanges(path,listener);
 
     }
