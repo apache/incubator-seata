@@ -1,4 +1,4 @@
-package com.alibaba.fescar.common;
+package com.alibaba.fescar.common.util;
 
 
 import com.alibaba.fescar.common.util.NetUtil;
@@ -75,22 +75,23 @@ public class NetUtilTest {
 
 
     @Test
-    public void testGetLocalIp() throws UnknownHostException {
-        Assert.assertEquals(NetUtil.getLocalIp(),InetAddress.getLocalHost().getHostAddress());
+    public void testGetLocalIp() {
+        Assert.assertNotNull(NetUtil.getLocalIp());
     }
 
     @Test
-    public void testGetLocalHost() throws UnknownHostException {
-        Assert.assertEquals(NetUtil.getLocalHost(),InetAddress.getLocalHost().getHostName());
+    public void testGetLocalHost() {
+        Assert.assertNotNull(NetUtil.getLocalHost());
     }
 
     @Test
-    public void testGetLocalAddress() throws UnknownHostException {
-        Assert.assertEquals(NetUtil.getLocalAddress(),InetAddress.getLocalHost());
+    public void testGetLocalAddress() {
+        Assert.assertNotNull(NetUtil.getLocalAddress());
     }
 
     @DataProvider
     public Object[][] inetAddress() throws UnknownHostException {
-        return new Object[][]{{new InetSocketAddress(Inet4Address.getLocalHost().getHostName(), 3902), new InetSocketAddress(Inet6Address.getLocalHost().getHostName(), 3904)}};
+        return new Object[][]{{new InetSocketAddress(Inet4Address.getLocalHost().getHostName(), 3902),
+            new InetSocketAddress(Inet6Address.getLocalHost().getHostName(), 3904)}};
     }
 }

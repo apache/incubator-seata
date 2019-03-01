@@ -1,4 +1,4 @@
-package com.alibaba.fescar.common;
+package com.alibaba.fescar.common.thread;
 
 
 import com.alibaba.fescar.common.thread.NamedThreadFactory;

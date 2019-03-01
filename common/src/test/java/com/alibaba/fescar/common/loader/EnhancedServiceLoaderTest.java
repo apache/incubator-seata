@@ -1,11 +1,5 @@
-package com.alibaba.fescar.common;
+package com.alibaba.fescar.common.loader;
 
-import com.alibaba.fescar.common.loader.ChineseHello;
-import com.alibaba.fescar.common.loader.EnglishHello;
-import com.alibaba.fescar.common.loader.EnhancedServiceLoader;
-import com.alibaba.fescar.common.loader.EnhancedServiceNotFoundException;
-import com.alibaba.fescar.common.loader.FrenchHello;
-import com.alibaba.fescar.common.loader.Hello;
 import java.util.List;
 import org.junit.Assert;
 import org.testng.annotations.Test;

@@ -1,6 +1,5 @@
-package com.alibaba.fescar.common;
+package com.alibaba.fescar.common.util;
 
-import com.alibaba.fescar.common.util.BlobUtils;
 import java.io.InputStream;
 import java.sql.SQLException;
 import javax.sql.rowset.serial.SerialBlob;

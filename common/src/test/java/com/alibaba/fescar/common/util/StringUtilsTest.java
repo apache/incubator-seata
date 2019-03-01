@@ -14,9 +14,8 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.common;
+package com.alibaba.fescar.common.util;
 
-import com.alibaba.fescar.common.util.StringUtils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
