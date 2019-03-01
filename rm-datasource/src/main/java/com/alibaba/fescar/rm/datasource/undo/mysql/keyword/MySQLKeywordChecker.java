@@ -172,14 +172,6 @@ public class MySQLKeywordChecker implements KeywordChecker {
 
     @Override
     public String checkAndReplace(String fieldOrTableName) {
-        try {
-            if (StringUtils.isNotBlank(fieldOrTableName)) {
-                MySQLKeyword.valueOf(fieldOrTableName.toUpperCase());
-                return "`" + fieldOrTableName + "`";
-            }
-        } catch (IllegalArgumentException e) {
-            //do nothing
-        }
-        return fieldOrTableName;
+        return check(fieldOrTableName)?"`" + fieldOrTableName + "`":fieldOrTableName;
     }
 }
