@@ -11,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class MySQLKeywordChecker implements KeywordChecker {
     /**
-     *
      * MySQL keyword
      */
     private enum MySQLKeyword {
@@ -144,30 +143,28 @@ public class MySQLKeywordChecker implements KeywordChecker {
         UNDO("UNDO"),
         SQLSTATE("SQLSTATE"),
         CONDITION("CONDITION"),
-        DIV("DIV"),
-        ;
+        DIV("DIV");
 
         public final String name;
 
-        MySQLKeyword(){
+        MySQLKeyword() {
             this(null);
         }
 
-        MySQLKeyword(String name){
+        MySQLKeyword(String name) {
             this.name = name;
         }
     }
 
 
     @Override
-    public boolean check(String fieldOrTableName)
-    {
+    public boolean check(String fieldOrTableName) {
         try {
-            if(StringUtils.isNotBlank(fieldOrTableName)){
+            if (StringUtils.isNotBlank(fieldOrTableName)) {
                 MySQLKeyword.valueOf(fieldOrTableName.toUpperCase());
                 return true;
             }
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             //do nothing
         }
         return false;
@@ -176,11 +173,11 @@ public class MySQLKeywordChecker implements KeywordChecker {
     @Override
     public String checkAndReplace(String fieldOrTableName) {
         try {
-            if(StringUtils.isNotBlank(fieldOrTableName)){
-                 MySQLKeyword.valueOf(fieldOrTableName.toUpperCase());
+            if (StringUtils.isNotBlank(fieldOrTableName)) {
+                MySQLKeyword.valueOf(fieldOrTableName.toUpperCase());
                 return "`" + fieldOrTableName + "`";
             }
-        }catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             //do nothing
         }
         return fieldOrTableName;
