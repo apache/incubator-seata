@@ -59,10 +59,11 @@ public class RpcMessageTest {
 
     @Test
     public void testGetNextMessageId() {
-        Assert.assertEquals(1, RpcMessage.getNextMessageId());
-        Assert.assertEquals(2, RpcMessage.getNextMessageId());
-        Assert.assertEquals(3, RpcMessage.getNextMessageId());
-        Assert.assertEquals(4, RpcMessage.getNextMessageId());
-        Assert.assertEquals(5, RpcMessage.getNextMessageId());
+        long startMessageId=RpcMessage.getNextMessageId();
+        Assert.assertEquals(1+startMessageId, RpcMessage.getNextMessageId());
+        Assert.assertEquals(2+startMessageId, RpcMessage.getNextMessageId());
+        Assert.assertEquals(3+startMessageId, RpcMessage.getNextMessageId());
+        Assert.assertEquals(4+startMessageId, RpcMessage.getNextMessageId());
+        Assert.assertEquals(5+startMessageId, RpcMessage.getNextMessageId());
     }
 }

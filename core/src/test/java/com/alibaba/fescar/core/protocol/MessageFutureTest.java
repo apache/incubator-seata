@@ -59,7 +59,7 @@ public class MessageFutureTest {
         MessageFuture messageFuture=new MessageFuture();
         messageFuture.setTimeout(TIME_OUT_FIELD);
         Assert.assertTrue(!messageFuture.isTimeout());
-        Thread.sleep(TIME_OUT_FIELD);
+        Thread.sleep(TIME_OUT_FIELD +1);
         Assert.assertTrue(messageFuture.isTimeout());
 
     }
