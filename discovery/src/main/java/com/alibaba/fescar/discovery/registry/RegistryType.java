@@ -14,30 +14,27 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.config;
+package com.alibaba.fescar.discovery.registry;
 
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 
 /**
- * The enum Config type.
- *
- * @author: jimin.jm @alibaba-inc.com
- * @date: 2019 /2/1
+ * @author: jimin.jm@alibaba-inc.com
+ * @date 2019/02/26
  */
-public enum ConfigType {
+public enum RegistryType {
     /**
-     * File config type.
+     * File registry type.
      */
     File,
     /**
-     * Nacos config type.
+     * Redis registry type.
      */
-    Nacos,
+    Redis,
     /**
-     * Apollo config type.
+     * Nacos registry type.
      */
-    Apollo;
-
+    Nacos;
 
     /**
      * Gets type.
@@ -45,13 +42,13 @@ public enum ConfigType {
      * @param name the name
      * @return the type
      */
-    public static ConfigType getType(String name) {
+    public static RegistryType getType(String name) {
         if (File.name().equalsIgnoreCase(name)) {
             return File;
         } else if (Nacos.name().equalsIgnoreCase(name)) {
             return Nacos;
-        } else if (Apollo.name().equalsIgnoreCase(name)) {
-            return Apollo;
+        } else if (Redis.name().equalsIgnoreCase(name)) {
+            return Redis;
         }else {
             throw new NotSupportYetException("unsupport type:" + name);
         }

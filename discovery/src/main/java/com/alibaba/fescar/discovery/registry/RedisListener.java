@@ -14,29 +14,22 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.config;
-
-import java.util.concurrent.ExecutorService;
+package com.alibaba.fescar.discovery.registry;
 
 /**
- * The interface Config change listener.
+ *  The RedisListener
  *
- * @author: jimin.jm @alibaba-inc.com
- * @date: 2018 /12/20
+ *  @author: kl @kailing.pub
+ *  @date: 2019/2/27
  */
-public interface ConfigChangeListener {
+public interface RedisListener {
+    String REGISTER = "register";
+    String UN_REGISTER = "unregister";
+
 
     /**
-     * Gets executor.
-     *
-     * @return the executor
+     * 用于订阅redis事件
+     * @param event
      */
-    ExecutorService getExecutor();
-
-    /**
-     * Receive config info.
-     *
-     * @param configInfo the config info
-     */
-    void receiveConfigInfo(final String configInfo);
+    void onEvent(String event);
 }
