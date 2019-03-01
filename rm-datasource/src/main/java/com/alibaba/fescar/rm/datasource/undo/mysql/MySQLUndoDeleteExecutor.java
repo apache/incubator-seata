@@ -18,12 +18,15 @@ package com.alibaba.fescar.rm.datasource.undo.mysql;
 
 import java.util.List;
 
+import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.KeyType;
 import com.alibaba.fescar.rm.datasource.sql.struct.Row;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 import com.alibaba.fescar.rm.datasource.undo.AbstractUndoExecutor;
+import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
+import com.alibaba.fescar.rm.datasource.undo.KeywordCheckerFactory;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import com.alibaba.fescar.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
 
@@ -43,7 +46,7 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
-        MySQLKeywordChecker mySQLKeywordChecker=new MySQLKeywordChecker();
+        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (beforeImageRows == null || beforeImageRows.size() == 0) {
@@ -66,7 +69,7 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
                     insertColumns.append(", ");
                     insertValues.append(", ");
                 }
-                insertColumns.append(mySQLKeywordChecker.checkAndReplace(field.getName()));
+                insertColumns.append(keywordChecker.checkAndReplace(field.getName()));
                 insertValues.append("?");
             }
 
@@ -77,10 +80,10 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
             insertColumns.append(", ");
             insertValues.append(", ");
         }
-        insertColumns.append(mySQLKeywordChecker.checkAndReplace(pkField.getName()));
+        insertColumns.append(keywordChecker.checkAndReplace(pkField.getName()));
         insertValues.append("?");
 
-        return "INSERT INTO " + mySQLKeywordChecker.checkAndReplace(sqlUndoLog.getTableName()) + "(" + insertColumns.toString() + ") VALUES (" + insertValues.toString() + ")";
+        return "INSERT INTO " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()) + "(" + insertColumns.toString() + ") VALUES (" + insertValues.toString() + ")";
     }
 
     @Override
