@@ -20,7 +20,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * Created by guoyao on 2019/3/1.
+ * @author guoyao
+ * @date 2019/3/2
  */
 public class RpcMessageTest {
 
@@ -41,11 +42,11 @@ public class RpcMessageTest {
                 "\t\"request\":" + REQUEST_FIELD + "\n" +
                 "}";
         RpcMessage fromJsonMessage=JSON.parseObject(fromJson, RpcMessage.class);
-        Assert.assertEquals(false,fromJsonMessage.isAsync());
-        Assert.assertEquals(true,fromJsonMessage.isHeartbeat());
-        Assert.assertEquals(false, fromJsonMessage.isRequest());
-        Assert.assertEquals("test_body", fromJsonMessage.getBody());
-        Assert.assertEquals(100, fromJsonMessage.getId());
+        Assert.assertEquals(ASYNC_FIELD,fromJsonMessage.isAsync());
+        Assert.assertEquals(HEART_BEAT_FIELD,fromJsonMessage.isHeartbeat());
+        Assert.assertEquals(REQUEST_FIELD, fromJsonMessage.isRequest());
+        Assert.assertEquals(BODY_FIELD, fromJsonMessage.getBody());
+        Assert.assertEquals(ID_FIELD, fromJsonMessage.getId());
 
         RpcMessage toJsonMessage=new RpcMessage();
         toJsonMessage.setAsync(ASYNC_FIELD);

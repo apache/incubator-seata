@@ -22,7 +22,8 @@ import org.junit.Test;
 import java.util.concurrent.*;
 
 /**
- * Created by guoyao on 2019/3/1.
+ * @author guoyao
+ * @date 2019/3/2
  */
 public class MessageFutureTest {
 
