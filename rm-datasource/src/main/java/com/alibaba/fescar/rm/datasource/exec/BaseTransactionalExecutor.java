@@ -21,10 +21,7 @@ import java.sql.Statement;
 import java.util.List;
 
 import com.alibaba.fescar.core.context.RootContext;
-import com.alibaba.fescar.core.exception.TransactionException;
-import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.rm.datasource.ConnectionProxy;
-import com.alibaba.fescar.rm.datasource.DataSourceManager;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
@@ -74,8 +71,16 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     @Override
     public Object execute(Object... args) throws Throwable {
-        String xid = RootContext.getXID();
-        statementProxy.getConnectionProxy().bind(xid);
+        if(RootContext.inGlobalTransaction()) {
+            String xid = RootContext.getXID();
+            statementProxy.getConnectionProxy().bind(xid);
+        }
+        
+        if(RootContext.requireGlobalLock()) {
+            statementProxy.getConnectionProxy().setGlobalLockRequire(true);
+        } else {
+            statementProxy.getConnectionProxy().setGlobalLockRequire(false);
+        }
         return doExecute(args);
     }
 

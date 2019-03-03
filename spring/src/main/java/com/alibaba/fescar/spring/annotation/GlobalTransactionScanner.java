@@ -51,6 +51,11 @@ import org.springframework.beans.factory.InitializingBean;
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator implements InitializingBean {
 
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionScanner.class);
 
     private static final int AT_MODE = 1;
@@ -184,16 +189,25 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 }
                 Class<?> serviceInterface = findTargetClass(bean);
                 Method[] methods = serviceInterface.getMethods();
-                LinkedList<MethodDesc> methodDescList = new LinkedList<>();
+                boolean shouldSkip = true;
                 for (Method method : methods) {
-                    GlobalTransactional anno = method.getAnnotation(GlobalTransactional.class);
-                    if (anno != null) {
-                        methodDescList.add(makeMethodDesc(anno, method));
+                    GlobalTransactional trxAnno = method.getAnnotation(GlobalTransactional.class);
+                    if (trxAnno != null) {
+                        shouldSkip = false;
+                        break;
+                    }
+                    
+                    GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);
+                    if (lockAnno != null) {
+                        shouldSkip = false;
+                        break;
                     }
                 }
-                if (methodDescList.isEmpty()) {
+                
+                if (shouldSkip) {
                     return bean;
                 }
+                
                 if (interceptor == null) {
                     interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
                 }
