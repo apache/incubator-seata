@@ -43,6 +43,7 @@ public class RejectedPolicysTest {
                         new NamedThreadFactory("OldestRunsPolicy", DEFAULT_CORE_POOL_SIZE), RejectedPolicys.runsOldestTaskPolicy());
         CountDownLatch downLatch1=new CountDownLatch(1);
         CountDownLatch downLatch2=new CountDownLatch(1);
+        CountDownLatch downLatch3=new CountDownLatch(1);
         //task1
         poolExecutor.execute(new Runnable() {
             @Override
@@ -70,13 +71,17 @@ public class RejectedPolicysTest {
             @Override
             public void run() {
                 downLatch2.countDown();
+                //task3 run
                 atomicInteger.getAndAdd(3);
+                downLatch3.countDown();
             }
         });
         //only the task2 run which is the oldest task of queue
         assertThat(atomicInteger.get()).isEqualTo(2);
         downLatch1.countDown();
         downLatch2.await();
+        //wait task3 run +3
+        downLatch3.await();
         //run task3
         assertThat(atomicInteger.get()).isEqualTo(6);
 
