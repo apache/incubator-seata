@@ -17,13 +17,14 @@
 package com.alibaba.fescar.common;
 
 import com.alibaba.fescar.common.util.StringUtils;
+import org.junit.Test;
+
+import javax.sql.rowset.serial.SerialBlob;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import javax.sql.rowset.serial.SerialBlob;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author melon.zhao
@@ -33,18 +34,18 @@ public class StringUtilsTest {
 
     @Test
     public void testIsEmpty() {
-        Assert.assertEquals(StringUtils.isEmpty(null), true);
-        Assert.assertEquals(StringUtils.isEmpty("abc"), false);
-        Assert.assertEquals(StringUtils.isEmpty(""), true);
-        Assert.assertEquals(StringUtils.isEmpty(" "), false);
+        assertThat(StringUtils.isEmpty(null)).isTrue();
+        assertThat(StringUtils.isEmpty("abc")).isFalse();
+        assertThat(StringUtils.isEmpty("")).isTrue();
+        assertThat(StringUtils.isEmpty(" ")).isFalse();
     }
 
     @Test
     public void testString2blob() throws SQLException {
-        Assert.assertEquals(StringUtils.string2blob(null), null);
+        assertThat(StringUtils.string2blob(null)).isNull();
         String[] strs = new String[]{"abc", "", " "};
         for (String str : strs) {
-            Assert.assertEquals(StringUtils.string2blob(str), new SerialBlob(str.getBytes()));
+            assertThat(StringUtils.string2blob(str)).isEqualTo(new SerialBlob(str.getBytes()));
         }
     }
 
@@ -52,7 +53,8 @@ public class StringUtilsTest {
     public void testBlob2string() throws SQLException {
         String[] strs = new String[]{"abc", " "};
         for (String str : strs) {
-            Assert.assertEquals(StringUtils.blob2string(new SerialBlob(str.getBytes())), str);
+            assertThat(StringUtils.blob2string(new SerialBlob(str.getBytes()))).isEqualTo(str);
+
         }
     }
 
@@ -60,9 +62,9 @@ public class StringUtilsTest {
     public void testInputStream2String() {
         try {
             InputStream inputStream = StringUtilsTest.class.getClassLoader().getResourceAsStream("test.txt");
-            Assert.assertEquals(StringUtils.inputStream2String(inputStream), "abc\n"
-                + ":\"klsdf\n"
-                + "2ks,x:\".,-3sd˚ø≤ø¬≥");
+            assertThat(StringUtils.inputStream2String(inputStream)).isEqualTo("abc\n"
+                    + ":\"klsdf\n"
+                    + "2ks,x:\".,-3sd˚ø≤ø¬≥");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {

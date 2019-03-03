@@ -16,7 +16,8 @@
 
 package com.alibaba.fescar.config;
 
-import org.testng.annotations.Test;
+
+import org.junit.Test;
 
 /**
  * @author: jimin.jm@alibaba-inc.com
