@@ -16,8 +16,10 @@
 package com.alibaba.fescar.core.protocol;
 
 import com.alibaba.fastjson.JSON;
-import org.junit.Assert;
+
 import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author guoyao
@@ -42,11 +44,11 @@ public class RpcMessageTest {
                 "\t\"request\":" + REQUEST_FIELD + "\n" +
                 "}";
         RpcMessage fromJsonMessage=JSON.parseObject(fromJson, RpcMessage.class);
-        Assert.assertEquals(ASYNC_FIELD,fromJsonMessage.isAsync());
-        Assert.assertEquals(HEART_BEAT_FIELD,fromJsonMessage.isHeartbeat());
-        Assert.assertEquals(REQUEST_FIELD, fromJsonMessage.isRequest());
-        Assert.assertEquals(BODY_FIELD, fromJsonMessage.getBody());
-        Assert.assertEquals(ID_FIELD, fromJsonMessage.getId());
+        assertThat(fromJsonMessage.isAsync()).isEqualTo(ASYNC_FIELD);
+        assertThat(fromJsonMessage.isHeartbeat()).isEqualTo(HEART_BEAT_FIELD);
+        assertThat(fromJsonMessage.isRequest()).isEqualTo(REQUEST_FIELD);
+        assertThat(fromJsonMessage.getBody()).isEqualTo(BODY_FIELD);
+        assertThat(fromJsonMessage.getId()).isEqualTo(ID_FIELD);
 
         RpcMessage toJsonMessage=new RpcMessage();
         toJsonMessage.setAsync(ASYNC_FIELD);
@@ -55,16 +57,16 @@ public class RpcMessageTest {
         toJsonMessage.setHeartbeat(HEART_BEAT_FIELD);
         toJsonMessage.setId(ID_FIELD);
         String toJson=JSON.toJSONString(toJsonMessage, true);
-        Assert.assertEquals(fromJson, toJson);
+        assertThat(fromJson).isEqualTo(toJson);
     }
 
     @Test
     public void testGetNextMessageId() {
         long startMessageId=RpcMessage.getNextMessageId();
-        Assert.assertEquals(1+startMessageId, RpcMessage.getNextMessageId());
-        Assert.assertEquals(2+startMessageId, RpcMessage.getNextMessageId());
-        Assert.assertEquals(3+startMessageId, RpcMessage.getNextMessageId());
-        Assert.assertEquals(4+startMessageId, RpcMessage.getNextMessageId());
-        Assert.assertEquals(5+startMessageId, RpcMessage.getNextMessageId());
+        assertThat(RpcMessage.getNextMessageId()).isEqualTo(1+startMessageId);
+        assertThat(RpcMessage.getNextMessageId()).isEqualTo(2+startMessageId);
+        assertThat(RpcMessage.getNextMessageId()).isEqualTo(3+startMessageId);
+        assertThat(RpcMessage.getNextMessageId()).isEqualTo(4+startMessageId);
+        assertThat(RpcMessage.getNextMessageId()).isEqualTo(5+startMessageId);
     }
 }

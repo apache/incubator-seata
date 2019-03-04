@@ -16,10 +16,12 @@
 package com.alibaba.fescar.core.protocol;
 
 import com.alibaba.fastjson.JSON;
-import org.junit.Assert;
+
 import org.junit.Test;
 
 import java.util.concurrent.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author guoyao
@@ -47,21 +49,21 @@ public class MessageFutureTest {
                 "\t\"timeout\":"+TIME_OUT_FIELD+"\n" +
                 "}";
         MessageFuture fromJsonFuture=JSON.parseObject(fromJson, MessageFuture.class);
-        Assert.assertEquals(TIME_OUT_FIELD, fromJsonFuture.getTimeout());
+        assertThat(fromJsonFuture.getTimeout()).isEqualTo(TIME_OUT_FIELD);
         MessageFuture toJsonFuture=new MessageFuture();
         toJsonFuture.setRequestMessage(buildRepcMessage());
         toJsonFuture.setTimeout(TIME_OUT_FIELD);
         String toJson=JSON.toJSONString(toJsonFuture, true);
-        Assert.assertEquals(toJson, fromJson);
+        assertThat(toJson).isEqualTo(fromJson);
     }
 
     @Test
     public void testIsTimeOut() throws Exception {
         MessageFuture messageFuture=new MessageFuture();
         messageFuture.setTimeout(TIME_OUT_FIELD);
-        Assert.assertTrue(!messageFuture.isTimeout());
+        assertThat(messageFuture.isTimeout()).isFalse();
         Thread.sleep(TIME_OUT_FIELD +1);
-        Assert.assertTrue(messageFuture.isTimeout());
+        assertThat(messageFuture.isTimeout()).isTrue();
 
     }
 
@@ -104,13 +106,41 @@ public class MessageFutureTest {
         messageFuture.get(TIME_OUT_FIELD, TimeUnit.MILLISECONDS);
     }
 
-    @Test(expected =RuntimeException.class)
+    @Test
+    public void testGetHasResultWithRunTimeExceptionWithMessage() throws Exception {
+        MessageFuture messageFuture=new MessageFuture();
+        messageFuture.setRequestMessage(buildRepcMessage());
+        messageFuture.setTimeout(TIME_OUT_FIELD);
+        RuntimeException runtimeException=new RuntimeException("test_runtime");
+        messageFuture.setResultMessage(runtimeException);
+        try {
+            messageFuture.get(TIME_OUT_FIELD, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            assertThat(e.getMessage()).isEqualTo(runtimeException.getMessage());
+        }
+    }
+
+    @Test(expected = RuntimeException.class)
     public void testGetHasResultWithThrowable() throws Exception {
         MessageFuture messageFuture=new MessageFuture();
         messageFuture.setRequestMessage(buildRepcMessage());
         messageFuture.setTimeout(TIME_OUT_FIELD);
-        messageFuture.setResultMessage(new Throwable("test_throwable"));
+        messageFuture.setResultMessage(new Throwable());
         messageFuture.get(TIME_OUT_FIELD, TimeUnit.MILLISECONDS);
+    }
+
+    @Test
+    public void testGetHasResultWithThrowableWithMessage() throws Exception {
+        MessageFuture messageFuture=new MessageFuture();
+        messageFuture.setRequestMessage(buildRepcMessage());
+        messageFuture.setTimeout(TIME_OUT_FIELD);
+        Throwable throwable=new Throwable("test_throwable");
+        messageFuture.setResultMessage(throwable);
+        try {
+            messageFuture.get(TIME_OUT_FIELD, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            assertThat(e.getMessage()).isEqualTo(new RuntimeException(throwable).getMessage());
+        }
     }
 
     private RpcMessage buildRepcMessage() {
