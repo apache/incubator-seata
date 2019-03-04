@@ -134,7 +134,7 @@ public class DataSourceBasicTest {
             }
 
             @Override
-            public void branchReport(String xid, long branchId, BranchStatus status, String applicationData)
+            public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData)
                 throws TransactionException {
 
             }
@@ -156,13 +156,13 @@ public class DataSourceBasicTest {
             }
 
             @Override
-            public BranchStatus branchCommit(String xid, long branchId, String resourceId, String applicationData)
+            public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
                 throws TransactionException {
                 return BranchStatus.PhaseTwo_Committed;
             }
 
             @Override
-            public BranchStatus branchRollback(String xid, long branchId, String resourceId, String applicationData)
+            public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
                 throws TransactionException {
                 return BranchStatus.PhaseTwo_Rollbacked;
             }

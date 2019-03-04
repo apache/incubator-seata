@@ -26,6 +26,7 @@ import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
+import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.model.ResourceManagerInbound;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
@@ -126,7 +127,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     @Override
     protected void doBranchReport(BranchReportRequest request, BranchReportResponse response, RpcContext rpcContext)
         throws TransactionException {
-        core.branchReport(XID.generateXID(request.getTransactionId()), request.getBranchId(), request.getStatus(),
+        core.branchReport(request.getBranchType(), XID.generateXID(request.getTransactionId()), request.getBranchId(), request.getStatus(),
             request.getApplicationData());
 
     }
@@ -139,15 +140,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     }
 
     @Override
-    public BranchStatus branchCommit(String xid, long branchId, String resourceId, String applicationData)
+    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
         throws TransactionException {
         try {
-            BranchCommitRequest
-                request = new BranchCommitRequest();
+            BranchCommitRequest request = new BranchCommitRequest();
             request.setXid(xid);
             request.setBranchId(branchId);
             request.setResourceId(resourceId);
             request.setApplicationData(applicationData);
+            request.setBranchType(branchType);
 
             GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
             BranchSession branchSession = globalSession.getBranch(branchId);
@@ -163,7 +164,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     }
 
     @Override
-    public BranchStatus branchRollback(String xid, long branchId, String resourceId, String applicationData)
+    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
         throws TransactionException {
         try {
             BranchRollbackRequest
@@ -172,6 +173,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             request.setBranchId(branchId);
             request.setResourceId(resourceId);
             request.setApplicationData(applicationData);
+            request.setBranchType(branchType);
 
             GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
             BranchSession branchSession = globalSession.getBranch(branchId);

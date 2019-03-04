@@ -40,13 +40,14 @@ public interface ResourceManagerOutbound {
     /**
      * Branch report.
      *
+     * @param branchType      the branch type
      * @param xid             the xid
      * @param branchId        the branch id
      * @param status          the status
      * @param applicationData the application data
      * @throws TransactionException the transaction exception
      */
-    void branchReport(String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException;
+    void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException;
 
     /**
      * Lock query boolean.

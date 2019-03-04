@@ -35,6 +35,8 @@
         <module>discovery</module>
         <module>test</module>
         <module>dubbo-alibaba</module>
+        <module>tcc</module>
+        <module>rm</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -150,6 +152,16 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>fescar-discovery</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>fescar-tcc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>fescar-rm</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

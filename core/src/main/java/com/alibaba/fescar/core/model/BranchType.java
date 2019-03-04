@@ -31,7 +31,12 @@ public enum BranchType {
      * The Mt.
      */
     // MT Branch
-    MT;
+    MT,
+    
+    /**
+     * The TCC.
+     */
+    TCC;
 
     /**
      * Get branch type.

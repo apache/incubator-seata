@@ -16,34 +16,28 @@
 
 package com.alibaba.fescar.rm.datasource;
 
+import com.alibaba.fescar.common.XID;
+import com.alibaba.fescar.common.exception.NotSupportYetException;
+import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
+import com.alibaba.fescar.common.executor.Initialize;
+import com.alibaba.fescar.common.loader.LoadLevel;
+import com.alibaba.fescar.core.exception.TransactionException;
+import com.alibaba.fescar.core.exception.TransactionExceptionCode;
+import com.alibaba.fescar.core.model.*;
+import com.alibaba.fescar.core.protocol.ResultCode;
+import com.alibaba.fescar.core.protocol.transaction.*;
+import com.alibaba.fescar.core.rpc.netty.RmRpcClient;
+import com.alibaba.fescar.rm.DefaultResourceManager;
+import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
-import com.alibaba.fescar.common.XID;
-import com.alibaba.fescar.common.exception.NotSupportYetException;
-import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
-import com.alibaba.fescar.core.exception.TransactionException;
-import com.alibaba.fescar.core.exception.TransactionExceptionCode;
-import com.alibaba.fescar.core.model.BranchStatus;
-import com.alibaba.fescar.core.model.BranchType;
-import com.alibaba.fescar.core.model.Resource;
-import com.alibaba.fescar.core.model.ResourceManager;
-import com.alibaba.fescar.core.model.ResourceManagerInbound;
-import com.alibaba.fescar.core.protocol.ResultCode;
-import com.alibaba.fescar.core.protocol.transaction.BranchRegisterRequest;
-import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
-import com.alibaba.fescar.core.protocol.transaction.BranchReportRequest;
-import com.alibaba.fescar.core.protocol.transaction.BranchReportResponse;
-import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryRequest;
-import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryResponse;
-import com.alibaba.fescar.core.rpc.netty.RmRpcClient;
-import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
-
 /**
  * The type Data source manager.
  */
-public class DataSourceManager implements ResourceManager {
+public class DataSourceManager implements ResourceManager, Initialize {
 
     private ResourceManagerInbound asyncWorker;
 
@@ -80,7 +74,7 @@ public class DataSourceManager implements ResourceManager {
     }
 
     @Override
-    public void branchReport(String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
+    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
         try {
             BranchReportRequest request = new BranchReportRequest();
             request.setTransactionId(XID.getTransactionId(xid));
@@ -107,6 +101,7 @@ public class DataSourceManager implements ResourceManager {
             request.setTransactionId(XID.getTransactionId(xid));
             request.setLockKey(lockKeys);
             request.setResourceId(resourceId);
+            request.setBranchType(branchType);
 
             GlobalLockQueryResponse response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
             if (response.getResultCode() == ResultCode.Failed) {
@@ -121,8 +116,11 @@ public class DataSourceManager implements ResourceManager {
 
     }
 
+    /**
+     * for test
+     */
     private static class SingletonHolder {
-        private static DataSourceManager INSTANCE = new DataSourceManager();
+        private static DataSourceManager INSTANCE = new DataSourceManager(true);
     }
 
     /**
@@ -148,14 +146,28 @@ public class DataSourceManager implements ResourceManager {
      *
      * @param asyncWorker the async worker
      */
-    public static synchronized void init(ResourceManagerInbound asyncWorker) {
-        get().setAsyncWorker(asyncWorker);
+    public synchronized void initAsyncWorker(ResourceManagerInbound asyncWorker) {
+        setAsyncWorker(asyncWorker);
     }
 
     /**
      * Instantiates a new Data source manager.
      */
-    protected DataSourceManager() {
+    public DataSourceManager() {
+    }
+
+    public DataSourceManager(boolean isInit) {
+        if(isInit){
+            init();
+        }
+
+    }
+
+    @Override
+    public void init(){
+        AsyncWorker asyncWorker = new AsyncWorker();
+        asyncWorker.init();
+        initAsyncWorker(asyncWorker);
     }
 
     @Override
@@ -182,12 +194,12 @@ public class DataSourceManager implements ResourceManager {
     }
 
     @Override
-    public BranchStatus branchCommit(String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
-        return asyncWorker.branchCommit(xid, branchId, resourceId, applicationData);
+    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+        return asyncWorker.branchCommit(branchType, xid, branchId, resourceId, applicationData);
     }
 
     @Override
-    public BranchStatus branchRollback(String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
         DataSourceProxy dataSourceProxy = get(resourceId);
         if (dataSourceProxy == null) {
             throw new ShouldNeverHappenException();
@@ -209,4 +221,10 @@ public class DataSourceManager implements ResourceManager {
     public Map<String, Resource> getManagedResources() {
         return dataSourceCache;
     }
+
+    @Override
+    public BranchType getBranchType(){
+        return BranchType.AT;
+    }
+
 }

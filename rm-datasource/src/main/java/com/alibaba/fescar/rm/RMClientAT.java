@@ -24,6 +24,7 @@ import com.alibaba.fescar.rm.datasource.DataSourceManager;
 /**
  * The type Rm client at.
  */
+@Deprecated
 public class RMClientAT {
 
     /**

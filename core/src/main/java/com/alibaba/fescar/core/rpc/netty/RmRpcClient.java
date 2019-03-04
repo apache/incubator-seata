@@ -505,6 +505,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
      * @return the merged resource keys
      */
     public String getMergedResourceKeys(ResourceManager resourceManager) {
+        //TODO
         Map<String, Resource> managedResources = resourceManager.getManagedResources();
         Set<String> resourceIds = managedResources.keySet();
         if (!resourceIds.isEmpty()) {

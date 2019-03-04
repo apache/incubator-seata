@@ -24,6 +24,7 @@ import java.util.Set;
 
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.rm.RMClient;
 import com.alibaba.fescar.rm.RMClientAT;
 import com.alibaba.fescar.tm.TMClient;
 import com.alibaba.fescar.tm.api.DefaultFailureHandlerImpl;
@@ -57,7 +58,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     private static final int MT_MODE = 2;
 
     private static final int ORDER_NUM = 1024;
-    private static final int DEFAULT_MODE = AT_MODE;
+    private static final int DEFAULT_MODE = AT_MODE + MT_MODE;
 
     private static final Set<String> PROXYED_SET = new HashSet<>();
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
@@ -149,24 +150,20 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
             throw new IllegalArgumentException(
                 "applicationId: " + applicationId + ", txServiceGroup: " + txServiceGroup);
         }
+        //init TM
         TMClient.init(applicationId, txServiceGroup);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(
                 "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
                     + txServiceGroup + "]");
         }
-        if ((AT_MODE & mode) > 0) {
-            RMClientAT.init(applicationId, txServiceGroup);
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(
-                    "Resource Manager for AT Client is initialized. applicationId[" + applicationId
-                        + "] txServiceGroup["
-                        + txServiceGroup + "]");
-            }
+
+        //init RM
+        RMClient.init(applicationId, txServiceGroup);
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Resource Manager is initialized. applicationId[" + applicationId  + "] txServiceGroup["  + txServiceGroup + "]");
         }
-        if ((MT_MODE & mode) > 0) {
-            throw new NotSupportYetException();
-        }
+
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Global Transaction Clients are initialized. ");
         }

@@ -43,5 +43,56 @@ public class Constants {
      */
     public static final String DBKEYS_SPLIT_CHAR = ",";
 
+    /** the start time of transaction  */
+    public static final String START_TIME  = "start-time";
+    
+    /**
+     * 应用名称
+     */
+    public static final String APP_NAME = "appName";
+    
+    /**
+     * TCC参与者开始时间
+     */
+    public static final String ACTION_START_TIME = "action-start-time";
+    
+    /**
+     * TCC 参与者名称
+     */
+    public final static String ACTION_NAME = "actionName";
+    
+    /**
+     * 一阶段准备方法 
+     */
+    public final static String PREPARE_METHOD = "sys::prepare";
+    
+    /**
+     * 二阶段提交方法
+     */
+    public final static String COMMIT_METHOD = "sys::commit_method";
+    
+    /**
+     * 二阶段回滚方法
+     */
+    public final static String ROLLBACK_METHOD = "sys::rollback_method";
+    
+    /**
+     * 主机ip
+     */
+    public final static String HOST_NAME = "host-name";
+    
+    public final static String TCC_METHOD_RESULT = "result";
+    
+    public final static String TCC_METHOD_ARGUMENTS = "arguments";
+
+    /**
+     * 主事务记录上下文
+     */
+    public final static String TCC_ACTIVITY_CONTEXT = "activityContext";
+
+    /**
+     * 分支事务上下文
+     */
+    public final static String TCC_ACTION_CONTEXT = "actionContext";
 
 }
