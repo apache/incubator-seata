@@ -17,6 +17,11 @@
 package com.alibaba.fescar.tm.api;
 
 import com.alibaba.fescar.core.exception.TransactionException;
+import com.alibaba.fescar.tm.api.transaction.TransactionHook;
+import com.alibaba.fescar.tm.api.transaction.TransactionHookExecuteException;
+import com.alibaba.fescar.tm.api.transaction.TransactionHookManager;
+
+import java.util.List;
 
 /**
  * Template of executing business logic with a global transaction.
@@ -35,51 +40,93 @@ public class TransactionalTemplate {
         // 1. get or create a transaction
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
 
-        // 2. begin transaction
-        try {
-            tx.begin(business.timeout(), business.name());
-
-        } catch (TransactionException txe) {
-            throw new TransactionalExecutor.ExecutionException(tx, txe,
-                TransactionalExecutor.Code.BeginFailure);
-
-        }
-
-        Object rs = null;
         try {
 
-            // Do Your Business
-            rs = business.execute();
-
-        } catch (Throwable ex) {
-
-            // 3. any business exception, rollback.
+            // 2. begin transaction
             try {
-                tx.rollback();
-
-                // 3.1 Successfully rolled back
-                throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
-
+                triggerBeforeBegin();
+                tx.begin(business.timeout(), business.name());
+                triggerAfterBegin();
             } catch (TransactionException txe) {
-                // 3.2 Failed to rollback
                 throw new TransactionalExecutor.ExecutionException(tx, txe,
-                    TransactionalExecutor.Code.RollbackFailure, ex);
+                        TransactionalExecutor.Code.BeginFailure);
 
             }
+            Object rs = null;
+            try {
 
+                // Do Your Business
+                rs = business.execute();
+
+            } catch (Throwable ex) {
+
+                // 3. any business exception, rollback.
+                try {
+                    tx.rollback();
+
+                    // 3.1 Successfully rolled back
+                    throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
+
+                } catch (TransactionException txe) {
+                    // 3.2 Failed to rollback
+                    throw new TransactionalExecutor.ExecutionException(tx, txe,
+                            TransactionalExecutor.Code.RollbackFailure, ex);
+
+                }
+
+            }
+            // 4. everything is fine, commit.
+            try {
+                triggerBeforeCommit();
+                tx.commit();
+
+            } catch (TransactionException txe) {
+                // 4.1 Failed to commit
+                throw new TransactionalExecutor.ExecutionException(tx, txe,
+                        TransactionalExecutor.Code.CommitFailure);
+
+            }
+            try {
+                triggerAfterCommit();
+            } catch (Exception e) {
+                throw new TransactionHookExecuteException(e);
+            }
+            return rs;
+        }finally {
+            cleanupAfterCommit();
         }
+    }
 
-        // 4. everything is fine, commit.
-        try {
-            tx.commit();
 
-        } catch (TransactionException txe) {
-            // 4.1 Failed to commit
-            throw new TransactionalExecutor.ExecutionException(tx, txe,
-                TransactionalExecutor.Code.CommitFailure);
-
+    private void triggerBeforeBegin() {
+        for (TransactionHook hook : getCurrentHooks()) {
+            hook.beforeBegin();
         }
-        return rs;
+    }
+
+    private void triggerAfterBegin() {
+        for (TransactionHook hook : getCurrentHooks()) {
+            hook.afterBegin();
+        }
+    }
+    private void triggerBeforeCommit() {
+        for (TransactionHook hook : getCurrentHooks()) {
+            hook.beforeCommit();
+        }
+    }
+
+    private void triggerAfterCommit() {
+        for (TransactionHook hook : getCurrentHooks()) {
+            hook.afterCommit();
+        }
+    }
+
+    private void cleanupAfterCommit() {
+        TransactionHookManager.clear();
+    }
+
+    private List<TransactionHook> getCurrentHooks() {
+        return TransactionHookManager.getHooks();
     }
 
 }
