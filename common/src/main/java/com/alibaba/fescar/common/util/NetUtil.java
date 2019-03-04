@@ -27,9 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/10/10 12:14
+ * The type Net util.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /10/10 12:14
  * @FileName: NetUtil
  * @Description:
  */
@@ -43,19 +45,43 @@ public class NetUtil {
 
     private static final Pattern IP_PATTERN = Pattern.compile("\\d{1,3}(\\.\\d{1,3}){3,5}$");
 
+    /**
+     * To string address string.
+     *
+     * @param address the address
+     * @return the string
+     */
     public static String toStringAddress(SocketAddress address) {
         return toStringAddress((InetSocketAddress) address);
     }
 
+    /**
+     * To ip address string.
+     *
+     * @param address the address
+     * @return the string
+     */
     public static String toIpAddress(SocketAddress address) {
         InetSocketAddress inetSocketAddress = (InetSocketAddress)address;
         return inetSocketAddress.getAddress().getHostAddress();
     }
 
+    /**
+     * To string address string.
+     *
+     * @param address the address
+     * @return the string
+     */
     public static String toStringAddress(InetSocketAddress address) {
         return address.getAddress().getHostAddress() + ":" + address.getPort();
     }
 
+    /**
+     * To inet socket address inet socket address.
+     *
+     * @param address the address
+     * @return the inet socket address
+     */
     public static InetSocketAddress toInetSocketAddress(String address) {
         int i = address.indexOf(':');
         String host;
@@ -70,28 +96,49 @@ public class NetUtil {
         return new InetSocketAddress(host, port);
     }
 
+    /**
+     * To long long.
+     *
+     * @param address the address
+     * @return the long
+     */
     public static long toLong(String address){
         InetSocketAddress ad = toInetSocketAddress(address);
         String[] ip = ad.getAddress().getHostAddress().split("\\.");
         long r = 0;
-        r = r | (Long.valueOf(ip[0]) << 40);
-        r = r | (Long.valueOf(ip[1]) << 32);
-        r = r | (Long.valueOf(ip[2]) << 24);
-        r = r | (Long.valueOf(ip[3]) << 16);
+        r = r | (Long.parseLong(ip[0]) << 40);
+        r = r | (Long.parseLong(ip[1]) << 32);
+        r = r | (Long.parseLong(ip[2]) << 24);
+        r = r | (Long.parseLong(ip[3]) << 16);
         r = r | ad.getPort();
         return r;
     }
 
+    /**
+     * Gets local ip.
+     *
+     * @return the local ip
+     */
     public static String getLocalIp() {
         InetAddress address = getLocalAddress();
         return address == null ? LOCALHOST : address.getHostAddress();
     }
 
+    /**
+     * Gets local host.
+     *
+     * @return the local host
+     */
     public static String getLocalHost() {
         InetAddress address = getLocalAddress();
         return address == null ? "localhost" : address.getHostName();
     }
 
+    /**
+     * Gets local address.
+     *
+     * @return the local address
+     */
     public static InetAddress getLocalAddress() {
         if (LOCAL_ADDRESS != null) {
             return LOCAL_ADDRESS;
@@ -141,7 +188,11 @@ public class NetUtil {
         LOGGER.error("Could not get local host ip address, will use 127.0.0.1 instead.");
         return localAddress;
     }
-
+    public static void validAddress(InetSocketAddress address) {
+        if (null == address.getHostName() || 0 == address.getPort()) {
+            throw new IllegalArgumentException("invalid address:" + address);
+        }
+    }
     private static boolean isValidAddress(InetAddress address) {
         if (address == null || address.isLoopbackAddress()) {
             return false;

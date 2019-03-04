@@ -16,11 +16,33 @@
 
 package com.alibaba.fescar.core.context;
 
+/**
+ * The interface Context core.
+ */
 public interface ContextCore {
 
+    /**
+     * Put string.
+     *
+     * @param key   the key
+     * @param value the value
+     * @return the string
+     */
     String put(String key, String value);
 
+    /**
+     * Get string.
+     *
+     * @param key the key
+     * @return the string
+     */
     String get(String key);
 
+    /**
+     * Remove string.
+     *
+     * @param key the key
+     * @return the string
+     */
     String remove(String key);
 }

@@ -16,31 +16,34 @@
 
 package com.alibaba.fescar.rm.datasource.sql;
 
+/**
+ * The interface Sql recognizer.
+ */
 public interface SQLRecognizer {
 
     /**
      * Type of the SQL. INSERT/UPDATE/DELETE ...
      *
-     * @return
+     * @return sql type
      */
     SQLType getSQLType();
 
     /**
      * TableRecords source related in the SQL, including alias if any.
      * SELECT id, name FROM user u WHERE ...
-     * TableRecords source should be 'user u' for this SQL.
+     * Alias should be 'u' for this SQL.
      *
      * @return table source.
      */
-    String getTableSource();
+    String getTableAlias();
 
     /**
      * TableRecords name related in the SQL.
      * SELECT id, name FROM user u WHERE ...
      * TableRecords name should be 'user' for this SQL, without alias 'u'.
      *
-     * @see #getTableSource()
      * @return table name.
+     * @see #getTableAlias() #getTableAlias()
      */
     String getTableName();
 

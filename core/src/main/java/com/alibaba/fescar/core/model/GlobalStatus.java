@@ -16,72 +16,150 @@
 
 package com.alibaba.fescar.core.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Status of global transaction.
  */
 public enum GlobalStatus {
 
+    /**
+     * Un known global status.
+     */
     // Unknown
-    UnKnown,
+    UnKnown(0),
 
+    /**
+     * The Begin.
+     */
     // PHASE 1: can accept new branch registering.
-    Begin,
+    Begin(1),
 
-
-    /** PHASE 2: Running Status: may be changed any time. */
-
+    /**
+     * PHASE 2: Running Status: may be changed any time.
+     */
     // Committing.
-    Committing,
+    Committing(2),
 
+    /**
+     * The Commit retrying.
+     */
     // Retrying commit after a recoverable failure.
-    CommitRetrying,
+    CommitRetrying(3),
 
+    /**
+     * Rollbacking global status.
+     */
     // Rollbacking
-    Rollbacking,
+    Rollbacking(4),
 
+    /**
+     * The Rollback retrying.
+     */
     // Retrying rollback after a recoverable failure.
-    RollbackRetrying,
+    RollbackRetrying(5),
 
+    /**
+     * The Timeout rollbacking.
+     */
     // Rollbacking since timeout
-    TimeoutRollbacking,
+    TimeoutRollbacking(6),
 
+    /**
+     * The Timeout rollback retrying.
+     */
     // Retrying rollback (since timeout) after a recoverable failure.
-    TimeoutRollbackRetrying,
+    TimeoutRollbackRetrying(7),
 
+    /**
+     * All branches can be async committed. The committing is NOT done yet, but it can be seen as committed for TM/RM client.
+     */
+    AsyncCommitting(8),
 
-    /** PHASE 2: Final Status: will NOT change any more. */
-
+    /**
+     * PHASE 2: Final Status: will NOT change any more.
+     */
     // Finally: global transaction is successfully committed.
-    Committed,
+    Committed(9),
 
+    /**
+     * The Commit failed.
+     */
     // Finally: failed to commit
-    CommitFailed,
+    CommitFailed(10),
 
+    /**
+     * The Rollbacked.
+     */
     // Finally: global transaction is successfully rollbacked.
-    Rollbacked,
+    Rollbacked(11),
 
+    /**
+     * The Rollback failed.
+     */
     // Finally: failed to rollback
-    RollbackFailed,
+    RollbackFailed(12),
 
+    /**
+     * The Timeout rollbacked.
+     */
     // Finally: global transaction is successfully rollbacked since timeout.
-    TimeoutRollbacked,
+    TimeoutRollbacked(13),
 
+    /**
+     * The Timeout rollback failed.
+     */
     // Finally: failed to rollback since timeout
-    TimeoutRollbackFailed,
+    TimeoutRollbackFailed(14),
 
-    // Not managed in session map any more
-    Finished;
+    /**
+     * The Finished.
+     */
+    // Not managed in session MAP any more
+    Finished(15);
 
-    public static GlobalStatus get(byte ordinal) {
-        return get((int) ordinal);
+    private int code;
+
+    GlobalStatus(int code) {
+        this.code = code;
     }
 
-    public static GlobalStatus get(int ordinal) {
-        for (GlobalStatus globalStatus : GlobalStatus.values()) {
-            if (globalStatus.ordinal() == ordinal) {
-                return globalStatus;
-            }
+    public int getCode() {
+        return code;
+    }
+
+    private static final Map<Integer, GlobalStatus> MAP = new HashMap<>(values().length);
+
+    static {
+        for (GlobalStatus status : values()) {
+            MAP.put(status.code, status);
         }
-        throw new IllegalArgumentException("Unknown GlobalStatus[" + ordinal + "]");
+    }
+
+    /**
+     * Get global status.
+     *
+     * @param code the code
+     * @return the global status
+     */
+    public static GlobalStatus get(byte code) {
+        return get((int) code);
+    }
+
+    /**
+     * Get global status.
+     *
+     * @param code the code
+     * @return the global status
+     */
+    public static GlobalStatus get(int code) {
+        GlobalStatus status = MAP.get(code);
+
+        if (null == status) {
+            throw new IllegalArgumentException("Unknown GlobalStatus[" + code + "]");
+        }
+
+        return status;
     }
 }

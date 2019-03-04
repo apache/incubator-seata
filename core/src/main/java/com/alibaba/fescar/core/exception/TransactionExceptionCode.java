@@ -16,67 +16,138 @@
 
 package com.alibaba.fescar.core.exception;
 
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * The enum Transaction exception code.
+ */
 public enum TransactionExceptionCode {
 
+    /**
+     * Unknown transaction exception code.
+     */
     //
     Unknown,
 
+    /**
+     * Lock key conflict transaction exception code.
+     */
     //
     LockKeyConflict,
 
+    /**
+     * Io transaction exception code.
+     */
     //
     IO,
 
+    /**
+     * Branch rollback failed retriable transaction exception code.
+     */
     //
     BranchRollbackFailed_Retriable,
 
+    /**
+     * Branch rollback failed unretriable transaction exception code.
+     */
     //
     BranchRollbackFailed_Unretriable,
 
+    /**
+     * Branch register failed transaction exception code.
+     */
     //
     BranchRegisterFailed,
 
+    /**
+     * Branch report failed transaction exception code.
+     */
     //
     BranchReportFailed,
 
+    /**
+     * Lockable check failed transaction exception code.
+     */
     //
     LockableCheckFailed,
 
+    /**
+     * Branch transaction not exist transaction exception code.
+     */
     //
     BranchTransactionNotExist,
 
+    /**
+     * Global transaction not exist transaction exception code.
+     */
     //
     GlobalTransactionNotExist,
 
+    /**
+     * Global transaction not active transaction exception code.
+     */
     //
     GlobalTransactionNotActive,
 
+    /**
+     * Global transaction status invalid transaction exception code.
+     */
     //
     GlobalTransactionStatusInvalid,
 
+    /**
+     * Failed to send branch commit request transaction exception code.
+     */
     //
     FailedToSendBranchCommitRequest,
 
+    /**
+     * Failed to send branch rollback request transaction exception code.
+     */
     //
     FailedToSendBranchRollbackRequest,
 
+    /**
+     * Failed to add branch transaction exception code.
+     */
     //
     FailedToAddBranch,
 
-
     ;
 
+    private static final Map<Integer, TransactionExceptionCode> MAP = new HashMap<>(values().length);
 
+    static {
+        for (TransactionExceptionCode code : values()) {
+            MAP.put(code.ordinal(), code);
+        }
+    }
+
+    /**
+     * Get transaction exception code.
+     *
+     * @param ordinal the ordinal
+     * @return the transaction exception code
+     */
     public static TransactionExceptionCode get(byte ordinal) {
         return get((int) ordinal);
     }
+
+    /**
+     * Get transaction exception code.
+     *
+     * @param ordinal the ordinal
+     * @return the transaction exception code
+     */
     public static TransactionExceptionCode get(int ordinal) {
-        for (TransactionExceptionCode value : TransactionExceptionCode.values()) {
-            if (value.ordinal() == ordinal) {
-                return value;
-            }
+        TransactionExceptionCode code = MAP.get(ordinal);
+
+        if (null == code) {
+            throw new IllegalArgumentException("Unknown TransactionExceptionCode[" + ordinal + "]");
         }
-        throw new IllegalArgumentException("Unknown TransactionExceptionCode[" + ordinal + "]");
+
+        return code;
     }
 
 }

@@ -24,7 +24,7 @@ import com.alibaba.fescar.core.protocol.AbstractMessage;
  *
  * @author min.ji
  * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
+ * @Project: fescar -all
  * @DateTime: 2018 /11/29 15:24
  * @FileName: NettyPoolKey
  * @Description:
@@ -39,7 +39,7 @@ public class NettyPoolKey {
      * Instantiates a new Netty pool key.
      *
      * @param transactionRole the client role
-     * @param address    the address
+     * @param address         the address
      */
     public NettyPoolKey(TransactionRole transactionRole, String address) {
         this.transactionRole = transactionRole;
@@ -50,8 +50,8 @@ public class NettyPoolKey {
      * Instantiates a new Netty pool key.
      *
      * @param transactionRole the client role
-     * @param address    the address
-     * @param message    the message
+     * @param address         the address
+     * @param message         the message
      */
     public NettyPoolKey(TransactionRole transactionRole, String address, AbstractMessage message) {
         this.transactionRole = transactionRole;
@@ -147,7 +147,7 @@ public class NettyPoolKey {
         /**
          * Gets value.
          *
-         * @return value
+         * @return value value
          */
         public int getValue() {
             return value;

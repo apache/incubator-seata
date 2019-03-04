@@ -30,8 +30,20 @@ import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLSelectRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 
+/**
+ * The type Select for update executor.
+ *
+ * @param <S> the type parameter
+ */
 public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactionalExecutor<ResultSet, S> {
 
+    /**
+     * Instantiates a new Select for update executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param sqlRecognizer     the sql recognizer
+     */
     public SelectForUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<ResultSet, S> statementCallback, SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
@@ -47,8 +59,8 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
         boolean originalAutoCommit = conn.getAutoCommit();
 
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
-        selectSQLAppender.append(getTableMeta().getPkName());
-        selectSQLAppender.append(" FROM " + getTableMeta().getTableName());
+        selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
+        selectSQLAppender.append(" FROM " + getFromTableInSQL());
         String whereCondition = null;
         ArrayList<Object> paramAppender = new ArrayList<>();
         if (statementProxy instanceof ParametersHolder) {
@@ -87,7 +99,8 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
                     }
 
                     TableRecords selectPKRows = TableRecords.buildRecords(getTableMeta(), rsPK);
-                    statementProxy.getConnectionProxy().checkLock(selectPKRows);
+                    String lockKeys = buildLockKey(selectPKRows);
+                    statementProxy.getConnectionProxy().checkLock(lockKeys);
                     break;
 
                 } catch (LockConflictException lce) {

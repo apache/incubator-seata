@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -68,8 +70,8 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
     private File currDataFile;
     private RandomAccessFile currRaf;
     private FileChannel currFileChannel;
-    private static long recoverCurrOffset = 0;
-    private static long recoverHisOffset = 0;
+    private long recoverCurrOffset = 0;
+    private long recoverHisOffset = 0;
     private SessionManager sessionManager;
     private String currFullFileName;
     private String hisFullFileName;
@@ -79,6 +81,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
      *
      * @param fullFileName   the dir path
      * @param sessionManager the session manager
+     * @throws IOException the io exception
      */
     public FileTransactionStoreManager(String fullFileName, SessionManager sessionManager) throws IOException {
         initFile(fullFileName);
@@ -175,7 +178,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
 
         } catch (IOException exx) {
         } finally {
-            closeFile(raf, null);
+            closeFile(raf);
         }
         return false;
     }
@@ -226,7 +229,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                         recoverCurrOffset = fileChannel.position();
                     }
                 }
-                closeFile(raf, fileChannel);
+                closeFile(raf);
             } catch (IOException exx) {
                 LOGGER.error("file close error," + exx.getMessage());
             }
@@ -239,12 +242,8 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
         return file.getName().endsWith(HIS_DATA_FILENAME_POSTFIX);
     }
 
-    private void closeFile(RandomAccessFile raf, FileChannel fileChannel) {
+    private void closeFile(RandomAccessFile raf) {
         try {
-            if (null != fileChannel) {
-                fileChannel.close();
-                fileChannel = null;
-            }
             if (null != raf) {
                 raf.close();
                 raf = null;
@@ -263,7 +262,8 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
         public void run() {
             while (!stopping) {
                 try {
-                    TransactionWriteFuture transactionWriteFuture = transactionWriteFutureQueue.poll(MAX_POOL_TIME_MILLS,
+                    TransactionWriteFuture transactionWriteFuture = transactionWriteFutureQueue.poll(
+                        MAX_POOL_TIME_MILLS,
                         TimeUnit.MILLISECONDS);
                     if (null == transactionWriteFuture) {
                         flushOnCondition();
@@ -350,12 +350,9 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                     }
                 }
                 currFileChannel.force(true);
-                File hisDataFile = new File(hisFullFileName);
-                if (hisDataFile.exists()) {
-                    hisDataFile.delete();
-                }
-                closeFile(currRaf, currFileChannel);
-                currDataFile.renameTo(new File(hisFullFileName));
+                closeFile(currRaf);
+                Files.move(currDataFile.toPath(), new File(hisFullFileName).toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException exx) {
                 LOGGER.error("save history data file error," + exx.getMessage());
             } finally {

@@ -22,64 +22,47 @@ import java.util.concurrent.TimeoutException;
 import io.netty.channel.Channel;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/10/15 16:56
+ * The interface Server message sender.
+ *
+ * @Author: jimin.jm @alibaba-inc.com
+ * @Project: fescar -all
+ * @DateTime: 2018 /10/15 16:56
  * @FileName: ServerMessageSender
  * @Description:
  */
 public interface ServerMessageSender {
+
     /**
-     * Send request to client by the upper level.
-     * Actually, just BranchCommitRequest/BranchRollbackRequest will be sent from server to RM client.
-     * No case for sending a request to TM client. ResourceId is useless by case of sending a TM request.
+     * Send response.
      *
-     * @param resourceId resourceId
-     * @param clientIP IP of the target client
-     * @param applicationId applicationId of the target client
-     * @param request request to be sent
-     */
-    void sendRequest(String resourceId, String clientIP, String applicationId, Object request /* TODO: this should be AbstractMessage */);
-
-    /**
-     * @param msgId
-     * @param dbKey
-     * @param clientIp
-     * @param clientAppName
-     * @param msg
-     */
-    void sendResponse(long msgId, String dbKey, String clientIp, String clientAppName, Object msg);
-
-    /**
-     * @param msgId
-     * @param channel
-     * @param msg
+     * @param msgId   the msg id
+     * @param channel the channel
+     * @param msg     the msg
      */
     void sendResponse(long msgId, Channel channel, Object msg);
 
     /**
-     * 同步调用client
+     * Sync call to RM with timeout.
      *
-     * @param dbKey
-     * @param clientIp
-     * @param clientAppName
-     * @param msg
-     * @return
-     * @throws IOException
+     * @param resourceId Resource ID
+     * @param clientId   Client ID
+     * @param message    Request message
+     * @param timeout    timeout of the call
+     * @return Response message
+     * @throws IOException .
+     * @throws TimeoutException the timeout exception
      */
-    Object sendSynRequest(String dbKey, String clientIp, String clientAppName,
-                          Object msg, long timeout) throws IOException, TimeoutException;
+    Object sendSyncRequest(String resourceId, String clientId, Object message, long timeout) throws IOException, TimeoutException;
 
     /**
-     * 同步调用client
+     * Sync call to RM
      *
-     * @param dbKey
-     * @param clientIp
-     * @param clientAppName
-     * @param msg
-     * @return
-     * @throws IOException
+     * @param resourceId Resource ID
+     * @param clientId   Client ID
+     * @param message    Request message
+     * @return Response message
+     * @throws IOException .
+     * @throws TimeoutException the timeout exception
      */
-    Object sendSynRequest(String dbKey, String clientIp, String clientAppName,
-                          Object msg) throws IOException, TimeoutException;
+    Object sendSyncRequest(String resourceId, String clientId, Object message) throws IOException, TimeoutException;
 }
