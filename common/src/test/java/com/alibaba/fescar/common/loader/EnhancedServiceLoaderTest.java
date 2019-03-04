@@ -19,9 +19,11 @@
 
 package com.alibaba.fescar.common.loader;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 import org.junit.Assert;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 /**
  * @author melon.zhao
@@ -35,7 +37,7 @@ public class EnhancedServiceLoaderTest {
         Assert.assertEquals(load.say(), "Bonjour");
     }
 
-    @Test(expectedExceptions = EnhancedServiceNotFoundException.class)
+    @Test(expected = EnhancedServiceNotFoundException.class)
     public void testLoadException() {
         EnhancedServiceLoaderTest load = EnhancedServiceLoader.load(EnhancedServiceLoaderTest.class);
     }
@@ -44,28 +46,28 @@ public class EnhancedServiceLoaderTest {
     @Test
     public void testLoadByClass() {
         Hello load = EnhancedServiceLoader.load(Hello.class);
-        Assert.assertEquals(load.say(), "Bonjour");
+        assertThat(load.say()).isEqualTo("Bonjour");
     }
 
     @Test
     public void testLoadByClassAndActivateName() {
         Hello englishHello = EnhancedServiceLoader.load(Hello.class, "EnglishHello");
-        Assert.assertEquals(englishHello.say(), "hello!");
+        assertThat(englishHello.say()).isEqualTo("hello!");
     }
 
     @Test
     public void testLoadByClassAndClassLoaderAndActivateName() {
         Hello englishHello = EnhancedServiceLoader
             .load(Hello.class, "EnglishHello", EnhancedServiceLoaderTest.class.getClassLoader());
-        Assert.assertEquals(englishHello.say(), "hello!");
+        assertThat(englishHello.say()).isEqualTo("hello!");
     }
 
     @Test
     public void getAllExtensionClass() {
         List<Class> allExtensionClass = EnhancedServiceLoader.getAllExtensionClass(Hello.class);
-        Assert.assertTrue(allExtensionClass.get(2).getSimpleName().equals(FrenchHello.class.getSimpleName()));
-        Assert.assertTrue(allExtensionClass.get(1).getSimpleName().equals(EnglishHello.class.getSimpleName()));
-        Assert.assertTrue(allExtensionClass.get(0).getSimpleName().equals(ChineseHello.class.getSimpleName()));
+        assertThat(allExtensionClass.get(2).getSimpleName()).isEqualTo((FrenchHello.class.getSimpleName()));
+        assertThat(allExtensionClass.get(1).getSimpleName()).isEqualTo((EnglishHello.class.getSimpleName()));
+        assertThat(allExtensionClass.get(0).getSimpleName()).isEqualTo((ChineseHello.class.getSimpleName()));
 
     }
 
@@ -73,7 +75,7 @@ public class EnhancedServiceLoaderTest {
     public void getAllExtensionClass1() {
         List<Class> allExtensionClass = EnhancedServiceLoader
             .getAllExtensionClass(Hello.class, ClassLoader.getSystemClassLoader());
-        Assert.assertTrue(!allExtensionClass.isEmpty());
+        assertThat(allExtensionClass).isNotEmpty();
     }
 
 

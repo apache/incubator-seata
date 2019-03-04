@@ -19,9 +19,10 @@
 
 package com.alibaba.fescar.common.exception;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.sql.SQLException;
-import org.junit.Assert;
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 /**
  * @author melon.zhao
@@ -29,65 +30,98 @@ import org.testng.annotations.Test;
  */
 public class FrameworkExceptionTest {
 
-    Message message = new Message();
+    private Message message = new Message();
 
     @Test
     public void testGetErrcode() {
         try {
             message.print4();
         } catch (FrameworkException e) {
-            Assert.assertEquals(e.getErrcode(), FrameworkErrorCode.UnknownAppError);
+            assertThat(e).isInstanceOf(FrameworkException.class).hasMessage(FrameworkErrorCode.UnknownAppError.errMessage);
+            assertThat(e.getErrcode()).isEqualTo(FrameworkErrorCode.UnknownAppError);
         }
     }
 
-    @Test(expectedExceptions = FrameworkException.class)
+    @Test
     public void testNestedException() {
-        message.print();
+        try {
+            message.print();
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(FrameworkException.class).hasMessage("");
+        }
     }
 
-    @Test(expectedExceptions = FrameworkException.class)
+    @Test
     public void testNestedException1() {
-        message.print1();
+        try {
+            message.print1();
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(FrameworkException.class).hasMessage("nestedException");
+        }
     }
 
-    @Test(expectedExceptions = FrameworkException.class)
+    @Test
     public void testNestedException2() {
-        message.print1();
+        try {
+            message.print2();
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(SQLException.class).hasMessageContaining("Message");
+        }
     }
 
-    @Test(expectedExceptions = SQLException.class)
-    public void testNestedException3() throws SQLException {
-        message.print2();
+    @Test
+    public void testNestedException3()  {
+        try {
+            message.print3();
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(SQLException.class).hasMessageContaining("Message");
+        }
     }
 
-    @Test(expectedExceptions = SQLException.class)
-    public void testNestedException4() throws SQLException {
-        message.print3();
-    }
 
-    @Test(expectedExceptions = FrameworkException.class)
+    @Test
     public void testNestedException5() {
-        message.print5();
+        try {
+            message.print5();
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(FrameworkException.class).hasMessage(FrameworkErrorCode.ExceptionCaught.errMessage);
+        }
     }
 
-    @Test(expectedExceptions = FrameworkException.class)
+    @Test
     public void testNestedException6() {
-        message.print6();
+        try {
+            message.print6();
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(FrameworkException.class).hasMessage("frameworkException");
+        }
     }
 
-    @Test(expectedExceptions = FrameworkException.class)
+    @Test
     public void testNestedException7() {
-        message.print7();
+        try {
+            message.print7();
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(FrameworkException.class).hasMessage("frameworkException");
+        }
     }
 
-    @Test(expectedExceptions = FrameworkException.class)
+    @Test
     public void testNestedException8() {
-        message.print8();
+        try {
+            message.print8();
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(FrameworkException.class).hasMessage("throw");
+        }
     }
 
-    @Test(expectedExceptions = FrameworkException.class)
+    @Test
     public void testNestedException9() {
-        message.print9();
+        try {
+            message.print9();
+        } catch (Exception e) {
+            assertThat(e).isInstanceOf(FrameworkException.class).hasMessage("frameworkExceptionMsg");
+        }
     }
 
 

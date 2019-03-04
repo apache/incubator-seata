@@ -20,8 +20,9 @@
 package com.alibaba.fescar.common.thread;
 
 
-import org.junit.Assert;
-import org.testng.annotations.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.Test;
 
 /**
  * @author melon.zhao
@@ -36,7 +37,7 @@ public class NamedThreadFactoryTest {
         Thread testNameThread = namedThreadFactory
             .newThread(() -> System.out.println(Thread.currentThread().getName()));
         System.out.println(testNameThread.toString());
-        Assert.assertTrue(testNameThread.getName().startsWith("testNameThread"));
-        Assert.assertTrue(testNameThread.isDaemon());
+        assertThat(testNameThread.getName()).startsWith("testNameThread");
+        assertThat(testNameThread.isDaemon()).isTrue();
     }
 }
