@@ -21,7 +21,7 @@
 
     <groupId>com.alibaba.fescar</groupId>
     <artifactId>fescar-all</artifactId>
-    <version>0.2.3-SNAPSHOT</version>
+    <version>0.2.3</version>
     <modules>
         <module>config</module>
         <module>common</module>
@@ -107,6 +107,21 @@
         <apollo-client.version>1.1.0</apollo-client.version>
         <redis-clients.version>2.9.0</redis-clients.version>
     </properties>
+    <!--test-->
+    <dependencies>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>2.6.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.6.3</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     <dependencyManagement>
         <dependencies>
             <dependency>
