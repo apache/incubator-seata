@@ -17,13 +17,13 @@
 package com.alibaba.fescar.common.thread;
 
 import org.junit.Test;
-import org.testng.Assert;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Created by guoyao on 2019/2/26.
@@ -43,6 +43,7 @@ public class RejectedPolicysTest {
                         new NamedThreadFactory("OldestRunsPolicy", DEFAULT_CORE_POOL_SIZE), RejectedPolicys.runsOldestTaskPolicy());
         CountDownLatch downLatch1=new CountDownLatch(1);
         CountDownLatch downLatch2=new CountDownLatch(1);
+        CountDownLatch downLatch3=new CountDownLatch(1);
         //task1
         poolExecutor.execute(new Runnable() {
             @Override
@@ -56,7 +57,7 @@ public class RejectedPolicysTest {
                 atomicInteger.getAndAdd(1);
             }
         });
-        Assert.assertEquals(atomicInteger.get(), 0);
+        assertThat(atomicInteger.get()).isEqualTo(0);
         //task2
         poolExecutor.execute(new Runnable() {
             @Override
@@ -70,15 +71,19 @@ public class RejectedPolicysTest {
             @Override
             public void run() {
                 downLatch2.countDown();
+                //task3 run
                 atomicInteger.getAndAdd(3);
+                downLatch3.countDown();
             }
         });
         //only the task2 run which is the oldest task of queue
-        Assert.assertEquals(atomicInteger.get(), 2);
+        assertThat(atomicInteger.get()).isEqualTo(2);
         downLatch1.countDown();
         downLatch2.await();
+        //wait task3 run +3
+        downLatch3.await();
         //run task3
-        Assert.assertEquals(atomicInteger.get(), 6);
+        assertThat(atomicInteger.get()).isEqualTo(6);
 
     }
 }
