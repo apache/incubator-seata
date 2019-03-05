@@ -14,9 +14,8 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.common;
+package com.alibaba.fescar.common.util;
 
-import com.alibaba.fescar.common.util.StringUtils;
 import org.junit.Test;
 
 import javax.sql.rowset.serial.SerialBlob;
@@ -27,8 +26,8 @@ import java.sql.SQLException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * @author melon.zhao
- * @since 2019/2/20
+ * @author Otis.z
+ * @date 2019/2/20
  */
 public class StringUtilsTest {
 
