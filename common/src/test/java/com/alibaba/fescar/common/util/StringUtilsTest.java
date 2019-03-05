@@ -14,9 +14,8 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.common;
+package com.alibaba.fescar.common.util;
 
-import com.alibaba.fescar.common.util.StringUtils;
 import org.junit.Test;
 
 import javax.sql.rowset.serial.SerialBlob;
