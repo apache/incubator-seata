@@ -16,20 +16,16 @@
 
 package com.alibaba.fescar.spring.annotation;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
-
-import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.rm.RMClient;
-import com.alibaba.fescar.rm.RMClientAT;
+import com.alibaba.fescar.rm.tcc.remoting.Protocols;
+import com.alibaba.fescar.rm.tcc.remoting.RemotingDesc;
+import com.alibaba.fescar.rm.tcc.remoting.parser.DefaultRemotingParser;
+import com.alibaba.fescar.spring.tcc.TccActionInterceptor;
 import com.alibaba.fescar.tm.TMClient;
 import com.alibaba.fescar.tm.api.DefaultFailureHandlerImpl;
 import com.alibaba.fescar.tm.api.FailureHandler;
-
+import org.aopalliance.intercept.MethodInterceptor;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,6 +36,15 @@ import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
 
 /**
  * The type Global transaction scanner.
@@ -50,7 +55,7 @@ import org.springframework.beans.factory.InitializingBean;
  * @FileName: GlobalTransactionScanner
  * @Description:
  */
-public class GlobalTransactionScanner extends AbstractAutoProxyCreator implements InitializingBean {
+public class GlobalTransactionScanner extends AbstractAutoProxyCreator implements InitializingBean, ApplicationContextAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionScanner.class);
 
@@ -63,7 +68,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     private static final Set<String> PROXYED_SET = new HashSet<>();
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
 
-    private GlobalTransactionalInterceptor interceptor;
+    private MethodInterceptor interceptor;
 
     private final String applicationId;
     private final String txServiceGroup;
@@ -72,6 +77,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         ConfigurationFactory.getInstance().getBoolean("service.disableGlobalTransaction", false);
 
     private final FailureHandler failureHandlerHook;
+
+    private ApplicationContext applicationContext;
 
     /**
      * Instantiates a new Global transaction scanner.
@@ -157,7 +164,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
                     + txServiceGroup + "]");
         }
-
         //init RM
         RMClient.init(applicationId, txServiceGroup);
         if (LOGGER.isInfoEnabled()) {
@@ -179,21 +185,29 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 if (PROXYED_SET.contains(beanName)) {
                     return bean;
                 }
-                Class<?> serviceInterface = findTargetClass(bean);
-                Method[] methods = serviceInterface.getMethods();
-                LinkedList<MethodDesc> methodDescList = new LinkedList<>();
-                for (Method method : methods) {
-                    GlobalTransactional anno = method.getAnnotation(GlobalTransactional.class);
-                    if (anno != null) {
-                        methodDescList.add(makeMethodDesc(anno, method));
+                //是否 TCC 动态代理
+                if(isTccAutoProxy(bean, beanName)){
+                    //TCC 动态代理， 代理sofa:reference /  dubbo:reference / LocalTCC
+                    interceptor = new TccActionInterceptor();
+                }else{
+                    //@GlobalTransactional 动态代理
+                    Class<?> serviceInterface = findTargetClass(bean);
+                    Method[] methods = serviceInterface.getMethods();
+                    LinkedList<MethodDesc> methodDescList = new LinkedList<>();
+                    for (Method method : methods) {
+                        GlobalTransactional anno = method.getAnnotation(GlobalTransactional.class);
+                        if (anno != null) {
+                            methodDescList.add(makeMethodDesc(anno, method));
+                        }
+                    }
+                    if (methodDescList.isEmpty()) {
+                        return bean;
+                    }
+                    if (interceptor == null) {
+                        interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
                     }
                 }
-                if (methodDescList.isEmpty()) {
-                    return bean;
-                }
-                if (interceptor == null) {
-                    interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
-                }
+                LOGGER.info("Bean["+ bean.getClass().getName() +"] with name ["+beanName+"] would use proxy [" + interceptor.getClass().getName()  + "]");
                 if (!AopUtils.isAopProxy(bean)) {
                     bean = super.wrapIfNecessary(bean, beanName, cacheKey);
                 } else {
@@ -208,6 +222,60 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
             }
         } catch (Exception exx) {
             throw new RuntimeException(exx);
+        }
+    }
+
+    /**
+     * is auto proxy TCC bean
+     * @param bean
+     * @param beanName
+     * @return
+     */
+    protected boolean isTccAutoProxy( Object bean, String beanName){
+        //解析 remoting TCC bean信息
+        parserRemotingServiceInfo(bean, beanName);
+        //获取解析结果
+        RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
+        if(remotingDesc == null){
+            //非否proxy bean
+            if(!isProxy(bean)){
+                return false;
+            }
+            //factory bean  二次判断，以防bean 扫描遗漏
+            String factoryBeanName = new StringBuilder().append("&").append(beanName).toString();
+            Object factoryBean = null;
+            if(applicationContext.containsBean(factoryBeanName)){
+                factoryBean = applicationContext.getBean(factoryBeanName);
+            }
+            if(factoryBean == null ){
+                return false;
+            }
+            //递归判断
+            return isTccAutoProxy(factoryBean, beanName);
+        }else {
+            Protocols protocols = Protocols.valueOf(remotingDesc.getProtocol());
+            if(Protocols.IN_JVM.equals(protocols)){
+                //in jvm TCC bean
+                return true;
+            }
+            // sofa:reference /  dubbo:reference  , 需要AOP切面
+            if(remotingDesc.isReference()){
+                return true;
+            }
+            return false;
+        }
+    }
+
+    /**
+     * 解析 remoting bean 信息
+     * @param bean
+     * @param beanName
+     */
+    protected void parserRemotingServiceInfo(Object bean, String beanName) {
+        //是否是远程服务bean
+        if(DefaultRemotingParser.get().isRemoting(bean, beanName)) {
+            //解析remoting bean 信息
+            DefaultRemotingParser.get().parserRemotingServiceInfo(bean, beanName);
         }
     }
 
@@ -239,11 +307,23 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         return (AdvisedSupport)advised.get(dynamicAdvisedInterceptor);
     }
 
+    public static boolean isProxy(Object bean){
+        if(bean == null){
+            return false;
+        }
+        if (Proxy.class.isAssignableFrom(bean.getClass()) || AopUtils.isAopProxy(bean)) {
+            return true;
+        }else{
+            return false;
+        }
+    }
+
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
         throws BeansException {
         return new Object[] {interceptor};
     }
+
 
     @Override
     public void afterPropertiesSet() {
@@ -255,5 +335,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         }
         initClient();
 
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }

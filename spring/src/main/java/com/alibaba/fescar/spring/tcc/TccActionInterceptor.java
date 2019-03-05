@@ -19,9 +19,9 @@ import com.alibaba.fescar.rm.tcc.interceptor.ActionInterceptorHandler;
  * @author zhangsen
  *
  */
-public class TccActionSpringInterceptor implements MethodInterceptor {
+public class TccActionInterceptor implements MethodInterceptor {
 	
-    private static final Logger LOGGER = LoggerFactory.getLogger(TccActionSpringInterceptor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptor.class);
 
 	private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 	

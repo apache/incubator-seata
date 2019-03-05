@@ -18,7 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * the default RM event handler implement
+ * the default RM event handler implement, deal with the phase two events
  *
  * @author zhangsen
  */
@@ -26,7 +26,7 @@ public class DefaultRMHandler extends AbstractRMHandler {
 
     protected static Map<BranchType, AbstractRMHandler> allRMHandlersMap = new ConcurrentHashMap<BranchType, AbstractRMHandler>();
 
-    private DefaultRMHandler(){
+    protected DefaultRMHandler(){
         initRMHandlers();
     }
 
@@ -43,7 +43,6 @@ public class DefaultRMHandler extends AbstractRMHandler {
     public BranchCommitResponse handle(BranchCommitRequest request) {
         return getRMHandler(request.getBranchType()).handle(request);
     }
-
 
     @Override
     public BranchRollbackResponse handle(BranchRollbackRequest request) {

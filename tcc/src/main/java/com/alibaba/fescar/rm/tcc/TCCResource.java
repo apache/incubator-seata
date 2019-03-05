@@ -37,7 +37,17 @@ public class TCCResource implements Resource {
     /**
      * 提交方法
      */
+    private String commitMethodName;
+
+    /**
+     * 提交方法
+     */
     private Method commitMethod;
+
+    /**
+     * 回滚方法
+     */
+    private String rollbackMethodName;
 
     /**
      * 回滚方法
@@ -111,5 +121,34 @@ public class TCCResource implements Resource {
 
     public void setRollbackMethod(Method rollbackMethod) {
         this.rollbackMethod = rollbackMethod;
+    }
+
+    public String getCommitMethodName() {
+        return commitMethodName;
+    }
+
+    public void setCommitMethodName(String commitMethodName) {
+        this.commitMethodName = commitMethodName;
+    }
+
+    public String getRollbackMethodName() {
+        return rollbackMethodName;
+    }
+
+    public void setRollbackMethodName(String rollbackMethodName) {
+        this.rollbackMethodName = rollbackMethodName;
+    }
+
+    @Override
+    public int hashCode() {
+        return actionName.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof TCCResource)){
+            return false;
+        }
+        return this.actionName.equals(((TCCResource)obj).actionName);
     }
 }
