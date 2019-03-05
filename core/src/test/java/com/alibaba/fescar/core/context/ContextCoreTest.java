@@ -20,7 +20,8 @@ package com.alibaba.fescar.core.context;
 import org.junit.Test;
 import static org.assertj.core.api.Assertions.assertThat;
 /**
- * Created by guoyao on 2019/2/28.
+ * @author guoyao
+ * @date 2019/3/5
  */
 public class ContextCoreTest {
 
