@@ -58,6 +58,9 @@ public class RegistryFactory {
             case Redis:
                 registryService = RedisRegistryServiceImpl.getInstance();
                 break;
+            case Eureka:
+                registryService = EurekaRegistryServiceImpl.getInstance();
+                break;
             case File:
                 registryService = FileRegistryServiceImpl.getInstance();
                 break;
