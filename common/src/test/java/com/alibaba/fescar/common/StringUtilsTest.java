@@ -27,8 +27,8 @@ import java.sql.SQLException;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * @author melon.zhao
- * @since 2019/2/20
+ * @author Otis.z
+ * @date  2019/2/20
  */
 public class StringUtilsTest {
 
