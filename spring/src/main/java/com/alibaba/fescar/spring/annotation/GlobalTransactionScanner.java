@@ -187,9 +187,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 }
                 //是否 TCC 动态代理
                 if(isTccAutoProxy(bean, beanName)){
-                    //TCC 动态代理， 代理sofa:reference /  dubbo:reference / LocalTCC
+                    //TCC 动态代理，代理 proxy bean of sofa:reference/dubbo:reference , and LocalTCC
                     interceptor = new TccActionInterceptor();
-                }else{
+                }else {
                     //@GlobalTransactional 动态代理
                     Class<?> serviceInterface = findTargetClass(bean);
                     Method[] methods = serviceInterface.getMethods();
@@ -207,7 +207,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                         interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
                     }
                 }
-                LOGGER.info("Bean["+ bean.getClass().getName() +"] with name ["+beanName+"] would use proxy [" + interceptor.getClass().getName()  + "]");
+                LOGGER.info("Bean["+ bean.getClass().getName() +"] with name ["+beanName+"] would use interceptor [" + interceptor.getClass().getName()  + "]");
                 if (!AopUtils.isAopProxy(bean)) {
                     bean = super.wrapIfNecessary(bean, beanName, cacheKey);
                 } else {
@@ -232,51 +232,78 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
      * @return
      */
     protected boolean isTccAutoProxy( Object bean, String beanName){
-        //解析 remoting TCC bean信息
-        parserRemotingServiceInfo(bean, beanName);
-        //获取解析结果
-        RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-        if(remotingDesc == null){
-            //非否proxy bean
-            if(!isProxy(bean)){
-                return false;
+        //解析remoting bean 信息
+        boolean isRemotingBean = parserRemotingServiceInfo(bean, beanName);
+        //是否是远程服务bean
+        if(isRemotingBean) {
+            // sofa:reference / dubbo:reference, factory bean 不代理
+            return false;
+        }else{
+            //获取解析结果
+            RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
+            if(remotingDesc == null){
+                //是否 proxy bean
+                if(!isProxy(bean)){
+                    return false;
+                }
+                //the FactoryBean of proxy bean，以防 bean 扫描遗漏
+                String factoryBeanName = new StringBuilder().append("&").append(beanName).toString();
+                Object factoryBean = null;
+                if(applicationContext.containsBean(factoryBeanName)){
+                    factoryBean = applicationContext.getBean(factoryBeanName);
+                }
+                //无factory bean，无需动态代理
+                if(factoryBean == null ){
+                    return false;
+                }
+                //解析factory bean信息
+                parserRemotingServiceInfo(factoryBean, beanName);
+                remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
+                //判断是否需要代理
+                return isTccProxyTargetBean(remotingDesc);
+            }else {
+                //判断是否需要代理
+                return isTccProxyTargetBean(remotingDesc);
             }
-            //factory bean  二次判断，以防bean 扫描遗漏
-            String factoryBeanName = new StringBuilder().append("&").append(beanName).toString();
-            Object factoryBean = null;
-            if(applicationContext.containsBean(factoryBeanName)){
-                factoryBean = applicationContext.getBean(factoryBeanName);
-            }
-            if(factoryBean == null ){
-                return false;
-            }
-            //递归判断
-            return isTccAutoProxy(factoryBean, beanName);
-        }else {
-            Protocols protocols = Protocols.valueOf(remotingDesc.getProtocol());
-            if(Protocols.IN_JVM.equals(protocols)){
-                //in jvm TCC bean， 创建 AOP 切面
-                return true;
-            }
-            // sofa:reference /  dubbo:reference, 需要创建AOP切面
-            if(remotingDesc.isReference()){
-                return true;
-            }
+        }
+    }
+
+    /**
+     * 是否是TCC代理的目标bean: LocalTCC , the proxy bean of sofa:reference/dubbo:reference
+     * @param remotingDesc
+     * @return
+     */
+    protected boolean isTccProxyTargetBean(RemotingDesc remotingDesc){
+        if(remotingDesc == null) {
             return false;
         }
+        Protocols protocols = Protocols.valueOf(remotingDesc.getProtocol());
+        //LocalTCC
+        if(Protocols.IN_JVM.equals(protocols)){
+            //in jvm TCC bean， 创建 AOP 切面
+            return true;
+        }
+        // sofa:reference /  dubbo:reference, 需要创建AOP切面
+        if(remotingDesc.isReference()){
+            return true;
+        }
+        return false;
     }
 
     /**
      * 解析 remoting bean 信息，提取 sofa:service、sofa:reference、dubbo:reference、dubbo:service 信息
      * @param bean
      * @param beanName
+     * @return 是 sofa:service、sofa:reference、dubbo:reference、dubbo:service 返回true，否则返回false
      */
-    protected void parserRemotingServiceInfo(Object bean, String beanName) {
+    protected boolean parserRemotingServiceInfo(Object bean, String beanName) {
         //是否是远程服务bean
         if(DefaultRemotingParser.get().isRemoting(bean, beanName)) {
             //解析remoting bean 信息
             DefaultRemotingParser.get().parserRemotingServiceInfo(bean, beanName);
+            return true;
         }
+        return false;
     }
 
     private MethodDesc makeMethodDesc(GlobalTransactional anno, Method method) {
