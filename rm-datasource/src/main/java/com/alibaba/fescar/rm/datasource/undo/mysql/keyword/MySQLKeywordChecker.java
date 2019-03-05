@@ -26,6 +26,24 @@ import org.apache.commons.lang3.StringUtils;
  * MySQL keyword checker
  */
 public class MySQLKeywordChecker implements KeywordChecker {
+    private static volatile KeywordChecker keywordChecker;
+
+    private MySQLKeywordChecker(){}
+
+    /**
+     * get instance of type MySQL keyword checker
+     * @return
+     */
+    public static KeywordChecker getInstance(){
+        if(keywordChecker==null){
+            synchronized (MySQLKeywordChecker.class){
+                if(keywordChecker==null){
+                    keywordChecker=new MySQLKeywordChecker();
+                }
+            }
+        }
+        return keywordChecker;
+    }
     /**
      * MySQL keyword
      */
