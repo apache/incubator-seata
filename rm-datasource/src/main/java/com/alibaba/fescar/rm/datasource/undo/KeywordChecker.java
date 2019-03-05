@@ -18,7 +18,7 @@ package com.alibaba.fescar.rm.datasource.undo;
 
 /**
  * @author Wu
- * xingfudeshi@gmail.com
+ * @date 2019/3/5
  * The interface Keyword checker
  */
 public interface KeywordChecker {
