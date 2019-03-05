@@ -34,6 +34,8 @@ import java.sql.*;
 
 
 /**
+ * @author Wu
+ * @date 2019/3/5
  * The type MySQL keyword checker test.
  */
 public class MySQLKeywordCheckerTest {

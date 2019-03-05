@@ -22,7 +22,7 @@ import com.alibaba.fescar.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
 
 /**
  * @author Wu
- * xingfudeshi@gmail.com
+ * @date 2019/3/5
  * The Type keyword checker factory
  */
 public class KeywordCheckerFactory {
