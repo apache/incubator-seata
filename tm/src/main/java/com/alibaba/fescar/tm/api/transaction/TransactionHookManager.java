@@ -23,7 +23,7 @@ import java.util.*;
  */
 public final class TransactionHookManager {
 
-    private static final ThreadLocal<Set<TransactionHook>> hooksLocal=new ThreadLocal<>();
+    private static final ThreadLocal<LinkedHashSet<TransactionHook>> hooksLocal=new ThreadLocal<>();
 
     /**
      * get the current hooks
