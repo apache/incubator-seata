@@ -23,8 +23,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
- * @author melon.zhao
- * @since 2019/2/22
+ * @author Otis.z
+ * @date 2019/2/22
  */
 public class XIDTest {
 
