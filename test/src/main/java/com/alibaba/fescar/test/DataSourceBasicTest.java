@@ -16,21 +16,20 @@
 
 package com.alibaba.fescar.test;
 
-import java.util.Date;
-
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.Resource;
 import com.alibaba.fescar.rm.datasource.DataSourceManager;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.Date;
 
 /**
  * The type Data source basic test.
@@ -129,7 +128,7 @@ public class DataSourceBasicTest {
 
             @Override
             public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
-                                       String lockKeys) throws TransactionException {
+                                       String applicationData, String lockKeys) throws TransactionException {
                 return 123456L;
             }
 
