@@ -1,23 +1,23 @@
 package com.alibaba.fescar.rm.tcc.interceptor;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import com.alibaba.fescar.rm.DefaultResourceManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fescar.common.Constants;
 import com.alibaba.fescar.common.executor.Callback;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.model.BranchType;
+import com.alibaba.fescar.rm.DefaultResourceManager;
 import com.alibaba.fescar.rm.tcc.api.BusinessActionContext;
 import com.alibaba.fescar.rm.tcc.api.BusinessActionContextParameter;
 import com.alibaba.fescar.rm.tcc.api.TwoPhaseBusinessAction;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 处理TCC参与者切面逻辑：设置上下文、创建分支事务记录
@@ -42,7 +42,6 @@ public class ActionInterceptorHandler {
 		
 		//TCC 一阶段方法
         String actionName = businessAction.name();
-
         String txId = RootContext.getXID();
         BusinessActionContext actionContext = new BusinessActionContext();
         //填充事物号
@@ -80,7 +79,6 @@ public class ActionInterceptorHandler {
         String txId = actionContext.getTxId();
         //提取参数至上下文
         Map<String, Object> context = fetchActionRequestContext(method, arguments);
-//        context.put(Constants.APP_NAME, RuntimeConfiguration.getAppName());
         context.put(Constants.ACTION_START_TIME, System.currentTimeMillis());
         
         //初始化业务上下文
@@ -89,9 +87,17 @@ public class ActionInterceptorHandler {
         initFrameworkContext(context);
         //参与者名称
         actionContext.setActionContext(context);
+
+        //TCC 分支上下文
+        Map<String, Object> applicationContext = new HashMap<String, Object>();
+        applicationContext.put(Constants.TCC_ACTION_CONTEXT, context);
+        if(actionContext.getActivityContext() != null && actionContext.getActivityContext().getContext() != null){
+            applicationContext.put( Constants.TCC_ACTIVITY_CONTEXT, actionContext.getActivityContext().getContext());
+        }
+        String applicationContextStr = JSON.toJSONString(applicationContext);
         try {
         	//注册分支事务
-        	Long branchId = DefaultResourceManager.get().branchRegister(BranchType.TCC, actionName, null, txId, null);
+        	Long branchId = DefaultResourceManager.get().branchRegister(BranchType.TCC, actionName, null, txId, applicationContextStr, null);
         	return String.valueOf(branchId);
         }catch(Throwable t){
         	LOGGER.error("", t);
@@ -130,7 +136,6 @@ public class ActionInterceptorHandler {
             context.put(Constants.ACTION_NAME, businessAction.name());
         }
     }
-
 
     /**
      * 从一阶段方法中提取参数，存入分布式事务上下文

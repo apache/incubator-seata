@@ -255,10 +255,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         }else {
             Protocols protocols = Protocols.valueOf(remotingDesc.getProtocol());
             if(Protocols.IN_JVM.equals(protocols)){
-                //in jvm TCC bean
+                //in jvm TCC bean， 创建 AOP 切面
                 return true;
             }
-            // sofa:reference /  dubbo:reference  , 需要AOP切面
+            // sofa:reference /  dubbo:reference, 需要创建AOP切面
             if(remotingDesc.isReference()){
                 return true;
             }
@@ -267,7 +267,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     }
 
     /**
-     * 解析 remoting bean 信息
+     * 解析 remoting bean 信息，提取 sofa:service、sofa:reference、dubbo:reference、dubbo:service 信息
      * @param bean
      * @param beanName
      */

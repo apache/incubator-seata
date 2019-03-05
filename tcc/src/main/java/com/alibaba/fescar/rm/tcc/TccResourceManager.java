@@ -177,13 +177,14 @@ public class TccResourceManager implements ResourceManager {
 	 * @throws TransactionException
 	 */
 	@Override
-	public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys) throws TransactionException {
+	public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
 		try {
 			BranchRegisterRequest request = new BranchRegisterRequest();
 			request.setTransactionId(XID.getTransactionId(xid));
 			request.setLockKey(lockKeys);
 			request.setResourceId(resourceId);
 			request.setBranchType(branchType);
+			request.setApplicationData(applicationData);
 
 			BranchRegisterResponse response = (BranchRegisterResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
 			if (response.getResultCode() == ResultCode.Failed) {
