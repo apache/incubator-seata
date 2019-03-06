@@ -23,7 +23,7 @@ import java.util.*;
  */
 public final class TransactionHookManager {
 
-    private static final ThreadLocal<LinkedHashSet<TransactionHook>> hooksLocal=new ThreadLocal<>();
+    private static final ThreadLocal<List<TransactionHook>> hooksLocal=new ThreadLocal<>();
 
     /**
      * get the current hooks
@@ -31,13 +31,12 @@ public final class TransactionHookManager {
      * @throws IllegalStateException
      */
     public static List<TransactionHook> getHooks() throws IllegalStateException {
-        Set<TransactionHook> hooks = hooksLocal.get();
+        List<TransactionHook> hooks = hooksLocal.get();
 
         if (hooks == null || hooks.isEmpty()) {
             return Collections.emptyList();
         }
-        List<TransactionHook> sortedSynchs = new ArrayList<>(hooks);
-        return Collections.unmodifiableList(sortedSynchs);
+        return Collections.unmodifiableList(hooks);
     }
 
     /**
@@ -48,9 +47,9 @@ public final class TransactionHookManager {
         if (transactionHook == null) {
             throw new NullPointerException("transactionHook must not be null");
         }
-        Set<TransactionHook> transactionHooks=hooksLocal.get();
+        List<TransactionHook> transactionHooks=hooksLocal.get();
         if (transactionHooks == null) {
-            hooksLocal.set(new LinkedHashSet<>());
+            hooksLocal.set(new ArrayList<>());
         }
         hooksLocal.get().add(transactionHook);
     }
