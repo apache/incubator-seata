@@ -17,24 +17,25 @@
 package com.alibaba.fescar.rm.datasource.undo;
 
 /**
+ * The interface Keyword checker.
+ *
  * @author Wu
- * @date 2019/3/5
- * The interface Keyword checker
+ * @date 2019 /3/5 The interface Keyword checker
  */
 public interface KeywordChecker {
     /**
      * check whether given field name and table name use keywords
      *
-     * @param fieldOrTableName
-     * @return
+     * @param fieldOrTableName the field or table name
+     * @return boolean
      */
     boolean check(String fieldOrTableName);
 
     /**
      * check whether given field name and table name use keywords and,if so,will add "`" to the name.
      *
-     * @param fieldOrTableName
-     * @return
+     * @param fieldOrTableName the field or table name
+     * @return string
      */
     String checkAndReplace(String fieldOrTableName);
 }
