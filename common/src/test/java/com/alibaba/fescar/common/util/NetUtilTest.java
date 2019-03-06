@@ -15,28 +15,38 @@
  */
 package com.alibaba.fescar.common.util;
 
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
+ * The type Net util test.
+ *
  * @author Otis.z
- * @date 2019/2/26
+ * @date 2019 /2/26
  */
 public class NetUtilTest {
 
     private InetSocketAddress ipv4 = new InetSocketAddress(Inet4Address.getLocalHost().getHostName(), 3902);
     private InetSocketAddress ipv6 = new InetSocketAddress(Inet6Address.getLocalHost().getHostName(), 3904);
 
+    /**
+     * Instantiates a new Net util test.
+     *
+     * @throws UnknownHostException the unknown host exception
+     */
     public NetUtilTest() throws UnknownHostException {
     }
 
+    /**
+     * Test to string address.
+     */
     @Test
     public void testToStringAddress() {
         try {
@@ -46,14 +56,20 @@ public class NetUtilTest {
         }
     }
 
+    /**
+     * Test to string address 1.
+     */
     @Test
     public void testToStringAddress1() {
-        assertThat(NetUtil.toStringAddress((SocketAddress) ipv4))
+        assertThat(NetUtil.toStringAddress((SocketAddress)ipv4))
             .isEqualTo(ipv4.getAddress().getHostAddress() + ":" + ipv4.getPort());
-        assertThat(NetUtil.toStringAddress((SocketAddress) ipv6)).isEqualTo(
+        assertThat(NetUtil.toStringAddress((SocketAddress)ipv6)).isEqualTo(
             ipv6.getAddress().getHostAddress() + ":" + ipv6.getPort());
     }
 
+    /**
+     * Test to string address 2.
+     */
     @Test
     public void testToStringAddress2() {
         assertThat(NetUtil.toStringAddress(ipv4)).isEqualTo(
@@ -62,13 +78,20 @@ public class NetUtilTest {
             ipv6.getAddress().getHostAddress() + ":" + ipv6.getPort());
     }
 
+    /**
+     * Test to ip address.
+     *
+     * @throws UnknownHostException the unknown host exception
+     */
     @Test
     public void testToIpAddress() throws UnknownHostException {
         assertThat(NetUtil.toIpAddress(ipv4)).isEqualTo(ipv4.getAddress().getHostAddress());
         assertThat(NetUtil.toIpAddress(ipv6)).isEqualTo(ipv6.getAddress().getHostAddress());
     }
 
-
+    /**
+     * Test to inet socket address.
+     */
     @Test
     public void testToInetSocketAddress() {
         try {
@@ -78,12 +101,17 @@ public class NetUtilTest {
         }
     }
 
+    /**
+     * Test to inet socket address 1.
+     */
     @Test
     public void testToInetSocketAddress1() {
         assertThat(NetUtil.toInetSocketAddress("kadfskl").getHostName()).isEqualTo("kadfskl");
     }
 
-
+    /**
+     * Test to long.
+     */
     @Test
     public void testToLong() {
         try {
@@ -93,6 +121,9 @@ public class NetUtilTest {
         }
     }
 
+    /**
+     * Test to long 1.
+     */
     @Test
     public void testToLong1() {
         String[] split = "127.0.0.1".split("\\.");
@@ -106,17 +137,25 @@ public class NetUtilTest {
 
     }
 
-
+    /**
+     * Test get local ip.
+     */
     @Test
     public void testGetLocalIp() {
         assertThat(NetUtil.getLocalIp()).isNotNull();
     }
 
+    /**
+     * Test get local host.
+     */
     @Test
     public void testGetLocalHost() {
         assertThat(NetUtil.getLocalHost()).isNotNull();
     }
 
+    /**
+     * Test get local address.
+     */
     @Test
     public void testGetLocalAddress() {
         assertThat(NetUtil.getLocalAddress()).isNotNull();

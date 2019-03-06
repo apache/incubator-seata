@@ -15,30 +15,49 @@
  */
 package com.alibaba.fescar.common.util;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.sql.SQLException;
+
 import javax.sql.rowset.serial.SerialBlob;
+
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
+ * The type Blob utils test.
+ *
  * @author Otis.z
- * @date 2019/2/26
+ * @date 2019 /2/26
  */
 public class BlobUtilsTest {
 
+    /**
+     * Test string 2 blob.
+     *
+     * @throws SQLException the sql exception
+     */
     @Test
     public void testString2blob() throws SQLException {
-        assertThat(BlobUtils.string2blob("123abc")).isEqualTo(new SerialBlob("123abc".getBytes(Charset.forName("UTF-8"))));
+        assertThat(BlobUtils.string2blob("123abc")).isEqualTo(
+            new SerialBlob("123abc".getBytes(Charset.forName("UTF-8"))));
     }
 
+    /**
+     * Test blob 2 string.
+     *
+     * @throws SQLException the sql exception
+     */
     @Test
     public void testBlob2string() throws SQLException {
-        assertThat(BlobUtils.blob2string(new SerialBlob("123absent".getBytes(Charset.forName("UTF-8"))))).isEqualTo("123absent");
+        assertThat(BlobUtils.blob2string(new SerialBlob("123absent".getBytes(Charset.forName("UTF-8"))))).isEqualTo(
+            "123absent");
     }
 
+    /**
+     * Test input stream 2 string.
+     */
     @Test
     public void testInputStream2String() {
         InputStream inputStream = BlobUtilsTest.class.getClassLoader().getResourceAsStream("test.txt");

@@ -21,11 +21,8 @@ import org.apache.commons.lang.exception.NestableRuntimeException;
 /**
  * The type Enhanced service not found exception.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /10/10 14:30
- * @FileName: EnhancedServiceNotFoundException
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/10
  */
 public class EnhancedServiceNotFoundException extends NestableRuntimeException {
     private static final long serialVersionUID = 7748438218914409019L;

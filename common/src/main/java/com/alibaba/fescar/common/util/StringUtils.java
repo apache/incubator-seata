@@ -69,7 +69,7 @@ public class StringUtils {
             return null;
         }
 
-        return new String(blob.getBytes((long) 1, (int) blob.length()));
+        return new String(blob.getBytes((long)1, (int)blob.length()));
     }
 
     /**
