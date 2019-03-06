@@ -24,7 +24,7 @@ import com.alibaba.fescar.common.loader.LoadLevel;
 /**
  * The type Round robin load balance.
  *
- * @author: jimin.jm @alibaba-inc.com
+ * @author jimin.jm @alibaba-inc.com
  * @date 2019 /02/12
  */
 @LoadLevel(name = "RoundRobinLoadBalance", order = 1)

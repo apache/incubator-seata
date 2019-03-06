@@ -22,8 +22,10 @@ import java.util.Random;
 import com.alibaba.fescar.common.loader.LoadLevel;
 
 /**
- * @author: yuoyao
- * @date 2019/02/14
+ * The type Random load balance.
+ *
+ * @author yuoyao
+ * @date 2019 /02/14
  */
 @LoadLevel(name = "RandomLoadBalance", order = 2)
 public class RandomLoadBalance extends AbstractLoadBalance {

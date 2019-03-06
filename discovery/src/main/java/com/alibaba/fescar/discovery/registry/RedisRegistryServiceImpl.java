@@ -16,12 +16,25 @@
 
 package com.alibaba.fescar.discovery.registry;
 
+import java.lang.management.ManagementFactory;
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
+
 import com.google.common.collect.Lists;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
@@ -31,16 +44,11 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPubSub;
 import redis.clients.jedis.Protocol;
 
-import java.lang.management.ManagementFactory;
-import java.net.InetSocketAddress;
-import java.util.*;
-import java.util.concurrent.*;
-
 /**
- *  The type Redis registry service.
+ * The type Redis registry service.
  *
- *  @author: kl @kailing.pub
- *  @date: 2019/2/27
+ * @author kl @kailing.pub
+ * @date 2019 /2/27
  */
 public class RedisRegistryServiceImpl implements RegistryService<RedisListener> {
 
@@ -57,7 +65,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     private static volatile RedisRegistryServiceImpl instance;
     private static volatile JedisPool jedisPool;
     private ExecutorService threadPoolExecutor = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory("RedisRegistryService", 1));
+        new NamedThreadFactory("RedisRegistryService", 1));
+
     private RedisRegistryServiceImpl() {
         Configuration fescarConfig = ConfigurationFactory.getInstance();
         this.clusterName = fescarConfig.getConfig(REDIS_FILEKEY_PREFIX + REGISTRY_CLUSTER_KEY, DEFAULT_CLUSTER);
@@ -87,7 +96,8 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         if (maxTotal > 0) {
             redisConfig.setMaxTotal(maxTotal);
         }
-        int maxWait = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.wait", fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0));
+        int maxWait = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.wait",
+            fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0));
         if (maxWait > 0) {
             redisConfig.setMaxWaitMillis(maxWait);
         }
@@ -95,11 +105,13 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         if (numTestsPerEvictionRun > 0) {
             redisConfig.setNumTestsPerEvictionRun(numTestsPerEvictionRun);
         }
-        int timeBetweenEvictionRunsMillis = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "time.between.eviction.runs.millis", 0);
+        int timeBetweenEvictionRunsMillis = fescarConfig.getInt(
+            REDIS_FILEKEY_PREFIX + "time.between.eviction.runs.millis", 0);
         if (timeBetweenEvictionRunsMillis > 0) {
             redisConfig.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
         }
-        int minEvictableIdleTimeMillis = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "min.evictable.idle.time.millis", 0);
+        int minEvictableIdleTimeMillis = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "min.evictable.idle.time.millis",
+            0);
         if (minEvictableIdleTimeMillis > 0) {
             redisConfig.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
         }
@@ -110,6 +122,11 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         }
     }
 
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     public static RedisRegistryServiceImpl getInstance() {
         if (null == instance) {
             synchronized (RedisRegistryServiceImpl.class) {
@@ -129,10 +146,11 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         try {
             jedis.hset(getRedisRegistryKey(), serverAddr, ManagementFactory.getRuntimeMXBean().getName());
             jedis.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.REGISTER);
-        }finally {
+        } finally {
             jedis.close();
         }
     }
+
     @Override
     public void unregister(InetSocketAddress address) {
         NetUtil.validAddress(address);
@@ -141,7 +159,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         try {
             jedis.hdel(getRedisRegistryKey(), serverAddr);
             jedis.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.UN_REGISTER);
-        }finally {
+        } finally {
             jedis.close();
         }
     }
@@ -158,11 +176,11 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                     Jedis jedis = jedisPool.getResource();
                     try {
                         jedis.subscribe(new NotifySub(LISTENER_SERVICE_MAP.get(cluster)), redisRegistryKey);
-                    }finally {
+                    } finally {
                         jedis.close();
                     }
-                }catch (Exception e){
-                    LOGGER.error(e.getMessage(),e);
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         });
@@ -184,7 +202,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             Map<String, String> instances = null;
             try {
                 instances = jedis.hgetAll(getRedisRegistryKey());
-            }finally {
+            } finally {
                 jedis.close();
             }
             if (null != instances) {
@@ -199,7 +217,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 @Override
                 public void onEvent(String msg) {
                     String[] msgr = msg.split("-");
-                    String serverAddr =msgr[0];
+                    String serverAddr = msgr[0];
                     String eventType = msgr[1];
                     switch (eventType) {
                         case RedisListener.REGISTER:
@@ -221,6 +239,11 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
 
         private final List<RedisListener> redisListeners;
 
+        /**
+         * Instantiates a new Notify sub.
+         *
+         * @param redisListeners the redis listeners
+         */
         NotifySub(List<RedisListener> redisListeners) {
             this.redisListeners = redisListeners;
         }

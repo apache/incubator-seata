@@ -26,11 +26,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Registry factory.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2019 /2/1 5:57 PM
- * @FileName: RegistryFactory
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /2/1
  */
 public class RegistryFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistryFactory.class);

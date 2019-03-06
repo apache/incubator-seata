@@ -32,7 +32,7 @@ import org.testng.annotations.Test;
 /**
  * The type Load balance factory test.
  *
- * @author: jimin.jm @alibaba-inc.com
+ * @author jimin.jm @alibaba-inc.com
  * @date 2019 /02/12
  */
 public class LoadBalanceFactoryTest {
@@ -63,7 +63,6 @@ public class LoadBalanceFactoryTest {
      * @param loadBalance the load balance
      * @throws Exception the exception
      */
-
     @Test
     @Ignore
     public void testUnRegistry() throws Exception {
@@ -72,6 +71,12 @@ public class LoadBalanceFactoryTest {
         registryService.unregister(address);
     }
 
+    /**
+     * Test subscribe.
+     *
+     * @param loadBalance the load balance
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "instanceProvider")
     @Ignore
     public void testSubscribe(LoadBalance loadBalance) throws Exception {
@@ -89,6 +94,12 @@ public class LoadBalanceFactoryTest {
         Assert.assertEquals(1, addressList1.size());
     }
 
+    /**
+     * Test get address.
+     *
+     * @param loadBalance the load balance
+     * @throws Exception the exception
+     */
     @Test(dataProvider = "instanceProvider")
     public void testGetAddress(LoadBalance loadBalance) throws Exception {
         Assert.assertNotNull(loadBalance);
