@@ -157,26 +157,26 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
         // 1. xid
         if (this.xid != null) {
             byte[] bs = xid.getBytes(UTF8);
-            byteBuffer.putShort((short) bs.length);
+            byteBuffer.putShort((short)bs.length);
             if (bs.length > 0) {
                 byteBuffer.put(bs);
             }
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
         // 2. Branch Id
         byteBuffer.putLong(this.branchId);
         // 3. Branch Type
-        byteBuffer.put((byte) this.branchType.ordinal());
+        byteBuffer.put((byte)this.branchType.ordinal());
         // 4. Resource Id
         if (this.resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
-            byteBuffer.putShort((short) bs.length);
+            byteBuffer.putShort((short)bs.length);
             if (bs.length > 0) {
                 byteBuffer.put(bs);
             }
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
 
         // 5. Application Data
@@ -212,7 +212,7 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
         this.branchId = in.readLong();
         leftLen -= 8;
         this.branchType = BranchType.get(in.readByte());
-        leftLen --;
+        leftLen--;
 
         int resourceIdLen = in.readShort();
         if (resourceIdLen > 0) {

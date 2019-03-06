@@ -23,11 +23,8 @@ import io.netty.channel.Channel;
 /**
  * The interface Register msg listener.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /11/29 17:24
- * @FileName: RegisterMsgListener
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /11/29
  */
 public interface RegisterMsgListener {
 

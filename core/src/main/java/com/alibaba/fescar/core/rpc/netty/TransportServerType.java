@@ -19,11 +19,8 @@ package com.alibaba.fescar.core.rpc.netty;
 /**
  * The enum Transport server type.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /9/10 14:46
- * @FileName: TransportServerType
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/10
  */
 public enum TransportServerType {
     /**

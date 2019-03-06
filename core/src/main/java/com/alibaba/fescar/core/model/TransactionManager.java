@@ -36,7 +36,8 @@ public interface TransactionManager {
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
      * out.
      */
-    String begin(String applicationId, String transactionServiceGroup, String name, int timeout) throws TransactionException;
+    String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
+        throws TransactionException;
 
     /**
      * Global commit.

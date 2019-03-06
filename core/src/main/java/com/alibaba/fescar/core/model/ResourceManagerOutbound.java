@@ -46,7 +46,8 @@ public interface ResourceManagerOutbound {
      * @param applicationData the application data
      * @throws TransactionException the transaction exception
      */
-    void branchReport(String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException;
+    void branchReport(String xid, long branchId, BranchStatus status, String applicationData)
+        throws TransactionException;
 
     /**
      * Lock query boolean.
@@ -58,5 +59,6 @@ public interface ResourceManagerOutbound {
      * @return the boolean
      * @throws TransactionException the transaction exception
      */
-    boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException;
+    boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
+        throws TransactionException;
 }

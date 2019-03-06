@@ -98,6 +98,11 @@ public enum BranchStatus {
         this.code = code;
     }
 
+    /**
+     * Gets code.
+     *
+     * @return the code
+     */
     public int getCode() {
         return code;
     }
@@ -117,7 +122,7 @@ public enum BranchStatus {
      * @return the branch status
      */
     public static BranchStatus get(byte code) {
-        return get((int) code);
+        return get((int)code);
     }
 
     /**

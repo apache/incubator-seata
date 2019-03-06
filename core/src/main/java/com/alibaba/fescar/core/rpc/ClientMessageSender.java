@@ -21,11 +21,8 @@ import java.util.concurrent.TimeoutException;
 /**
  * The interface Client message sender.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /10/10 12:21
- * @FileName: ClientMessageSender
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/10
  */
 public interface ClientMessageSender {
     /**

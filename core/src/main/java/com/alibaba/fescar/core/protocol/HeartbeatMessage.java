@@ -21,11 +21,8 @@ import java.io.Serializable;
 /**
  * The type Heartbeat message.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /9/14 15:32
- * @FileName: HeartbeatMessage
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/14
  */
 public class HeartbeatMessage implements Serializable {
     private static final long serialVersionUID = -985316399527884899L;

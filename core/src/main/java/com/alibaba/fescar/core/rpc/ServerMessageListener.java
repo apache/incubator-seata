@@ -25,11 +25,8 @@ import io.netty.channel.ChannelHandlerContext;
 /**
  * The interface Server message listener.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /10/15 17:09
- * @FileName: ServerMessageListener
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/15
  */
 public interface ServerMessageListener {
 

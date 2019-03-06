@@ -24,11 +24,8 @@ import io.netty.channel.Channel;
 /**
  * The interface Server message sender.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /10/15 16:56
- * @FileName: ServerMessageSender
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/15
  */
 public interface ServerMessageSender {
 
@@ -52,7 +49,8 @@ public interface ServerMessageSender {
      * @throws IOException .
      * @throws TimeoutException the timeout exception
      */
-    Object sendSyncRequest(String resourceId, String clientId, Object message, long timeout) throws IOException, TimeoutException;
+    Object sendSyncRequest(String resourceId, String clientId, Object message, long timeout)
+        throws IOException, TimeoutException;
 
     /**
      * Sync call to RM

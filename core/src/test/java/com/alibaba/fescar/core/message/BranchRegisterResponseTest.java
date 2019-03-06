@@ -21,17 +21,27 @@ import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * The type Branch register response test.
+ */
 public class BranchRegisterResponseTest {
 
-  @Test
-  public void toStringTest() throws Exception{
-    BranchRegisterResponse branchRegisterResponse = new BranchRegisterResponse();
+    /**
+     * To string test.
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void toStringTest() throws Exception {
+        BranchRegisterResponse branchRegisterResponse = new BranchRegisterResponse();
 
-    branchRegisterResponse.setTransactionId(123456L);
-    branchRegisterResponse.setBranchId(123457L);
-    branchRegisterResponse.setResultCode(ResultCode.Success);
-    branchRegisterResponse.setMsg("");
-    Assert.assertEquals("BranchRegisterResponse: transactionId=123456,branchId=123457,result code =Success,getMsg =", branchRegisterResponse.toString());
+        branchRegisterResponse.setTransactionId(123456L);
+        branchRegisterResponse.setBranchId(123457L);
+        branchRegisterResponse.setResultCode(ResultCode.Success);
+        branchRegisterResponse.setMsg("");
+        Assert.assertEquals(
+            "BranchRegisterResponse: transactionId=123456,branchId=123457,result code =Success,getMsg =",
+            branchRegisterResponse.toString());
 
-  }
+    }
 }

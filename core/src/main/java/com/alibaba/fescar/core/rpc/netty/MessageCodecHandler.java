@@ -33,11 +33,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Message codec handler.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /9/14 15:04
- * @FileName: MessageCodecHandler
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/14
  */
 public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 

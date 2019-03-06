@@ -51,7 +51,7 @@ public abstract class AbstractTransactionResponse extends AbstractResultMessage 
     @Override
     protected void doEncode() {
         super.doEncode();
-        byteBuffer.put((byte) transactionExceptionCode.ordinal());
+        byteBuffer.put((byte)transactionExceptionCode.ordinal());
     }
 
     @Override

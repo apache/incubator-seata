@@ -40,7 +40,7 @@ public enum ResultCode {
      * @return the result code
      */
     public static ResultCode get(byte ordinal) {
-        return get((int) ordinal);
+        return get((int)ordinal);
     }
 
     /**

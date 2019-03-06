@@ -21,11 +21,8 @@ import io.netty.buffer.ByteBuf;
 /**
  * The interface Message codec.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /9/14 15:11
- * @FileName: MessageCodec
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/14
  */
 public interface MessageCodec {
     /**

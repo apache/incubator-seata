@@ -147,16 +147,16 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
         // 2. Branch Id
         byteBuffer.putLong(this.branchId);
         // 3. Branch Status
-        byteBuffer.put((byte) this.status.getCode());
+        byteBuffer.put((byte)this.status.getCode());
         // 4. Resource Id
         if (this.resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
-            byteBuffer.putShort((short) bs.length);
+            byteBuffer.putShort((short)bs.length);
             if (bs.length > 0) {
                 byteBuffer.put(bs);
             }
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
 
         // 5. Application Data

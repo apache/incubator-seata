@@ -23,11 +23,8 @@ import io.netty.buffer.ByteBuf;
 /**
  * The type Register rm request.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /10/10 14:43
- * @FileName: RegisterRMRequest
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/10
  */
 public class RegisterRMRequest extends AbstractIdentifyRequest implements Serializable {
     private static final long serialVersionUID = 7539732523682335742L;
@@ -68,6 +65,7 @@ public class RegisterRMRequest extends AbstractIdentifyRequest implements Serial
     public void setResourceIds(String resourceIds) {
         this.resourceIds = resourceIds;
     }
+
     @Override
     public short getTypeCode() {
         return TYPE_REG_RM;

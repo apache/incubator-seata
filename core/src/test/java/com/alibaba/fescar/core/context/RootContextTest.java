@@ -18,16 +18,22 @@ package com.alibaba.fescar.core.context;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 
 import org.junit.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * The type Root context test.
+ *
  * @author guoyao
- * @date 2019/3/2
+ * @date 2019 /3/2
  */
 public class RootContextTest {
 
-    private final String DEFAULT_XID="default_xid";
+    private final String DEFAULT_XID = "default_xid";
 
+    /**
+     * Test bind and unbind.
+     */
     @Test
     public void testBind_And_Unbind() {
         assertThat(RootContext.unbind()).isNull();
@@ -37,6 +43,9 @@ public class RootContextTest {
         assertThat(RootContext.getXID()).isNull();
     }
 
+    /**
+     * Test get xid.
+     */
     @Test
     public void testGetXID() {
         RootContext.bind(DEFAULT_XID);
@@ -45,6 +54,9 @@ public class RootContextTest {
         assertThat(RootContext.getXID()).isNull();
     }
 
+    /**
+     * Test in global transaction.
+     */
     @Test
     public void testInGlobalTransaction() {
         assertThat(RootContext.inGlobalTransaction()).isFalse();
@@ -55,19 +67,25 @@ public class RootContextTest {
         assertThat(RootContext.getXID()).isNull();
     }
 
-    @Test(expected =ShouldNeverHappenException.class)
+    /**
+     * Test assert not in global transaction with exception.
+     */
+    @Test(expected = ShouldNeverHappenException.class)
     public void testAssertNotInGlobalTransactionWithException() {
         try {
             RootContext.assertNotInGlobalTransaction();
             RootContext.bind(DEFAULT_XID);
             RootContext.assertNotInGlobalTransaction();
-        }finally {
+        } finally {
             //clear
             RootContext.unbind();
             assertThat(RootContext.getXID()).isNull();
         }
     }
 
+    /**
+     * Test assert not in global transaction.
+     */
     @Test
     public void testAssertNotInGlobalTransaction() {
         RootContext.assertNotInGlobalTransaction();

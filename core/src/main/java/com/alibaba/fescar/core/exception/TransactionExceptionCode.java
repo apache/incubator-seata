@@ -131,7 +131,7 @@ public enum TransactionExceptionCode {
      * @return the transaction exception code
      */
     public static TransactionExceptionCode get(byte ordinal) {
-        return get((int) ordinal);
+        return get((int)ordinal);
     }
 
     /**
