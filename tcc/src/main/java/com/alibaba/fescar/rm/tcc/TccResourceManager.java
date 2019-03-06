@@ -12,13 +12,13 @@ import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.Resource;
-import com.alibaba.fescar.core.model.ResourceManager;
 import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.BranchRegisterRequest;
 import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
 import com.alibaba.fescar.core.protocol.transaction.BranchReportRequest;
 import com.alibaba.fescar.core.protocol.transaction.BranchReportResponse;
 import com.alibaba.fescar.core.rpc.netty.RmRpcClient;
+import com.alibaba.fescar.rm.AbstractResourceManager;
 import com.alibaba.fescar.rm.tcc.api.BusinessActionContext;
 import com.alibaba.fescar.rm.tcc.api.BusinessActivityContext;
 import org.slf4j.Logger;
@@ -35,9 +35,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author zhangsen
  */
-public class TccResourceManager implements ResourceManager {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(TccResourceManager.class);
+public class TccResourceManager extends AbstractResourceManager {
 
 	/**
 	 * TCC资源信息
@@ -55,12 +53,7 @@ public class TccResourceManager implements ResourceManager {
 	public void registerResource(Resource resource) {
 		TCCResource tccResource = (TCCResource) resource;
 		tccResourceCache.put(tccResource.getResourceId(), tccResource);
-		RmRpcClient.getInstance().registerResource(tccResource.getResourceGroupId(), tccResource.getResourceId());
-	}
-
-	@Override
-	public void unregisterResource(Resource resource) {
-		throw new NotSupportYetException("unregister a resource");
+		super.registerResource(tccResource);
 	}
 
 	@Override
@@ -165,73 +158,6 @@ public class TccResourceManager implements ResourceManager {
 		businessActionContext.setActionName(resourceId);
 		return businessActionContext;
 	}
-
-	/**
-	 * 创建分支事务记录
-	 * @param branchType the branch type
-	 * @param resourceId the resource id
-	 * @param clientId   the client id
-	 * @param xid        the xid
-	 * @param lockKeys   the lock keys
-	 * @return
-	 * @throws TransactionException
-	 */
-	@Override
-	public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
-		try {
-			BranchRegisterRequest request = new BranchRegisterRequest();
-			request.setTransactionId(XID.getTransactionId(xid));
-			request.setLockKey(lockKeys);
-			request.setResourceId(resourceId);
-			request.setBranchType(branchType);
-			request.setApplicationData(applicationData);
-
-			BranchRegisterResponse response = (BranchRegisterResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
-			if (response.getResultCode() == ResultCode.Failed) {
-				throw new TransactionException(response.getTransactionExceptionCode(), "Response[" + response.getMsg() + "]");
-			}
-			return response.getBranchId();
-		} catch (TimeoutException toe) {
-			throw new TransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
-		} catch (RuntimeException rex) {
-			throw new TransactionException(TransactionExceptionCode.BranchRegisterFailed, "Runtime", rex);
-		}
-	}
-
-	/**
-	 * 更新分支事务记录状态
-	 * @param branchType      the branch type
-	 * @param xid             the xid
-	 * @param branchId        the branch id
-	 * @param status          the status
-	 * @param applicationData the application data
-	 * @throws TransactionException
-	 */
-	@Override
-	public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
-		try {
-			BranchReportRequest request = new BranchReportRequest();
-			request.setTransactionId(XID.getTransactionId(xid));
-			request.setBranchId(branchId);
-			request.setStatus(status);
-			request.setApplicationData(applicationData);
-
-			BranchReportResponse response = (BranchReportResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
-			if (response.getResultCode() == ResultCode.Failed) {
-				throw new TransactionException(response.getTransactionExceptionCode(), "Response[" + response.getMsg() + "]");
-			}
-		} catch (TimeoutException toe) {
-			throw new TransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
-		} catch (RuntimeException rex) {
-			throw new TransactionException(TransactionExceptionCode.BranchReportFailed, "Runtime", rex);
-		}
-	}
-
-	@Override
-	public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
-		return false;
-	}
-
 
 	@Override
 	public BranchType getBranchType(){

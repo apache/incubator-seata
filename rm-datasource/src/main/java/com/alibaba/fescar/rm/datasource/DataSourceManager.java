@@ -26,6 +26,7 @@ import com.alibaba.fescar.core.model.*;
 import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.*;
 import com.alibaba.fescar.core.rpc.netty.RmRpcClient;
+import com.alibaba.fescar.rm.AbstractResourceManager;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
 
 import java.util.Map;
@@ -35,7 +36,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * The type Data source manager.
  */
-public class DataSourceManager implements ResourceManager, Initialize {
+public class DataSourceManager extends AbstractResourceManager implements Initialize {
 
     private ResourceManagerInbound asyncWorker;
 
@@ -48,49 +49,6 @@ public class DataSourceManager implements ResourceManager, Initialize {
      */
     public void setAsyncWorker(ResourceManagerInbound asyncWorker) {
         this.asyncWorker = asyncWorker;
-    }
-
-    @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
-        try {
-            BranchRegisterRequest request = new BranchRegisterRequest();
-            request.setTransactionId(XID.getTransactionId(xid));
-            request.setLockKey(lockKeys);
-            request.setResourceId(resourceId);
-            request.setBranchType(branchType);
-            request.setApplicationData(applicationData);
-
-            BranchRegisterResponse response = (BranchRegisterResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
-            if (response.getResultCode() == ResultCode.Failed) {
-                throw new TransactionException(response.getTransactionExceptionCode(), "Response[" + response.getMsg() + "]");
-            }
-            return response.getBranchId();
-        } catch (TimeoutException toe) {
-            throw new TransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
-        } catch (RuntimeException rex) {
-            throw new TransactionException(TransactionExceptionCode.BranchRegisterFailed, "Runtime", rex);
-        }
-    }
-
-    @Override
-    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
-        try {
-            BranchReportRequest request = new BranchReportRequest();
-            request.setTransactionId(XID.getTransactionId(xid));
-            request.setBranchId(branchId);
-            request.setStatus(status);
-            request.setApplicationData(applicationData);
-
-            BranchReportResponse response = (BranchReportResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
-            if (response.getResultCode() == ResultCode.Failed) {
-                throw new TransactionException(response.getTransactionExceptionCode(), "Response[" + response.getMsg() + "]");
-            }
-        } catch (TimeoutException toe) {
-            throw new TransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
-        } catch (RuntimeException rex) {
-            throw new TransactionException(TransactionExceptionCode.BranchReportFailed, "Runtime", rex);
-        }
-
     }
 
     @Override
@@ -112,7 +70,6 @@ public class DataSourceManager implements ResourceManager, Initialize {
         } catch (RuntimeException rex) {
             throw new TransactionException(TransactionExceptionCode.LockableCheckFailed, "Runtime", rex);
         }
-
     }
 
     /**
@@ -173,13 +130,7 @@ public class DataSourceManager implements ResourceManager, Initialize {
     public void registerResource(Resource resource) {
         DataSourceProxy dataSourceProxy = (DataSourceProxy) resource;
         dataSourceCache.put(dataSourceProxy.getResourceId(), dataSourceProxy);
-        RmRpcClient.getInstance().registerResource(dataSourceProxy.getResourceGroupId(), dataSourceProxy.getResourceId());
-
-    }
-
-    @Override
-    public void unregisterResource(Resource resource) {
-        throw new NotSupportYetException("unregister a resource");
+        super.registerResource(dataSourceProxy);
     }
 
     /**

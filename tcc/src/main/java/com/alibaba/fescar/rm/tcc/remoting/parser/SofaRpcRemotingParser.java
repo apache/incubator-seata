@@ -47,6 +47,9 @@ public class SofaRpcRemotingParser extends AbstractedRemotingParser {
 
     @Override
     public RemotingDesc getServiceDesc(Object bean, String beanName) throws FrameworkException {
+        if(!this.isRemoting(bean, beanName)){
+            return null;
+        }
         try{
             RemotingDesc serviceBeanDesc = new RemotingDesc();
             Class<?> interfaceClass = (Class<?>) ReflectionUtil.invokeMethod(bean, "getInterfaceClass");

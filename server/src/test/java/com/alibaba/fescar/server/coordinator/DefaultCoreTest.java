@@ -76,7 +76,7 @@ public class DefaultCoreTest {
      */
     @Test(dataProvider = "xidProvider")
     public void branchRegisterTest(String xid) throws Exception {
-        core.branchRegister(BranchType.AT, resourceId, clientId, xid, null, lockKeys_1);
+        core.branchRegister(BranchType.AT, resourceId, clientId, xid, "abc", lockKeys_1);
 
         long transactionId = XID.getTransactionId(xid);
         GlobalSession globalSession = SessionHolder.findGlobalSession(transactionId);

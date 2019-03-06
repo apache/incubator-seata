@@ -2,6 +2,7 @@ package com.alibaba.fescar.rm.tcc.interceptor;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fescar.common.Constants;
+import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.executor.Callback;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.context.RootContext;
@@ -74,7 +75,7 @@ public class ActionInterceptorHandler {
 	/**
      * 创建分支事务记录
 	 */
-	private String doTccActionLogStore(Method method, Object[] arguments, TwoPhaseBusinessAction businessAction, BusinessActionContext actionContext) {
+	protected String doTccActionLogStore(Method method, Object[] arguments, TwoPhaseBusinessAction businessAction, BusinessActionContext actionContext) {
 		String actionName = actionContext.getActionName();
         String txId = actionContext.getTxId();
         //提取参数至上下文
@@ -100,10 +101,10 @@ public class ActionInterceptorHandler {
         	Long branchId = DefaultResourceManager.get().branchRegister(BranchType.TCC, actionName, null, txId, applicationContextStr, null);
         	return String.valueOf(branchId);
         }catch(Throwable t){
-        	LOGGER.error("", t);
+            String msg = "TCC branch Register error, xid:" + txId;
+        	LOGGER.error(msg, t);
+        	throw new FrameworkException(t, msg);
         }
-        
-		return null;
 	}
 	
 	/**
@@ -143,7 +144,7 @@ public class ActionInterceptorHandler {
      * @param arguments
      * @return
      */
-    private Map<String, Object> fetchActionRequestContext(Method method, Object[] arguments) {
+    protected Map<String, Object> fetchActionRequestContext(Method method, Object[] arguments) {
         Map<String, Object> context = new HashMap<String, Object>();
 
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
@@ -161,13 +162,13 @@ public class ActionInterceptorHandler {
                         @SuppressWarnings("unchecked")
 						Object targetParam = ((List<Object>) paramObject).get(index);
                         if (param.isParamInProperty()) {
-                            context.putAll(ActionContextUtil.fetchContextFromObject(targetParam, null));
+                            context.putAll(ActionContextUtil.fetchContextFromObject(targetParam));
                         } else {
                             context.put(param.paramName(), targetParam);
                         }
                     } else {
                         if (param.isParamInProperty()) {
-                            context.putAll(ActionContextUtil.fetchContextFromObject(paramObject, null));
+                            context.putAll(ActionContextUtil.fetchContextFromObject(paramObject));
                         } else {
                             context.put(param.paramName(), paramObject);
                         }

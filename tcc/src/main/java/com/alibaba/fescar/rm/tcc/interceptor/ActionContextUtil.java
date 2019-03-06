@@ -21,10 +21,9 @@ public class ActionContextUtil {
     /**
      * 从参数中提取数据
      * @param targetParam
-     * @param filter
      * @return
      */
-    public static Map<String, Object> fetchContextFromObject(Object targetParam, ActionContextFilter filter) {
+    public static Map<String, Object> fetchContextFromObject(Object targetParam) {
         try {
             Map<String, Object> context = new HashMap<String, Object>();
             List<Field> fields = new ArrayList<Field>();
@@ -37,9 +36,6 @@ public class ActionContextUtil {
                 //打了注解
                 if (annotation != null) {
                     BusinessActionContextParameter param = (BusinessActionContextParameter) annotation;
-                    if (filter != null && filter.needFilter(param)) {
-                        continue;
-                    }
                     f.setAccessible(true);
                     Object paramObject = f.get(targetParam);
                     int index = param.index();
@@ -48,7 +44,7 @@ public class ActionContextUtil {
                         @SuppressWarnings("unchecked")
 						Object targetObject = ((List<Object>) paramObject).get(index);
                         if (param.isParamInProperty()) {
-                            context.putAll(fetchContextFromObject(targetObject, null));
+                            context.putAll(fetchContextFromObject(targetObject));
                         } else {
                             if (StringUtils.isBlank(param.paramName())) {
                                 context.put(fieldName, paramObject);
@@ -58,7 +54,7 @@ public class ActionContextUtil {
                         }
                     } else {
                         if (param.isParamInProperty()) {
-                            context.putAll(fetchContextFromObject(paramObject, null));
+                            context.putAll(fetchContextFromObject(paramObject));
                         } else {
                             if (StringUtils.isBlank(param.paramName())) {
                                 context.put(fieldName, paramObject);

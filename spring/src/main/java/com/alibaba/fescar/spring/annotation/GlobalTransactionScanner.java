@@ -22,6 +22,7 @@ import com.alibaba.fescar.rm.tcc.remoting.Protocols;
 import com.alibaba.fescar.rm.tcc.remoting.RemotingDesc;
 import com.alibaba.fescar.rm.tcc.remoting.parser.DefaultRemotingParser;
 import com.alibaba.fescar.spring.tcc.TccActionInterceptor;
+import com.alibaba.fescar.spring.util.SpringProxyUtils;
 import com.alibaba.fescar.tm.TMClient;
 import com.alibaba.fescar.tm.api.DefaultFailureHandlerImpl;
 import com.alibaba.fescar.tm.api.FailureHandler;
@@ -39,9 +40,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
@@ -188,10 +187,11 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 //是否 TCC 动态代理
                 if(isTccAutoProxy(bean, beanName)){
                     //TCC 动态代理，代理 proxy bean of sofa:reference/dubbo:reference , and LocalTCC
-                    interceptor = new TccActionInterceptor();
+                    RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
+                    interceptor = new TccActionInterceptor(remotingDesc);
                 }else {
                     //@GlobalTransactional 动态代理
-                    Class<?> serviceInterface = findTargetClass(bean);
+                    Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
                     Method[] methods = serviceInterface.getMethods();
                     LinkedList<MethodDesc> methodDescList = new LinkedList<>();
                     for (Method method : methods) {
@@ -211,7 +211,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 if (!AopUtils.isAopProxy(bean)) {
                     bean = super.wrapIfNecessary(bean, beanName, cacheKey);
                 } else {
-                    AdvisedSupport advised = getAdvisedSupport(bean);
+                    AdvisedSupport advised = SpringProxyUtils.getAdvisedSupport(bean);
                     Advisor[] advisor = buildAdvisors(beanName, getAdvicesAndAdvisorsForBean(null, null, null));
                     for (Advisor avr : advisor) {
                         advised.addAdvisor(0, avr);
@@ -231,41 +231,60 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
      * @param beanName
      * @return
      */
-    protected boolean isTccAutoProxy( Object bean, String beanName){
+    protected boolean isTccAutoProxy(Object bean, String beanName){
+        RemotingDesc remotingDesc = null;
         //解析remoting bean 信息
         boolean isRemotingBean = parserRemotingServiceInfo(bean, beanName);
         //是否是远程服务bean
         if(isRemotingBean) {
-            // sofa:reference / dubbo:reference, factory bean 不代理
-            return false;
+            remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
+            if(remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM.getCode()){
+                //LocalTCC
+                return true;
+            }else {
+                // sofa:reference / dubbo:reference, factory bean 不代理
+                return false;
+            }
         }else{
             //获取解析结果
-            RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
+            remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
             if(remotingDesc == null){
-                //是否 proxy bean
-                if(!isProxy(bean)){
+                //FactoryBean 判断
+                if(isRemotingFactoryBean(bean, beanName)){
+                    remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
+                    //判断是否需要代理
+                    return isTccProxyTargetBean(remotingDesc);
+                }else {
                     return false;
                 }
-                //the FactoryBean of proxy bean，以防 bean 扫描遗漏
-                String factoryBeanName = new StringBuilder().append("&").append(beanName).toString();
-                Object factoryBean = null;
-                if(applicationContext.containsBean(factoryBeanName)){
-                    factoryBean = applicationContext.getBean(factoryBeanName);
-                }
-                //无factory bean，无需动态代理
-                if(factoryBean == null ){
-                    return false;
-                }
-                //解析factory bean信息
-                parserRemotingServiceInfo(factoryBean, beanName);
-                remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-                //判断是否需要代理
-                return isTccProxyTargetBean(remotingDesc);
             }else {
                 //判断是否需要代理
                 return isTccProxyTargetBean(remotingDesc);
             }
         }
+    }
+
+    /**
+     * 当前bean是proxy，判断其FactoryBean是否是 Remoting bean
+     *
+     * @return
+     */
+    protected boolean isRemotingFactoryBean(Object bean, String beanName) {
+        if(!SpringProxyUtils.isProxy(bean)){
+            return false;
+        }
+        //the FactoryBean of proxy bean，以防 bean 扫描遗漏
+        String factoryBeanName = new StringBuilder().append("&").append(beanName).toString();
+        Object factoryBean = null;
+        if(applicationContext != null && applicationContext.containsBean(factoryBeanName)){
+            factoryBean = applicationContext.getBean(factoryBeanName);
+        }
+        //无factory bean，无需动态代理
+        if(factoryBean == null ){
+            return false;
+        }
+        //解析factory bean信息
+        return parserRemotingServiceInfo(factoryBean, beanName);
     }
 
     /**
@@ -310,40 +329,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         return new MethodDesc(anno, method);
     }
 
-    private Class<?> findTargetClass(Object proxy) throws Exception {
-        if (AopUtils.isAopProxy(proxy)) {
-            AdvisedSupport advised = getAdvisedSupport(proxy);
-            Object target = advised.getTargetSource().getTarget();
-            return findTargetClass(target);
-        } else {
-            return proxy.getClass();
-        }
-    }
-
-    private AdvisedSupport getAdvisedSupport(Object proxy) throws Exception {
-        Field h;
-        if (AopUtils.isJdkDynamicProxy(proxy)) {
-            h = proxy.getClass().getSuperclass().getDeclaredField("h");
-        } else {
-            h = proxy.getClass().getDeclaredField("CGLIB$CALLBACK_0");
-        }
-        h.setAccessible(true);
-        Object dynamicAdvisedInterceptor = h.get(proxy);
-        Field advised = dynamicAdvisedInterceptor.getClass().getDeclaredField("advised");
-        advised.setAccessible(true);
-        return (AdvisedSupport)advised.get(dynamicAdvisedInterceptor);
-    }
-
-    public static boolean isProxy(Object bean){
-        if(bean == null){
-            return false;
-        }
-        if (Proxy.class.isAssignableFrom(bean.getClass()) || AopUtils.isAopProxy(bean)) {
-            return true;
-        }else{
-            return false;
-        }
-    }
 
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
