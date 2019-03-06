@@ -22,8 +22,8 @@ import java.util.List;
  * The interface Configuration.
  *
  * @param <T> the type parameter
- * @author: jimin.jm @alibaba-inc.com
- * @date: 2018 /12/20
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /12/20
  */
 public interface Configuration<T> {
 

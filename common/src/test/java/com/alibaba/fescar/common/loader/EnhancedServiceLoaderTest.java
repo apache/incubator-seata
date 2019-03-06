@@ -16,42 +16,59 @@
 
 package com.alibaba.fescar.common.loader;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.util.List;
+
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
+ * The type Enhanced service loader test.
+ *
  * @author Otis.z
- * @date 2019/2/26
+ * @date 2019 /2/26
  */
 public class EnhancedServiceLoaderTest {
 
+    /**
+     * Test load by class and class loader.
+     */
     @Test
     public void testLoadByClassAndClassLoader() {
         Hello load = EnhancedServiceLoader.load(Hello.class, Hello.class.getClassLoader());
         Assert.assertEquals(load.say(), "Bonjour");
     }
 
+    /**
+     * Test load exception.
+     */
     @Test(expected = EnhancedServiceNotFoundException.class)
     public void testLoadException() {
         EnhancedServiceLoaderTest load = EnhancedServiceLoader.load(EnhancedServiceLoaderTest.class);
     }
 
-
+    /**
+     * Test load by class.
+     */
     @Test
     public void testLoadByClass() {
         Hello load = EnhancedServiceLoader.load(Hello.class);
         assertThat(load.say()).isEqualTo("Bonjour");
     }
 
+    /**
+     * Test load by class and activate name.
+     */
     @Test
     public void testLoadByClassAndActivateName() {
         Hello englishHello = EnhancedServiceLoader.load(Hello.class, "EnglishHello");
         assertThat(englishHello.say()).isEqualTo("hello!");
     }
 
+    /**
+     * Test load by class and class loader and activate name.
+     */
     @Test
     public void testLoadByClassAndClassLoaderAndActivateName() {
         Hello englishHello = EnhancedServiceLoader
@@ -59,6 +76,9 @@ public class EnhancedServiceLoaderTest {
         assertThat(englishHello.say()).isEqualTo("hello!");
     }
 
+    /**
+     * Gets all extension class.
+     */
     @Test
     public void getAllExtensionClass() {
         List<Class> allExtensionClass = EnhancedServiceLoader.getAllExtensionClass(Hello.class);
@@ -68,12 +88,14 @@ public class EnhancedServiceLoaderTest {
 
     }
 
+    /**
+     * Gets all extension class 1.
+     */
     @Test
     public void getAllExtensionClass1() {
         List<Class> allExtensionClass = EnhancedServiceLoader
             .getAllExtensionClass(Hello.class, ClassLoader.getSystemClassLoader());
         assertThat(allExtensionClass).isNotEmpty();
     }
-
 
 }

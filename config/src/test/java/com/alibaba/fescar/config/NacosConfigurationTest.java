@@ -16,46 +16,71 @@
 
 package com.alibaba.fescar.config;
 
-
 import org.junit.Test;
 
 /**
- * @author: jimin.jm@alibaba-inc.com
- * @date: 2019/2/1
+ * The type Nacos configuration test.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /2/1
  */
 public class NacosConfigurationTest {
     //private static final Configuration CONFIGURATION = new NacosConfiguration();
 
+    /**
+     * Test get config.
+     */
     @Test
     public void testGetConfig() {
         //String value = CONFIGURATION.getConfig("fescar.test.dataId");
         //Assert.assertEquals(value, "test");
     }
 
+    /**
+     * Test put config.
+     */
     @Test
     public void testPutConfig() {
     }
 
+    /**
+     * Test put config if absent.
+     */
     @Test
     public void testPutConfigIfAbsent() {
     }
 
+    /**
+     * Test remove config.
+     */
     @Test
     public void testRemoveConfig() {
     }
 
+    /**
+     * Test add config listener.
+     */
     @Test
     public void testAddConfigListener() {
     }
 
+    /**
+     * Test remove config listener.
+     */
     @Test
     public void testRemoveConfigListener() {
     }
 
+    /**
+     * Test get config listeners.
+     */
     @Test
     public void testGetConfigListeners() {
     }
 
+    /**
+     * Test get type name.
+     */
     @Test
     public void testGetTypeName() {
     }

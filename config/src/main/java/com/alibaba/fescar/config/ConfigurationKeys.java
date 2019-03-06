@@ -17,12 +17,26 @@
 package com.alibaba.fescar.config;
 
 /**
- * @author: jimin.jm@alibaba-inc.com
- * @date 2019/02/26
+ * The type Configuration keys.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /02/26
  */
 public final class ConfigurationKeys {
+    /**
+     * The constant FILE_ROOT_REGISTRY.
+     */
     public static final String FILE_ROOT_REGISTRY = "registry";
+    /**
+     * The constant FILE_ROOT_CONFIG.
+     */
     public static final String FILE_ROOT_CONFIG = "config";
+    /**
+     * The constant FILE_CONFIG_SPLIT_CHAR.
+     */
     public static final String FILE_CONFIG_SPLIT_CHAR = ".";
+    /**
+     * The constant FILE_ROOT_TYPE.
+     */
     public static final String FILE_ROOT_TYPE = "type";
 }

@@ -20,8 +20,8 @@ package com.alibaba.fescar.config;
  * The type Abstract configuration.
  *
  * @param <T> the type parameter
- * @author: jimin.jm @alibaba-inc.com
- * @date: 2019 /2/1
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /2/1
  */
 public abstract class AbstractConfiguration<T> implements Configuration<T> {
 
@@ -108,5 +108,10 @@ public abstract class AbstractConfiguration<T> implements Configuration<T> {
         return removeConfig(dataId, DEFAULT_CONFIG_TIMEOUT);
     }
 
+    /**
+     * Gets type name.
+     *
+     * @return the type name
+     */
     public abstract String getTypeName();
 }

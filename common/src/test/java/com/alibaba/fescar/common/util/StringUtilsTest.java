@@ -16,21 +16,28 @@
 
 package com.alibaba.fescar.common.util;
 
-import org.junit.Test;
-
-import javax.sql.rowset.serial.SerialBlob;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+
+import javax.sql.rowset.serial.SerialBlob;
+
+import org.junit.Test;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * The type String utils test.
+ *
  * @author Otis.z
- * @date 2019/2/20
+ * @date 2019 /2/20
  */
 public class StringUtilsTest {
 
+    /**
+     * Test is empty.
+     */
     @Test
     public void testIsEmpty() {
         assertThat(StringUtils.isEmpty(null)).isTrue();
@@ -39,31 +46,44 @@ public class StringUtilsTest {
         assertThat(StringUtils.isEmpty(" ")).isFalse();
     }
 
+    /**
+     * Test string 2 blob.
+     *
+     * @throws SQLException the sql exception
+     */
     @Test
     public void testString2blob() throws SQLException {
         assertThat(StringUtils.string2blob(null)).isNull();
-        String[] strs = new String[]{"abc", "", " "};
+        String[] strs = new String[] {"abc", "", " "};
         for (String str : strs) {
             assertThat(StringUtils.string2blob(str)).isEqualTo(new SerialBlob(str.getBytes()));
         }
     }
 
+    /**
+     * Test blob 2 string.
+     *
+     * @throws SQLException the sql exception
+     */
     @Test
     public void testBlob2string() throws SQLException {
-        String[] strs = new String[]{"abc", " "};
+        String[] strs = new String[] {"abc", " "};
         for (String str : strs) {
             assertThat(StringUtils.blob2string(new SerialBlob(str.getBytes()))).isEqualTo(str);
 
         }
     }
 
+    /**
+     * Test input stream 2 string.
+     */
     @Test
     public void testInputStream2String() {
         try {
             InputStream inputStream = StringUtilsTest.class.getClassLoader().getResourceAsStream("test.txt");
             assertThat(StringUtils.inputStream2String(inputStream)).isEqualTo("abc\n"
-                    + ":\"klsdf\n"
-                    + "2ks,x:\".,-3sd˚ø≤ø¬≥");
+                + ":\"klsdf\n"
+                + "2ks,x:\".,-3sd˚ø≤ø¬≥");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
