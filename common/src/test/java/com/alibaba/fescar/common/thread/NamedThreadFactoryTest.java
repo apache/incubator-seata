@@ -31,7 +31,13 @@ public class NamedThreadFactoryTest {
         NamedThreadFactory namedThreadFactory = new NamedThreadFactory("testNameThread", 5);
 
         Thread testNameThread = namedThreadFactory
-            .newThread(() -> System.out.println(Thread.currentThread().getName()));
+            .newThread(() -> {
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
         assertThat(testNameThread.getName()).startsWith("testNameThread");
         assertThat(testNameThread.isDaemon()).isTrue();
     }
