@@ -19,8 +19,10 @@ package com.alibaba.fescar.discovery.registry;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 
 /**
- * @author: jimin.jm@alibaba-inc.com
- * @date 2019/02/26
+ * The enum Registry type.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /02/26
  */
 public enum RegistryType {
     /**
@@ -49,7 +51,7 @@ public enum RegistryType {
             return Nacos;
         } else if (Redis.name().equalsIgnoreCase(name)) {
             return Redis;
-        }else {
+        } else {
             throw new NotSupportYetException("unsupport type:" + name);
         }
     }

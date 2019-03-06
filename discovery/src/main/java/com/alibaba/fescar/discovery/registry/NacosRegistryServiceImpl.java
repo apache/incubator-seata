@@ -37,11 +37,8 @@ import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 /**
  * The type Nacos registry service.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2019 /1/31 5:22 PM
- * @FileName: NacosRegistryServiceImpl
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /1/31
  */
 public class NacosRegistryServiceImpl implements RegistryService<EventListener> {
 
