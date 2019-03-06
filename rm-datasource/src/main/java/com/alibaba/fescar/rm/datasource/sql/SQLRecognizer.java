@@ -43,7 +43,7 @@ public interface SQLRecognizer {
      * TableRecords name should be 'user' for this SQL, without alias 'u'.
      *
      * @return table name.
-     * @see #getTableAlias() #getTableAlias()
+     * @see #getTableAlias() #getTableAlias()#getTableAlias()
      */
     String getTableName();
 

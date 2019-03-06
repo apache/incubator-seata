@@ -21,17 +21,18 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
 
 /**
+ * The type Keyword checker factory.
+ *
  * @author Wu
- * @date 2019/3/5
- * The Type keyword checker factory
+ * @date 2019 /3/5 The Type keyword checker factory
  */
 public class KeywordCheckerFactory {
 
     /**
      * get keyword checker
      *
-     * @param dbType
-     * @return
+     * @param dbType the db type
+     * @return keyword checker
      */
     public static KeywordChecker getKeywordChecker(String dbType) {
         if (dbType.equals(JdbcConstants.MYSQL)) {

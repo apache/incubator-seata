@@ -46,7 +46,7 @@ public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRe
      */
     public MySQLInsertRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (MySqlInsertStatement) ast;
+        this.ast = (MySqlInsertStatement)ast;
     }
 
     @Override

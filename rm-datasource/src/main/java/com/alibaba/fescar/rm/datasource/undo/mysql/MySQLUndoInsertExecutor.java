@@ -31,7 +31,6 @@ import com.alibaba.fescar.rm.datasource.undo.AbstractUndoExecutor;
 import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
 import com.alibaba.fescar.rm.datasource.undo.KeywordCheckerFactory;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
-import com.alibaba.fescar.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
 
 /**
  * The type My sql undo insert executor.
@@ -40,19 +39,20 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
         TableRecords afterImage = sqlUndoLog.getAfterImage();
         List<Row> afterImageRows = afterImage.getRows();
         if (afterImageRows == null || afterImageRows.size() == 0) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = afterImageRows.get(0);
-        StringBuffer mainSQL = new StringBuffer("DELETE FROM " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()));
+        StringBuffer mainSQL = new StringBuffer(
+            "DELETE FROM " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()));
         StringBuffer where = new StringBuffer(" WHERE ");
         boolean first = true;
         for (Field field : row.getFields()) {
             if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(keywordChecker.checkAndReplace(field.getName()) +" = ?");
+                where.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
             }
 
         }
@@ -60,7 +60,8 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
     }
 
     @Override
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue) throws SQLException {
+    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue)
+        throws SQLException {
         undoPST.setObject(1, pkValue.getValue(), pkValue.getType());
     }
 

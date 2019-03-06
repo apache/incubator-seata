@@ -28,7 +28,6 @@ import com.alibaba.fescar.rm.datasource.undo.AbstractUndoExecutor;
 import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
 import com.alibaba.fescar.rm.datasource.undo.KeywordCheckerFactory;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
-import com.alibaba.fescar.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
 
 /**
  * The type My sql undo update executor.
@@ -37,26 +36,27 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (beforeImageRows == null || beforeImageRows.size() == 0) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG"); // TODO
         }
         Row row = beforeImageRows.get(0);
-        StringBuffer mainSQL = new StringBuffer("UPDATE " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()) + " SET ");
+        StringBuffer mainSQL = new StringBuffer(
+            "UPDATE " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()) + " SET ");
         StringBuffer where = new StringBuffer(" WHERE ");
         boolean first = true;
         for (Field field : row.getFields()) {
             if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(keywordChecker.checkAndReplace(field.getName()) +" = ?");
+                where.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
             } else {
                 if (first) {
                     first = false;
                 } else {
                     mainSQL.append(", ");
                 }
-                mainSQL.append(keywordChecker.checkAndReplace(field.getName()) +" = ?");
+                mainSQL.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
             }
 
         }

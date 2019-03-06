@@ -38,7 +38,8 @@ public class StatementProxy<T extends Statement> extends AbstractStatementProxy<
      * @param targetSQL         the target sql
      * @throws SQLException the sql exception
      */
-    public StatementProxy(AbstractConnectionProxy connectionWrapper, T targetStatement, String targetSQL) throws SQLException {
+    public StatementProxy(AbstractConnectionProxy connectionWrapper, T targetStatement, String targetSQL)
+        throws SQLException {
         super(connectionWrapper, targetStatement, targetSQL);
     }
 
@@ -55,7 +56,7 @@ public class StatementProxy<T extends Statement> extends AbstractStatementProxy<
 
     @Override
     public ConnectionProxy getConnectionProxy() {
-        return (ConnectionProxy) super.getConnectionProxy();
+        return (ConnectionProxy)super.getConnectionProxy();
     }
 
     @Override
@@ -64,7 +65,7 @@ public class StatementProxy<T extends Statement> extends AbstractStatementProxy<
         return ExecuteTemplate.execute(this, new StatementCallback<ResultSet, T>() {
             @Override
             public ResultSet execute(Statement statement, Object... args) throws SQLException {
-                return statement.executeQuery((String) args[0]);
+                return statement.executeQuery((String)args[0]);
             }
         }, sql);
     }
@@ -75,7 +76,7 @@ public class StatementProxy<T extends Statement> extends AbstractStatementProxy<
         return ExecuteTemplate.execute(this, new StatementCallback<Integer, T>() {
             @Override
             public Integer execute(Statement statement, Object... args) throws SQLException {
-                return statement.executeUpdate((String) args[0]);
+                return statement.executeUpdate((String)args[0]);
             }
         }, sql);
     }

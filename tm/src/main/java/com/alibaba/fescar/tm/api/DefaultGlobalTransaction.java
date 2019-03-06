@@ -55,7 +55,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     /**
      * Instantiates a new Default global transaction.
      *
-     * @param xid the xid
+     * @param xid    the xid
+     * @param status the status
+     * @param role   the role
      */
     DefaultGlobalTransaction(String xid, GlobalStatus status, GlobalTransactionRole role) {
         this.transactionManager = DefaultTransactionManager.get();

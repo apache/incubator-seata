@@ -24,7 +24,7 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 /**
  * The type Abstract my sql recognizer test.
  *
- * @author hanwen  created at 2019-01-25
+ * @author hanwen created at 2019-01-25
  */
 public class AbstractMySQLRecognizerTest {
 

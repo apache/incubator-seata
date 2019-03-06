@@ -39,7 +39,8 @@ public class RMHandlerAT extends AbstractRMHandlerAT implements RMInboundHandler
     private DataSourceManager dataSourceManager = DataSourceManager.get();
 
     @Override
-    protected void doBranchCommit(BranchCommitRequest request, BranchCommitResponse response) throws TransactionException {
+    protected void doBranchCommit(BranchCommitRequest request, BranchCommitResponse response)
+        throws TransactionException {
         String xid = request.getXid();
         long branchId = request.getBranchId();
         String resourceId = request.getResourceId();
@@ -52,7 +53,8 @@ public class RMHandlerAT extends AbstractRMHandlerAT implements RMInboundHandler
     }
 
     @Override
-    protected void doBranchRollback(BranchRollbackRequest request, BranchRollbackResponse response) throws TransactionException {
+    protected void doBranchRollback(BranchRollbackRequest request, BranchRollbackResponse response)
+        throws TransactionException {
         String xid = request.getXid();
         long branchId = request.getBranchId();
         String resourceId = request.getResourceId();

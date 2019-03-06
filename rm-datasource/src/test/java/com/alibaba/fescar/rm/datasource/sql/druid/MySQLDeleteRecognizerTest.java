@@ -28,7 +28,7 @@ import org.junit.Test;
 /**
  * The type My sql delete recognizer test.
  *
- * @author hanwen  created at 2019-01-25
+ * @author hanwen created at 2019-01-25
  */
 public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
 

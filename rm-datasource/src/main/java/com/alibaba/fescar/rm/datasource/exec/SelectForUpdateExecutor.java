@@ -44,13 +44,14 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public SelectForUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<ResultSet, S> statementCallback, SQLRecognizer sqlRecognizer) {
+    public SelectForUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<ResultSet, S> statementCallback,
+                                   SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
     @Override
     public Object doExecute(Object... args) throws Throwable {
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) sqlRecognizer;
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
 
         Connection conn = statementProxy.getConnection();
         ResultSet rs = null;
@@ -64,7 +65,7 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
         String whereCondition = null;
         ArrayList<Object> paramAppender = new ArrayList<>();
         if (statementProxy instanceof ParametersHolder) {
-            whereCondition = recognizer.getWhereCondition((ParametersHolder) statementProxy, paramAppender);
+            whereCondition = recognizer.getWhereCondition((ParametersHolder)statementProxy, paramAppender);
         } else {
             whereCondition = recognizer.getWhereCondition();
         }

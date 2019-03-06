@@ -46,7 +46,8 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public UpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
+    public UpdateExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
+                          SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
@@ -88,7 +89,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 rs = st.executeQuery(selectSQL);
             } else {
                 ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                for (int i = 0; i< paramAppender.size(); i++) {
+                for (int i = 0; i < paramAppender.size(); i++) {
                     ps.setObject(i + 1, paramAppender.get(i));
                 }
                 rs = ps.executeQuery();

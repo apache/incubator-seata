@@ -55,7 +55,8 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
      * @param targetSQL       the target sql
      * @throws SQLException the sql exception
      */
-    public AbstractStatementProxy(AbstractConnectionProxy connectionProxy, T targetStatement, String targetSQL) throws SQLException {
+    public AbstractStatementProxy(AbstractConnectionProxy connectionProxy, T targetStatement, String targetSQL)
+        throws SQLException {
         this.connectionProxy = connectionProxy;
         this.targetStatement = targetStatement;
         this.targetSQL = targetSQL;
