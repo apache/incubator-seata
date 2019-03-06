@@ -40,4 +40,19 @@ public class TransactionHookAdapter implements TransactionHook {
     public void afterCommit() {
 
     }
+
+    @Override
+    public void beforeRollback() {
+
+    }
+
+    @Override
+    public void afterRollback() {
+
+    }
+
+    @Override
+    public void afterCompletion() {
+
+    }
 }

@@ -18,8 +18,9 @@ package com.alibaba.fescar.tm.api;
 
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.tm.api.transaction.TransactionHook;
-import com.alibaba.fescar.tm.api.transaction.TransactionHookExecuteException;
 import com.alibaba.fescar.tm.api.transaction.TransactionHookManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -27,6 +28,9 @@ import java.util.List;
  * Template of executing business logic with a global transaction.
  */
 public class TransactionalTemplate {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionalTemplate.class);
+
 
     /**
      * Execute object.
@@ -62,8 +66,9 @@ public class TransactionalTemplate {
 
                 // 3. any business exception, rollback.
                 try {
+                    triggerBeforeRollback();
                     tx.rollback();
-
+                    triggerAfterRollback();
                     // 3.1 Successfully rolled back
                     throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
 
@@ -79,49 +84,94 @@ public class TransactionalTemplate {
             try {
                 triggerBeforeCommit();
                 tx.commit();
-
+                triggerAfterCommit();
             } catch (TransactionException txe) {
                 // 4.1 Failed to commit
                 throw new TransactionalExecutor.ExecutionException(tx, txe,
                         TransactionalExecutor.Code.CommitFailure);
+            }
 
-            }
-            try {
-                triggerAfterCommit();
-            } catch (Exception e) {
-                throw new TransactionHookExecuteException(e);
-            }
             return rs;
         }finally {
-            cleanupAfterCommit();
+            //5. clear
+            triggerAfterCompletion();
+            cleanUp();
         }
     }
 
 
     private void triggerBeforeBegin() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            hook.beforeBegin();
+        try {
+            for (TransactionHook hook : getCurrentHooks()) {
+                hook.beforeBegin();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed execute beforeBegin in hook " + e.getMessage());
         }
     }
 
     private void triggerAfterBegin() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            hook.afterBegin();
+        try {
+            for (TransactionHook hook : getCurrentHooks()) {
+                hook.afterBegin();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed execute afterBegin in hook " + e.getMessage());
+        }
+
+    }
+
+    private void triggerBeforeRollback() {
+        try {
+            for (TransactionHook hook : getCurrentHooks()) {
+                hook.beforeRollback();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed execute beforeRollback in hook " + e.getMessage());
         }
     }
+
+    private void triggerAfterRollback() {
+        try {
+            for (TransactionHook hook : getCurrentHooks()) {
+                hook.afterRollback();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed execute afterRollback in hook " + e.getMessage());
+        }
+    }
+
     private void triggerBeforeCommit() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            hook.beforeCommit();
+        try {
+            for (TransactionHook hook : getCurrentHooks()) {
+                hook.beforeCommit();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed execute beforeCommit in hook " + e.getMessage());
         }
     }
 
     private void triggerAfterCommit() {
-        for (TransactionHook hook : getCurrentHooks()) {
-            hook.afterCommit();
+        try {
+            for (TransactionHook hook : getCurrentHooks()) {
+                hook.afterCommit();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed execute afterCommit in hook " + e.getMessage());
         }
     }
 
-    private void cleanupAfterCommit() {
+    private void triggerAfterCompletion() {
+        try {
+            for (TransactionHook hook : getCurrentHooks()) {
+                hook.afterCompletion();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed execute afterCompletion in hook " + e.getMessage());
+        }
+    }
+
+    private void cleanUp() {
         TransactionHookManager.clear();
     }
 

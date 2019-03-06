@@ -40,4 +40,19 @@ public interface TransactionHook {
      * after tx commit
      */
     void afterCommit();
+
+    /**
+     * before tx rollback
+     */
+    void beforeRollback();
+
+    /**
+     * after tx rollback
+     */
+    void afterRollback();
+
+    /**
+     * after tx all Completed
+     */
+    void afterCompletion();
 }
