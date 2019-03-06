@@ -16,12 +16,9 @@
 
 package com.alibaba.fescar.server.session;
 
-
 import org.testng.annotations.Test;
-
 import static com.alibaba.fescar.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
 import static org.assertj.core.api.Assertions.*;
-
 import java.io.File;
 import java.io.IOException;
 
@@ -34,20 +31,17 @@ public class SessionHolderTest {
 
     @Test
     public void testInit() throws IOException {
-        String sessionStorePath=System.getProperty("user.dir")+ File.separator +"sessionStore";
+        String sessionStorePath = System.getProperty("user.dir") + File.separator + "sessionStore";
         //delete file previously created
-        File rootSessionFile=new File(sessionStorePath+File.separator+ROOT_SESSION_MANAGER_NAME);
-        if(rootSessionFile.exists()){
+        File rootSessionFile = new File(sessionStorePath + File.separator + ROOT_SESSION_MANAGER_NAME);
+        if (rootSessionFile.exists()) {
             rootSessionFile.delete();
         }
-        File file=new File(sessionStorePath);
-        if(!file.exists()&&!file.isDirectory()){
+        File file = new File(sessionStorePath);
+        if (!file.exists() && !file.isDirectory()) {
             file.mkdirs();
         }
         SessionHolder.init(sessionStorePath);
-
-        assertThat(new File(sessionStorePath+File.separator+ROOT_SESSION_MANAGER_NAME)).exists().isFile();
-
-
+        assertThat(new File(sessionStorePath + File.separator + ROOT_SESSION_MANAGER_NAME)).exists().isFile();
     }
 }
