@@ -51,7 +51,7 @@ public class GlobalLockQueryResponse extends AbstractTransactionResponse {
     @Override
     protected void doEncode() {
         super.doEncode();
-        byteBuffer.putShort((short) (lockable ? 1 : 0));
+        byteBuffer.putShort((short)(lockable ? 1 : 0));
     }
 
     @Override
