@@ -17,33 +17,47 @@
 package com.alibaba.fescar.config;
 
 import com.alibaba.fescar.common.exception.NotSupportYetException;
+
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
  * ConfigType test.
+ *
  * @author Lay
  */
 public class ConfigTypeTest {
 
+    /**
+     * Test get type with file.
+     */
     @Test
     public void testGetTypeWithFile() {
         ConfigType configType = ConfigType.getType("file");
         Assert.assertEquals(configType, ConfigType.File);
     }
 
+    /**
+     * Test get type with nacos.
+     */
     @Test
     public void testGetTypeWithNacos() {
         ConfigType configType = ConfigType.getType("nacos");
         Assert.assertEquals(configType, ConfigType.Nacos);
     }
 
+    /**
+     * Test get type with apollo.
+     */
     @Test
     public void testGetTypeWithApollo() {
         ConfigType configType = ConfigType.getType("apollo");
         Assert.assertEquals(configType, ConfigType.Apollo);
     }
 
+    /**
+     * Test get type with not support.
+     */
     @Test(expected = NotSupportYetException.class)
     public void testGetTypeWithNotSupport() {
         ConfigType.getType("none");
