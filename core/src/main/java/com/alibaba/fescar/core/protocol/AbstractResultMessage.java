@@ -23,11 +23,8 @@ import io.netty.buffer.ByteBuf;
 /**
  * The type Abstract result message.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /9/14 17:07
- * @FileName: AbstractResultMessage
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/14
  */
 public abstract class AbstractResultMessage extends AbstractMessage implements MergedMessage {
     private static final long serialVersionUID = 6540352050650203313L;
@@ -81,7 +78,7 @@ public abstract class AbstractResultMessage extends AbstractMessage implements M
      * Do encode.
      */
     protected void doEncode() {
-        byteBuffer.put((byte) resultCode.ordinal());
+        byteBuffer.put((byte)resultCode.ordinal());
         if (resultCode == ResultCode.Failed) {
             if (getMsg() != null) {
                 String msg;
@@ -95,12 +92,12 @@ public abstract class AbstractResultMessage extends AbstractMessage implements M
                     msg = getMsg().substring(0, 64);
                     bs = msg.getBytes(UTF8);
                 }
-                byteBuffer.putShort((short) bs.length);
+                byteBuffer.putShort((short)bs.length);
                 if (bs.length > 0) {
                     byteBuffer.put(bs);
                 }
             } else {
-                byteBuffer.putShort((short) 0);
+                byteBuffer.putShort((short)0);
             }
         }
     }
