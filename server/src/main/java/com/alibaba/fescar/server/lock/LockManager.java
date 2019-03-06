@@ -46,6 +46,7 @@ public interface LockManager {
 
     /**
      * Clean all locks.
+     *
      * @throws TransactionException the transaction exception
      */
     void cleanAllLocks() throws TransactionException;

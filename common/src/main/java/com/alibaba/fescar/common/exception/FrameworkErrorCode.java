@@ -20,7 +20,7 @@ package com.alibaba.fescar.common.exception;
  * The enum Framework error code.
  *
  * @author jimin.jm @alibaba-inc.com
- * @DateTime: 2018 /10/9
+ * @date 2018 /10/9
  */
 public enum FrameworkErrorCode {
     /**

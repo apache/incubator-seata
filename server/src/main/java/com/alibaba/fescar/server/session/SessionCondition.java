@@ -21,11 +21,8 @@ import com.alibaba.fescar.core.model.GlobalStatus;
 /**
  * The type Session condition.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /12/13 14:47
- * @FileName: SessionCondition
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /12/13
  */
 public class SessionCondition {
     private GlobalStatus status;

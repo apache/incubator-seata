@@ -37,11 +37,9 @@ import com.alibaba.fescar.server.store.TransactionWriteStore;
 /**
  * The type Write store test.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /12/13 10:21
- * @FileName: WriteStoreTest
- * @Description:c write  cost:87281,read cost:158922   65535*5  1000 per open  init 1024 write cost:86454,read
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /12/13
+ * write  cost:87281,read cost:158922   65535*5  1000 per open  init 1024 write cost:86454,read
  * cost:160541   65535*5  2000 per open  init 1024 write cost:82953,read cost:157736   65535*5  2000 per open  init
  * 65535*5*9 write cost:115079,read cost:163664   65535*5  2000 per open  init 65535*5*9  schedule flush 10||2s
  */

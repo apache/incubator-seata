@@ -24,7 +24,8 @@ import org.testng.annotations.Test;
  * GlobalTransactionScanner Unit Test
  */
 public class GlobalTransactionScannerTest {
-    private GlobalTransactionScanner globalTransactionScanner = new GlobalTransactionScanner("global-trans-scanner-test");
+    private GlobalTransactionScanner globalTransactionScanner = new GlobalTransactionScanner(
+        "global-trans-scanner-test");
 
     @Test(dataProvider = "normalBeanProvider")
     public void testWrapNormalBean(Object bean, String beanName, Object cacheKey) {
@@ -42,6 +43,6 @@ public class GlobalTransactionScannerTest {
         Business business = new BusinessImpl();
         String beanName = "business";
         String cacheKey = "business-key";
-        return new Object[][]{{business, beanName, cacheKey}};
+        return new Object[][] {{business, beanName, cacheKey}};
     }
 }

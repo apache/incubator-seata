@@ -50,7 +50,8 @@ public interface SessionLifecycleListener {
      * @param status        the status
      * @throws TransactionException the transaction exception
      */
-    void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession, BranchStatus status) throws TransactionException;
+    void onBranchStatusChange(GlobalSession globalSession, BranchSession branchSession, BranchStatus status)
+        throws TransactionException;
 
     /**
      * On add branch.

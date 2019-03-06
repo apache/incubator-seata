@@ -104,5 +104,4 @@ public interface SessionManager extends SessionLifecycleListener {
      */
     List<GlobalSession> findGlobalSessions(SessionCondition condition);
 
-
 }

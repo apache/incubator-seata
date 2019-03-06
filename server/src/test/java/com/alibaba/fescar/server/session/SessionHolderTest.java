@@ -16,21 +16,27 @@
 
 package com.alibaba.fescar.server.session;
 
-import org.junit.Test;
-
-import static com.alibaba.fescar.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
-import static org.assertj.core.api.Assertions.*;
-
 import java.io.File;
 import java.io.IOException;
 
+import org.junit.Test;
+
+import static com.alibaba.fescar.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
- * @author Wu
- * @date 2019/3/6
  * The type Session holder test.
+ *
+ * @author Wu
+ * @date 2019 /3/6 The type Session holder test.
  */
 public class SessionHolderTest {
 
+    /**
+     * Test init.
+     *
+     * @throws IOException the io exception
+     */
     @Test
     public void testInit() throws IOException {
         String sessionStorePath = System.getProperty("user.dir") + File.separator + "sessionStore";
