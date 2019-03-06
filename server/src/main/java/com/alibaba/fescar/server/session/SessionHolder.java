@@ -16,6 +16,7 @@
 
 package com.alibaba.fescar.server.session;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,8 +59,8 @@ public class SessionHolder {
             RETRY_COMMITTING_SESSION_MANAGER = new DefaultSessionManager(RETRY_COMMITTING_SESSION_MANAGER_NAME);
             RETRY_ROLLBACKING_SESSION_MANAGER = new DefaultSessionManager(RETRY_ROLLBACKING_SESSION_MANAGER_NAME);
         } else {
-            if (!sessionStorePath.endsWith("/")) {
-                sessionStorePath = sessionStorePath + "/";
+            if (!sessionStorePath.endsWith(File.separator)) {
+                sessionStorePath = sessionStorePath + File.separator;
             }
             ROOT_SESSION_MANAGER = new FileBasedSessionManager(ROOT_SESSION_MANAGER_NAME, sessionStorePath);
             ASYNC_COMMITTING_SESSION_MANAGER = new DefaultSessionManager(ASYNC_COMMITTING_SESSION_MANAGER_NAME);
