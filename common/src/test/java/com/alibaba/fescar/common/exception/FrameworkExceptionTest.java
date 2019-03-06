@@ -16,29 +16,39 @@
 
 package com.alibaba.fescar.common.exception;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import java.sql.SQLException;
+
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 /**
+ * The type Framework exception test.
+ *
  * @author Otis.z
- * @date 2019/3/1
+ * @date 2019 /3/1
  */
 public class FrameworkExceptionTest {
 
     private Message message = new Message();
 
+    /**
+     * Test get errcode.
+     */
     @Test
     public void testGetErrcode() {
         try {
             message.print4();
         } catch (FrameworkException e) {
-            assertThat(e).isInstanceOf(FrameworkException.class).hasMessage(FrameworkErrorCode.UnknownAppError.errMessage);
+            assertThat(e).isInstanceOf(FrameworkException.class).hasMessage(
+                FrameworkErrorCode.UnknownAppError.errMessage);
             assertThat(e.getErrcode()).isEqualTo(FrameworkErrorCode.UnknownAppError);
         }
     }
 
+    /**
+     * Test nested exception.
+     */
     @Test
     public void testNestedException() {
         try {
@@ -48,6 +58,9 @@ public class FrameworkExceptionTest {
         }
     }
 
+    /**
+     * Test nested exception 1.
+     */
     @Test
     public void testNestedException1() {
         try {
@@ -57,6 +70,9 @@ public class FrameworkExceptionTest {
         }
     }
 
+    /**
+     * Test nested exception 2.
+     */
     @Test
     public void testNestedException2() {
         try {
@@ -66,8 +82,11 @@ public class FrameworkExceptionTest {
         }
     }
 
+    /**
+     * Test nested exception 3.
+     */
     @Test
-    public void testNestedException3()  {
+    public void testNestedException3() {
         try {
             message.print3();
         } catch (Exception e) {
@@ -75,16 +94,22 @@ public class FrameworkExceptionTest {
         }
     }
 
-
+    /**
+     * Test nested exception 5.
+     */
     @Test
     public void testNestedException5() {
         try {
             message.print5();
         } catch (Exception e) {
-            assertThat(e).isInstanceOf(FrameworkException.class).hasMessage(FrameworkErrorCode.ExceptionCaught.errMessage);
+            assertThat(e).isInstanceOf(FrameworkException.class).hasMessage(
+                FrameworkErrorCode.ExceptionCaught.errMessage);
         }
     }
 
+    /**
+     * Test nested exception 6.
+     */
     @Test
     public void testNestedException6() {
         try {
@@ -94,6 +119,9 @@ public class FrameworkExceptionTest {
         }
     }
 
+    /**
+     * Test nested exception 7.
+     */
     @Test
     public void testNestedException7() {
         try {
@@ -103,6 +131,9 @@ public class FrameworkExceptionTest {
         }
     }
 
+    /**
+     * Test nested exception 8.
+     */
     @Test
     public void testNestedException8() {
         try {
@@ -112,6 +143,9 @@ public class FrameworkExceptionTest {
         }
     }
 
+    /**
+     * Test nested exception 9.
+     */
     @Test
     public void testNestedException9() {
         try {
@@ -120,6 +154,5 @@ public class FrameworkExceptionTest {
             assertThat(e).isInstanceOf(FrameworkException.class).hasMessage("frameworkExceptionMsg");
         }
     }
-
 
 }
