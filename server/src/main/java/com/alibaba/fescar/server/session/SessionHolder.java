@@ -20,12 +20,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
 
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.GlobalStatus;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,9 +35,21 @@ public class SessionHolder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionHolder.class);
 
+    /**
+     * The constant ROOT_SESSION_MANAGER_NAME.
+     */
     public static final String ROOT_SESSION_MANAGER_NAME = "root.data";
+    /**
+     * The constant ASYNC_COMMITTING_SESSION_MANAGER_NAME.
+     */
     public static final String ASYNC_COMMITTING_SESSION_MANAGER_NAME = "async.commit.data";
+    /**
+     * The constant RETRY_COMMITTING_SESSION_MANAGER_NAME.
+     */
     public static final String RETRY_COMMITTING_SESSION_MANAGER_NAME = "retry.commit.data";
+    /**
+     * The constant RETRY_ROLLBACKING_SESSION_MANAGER_NAME.
+     */
     public static final String RETRY_ROLLBACKING_SESSION_MANAGER_NAME = "retry.rollback.data";
 
     private static SessionManager ROOT_SESSION_MANAGER;
