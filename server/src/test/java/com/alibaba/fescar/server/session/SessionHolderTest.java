@@ -16,9 +16,11 @@
 
 package com.alibaba.fescar.server.session;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
+
 import static com.alibaba.fescar.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
 import static org.assertj.core.api.Assertions.*;
+
 import java.io.File;
 import java.io.IOException;
 
