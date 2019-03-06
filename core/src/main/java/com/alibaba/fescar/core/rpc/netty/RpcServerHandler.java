@@ -28,11 +28,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Rpc server handler.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /9/12 16:51
- * @FileName: RpcServerHandler
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/12
  */
 @Sharable
 public class RpcServerHandler extends ChannelInboundHandlerAdapter {
@@ -117,7 +114,8 @@ public class RpcServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        LOGGER.info("channel inactive for ServerProxyHandler at :[{}],[{}]", ctx.channel(),ctx.channel().remoteAddress());
+        LOGGER.info("channel inactive for ServerProxyHandler at :[{}],[{}]", ctx.channel(),
+            ctx.channel().remoteAddress());
     }
 
     @Override

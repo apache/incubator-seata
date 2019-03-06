@@ -40,7 +40,7 @@ public enum ClientType {
      * @return the client type
      */
     public static ClientType get(byte ordinal) {
-        return get((int) ordinal);
+        return get((int)ordinal);
     }
 
     /**

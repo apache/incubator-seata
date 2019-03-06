@@ -16,18 +16,19 @@
 
 package com.alibaba.fescar.config;
 
+import java.util.concurrent.ExecutorService;
+
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import org.junit.Test;
 
-import java.util.concurrent.ExecutorService;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * The type File configuration test.
  *
- * @author: jimin.jm @alibaba-inc.com
- * @date: 2019 /1/24
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /1/24
  */
 public class FileConfigurationTest {
     private final Config config;
@@ -39,6 +40,9 @@ public class FileConfigurationTest {
     private static final String PUT_DATAID = "transport.mock";
     private static final String NOT_EXIST_DATAID = "service.yyy.xxx";
 
+    /**
+     * Instantiates a new File configuration test.
+     */
     public FileConfigurationTest() {
         config = ConfigFactory.load("file.conf");
     }
@@ -224,7 +228,7 @@ public class FileConfigurationTest {
      */
     @Test
     public void testRemoveConfigListener() {
-        ConfigChangeListener listener=listenerProvider();
+        ConfigChangeListener listener = listenerProvider();
         fileConfig.addConfigListener(INT_DATAID, listener);
         fileConfig.removeConfigListener(INT_DATAID, listener);
         assertThat(fileConfig.getConfigListeners(INT_DATAID)).isEmpty();
@@ -233,10 +237,10 @@ public class FileConfigurationTest {
     /**
      * Listener provider
      *
-     * @return ConfigChangeListener
+     * @return ConfigChangeListener config change listener
      */
     public ConfigChangeListener listenerProvider() {
-        ConfigChangeListener listener=new ConfigChangeListener() {
+        ConfigChangeListener listener = new ConfigChangeListener() {
             @Override
             public ExecutorService getExecutor() {
                 return null;

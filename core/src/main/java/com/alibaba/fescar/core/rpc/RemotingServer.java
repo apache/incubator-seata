@@ -19,11 +19,8 @@ package com.alibaba.fescar.core.rpc;
 /**
  * The interface Remoting server.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /9/12 11:32
- * @FileName: RemotingServer
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/12
  */
 public interface RemotingServer extends RemotingService {
 }

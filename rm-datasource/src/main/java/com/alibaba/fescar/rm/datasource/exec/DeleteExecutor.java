@@ -45,13 +45,14 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public DeleteExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
+    public DeleteExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
+                          SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
     @Override
     protected TableRecords beforeImage() throws SQLException {
-        SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) sqlRecognizer;
+        SQLDeleteRecognizer visitor = (SQLDeleteRecognizer)sqlRecognizer;
 
         TableMeta tmeta = getTableMeta(visitor.getTableName());
         List<String> columns = new ArrayList<>();
@@ -70,7 +71,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         String whereCondition = null;
         ArrayList<Object> paramAppender = new ArrayList<>();
         if (statementProxy instanceof ParametersHolder) {
-            whereCondition = visitor.getWhereCondition((ParametersHolder) statementProxy, paramAppender);
+            whereCondition = visitor.getWhereCondition((ParametersHolder)statementProxy, paramAppender);
         } else {
             whereCondition = visitor.getWhereCondition();
         }
@@ -87,7 +88,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 rs = st.executeQuery(selectSQL);
             } else {
                 ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                for (int i = 0; i< paramAppender.size(); i++) {
+                for (int i = 0; i < paramAppender.size(); i++) {
                     ps.setObject(i + 1, paramAppender.get(i));
                 }
                 rs = ps.executeQuery();
