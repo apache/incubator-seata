@@ -17,26 +17,117 @@
 package com.alibaba.fescar.config;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author mawerss1@gmail.com
- * @Date 2019.03.17 11.12am
+ * @Date 2019/03/7
  */
 public class ConfigFutureTest {
 
-    private final String dataId = "dataid";
+    private final String dataId = "dataId";
     private final String content = "content";
-    private final String success = "success";
+    private final String result = "result";
 
-    private ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.GET);
+    private final ConfigFuture.ConfigOperation getOperation = ConfigFuture.ConfigOperation.GET;
 
-    @Test
-    public void testGet() {
-        Assert.assertEquals(content, configFuture.get());
-        new Thread(() -> configFuture.setContent(success)).start();
-        Assert.assertEquals(success, configFuture.get());
+    private ConfigFuture configFuture;
+
+
+    @Before
+    public void initConfigFutureBeforeTest() {
+        configFuture = new ConfigFuture(dataId, content, getOperation);
     }
 
+    /**
+     * Test get with get operation.
+     */
+    @Test
+    public void testGetWithGetOperation() {
+        Assert.assertEquals(content, configFuture.get());
+        startSetResultThread(result);
+        Assert.assertEquals(result, configFuture.get());
+    }
+
+    /**
+     * Test get with put operation.
+     */
+    @Test
+    public void testGetWithPutOperation() {
+        configFuture.setOperation(ConfigFuture.ConfigOperation.PUT);
+        Assert.assertEquals(Boolean.FALSE,configFuture.get());
+        startSetResultThread(result);
+        Assert.assertEquals(result,configFuture.get());
+    }
+
+    /**
+     * Test get with timeout argument.
+     */
+    @Test
+    public void testGetWithTimeOut() {
+        long outTime = 200L;
+        new Thread(() -> {
+            try {
+                Thread.sleep(outTime + 100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                return;
+            }
+            configFuture.setResult(result);
+        });
+        final Object result = configFuture.get(outTime, TimeUnit.MILLISECONDS);
+        Assert.assertEquals(content,result);
+    }
+
+    @Test
+    public void testSetContent() {
+        configFuture.setContent(content);
+    }
+
+    @Test
+    public void testGetContent() {
+        configFuture.setContent(content);
+        Assert.assertEquals(content,configFuture.getContent());
+    }
+
+    @Test
+    public void testSetDataId() {
+        configFuture.setDataId(dataId);
+        Assert.assertEquals(dataId,configFuture.getDataId());
+    }
+
+    @Test
+    public void testGetDataId() {
+        configFuture.setDataId(dataId);
+        Assert.assertEquals(dataId,configFuture.getDataId());
+    }
+
+    @Test
+    public void testSetResult() {
+        configFuture.setResult(result);
+    }
+
+    @Test
+    public void testGetOperation() {
+        configFuture.setOperation(ConfigFuture.ConfigOperation.GET);
+        Assert.assertEquals(ConfigFuture.ConfigOperation.GET,configFuture.getOperation());
+    }
+
+    @Test
+    public void testSetOperation() {
+        configFuture.setOperation(ConfigFuture.ConfigOperation.GET);
+    }
+
+    @Test
+    public void testIsTimeout() {
+        configFuture.isTimeout();
+    }
+
+    private void startSetResultThread(Object result) {
+        new Thread(() -> configFuture.setResult(this.result)).start();
+    }
 
 }
