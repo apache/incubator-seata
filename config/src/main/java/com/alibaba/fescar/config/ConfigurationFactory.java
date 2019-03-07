@@ -46,14 +46,18 @@ public final class ConfigurationFactory {
      */
     public static Configuration getInstance() {
         ConfigType configType = null;
+        String configTypeName = null;
         try {
-            configType = ConfigType.getType(
-                FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                    + ConfigurationKeys.FILE_ROOT_TYPE));
+            configTypeName = FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                    + ConfigurationKeys.FILE_ROOT_TYPE);
+            configType = ConfigType.getType(configTypeName);
         } catch (Exception exx) {
             LOGGER.error(exx.getMessage());
         }
         Configuration configuration;
+        if (configType == null) {
+            throw new NotSupportYetException("not support register type: " + configTypeName);
+        }
         switch (configType) {
             case Nacos:
                 try {

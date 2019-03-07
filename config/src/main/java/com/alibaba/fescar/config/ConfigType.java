@@ -16,7 +16,6 @@
 
 package com.alibaba.fescar.config;
 
-import com.alibaba.fescar.common.exception.NotSupportYetException;
 
 /**
  * The enum Config type.
@@ -25,6 +24,10 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
  * @date 2019 /2/1
  */
 public enum ConfigType {
+    /**
+     * default for fault-tolerant
+     */
+    Default,
     /**
      * File config type.
      */
@@ -45,14 +48,11 @@ public enum ConfigType {
      * @return the type
      */
     public static ConfigType getType(String name) {
-        if (File.name().equalsIgnoreCase(name)) {
-            return File;
-        } else if (Nacos.name().equalsIgnoreCase(name)) {
-            return Nacos;
-        } else if (Apollo.name().equalsIgnoreCase(name)) {
-            return Apollo;
-        } else {
-            throw new NotSupportYetException("unsupport type:" + name);
+        for (ConfigType configType : values()) {
+            if (configType.name().equalsIgnoreCase(name)) {
+                return configType;
+            }
         }
+        return Default;
     }
 }
