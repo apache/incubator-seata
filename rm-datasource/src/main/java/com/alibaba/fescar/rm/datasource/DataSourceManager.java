@@ -16,13 +16,23 @@
 
 package com.alibaba.fescar.rm.datasource;
 
+import static com.alibaba.fescar.common.exception.FrameworkErrorCode.NoAvailableService;
+
+import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.alibaba.fescar.common.XID;
+import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
+import com.alibaba.fescar.common.util.NetUtil;
+import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
@@ -37,13 +47,19 @@ import com.alibaba.fescar.core.protocol.transaction.BranchReportRequest;
 import com.alibaba.fescar.core.protocol.transaction.BranchReportResponse;
 import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryRequest;
 import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryResponse;
+import com.alibaba.fescar.core.rpc.netty.NettyClientConfig;
 import com.alibaba.fescar.core.rpc.netty.RmRpcClient;
+import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
+import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
+import com.alibaba.fescar.discovery.registry.RegistryFactory;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
 
 /**
  * The type Data source manager.
  */
 public class DataSourceManager implements ResourceManager {
+    
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceManager.class);
 
     private ResourceManagerInbound asyncWorker;
 
@@ -115,8 +131,15 @@ public class DataSourceManager implements ResourceManager {
             request.setLockKey(lockKeys);
             request.setResourceId(resourceId);
 
-            GlobalLockQueryResponse response = (GlobalLockQueryResponse)RmRpcClient.getInstance().sendMsgWithResponse(
-                request);
+            GlobalLockQueryResponse response = null;
+            if (RootContext.inGlobalTransaction()) {
+                response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
+            } else if(RootContext.requireGlobalLock()) {
+                response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(loadBalance(), request, NettyClientConfig.getRpcRequestTimeout());
+            } else {
+                throw new RuntimeException("unknow situation!");
+            }
+
             if (response.getResultCode() == ResultCode.Failed) {
                 throw new TransactionException(response.getTransactionExceptionCode(),
                     "Response[" + response.getMsg() + "]");
@@ -128,6 +151,22 @@ public class DataSourceManager implements ResourceManager {
             throw new TransactionException(TransactionExceptionCode.LockableCheckFailed, "Runtime", rex);
         }
 
+    }
+    
+    @SuppressWarnings("unchecked")
+    private String loadBalance() {
+        InetSocketAddress address = null;
+        try {
+            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(
+                TmRpcClient.getInstance().getTransactionServiceGroup());
+            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
+        } catch (Exception ignore) {
+            LOGGER.error(ignore.getMessage());
+        }
+        if (address == null) {
+            throw new FrameworkException(NoAvailableService);
+        }
+        return NetUtil.toStringAddress(address);
     }
 
     private static class SingletonHolder {
