@@ -17,6 +17,8 @@
 package com.alibaba.fescar.config;
 
 
+import com.alibaba.fescar.common.exception.NotSupportYetException;
+
 /**
  * The enum Config type.
  *
@@ -24,10 +26,6 @@ package com.alibaba.fescar.config;
  * @date 2019 /2/1
  */
 public enum ConfigType {
-    /**
-     * default for fault-tolerant
-     */
-    Default,
     /**
      * File config type.
      */
@@ -53,6 +51,6 @@ public enum ConfigType {
                 return configType;
             }
         }
-        return Default;
+        throw new NotSupportYetException("unsupport type:" + name);
     }
 }
