@@ -58,9 +58,9 @@ public class ConfigFutureTest {
     @Test
     public void testGetWithPutOperation() {
         configFuture.setOperation(ConfigFuture.ConfigOperation.PUT);
-        Assert.assertEquals(Boolean.FALSE,configFuture.get());
+        Assert.assertEquals(Boolean.FALSE, configFuture.get());
         startSetResultThread(result);
-        Assert.assertEquals(result,configFuture.get());
+        Assert.assertEquals(result, configFuture.get());
     }
 
     /**
@@ -79,7 +79,7 @@ public class ConfigFutureTest {
             configFuture.setResult(result);
         });
         final Object result = configFuture.get(outTime, TimeUnit.MILLISECONDS);
-        Assert.assertEquals(content,result);
+        Assert.assertEquals(content, result);
     }
 
     @Test
@@ -90,19 +90,19 @@ public class ConfigFutureTest {
     @Test
     public void testGetContent() {
         configFuture.setContent(content);
-        Assert.assertEquals(content,configFuture.getContent());
+        Assert.assertEquals(content, configFuture.getContent());
     }
 
     @Test
     public void testSetDataId() {
         configFuture.setDataId(dataId);
-        Assert.assertEquals(dataId,configFuture.getDataId());
+        Assert.assertEquals(dataId, configFuture.getDataId());
     }
 
     @Test
     public void testGetDataId() {
         configFuture.setDataId(dataId);
-        Assert.assertEquals(dataId,configFuture.getDataId());
+        Assert.assertEquals(dataId, configFuture.getDataId());
     }
 
     @Test
@@ -113,7 +113,7 @@ public class ConfigFutureTest {
     @Test
     public void testGetOperation() {
         configFuture.setOperation(ConfigFuture.ConfigOperation.GET);
-        Assert.assertEquals(ConfigFuture.ConfigOperation.GET,configFuture.getOperation());
+        Assert.assertEquals(ConfigFuture.ConfigOperation.GET, configFuture.getOperation());
     }
 
     @Test
