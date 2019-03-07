@@ -36,9 +36,9 @@ public class TransactionHookManagerTest {
 
     @Test
     public void testRegisterHook() {
-        TransactionHookAdapter transactionHookAdapter=new TransactionHookAdapter();
+        TransactionHookAdapter transactionHookAdapter = new TransactionHookAdapter();
         TransactionHookManager.registerHook(transactionHookAdapter);
-        List<TransactionHook> hooks=TransactionHookManager.getHooks();
+        List<TransactionHook> hooks = TransactionHookManager.getHooks();
         assertThat(hooks).isNotEmpty();
         assertThat(hooks.get(0)).isEqualTo(transactionHookAdapter);
     }

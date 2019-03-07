@@ -34,14 +34,14 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TransactionTemplateTest {
 
-    private static final String DEFAULT_XID="123456789";
-    private static final String DEFAULT_NAME="test";
-    private static final int DEFAULT_TIME_OUT=30000;
+    private static final String DEFAULT_XID = "123456789";
+    private static final String DEFAULT_NAME = "test";
+    private static final int DEFAULT_TIME_OUT = 30000;
 
 
     @Before
     public void init() throws Exception {
-        TransactionManager transactionManager=mock(TransactionManager.class);
+        TransactionManager transactionManager = mock(TransactionManager.class);
         when(transactionManager.begin(null, null, DEFAULT_NAME, DEFAULT_TIME_OUT)).thenReturn(DEFAULT_XID);
         when(transactionManager.commit(DEFAULT_XID)).thenReturn(GlobalStatus.Committed);
         when(transactionManager.rollback(DEFAULT_XID)).thenReturn(GlobalStatus.Rollbacked);
@@ -57,12 +57,12 @@ public class TransactionTemplateTest {
 
     @Test
     public void testTransactionCommitHook() throws Exception {
-        TransactionHook transactionHook=Mockito.mock(TransactionHook.class);
-        TransactionalExecutor transactionalExecutor=Mockito.mock(TransactionalExecutor.class);
+        TransactionHook transactionHook = Mockito.mock(TransactionHook.class);
+        TransactionalExecutor transactionalExecutor = Mockito.mock(TransactionalExecutor.class);
         when(transactionalExecutor.name()).thenReturn(DEFAULT_NAME);
         when(transactionalExecutor.timeout()).thenReturn(DEFAULT_TIME_OUT);
         TransactionHookManager.registerHook(transactionHook);
-        TransactionalTemplate template=new TransactionalTemplate();
+        TransactionalTemplate template = new TransactionalTemplate();
         template.execute(transactionalExecutor);
         verify(transactionHook).beforeBegin();
         verify(transactionHook).afterBegin();
@@ -73,13 +73,13 @@ public class TransactionTemplateTest {
 
     @Test
     public void testTransactionRollbackHook() throws Throwable {
-        TransactionHook transactionHook=Mockito.mock(TransactionHook.class);
-        TransactionalExecutor transactionalExecutor=Mockito.mock(TransactionalExecutor.class);
+        TransactionHook transactionHook = Mockito.mock(TransactionHook.class);
+        TransactionalExecutor transactionalExecutor = Mockito.mock(TransactionalExecutor.class);
         when(transactionalExecutor.name()).thenReturn(DEFAULT_NAME);
         when(transactionalExecutor.timeout()).thenReturn(DEFAULT_TIME_OUT);
         when(transactionalExecutor.execute()).thenThrow(new RuntimeException());
         TransactionHookManager.registerHook(transactionHook);
-        TransactionalTemplate template=new TransactionalTemplate();
+        TransactionalTemplate template = new TransactionalTemplate();
         try {
             template.execute(transactionalExecutor);
         } catch (Exception e) {
