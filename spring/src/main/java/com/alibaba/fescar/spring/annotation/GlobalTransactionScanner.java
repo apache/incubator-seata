@@ -43,11 +43,8 @@ import org.springframework.beans.factory.InitializingBean;
 /**
  * The type Global transaction scanner.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /12/28 17:23
- * @FileName: GlobalTransactionScanner
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /12/28
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator implements InitializingBean {
 

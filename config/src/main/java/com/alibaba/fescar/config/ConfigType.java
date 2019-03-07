@@ -51,7 +51,7 @@ public enum ConfigType {
             return Nacos;
         } else if (Apollo.name().equalsIgnoreCase(name)) {
             return Apollo;
-        } else {
+        }else {
             throw new NotSupportYetException("unsupport type:" + name);
         }
     }
