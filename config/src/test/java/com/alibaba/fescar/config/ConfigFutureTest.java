@@ -34,26 +34,9 @@ public class ConfigFutureTest {
     @Test
     public void testGet() {
         Assert.assertEquals(content, configFuture.get());
-        final SetResultTask setResultTask = new SetResultTask(configFuture, success);
-        new Thread(setResultTask).start();
+        new Thread(() -> configFuture.setContent(success)).start();
         Assert.assertEquals(success, configFuture.get());
     }
 
-    static class SetResultTask implements Runnable {
-
-        private ConfigFuture configFuture;
-
-        private String result;
-
-        public SetResultTask(ConfigFuture configFuture, String result) {
-            this.configFuture = configFuture;
-            this.result = result;
-        }
-
-        @Override
-        public void run() {
-            configFuture.setContent(result);
-        }
-    }
 
 }
