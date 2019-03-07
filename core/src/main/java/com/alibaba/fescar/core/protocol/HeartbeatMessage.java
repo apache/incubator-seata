@@ -30,11 +30,11 @@ public class HeartbeatMessage implements Serializable {
     /**
      * The constant PING.
      */
-    public static HeartbeatMessage PING = new HeartbeatMessage(true);
+    public static final HeartbeatMessage PING = new HeartbeatMessage(true);
     /**
      * The constant PONG.
      */
-    public static HeartbeatMessage PONG = new HeartbeatMessage(false);
+    public static final HeartbeatMessage PONG = new HeartbeatMessage(false);
 
     private HeartbeatMessage(boolean pingOrPong) {
         this.pingOrPong = pingOrPong;
