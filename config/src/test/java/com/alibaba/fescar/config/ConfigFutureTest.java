@@ -32,6 +32,7 @@ public class ConfigFutureTest {
     private final String content = "content";
     private final String result = "result";
 
+    private final long timeMills = 10l;
     private final ConfigFuture.ConfigOperation getOperation = ConfigFuture.ConfigOperation.GET;
 
     private ConfigFuture configFuture;
@@ -39,7 +40,7 @@ public class ConfigFutureTest {
 
     @Before
     public void initConfigFutureBeforeTest() {
-        configFuture = new ConfigFuture(dataId, content, getOperation);
+        configFuture = new ConfigFuture(dataId, content, getOperation,timeMills);
     }
 
     /**
@@ -122,8 +123,9 @@ public class ConfigFutureTest {
     }
 
     @Test
-    public void testIsTimeout() {
-        configFuture.isTimeout();
+    public void testIsTimeout() throws InterruptedException {
+        Thread.sleep(timeMills * 2);
+        Assert.assertTrue(configFuture.isTimeout());
     }
 
     private void startSetResultThread(Object result) {
