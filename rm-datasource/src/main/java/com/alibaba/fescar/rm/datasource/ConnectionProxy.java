@@ -164,11 +164,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         try {
             targetConnection.commit();
         } catch (Throwable ex) {
-            if (ex instanceof SQLException) {
-                throw (SQLException) ex;
-            } else {
-                throw new SQLException(ex);
-            }
+            throw new SQLException(ex);
         }
         context.reset();
     }
@@ -188,8 +184,6 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         } catch (Throwable ex) {
             report(false);
             if (ex instanceof SQLException) {
-                throw (SQLException) ex;
-            } else {
                 throw new SQLException(ex);
             }
         }

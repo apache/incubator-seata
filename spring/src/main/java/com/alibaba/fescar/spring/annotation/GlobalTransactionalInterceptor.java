@@ -78,9 +78,9 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
                     return methodInvocation.proceed();
                 } catch (Throwable e) {
                     if(e instanceof Exception) {
-                        throw (Exception)e;
+                        throw (Exception) e;
                     } else {
-                        throw new RuntimeException(e.getMessage(),e);
+                        throw new RuntimeException(e);
                     }
                 }
         }

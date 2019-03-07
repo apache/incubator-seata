@@ -21,7 +21,12 @@ import java.util.concurrent.Callable;
 import com.alibaba.fescar.core.context.RootContext;
 
 /**
- * Template of executing business logic in a local transaction with Global lock.
+ *  Template of executing business logic in a local transaction with Global lock.
+ * 
+ * @author deyou
+ * @date 2019.03.07
+ * 
+ * @param <T>
  */
 public class GlobalLockTemplate<T> {
 
