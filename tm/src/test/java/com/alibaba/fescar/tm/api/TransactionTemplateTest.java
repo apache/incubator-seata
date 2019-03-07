@@ -27,6 +27,7 @@ import org.mockito.Mockito;
 
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
+
 /**
  * @author guoyao
  * @date 2019/3/6

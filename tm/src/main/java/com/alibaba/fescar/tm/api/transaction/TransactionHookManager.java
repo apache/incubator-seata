@@ -15,7 +15,10 @@
  */
 package com.alibaba.fescar.tm.api.transaction;
 
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author guoyao
@@ -27,11 +30,12 @@ public final class TransactionHookManager {
 
     /**
      * get the current hooks
+     *
      * @return
      * @throws IllegalStateException
      */
     public static List<TransactionHook> getHooks() throws IllegalStateException {
-        List<TransactionHook> hooks = hooksLocal.get();
+        List<TransactionHook> hooks=hooksLocal.get();
 
         if (hooks == null || hooks.isEmpty()) {
             return Collections.emptyList();
@@ -41,6 +45,7 @@ public final class TransactionHookManager {
 
     /**
      * add new hook
+     *
      * @param transactionHook
      */
     public static void registerHook(TransactionHook transactionHook) {
