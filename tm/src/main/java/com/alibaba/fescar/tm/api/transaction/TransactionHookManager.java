@@ -26,7 +26,7 @@ import java.util.List;
  */
 public final class TransactionHookManager {
 
-    private static final ThreadLocal<List<TransactionHook>> hooksLocal = new ThreadLocal<>();
+    private static final ThreadLocal<List<TransactionHook>> LOCAL_HOOKS = new ThreadLocal<>();
 
     /**
      * get the current hooks
@@ -35,7 +35,7 @@ public final class TransactionHookManager {
      * @throws IllegalStateException
      */
     public static List<TransactionHook> getHooks() throws IllegalStateException {
-        List<TransactionHook> hooks = hooksLocal.get();
+        List<TransactionHook> hooks = LOCAL_HOOKS.get();
 
         if (hooks == null || hooks.isEmpty()) {
             return Collections.emptyList();
@@ -52,14 +52,17 @@ public final class TransactionHookManager {
         if (transactionHook == null) {
             throw new NullPointerException("transactionHook must not be null");
         }
-        List<TransactionHook> transactionHooks = hooksLocal.get();
+        List<TransactionHook> transactionHooks = LOCAL_HOOKS.get();
         if (transactionHooks == null) {
-            hooksLocal.set(new ArrayList<>());
+            LOCAL_HOOKS.set(new ArrayList<>());
         }
-        hooksLocal.get().add(transactionHook);
+        LOCAL_HOOKS.get().add(transactionHook);
     }
 
+    /**
+     * clear hooks
+     */
     public static void clear() {
-        hooksLocal.remove();
+        LOCAL_HOOKS.remove();
     }
 }
