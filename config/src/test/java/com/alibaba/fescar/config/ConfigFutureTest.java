@@ -32,11 +32,6 @@ public class ConfigFutureTest {
     private ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.GET);
 
     @Test
-    public void testIsTimeOut() {
-        configFuture.isTimeout();
-    }
-
-    @Test
     public void testGet() {
         Assert.assertEquals(content, configFuture.get());
         final SetResultTask setResultTask = new SetResultTask(configFuture, success);
