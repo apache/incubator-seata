@@ -63,7 +63,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback, SQLRecognizer sqlRecognizer) {
+    public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
+                                     SQLRecognizer sqlRecognizer) {
         this.statementProxy = statementProxy;
         this.statementCallback = statementCallback;
         this.sqlRecognizer = sqlRecognizer;
@@ -187,11 +188,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         connectionProxy.appendUndoLog(sqlUndoLog);
     }
 
-
     /**
      * build lockKey
      *
      * @param rowsIncludingPK the records
+     * @return the string
      */
     protected String buildLockKey(TableRecords rowsIncludingPK) {
         if (rowsIncludingPK.size() == 0) {
@@ -216,9 +217,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * build a SQLUndoLog
      *
-     * @param beforeImage
-     * @param afterImage
-     * @return
+     * @param beforeImage the before image
+     * @param afterImage  the after image
+     * @return sql undo log
      */
     protected SQLUndoLog buildUndoItem(TableRecords beforeImage, TableRecords afterImage) {
         SQLType sqlType = sqlRecognizer.getSQLType();

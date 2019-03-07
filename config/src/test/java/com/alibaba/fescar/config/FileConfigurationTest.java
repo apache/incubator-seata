@@ -20,18 +20,15 @@ import java.util.concurrent.ExecutorService;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * The type File configuration test.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: feats -all
- * @DateTime: 2019 /1/24 1:31 PM
- * @FileName: FileConfigurationTest
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /1/24
  */
 public class FileConfigurationTest {
     private final Config config;
@@ -43,6 +40,9 @@ public class FileConfigurationTest {
     private static final String PUT_DATAID = "transport.mock";
     private static final String NOT_EXIST_DATAID = "service.yyy.xxx";
 
+    /**
+     * Instantiates a new File configuration test.
+     */
     public FileConfigurationTest() {
         config = ConfigFactory.load("file.conf");
     }
@@ -52,8 +52,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testGetInt() {
-        Assert.assertEquals(fileConfig.getInt(INT_DATAID), config.getInt(INT_DATAID));
-        Assert.assertEquals(fileConfig.getInt(NOT_EXIST_DATAID), 0);
+        assertThat(fileConfig.getInt(INT_DATAID)).isEqualTo(config.getInt(INT_DATAID));
+        assertThat(fileConfig.getInt(NOT_EXIST_DATAID)).isEqualTo(0);
     }
 
     /**
@@ -61,8 +61,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testGetInt1() {
-        Assert.assertEquals(fileConfig.getInt(INT_DATAID, 999), config.getInt(INT_DATAID));
-        Assert.assertEquals(fileConfig.getInt(NOT_EXIST_DATAID, 999), 999);
+        assertThat(fileConfig.getInt(INT_DATAID, 999)).isEqualTo(config.getInt(INT_DATAID));
+        assertThat(fileConfig.getInt(NOT_EXIST_DATAID, 999)).isEqualTo(999);
     }
 
     /**
@@ -70,8 +70,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testGetInt2() {
-        Assert.assertEquals(fileConfig.getInt(INT_DATAID, 999, 1000), config.getInt(INT_DATAID));
-        Assert.assertEquals(fileConfig.getInt(NOT_EXIST_DATAID, 999, 1000), 999);
+        assertThat(fileConfig.getInt(INT_DATAID, 999, 1000)).isEqualTo(config.getInt(INT_DATAID));
+        assertThat(fileConfig.getInt(NOT_EXIST_DATAID, 999, 1000)).isEqualTo(999);
     }
 
     /**
@@ -79,8 +79,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testGetLong() {
-        Assert.assertEquals(fileConfig.getLong(LONG_DATAID), config.getLong(LONG_DATAID));
-        Assert.assertEquals(fileConfig.getLong(NOT_EXIST_DATAID), 0);
+        assertThat(fileConfig.getLong(LONG_DATAID)).isEqualTo(config.getLong(LONG_DATAID));
+        assertThat(fileConfig.getLong(NOT_EXIST_DATAID)).isEqualTo(0);
     }
 
     /**
@@ -88,8 +88,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testGetLong1() {
-        Assert.assertEquals(fileConfig.getLong(LONG_DATAID, 999L), config.getLong(LONG_DATAID));
-        Assert.assertEquals(fileConfig.getLong(NOT_EXIST_DATAID, 999L), 999L);
+        assertThat(fileConfig.getLong(LONG_DATAID, 999L)).isEqualTo(config.getLong(LONG_DATAID));
+        assertThat(fileConfig.getLong(NOT_EXIST_DATAID, 999L)).isEqualTo(999L);
     }
 
     /**
@@ -97,8 +97,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testGetLong2() {
-        Assert.assertEquals(fileConfig.getLong(LONG_DATAID, 999L, 1000), config.getLong(LONG_DATAID));
-        Assert.assertEquals(fileConfig.getLong(NOT_EXIST_DATAID, 999L, 1000), 999L);
+        assertThat(fileConfig.getLong(LONG_DATAID, 999L, 1000)).isEqualTo(config.getLong(LONG_DATAID));
+        assertThat(fileConfig.getLong(NOT_EXIST_DATAID, 999L, 1000)).isEqualTo(999L);
     }
 
     /**
@@ -106,8 +106,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testGetBoolean() {
-        Assert.assertEquals(fileConfig.getBoolean(BOOLEAN_DATAID), config.getBoolean(BOOLEAN_DATAID));
-        Assert.assertEquals(fileConfig.getBoolean(NOT_EXIST_DATAID), false);
+        assertThat(fileConfig.getBoolean(BOOLEAN_DATAID)).isEqualTo(config.getBoolean(BOOLEAN_DATAID));
+        assertThat(fileConfig.getBoolean(NOT_EXIST_DATAID)).isFalse();
     }
 
     /**
@@ -115,8 +115,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testGetBoolean1() {
-        Assert.assertEquals(fileConfig.getBoolean(BOOLEAN_DATAID, true), config.getBoolean(BOOLEAN_DATAID));
-        Assert.assertEquals(fileConfig.getBoolean(NOT_EXIST_DATAID, false), false);
+        assertThat(fileConfig.getBoolean(BOOLEAN_DATAID, true)).isEqualTo(config.getBoolean(BOOLEAN_DATAID));
+        assertThat(fileConfig.getBoolean(NOT_EXIST_DATAID, false)).isFalse();
     }
 
     /**
@@ -124,8 +124,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testGetBoolean2() {
-        Assert.assertEquals(fileConfig.getBoolean(BOOLEAN_DATAID, true, 1000), config.getBoolean(BOOLEAN_DATAID));
-        Assert.assertEquals(fileConfig.getBoolean(NOT_EXIST_DATAID, false, 1000), false);
+        assertThat(fileConfig.getBoolean(BOOLEAN_DATAID, true, 1000)).isEqualTo(config.getBoolean(BOOLEAN_DATAID));
+        assertThat(fileConfig.getBoolean(NOT_EXIST_DATAID, false, 1000)).isFalse();
     }
 
     /**
@@ -133,8 +133,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testGetConfig() {
-        Assert.assertEquals(fileConfig.getConfig(STRING_DATAID), config.getString(STRING_DATAID));
-        Assert.assertEquals(fileConfig.getConfig(NOT_EXIST_DATAID), null);
+        assertThat(fileConfig.getConfig(STRING_DATAID)).isEqualTo(config.getString(STRING_DATAID));
+        assertThat(fileConfig.getConfig(NOT_EXIST_DATAID)).isNull();
     }
 
     /**
@@ -142,8 +142,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testGetConfig1() {
-        Assert.assertEquals(fileConfig.getConfig(STRING_DATAID, 1000), config.getString(STRING_DATAID));
-        Assert.assertEquals(fileConfig.getConfig(NOT_EXIST_DATAID, 1000), null);
+        assertThat(fileConfig.getConfig(STRING_DATAID, 1000)).isEqualTo(config.getString(STRING_DATAID));
+        assertThat(fileConfig.getConfig(NOT_EXIST_DATAID, 1000)).isNull();
     }
 
     /**
@@ -151,8 +151,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testGetConfig2() {
-        Assert.assertEquals(fileConfig.getConfig(STRING_DATAID, "123"), config.getString(STRING_DATAID));
-        Assert.assertEquals(fileConfig.getConfig(NOT_EXIST_DATAID, "123"), "123");
+        assertThat(fileConfig.getConfig(STRING_DATAID, "123")).isEqualTo(config.getString(STRING_DATAID));
+        assertThat(fileConfig.getConfig(NOT_EXIST_DATAID, "123")).isEqualTo("123");
     }
 
     /**
@@ -160,8 +160,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testGetConfig3() {
-        Assert.assertEquals(fileConfig.getConfig(STRING_DATAID, "123", 1000), config.getString(STRING_DATAID));
-        Assert.assertEquals(fileConfig.getConfig(NOT_EXIST_DATAID, "123", 1000), "123");
+        assertThat(fileConfig.getConfig(STRING_DATAID, "123", 1000)).isEqualTo(config.getString(STRING_DATAID));
+        assertThat(fileConfig.getConfig(NOT_EXIST_DATAID, "123", 1000)).isEqualTo("123");
     }
 
     /**
@@ -169,7 +169,7 @@ public class FileConfigurationTest {
      */
     @Test
     public void testPutConfig() {
-        Assert.assertTrue(fileConfig.putConfig(PUT_DATAID, "123"));
+        assertThat(fileConfig.putConfig(PUT_DATAID, "123")).isTrue();
     }
 
     /**
@@ -177,7 +177,7 @@ public class FileConfigurationTest {
      */
     @Test
     public void testPutConfig1() {
-        Assert.assertTrue(fileConfig.putConfig(PUT_DATAID, "123", 5000));
+        assertThat(fileConfig.putConfig(PUT_DATAID, "123", 5000)).isTrue();
     }
 
     /**
@@ -185,7 +185,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testPutConfigIfAbsent() {
-        Assert.assertTrue(fileConfig.putConfigIfAbsent(PUT_DATAID, "123"));
+        assertThat(fileConfig.putConfigIfAbsent(PUT_DATAID, "123")).isTrue();
+
     }
 
     /**
@@ -193,7 +194,7 @@ public class FileConfigurationTest {
      */
     @Test
     public void testPutConfigIfAbsent1() {
-        Assert.assertTrue(fileConfig.putConfigIfAbsent(PUT_DATAID, "123", 5000));
+        assertThat(fileConfig.putConfigIfAbsent(PUT_DATAID, "123", 5000)).isTrue();
     }
 
     /**
@@ -201,7 +202,8 @@ public class FileConfigurationTest {
      */
     @Test
     public void testRemoveConfig() {
-        Assert.assertTrue(fileConfig.removeConfig(PUT_DATAID));
+        assertThat(fileConfig.removeConfig(PUT_DATAID)).isTrue();
+
     }
 
     /**
@@ -209,40 +211,35 @@ public class FileConfigurationTest {
      */
     @Test
     public void testRemoveConfig1() {
-        Assert.assertTrue(fileConfig.removeConfig(PUT_DATAID, 5000));
+        assertThat(fileConfig.removeConfig(PUT_DATAID, 5000)).isTrue();
     }
 
     /**
      * Test add config listener.
-     *
-     * @param listener the listener
      */
-    @Test(dataProvider = "listenerProvider")
-    public void testAddConfigListener(ConfigChangeListener listener) {
-        fileConfig.addConfigListener(INT_DATAID, listener);
-        Assert.assertEquals(fileConfig.getConfigListeners(INT_DATAID).size(), 1);
+    @Test
+    public void testAddConfigListener() {
+        fileConfig.addConfigListener(INT_DATAID, listenerProvider());
+        assertThat(fileConfig.getConfigListeners(INT_DATAID).size()).isEqualTo(1);
     }
 
     /**
      * Test remove config listener.
-     *
-     * @param listener the listener
      */
-    @Test(dataProvider = "listenerProvider")
-    public void testRemoveConfigListener(ConfigChangeListener listener) {
-        int currSize = fileConfig.getConfigListeners(INT_DATAID).size();
+    @Test
+    public void testRemoveConfigListener() {
+        ConfigChangeListener listener = listenerProvider();
         fileConfig.addConfigListener(INT_DATAID, listener);
         fileConfig.removeConfigListener(INT_DATAID, listener);
-        Assert.assertEquals(fileConfig.getConfigListeners(INT_DATAID).size(), currSize);
+        assertThat(fileConfig.getConfigListeners(INT_DATAID)).isEmpty();
     }
 
     /**
-     * Listener provider object [ ] [ ].
+     * Listener provider
      *
-     * @return the object [ ] [ ]
+     * @return ConfigChangeListener config change listener
      */
-    @DataProvider
-    public static Object[][] listenerProvider() {
+    public ConfigChangeListener listenerProvider() {
         ConfigChangeListener listener = new ConfigChangeListener() {
             @Override
             public ExecutorService getExecutor() {
@@ -254,6 +251,6 @@ public class FileConfigurationTest {
                 System.out.print(configInfo);
             }
         };
-        return new Object[][] {{listener}};
+        return listener;
     }
 }

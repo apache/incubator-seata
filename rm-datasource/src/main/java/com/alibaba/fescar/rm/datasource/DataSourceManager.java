@@ -75,7 +75,8 @@ public class DataSourceManager implements ResourceManager {
     }
 
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys) throws TransactionException {
+    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys)
+        throws TransactionException {
         try {
             BranchRegisterRequest request = new BranchRegisterRequest();
             request.setTransactionId(XID.getTransactionId(xid));
@@ -83,9 +84,11 @@ public class DataSourceManager implements ResourceManager {
             request.setResourceId(resourceId);
             request.setBranchType(branchType);
 
-            BranchRegisterResponse response = (BranchRegisterResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
+            BranchRegisterResponse response = (BranchRegisterResponse)RmRpcClient.getInstance().sendMsgWithResponse(
+                request);
             if (response.getResultCode() == ResultCode.Failed) {
-                throw new TransactionException(response.getTransactionExceptionCode(), "Response[" + response.getMsg() + "]");
+                throw new TransactionException(response.getTransactionExceptionCode(),
+                    "Response[" + response.getMsg() + "]");
             }
             return response.getBranchId();
         } catch (TimeoutException toe) {
@@ -96,7 +99,8 @@ public class DataSourceManager implements ResourceManager {
     }
 
     @Override
-    public void branchReport(String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
+    public void branchReport(String xid, long branchId, BranchStatus status, String applicationData)
+        throws TransactionException {
         try {
             BranchReportRequest request = new BranchReportRequest();
             request.setTransactionId(XID.getTransactionId(xid));
@@ -104,9 +108,11 @@ public class DataSourceManager implements ResourceManager {
             request.setStatus(status);
             request.setApplicationData(applicationData);
 
-            BranchReportResponse response = (BranchReportResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
+            BranchReportResponse response = (BranchReportResponse)RmRpcClient.getInstance().sendMsgWithResponse(
+                request);
             if (response.getResultCode() == ResultCode.Failed) {
-                throw new TransactionException(response.getTransactionExceptionCode(), "Response[" + response.getMsg() + "]");
+                throw new TransactionException(response.getTransactionExceptionCode(),
+                    "Response[" + response.getMsg() + "]");
             }
         } catch (TimeoutException toe) {
             throw new TransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
@@ -117,7 +123,8 @@ public class DataSourceManager implements ResourceManager {
     }
 
     @Override
-    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
+    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
+        throws TransactionException {
         try {
             GlobalLockQueryRequest request = new GlobalLockQueryRequest();
             request.setTransactionId(XID.getTransactionId(xid));
@@ -125,7 +132,6 @@ public class DataSourceManager implements ResourceManager {
             request.setResourceId(resourceId);
 
             GlobalLockQueryResponse response = null;
-            
             if (RootContext.inGlobalTransaction()) {
                 response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
             } else if(RootContext.requireGlobalLock()) {
@@ -133,9 +139,10 @@ public class DataSourceManager implements ResourceManager {
             } else {
                 throw new RuntimeException("unknow situation!");
             }
-            
+
             if (response.getResultCode() == ResultCode.Failed) {
-                throw new TransactionException(response.getTransactionExceptionCode(), "Response[" + response.getMsg() + "]");
+                throw new TransactionException(response.getTransactionExceptionCode(),
+                    "Response[" + response.getMsg() + "]");
             }
             return response.isLockable();
         } catch (TimeoutException toe) {
@@ -201,9 +208,10 @@ public class DataSourceManager implements ResourceManager {
 
     @Override
     public void registerResource(Resource resource) {
-        DataSourceProxy dataSourceProxy = (DataSourceProxy) resource;
+        DataSourceProxy dataSourceProxy = (DataSourceProxy)resource;
         dataSourceCache.put(dataSourceProxy.getResourceId(), dataSourceProxy);
-        RmRpcClient.getInstance().registerResource(dataSourceProxy.getResourceGroupId(), dataSourceProxy.getResourceId());
+        RmRpcClient.getInstance().registerResource(dataSourceProxy.getResourceGroupId(),
+            dataSourceProxy.getResourceId());
 
     }
 
@@ -219,16 +227,18 @@ public class DataSourceManager implements ResourceManager {
      * @return the data source proxy
      */
     public DataSourceProxy get(String resourceId) {
-        return (DataSourceProxy) dataSourceCache.get(resourceId);
+        return (DataSourceProxy)dataSourceCache.get(resourceId);
     }
 
     @Override
-    public BranchStatus branchCommit(String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(String xid, long branchId, String resourceId, String applicationData)
+        throws TransactionException {
         return asyncWorker.branchCommit(xid, branchId, resourceId, applicationData);
     }
 
     @Override
-    public BranchStatus branchRollback(String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(String xid, long branchId, String resourceId, String applicationData)
+        throws TransactionException {
         DataSourceProxy dataSourceProxy = get(resourceId);
         if (dataSourceProxy == null) {
             throw new ShouldNeverHappenException();

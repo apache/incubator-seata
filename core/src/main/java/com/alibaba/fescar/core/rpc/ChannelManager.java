@@ -39,11 +39,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type channel manager.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /12/07 10:50
- * @FileName: ChannelManager
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /12/07
  */
 public class ChannelManager {
 
@@ -54,14 +51,16 @@ public class ChannelManager {
     /**
      * resourceId -> applicationId -> ip -> port -> RpcContext
      */
-    private static final ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>>>
+    private static final ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
+        RpcContext>>>>
         RM_CHANNELS = new ConcurrentHashMap<String, ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
         RpcContext>>>>();
 
     /**
      * ip+appname,port
      */
-    private static final ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> TM_CHANNELS = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
+    private static final ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> TM_CHANNELS
+        = new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>();
 
     /**
      * Is registered boolean.
@@ -369,18 +368,21 @@ public class ChannelManager {
 
                 // The original channel was broken, try another one.
                 if (resultChannel == null) {
-                    for (ConcurrentMap.Entry<Integer, RpcContext> portMapOnTargetIPEntry : portMapOnTargetIP.entrySet()) {
+                    for (ConcurrentMap.Entry<Integer, RpcContext> portMapOnTargetIPEntry : portMapOnTargetIP
+                        .entrySet()) {
                         Channel channel = portMapOnTargetIPEntry.getValue().getChannel();
 
                         if (channel.isActive()) {
                             resultChannel = channel;
                             if (LOGGER.isInfoEnabled()) {
-                                LOGGER.info("Choose " + channel + " on the same IP[" + targetIP + "]  as alternative of "
+                                LOGGER.info(
+                                    "Choose " + channel + " on the same IP[" + targetIP + "]  as alternative of "
                                         + clientId);
                             }
                             break;
                         } else {
-                            if (portMapOnTargetIP.remove(portMapOnTargetIPEntry.getKey(), portMapOnTargetIPEntry.getValue())) {
+                            if (portMapOnTargetIP.remove(portMapOnTargetIPEntry.getKey(),
+                                portMapOnTargetIPEntry.getValue())) {
                                 if (LOGGER.isInfoEnabled()) {
                                     LOGGER.info("Removed inactive " + channel);
                                 }
@@ -413,7 +415,8 @@ public class ChannelManager {
                             }
                             break;
                         } else {
-                            if (portMapOnOtherIP.remove(portMapOnOtherIPEntry.getKey(), portMapOnOtherIPEntry.getValue())) {
+                            if (portMapOnOtherIP.remove(portMapOnOtherIPEntry.getKey(),
+                                portMapOnOtherIPEntry.getValue())) {
                                 if (LOGGER.isInfoEnabled()) {
                                     LOGGER.info("Removed inactive " + channel);
                                 }
@@ -450,7 +453,8 @@ public class ChannelManager {
     private static Channel tryOtherApp(ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
         RpcContext>>> applicationIdMap, String myApplicationId) {
         Channel chosenChannel = null;
-        for (ConcurrentMap.Entry<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>> applicationIdMapEntry : applicationIdMap.entrySet()) {
+        for (ConcurrentMap.Entry<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>> applicationIdMapEntry : applicationIdMap
+            .entrySet()) {
             if (applicationIdMapEntry.getKey().equals(myApplicationId)) {
                 continue;
             }
@@ -460,7 +464,8 @@ public class ChannelManager {
                 continue;
             }
 
-            for (ConcurrentMap.Entry<String, ConcurrentMap<Integer, RpcContext>> targetIPMapEntry : targetIPMap.entrySet()) {
+            for (ConcurrentMap.Entry<String, ConcurrentMap<Integer, RpcContext>> targetIPMapEntry : targetIPMap
+                .entrySet()) {
                 ConcurrentMap<Integer, RpcContext> portMap = targetIPMapEntry.getValue();
                 if (portMap == null || portMap.isEmpty()) {
                     continue;

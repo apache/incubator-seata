@@ -54,11 +54,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Abstract rpc remoting.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /9/12 16:21
- * @FileName: AbstractRpcRemoting
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/12
  */
 public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
 
@@ -326,7 +323,8 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
                     tryTimes++;
                     if (tryTimes > NettyClientConfig.getMaxNotWriteableRetry()) {
                         destroyChannel(channel);
-                        throw new FrameworkException("msg:" + ((msg == null) ? "null" : msg.toString()), FrameworkErrorCode.ChannelIsNotWritable);
+                        throw new FrameworkException("msg:" + ((msg == null) ? "null" : msg.toString()),
+                            FrameworkErrorCode.ChannelIsNotWritable);
                     }
                     lock.wait(NOT_WRITEABLE_CHECK_MILLS);
                 } catch (InterruptedException exx) {
@@ -407,7 +405,8 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOGGER.error(FrameworkErrorCode.ExceptionCaught.errCode, ctx.channel() + " connect exception. " + cause.getMessage(),
+        LOGGER.error(FrameworkErrorCode.ExceptionCaught.errCode,
+            ctx.channel() + " connect exception. " + cause.getMessage(),
             cause);
         try {
             destroyChannel(ctx.channel());

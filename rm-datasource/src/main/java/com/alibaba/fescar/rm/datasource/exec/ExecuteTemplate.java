@@ -101,7 +101,7 @@ public class ExecuteTemplate {
 
         } catch (Throwable ex) {
             if (ex instanceof SQLException) {
-                throw (SQLException) ex;
+                throw (SQLException)ex;
             } else {
                 // Turn everything into SQLException
                 new SQLException(ex);
