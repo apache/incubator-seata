@@ -27,7 +27,8 @@ public class DubboUtil {
 		if(proxyBean == null){
 			return null;
 		}
-		if(!proxyBean.getClass().getName().startsWith("com.alibaba.dubbo.common.bytecode.proxy")){
+		if(!proxyBean.getClass().getName().startsWith("com.alibaba.dubbo.common.bytecode.proxy")
+				&&  !proxyBean.getClass().getName().startsWith("com.apache.dubbo.common.bytecode.proxy")){
 			return null;
 		}
 		Field handlerField=proxyBean.getClass().getDeclaredField("handler");  

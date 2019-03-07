@@ -178,7 +178,8 @@ public class DefaultRemotingParser {
             }catch (Throwable t){
                 throw new FrameworkException(t, "parser remting service error");
             }
-        }else if(isReference(bean, beanName)){
+        }
+        if(isReference(bean, beanName)){
             //服务订阅bean， 生成动态代理
             remotingBeanDesc.setReference(true);
         }

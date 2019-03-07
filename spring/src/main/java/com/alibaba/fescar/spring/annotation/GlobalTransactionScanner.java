@@ -18,6 +18,7 @@ package com.alibaba.fescar.spring.annotation;
 
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.rm.RMClient;
+import com.alibaba.fescar.rm.tcc.api.TwoPhaseBusinessAction;
 import com.alibaba.fescar.rm.tcc.remoting.Protocols;
 import com.alibaba.fescar.rm.tcc.remoting.RemotingDesc;
 import com.alibaba.fescar.rm.tcc.remoting.parser.DefaultRemotingParser;
@@ -184,6 +185,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 if (PROXYED_SET.contains(beanName)) {
                     return bean;
                 }
+                interceptor = null;
                 //是否 TCC 动态代理
                 if(isTccAutoProxy(bean, beanName)){
                     //TCC 动态代理，代理 proxy bean of sofa:reference/dubbo:reference , and LocalTCC
@@ -240,7 +242,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
             remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
             if(remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM.getCode()){
                 //LocalTCC
-                return true;
+                return isTccProxyTargetBean(remotingDesc);
             }else {
                 // sofa:reference / dubbo:reference, factory bean 不代理
                 return false;
@@ -294,6 +296,21 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
      */
     protected boolean isTccProxyTargetBean(RemotingDesc remotingDesc){
         if(remotingDesc == null) {
+            return false;
+        }
+        //是否是TCC bean
+        boolean isTccClazz = false;
+        Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
+        Method[] methods = tccInterfaceClazz.getMethods();
+        TwoPhaseBusinessAction twoPhaseBusinessAction = null;
+        for (Method method : methods) {
+            twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
+            if(twoPhaseBusinessAction != null ){
+                isTccClazz = true;
+                break;
+            }
+        }
+        if(!isTccClazz){
             return false;
         }
         Protocols protocols = Protocols.valueOf(remotingDesc.getProtocol());
