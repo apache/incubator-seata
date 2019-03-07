@@ -21,8 +21,8 @@ import java.util.concurrent.ExecutorService;
 /**
  * The interface Config change listener.
  *
- * @author: jimin.jm @alibaba-inc.com
- * @date: 2018 /12/20
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /12/20
  */
 public interface ConfigChangeListener {
 

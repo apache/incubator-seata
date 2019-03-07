@@ -63,7 +63,7 @@ public class BlobUtils {
         }
 
         try {
-            return new String(blob.getBytes((long) 1, (int) blob.length()));
+            return new String(blob.getBytes((long)1, (int)blob.length()));
         } catch (Exception e) {
             throw new ShouldNeverHappenException(e);
         }

@@ -19,8 +19,10 @@ package com.alibaba.fescar.discovery.registry;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 
 /**
- * @author: jimin.jm@alibaba-inc.com
- * @date 2019/02/26
+ * The enum Registry type.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /02/26
  */
 public enum RegistryType {
     /**
@@ -38,7 +40,11 @@ public enum RegistryType {
     /**
      * Nacos registry type.
      */
-    Nacos;
+    Nacos,
+    /**
+     * Eureka registry type.
+     */
+    Eureka;
 
     /**
      * Gets type.
@@ -53,6 +59,8 @@ public enum RegistryType {
             return Nacos;
         } else if (Redis.name().equalsIgnoreCase(name)) {
             return Redis;
+        } else if (Eureka.name().equalsIgnoreCase(name)) {
+            return Eureka;
         }else if (ZK.name().equalsIgnoreCase(name)) {
             return ZK;
         }else {

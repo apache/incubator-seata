@@ -21,8 +21,8 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
 /**
  * The enum Config type.
  *
- * @author: jimin.jm @alibaba-inc.com
- * @date: 2019 /2/1
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /2/1
  */
 public enum ConfigType {
     /**
@@ -41,7 +41,6 @@ public enum ConfigType {
      * Apollo config type.
      */
     Apollo;
-
 
     /**
      * Gets type.

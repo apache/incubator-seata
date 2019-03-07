@@ -17,16 +17,15 @@
 package com.alibaba.fescar.tm.api;
 
 import com.alibaba.fescar.core.context.RootContext;
-
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.model.TransactionManager;
 import com.alibaba.fescar.tm.DefaultTransactionManager;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 /**
  * The type Api test.
@@ -35,6 +34,9 @@ public class APITest {
 
     private static final String DEFAULT_XID = "1234567890";
 
+    /**
+     * Init.
+     */
     @BeforeClass
     public static void init() {
         DefaultTransactionManager.set(new TransactionManager() {
@@ -61,6 +63,9 @@ public class APITest {
         });
     }
 
+    /**
+     * Clean root context.
+     */
     @After
     public void cleanRootContext() {
         RootContext.unbind();
@@ -80,6 +85,11 @@ public class APITest {
 
     }
 
+    /**
+     * Test new tx.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testNewTx() throws Exception {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
@@ -87,6 +97,11 @@ public class APITest {
         Assert.assertNull(tx.getXid());
     }
 
+    /**
+     * Test begin.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testBegin() throws Exception {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
@@ -96,6 +111,11 @@ public class APITest {
 
     }
 
+    /**
+     * Test nested commit.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testNestedCommit() throws Exception {
         TransactionalTemplate template = new TransactionalTemplate();
@@ -123,6 +143,11 @@ public class APITest {
         });
     }
 
+    /**
+     * Test nested rollback.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testNestedRollback() throws Exception {
 

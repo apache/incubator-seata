@@ -17,45 +17,63 @@
 package com.alibaba.fescar.common;
 
 import java.util.Random;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * @author melon.zhao
- * @since 2019/2/22
+ * The type Xid test.
+ *
+ * @author Otis.z
+ * @date 2019 /2/22
  */
 public class XIDTest {
 
+    /**
+     * Test set ip address.
+     */
     @Test
     public void testSetIpAddress() {
         XID.setIpAddress("127.0.0.1");
-        Assert.assertEquals(XID.getIpAddress(), "127.0.0.1");
+        assertThat(XID.getIpAddress()).isEqualTo("127.0.0.1");
     }
 
+    /**
+     * Test set port.
+     */
     @Test
-    void testSetPort() {
+    public void testSetPort() {
         XID.setPort(8080);
-        Assert.assertEquals(XID.getPort(), 8080);
+        assertThat(XID.getPort()).isEqualTo(8080);
     }
 
-
+    /**
+     * Test generate xid.
+     */
     @Test
-    void testGenerateXID() {
+    public void testGenerateXID() {
         long tranId = new Random().nextLong();
         XID.setPort(8080);
         XID.setIpAddress("127.0.0.1");
-        Assert.assertEquals(XID.generateXID(tranId), XID.getIpAddress() + ":" + XID.getPort() + ":" + tranId);
+        assertThat(XID.generateXID(tranId)).isEqualTo(XID.getIpAddress() + ":" + XID.getPort() + ":" + tranId);
     }
 
+    /**
+     * Test get server address.
+     */
     @Test
-    void testGetServerAddress() {
-        Assert.assertNull(XID.getServerAddress(null));
-        Assert.assertEquals(XID.getServerAddress("127.0.0.1:8080:8577662204289747564"), "127.0.0.1:8080");
+    public void testGetServerAddress() {
+        assertThat(XID.getServerAddress(null)).isNull();
+        assertThat(XID.getServerAddress("127.0.0.1:8080:8577662204289747564")).isEqualTo("127.0.0.1:8080");
     }
 
+    /**
+     * Test get transaction id.
+     */
     @Test
-    void testGetTransactionId() {
-        Assert.assertEquals(XID.getTransactionId(null), -1);
-        Assert.assertEquals(XID.getTransactionId("127.0.0.1:8080:8577662204289747564"), 8577662204289747564L);
+    public void testGetTransactionId() {
+        assertThat(XID.getTransactionId(null)).isEqualTo(-1);
+        assertThat(XID.getTransactionId("127.0.0.1:8080:8577662204289747564")).isEqualTo(8577662204289747564L);
     }
 }
