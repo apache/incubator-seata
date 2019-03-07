@@ -23,6 +23,8 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     private static final String REGISTRY_TYPE = "zk";
     private static final String ZK_PATH_SPLIT_CHAR = "/";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
+    private static final String ZK_SESSION_TIMEOUT_KEY = "session.timeout";
+    private static final String ZK_CONNECT_TIMEOUT_KEY = "connect.timeout";
     private static final String FILE_ROOT_CONFIG = "config";
     private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_CONFIG;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
@@ -30,7 +32,10 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     private static volatile ZkClient zkClient;
     public ZKConfiguration() {
         if(zkClient == null){
-            zkClient = new ZkClient(FILE_CONFIG.getConfig(getZKAddrFileKey()));
+            zkClient = new ZkClient(FILE_CONFIG.getConfig(getZKAddrFileKey()),
+                    FILE_CONFIG.getInt(getSessionTimeOutKey()),
+                    FILE_CONFIG.getInt(getConnectTimeOutKey())
+            );
             if(!zkClient.exists(ROOT_PATH)){
                 zkClient.create(ROOT_PATH,null, CreateMode.PERSISTENT);
             }
@@ -102,9 +107,17 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
         return zkClient;
     }
 
-
+    // TODO: 2019/3/4 Registry and config configuration are independent of each other  this key??
     private static String getZKAddrFileKey() {
         return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
                 + PRO_SERVER_ADDR_KEY;
+    }
+    private static String getSessionTimeOutKey() {
+        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
+                + ZK_SESSION_TIMEOUT_KEY;
+    }
+    private static String getConnectTimeOutKey() {
+        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
+                + ZK_CONNECT_TIMEOUT_KEY;
     }
 }

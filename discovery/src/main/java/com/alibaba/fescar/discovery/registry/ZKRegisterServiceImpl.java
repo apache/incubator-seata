@@ -1,11 +1,14 @@
 package com.alibaba.fescar.discovery.registry;
 
+import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.config.ZKConfiguration;
+import com.alibaba.nacos.client.naming.utils.NetUtils;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,34 +47,32 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
     }
     @Override
     public void register(InetSocketAddress address) throws Exception {
-        String path = ROOT_PATH + getClusterName()+ZK_PATH_SPLIT_CHAR+getIPAndPort(address);
+        String path = ROOT_PATH + getClusterName()+ZK_PATH_SPLIT_CHAR+NetUtil.toStringAddress(address);
         getClientInstance().createPersistent(path,true);
     }
 
     @Override
     public void unregister(InetSocketAddress address) throws Exception {
-        String path = ROOT_PATH + getClusterName()+ZK_PATH_SPLIT_CHAR+getIPAndPort(address);
+        String path = ROOT_PATH + getClusterName()+ZK_PATH_SPLIT_CHAR+NetUtil.toStringAddress(address);
         getClientInstance().delete(path);
     }
 
     @Override
     public void subscribe(String cluster, IZkChildListener listener) throws Exception {
-        String clusterName = getServiceGroup(cluster);
-        if (null == clusterName) {
+        if (null == cluster) {
             return ;
         }
-        String path = ROOT_PATH  + clusterName;
+        String path = ROOT_PATH  + cluster;
         if(!getClientInstance().exists(path)) {return;}
         getClientInstance().subscribeChildChanges(path,listener);
     }
 
     @Override
     public void unsubscribe(String cluster, IZkChildListener listener) throws Exception {
-        String clusterName = getServiceGroup(cluster);
-        if (null == clusterName) {
+        if (null == cluster) {
             return ;
         }
-        String path = ROOT_PATH + clusterName;
+        String path = ROOT_PATH + cluster;
         if(!getClientInstance().exists(path)) {return;}
         getClientInstance().unsubscribeChildChanges(path,listener);
 
@@ -103,10 +104,8 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
         });
         return interSocketAddresses;
     }
-
     private ZkClient getClientInstance() {
-        ZKConfiguration configuration = (ZKConfiguration) ConfigurationFactory.getInstance();
-        return configuration.getZkClient();
+        return ZKClientSingleton.getInstance();
     }
 
     private String getClusterName() {
@@ -121,9 +120,5 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
         return configuration.getConfig(clusterName);
     }
 
-    private String getIPAndPort(InetSocketAddress address) {
-        String addr = address.getHostName() + IP_PORT_SPLIT_CHAR + address.getPort();
-        return addr;
-    }
 
 }
