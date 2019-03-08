@@ -53,7 +53,7 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
     @Override
     protected void doEncode() {
         super.doEncode();
-        byteBuffer.put((byte) branchStatus.getCode());
+        byteBuffer.put((byte)branchStatus.getCode());
     }
 
     @Override

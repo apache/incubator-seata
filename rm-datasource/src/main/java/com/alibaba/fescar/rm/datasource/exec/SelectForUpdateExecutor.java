@@ -24,6 +24,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 
 import com.alibaba.fescar.common.util.StringUtils;
+import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.rm.datasource.ParametersHolder;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
@@ -44,13 +45,14 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public SelectForUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<ResultSet, S> statementCallback, SQLRecognizer sqlRecognizer) {
+    public SelectForUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<ResultSet, S> statementCallback,
+                                   SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
     @Override
     public Object doExecute(Object... args) throws Throwable {
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) sqlRecognizer;
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
 
         Connection conn = statementProxy.getConnection();
         ResultSet rs = null;
@@ -64,7 +66,7 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
         String whereCondition = null;
         ArrayList<Object> paramAppender = new ArrayList<>();
         if (statementProxy instanceof ParametersHolder) {
-            whereCondition = recognizer.getWhereCondition((ParametersHolder) statementProxy, paramAppender);
+            whereCondition = recognizer.getWhereCondition((ParametersHolder)statementProxy, paramAppender);
         } else {
             whereCondition = recognizer.getWhereCondition();
         }
@@ -100,7 +102,18 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
 
                     TableRecords selectPKRows = TableRecords.buildRecords(getTableMeta(), rsPK);
                     String lockKeys = buildLockKey(selectPKRows);
-                    statementProxy.getConnectionProxy().checkLock(lockKeys);
+
+                    if (RootContext.inGlobalTransaction()) {
+                        //do as usual
+                        statementProxy.getConnectionProxy().checkLock(lockKeys);
+                    } else if (RootContext.requireGlobalLock()) {
+                        //check lock key before commit just like DML to avoid reentrant lock problem(no xid thus can
+                        // not reentrant)
+                        statementProxy.getConnectionProxy().appendLockKey(lockKeys);
+                    } else {
+                        throw new RuntimeException("Unknown situation!");
+                    }
+                    
                     break;
 
                 } catch (LockConflictException lce) {

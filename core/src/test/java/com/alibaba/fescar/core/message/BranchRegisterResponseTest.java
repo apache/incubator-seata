@@ -21,8 +21,16 @@ import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * The type Branch register response test.
+ */
 public class BranchRegisterResponseTest {
 
+    /**
+     * To string test.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void toStringTest() throws Exception {
         BranchRegisterResponse branchRegisterResponse = new BranchRegisterResponse();

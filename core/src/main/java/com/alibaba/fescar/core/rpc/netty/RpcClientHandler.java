@@ -27,11 +27,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Rpc client handler.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /9/12 17:10
- * @FileName: RpcClientHandler
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/12
  */
 public class RpcClientHandler extends ChannelDuplexHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcClientHandler.class);
@@ -63,30 +60,30 @@ public class RpcClientHandler extends ChannelDuplexHandler {
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         super.channelActive(ctx);
-        LOGGER.info("channel active for ClientProxyHandler at :[{}]",ctx.channel());
+        LOGGER.info("channel active for ClientProxyHandler at :[{}]", ctx.channel());
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         super.channelInactive(ctx);
-        LOGGER.info("channel inactive for ClientProxyHandler at :[{}]",ctx.channel());
+        LOGGER.info("channel inactive for ClientProxyHandler at :[{}]", ctx.channel());
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         ctx.close();
-        LOGGER.info("channel error for ClientProxyHandler at :[{}]",ctx.channel());
+        LOGGER.info("channel error for ClientProxyHandler at :[{}]", ctx.channel());
     }
 
     @Override
     public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-        LOGGER.info("channel write for ClientProxyHandler at :[{}]",msg);
+        LOGGER.info("channel write for ClientProxyHandler at :[{}]", msg);
         ctx.write(msg, promise);
     }
 
     @Override
     public void flush(ChannelHandlerContext ctx) throws Exception {
-        LOGGER.info("channel flush for ClientProxyHandler at :[{}]",ctx.channel());
+        LOGGER.info("channel flush for ClientProxyHandler at :[{}]", ctx.channel());
         ctx.flush();
     }
 }

@@ -80,12 +80,12 @@ public class GlobalBeginRequest extends AbstractTransactionRequestToTC implement
 
         if (this.transactionName != null) {
             byte[] bs = transactionName.getBytes(UTF8);
-            byteBuffer.putShort((short) bs.length);
+            byteBuffer.putShort((short)bs.length);
             if (bs.length > 0) {
                 byteBuffer.put(bs);
             }
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
 
         byteBuffer.flip();

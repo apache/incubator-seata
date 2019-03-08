@@ -215,7 +215,7 @@ public enum SQLType {
 
     private int i;
 
-    private SQLType(int i){
+    private SQLType(int i) {
         this.i = i;
     }
 

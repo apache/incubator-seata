@@ -25,11 +25,8 @@ import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
 /**
  * The type Server test.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /12/4 19:34
- * @FileName: ServerTest
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /12/4
  */
 public class ServerTest {
 

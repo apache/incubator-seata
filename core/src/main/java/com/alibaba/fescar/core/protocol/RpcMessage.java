@@ -21,11 +21,8 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * The type Rpc message.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /9/14 15:00
- * @FileName: RpcMessage
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/14
  */
 public class RpcMessage {
 
@@ -36,9 +33,10 @@ public class RpcMessage {
      *
      * @return the next message id
      */
-    public static  long getNextMessageId() {
+    public static long getNextMessageId() {
         return NEXT_ID.incrementAndGet();
     }
+
     private long id;
     private boolean isAsync;
     private boolean isRequest;

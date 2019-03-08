@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type FileConfiguration.
  *
- * @author: jimin.jm @alibaba-inc.com
- * @date: 2018 /9/10
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/10
  */
 public class FileConfiguration extends AbstractConfiguration<ConfigChangeListener> {
 
