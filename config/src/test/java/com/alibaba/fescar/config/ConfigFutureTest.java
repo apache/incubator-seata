@@ -32,7 +32,7 @@ public class ConfigFutureTest {
     private final String content = "content";
     private final String result = "result";
 
-    private final long timeMills = 10l;
+    private final long timeMills = 10L;
     private final ConfigFuture.ConfigOperation getOperation = ConfigFuture.ConfigOperation.GET;
 
     private ConfigFuture configFuture;
@@ -75,12 +75,10 @@ public class ConfigFutureTest {
                 Thread.sleep(outTime + 100);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                return;
             }
             configFuture.setResult(result);
         });
-        final Object result = configFuture.get(outTime, TimeUnit.MILLISECONDS);
-        Assert.assertEquals(content, result);
+        Assert.assertEquals(content, configFuture.get(outTime, TimeUnit.MILLISECONDS));
     }
 
     @Test
@@ -124,12 +122,13 @@ public class ConfigFutureTest {
 
     @Test
     public void testIsTimeout() throws InterruptedException {
+        configFuture.get(timeMills, TimeUnit.MILLISECONDS);
         Thread.sleep(timeMills * 2);
         Assert.assertTrue(configFuture.isTimeout());
     }
 
     private void startSetResultThread(Object result) {
-        new Thread(() -> configFuture.setResult(this.result)).start();
+        new Thread(() -> configFuture.setResult(result)).start();
     }
 
 }
