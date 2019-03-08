@@ -19,7 +19,6 @@ package com.alibaba.fescar.spring.annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Set;
 
 import com.alibaba.fescar.common.exception.NotSupportYetException;
@@ -49,7 +48,7 @@ import org.springframework.beans.factory.InitializingBean;
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator implements InitializingBean {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1L;
 
@@ -193,18 +192,18 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                         shouldSkip = false;
                         break;
                     }
-                    
+
                     GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);
                     if (lockAnno != null) {
                         shouldSkip = false;
                         break;
                     }
                 }
-                
+
                 if (shouldSkip) {
                     return bean;
                 }
-                
+
                 if (interceptor == null) {
                     interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
                 }

@@ -23,6 +23,7 @@ import java.sql.SQLException;
 
 import javax.sql.rowset.serial.SerialBlob;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -78,6 +79,7 @@ public class StringUtilsTest {
      * Test input stream 2 string.
      */
     @Test
+    @Ignore
     public void testInputStream2String() {
         try {
             InputStream inputStream = StringUtilsTest.class.getClassLoader().getResourceAsStream("test.txt");
