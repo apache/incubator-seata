@@ -20,7 +20,7 @@ public @interface BusinessActionContextParameter {
     /**
      * parameter's name
      */
-    String paramName();
+    String paramName() default "";
 
     /**
      * if it is a sharding param ?
