@@ -57,7 +57,7 @@ public enum RegistryType {
             return Redis;
         } else if (Eureka.name().equalsIgnoreCase(name)) {
             return Eureka;
-        } else {
+        }else {
             throw new NotSupportYetException("unsupport type:" + name);
         }
     }
