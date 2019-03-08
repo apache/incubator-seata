@@ -49,7 +49,7 @@ public class SpringProxyUtils {
     }
 
     /**
-     * 获取目标类类型，如果是Proxy则获取其代理的interface
+     * Get the target class , get the interface of its agent if it is a Proxy
      * @param proxy
      * @return
      * @throws Exception
@@ -69,7 +69,7 @@ public class SpringProxyUtils {
     }
 
     /**
-     * 获取 被代理 目标对象
+     * Get the proxy target object
      * @param proxy 代理对象
      * @return
      * @throws Exception
