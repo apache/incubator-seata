@@ -51,7 +51,7 @@ public abstract class AbstractGlobalEndResponse extends AbstractTransactionRespo
     @Override
     protected void doEncode() {
         super.doEncode();
-        byteBuffer.put((byte) globalStatus.getCode());
+        byteBuffer.put((byte)globalStatus.getCode());
     }
 
     @Override

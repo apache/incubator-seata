@@ -83,7 +83,8 @@ public class AsyncWorker implements ResourceManagerInbound {
         String applicationData;
     }
 
-    private static final List<Phase2Context> ASYNC_COMMIT_BUFFER = Collections.synchronizedList(new ArrayList<Phase2Context>());
+    private static final List<Phase2Context> ASYNC_COMMIT_BUFFER = Collections.synchronizedList(
+        new ArrayList<Phase2Context>());
 
     private static int ASYNC_COMMIT_BUFFER_LIMIT = ConfigurationFactory.getInstance().getInt(
         CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, 10000);
@@ -91,11 +92,13 @@ public class AsyncWorker implements ResourceManagerInbound {
     private static ScheduledExecutorService timerExecutor;
 
     @Override
-    public BranchStatus branchCommit(String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(String xid, long branchId, String resourceId, String applicationData)
+        throws TransactionException {
         if (ASYNC_COMMIT_BUFFER.size() < ASYNC_COMMIT_BUFFER_LIMIT) {
             ASYNC_COMMIT_BUFFER.add(new Phase2Context(xid, branchId, resourceId, applicationData));
         } else {
-            LOGGER.warn("Async commit buffer is FULL. Rejected branch [" + branchId + "/" + xid + "] will be handled by housekeeping later.");
+            LOGGER.warn("Async commit buffer is FULL. Rejected branch [" + branchId + "/" + xid
+                + "] will be handled by housekeeping later.");
         }
         return BranchStatus.PhaseTwo_Committed;
     }
@@ -141,23 +144,23 @@ public class AsyncWorker implements ResourceManagerInbound {
 
         }
 
-        for (String resourceId : mappedContexts.keySet()) {
+        for (Map.Entry<String, List<Phase2Context>> entry : mappedContexts.entrySet()) {
             Connection conn = null;
             try {
                 try {
-                    DataSourceProxy dataSourceProxy = DataSourceManager.get().get(resourceId);
+                    DataSourceProxy dataSourceProxy = DataSourceManager.get().get(entry.getKey());
                     conn = dataSourceProxy.getPlainConnection();
                 } catch (SQLException sqle) {
-                    LOGGER.warn("Failed to get connection for async committing on " + resourceId, sqle);
+                    LOGGER.warn("Failed to get connection for async committing on " + entry.getKey(), sqle);
                     continue;
                 }
-
-                List<Phase2Context> contextsGroupedByResourceId = mappedContexts.get(resourceId);
+                List<Phase2Context> contextsGroupedByResourceId = entry.getValue();
                 for (Phase2Context commitContext : contextsGroupedByResourceId) {
                     try {
                         UndoLogManager.deleteUndoLog(commitContext.xid, commitContext.branchId, conn);
                     } catch (Exception ex) {
-                        LOGGER.warn("Failed to delete undo log [" + commitContext.branchId + "/" + commitContext.xid + "]", ex);
+                        LOGGER.warn(
+                            "Failed to delete undo log [" + commitContext.branchId + "/" + commitContext.xid + "]", ex);
                     }
                 }
 
@@ -170,13 +173,12 @@ public class AsyncWorker implements ResourceManagerInbound {
                     }
                 }
             }
-
         }
-
     }
 
     @Override
-    public BranchStatus branchRollback(String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(String xid, long branchId, String resourceId, String applicationData)
+        throws TransactionException {
         throw new NotSupportYetException();
 
     }
