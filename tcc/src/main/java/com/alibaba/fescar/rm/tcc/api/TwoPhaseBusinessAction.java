@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 两阶段原子业务活动标记注解；此注解添加至TCC服务的一阶段try方法上
+ * TCC annotation, Define a TCC interface，which added on the try method
  * 
  * @author zhangsen
  */
@@ -17,17 +17,17 @@ import java.lang.annotation.Target;
 public @interface TwoPhaseBusinessAction {
 
     /**
-     * 原子业务活动名称；全局唯一；
+     * TCC bean name, must be unique
      */
     String name() ;
 
     /**
-     *  提交方法名称
+     *  commit methed name
      */
     String commitMethod() default "commit";
 
     /**
-     * 回滚方法名称
+     * rollback method name
      */
     String rollbackMethod() default "rollback";
 

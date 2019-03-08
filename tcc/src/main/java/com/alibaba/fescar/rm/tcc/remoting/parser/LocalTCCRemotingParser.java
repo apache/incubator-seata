@@ -9,7 +9,7 @@ import com.alibaba.fescar.rm.tcc.remoting.RemotingDesc;
 import java.util.Set;
 
 /**
- * 本地bean，非远程服务bean
+ * local tcc bean parsing
  * @author zhangsen
  */
 public class LocalTCCRemotingParser extends AbstractedRemotingParser {

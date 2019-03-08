@@ -4,23 +4,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
+ * the TCC method result
  * @author zhangsen
  */
 public class TwoPhaseResult {
 
     /**
-     * 结果成功还是失败
+     * is Success ?
      */
-    private boolean             isSuccess;
+    private boolean             isSuccess = false;
 
     /**
-     * 如果失败可以输出一些异常信息，供线上问题跟踪
+     * result message
      */
     private String              msg;
 
-    /**
-     * 这个是占位属性，业务同学不用关注，xts框架用来回传一些二阶段的信息
-     */
     private Map<String, Object> context = new HashMap<String, Object>();
 
     public TwoPhaseResult(boolean isSuccess, String msg) {

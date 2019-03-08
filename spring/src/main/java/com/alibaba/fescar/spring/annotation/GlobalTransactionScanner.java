@@ -298,7 +298,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         if(remotingDesc == null) {
             return false;
         }
-        //是否是TCC bean
+        //check if it is TCC bean
         boolean isTccClazz = false;
         Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
         Method[] methods = tccInterfaceClazz.getMethods();

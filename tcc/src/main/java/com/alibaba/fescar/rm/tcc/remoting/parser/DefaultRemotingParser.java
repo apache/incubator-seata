@@ -16,23 +16,19 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 解析远程通信协议
+ * parsing remoting bean
  * @author zhangsen
  */
 public class DefaultRemotingParser {
 
     /**
-     * 所有的远程通信协议解析
+     * all remoting bean parser
      */
     protected static List<RemotingParser> allRemotingParsers = new ArrayList<RemotingParser>();
 
-    /**
-     * 本地所有 TCC 资源, 注册至服务端
-     */
-    protected static Set<TCCResource> allLocalTccResources = new HashSet<TCCResource>();
 
     /**
-     * 服务订阅bean 信息
+     * all remoting beans
      * beanName -> RemotingDesc
      */
     protected static Map<String, RemotingDesc> remotingServiceMap = new ConcurrentHashMap<String,RemotingDesc>();
@@ -72,7 +68,7 @@ public class DefaultRemotingParser {
     }
 
     /**
-     * 是否是远程通信bean
+     * is remoting bean ?
      * @param bean
      * @param beanName
      * @return
@@ -87,7 +83,7 @@ public class DefaultRemotingParser {
     }
 
     /**
-     * 是否是服务 订阅 bean
+     * is reference bean?
      * @param bean
      * @param beanName
      * @return
@@ -103,7 +99,7 @@ public class DefaultRemotingParser {
 
 
     /**
-     * 是否是服务发布bean
+     * is service bean ?
      * @param bean
      * @param beanName
      * @return
@@ -118,7 +114,7 @@ public class DefaultRemotingParser {
     }
 
     /**
-     * 获取 remoting Service desc
+     * get the remoting Service desc
      * @param bean
      * @param beanName
      * @return
@@ -141,11 +137,10 @@ public class DefaultRemotingParser {
     }
 
     /**
-     * 解析远程通信bean 信息
+     * parse the remoting bean info
      * @param bean
      * @param beanName
-     * @return  是否生成动态代理
-     * @throws NoSuchMethodException
+     * @return
      */
     public RemotingDesc parserRemotingServiceInfo(Object bean, String beanName)  {
         //remoting bean 信息
@@ -156,7 +151,7 @@ public class DefaultRemotingParser {
         Method[] methods = interfaceClass.getMethods();
         if(isService(bean, beanName)){
             try{
-                //服务发布bean， 注册资源
+                //service bean， registry resource
                 Object targetBean = remotingBeanDesc.getTargetBean();
                 for(Method m : methods){
                     TwoPhaseBusinessAction twoPhaseBusinessAction = m.getAnnotation(TwoPhaseBusinessAction.class);
@@ -170,9 +165,8 @@ public class DefaultRemotingParser {
                         tccResource.setCommitMethod(ReflectionUtil.getMethod(interfaceClass, twoPhaseBusinessAction.commitMethod(), new Class[]{BusinessActionContext.class}));
                         tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
                         tccResource.setRollbackMethod(ReflectionUtil.getMethod(interfaceClass, twoPhaseBusinessAction.rollbackMethod(), new Class[]{BusinessActionContext.class}));
-                        //注册TCC 资源
+                        //registry tcc resource
                         DefaultResourceManager.get().registerResource(tccResource);
-                        allLocalTccResources.add(tccResource);
                     }
                 }
             }catch (Throwable t){
@@ -180,17 +174,12 @@ public class DefaultRemotingParser {
             }
         }
         if(isReference(bean, beanName)){
-            //服务订阅bean， 生成动态代理
+            //reference bean， TCC proxy
             remotingBeanDesc.setReference(true);
         }
         return remotingBeanDesc;
     }
 
-    /**
-     * 获取远程服务bean信息
-     * @param beanName
-     * @return
-     */
     public RemotingDesc getRemotingBeanDesc(String beanName){
         return remotingServiceMap.get(beanName);
     }

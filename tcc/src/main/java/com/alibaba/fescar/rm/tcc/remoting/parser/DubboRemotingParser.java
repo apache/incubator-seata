@@ -6,7 +6,7 @@ import com.alibaba.fescar.rm.tcc.remoting.Protocols;
 import com.alibaba.fescar.rm.tcc.remoting.RemotingDesc;
 
 /**
- * dubbo 协议解析
+ * dubbo  remoting bean parsing
  *
  * @author zhangsen
  */

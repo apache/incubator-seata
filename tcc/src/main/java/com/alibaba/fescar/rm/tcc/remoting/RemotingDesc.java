@@ -1,29 +1,29 @@
 package com.alibaba.fescar.rm.tcc.remoting;
 
 /**
- * remoting 服务 bean 描述信息
+ * remoting bean info
  * @author zhangsen
  *
  */
 public class RemotingDesc {
 
 	/**
-	 * 是否是服务订阅bean
+	 * is referenc bean ?
 	 */
 	private boolean isReference = false;
 	
 	/**
-	 * rpc 服务的目标bean, 服务发布bean才有
+	 * rpc target bean, the service bean has this property
 	 */
 	private Object targetBean;
 	
 	/**
-	 * interface 类型
+	 * the tcc interface tyep
 	 */
 	private Class<?> interfaceClass ;
 	
 	/**
-	 * interface 类名称
+	 * interface class name
 	 */
 	private String interfaceClassName ;
 	
@@ -38,7 +38,7 @@ public class RemotingDesc {
 	private String group;
 	
 	/**
-	 * 协议，sofa-rpc、dubbo、restful 等
+	 * protocol: sofa-rpc、dubbo、injvm 等
 	 */
 	private int protocol;
 	

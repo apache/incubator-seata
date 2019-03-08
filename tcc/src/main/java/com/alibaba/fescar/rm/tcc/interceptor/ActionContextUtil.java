@@ -14,12 +14,12 @@ import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.rm.tcc.api.BusinessActionContextParameter;
 
 /**
- * 从方法中提取TCC上下文信息
+ * Extracting TCC Context from Method
  */
 public class ActionContextUtil {
 
     /**
-     * 从参数中提取数据
+     * Extracting context data from parameters
      * @param targetParam
      * @return
      */

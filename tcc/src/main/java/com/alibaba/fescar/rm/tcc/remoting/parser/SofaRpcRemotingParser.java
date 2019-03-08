@@ -6,14 +6,14 @@ import com.alibaba.fescar.rm.tcc.remoting.Protocols;
 import com.alibaba.fescar.rm.tcc.remoting.RemotingDesc;
 
 /**
- * sofa-rpc 微服务解析
+ * sofa-rpc remoting bean parsing
  *
  * @author zhangsen
  */
 public class SofaRpcRemotingParser extends AbstractedRemotingParser {
 
     /**
-     * 是否是服务订阅bean
+     * is reference bean ?
      * @param bean
      * @param beanName
      * @return
@@ -30,7 +30,7 @@ public class SofaRpcRemotingParser extends AbstractedRemotingParser {
     }
 
     /**
-     * 是否服务发布bean
+     * is service bean ?
      * @param bean
      * @param beanName
      * @return

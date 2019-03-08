@@ -3,7 +3,7 @@ package com.alibaba.fescar.rm.tcc.remoting;
 import com.alibaba.fescar.common.exception.FrameworkException;
 
 /**
- * 远程通信 协议 枚举
+ * remoting protocols enum
  * 
  * @author zhangsen
  *

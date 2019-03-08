@@ -38,7 +38,7 @@ import java.util.concurrent.TimeoutException;
 public class TccResourceManager extends AbstractResourceManager {
 
 	/**
-	 * TCC资源信息
+	 * TCC resource cache
 	 */
 	private Map<String, Resource> tccResourceCache = new ConcurrentHashMap<String, Resource>();
 
@@ -46,7 +46,7 @@ public class TccResourceManager extends AbstractResourceManager {
 	}
 
 	/**
-	 * 注册 TCC 资源
+	 * registry TCC resource
 	 * @param resource The resource to be managed.
 	 */
 	@Override
@@ -62,7 +62,7 @@ public class TccResourceManager extends AbstractResourceManager {
 	}
 
 	/**
-	 * 二阶段提交
+	 * TCC branch commit
 	 * @param branchType
 	 * @param xid             Transaction id.
 	 * @param branchId        Branch id.
@@ -84,7 +84,7 @@ public class TccResourceManager extends AbstractResourceManager {
 		}
 		try {
 			boolean result = false;
-			//方法参数
+			//BusinessActionContext
 			BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId, applicationData);
 			Object ret = commitMethod.invoke(targetTCCBean, businessActionContext);
 			if(ret != null && ret instanceof TwoPhaseResult){
@@ -101,7 +101,7 @@ public class TccResourceManager extends AbstractResourceManager {
 	}
 
 	/**
-	 * 二阶段回滚
+	 * TCC branch rollback
 	 * @param branchType the branch type
 	 * @param xid             Transaction id.
 	 * @param branchId        Branch id.
@@ -123,7 +123,7 @@ public class TccResourceManager extends AbstractResourceManager {
 		}
 		try {
 			boolean result = false;
-			//方法参数
+			//BusinessActionContext
 			BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId, applicationData);
 			Object ret = rollbackMethod.invoke(targetTCCBean, businessActionContext);
 			if (ret != null && ret instanceof TwoPhaseResult) {
@@ -140,7 +140,7 @@ public class TccResourceManager extends AbstractResourceManager {
 	}
 
 	/**
-	 * 生成二阶段方法参数
+	 * transfer tcc applicationData to BusinessActionContext
 	 * @param xid
 	 * @param branchId
 	 * @param resourceId
@@ -148,13 +148,11 @@ public class TccResourceManager extends AbstractResourceManager {
 	 * @return
 	 */
 	protected BusinessActionContext getBusinessActionContext(String xid, long branchId, String resourceId, String applicationData){
-		//方法参数
+		//transfer tcc applicationData to Context
 		Map tccContext = StringUtils.isBlank(applicationData)?new HashMap():(Map) JSON.parse(applicationData);
-		Map activityContextMap = (Map) tccContext.get(Constants.TCC_ACTIVITY_CONTEXT);
 		Map actionContextMap = (Map) tccContext.get(Constants.TCC_ACTION_CONTEXT);
 		BusinessActionContext businessActionContext = new BusinessActionContext(
-				xid, String.valueOf(branchId), new BusinessActivityContext(activityContextMap==null?new HashMap<String, Object>():activityContextMap),
-				actionContextMap);
+				xid, String.valueOf(branchId),  actionContextMap);
 		businessActionContext.setActionName(resourceId);
 		return businessActionContext;
 	}
