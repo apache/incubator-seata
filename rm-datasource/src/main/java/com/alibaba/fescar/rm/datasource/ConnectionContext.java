@@ -32,11 +32,10 @@ public class ConnectionContext {
     private boolean isGlobalLockRequire;
     private List<String> lockKeysBuffer = new ArrayList<>();
     private List<SQLUndoLog> sqlUndoItemsBuffer = new ArrayList<>();
-    
-    
 
     /**
      * whether requires global lock in this connection
+     *
      * @return
      */
     boolean isGlobalLockRequire() {
@@ -45,6 +44,7 @@ public class ConnectionContext {
 
     /**
      * set whether requires global lock in this connection
+     *
      * @param isGlobalLockRequires
      */
     void setGlobalLockRequire(boolean isGlobalLockRequire) {

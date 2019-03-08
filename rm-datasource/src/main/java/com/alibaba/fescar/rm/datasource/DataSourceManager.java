@@ -16,16 +16,11 @@
 
 package com.alibaba.fescar.rm.datasource;
 
-import static com.alibaba.fescar.common.exception.FrameworkErrorCode.NoAvailableService;
-
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.exception.FrameworkException;
@@ -54,11 +49,16 @@ import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static com.alibaba.fescar.common.exception.FrameworkErrorCode.NoAvailableService;
+
 /**
  * The type Data source manager.
  */
 public class DataSourceManager implements ResourceManager {
-    
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceManager.class);
 
     private ResourceManagerInbound asyncWorker;
@@ -133,9 +133,10 @@ public class DataSourceManager implements ResourceManager {
 
             GlobalLockQueryResponse response = null;
             if (RootContext.inGlobalTransaction()) {
-                response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
-            } else if(RootContext.requireGlobalLock()) {
-                response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(loadBalance(), request, NettyClientConfig.getRpcRequestTimeout());
+                response = (GlobalLockQueryResponse)RmRpcClient.getInstance().sendMsgWithResponse(request);
+            } else if (RootContext.requireGlobalLock()) {
+                response = (GlobalLockQueryResponse)RmRpcClient.getInstance().sendMsgWithResponse(loadBalance(),
+                    request, NettyClientConfig.getRpcRequestTimeout());
             } else {
                 throw new RuntimeException("unknow situation!");
             }
@@ -152,7 +153,7 @@ public class DataSourceManager implements ResourceManager {
         }
 
     }
-    
+
     @SuppressWarnings("unchecked")
     private String loadBalance() {
         InetSocketAddress address = null;

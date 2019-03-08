@@ -20,11 +20,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
 
-import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.rm.GlobalLockTemplate;
@@ -32,6 +27,11 @@ import com.alibaba.fescar.tm.api.DefaultFailureHandlerImpl;
 import com.alibaba.fescar.tm.api.FailureHandler;
 import com.alibaba.fescar.tm.api.TransactionalExecutor;
 import com.alibaba.fescar.tm.api.TransactionalTemplate;
+
+import org.aopalliance.intercept.MethodInterceptor;
+import org.aopalliance.intercept.MethodInvocation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Global transactional interceptor.
@@ -59,8 +59,9 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
-        final GlobalTransactional globalTrxAnno = getAnnotation(methodInvocation.getMethod(),GlobalTransactional.class);
-        final GlobalLock globalLockAnno = getAnnotation(methodInvocation.getMethod(),GlobalLock.class);
+        final GlobalTransactional globalTrxAnno = getAnnotation(methodInvocation.getMethod(),
+            GlobalTransactional.class);
+        final GlobalLock globalLockAnno = getAnnotation(methodInvocation.getMethod(), GlobalLock.class);
         if (globalTrxAnno != null) {
             return handleGlobalTransaction(methodInvocation, globalTrxAnno);
         } else if (globalLockAnno != null) {
@@ -77,17 +78,18 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
                 try {
                     return methodInvocation.proceed();
                 } catch (Throwable e) {
-                    if(e instanceof Exception) {
-                        throw (Exception) e;
+                    if (e instanceof Exception) {
+                        throw (Exception)e;
                     } else {
                         throw new RuntimeException(e);
                     }
                 }
-        }
+            }
         });
     }
 
-    private Object handleGlobalTransaction(final MethodInvocation methodInvocation, final GlobalTransactional globalTrxAnno) throws Throwable {
+    private Object handleGlobalTransaction(final MethodInvocation methodInvocation,
+                                           final GlobalTransactional globalTrxAnno) throws Throwable {
         try {
             return transactionalTemplate.execute(new TransactionalExecutor() {
                 @Override
@@ -130,7 +132,7 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
         }
     }
 
-    private <T extends Annotation> T getAnnotation(Method method,Class<T> clazz) {
+    private <T extends Annotation> T getAnnotation(Method method, Class<T> clazz) {
         if (method == null) {
             return null;
         }

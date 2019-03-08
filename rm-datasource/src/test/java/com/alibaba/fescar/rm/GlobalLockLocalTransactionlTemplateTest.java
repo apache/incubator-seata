@@ -18,39 +18,38 @@ package com.alibaba.fescar.rm;
 
 import java.util.concurrent.Callable;
 
+import com.alibaba.fescar.core.context.RootContext;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.alibaba.fescar.core.context.RootContext;
-import com.alibaba.fescar.rm.GlobalLockTemplate;
-
 /**
  * check GlobalLockLocalTransactionlTemplate
- * @author deyou
  *
+ * @author deyou
  */
 public class GlobalLockLocalTransactionlTemplateTest {
 
     /**
      * Test sql recognizing.
-     * @throws Exception 
+     *
+     * @throws Exception
      */
     @Test
     public void testFlag() throws Exception {
-        
+
         GlobalLockTemplate<Object> template = new GlobalLockTemplate<Object>();
-        
+
         template.execute(new Callable<Object>() {
-            
+
             @Override
             public Object call() throws Exception {
                 Assert.assertTrue("lock flag not set!", RootContext.requireGlobalLock());
                 return null;
             }
         });
-        
+
         Assert.assertTrue("lock flag not clean!", !RootContext.requireGlobalLock());
 
-        
     }
 }

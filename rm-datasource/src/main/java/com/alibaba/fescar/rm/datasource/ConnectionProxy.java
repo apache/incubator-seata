@@ -19,9 +19,6 @@ package com.alibaba.fescar.rm.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
@@ -29,6 +26,9 @@ import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.rm.datasource.exec.LockConflictException;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Connection proxy.
@@ -67,7 +67,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     public void bind(String xid) {
         context.bind(xid);
     }
-    
+
     /**
      * set global lock requires flag
      *
@@ -76,10 +76,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     public void setGlobalLockRequire(boolean isLock) {
         context.setGlobalLockRequire(isLock);
     }
-    
+
     /**
      * get global lock requires flag
-     *
      */
     public boolean isGlobalLockRequire() {
         return context.isGlobalLockRequire();
@@ -151,7 +150,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     public void commit() throws SQLException {
         if (context.inGlobalTransaction()) {
             processGlobalTransactionCommit();
-        } else if(context.isGlobalLockRequire()) {
+        } else if (context.isGlobalLockRequire()) {
             processLocalCommitWithGlobalLocks();
         } else {
             targetConnection.commit();
@@ -159,7 +158,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void processLocalCommitWithGlobalLocks() throws SQLException {
-        
+
         checkLock(context.buildLockKeys());
         try {
             targetConnection.commit();

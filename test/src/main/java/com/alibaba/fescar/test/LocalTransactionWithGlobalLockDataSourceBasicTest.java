@@ -18,6 +18,13 @@ package com.alibaba.fescar.test;
 
 import java.util.Date;
 
+import com.alibaba.fescar.core.context.RootContext;
+import com.alibaba.fescar.core.exception.TransactionException;
+import com.alibaba.fescar.core.model.BranchStatus;
+import com.alibaba.fescar.core.model.BranchType;
+import com.alibaba.fescar.core.model.Resource;
+import com.alibaba.fescar.rm.datasource.DataSourceManager;
+
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -26,13 +33,6 @@ import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.UncategorizedSQLException;
 import org.springframework.jdbc.core.JdbcTemplate;
-
-import com.alibaba.fescar.core.context.RootContext;
-import com.alibaba.fescar.core.exception.TransactionException;
-import com.alibaba.fescar.core.model.BranchStatus;
-import com.alibaba.fescar.core.model.BranchType;
-import com.alibaba.fescar.core.model.Resource;
-import com.alibaba.fescar.rm.datasource.DataSourceManager;
 
 /**
  * The type Data source basic test.
@@ -43,18 +43,18 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     private static ClassPathXmlApplicationContext context;
     private static JdbcTemplate jdbcTemplate;
     private static JdbcTemplate directJdbcTemplate;
-    
-    
-    private abstract static class LockConflictExecuteTemplate{
+
+    private abstract static class LockConflictExecuteTemplate {
         public void execute() {
             synchronized (LocalTransactionWithGlobalLockDataSourceBasicTest.class) {
                 DataSourceManager.set(new MockDataSourceManager() {
                     @Override
-                    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
+                    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
+                        throws TransactionException {
                         return false;
                     }
                 });
-                
+
                 boolean exceptionOccour = false;
                 try {
                     doExecute();
@@ -64,37 +64,36 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
                 } finally {
                     DataSourceManager.set(new MockDataSourceManager());
                 }
-                
+
                 Assert.assertTrue("Lock Exception not occur!", exceptionOccour);
             }
         }
-        
+
         public abstract void doExecute();
-        
+
     }
-    
 
     /**
      * Test insert.
      */
     @Test
-    public  void testInsert() {
+    public void testInsert() {
         RootContext.bindGlobalLockFlag();
         jdbcTemplate.update("insert into user0 (id, name, gmt) values (?, ?, ?)",
             new Object[] {2, "xxx", new Date()});
     }
-    
+
     /**
      * Test insert.
      */
     @Test
-    public  void testInsertWithLock() {
+    public void testInsertWithLock() {
         RootContext.bindGlobalLockFlag();
         new LockConflictExecuteTemplate() {
             @Override
             public void doExecute() {
                 jdbcTemplate.update("insert into user0 (id, name, gmt) values (?, ?, ?)",
-                        new Object[] {3, "xxx", new Date()});                
+                    new Object[] {3, "xxx", new Date()});
             }
         }.execute();
     }
@@ -103,20 +102,20 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
      * Test update.
      */
     @Test
-    public  void testUpdate() {
+    public void testUpdate() {
         RootContext.bindGlobalLockFlag();
         jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.id = ?", new Object[] {1});
     }
-    
+
     @Test
-    public  void testUpdateWithLock() {
+    public void testUpdateWithLock() {
         RootContext.bindGlobalLockFlag();
         RootContext.bindGlobalLockFlag();
         new LockConflictExecuteTemplate() {
             @Override
             public void doExecute() {
                 jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.id = ?", new Object[] {1});
-              
+
             }
         }.execute();
     }
@@ -125,7 +124,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
      * Test update with alias 1.
      */
     @Test
-    public  void testUpdateWithAlias1() {
+    public void testUpdateWithAlias1() {
 
         directJdbcTemplate.update("delete from User1 where Id = ?",
             new Object[] {1});
@@ -135,9 +134,9 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
         RootContext.bindGlobalLockFlag();
         jdbcTemplate.update("update User1 a set a.Name = 'yyy' where a.Name = ?", new Object[] {"xxx"});
     }
-    
+
     @Test
-    public  void testUpdateWithAlias1WithLockConflict() {
+    public void testUpdateWithAlias1WithLockConflict() {
 
         directJdbcTemplate.update("delete from User1 where Id = ?",
             new Object[] {1});
@@ -146,32 +145,32 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
 
         RootContext.bindGlobalLockFlag();
         new LockConflictExecuteTemplate() {
-            
+
             @Override
             public void doExecute() {
                 jdbcTemplate.update("update User1 a set a.Name = 'yyy' where a.Name = ?", new Object[] {"xxx"});
             }
         };
-        
+
     }
 
     /**
      * Test delete.
      */
     @Test
-    public  void testDelete() {
+    public void testDelete() {
         RootContext.bindGlobalLockFlag();
         jdbcTemplate.update("delete from user0 where id = ?", new Object[] {2});
     }
-    
+
     /**
      * Test delete.
      */
     @Test
-    public  void testDeleteForLockConflict() {
+    public void testDeleteForLockConflict() {
         RootContext.bindGlobalLockFlag();
         new LockConflictExecuteTemplate() {
-            
+
             @Override
             public void doExecute() {
                 jdbcTemplate.update("delete from user0 where id = ?", new Object[] {2});
@@ -183,7 +182,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
      * Test select for update.
      */
     @Test
-    public  void testSelectForUpdate() {
+    public void testSelectForUpdate() {
         RootContext.bindGlobalLockFlag();
         jdbcTemplate.queryForRowSet("select a.name from user0 a where a.id = ? for update", new Object[] {1});
     }
@@ -192,32 +191,34 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
      * Test select for update.
      */
     @Test
-    public  void testSelectForUpdateWithLockConflict() {
+    public void testSelectForUpdateWithLockConflict() {
         RootContext.bindGlobalLockFlag();
         new LockConflictExecuteTemplate() {
-            
+
             @Override
             public void doExecute() {
                 jdbcTemplate.queryForRowSet("select a.name from user0 a where a.id = ? for update", new Object[] {1});
             }
         };
     }
-    
-    
+
     public static class MockDataSourceManager extends DataSourceManager {
 
         @Override
-        public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys) throws TransactionException {
+        public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
+                                   String lockKeys) throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
 
         @Override
-        public void branchReport(String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
+        public void branchReport(String xid, long branchId, BranchStatus status, String applicationData)
+            throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
 
         @Override
-        public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
+        public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
+            throws TransactionException {
             return true;
         }
 
@@ -232,16 +233,18 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
         }
 
         @Override
-        public BranchStatus branchCommit(String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+        public BranchStatus branchCommit(String xid, long branchId, String resourceId, String applicationData)
+            throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
 
         @Override
-        public BranchStatus branchRollback(String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+        public BranchStatus branchRollback(String xid, long branchId, String resourceId, String applicationData)
+            throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
     }
-    
+
     /**
      * Before.
      */
@@ -256,7 +259,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
             .getBean("jdbcTemplate");
         directJdbcTemplate = (JdbcTemplate)context
             .getBean("directJdbcTemplate");
-        
+
         directJdbcTemplate.execute("delete from user0");
         directJdbcTemplate.execute("delete from user1");
 
