@@ -16,7 +16,6 @@
 
 package com.alibaba.fescar.rm.datasource.undo;
 
-
 import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;

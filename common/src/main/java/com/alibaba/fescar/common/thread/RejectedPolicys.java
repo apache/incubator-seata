@@ -1,4 +1,3 @@
-package com.alibaba.fescar.common.thread;
 /*
  *  Copyright 1999-2018 Alibaba Group Holding Ltd.
  *
@@ -15,6 +14,8 @@ package com.alibaba.fescar.common.thread;
  *  limitations under the License.
  */
 
+package com.alibaba.fescar.common.thread;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -28,7 +29,8 @@ public final class RejectedPolicys {
 
     /**
      * when rejected happened ,add the new task and run the oldest task
-     * @return
+     *
+     * @return rejected execution handler
      */
     public static RejectedExecutionHandler runsOldestTaskPolicy() {
         return new RejectedExecutionHandler() {
@@ -37,9 +39,9 @@ public final class RejectedPolicys {
                 if (executor.isShutdown()) {
                     return;
                 }
-                BlockingQueue<Runnable> workQueue=executor.getQueue();
-                Runnable firstWork=workQueue.poll();
-                boolean newTaskAdd=workQueue.offer(r);
+                BlockingQueue<Runnable> workQueue = executor.getQueue();
+                Runnable firstWork = workQueue.poll();
+                boolean newTaskAdd = workQueue.offer(r);
                 if (firstWork != null) {
                     firstWork.run();
                 }

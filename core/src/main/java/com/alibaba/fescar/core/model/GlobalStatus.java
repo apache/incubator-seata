@@ -73,7 +73,8 @@ public enum GlobalStatus {
     TimeoutRollbackRetrying(7),
 
     /**
-     * All branches can be async committed. The committing is NOT done yet, but it can be seen as committed for TM/RM client.
+     * All branches can be async committed. The committing is NOT done yet, but it can be seen as committed for TM/RM
+     * client.
      */
     AsyncCommitting(8),
 
@@ -125,6 +126,11 @@ public enum GlobalStatus {
         this.code = code;
     }
 
+    /**
+     * Gets code.
+     *
+     * @return the code
+     */
     public int getCode() {
         return code;
     }
@@ -144,7 +150,7 @@ public enum GlobalStatus {
      * @return the global status
      */
     public static GlobalStatus get(byte code) {
-        return get((int) code);
+        return get((int)code);
     }
 
     /**

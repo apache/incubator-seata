@@ -21,8 +21,16 @@ import com.alibaba.fescar.core.protocol.ResultCode;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * The type Register tm response test.
+ */
 public class RegisterTMResponseTest {
 
+    /**
+     * Test to string.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testToString() throws Exception {
         RegisterTMResponse registerTMResponse = new RegisterTMResponse();

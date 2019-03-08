@@ -67,7 +67,9 @@ public class GlobalTransactionContext {
     /**
      * Reload GlobalTransaction instance according to the given XID
      *
+     * @param xid the xid
      * @return reloaded transaction instance.
+     * @throws TransactionException the transaction exception
      */
     public static GlobalTransaction reload(String xid) throws TransactionException {
         GlobalTransaction tx = new DefaultGlobalTransaction(xid, GlobalStatus.UnKnown, GlobalTransactionRole.Launcher) {

@@ -158,6 +158,12 @@ public class TableMetaTest {
 
         private List<String> columnLabels;
 
+        /**
+         * Instantiates a new Mock result set.
+         *
+         * @param statement    the statement
+         * @param columnLabels the column labels
+         */
         public MockResultSet(Statement statement, List<String> columnLabels) {
             super(statement);
             this.columnLabels = new ArrayList<>(columnLabels);
@@ -171,6 +177,13 @@ public class TableMetaTest {
 
     private class MockConnection extends com.alibaba.druid.mock.MockConnection {
 
+        /**
+         * Instantiates a new Mock connection.
+         *
+         * @param driver            the driver
+         * @param url               the url
+         * @param connectProperties the connect properties
+         */
         public MockConnection(com.alibaba.druid.mock.MockDriver driver, String url, Properties connectProperties) {
             super(driver, url, connectProperties);
         }

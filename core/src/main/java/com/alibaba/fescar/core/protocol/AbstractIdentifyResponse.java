@@ -23,7 +23,8 @@ import io.netty.buffer.ByteBuf;
  */
 public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
 
-    private String version = Version.CURRENT;;
+    private String version = Version.CURRENT;
+    ;
 
     private String extraData;
 
@@ -85,16 +86,16 @@ public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
 
     @Override
     public void doEncode() {
-//        super.doEncode();
-        byteBuffer.put(this.identified ? (byte) 1 : (byte) 0);
+        //        super.doEncode();
+        byteBuffer.put(this.identified ? (byte)1 : (byte)0);
         if (this.version != null) {
             byte[] bs = version.getBytes(UTF8);
-            byteBuffer.putShort((short) bs.length);
+            byteBuffer.putShort((short)bs.length);
             if (bs.length > 0) {
                 byteBuffer.put(bs);
             }
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
 
     }

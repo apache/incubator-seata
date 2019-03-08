@@ -33,12 +33,9 @@ import org.junit.Test;
 
 /**
  * The type Tm rpc client test.
- * @Author: jimin.jm@alibaba-inc.com
- * @Author: xiajun.0706@163.com
- * @Project: fescar-all
- * @DateTime: 2019/01/25 08:32
- * @FileName: TmRpcClientTest
- * @Description:
+ *
+ * @author jimin.jm @alibaba-inc.com xiajun.0706@163.com
+ * @date 2019 /01/25
  */
 public class TmRpcClientTest {
 
@@ -46,6 +43,11 @@ public class TmRpcClientTest {
         workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
         new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
+    /**
+     * Test get instance.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testGetInstance() throws Exception {
         String applicationId = "app 1";
@@ -122,9 +124,9 @@ public class TmRpcClientTest {
     /**
      * get private field in parent class
      *
-     * @param object
-     * @param fieldName
-     * @return
+     * @param object    the object
+     * @param fieldName the field name
+     * @return declared field
      */
     public static Field getDeclaredField(Object object, String fieldName) {
         Field field = null;

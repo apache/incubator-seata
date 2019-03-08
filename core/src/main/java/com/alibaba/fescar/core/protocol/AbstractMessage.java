@@ -44,11 +44,8 @@ import io.netty.channel.ChannelHandlerContext;
 /**
  * The type Abstract message.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /9/14 16:54
- * @FileName: AbstractMessage
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/14
  */
 public abstract class AbstractMessage implements MessageCodec, Serializable {
     private static final long serialVersionUID = -1441020418526899889L;

@@ -26,16 +26,18 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Configuration factory.
  *
- * @author: jimin.jm @alibaba-inc.com
- * @date: 2018 /12/24
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /12/24
  */
 public final class ConfigurationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
     private static final String REGISTRY_CONF = "registry.conf";
+    /**
+     * The constant FILE_INSTANCE.
+     */
     public static final Configuration FILE_INSTANCE = new FileConfiguration(REGISTRY_CONF);
     private static final String NAME_KEY = "name";
     private static final String FILE_TYPE = "file";
-
 
     /**
      * Gets instance.

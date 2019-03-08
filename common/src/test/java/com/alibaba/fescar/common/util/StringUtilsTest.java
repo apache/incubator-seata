@@ -14,53 +14,76 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.common;
+package com.alibaba.fescar.common.util;
 
-import com.alibaba.fescar.common.util.StringUtils;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+
 import javax.sql.rowset.serial.SerialBlob;
-import org.testng.Assert;
-import org.testng.annotations.Test;
+
+import org.junit.Ignore;
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * @author melon.zhao
- * @since 2019/2/20
+ * The type String utils test.
+ *
+ * @author Otis.z
+ * @date 2019 /2/20
  */
 public class StringUtilsTest {
 
+    /**
+     * Test is empty.
+     */
     @Test
     public void testIsEmpty() {
-        Assert.assertEquals(StringUtils.isEmpty(null), true);
-        Assert.assertEquals(StringUtils.isEmpty("abc"), false);
-        Assert.assertEquals(StringUtils.isEmpty(""), true);
-        Assert.assertEquals(StringUtils.isEmpty(" "), false);
+        assertThat(StringUtils.isEmpty(null)).isTrue();
+        assertThat(StringUtils.isEmpty("abc")).isFalse();
+        assertThat(StringUtils.isEmpty("")).isTrue();
+        assertThat(StringUtils.isEmpty(" ")).isFalse();
     }
 
+    /**
+     * Test string 2 blob.
+     *
+     * @throws SQLException the sql exception
+     */
     @Test
     public void testString2blob() throws SQLException {
-        Assert.assertEquals(StringUtils.string2blob(null), null);
-        String[] strs = new String[]{"abc", "", " "};
+        assertThat(StringUtils.string2blob(null)).isNull();
+        String[] strs = new String[] {"abc", "", " "};
         for (String str : strs) {
-            Assert.assertEquals(StringUtils.string2blob(str), new SerialBlob(str.getBytes()));
+            assertThat(StringUtils.string2blob(str)).isEqualTo(new SerialBlob(str.getBytes()));
         }
     }
 
+    /**
+     * Test blob 2 string.
+     *
+     * @throws SQLException the sql exception
+     */
     @Test
     public void testBlob2string() throws SQLException {
-        String[] strs = new String[]{"abc", " "};
+        String[] strs = new String[] {"abc", " "};
         for (String str : strs) {
-            Assert.assertEquals(StringUtils.blob2string(new SerialBlob(str.getBytes())), str);
+            assertThat(StringUtils.blob2string(new SerialBlob(str.getBytes()))).isEqualTo(str);
+
         }
     }
 
+    /**
+     * Test input stream 2 string.
+     */
     @Test
+    @Ignore
     public void testInputStream2String() {
         try {
             InputStream inputStream = StringUtilsTest.class.getClassLoader().getResourceAsStream("test.txt");
-            Assert.assertEquals(StringUtils.inputStream2String(inputStream), "abc\n"
+            assertThat(StringUtils.inputStream2String(inputStream)).isEqualTo("abc\n"
                 + ":\"klsdf\n"
                 + "2ks,x:\".,-3sd˚ø≤ø¬≥");
         } catch (FileNotFoundException e) {
