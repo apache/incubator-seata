@@ -41,10 +41,10 @@ public class StringUtilsTest {
      */
     @Test
     public void testIsEmpty() {
-        assertThat(StringUtils.isEmpty(null)).isTrue();
-        assertThat(StringUtils.isEmpty("abc")).isFalse();
-        assertThat(StringUtils.isEmpty("")).isTrue();
-        assertThat(StringUtils.isEmpty(" ")).isFalse();
+        assertThat(StringUtils.isNullOrEmpty(null)).isTrue();
+        assertThat(StringUtils.isNullOrEmpty("abc")).isFalse();
+        assertThat(StringUtils.isNullOrEmpty("")).isTrue();
+        assertThat(StringUtils.isNullOrEmpty(" ")).isFalse();
     }
 
     /**

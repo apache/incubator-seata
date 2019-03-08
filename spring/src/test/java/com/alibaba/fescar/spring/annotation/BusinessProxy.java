@@ -16,10 +16,16 @@
 
 package com.alibaba.fescar.spring.annotation;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
 public class BusinessProxy implements InvocationHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BusinessProxy.class);
+
     private Object proxy;
 
     public BusinessProxy(Object proxy) {
@@ -27,15 +33,16 @@ public class BusinessProxy implements InvocationHandler {
     }
 
     @Override
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    public Object invoke(Object proxy, Method method, Object[] args) {
+        LOGGER.debug("Before invoking proxy method.");
         System.out.println("before");
         Object result = null;
         try {
             result = method.invoke(this.proxy, args);
         } catch (Exception e) {
-
+            LOGGER.warn("Failed to invoke method {}.", method.getName());
         }
-        System.out.println("after");
+        LOGGER.debug("After invoking proxy method.");
         return result;
     }
 }
