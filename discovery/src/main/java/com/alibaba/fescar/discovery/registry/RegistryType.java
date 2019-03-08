@@ -36,7 +36,11 @@ public enum RegistryType {
     /**
      * Nacos registry type.
      */
-    Nacos;
+    Nacos,
+    /**
+     * Eureka registry type.
+     */
+    Eureka;
 
     /**
      * Gets type.
@@ -51,6 +55,8 @@ public enum RegistryType {
             return Nacos;
         } else if (Redis.name().equalsIgnoreCase(name)) {
             return Redis;
+        } else if (Eureka.name().equalsIgnoreCase(name)) {
+            return Eureka;
         } else {
             throw new NotSupportYetException("unsupport type:" + name);
         }

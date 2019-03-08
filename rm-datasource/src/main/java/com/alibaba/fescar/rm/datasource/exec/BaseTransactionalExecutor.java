@@ -72,8 +72,16 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     @Override
     public Object execute(Object... args) throws Throwable {
-        String xid = RootContext.getXID();
-        statementProxy.getConnectionProxy().bind(xid);
+        if (RootContext.inGlobalTransaction()) {
+            String xid = RootContext.getXID();
+            statementProxy.getConnectionProxy().bind(xid);
+        }
+
+        if (RootContext.requireGlobalLock()) {
+            statementProxy.getConnectionProxy().setGlobalLockRequire(true);
+        } else {
+            statementProxy.getConnectionProxy().setGlobalLockRequire(false);
+        }
         return doExecute(args);
     }
 
