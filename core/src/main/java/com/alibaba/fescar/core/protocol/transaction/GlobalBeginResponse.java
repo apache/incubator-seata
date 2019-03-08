@@ -78,22 +78,22 @@ public class GlobalBeginResponse extends AbstractTransactionResponse {
 
         if (this.xid != null) {
             byte[] bs = xid.getBytes(UTF8);
-            byteBuffer.putShort((short) bs.length);
+            byteBuffer.putShort((short)bs.length);
             if (bs.length > 0) {
                 byteBuffer.put(bs);
             }
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
 
         if (this.extraData != null) {
             byte[] bs = extraData.getBytes(UTF8);
-            byteBuffer.putShort((short) bs.length);
+            byteBuffer.putShort((short)bs.length);
             if (bs.length > 0) {
                 byteBuffer.put(bs);
             }
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
     }
 

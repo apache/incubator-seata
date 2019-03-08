@@ -16,24 +16,33 @@
 
 package com.alibaba.fescar.config;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
+
 import com.ctrip.framework.apollo.Config;
-import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.ConfigChangeListener;
+import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.model.ConfigChangeEvent;
 import com.google.common.collect.Lists;
 
-import static com.alibaba.fescar.config.ConfigurationKeys.*;
-
-import java.util.*;
-import java.util.concurrent.*;
+import static com.alibaba.fescar.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
+import static com.alibaba.fescar.config.ConfigurationKeys.FILE_ROOT_CONFIG;
 
 /**
- *  The type Apollo configuration.
+ * The type Apollo configuration.
  *
- *  @author: kl @kailing.pub
- *  @date: 2019/2/27
+ * @author: kl @kailing.pub
+ * @date: 2019 /2/27
  */
 public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListener> {
 
@@ -54,9 +63,10 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
             synchronized (ApolloConfiguration.class) {
                 if (null == config) {
                     config = ConfigService.getAppConfig();
-                    configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
-                            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
-                            new NamedThreadFactory("apolloConfigOperate", MAX_CONFIG_OPERATE_THREAD));
+                    configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD,
+                        MAX_CONFIG_OPERATE_THREAD,
+                        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
+                        new NamedThreadFactory("apolloConfigOperate", MAX_CONFIG_OPERATE_THREAD));
                     config.addChangeListener(new ConfigChangeListener() {
                         @Override
                         public void onChange(ConfigChangeEvent changeEvent) {
@@ -72,6 +82,11 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
         }
     }
 
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     public static ApolloConfiguration getInstance() {
         if (null == instance) {
             synchronized (ApolloConfiguration.class) {
@@ -85,7 +100,8 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
-        ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET, timeoutMills);
+        ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
+            timeoutMills);
         configOperateExecutor.submit(new Runnable() {
             @Override
             public void run() {
@@ -93,7 +109,7 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
                 configFuture.setResult(result);
             }
         });
-        return (String) configFuture.get(timeoutMills, TimeUnit.MILLISECONDS);
+        return (String)configFuture.get(timeoutMills, TimeUnit.MILLISECONDS);
     }
 
     @Override
@@ -126,13 +142,13 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
         return Lists.newArrayList(LISTENER_SERVICE_MAP.values());
     }
 
-    private void readyApolloConfig(){
-        Properties  properties = System.getProperties();
-        if(!properties.containsKey(APP_ID)){
-            System.setProperty(APP_ID,FILE_CONFIG.getConfig(getApolloAppIdFileKey()));
+    private void readyApolloConfig() {
+        Properties properties = System.getProperties();
+        if (!properties.containsKey(APP_ID)) {
+            System.setProperty(APP_ID, FILE_CONFIG.getConfig(getApolloAppIdFileKey()));
         }
-        if(!properties.containsKey(APOLLO_META)){
-            System.setProperty(APOLLO_META,FILE_CONFIG.getConfig(getApolloMetaFileKey()));
+        if (!properties.containsKey(APOLLO_META)) {
+            System.setProperty(APOLLO_META, FILE_CONFIG.getConfig(getApolloMetaFileKey()));
         }
     }
 
@@ -143,11 +159,11 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
 
     private static String getApolloMetaFileKey() {
         return FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-                + APOLLO_META;
+            + APOLLO_META;
     }
 
     private static String getApolloAppIdFileKey() {
         return FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-                + APP_ID;
+            + APP_ID;
     }
 }

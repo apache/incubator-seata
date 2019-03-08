@@ -19,11 +19,8 @@ package com.alibaba.fescar.common;
 /**
  * The type Constants.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /10/9 17:14
- * @FileName: Constants
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/9 17:14
  */
 public class Constants {
     /**
@@ -42,6 +39,5 @@ public class Constants {
      * The constant DBKEYS_SPLIT_CHAR.
      */
     public static final String DBKEYS_SPLIT_CHAR = ",";
-
 
 }

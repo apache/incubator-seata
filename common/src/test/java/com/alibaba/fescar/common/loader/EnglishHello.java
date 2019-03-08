@@ -17,10 +17,12 @@
 package com.alibaba.fescar.common.loader;
 
 /**
+ * The type English hello.
+ *
  * @author Otis.z
- * @date 2019/2/26
+ * @date 2019 /2/26
  */
-@LoadLevel(name = "EnglishHello",order = 1)
+@LoadLevel(name = "EnglishHello", order = 1)
 public class EnglishHello implements Hello {
 
     @Override

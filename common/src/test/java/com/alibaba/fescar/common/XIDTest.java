@@ -16,31 +16,41 @@
 
 package com.alibaba.fescar.common;
 
+import java.util.Random;
+
 import org.junit.Test;
 
-import java.util.Random;
 import static org.assertj.core.api.Assertions.assertThat;
 
-
 /**
+ * The type Xid test.
+ *
  * @author Otis.z
- * @date 2019/2/22
+ * @date 2019 /2/22
  */
 public class XIDTest {
 
+    /**
+     * Test set ip address.
+     */
     @Test
     public void testSetIpAddress() {
         XID.setIpAddress("127.0.0.1");
         assertThat(XID.getIpAddress()).isEqualTo("127.0.0.1");
     }
 
+    /**
+     * Test set port.
+     */
     @Test
     public void testSetPort() {
         XID.setPort(8080);
         assertThat(XID.getPort()).isEqualTo(8080);
     }
 
-
+    /**
+     * Test generate xid.
+     */
     @Test
     public void testGenerateXID() {
         long tranId = new Random().nextLong();
@@ -49,12 +59,18 @@ public class XIDTest {
         assertThat(XID.generateXID(tranId)).isEqualTo(XID.getIpAddress() + ":" + XID.getPort() + ":" + tranId);
     }
 
+    /**
+     * Test get server address.
+     */
     @Test
     public void testGetServerAddress() {
         assertThat(XID.getServerAddress(null)).isNull();
         assertThat(XID.getServerAddress("127.0.0.1:8080:8577662204289747564")).isEqualTo("127.0.0.1:8080");
     }
 
+    /**
+     * Test get transaction id.
+     */
     @Test
     public void testGetTransactionId() {
         assertThat(XID.getTransactionId(null)).isEqualTo(-1);

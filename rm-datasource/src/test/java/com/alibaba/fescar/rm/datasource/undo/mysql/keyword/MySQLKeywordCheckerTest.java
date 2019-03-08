@@ -16,6 +16,7 @@
 
 package com.alibaba.fescar.rm.datasource.undo.mysql.keyword;
 
+import java.sql.Types;
 
 import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
@@ -23,20 +24,22 @@ import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.KeyType;
 import com.alibaba.fescar.rm.datasource.sql.struct.Row;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
-import com.alibaba.fescar.rm.datasource.undo.*;
+import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
+import com.alibaba.fescar.rm.datasource.undo.KeywordCheckerFactory;
+import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
+import com.alibaba.fescar.rm.datasource.undo.UndoExecutorTest;
 import com.alibaba.fescar.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
 import com.alibaba.fescar.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
 import com.alibaba.fescar.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.sql.*;
-
-
 /**
+ * The type My sql keyword checker test.
+ *
  * @author Wu
- * @date 2019/3/5
- * The type MySQL keyword checker test.
+ * @date 2019 /3/5 The type MySQL keyword checker test.
  */
 public class MySQLKeywordCheckerTest {
 
@@ -45,9 +48,8 @@ public class MySQLKeywordCheckerTest {
      */
     @Test
     public void testCheck() {
-        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
         Assert.assertTrue(keywordChecker.check("desc"));
-
 
     }
 
@@ -56,8 +58,8 @@ public class MySQLKeywordCheckerTest {
      */
     @Test
     public void testCheckAndReplace() {
-        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-        Assert.assertEquals("`desc`",keywordChecker.checkAndReplace("desc"));
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+        Assert.assertEquals("`desc`", keywordChecker.checkAndReplace("desc"));
 
     }
 
@@ -131,21 +133,27 @@ public class MySQLKeywordCheckerTest {
 
         MySQLUndoUpdateExecutorExtension mySQLUndoUpdateExecutor = new MySQLUndoUpdateExecutorExtension(sqlUndoLog);
 
-        Assert.assertEquals("UPDATE `lock` SET `desc` = ?, `order` = ?, since = ? WHERE id = ?", mySQLUndoUpdateExecutor.getSql());
+        Assert.assertEquals("UPDATE `lock` SET `desc` = ?, `order` = ?, since = ? WHERE id = ?",
+            mySQLUndoUpdateExecutor.getSql());
 
     }
 
-   private static class MySQLUndoUpdateExecutorExtension extends MySQLUndoUpdateExecutor{
-       /**
-        * Instantiates a new My sql undo update executor.
-        *
-        * @param sqlUndoLog the sql undo log
-        */
-       public MySQLUndoUpdateExecutorExtension(SQLUndoLog sqlUndoLog) {
-           super(sqlUndoLog);
-       }
+    private static class MySQLUndoUpdateExecutorExtension extends MySQLUndoUpdateExecutor {
+        /**
+         * Instantiates a new My sql undo update executor.
+         *
+         * @param sqlUndoLog the sql undo log
+         */
+        public MySQLUndoUpdateExecutorExtension(SQLUndoLog sqlUndoLog) {
+            super(sqlUndoLog);
+        }
 
-       public String getSql(){
+        /**
+         * Gets sql.
+         *
+         * @return the sql
+         */
+        public String getSql() {
             return super.buildUndoSQL();
         }
     }
@@ -227,7 +235,12 @@ public class MySQLKeywordCheckerTest {
             super(sqlUndoLog);
         }
 
-        public String getSql(){
+        /**
+         * Gets sql.
+         *
+         * @return the sql
+         */
+        public String getSql() {
             return super.buildUndoSQL();
         }
     }
@@ -295,7 +308,8 @@ public class MySQLKeywordCheckerTest {
 
         MySQLUndoDeleteExecutorExtension mySQLUndoDeleteExecutor = new MySQLUndoDeleteExecutorExtension(sqlUndoLog);
 
-        Assert.assertEquals("INSERT INTO `lock`(`desc`, `order`, id) VALUES (?, ?, ?)", mySQLUndoDeleteExecutor.getSql());
+        Assert.assertEquals("INSERT INTO `lock`(`desc`, `order`, id) VALUES (?, ?, ?)",
+            mySQLUndoDeleteExecutor.getSql());
 
     }
 
@@ -309,11 +323,14 @@ public class MySQLKeywordCheckerTest {
             super(sqlUndoLog);
         }
 
-        public String getSql(){
+        /**
+         * Gets sql.
+         *
+         * @return the sql
+         */
+        public String getSql() {
             return super.buildUndoSQL();
         }
     }
-
-
 
 }

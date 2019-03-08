@@ -37,8 +37,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Enhanced service loader.
  *
- * @author: jimin.jm @alibaba-inc.com
- * @date: 2018/10/10
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/10
  */
 public class EnhancedServiceLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancedServiceLoader.class);
@@ -53,7 +53,7 @@ public class EnhancedServiceLoader {
      * @param <S>     the type parameter
      * @param service the service
      * @param loader  the loader
-     * @return s
+     * @return s s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service, ClassLoader loader) throws EnhancedServiceNotFoundException {
@@ -65,7 +65,7 @@ public class EnhancedServiceLoader {
      *
      * @param <S>     the type parameter
      * @param service the service
-     * @return s
+     * @return s s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service) throws EnhancedServiceNotFoundException {
@@ -78,7 +78,7 @@ public class EnhancedServiceLoader {
      * @param <S>          the type parameter
      * @param service      the service
      * @param activateName the activate name
-     * @return s
+     * @return s s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service, String activateName) throws EnhancedServiceNotFoundException {
@@ -92,7 +92,7 @@ public class EnhancedServiceLoader {
      * @param service      the service
      * @param activateName the activate name
      * @param loader       the loader
-     * @return s
+     * @return s s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service, String activateName, ClassLoader loader)
