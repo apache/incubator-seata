@@ -99,7 +99,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
             currDataFile = new File(currFullFileName);
             if (!currDataFile.exists()) {
                 //create parent dir first
-                if (!currDataFile.getParentFile().exists()) {
+                if (currDataFile.getParentFile() != null && !currDataFile.getParentFile().exists()) {
                     currDataFile.getParentFile().mkdirs();
                 }
                 currDataFile.createNewFile();
