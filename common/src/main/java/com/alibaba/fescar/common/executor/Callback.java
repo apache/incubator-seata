@@ -1,7 +1,7 @@
 package com.alibaba.fescar.common.executor;
 
 /**
- * 回调
+ * Callback
  * 
  * @author zhangsen
  *

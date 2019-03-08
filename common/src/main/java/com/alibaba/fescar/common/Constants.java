@@ -47,37 +47,37 @@ public class Constants {
     public static final String START_TIME  = "start-time";
     
     /**
-     * 应用名称
+     * app name
      */
     public static final String APP_NAME = "appName";
     
     /**
-     * TCC参与者开始时间
+     * TCC start time
      */
     public static final String ACTION_START_TIME = "action-start-time";
     
     /**
-     * TCC 参与者名称
+     * TCC name
      */
     public final static String ACTION_NAME = "actionName";
     
     /**
-     * 一阶段准备方法 
+     * phase one method name
      */
     public final static String PREPARE_METHOD = "sys::prepare";
     
     /**
-     * 二阶段提交方法
+     * phase two commit method name
      */
     public final static String COMMIT_METHOD = "sys::commit_method";
     
     /**
-     * 二阶段回滚方法
+     * phase two rollback method name
      */
     public final static String ROLLBACK_METHOD = "sys::rollback_method";
     
     /**
-     * 主机ip
+     * host ip
      */
     public final static String HOST_NAME = "host-name";
     
@@ -86,12 +86,12 @@ public class Constants {
     public final static String TCC_METHOD_ARGUMENTS = "arguments";
 
     /**
-     * 主事务记录上下文
+     * transaction context
      */
     public final static String TCC_ACTIVITY_CONTEXT = "activityContext";
 
     /**
-     * 分支事务上下文
+     * branch context
      */
     public final static String TCC_ACTION_CONTEXT = "actionContext";
 

@@ -8,7 +8,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
- * 反射工具类
+ * Reflection tools
  *
  * @author zhangsen
  */
@@ -21,7 +21,7 @@ public class ReflectionUtil {
     }
 
     /**
-     * 反射获取字段值
+     * get Field Value
      * @param target
      * @param fieldName
      * @return
@@ -46,7 +46,7 @@ public class ReflectionUtil {
     }
 
     /**
-     * 反射 方法调用
+     * invoke Method
      * @param target
      * @param methodName
      * @return
@@ -72,7 +72,7 @@ public class ReflectionUtil {
     }
 
     /**
-     * 反射 方法调用
+     * invoke Method
      * @param target
      * @param methodName
      * @param parameterTypes
@@ -100,7 +100,7 @@ public class ReflectionUtil {
     }
 
     /**
-     * 静态方法调用
+     * invoke static Method
      *
      * @param targetClass
      * @param methodName
@@ -127,7 +127,7 @@ public class ReflectionUtil {
     }
 
     /**
-     * 根据名称获取方法
+     * get Method by name
      * @param classType
      * @param methodName
      * @param parameterTypes
@@ -140,7 +140,7 @@ public class ReflectionUtil {
     }
 
     /**
-     * 获取类所有的接口
+     * get all interface of the clazz
      * @param clazz
      * @return
      */
