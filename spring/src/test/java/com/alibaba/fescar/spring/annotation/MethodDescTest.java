@@ -33,25 +33,25 @@ public class MethodDescTest {
     private GlobalTransactionScanner globalTransactionScanner = new GlobalTransactionScanner(
             "global-trans-scanner-test");
 
-    private static Method METHOD=null;
-    private static GlobalTransactional TRANSACTIONAL=null;
+    private static Method method=null;
+    private static GlobalTransactional transactional=null;
 
     public MethodDescTest() throws NoSuchMethodException {
-        METHOD = BusinessImpl.class.getDeclaredMethod("doBiz", new Class[]{String.class});
-        TRANSACTIONAL = METHOD.getAnnotation(GlobalTransactional.class);
+        method = BusinessImpl.class.getDeclaredMethod("doBiz", String.class);
+        transactional = method.getAnnotation(GlobalTransactional.class);
     }
 
     @Test(dataProvider = "normalBeanProvider")
     public void testGetTransactionAnnotation(Object bean, String beanName, Object cacheKey) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         MethodDesc methodDesc=getMethodDesc();
-        assertThat(methodDesc.getTransactionAnnotation()).isEqualTo(TRANSACTIONAL);
+        assertThat(methodDesc.getTransactionAnnotation()).isEqualTo(transactional);
 
     }
 
     @Test(dataProvider = "normalBeanProvider")
     public void testGetMethod(Object bean, String beanName, Object cacheKey) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         MethodDesc methodDesc=getMethodDesc();
-        assertThat(methodDesc.getMethod()).isEqualTo(METHOD);
+        assertThat(methodDesc.getMethod()).isEqualTo(method);
     }
 
     @Test(dataProvider = "normalBeanProvider")
@@ -74,9 +74,9 @@ public class MethodDescTest {
 
     private MethodDesc getMethodDesc() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         //call the private method
-        Method m = GlobalTransactionScanner.class.getDeclaredMethod("makeMethodDesc", new Class[]{GlobalTransactional.class, Method.class});
+        Method m = GlobalTransactionScanner.class.getDeclaredMethod("makeMethodDesc", GlobalTransactional.class, Method.class);
         m.setAccessible(true);
-        return (MethodDesc) m.invoke(globalTransactionScanner, TRANSACTIONAL, METHOD);
+        return (MethodDesc) m.invoke(globalTransactionScanner, transactional, method);
 
     }
 
