@@ -16,7 +16,6 @@
 
 package com.alibaba.fescar.spring.annotation;
 
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.lang.reflect.InvocationTargetException;
