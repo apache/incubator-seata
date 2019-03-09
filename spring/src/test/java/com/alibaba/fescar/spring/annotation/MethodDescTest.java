@@ -30,61 +30,51 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class MethodDescTest {
 
-    private GlobalTransactionScanner globalTransactionScanner = new GlobalTransactionScanner(
-            "global-trans-scanner-test");
-
-    private static Method method=null;
-    private static GlobalTransactional transactional=null;
+    private static final GlobalTransactionScanner GLOBAL_TRANSACTION_SCANNER = new GlobalTransactionScanner("global-trans-scanner-test");
+    private static Method method = null;
+    private static GlobalTransactional transactional = null;
 
     public MethodDescTest() throws NoSuchMethodException {
         method = BusinessImpl.class.getDeclaredMethod("doBiz", String.class);
         transactional = method.getAnnotation(GlobalTransactional.class);
     }
 
-    @Test(dataProvider = "normalBeanProvider")
-    public void testGetTransactionAnnotation(Object bean, String beanName, Object cacheKey) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        MethodDesc methodDesc=getMethodDesc();
+    @Test
+    public void testGetTransactionAnnotation() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        MethodDesc methodDesc = getMethodDesc();
         assertThat(methodDesc.getTransactionAnnotation()).isEqualTo(transactional);
 
     }
 
-    @Test(dataProvider = "normalBeanProvider")
-    public void testGetMethod(Object bean, String beanName, Object cacheKey) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        MethodDesc methodDesc=getMethodDesc();
+    @Test
+    public void testGetMethod() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        MethodDesc methodDesc = getMethodDesc();
         assertThat(methodDesc.getMethod()).isEqualTo(method);
     }
 
-    @Test(dataProvider = "normalBeanProvider")
-    public void testSetTransactionAnnotation(Object bean, String beanName, Object cacheKey) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        MethodDesc methodDesc=getMethodDesc();
+    @Test
+    public void testSetTransactionAnnotation() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        MethodDesc methodDesc = getMethodDesc();
         assertThat(methodDesc.getTransactionAnnotation()).isNotNull();
         methodDesc.setTransactionAnnotation(null);
         assertThat(methodDesc.getTransactionAnnotation()).isNull();
     }
 
-    @Test(dataProvider = "normalBeanProvider")
-    public void testSetMethod(Object bean, String beanName, Object cacheKey) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        MethodDesc methodDesc=getMethodDesc();
+    @Test
+    public void testSetMethod() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        MethodDesc methodDesc = getMethodDesc();
         assertThat(methodDesc.getMethod()).isNotNull();
         methodDesc.setMethod(null);
         assertThat(methodDesc.getMethod()).isNull();
     }
 
 
-
     private MethodDesc getMethodDesc() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         //call the private method
         Method m = GlobalTransactionScanner.class.getDeclaredMethod("makeMethodDesc", GlobalTransactional.class, Method.class);
         m.setAccessible(true);
-        return (MethodDesc) m.invoke(globalTransactionScanner, transactional, method);
+        return (MethodDesc) m.invoke(GLOBAL_TRANSACTION_SCANNER, transactional, method);
 
     }
 
-    @DataProvider
-    public static Object[][] normalBeanProvider() {
-        Business business = new BusinessImpl();
-        String beanName = "business";
-        String cacheKey = "business-key";
-        return new Object[][]{{business, beanName, cacheKey}};
-    }
 }
