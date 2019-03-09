@@ -51,6 +51,6 @@ public enum ConfigType {
                 return configType;
             }
         }
-        throw new NotSupportYetException("unsupport type:" + name);
+        throw new IllegalArgumentException("illegal type:" + name);
     }
 }

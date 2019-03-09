@@ -53,11 +53,9 @@ public final class ConfigurationFactory {
             configType = ConfigType.getType(configTypeName);
         } catch (Exception exx) {
             LOGGER.error(exx.getMessage());
-        }
-        Configuration configuration;
-        if (configType == null) {
             throw new NotSupportYetException("not support register type: " + configTypeName);
         }
+        Configuration configuration;
         switch (configType) {
             case Nacos:
                 try {
