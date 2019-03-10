@@ -16,13 +16,10 @@
 
 package com.alibaba.fescar.common.util;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-
 import javax.sql.rowset.serial.SerialBlob;
-
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -40,7 +37,8 @@ public class StringUtilsTest {
      * Test is empty.
      */
     @Test
-    public void testIsEmpty() {
+    public void testIsNullOrEmpty() {
+
         assertThat(StringUtils.isNullOrEmpty(null)).isTrue();
         assertThat(StringUtils.isNullOrEmpty("abc")).isFalse();
         assertThat(StringUtils.isNullOrEmpty("")).isTrue();
@@ -80,16 +78,9 @@ public class StringUtilsTest {
      */
     @Test
     @Ignore
-    public void testInputStream2String() {
-        try {
-            InputStream inputStream = StringUtilsTest.class.getClassLoader().getResourceAsStream("test.txt");
-            assertThat(StringUtils.inputStream2String(inputStream)).isEqualTo("abc\n"
-                + ":\"klsdf\n"
-                + "2ks,x:\".,-3sd˚ø≤ø¬≥");
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void testInputStream2String() throws IOException {
+        InputStream inputStream = StringUtilsTest.class.getClassLoader().getResourceAsStream("test.txt");
+        assertThat(StringUtils.inputStream2String(inputStream))
+            .isEqualTo("abc\n" + ":\"klsdf\n" + "2ks,x:\".,-3sd˚ø≤ø¬≥");
     }
 }

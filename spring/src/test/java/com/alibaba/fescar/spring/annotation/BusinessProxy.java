@@ -42,7 +42,10 @@ public class BusinessProxy implements InvocationHandler {
         } catch (Exception e) {
             LOGGER.warn("Failed to invoke method {}.", method.getName());
         }
-        LOGGER.debug("After invoking proxy method.");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("After invoking proxy method.");
+        }
+
         return result;
     }
 }
