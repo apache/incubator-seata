@@ -18,7 +18,6 @@ package com.alibaba.fescar.rm.datasource;
 
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;

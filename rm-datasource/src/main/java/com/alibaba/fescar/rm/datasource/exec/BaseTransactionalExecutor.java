@@ -26,7 +26,6 @@ import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMetaCache;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
-
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
@@ -204,7 +203,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         int filedSequence = 0;
         for (Field field : rowsIncludingPK.pkRows()) {
             sb.append(field.getValue());
-            if (++filedSequence < rowsIncludingPK.pkRows().size()) {
+            filedSequence++;
+            if (filedSequence < rowsIncludingPK.pkRows().size()) {
                 sb.append(",");
             }
         }
