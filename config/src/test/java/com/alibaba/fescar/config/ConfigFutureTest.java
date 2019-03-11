@@ -28,19 +28,19 @@ import java.util.concurrent.TimeUnit;
  */
 public class ConfigFutureTest {
 
-    private static final String dataId = "dataId";
-    private static final String content = "content";
-    private static final String result = "result";
+    private static final String DATA_ID = "dataId";
+    private static final String CONTENT = "content";
+    private static final String RESULT = "result";
 
-    private static final long timeMills = 10L;
-    private static final ConfigFuture.ConfigOperation getOperation = ConfigFuture.ConfigOperation.GET;
+    private static final long TIME_MILLS = 10L;
+    private static final ConfigFuture.ConfigOperation GET_OPERATION = ConfigFuture.ConfigOperation.GET;
 
     private ConfigFuture configFuture;
 
 
     @Before
     public void initConfigFutureBeforeTest() {
-        configFuture = new ConfigFuture(dataId, content, getOperation,timeMills);
+        configFuture = new ConfigFuture(DATA_ID, CONTENT, GET_OPERATION, TIME_MILLS);
     }
 
     /**
@@ -48,9 +48,9 @@ public class ConfigFutureTest {
      */
     @Test
     public void testGetWithGetOperation() {
-        Assert.assertEquals(content, configFuture.get());
-        startSetResultThread(result);
-        Assert.assertEquals(result, configFuture.get());
+        Assert.assertEquals(CONTENT, configFuture.get());
+        startSetResultThread(RESULT);
+        Assert.assertEquals(RESULT, configFuture.get());
     }
 
     /**
@@ -60,8 +60,8 @@ public class ConfigFutureTest {
     public void testGetWithPutOperation() {
         configFuture.setOperation(ConfigFuture.ConfigOperation.PUT);
         Assert.assertEquals(Boolean.FALSE, configFuture.get());
-        startSetResultThread(result);
-        Assert.assertEquals(result, configFuture.get());
+        startSetResultThread(RESULT);
+        Assert.assertEquals(RESULT, configFuture.get());
     }
 
     /**
@@ -76,37 +76,37 @@ public class ConfigFutureTest {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            configFuture.setResult(result);
+            configFuture.setResult(RESULT);
         });
-        Assert.assertEquals(content, configFuture.get(outTime, TimeUnit.MILLISECONDS));
+        Assert.assertEquals(CONTENT, configFuture.get(outTime, TimeUnit.MILLISECONDS));
     }
 
     @Test
     public void testSetContent() {
-        configFuture.setContent(content);
+        configFuture.setContent(CONTENT);
     }
 
     @Test
     public void testGetContent() {
-        configFuture.setContent(content);
-        Assert.assertEquals(content, configFuture.getContent());
+        configFuture.setContent(CONTENT);
+        Assert.assertEquals(CONTENT, configFuture.getContent());
     }
 
     @Test
     public void testSetDataId() {
-        configFuture.setDataId(dataId);
-        Assert.assertEquals(dataId, configFuture.getDataId());
+        configFuture.setDataId(DATA_ID);
+        Assert.assertEquals(DATA_ID, configFuture.getDataId());
     }
 
     @Test
     public void testGetDataId() {
-        configFuture.setDataId(dataId);
-        Assert.assertEquals(dataId, configFuture.getDataId());
+        configFuture.setDataId(DATA_ID);
+        Assert.assertEquals(DATA_ID, configFuture.getDataId());
     }
 
     @Test
     public void testSetResult() {
-        configFuture.setResult(result);
+        configFuture.setResult(RESULT);
     }
 
     @Test
@@ -122,8 +122,8 @@ public class ConfigFutureTest {
 
     @Test
     public void testIsTimeout() throws InterruptedException {
-        configFuture.get(timeMills, TimeUnit.MILLISECONDS);
-        Thread.sleep(timeMills * 2);
+        configFuture.get(TIME_MILLS, TimeUnit.MILLISECONDS);
+        Thread.sleep(TIME_MILLS * 2);
         Assert.assertTrue(configFuture.isTimeout());
     }
 
