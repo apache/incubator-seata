@@ -28,12 +28,12 @@ import java.util.concurrent.TimeUnit;
  */
 public class ConfigFutureTest {
 
-    private final String dataId = "dataId";
-    private final String content = "content";
-    private final String result = "result";
+    private static final String dataId = "dataId";
+    private static final String content = "content";
+    private static final String result = "result";
 
-    private final long timeMills = 10L;
-    private final ConfigFuture.ConfigOperation getOperation = ConfigFuture.ConfigOperation.GET;
+    private static final long timeMills = 10L;
+    private static final ConfigFuture.ConfigOperation getOperation = ConfigFuture.ConfigOperation.GET;
 
     private ConfigFuture configFuture;
 
