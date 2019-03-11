@@ -70,7 +70,7 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
         } else {
             whereCondition = recognizer.getWhereCondition();
         }
-        if (!StringUtils.isEmpty(whereCondition)) {
+        if (!StringUtils.isNullOrEmpty(whereCondition)) {
             selectSQLAppender.append(" WHERE " + whereCondition);
         }
         selectSQLAppender.append(" FOR UPDATE");
