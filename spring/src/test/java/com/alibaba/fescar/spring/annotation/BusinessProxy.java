@@ -34,8 +34,9 @@ public class BusinessProxy implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] args) {
-        LOGGER.debug("Before invoking proxy method.");
-        System.out.println("before");
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Before invoking proxy method.");
+        }
         Object result = null;
         try {
             result = method.invoke(this.proxy, args);
