@@ -15,10 +15,11 @@
  */
 package com.alibaba.fescar.config;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import org.junit.Test;
+
 import static com.alibaba.fescar.config.ConfigurationFactory.FILE_INSTANCE;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * @author Wu
@@ -31,22 +32,26 @@ public class ConfigurationFactoryTest {
     private final static ConfigType CONFIG_TYPE = ConfigType.getType(
             FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                     + ConfigurationKeys.FILE_ROOT_TYPE));
-    /**
-     * get configuration instance
-     */
-    private final static Configuration CONFIGURATION_INSTANCE = ConfigurationFactory.getInstance();
 
     /**
      * test for getInstance method
      */
     @Test
-    public void testGetInstance() throws NotSupportYetException {
-        if (ConfigType.Nacos.equals(CONFIG_TYPE)) {
-            assertThat(CONFIGURATION_INSTANCE).isInstanceOf(NacosConfiguration.class);
-        } else if (ConfigType.Apollo.equals(CONFIG_TYPE)) {
-            assertThat(CONFIGURATION_INSTANCE).isInstanceOf(ApolloConfiguration.class);
-        } else if (ConfigType.File.equals(CONFIG_TYPE)) {
-            assertThat(CONFIGURATION_INSTANCE).isInstanceOf(FileConfiguration.class);
+    public void testGetInstance() {
+        //try to get NotSupportYetException
+        Throwable thrown = catchThrowable(ConfigurationFactory::getInstance);
+
+        if (thrown instanceof NotSupportYetException) {//NotSupportYetException case
+            assertThat(thrown).hasMessage("not support register type:" + CONFIG_TYPE);
+        } else if (ConfigType.Nacos.equals(CONFIG_TYPE)) {//Nacos case
+            Configuration configuration = ConfigurationFactory.getInstance();
+            assertThat(configuration).isInstanceOf(NacosConfiguration.class);
+        } else if (ConfigType.Apollo.equals(CONFIG_TYPE)) {//Apollo case
+            Configuration configuration = ConfigurationFactory.getInstance();
+            assertThat(configuration).isInstanceOf(ApolloConfiguration.class);
+        } else {//File case
+            Configuration configuration = ConfigurationFactory.getInstance();
+            assertThat(configuration).isInstanceOf(FileConfiguration.class);
         }
     }
 }
