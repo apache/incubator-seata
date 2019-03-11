@@ -63,7 +63,7 @@ public class ServiceManagerStaticConfigImpl implements ServiceManager {
         }
         String rGroupDataId = ConfigurationKeys.SERVICE_PREFIX + rGroup + ConfigurationKeys.GROUPLIST_POSTFIX;
         String serverListConfig = configuration.getConfig(rGroupDataId);
-        if (StringUtils.isEmpty(serverListConfig)) {
+        if (StringUtils.isNullOrEmpty(serverListConfig)) {
             throw new FrameworkException(InvalidConfiguration);
         }
         serverAddresses = serverListConfig.split(SERVER_NODE_SPLIT_CHAR);

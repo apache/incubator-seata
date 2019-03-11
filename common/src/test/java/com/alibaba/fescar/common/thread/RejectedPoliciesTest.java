@@ -29,7 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Created by guoyao on 2019/2/26.
  */
-public class RejectedPolicysTest {
+public class RejectedPoliciesTest {
 
     private final int DEFAULT_CORE_POOL_SIZE = 1;
     private final int DEFAULT_KEEP_ALIVE_TIME = 10;
@@ -48,7 +48,7 @@ public class RejectedPolicysTest {
                 TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue(MAX_QUEUE_SIZE),
                 new NamedThreadFactory("OldestRunsPolicy", DEFAULT_CORE_POOL_SIZE),
-                RejectedPolicys.runsOldestTaskPolicy());
+                RejectedPolicies.runsOldestTaskPolicy());
         CountDownLatch downLatch1 = new CountDownLatch(1);
         CountDownLatch downLatch2 = new CountDownLatch(1);
         CountDownLatch downLatch3 = new CountDownLatch(1);

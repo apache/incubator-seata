@@ -20,12 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class BusinessImpl implements Business {
-    Logger logger = LoggerFactory.getLogger(BusinessImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BusinessImpl.class);
 
     @Override
     @GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
     public String doBiz(String msg) {
-        logger.info("Business doBiz");
+        LOGGER.info("Business doBiz");
         return "hello " + msg;
     }
 }

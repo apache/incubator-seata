@@ -31,7 +31,7 @@ import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.exception.FrameworkErrorCode;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
-import com.alibaba.fescar.common.thread.RejectedPolicys;
+import com.alibaba.fescar.common.thread.RejectedPolicies;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
@@ -126,7 +126,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
                         new LinkedBlockingQueue(MAX_QUEUE_SIZE),
                         new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()),
-                        RejectedPolicys.runsOldestTaskPolicy());
+                        RejectedPolicies.runsOldestTaskPolicy());
                     instance = new TmRpcClient(nettyClientConfig, null, threadPoolExecutor);
                 }
             }
