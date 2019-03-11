@@ -16,11 +16,10 @@
 
 package com.alibaba.fescar.spring.annotation;
 
-import org.testng.annotations.Test;
+import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -34,7 +33,7 @@ public class MethodDescTest {
     private static GlobalTransactional transactional = null;
 
     public MethodDescTest() throws NoSuchMethodException {
-        method = BusinessImpl.class.getDeclaredMethod("doBiz", String.class);
+        method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
         transactional = method.getAnnotation(GlobalTransactional.class);
     }
 
@@ -74,6 +73,16 @@ public class MethodDescTest {
         m.setAccessible(true);
         return (MethodDesc) m.invoke(GLOBAL_TRANSACTION_SCANNER, transactional, method);
 
+    }
+
+    /**
+     * the type mock business
+     */
+    private static class MockBusiness {
+        @GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
+        public String doBiz(String msg) {
+            return "hello " + msg;
+        }
     }
 
 }
