@@ -143,7 +143,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             });
         }
 
-        return Lists.newArrayList(CLUSTER_ADDRESS_MAP.get(clusterName));
+        return Lists.newArrayList(CLUSTER_ADDRESS_MAP.get(clusterName.toUpperCase()));
     }
 
     private static void refreshCluster() {
