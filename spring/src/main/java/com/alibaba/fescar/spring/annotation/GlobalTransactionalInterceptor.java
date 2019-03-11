@@ -109,13 +109,6 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
         return methodInvocation.proceed();
     }
 
-//    private GlobalTransactional getAnnotation(Method method) {
-//        if (method == null) {
-//            return null;
-//        }
-//        return method.getAnnotation(GlobalTransactional.class);
-//    }
-
     private String formatMethod(Method method) {
         StringBuilder sb = new StringBuilder();
 

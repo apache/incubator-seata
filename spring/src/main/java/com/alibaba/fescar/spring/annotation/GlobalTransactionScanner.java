@@ -184,16 +184,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 }
                 Class<?> serviceInterface = findTargetClass(bean);
                 Method[] methods = serviceInterface.getMethods();
-//                LinkedList<MethodDesc> methodDescList = new LinkedList<>();
-//                for (Method method : methods) {
-//                    GlobalTransactional anno = method.getAnnotation(GlobalTransactional.class);
-//                    if (anno != null) {
-//                        methodDescList.add(makeMethodDesc(anno, method));
-//                    }
-//                }
-//                if (methodDescList.isEmpty()) {
-//                    return bean;
-//                }
                 
                 boolean flag = false;
                 
@@ -230,10 +220,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
             throw new RuntimeException(exx);
         }
     }
-
-//    private MethodDesc makeMethodDesc(GlobalTransactional anno, Method method) {
-//        return new MethodDesc(anno, method);
-//    }
 
     private Class<?> findTargetClass(Object proxy) throws Exception {
         if (AopUtils.isAopProxy(proxy)) {
@@ -273,8 +259,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
             }
             return;
         }
-        //TODO 
-        //initClient();
+        initClient();
 
     }
 }
