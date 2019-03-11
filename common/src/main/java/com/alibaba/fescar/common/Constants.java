@@ -69,12 +69,12 @@ public class Constants {
     /**
      * phase two commit method name
      */
-    public final static String COMMIT_METHOD = "sys::commit_method";
+    public final static String COMMIT_METHOD = "sys::commit";
     
     /**
      * phase two rollback method name
      */
-    public final static String ROLLBACK_METHOD = "sys::rollback_method";
+    public final static String ROLLBACK_METHOD = "sys::rollback";
     
     /**
      * host ip
