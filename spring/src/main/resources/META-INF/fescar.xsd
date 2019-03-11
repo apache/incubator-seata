@@ -21,7 +21,7 @@
 	<xsd:element name="txs">
 		<xsd:complexType>
 			<xsd:sequence>
-				<xsd:element ref="tx" maxOccurs="unbounded" />
+				<xsd:element ref="tx" minOccurs="0" maxOccurs="unbounded" />
 			</xsd:sequence>
 			<xsd:attribute name="id" type="xsd:string" use="optional" />
 			<xsd:attribute name="appId" type="xsd:string" use="required" />
