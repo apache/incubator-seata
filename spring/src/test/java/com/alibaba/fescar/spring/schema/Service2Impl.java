@@ -24,13 +24,13 @@ public class Service2Impl implements Service
 {
 	
 	@Override
-	@GlobalTransactional(name="glTest",timeoutMills=40000)
 	public String pay(String json)
 	{
 		return "ok + " + json;
 	}
 	
 	@Override
+	@GlobalTransactional(name="glTest",timeoutMills=40000)
 	public String payService(String json)
 	{
 		// TODO Auto-generated method stub
