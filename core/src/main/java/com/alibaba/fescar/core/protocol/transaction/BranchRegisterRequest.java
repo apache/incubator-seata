@@ -131,7 +131,6 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
         if (this.lockKey != null) {
             lockKeyBytes = lockKey.getBytes(UTF8);
             if (lockKeyBytes.length > 512) {
-//                byteBuffer = ByteBuffer.allocate(lockKeyBytes.length + 1024);
                 byteLenth += lockKeyBytes.length;
             }
         }
@@ -139,7 +138,6 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
         if (this.applicationData != null) {
             applicationDataBytes = applicationData.getBytes(UTF8);
             if (applicationDataBytes.length > 512) {
-//                byteBuffer = ByteBuffer.allocate(applicationDataBytes.length + 1024);
                 byteLenth += applicationDataBytes.length;
             }
         }
