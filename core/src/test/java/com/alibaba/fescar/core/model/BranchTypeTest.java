@@ -30,6 +30,12 @@ public class BranchTypeTest {
     private static final int NONE = 99;
 
     @Test
+    public void testOrdinal() {
+        int ordinal = BranchType.AT.ordinal();
+        Assert.assertEquals(AT_ORDINAL, ordinal);
+    }
+
+    @Test
     public void testGetWithByte() {
         BranchType branchStatus = BranchType.get((byte)AT_ORDINAL);
         Assert.assertEquals(branchStatus, BranchType.AT);
