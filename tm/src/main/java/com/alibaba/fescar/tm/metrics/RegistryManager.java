@@ -14,30 +14,30 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.tm;
+package com.alibaba.fescar.tm.metrics;
 
 import com.alibaba.fescar.common.loader.EnhancedServiceLoader;
 import com.alibaba.fescar.common.loader.EnhancedServiceNotFoundException;
-import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
-import com.alibaba.fescar.metrics.Publisher;
+import com.alibaba.fescar.metrics.Registry;
 
-/**
- * The type Tm client.
- */
-public class TMClient {
-  /**
-   * Init.
-   *
-   * @param applicationId           the application id
-   * @param transactionServiceGroup the transaction service group
-   */
-  public static void init(String applicationId, String transactionServiceGroup) {
-    TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
-    tmRpcClient.init();
+public class RegistryManager {
+  private static class SingletonHolder {
+    private static RegistryManager INSTANCE = new RegistryManager();
+  }
 
-    //try to load metrics publisher
+  public static RegistryManager get() {
+    return RegistryManager.SingletonHolder.INSTANCE;
+  }
+
+  private Registry registry;
+
+  public Registry getRegistry() {
+    return registry;
+  }
+
+  private RegistryManager() {
     try {
-      EnhancedServiceLoader.load(Publisher.class);
+      this.registry = EnhancedServiceLoader.load(Registry.class);
     } catch (EnhancedServiceNotFoundException ignored) {
     }
   }

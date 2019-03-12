@@ -23,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.loader.EnhancedServiceLoader;
+import com.alibaba.fescar.common.loader.EnhancedServiceNotFoundException;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.rpc.netty.RpcServer;
 import com.alibaba.fescar.metrics.Publisher;
@@ -34,57 +35,60 @@ import com.alibaba.fescar.server.session.SessionHolder;
  */
 public class Server {
 
-    private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
-        new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+  private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
+      new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
-    /**
-     * The entry point of application.
-     *
-     * @param args the input arguments
-     * @throws IOException the io exception
-     */
-    public static void main(String[] args) throws IOException {
-        //try to load metrics publisher
-        EnhancedServiceLoader.load(Publisher.class);
-
-        RpcServer rpcServer = new RpcServer(WORKING_THREADS);
-
-        int port = 8091;
-        if (args.length == 0) {
-            rpcServer.setListenPort(port);
-        }
-
-        if (args.length > 0) {
-            try {
-                port = Integer.parseInt(args[0]);
-            } catch (NumberFormatException e) {
-                System.err.println("Usage: sh fescar-server.sh $LISTEN_PORT $PATH_FOR_PERSISTENT_DATA");
-                System.exit(0);
-            }
-            rpcServer.setListenPort(port);
-        }
-
-        String dataDir = null;
-        if (args.length > 1) {
-            dataDir = args[1];
-        }
-        SessionHolder.init(dataDir);
-
-        DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
-        coordinator.init();
-        rpcServer.setHandler(new DefaultCoordinator(rpcServer));
-
-        UUIDGenerator.init(1);
-
-        if (args.length > 2) {
-            XID.setIpAddress(args[2]);
-        } else {
-            XID.setIpAddress(NetUtil.getLocalIp());
-        }
-        XID.setPort(rpcServer.getListenPort());
-
-        rpcServer.init();
-
-        System.exit(0);
+  /**
+   * The entry point of application.
+   *
+   * @param args the input arguments
+   * @throws IOException the io exception
+   */
+  public static void main(String[] args) throws IOException {
+    //try to load metrics publisher
+    try {
+      EnhancedServiceLoader.load(Publisher.class);
+    } catch (EnhancedServiceNotFoundException ignored) {
     }
+
+    RpcServer rpcServer = new RpcServer(WORKING_THREADS);
+
+    int port = 8091;
+    if (args.length == 0) {
+      rpcServer.setListenPort(port);
+    }
+
+    if (args.length > 0) {
+      try {
+        port = Integer.parseInt(args[0]);
+      } catch (NumberFormatException e) {
+        System.err.println("Usage: sh fescar-server.sh $LISTEN_PORT $PATH_FOR_PERSISTENT_DATA");
+        System.exit(0);
+      }
+      rpcServer.setListenPort(port);
+    }
+
+    String dataDir = null;
+    if (args.length > 1) {
+      dataDir = args[1];
+    }
+    SessionHolder.init(dataDir);
+
+    DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
+    coordinator.init();
+    rpcServer.setHandler(new DefaultCoordinator(rpcServer));
+
+    UUIDGenerator.init(1);
+
+    if (args.length > 2) {
+      XID.setIpAddress(args[2]);
+    } else {
+      XID.setIpAddress(NetUtil.getLocalIp());
+    }
+    XID.setPort(rpcServer.getListenPort());
+
+    rpcServer.init();
+
+    System.exit(0);
+  }
 }

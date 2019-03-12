@@ -16,10 +16,12 @@
 
 package com.alibaba.fescar.metrics;
 
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Id {
   private final UUID id;
@@ -27,6 +29,8 @@ public class Id {
   private final String name;
 
   private final SortedMap<String, String> tags;
+
+  private final Map<String, Map<String, Id>> children;
 
   public UUID getId() {
     return id;
@@ -48,6 +52,7 @@ public class Id {
     this.id = UUID.randomUUID();
     this.name = name;
     this.tags = new TreeMap<>();
+    this.children = new ConcurrentHashMap<>();
   }
 
   public Id withTag(String name, String value) {
@@ -62,6 +67,27 @@ public class Id {
       }
     }
     return this;
+  }
+
+  /**
+   * get child Id from this Id, if not exists create one
+   * @param name child tag key
+   * @param value child tag value
+   * @return child Id
+   */
+  public Id fromChild(String name, String value) {
+    Map<String, Id> ids = children.computeIfAbsent(name, key -> new ConcurrentHashMap<>());
+    return ids.computeIfAbsent(value, key -> this.clone(name, value));
+  }
+
+  /**
+   * clone a new Id base on this
+   * @param name additional tag
+   * @param value additional value
+   * @return new Id
+   */
+  public Id clone(String name, String value) {
+    return new Id(this.name).withTag(getTags()).withTag(name, value);
   }
 
   @Override
