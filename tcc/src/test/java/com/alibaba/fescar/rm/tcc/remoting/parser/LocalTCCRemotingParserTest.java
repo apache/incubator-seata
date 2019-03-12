@@ -24,12 +24,20 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 
 /**
+ * The type Local tcc remoting parser test.
+ *
  * @author zhangsen
  */
 public class LocalTCCRemotingParserTest {
 
+    /**
+     * The Local tcc remoting parser.
+     */
     LocalTCCRemotingParser localTCCRemotingParser = new LocalTCCRemotingParser();
 
+    /**
+     * Test service parser.
+     */
     @Test
     public void testServiceParser(){
         TccActionImpl tccAction = new TccActionImpl();
@@ -38,6 +46,9 @@ public class LocalTCCRemotingParserTest {
         Assert.assertTrue(result);
     }
 
+    /**
+     * Test reference parser.
+     */
     @Test
     public void testReferenceParser(){
         TccActionImpl tccAction = new TccActionImpl();
@@ -46,6 +57,9 @@ public class LocalTCCRemotingParserTest {
         Assert.assertTrue(result);
     }
 
+    /**
+     * Test service desc.
+     */
     @Test
     public void testServiceDesc(){
         TccActionImpl tccAction = new TccActionImpl();

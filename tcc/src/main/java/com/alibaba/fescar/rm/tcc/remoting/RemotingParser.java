@@ -28,50 +28,48 @@ public interface RemotingParser {
 
     /**
      * if it is remoting bean ?
-     * @param bean
-     * @param beanName
-     * @return
-     * @throws ClassNotFoundException
+     *
+     * @param bean the bean
+     * @param beanName the bean name
+     * @return boolean boolean
+     * @throws FrameworkException the framework exception
      */
     public boolean isRemoting(Object bean, String beanName) throws FrameworkException;
 
     /**
      * if it is reference bean ?
-     * @param bean
-     * @param beanName
-     * @return
-     * @throws ClassNotFoundException
+     *
+     * @param bean the bean
+     * @param beanName the bean name
+     * @return boolean boolean
+     * @throws FrameworkException the framework exception
      */
     public boolean isReference(Object bean, String beanName) throws FrameworkException;
 
-
     /**
      * if it is service bean ?
-     * @param bean
-     * @param beanName
-     * @return
+     *
+     * @param bean the bean
+     * @param beanName the bean name
+     * @return boolean boolean
+     * @throws FrameworkException the framework exception
      */
     public boolean isService(Object bean, String beanName) throws FrameworkException;
 
     /**
      * get the remoting bean info
-     * @param bean
-     * @param beanName
-     * @return
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
-     * @throws NoSuchFieldException
-     * @throws ClassNotFoundException
+     *
+     * @param bean the bean
+     * @param beanName the bean name
+     * @return service desc
+     * @throws FrameworkException the framework exception
      */
     public RemotingDesc getServiceDesc(Object bean, String beanName) throws FrameworkException;
 
-
     /**
      * the remoting protocol
-     * @return
+     *
+     * @return protocol protocol
      */
     public Protocols getProtocol();
 

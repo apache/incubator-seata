@@ -19,6 +19,8 @@ import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.rm.tcc.remoting.RemotingParser;
 
 /**
+ * The type Abstracted remoting parser.
+ *
  * @author zhangsen
  */
 public abstract class AbstractedRemotingParser implements RemotingParser {

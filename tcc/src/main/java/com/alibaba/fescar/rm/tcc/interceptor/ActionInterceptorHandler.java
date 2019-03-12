@@ -37,24 +37,25 @@ import java.util.Map;
 
 /**
  * Handler the TCC Participant Aspect : Setting Context, Creating Branch Record
- * 
+ *
  * @author zhangsen
  */
 public class ActionInterceptorHandler {
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(ActionInterceptorHandler.class);
-	
-	/**
-	 * Handler the TCC Aspect
-	 * @param method
-	 * @param arguments
-	 * @param businessAction
-	 * @param targetCallback
-	 * @return
-	 * @throws Throwable
-	 */
-	public Map<String, Object> proceed(Method method, Object[] arguments, TwoPhaseBusinessAction businessAction, Callback<Object> targetCallback) throws Throwable {
-		Map<String, Object> ret = new HashMap<String, Object>();
+
+    /**
+     * Handler the TCC Aspect
+     *
+     * @param method the method
+     * @param arguments the arguments
+     * @param businessAction the business action
+     * @param targetCallback the target callback
+     * @return map
+     * @throws Throwable the throwable
+     */
+    public Map<String, Object> proceed(Method method, Object[] arguments, TwoPhaseBusinessAction businessAction, Callback<Object> targetCallback) throws Throwable {
+		Map<String, Object> ret = new HashMap<String, Object>(16);
 		
 		//TCC name
         String actionName = businessAction.name();
@@ -86,10 +87,16 @@ public class ActionInterceptorHandler {
         return ret;
 	}
 
-	/**
+    /**
      * Creating Branch Record
-	 */
-	protected String doTccActionLogStore(Method method, Object[] arguments, TwoPhaseBusinessAction businessAction, BusinessActionContext actionContext) {
+     *
+     * @param method the method
+     * @param arguments the arguments
+     * @param businessAction the business action
+     * @param actionContext the action context
+     * @return the string
+     */
+    protected String doTccActionLogStore(Method method, Object[] arguments, TwoPhaseBusinessAction businessAction, BusinessActionContext actionContext) {
 		String actionName = actionContext.getActionName();
         String xid = actionContext.getXid();
         //
@@ -103,7 +110,7 @@ public class ActionInterceptorHandler {
         actionContext.setActionContext(context);
 
         //init applicationData
-        Map<String, Object> applicationContext = new HashMap<String, Object>();
+        Map<String, Object> applicationContext = new HashMap<String, Object>(4);
         applicationContext.put(Constants.TCC_ACTION_CONTEXT, context);
         String applicationContextStr = JSON.toJSONString(applicationContext);
         try {
@@ -116,10 +123,11 @@ public class ActionInterceptorHandler {
         	throw new FrameworkException(t, msg);
         }
 	}
-	
-	/**
+
+    /**
      * Init running environment context
-     * @param context
+     *
+     * @param context the context
      */
     protected void initFrameworkContext(Map<String, Object> context){
         try {
@@ -128,12 +136,13 @@ public class ActionInterceptorHandler {
         	LOGGER.warn("getLocalIP error", t);
         }
     }
-	
-	 /**
+
+    /**
      * Init business context
-     * @param context
-     * @param method
-     * @param businessAction
+     *
+     * @param context the context
+     * @param method the method
+     * @param businessAction the business action
      */
     protected void initBusinessContext(Map<String,Object> context, Method method, TwoPhaseBusinessAction businessAction) {
     	if(method != null){
@@ -150,12 +159,13 @@ public class ActionInterceptorHandler {
 
     /**
      * Extracting context data from parameters, add them to the context
-     * @param method
-     * @param arguments
-     * @return
+     *
+     * @param method the method
+     * @param arguments the arguments
+     * @return map
      */
     protected Map<String, Object> fetchActionRequestContext(Method method, Object[] arguments) {
-        Map<String, Object> context = new HashMap<String, Object>();
+        Map<String, Object> context = new HashMap<String, Object>(8);
 
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterAnnotations.length; i++) {

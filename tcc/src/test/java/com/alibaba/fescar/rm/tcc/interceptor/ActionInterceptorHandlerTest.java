@@ -27,12 +27,22 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * The type Action interceptor handler test.
+ *
  * @author zhangsen
  */
 public class ActionInterceptorHandlerTest {
 
+    /**
+     * The Action interceptor handler.
+     */
     protected  ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
+    /**
+     * Test business action context.
+     *
+     * @throws NoSuchMethodException the no such method exception
+     */
     @Test
     public void testBusinessActionContext() throws NoSuchMethodException {
         Method prepareMethod = TccAction.class.getDeclaredMethod("prepare",

@@ -19,20 +19,34 @@ import com.alibaba.fescar.common.exception.FrameworkException;
 
 /**
  * remoting protocols enum
- * 
- * @author zhangsen
  *
+ * @author zhangsen
  */
 public enum Protocols {
-	
+
+	/**
+	 * sofa-rpc service
+	 */
 	SOFA_RPC(2),
-	
+
+	/**
+	 * dubbo service
+	 */
 	DUBBO(3),
-	
+
+	/**
+	 * restful service
+	 */
 	RESTFUL(4),
-	
+
+	/**
+	 * local bean
+	 */
 	IN_JVM(5),
-	
+
+	/**
+	 * hsf service
+	 */
 	HSF(8)
 	;
 
@@ -42,10 +56,21 @@ public enum Protocols {
 		this.code = code;
 	}
 
+	/**
+	 * Gets code.
+	 *
+	 * @return the code
+	 */
 	public int getCode() {
 		return code;
 	}
 
+	/**
+	 * Value of protocols.
+	 *
+	 * @param code the code
+	 * @return the protocols
+	 */
 	public static Protocols valueOf(int code){
 		for(Protocols p : values()){
 			if(p.getCode() == code){

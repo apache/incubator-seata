@@ -50,6 +50,7 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
         transactionStoreManager = new FileTransactionStoreManager(sessionStoreFilePath + name, this);
     }
 
+    @Override
     public void reload() {
         restoreSessions();
         washSessions();

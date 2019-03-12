@@ -22,7 +22,6 @@ import java.util.Map;
  * TCC Method context
  *
  * @author zhangsen
- *
  */
 public class BusinessActionContext implements Serializable {
 
@@ -49,9 +48,19 @@ public class BusinessActionContext implements Serializable {
      */
     private Map<String, Object> actionContext;
 
+    /**
+     * Instantiates a new Business action context.
+     */
     public BusinessActionContext() {
     }
 
+    /**
+     * Instantiates a new Business action context.
+     *
+     * @param xid the xid
+     * @param actionName the action name
+     * @param actionContext the action context
+     */
     public BusinessActionContext(String xid, String actionName, Map<String, Object> actionContext) {
         this.xid = xid;
         this.actionName = actionName;
@@ -60,9 +69,9 @@ public class BusinessActionContext implements Serializable {
 
     /**
      * 获取action级别的参数
-     * 
-     * @param key
-     * @return
+     *
+     * @param key the key
+     * @return action context
      */
     public Object getActionContext(String key) {
         return actionContext.get(key);
@@ -86,34 +95,70 @@ public class BusinessActionContext implements Serializable {
         this.branchId = String.valueOf(branchId);
     }
 
+    /**
+     * Gets action context.
+     *
+     * @return the action context
+     */
     public Map<String, Object> getActionContext() {
         return actionContext;
     }
 
+    /**
+     * Sets action context.
+     *
+     * @param actionContext the action context
+     */
     public void setActionContext(Map<String, Object> actionContext) {
         this.actionContext = actionContext;
     }
 
+    /**
+     * Gets xid.
+     *
+     * @return the xid
+     */
     public String getXid() {
         return xid;
     }
 
+    /**
+     * Sets xid.
+     *
+     * @param xid the xid
+     */
     public void setXid(String xid) {
         this.xid = xid;
     }
 
+    /**
+     * Sets branch id.
+     *
+     * @param branchId the branch id
+     */
     public void setBranchId(String branchId) {
         this.branchId = branchId;
     }
 
+    /**
+     * Gets action name.
+     *
+     * @return the action name
+     */
     public String getActionName() {
         return actionName;
     }
 
+    /**
+     * Sets action name.
+     *
+     * @param actionName the action name
+     */
     public void setActionName(String actionName) {
         this.actionName = actionName;
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("[xid:").append(xid)

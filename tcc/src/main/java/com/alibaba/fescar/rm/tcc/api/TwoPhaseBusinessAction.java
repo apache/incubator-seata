@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 
 /**
  * TCC annotation, Define a TCC interface，which added on the try method
- * 
+ *
  * @author zhangsen
  */
 @Retention(RetentionPolicy.RUNTIME)
@@ -33,16 +33,22 @@ public @interface TwoPhaseBusinessAction {
 
     /**
      * TCC bean name, must be unique
+     *
+     * @return the string
      */
     String name() ;
 
     /**
-     *  commit methed name
+     * commit methed name
+     *
+     * @return the string
      */
     String commitMethod() default "commit";
 
     /**
      * rollback method name
+     *
+     * @return the string
      */
     String rollbackMethod() default "rollback";
 

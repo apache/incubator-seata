@@ -57,7 +57,10 @@ public class TccResourceManager extends AbstractResourceManager {
 	 */
 	private Map<String, Resource> tccResourceCache = new ConcurrentHashMap<String, Resource>();
 
-	public TccResourceManager(){
+    /**
+     * Instantiates a new Tcc resource manager.
+     */
+    public TccResourceManager(){
 	}
 
 	/**
@@ -154,15 +157,16 @@ public class TccResourceManager extends AbstractResourceManager {
 		}
 	}
 
-	/**
-	 * transfer tcc applicationData to BusinessActionContext
-	 * @param xid
-	 * @param branchId
-	 * @param resourceId
-	 * @param applicationData
-	 * @return
-	 */
-	protected BusinessActionContext getBusinessActionContext(String xid, long branchId, String resourceId, String applicationData){
+    /**
+     * transfer tcc applicationData to BusinessActionContext
+     *
+     * @param xid the xid
+     * @param branchId the branch id
+     * @param resourceId the resource id
+     * @param applicationData the application data
+     * @return business action context
+     */
+    protected BusinessActionContext getBusinessActionContext(String xid, long branchId, String resourceId, String applicationData){
 		//transfer tcc applicationData to Context
 		Map tccContext = StringUtils.isBlank(applicationData)?new HashMap():(Map) JSON.parse(applicationData);
 		Map actionContextMap = (Map) tccContext.get(Constants.TCC_ACTION_CONTEXT);

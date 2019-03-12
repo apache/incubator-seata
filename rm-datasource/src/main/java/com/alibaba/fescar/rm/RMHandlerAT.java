@@ -27,6 +27,7 @@ public class RMHandlerAT extends AbstractRMHandler {
      * get AT resource manager
      * @return
      */
+    @Override
     protected ResourceManager getResourceManager() {
         return DefaultResourceManager.get().getResourceManager(BranchType.AT);
     }

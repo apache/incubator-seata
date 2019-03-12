@@ -21,7 +21,7 @@ import com.alibaba.fescar.core.model.Resource;
 import java.lang.reflect.Method;
 
 /**
- *
+ * The type Tcc resource.
  *
  * @author zhangsen
  */
@@ -75,6 +75,11 @@ public class TCCResource implements Resource {
         return resourceGroupId;
     }
 
+    /**
+     * Sets resource group id.
+     *
+     * @param resourceGroupId the resource group id
+     */
     public void setResourceGroupId(String resourceGroupId) {
         this.resourceGroupId = resourceGroupId;
     }
@@ -89,67 +94,146 @@ public class TCCResource implements Resource {
         return BranchType.TCC;
     }
 
-
+    /**
+     * Gets app name.
+     *
+     * @return the app name
+     */
     public String getAppName() {
         return appName;
     }
 
+    /**
+     * Sets app name.
+     *
+     * @param appName the app name
+     */
     public void setAppName(String appName) {
         this.appName = appName;
     }
 
+    /**
+     * Gets action name.
+     *
+     * @return the action name
+     */
     public String getActionName() {
         return actionName;
     }
 
+    /**
+     * Sets action name.
+     *
+     * @param actionName the action name
+     */
     public void setActionName(String actionName) {
         this.actionName = actionName;
     }
 
+    /**
+     * Gets target bean.
+     *
+     * @return the target bean
+     */
     public Object getTargetBean() {
         return targetBean;
     }
 
+    /**
+     * Sets target bean.
+     *
+     * @param targetBean the target bean
+     */
     public void setTargetBean(Object targetBean) {
         this.targetBean = targetBean;
     }
 
+    /**
+     * Gets prepare method.
+     *
+     * @return the prepare method
+     */
     public Method getPrepareMethod() {
         return prepareMethod;
     }
 
+    /**
+     * Sets prepare method.
+     *
+     * @param prepareMethod the prepare method
+     */
     public void setPrepareMethod(Method prepareMethod) {
         this.prepareMethod = prepareMethod;
     }
 
+    /**
+     * Gets commit method.
+     *
+     * @return the commit method
+     */
     public Method getCommitMethod() {
         return commitMethod;
     }
 
+    /**
+     * Sets commit method.
+     *
+     * @param commitMethod the commit method
+     */
     public void setCommitMethod(Method commitMethod) {
         this.commitMethod = commitMethod;
     }
 
+    /**
+     * Gets rollback method.
+     *
+     * @return the rollback method
+     */
     public Method getRollbackMethod() {
         return rollbackMethod;
     }
 
+    /**
+     * Sets rollback method.
+     *
+     * @param rollbackMethod the rollback method
+     */
     public void setRollbackMethod(Method rollbackMethod) {
         this.rollbackMethod = rollbackMethod;
     }
 
+    /**
+     * Gets commit method name.
+     *
+     * @return the commit method name
+     */
     public String getCommitMethodName() {
         return commitMethodName;
     }
 
+    /**
+     * Sets commit method name.
+     *
+     * @param commitMethodName the commit method name
+     */
     public void setCommitMethodName(String commitMethodName) {
         this.commitMethodName = commitMethodName;
     }
 
+    /**
+     * Gets rollback method name.
+     *
+     * @return the rollback method name
+     */
     public String getRollbackMethodName() {
         return rollbackMethodName;
     }
 
+    /**
+     * Sets rollback method name.
+     *
+     * @param rollbackMethodName the rollback method name
+     */
     public void setRollbackMethodName(String rollbackMethodName) {
         this.rollbackMethodName = rollbackMethodName;
     }

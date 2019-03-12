@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * parsing remoting bean
+ *
  * @author zhangsen
  */
 public class DefaultRemotingParser {
@@ -41,10 +42,8 @@ public class DefaultRemotingParser {
      */
     protected static List<RemotingParser> allRemotingParsers = new ArrayList<RemotingParser>();
 
-
     /**
-     * all remoting beans
-     * beanName -> RemotingDesc
+     * all remoting beans beanName -> RemotingDesc
      */
     protected static Map<String, RemotingDesc> remotingServiceMap = new ConcurrentHashMap<String,RemotingDesc>();
 
@@ -65,6 +64,9 @@ public class DefaultRemotingParser {
         return DefaultRemotingParser.SingletonHolder.INSTANCE;
     }
 
+    /**
+     * Instantiates a new Default remoting parser.
+     */
     protected DefaultRemotingParser(){
         initRemotingParser();
     }
@@ -84,9 +86,10 @@ public class DefaultRemotingParser {
 
     /**
      * is remoting bean ?
-     * @param bean
-     * @param beanName
-     * @return
+     *
+     * @param bean the bean
+     * @param beanName the bean name
+     * @return boolean
      */
     public boolean isRemoting(Object bean, String beanName) {
         for(RemotingParser remotingParser : allRemotingParsers){
@@ -99,9 +102,10 @@ public class DefaultRemotingParser {
 
     /**
      * is reference bean?
-     * @param bean
-     * @param beanName
-     * @return
+     *
+     * @param bean the bean
+     * @param beanName the bean name
+     * @return boolean
      */
     public boolean isReference(Object bean, String beanName) {
         for(RemotingParser remotingParser : allRemotingParsers){
@@ -112,12 +116,12 @@ public class DefaultRemotingParser {
         return false;
     }
 
-
     /**
      * is service bean ?
-     * @param bean
-     * @param beanName
-     * @return
+     *
+     * @param bean the bean
+     * @param beanName the bean name
+     * @return boolean
      */
     public boolean isService(Object bean, String beanName) {
         for(RemotingParser remotingParser : allRemotingParsers){
@@ -130,9 +134,10 @@ public class DefaultRemotingParser {
 
     /**
      * get the remoting Service desc
-     * @param bean
-     * @param beanName
-     * @return
+     *
+     * @param bean the bean
+     * @param beanName the bean name
+     * @return service desc
      */
     public RemotingDesc getServiceDesc(Object bean, String beanName)  {
         List<RemotingDesc>  ret = new ArrayList<RemotingDesc>();
@@ -153,9 +158,10 @@ public class DefaultRemotingParser {
 
     /**
      * parse the remoting bean info
-     * @param bean
-     * @param beanName
-     * @return
+     *
+     * @param bean the bean
+     * @param beanName the bean name
+     * @return remoting desc
      */
     public RemotingDesc parserRemotingServiceInfo(Object bean, String beanName)  {
         //remoting bean 信息
@@ -195,6 +201,12 @@ public class DefaultRemotingParser {
         return remotingBeanDesc;
     }
 
+    /**
+     * Get remoting bean desc remoting desc.
+     *
+     * @param beanName the bean name
+     * @return the remoting desc
+     */
     public RemotingDesc getRemotingBeanDesc(String beanName){
         return remotingServiceMap.get(beanName);
     }

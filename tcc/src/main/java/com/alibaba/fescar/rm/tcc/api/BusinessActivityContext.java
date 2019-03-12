@@ -23,6 +23,7 @@ import com.alibaba.fescar.common.Constants;
 
 /**
  * 主事务记录上下文信息
+ *
  * @author zhangsen
  */
 public class BusinessActivityContext implements Serializable {
@@ -32,20 +33,35 @@ public class BusinessActivityContext implements Serializable {
 
     private Map<String, Object> context          = new HashMap<String, Object>();
 
+    /**
+     * Instantiates a new Business activity context.
+     */
     public BusinessActivityContext() {
     }
 
+    /**
+     * Instantiates a new Business activity context.
+     *
+     * @param context the context
+     */
     public BusinessActivityContext(Map<String, Object> context) {
         this.context = context;
     }
 
+    /**
+     * Add context.
+     *
+     * @param key the key
+     * @param value the value
+     */
     public void addContext(String key, Object value) {
         context.put(key, value);
     }
 
     /**
      * 获取本次分布式事务的开启时间
-     * @return
+     *
+     * @return long
      */
     public Long fetchStartTime() {
         return (Long) context.get(Constants.START_TIME);
@@ -53,19 +69,33 @@ public class BusinessActivityContext implements Serializable {
 
     /**
      * 获取应用自定义的参数
+     *
+     * @param key the key
+     * @return the object
      */
     public Object getContext(String key){
         return context.get(key);
     }
 
+    /**
+     * Gets context.
+     *
+     * @return the context
+     */
     public Map<String, Object> getContext() {
         return context;
     }
 
+    /**
+     * Sets context.
+     *
+     * @param context the context
+     */
     public void setContext(Map<String, Object> context) {
         this.context = context;
     }
 
+    @Override
     public String toString() {
         return context.toString();
     }

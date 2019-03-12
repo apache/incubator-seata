@@ -20,6 +20,7 @@ import java.util.Map;
 
 /**
  * the TCC method result
+ *
  * @author zhangsen
  */
 public class TwoPhaseResult {
@@ -36,43 +37,92 @@ public class TwoPhaseResult {
 
     private Map<String, Object> context = new HashMap<String, Object>();
 
+    /**
+     * Instantiates a new Two phase result.
+     *
+     * @param isSuccess the is success
+     * @param msg the msg
+     */
     public TwoPhaseResult(boolean isSuccess, String msg) {
         this.isSuccess = isSuccess;
         this.msg = msg;
     }
 
+    /**
+     * Is success boolean.
+     *
+     * @return the boolean
+     */
     public boolean isSuccess() {
         return isSuccess;
     }
 
+    /**
+     * Sets success.
+     *
+     * @param isSuccess the is success
+     */
     public void setSuccess(boolean isSuccess) {
         this.isSuccess = isSuccess;
     }
 
+    /**
+     * Gets msg.
+     *
+     * @return the msg
+     */
     public String getMsg() {
         return msg;
     }
 
+    /**
+     * Sets msg.
+     *
+     * @param msg the msg
+     */
     public void setMsg(String msg) {
         this.msg = msg;
     }
 
+    /**
+     * Gets context.
+     *
+     * @return the context
+     */
     public Map<String, Object> getContext() {
         return context;
     }
 
+    /**
+     * Gets context.
+     *
+     * @param key the key
+     * @return the context
+     */
     public Object getContext(String key) {
         return context.get(key);
     }
 
+    /**
+     * Sets context.
+     *
+     * @param context the context
+     */
     public void setContext(Map<String, Object> context) {
         this.context = context;
     }
 
+    /**
+     * Add context.
+     *
+     * @param key the key
+     * @param value the value
+     */
     public void addContext(String key, Object value) {
         context.put(key, value);
     }
 
+    @Override
     public String toString() {
         return String.valueOf(isSuccess);
     }

@@ -30,17 +30,20 @@ import com.alibaba.fescar.rm.tcc.api.BusinessActionContextParameter;
 
 /**
  * Extracting TCC Context from Method
+ *
+ * @author zhangsen
  */
 public class ActionContextUtil {
 
     /**
      * Extracting context data from parameters
-     * @param targetParam
-     * @return
+     *
+     * @param targetParam the target param
+     * @return map map
      */
     public static Map<String, Object> fetchContextFromObject(Object targetParam) {
         try {
-            Map<String, Object> context = new HashMap<String, Object>();
+            Map<String, Object> context = new HashMap<String, Object>(8);
             List<Field> fields = new ArrayList<Field>();
             getAllField(targetParam.getClass(), fields);
             for (Field f : fields) {
@@ -86,6 +89,12 @@ public class ActionContextUtil {
         }
     }
 
+    /**
+     * Gets all field.
+     *
+     * @param interFace the inter face
+     * @param fields the fields
+     */
     public static void getAllField(Class<?> interFace, List<Field> fields) {
         if (interFace == Object.class || interFace.isInterface()) {
             return;

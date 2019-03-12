@@ -17,8 +17,8 @@ package com.alibaba.fescar.rm.tcc.remoting;
 
 /**
  * remoting bean info
- * @author zhangsen
  *
+ * @author zhangsen
  */
 public class RemotingDesc {
 
@@ -56,60 +56,130 @@ public class RemotingDesc {
 	 * protocol: sofa-rpc、dubbo、injvm 等
 	 */
 	private int protocol;
-	
-	public Object getTargetBean() {
+
+    /**
+     * Gets target bean.
+     *
+     * @return the target bean
+     */
+    public Object getTargetBean() {
 		return targetBean;
 	}
 
-	public void setTargetBean(Object targetBean) {
+    /**
+     * Sets target bean.
+     *
+     * @param targetBean the target bean
+     */
+    public void setTargetBean(Object targetBean) {
 		this.targetBean = targetBean;
 	}
 
-	public Class<?> getInterfaceClass() {
+    /**
+     * Gets interface class.
+     *
+     * @return the interface class
+     */
+    public Class<?> getInterfaceClass() {
 		return interfaceClass;
 	}
 
-	public void setInterfaceClass(Class<?> interfaceClass) {
+    /**
+     * Sets interface class.
+     *
+     * @param interfaceClass the interface class
+     */
+    public void setInterfaceClass(Class<?> interfaceClass) {
 		this.interfaceClass = interfaceClass;
 	}
 
-	public String getInterfaceClassName() {
+    /**
+     * Gets interface class name.
+     *
+     * @return the interface class name
+     */
+    public String getInterfaceClassName() {
 		return interfaceClassName;
 	}
 
-	public void setInterfaceClassName(String interfaceClassName) {
+    /**
+     * Sets interface class name.
+     *
+     * @param interfaceClassName the interface class name
+     */
+    public void setInterfaceClassName(String interfaceClassName) {
 		this.interfaceClassName = interfaceClassName;
 	}
 
-	public String getUniqueId() {
+    /**
+     * Gets unique id.
+     *
+     * @return the unique id
+     */
+    public String getUniqueId() {
 		return uniqueId;
 	}
 
-	public void setUniqueId(String uniqueId) {
+    /**
+     * Sets unique id.
+     *
+     * @param uniqueId the unique id
+     */
+    public void setUniqueId(String uniqueId) {
 		this.uniqueId = uniqueId;
 	}
 
-	public String getGroup() {
+    /**
+     * Gets group.
+     *
+     * @return the group
+     */
+    public String getGroup() {
 		return group;
 	}
 
-	public void setGroup(String group) {
+    /**
+     * Sets group.
+     *
+     * @param group the group
+     */
+    public void setGroup(String group) {
 		this.group = group;
 	}
 
-	public int getProtocol() {
+    /**
+     * Gets protocol.
+     *
+     * @return the protocol
+     */
+    public int getProtocol() {
 		return protocol;
 	}
 
-	public void setProtocol(int protocol) {
+    /**
+     * Sets protocol.
+     *
+     * @param protocol the protocol
+     */
+    public void setProtocol(int protocol) {
 		this.protocol = protocol;
 	}
 
-	public boolean isReference() {
+    /**
+     * Is reference boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isReference() {
 		return isReference;
 	}
 
-	public void setReference(boolean reference) {
+    /**
+     * Sets reference.
+     *
+     * @param reference the reference
+     */
+    public void setReference(boolean reference) {
 		isReference = reference;
 	}
 }

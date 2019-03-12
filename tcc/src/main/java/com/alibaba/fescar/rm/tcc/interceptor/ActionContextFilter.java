@@ -17,8 +17,18 @@ package com.alibaba.fescar.rm.tcc.interceptor;
 
 import com.alibaba.fescar.rm.tcc.api.BusinessActionContextParameter;
 
+/**
+ * The interface Action context filter.
+ * @author zhangsen
+ */
 public interface ActionContextFilter {
 
+    /**
+     * Need filter boolean.
+     *
+     * @param parameter the parameter
+     * @return the boolean
+     */
     public boolean needFilter(BusinessActionContextParameter parameter);
 
 }
