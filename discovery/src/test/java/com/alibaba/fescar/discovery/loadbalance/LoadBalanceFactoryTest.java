@@ -60,7 +60,6 @@ public class LoadBalanceFactoryTest {
     /**
      * Test get address.
      *
-     * @param loadBalance the load balance
      * @throws Exception the exception
      */
     @Test

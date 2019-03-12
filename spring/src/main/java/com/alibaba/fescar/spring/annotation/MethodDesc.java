@@ -32,7 +32,7 @@ public class MethodDesc {
      * Instantiates a new Method desc.
      *
      * @param transactionAnnotation the transaction annotation
-     * @param method                the method
+     * @param method the method
      */
     public MethodDesc(GlobalTransactional transactionAnnotation, Method method) {
         this.transactionAnnotation = transactionAnnotation;
