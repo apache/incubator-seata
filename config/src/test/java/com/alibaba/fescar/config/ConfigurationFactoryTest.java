@@ -19,7 +19,6 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
 import org.junit.Test;
 
 import static com.alibaba.fescar.config.ConfigurationFactory.FILE_INSTANCE;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -39,20 +38,18 @@ public class ConfigurationFactoryTest {
      */
     @Test
     public void testGetInstance() {
-        //try to get NotSupportYetException
-        Throwable thrown = catchThrowable(ConfigurationFactory::getInstance);
-
-        if (thrown instanceof NotSupportYetException) {//NotSupportYetException case
-            assertThat(thrown).hasMessage("not support register type:" + CONFIG_TYPE);
-        } else if (ConfigType.Nacos.equals(CONFIG_TYPE)) {//Nacos case
+        try {
             Configuration configuration = ConfigurationFactory.getInstance();
-            assertThat(configuration).isInstanceOf(NacosConfiguration.class);
-        } else if (ConfigType.Apollo.equals(CONFIG_TYPE)) {//Apollo case
-            Configuration configuration = ConfigurationFactory.getInstance();
-            assertThat(configuration).isInstanceOf(ApolloConfiguration.class);
-        } else {//File case
-            Configuration configuration = ConfigurationFactory.getInstance();
-            assertThat(configuration).isInstanceOf(FileConfiguration.class);
+            if (ConfigType.Nacos.equals(CONFIG_TYPE)) {//Nacos case
+                assertThat(configuration).isInstanceOf(NacosConfiguration.class);
+            } else if (ConfigType.Apollo.equals(CONFIG_TYPE)) {//Apollo case
+                assertThat(configuration).isInstanceOf(ApolloConfiguration.class);
+            } else {//File case
+                assertThat(configuration).isInstanceOf(FileConfiguration.class);
+            }
+        } catch (NotSupportYetException e) {
+            //try to get NotSupportYetException
+            assertThat(e).hasMessage("not support register type:" + CONFIG_TYPE);
         }
     }
 }
