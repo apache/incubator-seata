@@ -71,11 +71,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Rpc remoting client.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /9/12 11:30
- * @FileName: AbstractRpcRemotingClient
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/12
  */
 public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     implements RemotingService, RegisterMsgListener, ClientMessageSender {
@@ -324,6 +321,13 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         }
     }
 
+    /**
+     * Gets avail server list.
+     *
+     * @param transactionServiceGroup the transaction service group
+     * @return the avail server list
+     * @throws Exception the exception
+     */
     protected List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
         List<String> availList = new ArrayList<>();
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance().lookup(

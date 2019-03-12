@@ -19,24 +19,27 @@ package com.alibaba.fescar.discovery.loadbalance;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.alibaba.fescar.common.loader.LoadLevel;
+
 /**
  * The type Round robin load balance.
  *
- * @author: jimin.jm @alibaba-inc.com
+ * @author jimin.jm @alibaba-inc.com
  * @date 2019 /02/12
  */
+@LoadLevel(name = "RoundRobinLoadBalance", order = 1)
 public class RoundRobinLoadBalance extends AbstractLoadBalance {
 
-    private final AtomicInteger sequence  = new AtomicInteger();
+    private final AtomicInteger sequence = new AtomicInteger();
 
     @Override
     protected <T> T doSelect(List<T> invokers) {
-        int length=invokers.size();
+        int length = invokers.size();
         return invokers.get(getPositiveSequence() % length);
     }
 
     private int getPositiveSequence() {
-        for (;;) {
+        for (; ; ) {
             int current = sequence.get();
             int next = (current >= Integer.MAX_VALUE ? 0 : current + 1);
             if (sequence.compareAndSet(current, next)) {

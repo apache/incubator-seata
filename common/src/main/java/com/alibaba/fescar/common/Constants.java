@@ -19,11 +19,8 @@ package com.alibaba.fescar.common;
 /**
  * The type Constants.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /10/9 17:14
- * @FileName: Constants
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/9 17:14
  */
 public class Constants {
     /**
@@ -45,44 +42,44 @@ public class Constants {
 
     /** the start time of transaction  */
     public static final String START_TIME  = "start-time";
-    
+
     /**
      * app name
      */
     public static final String APP_NAME = "appName";
-    
+
     /**
      * TCC start time
      */
     public static final String ACTION_START_TIME = "action-start-time";
-    
+
     /**
      * TCC name
      */
     public final static String ACTION_NAME = "actionName";
-    
+
     /**
      * phase one method name
      */
     public final static String PREPARE_METHOD = "sys::prepare";
-    
+
     /**
      * phase two commit method name
      */
     public final static String COMMIT_METHOD = "sys::commit";
-    
+
     /**
      * phase two rollback method name
      */
     public final static String ROLLBACK_METHOD = "sys::rollback";
-    
+
     /**
      * host ip
      */
     public final static String HOST_NAME = "host-name";
-    
+
     public final static String TCC_METHOD_RESULT = "result";
-    
+
     public final static String TCC_METHOD_ARGUMENTS = "arguments";
 
     /**

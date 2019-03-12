@@ -17,6 +17,7 @@
 package com.alibaba.fescar.core.rpc.netty;
 
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
+
 import io.netty.channel.Channel;
 
 /**

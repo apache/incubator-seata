@@ -32,11 +32,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Netty key poolable factory.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /11/19 15:14
- * @FileName: NettyPoolableFactory
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /11/19
  */
 public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoolKey, Channel> {
 

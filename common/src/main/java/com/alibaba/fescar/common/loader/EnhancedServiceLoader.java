@@ -39,11 +39,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * The type Enhanced service loader.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /10/10 14:28
- * @FileName: EnhancedServiceLoader
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/10
  */
 public class EnhancedServiceLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancedServiceLoader.class);
@@ -58,7 +55,7 @@ public class EnhancedServiceLoader {
      * @param <S>     the type parameter
      * @param service the service
      * @param loader  the loader
-     * @return s
+     * @return s s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service, ClassLoader loader) throws EnhancedServiceNotFoundException {
@@ -70,7 +67,7 @@ public class EnhancedServiceLoader {
      *
      * @param <S>     the type parameter
      * @param service the service
-     * @return s
+     * @return s s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service) throws EnhancedServiceNotFoundException {
@@ -83,7 +80,7 @@ public class EnhancedServiceLoader {
      * @param <S>          the type parameter
      * @param service      the service
      * @param activateName the activate name
-     * @return s
+     * @return s s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
     public static <S> S load(Class<S> service, String activateName) throws EnhancedServiceNotFoundException {
@@ -97,10 +94,11 @@ public class EnhancedServiceLoader {
      * @param service      the service
      * @param activateName the activate name
      * @param loader       the loader
-     * @return s
+     * @return s s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
-    public static <S> S load(Class<S> service, String activateName, ClassLoader loader) throws EnhancedServiceNotFoundException {
+    public static <S> S load(Class<S> service, String activateName, ClassLoader loader)
+        throws EnhancedServiceNotFoundException {
         return loadFile(service, activateName, loader);
     }
 
@@ -185,8 +183,9 @@ public class EnhancedServiceLoader {
             }
 
             if (extensions.isEmpty()) {
-                throw new EnhancedServiceNotFoundException("not found service provider for : " + service.getName() + "[" + activateName
-                    + "] and classloader : " + ObjectUtils.toString(loader));
+                throw new EnhancedServiceNotFoundException(
+                    "not found service provider for : " + service.getName() + "[" + activateName
+                        + "] and classloader : " + ObjectUtils.toString(loader));
             }
             Class<?> extension = extensions.get(extensions.size() - 1);// 最大的一个
 //            S result = service.cast(extension.newInstance());
@@ -247,7 +246,8 @@ public class EnhancedServiceLoader {
     }
 
     @SuppressWarnings("rawtypes")
-    private static void loadFile(Class<?> service, String dir, ClassLoader classLoader, List<Class> extensions) throws IOException {
+    private static void loadFile(Class<?> service, String dir, ClassLoader classLoader, List<Class> extensions)
+        throws IOException {
         String fileName = dir + service.getName();
         Enumeration<URL> urls;
         if (classLoader != null) {

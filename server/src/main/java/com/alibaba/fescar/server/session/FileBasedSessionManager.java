@@ -17,11 +17,13 @@
 package com.alibaba.fescar.server.session;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.config.ConfigurationFactory;
-import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.service.ConfigurationKeys;
 import com.alibaba.fescar.server.store.FileTransactionStoreManager;
@@ -34,7 +36,8 @@ import com.alibaba.fescar.server.store.TransactionWriteStore;
  */
 public class FileBasedSessionManager extends AbstractSessionManager implements Reloadable {
 
-    private static final int READ_SIZE = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.SERVICE_SESSION_RELOAD_READ_SIZE, 100);
+    private static final int READ_SIZE = ConfigurationFactory.getInstance().getInt(
+        ConfigurationKeys.SERVICE_SESSION_RELOAD_READ_SIZE, 100);
 
     /**
      * Instantiates a new File based session manager.
@@ -166,7 +169,9 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
                     GlobalSession found = sessionMap.get(tid);
                     if (found == null) {
                         if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("GlobalSession To Be Updated (Remove Branch) Does Not Exists [" + bid + "/" + tid + "]");
+                            LOGGER.info(
+                                "GlobalSession To Be Updated (Remove Branch) Does Not Exists [" + bid + "/" + tid
+                                    + "]");
                         }
                     } else {
                         BranchSession theBranch = found.getBranch(bid);

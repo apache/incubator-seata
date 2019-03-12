@@ -89,4 +89,3 @@ public class GlobalTransactionScannerTest {
         return new Object[][]{{localTccAction, beanName, cacheKey}};
     }
 }
-

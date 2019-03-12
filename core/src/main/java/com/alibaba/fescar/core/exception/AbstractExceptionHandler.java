@@ -49,7 +49,8 @@ public abstract class AbstractExceptionHandler {
      * @param request  the request
      * @param response the response
      */
-    public void exceptionHandleTemplate(Callback callback, AbstractTransactionRequest request, AbstractTransactionResponse response) {
+    public void exceptionHandleTemplate(Callback callback, AbstractTransactionRequest request,
+                                        AbstractTransactionResponse response) {
         try {
             callback.execute(request, response);
             response.setResultCode(ResultCode.Success);

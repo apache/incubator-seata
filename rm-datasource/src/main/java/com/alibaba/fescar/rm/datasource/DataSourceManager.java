@@ -16,18 +16,45 @@
 
 package com.alibaba.fescar.rm.datasource;
 
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
+
 import com.alibaba.fescar.common.XID;
+import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
+import com.alibaba.fescar.common.util.NetUtil;
+import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.common.executor.Initialize;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
-import com.alibaba.fescar.core.model.*;
+import com.alibaba.fescar.core.model.BranchStatus;
+import com.alibaba.fescar.core.model.BranchType;
+import com.alibaba.fescar.core.model.Resource;
+import com.alibaba.fescar.core.model.ResourceManager;
+import com.alibaba.fescar.core.model.ResourceManagerInbound;
 import com.alibaba.fescar.core.protocol.ResultCode;
-import com.alibaba.fescar.core.protocol.transaction.*;
+import com.alibaba.fescar.core.protocol.transaction.BranchRegisterRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
+import com.alibaba.fescar.core.protocol.transaction.BranchReportRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchReportResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryResponse;
+import com.alibaba.fescar.core.rpc.netty.NettyClientConfig;
 import com.alibaba.fescar.core.rpc.netty.RmRpcClient;
+import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
+import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
+import com.alibaba.fescar.discovery.registry.RegistryFactory;
 import com.alibaba.fescar.rm.AbstractResourceManager;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import static com.alibaba.fescar.common.exception.FrameworkErrorCode.NoAvailableService;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,6 +64,8 @@ import java.util.concurrent.TimeoutException;
  * The type Data source manager.
  */
 public class DataSourceManager extends AbstractResourceManager implements Initialize {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceManager.class);
 
     private ResourceManagerInbound asyncWorker;
 
@@ -52,7 +81,56 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     }
 
     @Override
-    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
+    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys)
+        throws TransactionException {
+        try {
+            BranchRegisterRequest request = new BranchRegisterRequest();
+            request.setTransactionId(XID.getTransactionId(xid));
+            request.setLockKey(lockKeys);
+            request.setResourceId(resourceId);
+            request.setBranchType(branchType);
+
+            BranchRegisterResponse response = (BranchRegisterResponse)RmRpcClient.getInstance().sendMsgWithResponse(
+                request);
+            if (response.getResultCode() == ResultCode.Failed) {
+                throw new TransactionException(response.getTransactionExceptionCode(),
+                    "Response[" + response.getMsg() + "]");
+            }
+            return response.getBranchId();
+        } catch (TimeoutException toe) {
+            throw new TransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
+        } catch (RuntimeException rex) {
+            throw new TransactionException(TransactionExceptionCode.BranchRegisterFailed, "Runtime", rex);
+        }
+    }
+
+    @Override
+    public void branchReport(String xid, long branchId, BranchStatus status, String applicationData)
+        throws TransactionException {
+        try {
+            BranchReportRequest request = new BranchReportRequest();
+            request.setTransactionId(XID.getTransactionId(xid));
+            request.setBranchId(branchId);
+            request.setStatus(status);
+            request.setApplicationData(applicationData);
+
+            BranchReportResponse response = (BranchReportResponse)RmRpcClient.getInstance().sendMsgWithResponse(
+                request);
+            if (response.getResultCode() == ResultCode.Failed) {
+                throw new TransactionException(response.getTransactionExceptionCode(),
+                    "Response[" + response.getMsg() + "]");
+            }
+        } catch (TimeoutException toe) {
+            throw new TransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
+        } catch (RuntimeException rex) {
+            throw new TransactionException(TransactionExceptionCode.BranchReportFailed, "Runtime", rex);
+        }
+
+    }
+
+    @Override
+    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
+        throws TransactionException {
         try {
             GlobalLockQueryRequest request = new GlobalLockQueryRequest();
             request.setTransactionId(XID.getTransactionId(xid));
@@ -60,9 +138,19 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
             request.setResourceId(resourceId);
             request.setBranchType(branchType);
 
-            GlobalLockQueryResponse response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
+            GlobalLockQueryResponse response = null;
+            if (RootContext.inGlobalTransaction()) {
+                response = (GlobalLockQueryResponse)RmRpcClient.getInstance().sendMsgWithResponse(request);
+            } else if (RootContext.requireGlobalLock()) {
+                response = (GlobalLockQueryResponse)RmRpcClient.getInstance().sendMsgWithResponse(loadBalance(),
+                    request, NettyClientConfig.getRpcRequestTimeout());
+            } else {
+                throw new RuntimeException("unknow situation!");
+            }
+
             if (response.getResultCode() == ResultCode.Failed) {
-                throw new TransactionException(response.getTransactionExceptionCode(), "Response[" + response.getMsg() + "]");
+                throw new TransactionException(response.getTransactionExceptionCode(),
+                    "Response[" + response.getMsg() + "]");
             }
             return response.isLockable();
         } catch (TimeoutException toe) {
@@ -75,6 +163,22 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     /**
      * for test
      */
+    @SuppressWarnings("unchecked")
+    private String loadBalance() {
+        InetSocketAddress address = null;
+        try {
+            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(
+                TmRpcClient.getInstance().getTransactionServiceGroup());
+            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
+        } catch (Exception ignore) {
+            LOGGER.error(ignore.getMessage());
+        }
+        if (address == null) {
+            throw new FrameworkException(NoAvailableService);
+        }
+        return NetUtil.toStringAddress(address);
+    }
+
     private static class SingletonHolder {
         private static DataSourceManager INSTANCE = new DataSourceManager(true);
     }
@@ -133,6 +237,11 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
         super.registerResource(dataSourceProxy);
     }
 
+    @Override
+    public void unregisterResource(Resource resource) {
+        throw new NotSupportYetException("unregister a resource");
+    }
+
     /**
      * Get data source proxy.
      *
@@ -140,7 +249,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
      * @return the data source proxy
      */
     public DataSourceProxy get(String resourceId) {
-        return (DataSourceProxy) dataSourceCache.get(resourceId);
+        return (DataSourceProxy)dataSourceCache.get(resourceId);
     }
 
     @Override

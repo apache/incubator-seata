@@ -19,11 +19,8 @@ package com.alibaba.fescar.common.exception;
 /**
  * The enum Framework error code.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /10/9 15:37
- * @FileName: FrameworkErrorCode
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/9
  */
 public enum FrameworkErrorCode {
     /**
@@ -98,7 +95,7 @@ public enum FrameworkErrorCode {
     /**
      * 未定义错误
      */
-    UnknownAppError("10000","unknown error","内部错误"),
+    UnknownAppError("10000", "unknown error", "内部错误"),
     ;
 
     /**
