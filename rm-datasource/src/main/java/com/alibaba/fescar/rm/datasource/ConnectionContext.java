@@ -16,12 +16,11 @@
 
 package com.alibaba.fescar.rm.datasource;
 
+import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
+import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
-import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 
 /**
  * The type Connection context.
@@ -45,7 +44,7 @@ public class ConnectionContext {
     /**
      * set whether requires global lock in this connection
      *
-     * @param isGlobalLockRequires
+     * @param isGlobalLockRequire
      */
     void setGlobalLockRequire(boolean isGlobalLockRequire) {
         this.isGlobalLockRequire = isGlobalLockRequire;
@@ -181,7 +180,7 @@ public class ConnectionContext {
         if (lockKeysBuffer.isEmpty()) {
             return null;
         }
-        StringBuffer appender = new StringBuffer();
+        StringBuilder appender = new StringBuilder();
         Iterator<String> iterable = lockKeysBuffer.iterator();
         while (iterable.hasNext()) {
             appender.append(iterable.next());
