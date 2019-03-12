@@ -19,6 +19,7 @@ package com.alibaba.fescar.discovery.registry;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.config.ConfigChangeListener;
 import com.alibaba.fescar.config.Configuration;

@@ -19,7 +19,9 @@ package com.alibaba.fescar.common.util;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+
 import javax.sql.rowset.serial.SerialBlob;
+
 import org.junit.Ignore;
 import org.junit.Test;
 

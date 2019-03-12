@@ -16,21 +16,24 @@
 
 package com.alibaba.fescar.rm.datasource.exec;
 
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+
 import com.alibaba.fescar.rm.GlobalLockTemplate;
 import com.alibaba.fescar.rm.datasource.ConnectionProxy;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
 import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
+
 import org.junit.Assert;
 import org.junit.Test;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.mock;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 
 public class BaseTransactionalExecutorTest {
@@ -87,30 +90,30 @@ public class BaseTransactionalExecutorTest {
     @Test
     public void testBuildLockKey() {
         //build expect data
-        String tableName="test_name";
-        String fieldOne="field_one";
-        String fieldTwo="field_two";
-        String split1=":";
-        String split2=",";
-        String buildLockKeyExpect=tableName + split1 + fieldOne + split2 + fieldTwo;
+        String tableName = "test_name";
+        String fieldOne = "field_one";
+        String fieldTwo = "field_two";
+        String split1 = ":";
+        String split2 = ",";
+        String buildLockKeyExpect = tableName + split1 + fieldOne + split2 + fieldTwo;
         // mock field
-        Field field1=mock(Field.class);
+        Field field1 = mock(Field.class);
         when(field1.getValue()).thenReturn(fieldOne);
-        Field field2=mock(Field.class);
+        Field field2 = mock(Field.class);
         when(field2.getValue()).thenReturn(fieldTwo);
-        List<Field> fieldList=new ArrayList<>();
+        List<Field> fieldList = new ArrayList<>();
         fieldList.add(field1);
         fieldList.add(field2);
         // mock tableMeta
-        TableMeta tableMeta=mock(TableMeta.class);
+        TableMeta tableMeta = mock(TableMeta.class);
         when(tableMeta.getTableName()).thenReturn(tableName);
         // mock tableRecords
-        TableRecords tableRecords=mock(TableRecords.class);
+        TableRecords tableRecords = mock(TableRecords.class);
         when(tableRecords.getTableMeta()).thenReturn(tableMeta);
         when(tableRecords.pkRows()).thenReturn(fieldList);
         when(tableRecords.size()).thenReturn(fieldList.size());
         // mock executor
-        BaseTransactionalExecutor executor=mock(BaseTransactionalExecutor.class);
+        BaseTransactionalExecutor executor = mock(BaseTransactionalExecutor.class);
         when(executor.buildLockKey(tableRecords)).thenCallRealMethod();
         assertThat(executor.buildLockKey(tableRecords)).isEqualTo(buildLockKeyExpect);
     }

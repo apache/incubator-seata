@@ -202,6 +202,7 @@ public class NetUtil {
             return false;
         }
         String name = address.getHostAddress();
-        return (name != null && !ANY_HOST.equals(name) && !LOCALHOST.equals(name) && IP_PATTERN.matcher(name).matches());
+        return (name != null && !ANY_HOST.equals(name) && !LOCALHOST.equals(name) && IP_PATTERN.matcher(name)
+            .matches());
     }
 }

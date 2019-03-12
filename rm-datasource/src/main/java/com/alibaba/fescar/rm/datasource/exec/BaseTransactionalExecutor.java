@@ -16,6 +16,10 @@
 
 package com.alibaba.fescar.rm.datasource.exec;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.rm.datasource.ConnectionProxy;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
@@ -26,9 +30,6 @@ import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMetaCache;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
 
 /**
  * The type Base transactional executor.
