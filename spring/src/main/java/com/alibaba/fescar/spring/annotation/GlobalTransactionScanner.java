@@ -92,7 +92,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
      * Instantiates a new Global transaction scanner.
      *
      * @param txServiceGroup the tx service group
-     * @param mode           the mode
+     * @param mode the mode
      */
     public GlobalTransactionScanner(String txServiceGroup, int mode) {
         this(txServiceGroup, txServiceGroup, mode);
@@ -101,7 +101,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     /**
      * Instantiates a new Global transaction scanner.
      *
-     * @param applicationId  the application id
+     * @param applicationId the application id
      * @param txServiceGroup the default server group
      */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup) {
@@ -111,9 +111,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     /**
      * Instantiates a new Global transaction scanner.
      *
-     * @param applicationId  the application id
+     * @param applicationId the application id
      * @param txServiceGroup the tx service group
-     * @param mode           the mode
+     * @param mode the mode
      */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode) {
         this(applicationId, txServiceGroup, mode, DEFAULT_FAIL_HANDLER);
@@ -122,8 +122,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     /**
      * Instantiates a new Global transaction scanner.
      *
-     * @param applicationId      the application id
-     * @param txServiceGroup     the tx service group
+     * @param applicationId the application id
+     * @param txServiceGroup the tx service group
      * @param failureHandlerHook the failure handler hook
      */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, FailureHandler failureHandlerHook) {
@@ -133,9 +133,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     /**
      * Instantiates a new Global transaction scanner.
      *
-     * @param applicationId      the application id
-     * @param txServiceGroup     the tx service group
-     * @param mode               the mode
+     * @param applicationId the application id
+     * @param txServiceGroup the tx service group
+     * @param mode the mode
      * @param failureHandlerHook the failure handler hook
      */
     public GlobalTransactionScanner(String applicationId, String txServiceGroup, int mode,
@@ -237,9 +237,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
 
     /**
      * is auto proxy TCC bean
-     * @param bean
-     * @param beanName
-     * @return
+     *
+     * @param bean the bean
+     * @param beanName the bean name
+     * @return boolean boolean
      */
     protected boolean isTccAutoProxy(Object bean, String beanName){
         RemotingDesc remotingDesc = null;
@@ -275,7 +276,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     /**
      * if it is proxy bean, check if the FactoryBean is Remoting bean
      *
-     * @return
+     * @param bean the bean
+     * @param beanName the bean name
+     * @return boolean boolean
      */
     protected boolean isRemotingFactoryBean(Object bean, String beanName) {
         if(!SpringProxyUtils.isProxy(bean)){
@@ -297,8 +300,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
 
     /**
      * is TCC proxy-bean/target-bean: LocalTCC , the proxy bean of sofa:reference/dubbo:reference
-     * @param remotingDesc
-     * @return
+     *
+     * @param remotingDesc the remoting desc
+     * @return boolean boolean
      */
     protected boolean isTccProxyTargetBean(RemotingDesc remotingDesc){
         if(remotingDesc == null) {
@@ -334,8 +338,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
 
     /**
      * get remoting bean info: sofa:service、sofa:reference、dubbo:reference、dubbo:service
-     * @param bean
-     * @param beanName
+     *
+     * @param bean the bean
+     * @param beanName the bean name
      * @return if sofa:service、sofa:reference、dubbo:reference、dubbo:service return true，else return false
      */
     protected boolean parserRemotingServiceInfo(Object bean, String beanName) {

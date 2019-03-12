@@ -18,6 +18,9 @@ package com.alibaba.fescar.spring.annotation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * The type Business.
+ */
 public class BusinessImpl implements Business {
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessImpl.class);
 

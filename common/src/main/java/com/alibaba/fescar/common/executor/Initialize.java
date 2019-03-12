@@ -16,12 +16,14 @@
 package com.alibaba.fescar.common.executor;
 
 /**
+ * The interface Initialize.
+ *
  * @author zhangsen
  */
 public interface Initialize {
 
     /**
-     *  init method
+     * init method
      */
     public void init();
 

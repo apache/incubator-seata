@@ -19,7 +19,6 @@ package com.alibaba.fescar.common;
  * The type Constants.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/9 17:14
  */
 public class Constants {
     /**
@@ -39,7 +38,7 @@ public class Constants {
      */
     public static final String DBKEYS_SPLIT_CHAR = ",";
 
-    /** the start time of transaction  */
+    /** the start time of transaction */
     public static final String START_TIME  = "start-time";
 
     /**
@@ -77,8 +76,14 @@ public class Constants {
      */
     public final static String HOST_NAME = "host-name";
 
+    /**
+     * The constant TCC_METHOD_RESULT.
+     */
     public final static String TCC_METHOD_RESULT = "result";
 
+    /**
+     * The constant TCC_METHOD_ARGUMENTS.
+     */
     public final static String TCC_METHOD_ARGUMENTS = "arguments";
 
     /**

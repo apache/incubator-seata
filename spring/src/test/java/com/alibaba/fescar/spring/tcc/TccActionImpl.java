@@ -18,6 +18,8 @@ package com.alibaba.fescar.spring.tcc;
 import com.alibaba.fescar.rm.tcc.api.BusinessActionContext;
 
 /**
+ * The type Tcc action.
+ *
  * @author zhangsen
  */
 public class TccActionImpl implements TccAction {

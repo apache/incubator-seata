@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
  * The type Net util.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/10
  */
 public class NetUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetUtil.class);

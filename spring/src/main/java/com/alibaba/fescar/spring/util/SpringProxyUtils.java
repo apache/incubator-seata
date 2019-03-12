@@ -28,6 +28,13 @@ import java.lang.reflect.Proxy;
  */
 public class SpringProxyUtils {
 
+    /**
+     * Find target class class.
+     *
+     * @param proxy the proxy
+     * @return the class
+     * @throws Exception the exception
+     */
     public static Class<?> findTargetClass(Object proxy) throws Exception {
         if (AopUtils.isAopProxy(proxy)) {
             AdvisedSupport advised = getAdvisedSupport(proxy);
@@ -38,6 +45,13 @@ public class SpringProxyUtils {
         }
     }
 
+    /**
+     * Gets advised support.
+     *
+     * @param proxy the proxy
+     * @return the advised support
+     * @throws Exception the exception
+     */
     public static AdvisedSupport getAdvisedSupport(Object proxy) throws Exception {
         Field h;
         if (AopUtils.isJdkDynamicProxy(proxy)) {
@@ -52,6 +66,12 @@ public class SpringProxyUtils {
         return (AdvisedSupport)advised.get(dynamicAdvisedInterceptor);
     }
 
+    /**
+     * Is proxy boolean.
+     *
+     * @param bean the bean
+     * @return the boolean
+     */
     public static boolean isProxy(Object bean){
         if(bean == null){
             return false;
@@ -65,9 +85,10 @@ public class SpringProxyUtils {
 
     /**
      * Get the target class , get the interface of its agent if it is a Proxy
-     * @param proxy
-     * @return
-     * @throws Exception
+     *
+     * @param proxy the proxy
+     * @return target interface
+     * @throws Exception the exception
      */
     public static Class<?> getTargetInterface(Object proxy) throws Exception {
         if(proxy == null){
@@ -85,9 +106,10 @@ public class SpringProxyUtils {
 
     /**
      * Get the proxy target object
+     *
      * @param proxy 代理对象
-     * @return
-     * @throws Exception
+     * @return target target
+     * @throws Exception the exception
      */
     public static Object getTarget(Object proxy) throws Exception {
         if(proxy == null){

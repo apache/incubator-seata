@@ -22,8 +22,9 @@ import java.lang.reflect.Method;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
+ * The type Method desc test.
+ *
  * @author Wu
- * @date 2019/3/8
  */
 public class MethodDescTest {
 
@@ -31,11 +32,23 @@ public class MethodDescTest {
     private static Method method = null;
     private static GlobalTransactional transactional = null;
 
+    /**
+     * Instantiates a new Method desc test.
+     *
+     * @throws NoSuchMethodException the no such method exception
+     */
     public MethodDescTest() throws NoSuchMethodException {
         method = MockBusiness.class.getDeclaredMethod("doBiz", String.class);
         transactional = method.getAnnotation(GlobalTransactional.class);
     }
 
+    /**
+     * Test get transaction annotation.
+     *
+     * @throws NoSuchMethodException the no such method exception
+     * @throws InvocationTargetException the invocation target exception
+     * @throws IllegalAccessException the illegal access exception
+     */
     @Test
     public void testGetTransactionAnnotation() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         MethodDesc methodDesc = getMethodDesc();
@@ -43,12 +56,26 @@ public class MethodDescTest {
 
     }
 
+    /**
+     * Test get method.
+     *
+     * @throws NoSuchMethodException the no such method exception
+     * @throws InvocationTargetException the invocation target exception
+     * @throws IllegalAccessException the illegal access exception
+     */
     @Test
     public void testGetMethod() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         MethodDesc methodDesc = getMethodDesc();
         assertThat(methodDesc.getMethod()).isEqualTo(method);
     }
 
+    /**
+     * Test set transaction annotation.
+     *
+     * @throws NoSuchMethodException the no such method exception
+     * @throws InvocationTargetException the invocation target exception
+     * @throws IllegalAccessException the illegal access exception
+     */
     @Test
     public void testSetTransactionAnnotation() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         MethodDesc methodDesc = getMethodDesc();
@@ -57,6 +84,13 @@ public class MethodDescTest {
         assertThat(methodDesc.getTransactionAnnotation()).isNull();
     }
 
+    /**
+     * Test set method.
+     *
+     * @throws NoSuchMethodException the no such method exception
+     * @throws InvocationTargetException the invocation target exception
+     * @throws IllegalAccessException the illegal access exception
+     */
     @Test
     public void testSetMethod() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         MethodDesc methodDesc = getMethodDesc();
@@ -78,6 +112,12 @@ public class MethodDescTest {
      * the type mock business
      */
     private static class MockBusiness {
+        /**
+         * Do biz string.
+         *
+         * @param msg the msg
+         * @return the string
+         */
         @GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
         public String doBiz(String msg) {
             return "hello " + msg;

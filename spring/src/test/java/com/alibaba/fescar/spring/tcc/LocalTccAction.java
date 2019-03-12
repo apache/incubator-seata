@@ -18,6 +18,8 @@ package com.alibaba.fescar.spring.tcc;
 import com.alibaba.fescar.rm.tcc.api.LocalTCC;
 
 /**
+ * The interface Local tcc action.
+ *
  * @author zhangsen
  */
 @LocalTCC

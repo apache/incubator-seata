@@ -18,15 +18,28 @@ package com.alibaba.fescar.common.util;
 import java.util.Collection;
 
 /**
+ * The type Collection utils.
+ *
  * @author zhangsen
  */
 public class CollectionUtils {
 
-
+    /**
+     * Is empty boolean.
+     *
+     * @param col the col
+     * @return the boolean
+     */
     public static boolean isEmpty(Collection col){
         return !isNotEmpty(col);
     }
 
+    /**
+     * Is not empty boolean.
+     *
+     * @param col the col
+     * @return the boolean
+     */
     public static boolean isNotEmpty(Collection col){
         return col != null && col.size() > 0;
     }

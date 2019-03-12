@@ -16,14 +16,20 @@
 package com.alibaba.fescar.common.executor;
 
 /**
- * Callback
- * 
- * @author zhangsen
+ * The interface Callback.
  *
- * @param <T>
+ * @param <T> the type parameter
+ *
+ * @author zhangsen
  */
 public interface Callback<T> {
 
+    /**
+     * Execute t.
+     *
+     * @return the t
+     * @throws Throwable the throwable
+     */
     public T execute() throws Throwable;
 }
 

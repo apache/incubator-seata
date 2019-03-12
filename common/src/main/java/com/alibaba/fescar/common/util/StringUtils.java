@@ -44,8 +44,9 @@ public class StringUtils {
 
     /**
      * Is blank string ?
-     * @param str
-     * @return
+     *
+     * @param str the str
+     * @return boolean
      */
     public static boolean isBlank(String str) {
         int length;
@@ -63,8 +64,9 @@ public class StringUtils {
 
     /**
      * Is Not blank string ?
-     * @param str
-     * @return
+     *
+     * @param str the str
+     * @return boolean
      */
     public static boolean isNotBlank(String str) {
         int length;
@@ -80,6 +82,7 @@ public class StringUtils {
         }
         return false;
     }
+
     /**
      * String 2 blob blob.
      *

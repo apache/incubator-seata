@@ -36,9 +36,8 @@ import java.util.Map;
 
 /**
  * TCC Interceptor
- * 
- * @author zhangsen
  *
+ * @author zhangsen
  */
 public class TccActionInterceptor implements MethodInterceptor {
 	
@@ -51,9 +50,17 @@ public class TccActionInterceptor implements MethodInterceptor {
 	 */
 	protected RemotingDesc remotingDesc;
 
+	/**
+	 * Instantiates a new Tcc action interceptor.
+	 */
 	public TccActionInterceptor(){
 	}
 
+	/**
+	 * Instantiates a new Tcc action interceptor.
+	 *
+	 * @param remotingDesc the remoting desc
+	 */
 	public TccActionInterceptor(RemotingDesc remotingDesc){
 		this.remotingDesc = remotingDesc;
 	}
@@ -89,11 +96,13 @@ public class TccActionInterceptor implements MethodInterceptor {
 		return invocation.proceed();
 	}
 
-	
 	/**
-     * get the method from interface
-     */
-    protected Method getActionInterfaceMethod(MethodInvocation invocation) {
+	 * get the method from interface
+	 *
+	 * @param invocation the invocation
+	 * @return the action interface method
+	 */
+	protected Method getActionInterfaceMethod(MethodInvocation invocation) {
 		try {
 			Class<?> interfaceType  = null;
 			if(remotingDesc == null){
@@ -117,10 +126,12 @@ public class TccActionInterceptor implements MethodInterceptor {
 
 	/**
 	 * get the interface of proxy
-	 * @param proxyBean
-	 * @return
+	 *
+	 * @param proxyBean the proxy bean
+	 * @return proxy interface
+	 * @throws Exception the exception
 	 */
-    protected Class<?> getProxyInterface(Object proxyBean) throws Exception {
+	protected Class<?> getProxyInterface(Object proxyBean) throws Exception {
 		if(proxyBean.getClass().getName().startsWith("com.alibaba.dubbo.common.bytecode.proxy")){
 			//dubbo javaassist proxy
 			return DubboUtil.getAssistInterface(proxyBean);

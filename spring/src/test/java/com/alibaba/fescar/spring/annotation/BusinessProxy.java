@@ -21,12 +21,20 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 
+/**
+ * The type Business proxy.
+ */
 public class BusinessProxy implements InvocationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessProxy.class);
 
     private Object proxy;
 
+    /**
+     * Instantiates a new Business proxy.
+     *
+     * @param proxy the proxy
+     */
     public BusinessProxy(Object proxy) {
         this.proxy = proxy;
     }

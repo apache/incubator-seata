@@ -27,8 +27,18 @@ import org.testng.annotations.Test;
  * GlobalTransactionScanner Unit Test
  */
 public class GlobalTransactionScannerTest {
+    /**
+     * The Global transaction scanner.
+     */
     protected GlobalTransactionScanner globalTransactionScanner = new GlobalTransactionScanner("global-trans-scanner-test");
 
+    /**
+     * Test wrap normal bean.
+     *
+     * @param bean the bean
+     * @param beanName the bean name
+     * @param cacheKey the cache key
+     */
     @Test(dataProvider = "normalBeanProvider")
     public void testWrapNormalBean(Object bean, String beanName, Object cacheKey) {
         Object result = globalTransactionScanner.wrapIfNecessary(bean, beanName, cacheKey);
@@ -37,9 +47,10 @@ public class GlobalTransactionScannerTest {
 
     /**
      * wrap nothing
-     * @param bean
-     * @param beanName
-     * @param cacheKey
+     *
+     * @param bean the bean
+     * @param beanName the bean name
+     * @param cacheKey the cache key
      */
     @Test(dataProvider = "normalTccBeanProvider")
     public void testWrapNormalTccBean(Object bean, String beanName, Object cacheKey){
@@ -49,9 +60,10 @@ public class GlobalTransactionScannerTest {
 
     /**
      * wrapped
-     * @param bean
-     * @param beanName
-     * @param cacheKey
+     *
+     * @param bean the bean
+     * @param beanName the bean name
+     * @param cacheKey the cache key
      */
     @Test(dataProvider = "localTccBeanProvider")
     public void testWrapLocalTccBean(Object bean, String beanName, Object cacheKey){
@@ -59,11 +71,19 @@ public class GlobalTransactionScannerTest {
         Assert.assertNotSame(result, bean);
     }
 
+    /**
+     * Test after properties set.
+     */
     @Test
     public void testAfterPropertiesSet() {
         globalTransactionScanner.afterPropertiesSet();
     }
 
+    /**
+     * Normal bean provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
     @DataProvider
     public static Object[][] normalBeanProvider() {
         Business business = new BusinessImpl();
@@ -72,6 +92,11 @@ public class GlobalTransactionScannerTest {
         return new Object[][]{{business, beanName, cacheKey}};
     }
 
+    /**
+     * Normal tcc bean provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
     @DataProvider
     public static Object[][] normalTccBeanProvider() {
         TccAction tccAction = new TccActionImpl();
@@ -80,6 +105,11 @@ public class GlobalTransactionScannerTest {
         return new Object[][]{{tccAction, beanName, cacheKey}};
     }
 
+    /**
+     * Local tcc bean provider object [ ] [ ].
+     *
+     * @return the object [ ] [ ]
+     */
     @DataProvider
     public static Object[][] localTccBeanProvider() {
         LocalTccAction localTccAction = new LocalTccActionImpl();

@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
  * The type Method desc.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/28
  */
 public class MethodDesc {
     private GlobalTransactional transactionAnnotation;
@@ -31,7 +30,7 @@ public class MethodDesc {
      * Instantiates a new Method desc.
      *
      * @param transactionAnnotation the transaction annotation
-     * @param method                the method
+     * @param method the method
      */
     public MethodDesc(GlobalTransactional transactionAnnotation, Method method) {
         this.transactionAnnotation = transactionAnnotation;

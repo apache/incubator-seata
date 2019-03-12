@@ -29,21 +29,32 @@ import java.util.Set;
  */
 public class ReflectionUtil {
 
+    /**
+     * The constant MAX_NEST_DEPTH.
+     */
     public static int MAX_NEST_DEPTH = 20;
 
+    /**
+     * Gets class by name.
+     *
+     * @param className the class name
+     * @return the class by name
+     * @throws ClassNotFoundException the class not found exception
+     */
     public static Class<?> getClassByName(String className) throws ClassNotFoundException{
         return Class.forName(className, true, Thread.currentThread().getContextClassLoader());
     }
 
     /**
      * get Field Value
-     * @param target
-     * @param fieldName
-     * @return
-     * @throws SecurityException
-     * @throws NoSuchFieldException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
+     *
+     * @param target the target
+     * @param fieldName the field name
+     * @return field value
+     * @throws NoSuchFieldException the no such field exception
+     * @throws SecurityException the security exception
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws IllegalAccessException the illegal access exception
      */
     public static Object getFieldValue (Object target, String fieldName) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException {
         Class<?> cl = target.getClass();
@@ -62,14 +73,15 @@ public class ReflectionUtil {
 
     /**
      * invoke Method
-     * @param target
-     * @param methodName
-     * @return
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
+     *
+     * @param target the target
+     * @param methodName the method name
+     * @return object
+     * @throws NoSuchMethodException the no such method exception
+     * @throws SecurityException the security exception
+     * @throws IllegalAccessException the illegal access exception
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws InvocationTargetException the invocation target exception
      */
     public static Object invokeMethod(Object target, String methodName) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
         Class<?> cl = target.getClass();
@@ -88,16 +100,17 @@ public class ReflectionUtil {
 
     /**
      * invoke Method
-     * @param target
-     * @param methodName
-     * @param parameterTypes
-     * @param args
-     * @return
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
+     *
+     * @param target the target
+     * @param methodName the method name
+     * @param parameterTypes the parameter types
+     * @param args the args
+     * @return object
+     * @throws NoSuchMethodException the no such method exception
+     * @throws SecurityException the security exception
+     * @throws IllegalAccessException the illegal access exception
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws InvocationTargetException the invocation target exception
      */
     public static Object invokeMethod(Object target, String methodName, Class<?>[] parameterTypes, Object[] args) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
         Class<?> cl = target.getClass();
@@ -117,16 +130,16 @@ public class ReflectionUtil {
     /**
      * invoke static Method
      *
-     * @param targetClass
-     * @param methodName
-     * @param parameterTypes
-     * @param parameterValues
-     * @return
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InvocationTargetException
+     * @param targetClass the target class
+     * @param methodName the method name
+     * @param parameterTypes the parameter types
+     * @param parameterValues the parameter values
+     * @return object
+     * @throws NoSuchMethodException the no such method exception
+     * @throws SecurityException the security exception
+     * @throws IllegalAccessException the illegal access exception
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws InvocationTargetException the invocation target exception
      */
     public static Object invokeStaticMethod(Class<?> targetClass, String methodName, Class<?>[] parameterTypes , Object[] parameterValues) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException{
         int i = 0;
@@ -143,12 +156,13 @@ public class ReflectionUtil {
 
     /**
      * get Method by name
-     * @param classType
-     * @param methodName
-     * @param parameterTypes
-     * @return
-     * @throws NoSuchMethodException
-     * @throws SecurityException
+     *
+     * @param classType the class type
+     * @param methodName the method name
+     * @param parameterTypes the parameter types
+     * @return method
+     * @throws NoSuchMethodException the no such method exception
+     * @throws SecurityException the security exception
      */
     public static Method getMethod(Class<?> classType, String methodName, Class<?>[] parameterTypes) throws NoSuchMethodException, SecurityException{
         return classType.getMethod(methodName, parameterTypes);
@@ -156,8 +170,9 @@ public class ReflectionUtil {
 
     /**
      * get all interface of the clazz
-     * @param clazz
-     * @return
+     *
+     * @param clazz the clazz
+     * @return set
      */
     public static Set<Class<?>> getInterfaces(Class<?> clazz){
         if (clazz.isInterface() ) {

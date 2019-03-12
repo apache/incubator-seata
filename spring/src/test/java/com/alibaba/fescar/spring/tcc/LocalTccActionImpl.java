@@ -16,6 +16,8 @@
 package com.alibaba.fescar.spring.tcc;
 
 /**
+ * The type Local tcc action.
+ *
  * @author zhangsen
  */
 public class LocalTccActionImpl extends TccActionImpl implements LocalTccAction {
