@@ -23,7 +23,7 @@ import org.junit.Test;
 /**
  * A unit test for {@link BranchStatus}
  * @author Lay
- * @Date 2019/3/6
+ * @date 2019/3/6
  */
 public class BranchStatusTest {
 

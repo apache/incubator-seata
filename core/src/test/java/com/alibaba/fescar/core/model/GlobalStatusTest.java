@@ -22,7 +22,7 @@ import org.junit.Test;
 /**
  * A unit test for {@link GlobalStatus}
  * @author Lay
- * @Date 2019/3/6
+ * @date 2019/3/6
  */
 public class GlobalStatusTest {
     private static final int BEGIN_CODE = 1;
