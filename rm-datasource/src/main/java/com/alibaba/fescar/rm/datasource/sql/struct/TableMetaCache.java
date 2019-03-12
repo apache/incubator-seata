@@ -23,12 +23,14 @@ import java.sql.SQLException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.util.StringUtils;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.rm.datasource.AbstractConnectionProxy;
 import com.alibaba.fescar.rm.datasource.DataSourceProxy;
-import com.alibaba.druid.util.StringUtils;
+
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
