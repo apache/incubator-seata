@@ -36,6 +36,12 @@ public class BranchTypeTest {
     }
 
     @Test
+    public void testGetWithOrdinal() {
+        BranchType type  = BranchType.get(BranchType.AT.ordinal());
+        Assert.assertEquals(type, BranchType.AT);
+    }
+
+    @Test
     public void testGetWithByte() {
         BranchType branchStatus = BranchType.get((byte)AT_ORDINAL);
         Assert.assertEquals(branchStatus, BranchType.AT);
@@ -51,5 +57,6 @@ public class BranchTypeTest {
     public void testGetException() {
         BranchType.get(NONE);
     }
+
 
 }
