@@ -205,14 +205,13 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     public static class MockDataSourceManager extends DataSourceManager {
 
         @Override
-        public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
-                                   String lockKeys) throws TransactionException {
+        public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys)
+                throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
 
         @Override
-        public void branchReport(String xid, long branchId, BranchStatus status, String applicationData)
-            throws TransactionException {
+        public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
 
@@ -233,13 +232,12 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
         }
 
         @Override
-        public BranchStatus branchCommit(String xid, long branchId, String resourceId, String applicationData)
-            throws TransactionException {
+        public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
 
         @Override
-        public BranchStatus branchRollback(String xid, long branchId, String resourceId, String applicationData)
+        public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
             throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
