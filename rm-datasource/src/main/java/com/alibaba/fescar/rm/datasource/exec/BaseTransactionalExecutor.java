@@ -16,10 +16,6 @@
 
 package com.alibaba.fescar.rm.datasource.exec;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.rm.datasource.ConnectionProxy;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
@@ -30,6 +26,9 @@ import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMetaCache;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
 
 /**
  * The type Base transactional executor.
@@ -201,15 +200,13 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         StringBuilder sb = new StringBuilder();
         sb.append(rowsIncludingPK.getTableMeta().getTableName());
         sb.append(":");
-
-        boolean flag = false;
+        int filedSequence = 0;
         for (Field field : rowsIncludingPK.pkRows()) {
-            if (flag) {
-                sb.append(",");
-            } else {
-                flag = true;
-            }
             sb.append(field.getValue());
+            filedSequence++;
+            if (filedSequence < rowsIncludingPK.pkRows().size()) {
+                sb.append(",");
+            }
         }
         return sb.toString();
     }
