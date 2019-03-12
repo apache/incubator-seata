@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
+import com.alibaba.fescar.config.ConfigurationFactory;
+
 import io.prometheus.client.Collector;
 import io.prometheus.client.Collector.MetricFamilySamples.Sample;
 import io.prometheus.client.exporter.HTTPServer;
@@ -32,8 +34,11 @@ public class PrometheusPublisher extends Collector implements Collector.Describa
 
   public PrometheusPublisher() throws IOException {
     this.registry = new DefaultRegistry();
-    //TODO: configurable port
-    this.server = new HTTPServer(9898, true);
+
+    int publishPort = ConfigurationFactory.getInstance()
+        .getInt(ConfigurationKeys.METRICS_PUBLISHER_PROMETHEUS_PORT, 9898);
+
+    this.server = new HTTPServer(publishPort, true);
     this.register();
   }
 
