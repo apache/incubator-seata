@@ -105,7 +105,7 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
                 @Override
                 public String name() {
                     String name = globalTrxAnno.name();
-                    if (!StringUtils.isEmpty(name)) {
+                    if (!StringUtils.isNullOrEmpty(name)) {
                         return name;
                     }
                     return formatMethod(methodInvocation.getMethod());
