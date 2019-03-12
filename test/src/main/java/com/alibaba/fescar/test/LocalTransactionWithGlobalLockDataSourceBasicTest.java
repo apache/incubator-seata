@@ -16,15 +16,13 @@
 
 package com.alibaba.fescar.test;
 
-import java.util.Date;
-
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.Resource;
 import com.alibaba.fescar.rm.datasource.DataSourceManager;
-
+import java.util.Date;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -205,13 +203,13 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     public static class MockDataSourceManager extends DataSourceManager {
 
         @Override
-        public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
+        public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,String applicationData,
                                    String lockKeys) throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
 
         @Override
-        public void branchReport(String xid, long branchId, BranchStatus status, String applicationData)
+        public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData)
             throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
@@ -233,13 +231,13 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
         }
 
         @Override
-        public BranchStatus branchCommit(String xid, long branchId, String resourceId, String applicationData)
+        public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
             throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
 
         @Override
-        public BranchStatus branchRollback(String xid, long branchId, String resourceId, String applicationData)
+        public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
             throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }

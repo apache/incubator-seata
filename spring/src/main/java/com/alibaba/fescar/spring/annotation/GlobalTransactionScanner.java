@@ -16,11 +16,6 @@
 
 package com.alibaba.fescar.spring.annotation;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Set;
-import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.rm.RMClient;
@@ -33,6 +28,10 @@ import com.alibaba.fescar.spring.util.SpringProxyUtils;
 import com.alibaba.fescar.tm.TMClient;
 import com.alibaba.fescar.tm.api.DefaultFailureHandlerImpl;
 import com.alibaba.fescar.tm.api.FailureHandler;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
+import org.aopalliance.intercept.MethodInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.Advisor;
@@ -44,11 +43,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Set;
 
 /**
  * The type Global transaction scanner.
@@ -192,13 +186,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                     return bean;
                 }
                 interceptor = null;
-                //是否 TCC 动态代理
+                //check TCC proxy
                 if(isTccAutoProxy(bean, beanName)){
-                    //TCC 动态代理，代理 proxy bean of sofa:reference/dubbo:reference , and LocalTCC
+                    //TCC interceptor， proxy bean of sofa:reference/dubbo:reference, and LocalTCC
                     RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
                     interceptor = new TccActionInterceptor(remotingDesc);
                 }else {
-                    Class<?> serviceInterface = findTargetClass(bean);
+                    Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
                     Method[] methods = serviceInterface.getMethods();
                     boolean shouldSkip = true;
                     for (Method method : methods) {
@@ -250,9 +244,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
      */
     protected boolean isTccAutoProxy(Object bean, String beanName){
         RemotingDesc remotingDesc = null;
-        //解析remoting bean 信息
         boolean isRemotingBean = parserRemotingServiceInfo(bean, beanName);
-        //是否是远程服务bean
+        //is remoting bean
         if(isRemotingBean) {
             remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
             if(remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM.getCode()){
@@ -263,13 +256,12 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 return false;
             }
         }else{
-            //获取解析结果
+            //get RemotingBean description
             remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
             if(remotingDesc == null){
-                //FactoryBean 判断
+                //check FactoryBean
                 if(isRemotingFactoryBean(bean, beanName)){
                     remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-                    //判断是否需要代理
                     return isTccProxyTargetBean(remotingDesc);
                 }else {
                     return false;
@@ -282,7 +274,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     }
 
     /**
-     * 当前bean是proxy，判断其FactoryBean是否是 Remoting bean
+     * if it is proxy bean, check if the FactoryBean is Remoting bean
      *
      * @return
      */
@@ -290,22 +282,22 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         if(!SpringProxyUtils.isProxy(bean)){
             return false;
         }
-        //the FactoryBean of proxy bean，以防 bean 扫描遗漏
+        //the FactoryBean of proxy bean
         String factoryBeanName = new StringBuilder().append("&").append(beanName).toString();
         Object factoryBean = null;
         if(applicationContext != null && applicationContext.containsBean(factoryBeanName)){
             factoryBean = applicationContext.getBean(factoryBeanName);
         }
-        //无factory bean，无需动态代理
+        //not factory bean，needn't proxy
         if(factoryBean == null ){
             return false;
         }
-        //解析factory bean信息
+        //get FactoryBean info
         return parserRemotingServiceInfo(factoryBean, beanName);
     }
 
     /**
-     * 是否是TCC代理的目标bean: LocalTCC , the proxy bean of sofa:reference/dubbo:reference
+     * is TCC proxy-bean/target-bean: LocalTCC , the proxy bean of sofa:reference/dubbo:reference
      * @param remotingDesc
      * @return
      */
@@ -331,10 +323,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         Protocols protocols = Protocols.valueOf(remotingDesc.getProtocol());
         //LocalTCC
         if(Protocols.IN_JVM.equals(protocols)){
-            //in jvm TCC bean， 创建 AOP 切面
+            //in jvm TCC bean , AOP
             return true;
         }
-        // sofa:reference /  dubbo:reference, 需要创建AOP切面
+        // sofa:reference /  dubbo:reference, AOP
         if(remotingDesc.isReference()){
             return true;
         }
@@ -342,15 +334,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     }
 
     /**
-     * 解析 remoting bean 信息，提取 sofa:service、sofa:reference、dubbo:reference、dubbo:service 信息
+     * get remoting bean info: sofa:service、sofa:reference、dubbo:reference、dubbo:service
      * @param bean
      * @param beanName
-     * @return 是 sofa:service、sofa:reference、dubbo:reference、dubbo:service 返回true，否则返回false
+     * @return if sofa:service、sofa:reference、dubbo:reference、dubbo:service return true，else return false
      */
     protected boolean parserRemotingServiceInfo(Object bean, String beanName) {
-        //是否是远程服务bean
         if(DefaultRemotingParser.get().isRemoting(bean, beanName)) {
-            //解析remoting bean 信息
             DefaultRemotingParser.get().parserRemotingServiceInfo(bean, beanName);
             return true;
         }
