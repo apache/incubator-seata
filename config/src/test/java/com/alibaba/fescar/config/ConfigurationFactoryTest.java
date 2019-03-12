@@ -19,7 +19,8 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
 import org.junit.Test;
 
 import static com.alibaba.fescar.config.ConfigurationFactory.FILE_INSTANCE;
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Wu
