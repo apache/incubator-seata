@@ -20,7 +20,6 @@ import com.netflix.appinfo.MyDataCenterInstanceConfig;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- *
  * @author: rui_849217@163.com
  * @date: 2018/2/18
  * override MyDataCenterInstanceConfig for set value,
@@ -31,18 +30,18 @@ public class CustomEurekaInstanceConfig extends MyDataCenterInstanceConfig imple
     private String instanceId;
     private String ipAddress;
     private int port = -1;
+
     @Override
     public String getInstanceId() {
-        if (StringUtils.isBlank(instanceId)){
+        if (StringUtils.isBlank(instanceId)) {
             return super.getInstanceId();
         }
         return instanceId;
     }
 
-
     @Override
     public String getIpAddress() {
-        if (StringUtils.isBlank(ipAddress)){
+        if (StringUtils.isBlank(ipAddress)) {
             return super.getIpAddress();
         }
         return ipAddress;
@@ -58,7 +57,7 @@ public class CustomEurekaInstanceConfig extends MyDataCenterInstanceConfig imple
 
     @Override
     public String getAppname() {
-        if (StringUtils.isBlank(applicationName)){
+        if (StringUtils.isBlank(applicationName)) {
             return super.getAppname();
         }
         return applicationName;

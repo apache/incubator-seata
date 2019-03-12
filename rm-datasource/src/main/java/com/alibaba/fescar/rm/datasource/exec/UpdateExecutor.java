@@ -31,6 +31,8 @@ import com.alibaba.fescar.rm.datasource.sql.struct.Field;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 
+import org.apache.commons.lang.StringUtils;
+
 /**
  * The type Update executor.
  *
@@ -76,7 +78,12 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         } else {
             whereCondition = recognizer.getWhereCondition();
         }
-        selectSQLAppender.append(" FROM " + getFromTableInSQL() + " WHERE " + whereCondition + " FOR UPDATE");
+        selectSQLAppender.append(" FROM " + getFromTableInSQL());
+        if (StringUtils.isNotBlank(whereCondition)) {
+            selectSQLAppender.append(" WHERE " + whereCondition);
+        }
+        selectSQLAppender.append(" FOR UPDATE");
+
         String selectSQL = selectSQLAppender.toString();
 
         TableRecords beforeImage = null;
