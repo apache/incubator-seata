@@ -74,7 +74,7 @@ public class ConfigFutureTest {
             try {
                 Thread.sleep(outTime + 100);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+
             }
             configFuture.setResult(RESULT);
         });
