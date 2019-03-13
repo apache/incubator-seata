@@ -84,7 +84,6 @@ public final class ConfigurationFactory {
                     throw new RuntimeException(e);
                 }
                 break;
-
             default:
                 throw new NotSupportYetException("not support register type:" + configType);
         }
