@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.alibaba.fescar.common.Constants;
 import com.alibaba.fescar.common.exception.FrameworkException;
+import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.core.protocol.IncompatibleVersionException;
 import com.alibaba.fescar.core.protocol.RegisterRMRequest;
 import com.alibaba.fescar.core.protocol.RegisterTMRequest;
@@ -32,7 +33,6 @@ import com.alibaba.fescar.core.protocol.Version;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
 
 import io.netty.channel.Channel;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -233,7 +233,7 @@ public class ChannelManager {
     }
 
     private static Set<String> dbKeytoSet(String dbkey) {
-        if (StringUtils.isEmpty(dbkey)) {
+        if (StringUtils.isNullOrEmpty(dbkey)) {
             return null;
         }
         Set<String> set = new HashSet<String>();

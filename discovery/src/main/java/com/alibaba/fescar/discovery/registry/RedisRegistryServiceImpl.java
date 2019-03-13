@@ -115,7 +115,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         if (minEvictableIdleTimeMillis > 0) {
             redisConfig.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);
         }
-        if (StringUtils.isEmpty(password)) {
+        if (StringUtils.isNullOrEmpty(password)) {
             jedisPool = new JedisPool(redisConfig, host, port, Protocol.DEFAULT_TIMEOUT, null, db);
         } else {
             jedisPool = new JedisPool(redisConfig, host, port, Protocol.DEFAULT_TIMEOUT, password, db);
