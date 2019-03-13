@@ -74,7 +74,7 @@ public class ConfigFutureTest {
             final long start = System.currentTimeMillis();
             while (true) {
                 //mock timeout
-                if ((System.currentTimeMillis() - start) > outTime * 1000) {
+                if ((System.currentTimeMillis() - start) > outTime * 2) {
                     break;
                 }
             }
