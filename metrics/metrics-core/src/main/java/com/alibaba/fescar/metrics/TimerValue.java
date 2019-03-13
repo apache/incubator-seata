@@ -52,7 +52,8 @@ public class TimerValue {
   }
 
   public void record(long value, TimeUnit unit) {
-    if (value <= 0) {
+    //zero is valid
+    if (value < 0) {
       return;
     }
     long changeValue = unit == TimeUnit.MICROSECONDS ? value : TimeUnit.MICROSECONDS.convert(value, unit);

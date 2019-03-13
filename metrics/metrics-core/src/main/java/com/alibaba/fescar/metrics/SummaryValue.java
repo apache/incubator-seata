@@ -51,7 +51,8 @@ public class SummaryValue {
   }
 
   public void increase(long value) {
-    if (value <= 0) {
+    //zero is valid
+    if (value < 0) {
       return;
     }
     this.count.increment();

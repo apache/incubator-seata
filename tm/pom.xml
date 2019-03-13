@@ -44,6 +44,13 @@
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
+
+        <!--NOTICE:Only use for test, what is tm really use is dependent on tm project imported-->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>fescar-metrics-core</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 
