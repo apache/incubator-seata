@@ -27,22 +27,22 @@ import java.util.Map;
 public class BusinessActionContext implements Serializable {
 
     /**  */
-    private static final long       serialVersionUID = 6539226288677737991L;
+    private static final long serialVersionUID = 6539226288677737991L;
 
     /**
      * xid
      */
-    private String                  xid;
+    private String xid;
 
     /**
      * the branch id
      */
-    private String                  branchId;
+    private String branchId;
 
     /**
      * tcc bean name
      */
-    private String                  actionName;
+    private String actionName;
 
     /**
      * TCC's parameters witch is set by @BusinessActionContextParameter

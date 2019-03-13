@@ -167,6 +167,9 @@ public class DefaultRemotingParser {
     public RemotingDesc parserRemotingServiceInfo(Object bean, String beanName)  {
         //remoting bean 信息
         RemotingDesc remotingBeanDesc = getServiceDesc(bean, beanName);
+        if(remotingBeanDesc == null){
+            return null;
+        }
         remotingServiceMap.put(beanName, remotingBeanDesc);
 
         Class<?> interfaceClass = remotingBeanDesc.getInterfaceClass();
