@@ -24,11 +24,8 @@ import io.netty.channel.epoll.EpollServerSocketChannel;
 /**
  * The type Netty server config.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /9/12 11:35
- * @FileName: NettyServerConfig
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/12
  */
 public class NettyServerConfig extends NettyBaseConfig {
 

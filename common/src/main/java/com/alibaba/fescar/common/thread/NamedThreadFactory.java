@@ -24,11 +24,8 @@ import io.netty.util.concurrent.FastThreadLocalThread;
 /**
  * The type Named thread factory.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /9/12 14:24
- * @FileName: NamedThreadFactory
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/12
  */
 public class NamedThreadFactory implements ThreadFactory {
     private final AtomicInteger counter = new AtomicInteger(0);

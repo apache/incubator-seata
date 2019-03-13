@@ -21,8 +21,10 @@ import java.util.List;
 import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
 /**
- * @author: jimin.jm@alibaba-inc.com
- * @date 2019/02/12
+ * The type Abstract load balance.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /02/12
  */
 public abstract class AbstractLoadBalance implements LoadBalance {
 
@@ -37,5 +39,12 @@ public abstract class AbstractLoadBalance implements LoadBalance {
         return doSelect(invokers);
     }
 
+    /**
+     * Do select t.
+     *
+     * @param <T>      the type parameter
+     * @param invokers the invokers
+     * @return the t
+     */
     protected abstract <T> T doSelect(List<T> invokers);
 }

@@ -33,6 +33,8 @@ public class RootContext {
      */
     public static final String KEY_XID = "TX_XID";
 
+    public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
+
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
 
     /**
@@ -57,6 +59,19 @@ public class RootContext {
     }
 
     /**
+     * declare local transactions will use global lock check for update/delete/insert/selectForUpdate SQL
+     */
+    public static void bindGlobalLockFlag() {
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Local Transaction Global Lock support enabled");
+        }
+
+        //just put something not null
+        CONTEXT_HOLDER.put(KEY_GLOBAL_LOCK_FLAG, KEY_GLOBAL_LOCK_FLAG);
+    }
+
+    /**
      * Unbind string.
      *
      * @return the string
@@ -69,6 +84,13 @@ public class RootContext {
         return xid;
     }
 
+    public static void unbindGlobalLockFlag() {
+        String lockFlag = CONTEXT_HOLDER.remove(KEY_GLOBAL_LOCK_FLAG);
+        if (LOGGER.isDebugEnabled() && lockFlag != null) {
+            LOGGER.debug("unbind global lock flag");
+        }
+    }
+
     /**
      * In global transaction boolean.
      *
@@ -76,6 +98,15 @@ public class RootContext {
      */
     public static boolean inGlobalTransaction() {
         return CONTEXT_HOLDER.get(KEY_XID) != null;
+    }
+
+    /**
+     * requires global lock check
+     *
+     * @return
+     */
+    public static boolean requireGlobalLock() {
+        return CONTEXT_HOLDER.get(KEY_GLOBAL_LOCK_FLAG) != null;
     }
 
     /**

@@ -23,16 +23,22 @@ import java.util.List;
  * The interface Registry service.
  *
  * @param <T> the type parameter
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2019 /1/31 5:13 PM
- * @FileName: RegistryService
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /1/31
  */
 public interface RegistryService<T> {
 
+    /**
+     * The constant PREFIX_SERVICE_MAPPING.
+     */
     String PREFIX_SERVICE_MAPPING = "vgroup_mapping.";
+    /**
+     * The constant PREFIX_SERVICE_ROOT.
+     */
     String PREFIX_SERVICE_ROOT = "service";
+    /**
+     * The constant CONFIG_SPLIT_CHAR.
+     */
     String CONFIG_SPLIT_CHAR = ".";
 
     /**
