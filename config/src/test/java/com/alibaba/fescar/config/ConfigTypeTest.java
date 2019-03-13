@@ -58,7 +58,7 @@ public class ConfigTypeTest {
     /**
      * Test get type with not support.
      */
-    @Test(expected = NotSupportYetException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void testGetTypeWithNotSupport() {
         ConfigType.getType("none");
     }
