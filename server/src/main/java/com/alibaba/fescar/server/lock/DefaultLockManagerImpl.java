@@ -57,7 +57,7 @@ public class DefaultLockManagerImpl implements LockManager {
         ConcurrentHashMap<Map<String, Long>, Set<String>> bucketHolder = branchSession.getLockHolder();
 
         String lockKey = branchSession.getLockKey();
-        if (StringUtils.isEmpty(lockKey)) {
+        if (StringUtils.isNullOrEmpty(lockKey)) {
             return true;
         }
 
