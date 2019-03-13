@@ -52,7 +52,6 @@ public final class ConfigurationFactory {
                     + ConfigurationKeys.FILE_ROOT_TYPE);
             configType = ConfigType.getType(configTypeName);
         } catch (Exception exx) {
-            LOGGER.error(exx.getMessage());
             throw new NotSupportYetException("not support register type: " + configTypeName);
         }
         Configuration configuration;
