@@ -127,16 +127,16 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
         // 1. Transaction Id
         byteBuffer.putLong(this.transactionId);
         // 2. Branch Type
-        byteBuffer.put((byte) this.branchType.ordinal());
+        byteBuffer.put((byte)this.branchType.ordinal());
         // 3. Resource Id
         if (this.resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
-            byteBuffer.putShort((short) bs.length);
+            byteBuffer.putShort((short)bs.length);
             if (bs.length > 0) {
                 byteBuffer.put(bs);
             }
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
 
         // 4. Lock Key

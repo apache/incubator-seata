@@ -39,7 +39,7 @@ public class StringUtils {
      * @param str the str
      * @return the boolean
      */
-    public static final boolean isEmpty(String str) {
+    public static final boolean isNullOrEmpty(String str) {
         return (str == null) || (str.isEmpty());
     }
 
@@ -69,7 +69,7 @@ public class StringUtils {
             return null;
         }
 
-        return new String(blob.getBytes((long) 1, (int) blob.length()));
+        return new String(blob.getBytes((long)1, (int)blob.length()));
     }
 
     /**

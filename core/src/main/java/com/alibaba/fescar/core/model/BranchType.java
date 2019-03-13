@@ -40,7 +40,7 @@ public enum BranchType {
      * @return the branch type
      */
     public static BranchType get(byte ordinal) {
-        return get((int) ordinal);
+        return get((int)ordinal);
     }
 
     /**

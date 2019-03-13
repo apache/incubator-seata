@@ -16,19 +16,23 @@
 
 package com.alibaba.fescar.discovery.loadbalance;
 
-import java.util.ServiceLoader;
+import com.alibaba.fescar.common.loader.EnhancedServiceLoader;
 
 /**
- * @author: jimin.jm@alibaba-inc.com
- * @date 2019/02/12
+ * The type Load balance factory.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /02/12
  */
 public class LoadBalanceFactory {
 
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     public static LoadBalance getInstance() {
-        ServiceLoader<LoadBalance> serviceLoader = ServiceLoader.load(LoadBalance.class);
-        for (LoadBalance loadBalance : serviceLoader) {
-            return loadBalance;
-        }
-        return null;
+        LoadBalance loadBalance = EnhancedServiceLoader.load(LoadBalance.class);
+        return loadBalance;
     }
 }

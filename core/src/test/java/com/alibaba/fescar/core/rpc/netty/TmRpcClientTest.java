@@ -16,10 +16,6 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
-import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -31,22 +27,27 @@ import io.netty.bootstrap.ChannelFactory;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.apache.commons.pool.impl.GenericKeyedObjectPool;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * The type Tm rpc client test.
- * @Author: jimin.jm@alibaba-inc.com
- * @Author: xiajun.0706@163.com
- * @Project: fescar-all
- * @DateTime: 2019/01/25 08:32
- * @FileName: TmRpcClientTest
- * @Description:
+ *
+ * @author jimin.jm @alibaba-inc.com xiajun.0706@163.com
+ * @date 2019 /01/25
  */
 public class TmRpcClientTest {
 
     private static final ThreadPoolExecutor
         workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
-                                                new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+        new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
+    /**
+     * Test get instance.
+     *
+     * @throws Exception the exception
+     */
     @Test
     public void testGetInstance() throws Exception {
         String applicationId = "app 1";
@@ -60,7 +61,7 @@ public class TmRpcClientTest {
         Assert.assertEquals(defaultNettyClientConfig.getMaxAcquireConnMills(), config.maxWait);
         Assert.assertEquals(defaultNettyClientConfig.isPoolTestBorrow(), config.testOnBorrow);
         Assert.assertEquals(defaultNettyClientConfig.isPoolTestReturn(), config.testOnReturn);
-        Assert.assertEquals(defaultNettyClientConfig.isPoolFifo(), config.lifo);
+        Assert.assertEquals(defaultNettyClientConfig.isPoolLifo(), config.lifo);
     }
 
     /**
@@ -79,12 +80,12 @@ public class TmRpcClientTest {
         //check if attr of tmRpcClient object has been set success
         Field bootstrapField = getDeclaredField(tmRpcClient, "bootstrap");
         bootstrapField.setAccessible(true);
-        Bootstrap bootstrap = (Bootstrap) bootstrapField.get(tmRpcClient);
+        Bootstrap bootstrap = (Bootstrap)bootstrapField.get(tmRpcClient);
 
         Assert.assertNotNull(bootstrap);
         Field optionsField = getDeclaredField(bootstrap, "options");
         optionsField.setAccessible(true);
-        Map<ChannelOption<?>, Object> options = (Map<ChannelOption<?>, Object>) optionsField.get(bootstrap);
+        Map<ChannelOption<?>, Object> options = (Map<ChannelOption<?>, Object>)optionsField.get(bootstrap);
         Assert.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.TCP_NODELAY)));
         Assert.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.SO_KEEPALIVE)));
         Assert.assertEquals(10000, options.get(ChannelOption.CONNECT_TIMEOUT_MILLIS));
@@ -94,7 +95,7 @@ public class TmRpcClientTest {
         Field channelFactoryField = getDeclaredField(bootstrap, "channelFactory");
         channelFactoryField.setAccessible(true);
         ChannelFactory<? extends Channel>
-            channelFactory = (ChannelFactory<? extends Channel>) channelFactoryField.get(bootstrap);
+            channelFactory = (ChannelFactory<? extends Channel>)channelFactoryField.get(bootstrap);
         Assert.assertNotNull(channelFactory);
         Assert.assertTrue(channelFactory.newChannel() instanceof NioSocketChannel);
 
@@ -123,17 +124,17 @@ public class TmRpcClientTest {
     /**
      * get private field in parent class
      *
-     * @param object
-     * @param fieldName
-     * @return
+     * @param object    the object
+     * @param fieldName the field name
+     * @return declared field
      */
-    public static Field getDeclaredField(Object object, String fieldName){
-        Field field = null ;
-        Class<?> clazz = object.getClass() ;
-        for(; clazz != Object.class ; clazz = clazz.getSuperclass()) {
+    public static Field getDeclaredField(Object object, String fieldName) {
+        Field field = null;
+        Class<?> clazz = object.getClass();
+        for (; clazz != Object.class; clazz = clazz.getSuperclass()) {
             try {
-                field = clazz.getDeclaredField(fieldName) ;
-                return field ;
+                field = clazz.getDeclaredField(fieldName);
+                return field;
             } catch (Exception e) {
 
             }

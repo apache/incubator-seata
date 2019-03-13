@@ -20,15 +20,16 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.config.ConfigChangeListener;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
 
-import org.apache.commons.lang.StringUtils;
-
 /**
- * @author: jimin.jm@alibaba-inc.com
- * @date 2019/02/12
+ * The type File registry service.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /02/12
  */
 public class FileRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
     private static volatile FileRegistryServiceImpl instance;
@@ -39,6 +40,11 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
 
     private FileRegistryServiceImpl() {}
 
+    /**
+     * Gets instance.
+     *
+     * @return the instance
+     */
     public static FileRegistryServiceImpl getInstance() {
         if (null == instance) {
             synchronized (FileRegistryServiceImpl.class) {
@@ -78,7 +84,7 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
         }
         String endpointStr = CONFIG.getConfig(
             PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + clusterName + POSTFIX_GROUPLIST);
-        if (StringUtils.isEmpty(endpointStr)) {
+        if (StringUtils.isNullOrEmpty(endpointStr)) {
             throw new IllegalArgumentException(clusterName + POSTFIX_GROUPLIST + " is required");
         }
         String[] endpoints = endpointStr.split(ENDPOINT_SPLIT_CHAR);
@@ -88,7 +94,7 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
             if (ipAndPort.length != 2) {
                 throw new IllegalArgumentException("endpoint format should like ip:port");
             }
-            inetSocketAddresses.add(new InetSocketAddress(ipAndPort[0], Integer.valueOf(ipAndPort[1])));
+            inetSocketAddresses.add(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])));
         }
         return inetSocketAddresses;
     }

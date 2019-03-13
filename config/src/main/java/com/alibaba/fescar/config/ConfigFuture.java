@@ -25,11 +25,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Config future.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2018 /12/20 16:30
- * @FileName: ConfigFuture
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /12/20
  */
 public class ConfigFuture {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFuture.class);

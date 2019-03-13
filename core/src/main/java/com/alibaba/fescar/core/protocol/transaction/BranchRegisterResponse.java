@@ -16,8 +16,6 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
-import com.alibaba.fescar.core.protocol.AbstractMessage;
-
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 

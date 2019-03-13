@@ -43,7 +43,8 @@ import com.alibaba.fescar.rm.datasource.sql.struct.Null;
 /**
  * The type Abstract prepared statement proxy.
  */
-public abstract class AbstractPreparedStatementProxy extends StatementProxy<PreparedStatement> implements PreparedStatement {
+public abstract class AbstractPreparedStatementProxy extends StatementProxy<PreparedStatement>
+    implements PreparedStatement {
 
     /**
      * The Parameters.
@@ -66,7 +67,8 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
      * @param targetSQL       the target sql
      * @throws SQLException the sql exception
      */
-    public AbstractPreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement, String targetSQL) throws SQLException {
+    public AbstractPreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement,
+                                          String targetSQL) throws SQLException {
         super(connectionProxy, targetStatement, targetSQL);
         initParameterHolder();
     }
@@ -78,7 +80,8 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
      * @param targetStatement the target statement
      * @throws SQLException the sql exception
      */
-    public AbstractPreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement) throws SQLException {
+    public AbstractPreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement)
+        throws SQLException {
         super(connectionProxy, targetStatement);
         initParameterHolder();
     }
