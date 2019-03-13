@@ -68,7 +68,7 @@ public class ConfigFutureTest {
      * Test get with timeout argument.
      */
     @Test
-    public void testGetWithTimeOut() {
+    public void testGetWhenTimeOut() {
         long outTime = 50L;
         new Thread(() -> {
             final long start = System.currentTimeMillis();
