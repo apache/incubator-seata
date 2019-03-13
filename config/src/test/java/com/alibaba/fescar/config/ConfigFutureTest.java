@@ -69,21 +69,24 @@ public class ConfigFutureTest {
      */
     @Test
     public void testGetWithTimeOut() {
-        long outTime = 200L;
+        long outTime = 50L;
         new Thread(() -> {
-            try {
-                Thread.sleep(outTime + 100);
-            } catch (InterruptedException e) {
-
+            final long start = System.currentTimeMillis();
+            while (true) {
+                //mock timeout
+                if ((System.currentTimeMillis() - start) > outTime * 1000) {
+                    break;
+                }
             }
             configFuture.setResult(RESULT);
-        });
+        }).start();
         Assert.assertEquals(CONTENT, configFuture.get(outTime, TimeUnit.MILLISECONDS));
     }
 
     @Test
     public void testSetContent() {
         configFuture.setContent(CONTENT);
+        Assert.assertEquals(CONTENT, configFuture.getContent());
     }
 
     @Test
@@ -107,6 +110,7 @@ public class ConfigFutureTest {
     @Test
     public void testSetResult() {
         configFuture.setResult(RESULT);
+        Assert.assertEquals(RESULT,configFuture.get());
     }
 
     @Test
@@ -118,6 +122,7 @@ public class ConfigFutureTest {
     @Test
     public void testSetOperation() {
         configFuture.setOperation(ConfigFuture.ConfigOperation.GET);
+        Assert.assertEquals(ConfigFuture.ConfigOperation.GET, configFuture.getOperation());
     }
 
     @Test
