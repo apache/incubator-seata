@@ -51,7 +51,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author zhangsen
  */
-public class TccResourceManager extends AbstractResourceManager {
+public class TCCResourceManager extends AbstractResourceManager {
 
 	/**
 	 * TCC resource cache
@@ -61,7 +61,7 @@ public class TccResourceManager extends AbstractResourceManager {
     /**
      * Instantiates a new Tcc resource manager.
      */
-    public TccResourceManager(){
+    public TCCResourceManager(){
 	}
 
 	/**

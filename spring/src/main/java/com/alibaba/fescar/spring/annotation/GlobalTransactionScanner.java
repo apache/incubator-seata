@@ -346,8 +346,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
      */
     protected boolean parserRemotingServiceInfo(Object bean, String beanName) {
         if(DefaultRemotingParser.get().isRemoting(bean, beanName)) {
-            DefaultRemotingParser.get().parserRemotingServiceInfo(bean, beanName);
-            return true;
+            return null != DefaultRemotingParser.get().parserRemotingServiceInfo(bean, beanName);
         }
         return false;
     }
