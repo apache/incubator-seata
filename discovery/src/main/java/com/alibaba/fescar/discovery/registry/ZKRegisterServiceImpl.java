@@ -49,7 +49,6 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
             synchronized (ZKRegisterServiceImpl.class) {
                 if (null == instance) {
                     instance = new ZKRegisterServiceImpl();
-
                 }
             }
         }
@@ -153,7 +152,6 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
             @Override
             public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
                 String clusterName = parentPath.replace(ROOT_PATH, "");
-                //
                 if (CollectionUtils.isEmpty(currentChilds) && CLUSTER_ADDRESS_MAP.get(clusterName) != null) {
                     CLUSTER_ADDRESS_MAP.remove(clusterName);
                 } else if (!CollectionUtils.isEmpty(currentChilds)){
@@ -172,7 +170,7 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
         for (String path : instances){
             try {
                 String[] ipAndPort = path.split(IP_PORT_SPLIT_CHAR);
-                newAddressList.add(new InetSocketAddress(ipAndPort[0], Integer.valueOf(ipAndPort[1])));
+                newAddressList.add(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])));
             } catch (Exception e) {
                 LOGGER.warn("The cluster instance info is error, instance info:{}", path);
             }
@@ -188,8 +186,8 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
 
     private String getServiceGroup(String key){
         Configuration configuration = ConfigurationFactory.getInstance();
-        String clusterName = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
-        return configuration.getConfig(clusterName);
+        String clusterNameKey = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
+        return configuration.getConfig(clusterNameKey);
     }
 
     private String getRegisterPathByPath (InetSocketAddress address){

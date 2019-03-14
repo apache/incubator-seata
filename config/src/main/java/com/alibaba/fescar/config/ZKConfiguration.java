@@ -13,9 +13,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
-
 import static com.alibaba.fescar.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
-import static com.alibaba.fescar.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
 
 /**
  * @author crazier.huang
@@ -33,7 +31,7 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     private static final String SESSION_TIME_OUT_KEY = "session.timeout";
     private static final String CONNECT_TIME_OUT_KEY = "connect.timeout";
     private static final int THREAD_POOL_NUM = 5;
-    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
+    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
     private static final Executor executor= Executors.newFixedThreadPool(THREAD_POOL_NUM);
     private static volatile ZkClient zkClient;
 
