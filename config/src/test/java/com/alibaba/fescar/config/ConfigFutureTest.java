@@ -22,9 +22,10 @@ import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
 
+
 /**
  * @author mawerss1@gmail.com
- * @Date 2019/03/7
+ * @date 2019/03/7
  */
 public class ConfigFutureTest {
 
@@ -37,7 +38,6 @@ public class ConfigFutureTest {
 
     private ConfigFuture configFuture;
 
-
     @Before
     public void initConfigFutureBeforeTest() {
         configFuture = new ConfigFuture(DATA_ID, CONTENT, GET_OPERATION, TIME_MILLS);
@@ -47,40 +47,32 @@ public class ConfigFutureTest {
      * Test get with get operation.
      */
     @Test
-    public void testGetWithGetOperation() {
+    public void testConfigGetWithGetOperation() {
+        // return content value when future not set result
         Assert.assertEquals(CONTENT, configFuture.get());
-        startSetResultThread(RESULT);
-        Assert.assertEquals(RESULT, configFuture.get());
+        configFuture.setResult(RESULT);
+        Assert.assertEquals(RESULT,configFuture.get());
+    }
+
+    /**
+     * Test get with timeout argument
+     */
+    @Test
+    public void testConfigGetCustomeOutTime() {
+        Assert.assertEquals(CONTENT, configFuture.get(10L, TimeUnit.MILLISECONDS));
+        configFuture.setResult(RESULT);
+        Assert.assertEquals(RESULT,configFuture.get());
     }
 
     /**
      * Test get with put operation.
      */
     @Test
-    public void testGetWithPutOperation() {
+    public void testConfigGetWithPutOperation() {
         configFuture.setOperation(ConfigFuture.ConfigOperation.PUT);
-        Assert.assertEquals(Boolean.FALSE, configFuture.get());
-        startSetResultThread(RESULT);
-        Assert.assertEquals(RESULT, configFuture.get());
-    }
-
-    /**
-     * Test get with timeout argument.
-     */
-    @Test
-    public void testGetWhenTimeOut() {
-        long outTime = 50L;
-        new Thread(() -> {
-            final long start = System.currentTimeMillis();
-            while (true) {
-                //mock timeout
-                if ((System.currentTimeMillis() - start) > outTime * 2) {
-                    break;
-                }
-            }
-            configFuture.setResult(RESULT);
-        }).start();
-        Assert.assertEquals(CONTENT, configFuture.get(outTime, TimeUnit.MILLISECONDS));
+        Assert.assertEquals(false,configFuture.get());
+        configFuture.setResult(RESULT);
+        Assert.assertEquals(RESULT,configFuture.get());
     }
 
     @Test
@@ -126,14 +118,9 @@ public class ConfigFutureTest {
     }
 
     @Test
-    public void testIsTimeout() throws InterruptedException {
+    public void testIsTimeout() {
         configFuture.get(TIME_MILLS, TimeUnit.MILLISECONDS);
-        Thread.sleep(TIME_MILLS * 2);
         Assert.assertTrue(configFuture.isTimeout());
-    }
-
-    private void startSetResultThread(Object result) {
-        new Thread(() -> configFuture.setResult(result)).start();
     }
 
 }
