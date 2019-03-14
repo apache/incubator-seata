@@ -39,7 +39,7 @@ public class TccParam {
     /**
      * Instantiates a new Tcc param.
      *
-     * @param num the num
+     * @param num   the num
      * @param email the email
      */
     public TccParam(int num, String email) {

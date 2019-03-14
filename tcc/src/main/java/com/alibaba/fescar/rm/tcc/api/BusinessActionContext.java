@@ -58,8 +58,8 @@ public class BusinessActionContext implements Serializable {
     /**
      * Instantiates a new Business action context.
      *
-     * @param xid the xid
-     * @param actionName the action name
+     * @param xid           the xid
+     * @param actionName    the action name
      * @param actionContext the action context
      */
     public BusinessActionContext(String xid, String actionName, Map<String, Object> actionContext) {

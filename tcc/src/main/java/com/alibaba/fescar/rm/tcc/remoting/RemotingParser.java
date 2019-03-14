@@ -30,7 +30,7 @@ public interface RemotingParser {
     /**
      * if it is remoting bean ?
      *
-     * @param bean the bean
+     * @param bean     the bean
      * @param beanName the bean name
      * @return boolean boolean
      * @throws FrameworkException the framework exception
@@ -40,7 +40,7 @@ public interface RemotingParser {
     /**
      * if it is reference bean ?
      *
-     * @param bean the bean
+     * @param bean     the bean
      * @param beanName the bean name
      * @return boolean boolean
      * @throws FrameworkException the framework exception
@@ -50,7 +50,7 @@ public interface RemotingParser {
     /**
      * if it is service bean ?
      *
-     * @param bean the bean
+     * @param bean     the bean
      * @param beanName the bean name
      * @return boolean boolean
      * @throws FrameworkException the framework exception
@@ -60,7 +60,7 @@ public interface RemotingParser {
     /**
      * get the remoting bean info
      *
-     * @param bean the bean
+     * @param bean     the bean
      * @param beanName the bean name
      * @return service desc
      * @throws FrameworkException the framework exception
@@ -70,7 +70,7 @@ public interface RemotingParser {
     /**
      * the remoting protocol
      *
-     * @return
+     * @return protocol
      */
     public short getProtocol();
 

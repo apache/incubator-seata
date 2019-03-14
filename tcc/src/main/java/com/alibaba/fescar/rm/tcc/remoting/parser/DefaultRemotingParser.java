@@ -88,9 +88,9 @@ public class DefaultRemotingParser {
     /**
      * is remoting bean ?
      *
-     * @param bean the bean
+     * @param bean     the bean
      * @param beanName the bean name
-     * @return boolean
+     * @return boolean boolean
      */
     public boolean isRemoting(Object bean, String beanName) {
         for(RemotingParser remotingParser : allRemotingParsers){
@@ -104,9 +104,9 @@ public class DefaultRemotingParser {
     /**
      * is reference bean?
      *
-     * @param bean the bean
+     * @param bean     the bean
      * @param beanName the bean name
-     * @return boolean
+     * @return boolean boolean
      */
     public boolean isReference(Object bean, String beanName) {
         for(RemotingParser remotingParser : allRemotingParsers){
@@ -120,9 +120,9 @@ public class DefaultRemotingParser {
     /**
      * is service bean ?
      *
-     * @param bean the bean
+     * @param bean     the bean
      * @param beanName the bean name
-     * @return boolean
+     * @return boolean boolean
      */
     public boolean isService(Object bean, String beanName) {
         for(RemotingParser remotingParser : allRemotingParsers){
@@ -136,7 +136,7 @@ public class DefaultRemotingParser {
     /**
      * get the remoting Service desc
      *
-     * @param bean the bean
+     * @param bean     the bean
      * @param beanName the bean name
      * @return service desc
      */
@@ -160,7 +160,7 @@ public class DefaultRemotingParser {
     /**
      * parse the remoting bean info
      *
-     * @param bean the bean
+     * @param bean     the bean
      * @param beanName the bean name
      * @return remoting desc
      */

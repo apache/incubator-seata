@@ -50,34 +50,4 @@ public class Protocols {
 	 */
 	public static short HSF = 8;
 
-	private int code;
-	
-//	Protocols(int code){
-//		this.code = code;
-//	}
-//
-//	/**
-//	 * Gets code.
-//	 *
-//	 * @return the code
-//	 */
-//	public int getCode() {
-//		return code;
-//	}
-
-	/**
-	 * Value of protocols.
-	 *
-	 * @param code the code
-	 * @return the protocols
-	 */
-//	public static Protocols valueOf(int code){
-//		for(Protocols p : values()){
-//			if(p.getCode() == code){
-//				return p;
-//			}
-//		}
-//		throw new FrameworkException("Unknown Protocols, code:" + code);
-//	}
-
 }

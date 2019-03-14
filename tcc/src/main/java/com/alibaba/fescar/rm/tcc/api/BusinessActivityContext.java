@@ -52,7 +52,7 @@ public class BusinessActivityContext implements Serializable {
     /**
      * Add context.
      *
-     * @param key the key
+     * @param key   the key
      * @param value the value
      */
     public void addContext(String key, Object value) {
@@ -62,7 +62,7 @@ public class BusinessActivityContext implements Serializable {
     /**
      * 获取本次分布式事务的开启时间
      *
-     * @return long
+     * @return long long
      */
     public Long fetchStartTime() {
         return (Long) context.get(Constants.START_TIME);
