@@ -209,6 +209,7 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
 
     }
 
+    @Deprecated
     @Override
     public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
         setParamByIndex(parameterIndex, x);
