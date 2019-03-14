@@ -66,11 +66,11 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
         final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
-        final GlobalTransactional globalTrxAnno = getAnnotation(method, GlobalTransactional.class);
-        final GlobalLock globalLockAnno = getAnnotation(method, GlobalLock.class);
-        if (globalTrxAnno != null) {
-            return handleGlobalTransaction(methodInvocation, globalTrxAnno);
-        } else if (globalLockAnno != null) {
+        final GlobalTransactional globalTransactionalAnnotation = getAnnotation(method, GlobalTransactional.class);
+        final GlobalLock globalLockAnnotation = getAnnotation(method, GlobalLock.class);
+        if (globalTransactionalAnnotation != null) {
+            return handleGlobalTransaction(methodInvocation, globalTransactionalAnnotation);
+        } else if (globalLockAnnotation != null) {
             return handleGlobalLock(methodInvocation);
         } else {
             return methodInvocation.proceed();
