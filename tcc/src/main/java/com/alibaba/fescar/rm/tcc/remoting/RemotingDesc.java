@@ -56,7 +56,7 @@ public class RemotingDesc {
 	/**
 	 * protocol: sofa-rpc、dubbo、injvm 等
 	 */
-	private int protocol;
+	private short protocol;
 
     /**
      * Gets target bean.
@@ -153,7 +153,7 @@ public class RemotingDesc {
      *
      * @return the protocol
      */
-    public int getProtocol() {
+    public short getProtocol() {
 		return protocol;
 	}
 
@@ -162,7 +162,7 @@ public class RemotingDesc {
      *
      * @param protocol the protocol
      */
-    public void setProtocol(int protocol) {
+    public void setProtocol(short protocol) {
 		this.protocol = protocol;
 	}
 

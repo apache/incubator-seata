@@ -33,11 +33,11 @@ public class DubboUtil {
      *
      * @param proxyBean the proxy bean
      * @return the assist interface
-     * @throws NoSuchFieldException the no such field exception
-     * @throws SecurityException the security exception
-     * @throws IllegalArgumentException the illegal argument exception
-     * @throws IllegalAccessException the illegal access exception
-     * @throws NoSuchMethodException the no such method exception
+     * @throws NoSuchFieldException      the no such field exception
+     * @throws SecurityException         the security exception
+     * @throws IllegalArgumentException  the illegal argument exception
+     * @throws IllegalAccessException    the illegal access exception
+     * @throws NoSuchMethodException     the no such method exception
      * @throws InvocationTargetException the invocation target exception
      */
     public static Class<?> getAssistInterface(Object proxyBean) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {

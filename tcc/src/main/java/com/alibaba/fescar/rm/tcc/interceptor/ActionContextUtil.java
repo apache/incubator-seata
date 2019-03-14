@@ -94,7 +94,7 @@ public class ActionContextUtil {
      * Gets all field.
      *
      * @param interFace the inter face
-     * @param fields the fields
+     * @param fields    the fields
      */
     public static void getAllField(Class<?> interFace, List<Field> fields) {
         if (interFace == Object.class || interFace.isInterface()) {

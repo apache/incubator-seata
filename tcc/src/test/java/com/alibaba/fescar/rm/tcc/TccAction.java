@@ -35,9 +35,9 @@ public interface TccAction {
      * Prepare boolean.
      *
      * @param actionContext the action context
-     * @param a the a
-     * @param b the b
-     * @param tccParam the tcc param
+     * @param a             the a
+     * @param b             the b
+     * @param tccParam      the tcc param
      * @return the boolean
      */
     @TwoPhaseBusinessAction(name = "tccActionForTest" , commitMethod = "commit", rollbackMethod = "rollback")

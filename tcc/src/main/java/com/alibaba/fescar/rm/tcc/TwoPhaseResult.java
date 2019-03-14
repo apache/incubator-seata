@@ -42,7 +42,7 @@ public class TwoPhaseResult {
      * Instantiates a new Two phase result.
      *
      * @param isSuccess the is success
-     * @param msg the msg
+     * @param msg       the msg
      */
     public TwoPhaseResult(boolean isSuccess, String msg) {
         this.isSuccess = isSuccess;
@@ -116,7 +116,7 @@ public class TwoPhaseResult {
     /**
      * Add context.
      *
-     * @param key the key
+     * @param key   the key
      * @param value the value
      */
     public void addContext(String key, Object value) {

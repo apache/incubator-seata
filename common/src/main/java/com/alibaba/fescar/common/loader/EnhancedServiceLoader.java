@@ -103,10 +103,11 @@ public class EnhancedServiceLoader {
     }
 
     /**
-     * 返回所有实现类实例
-     * @param service
-     * @param <S>
-     * @return
+     * get all implements
+     *
+     * @param <S>     the type parameter
+     * @param service the service
+     * @return list
      */
     public static <S> List<S> loadAll(Class<S> service){
         List<S> allInstances = new ArrayList<>();
@@ -188,7 +189,6 @@ public class EnhancedServiceLoader {
                         + "] and classloader : " + ObjectUtils.toString(loader));
             }
             Class<?> extension = extensions.get(extensions.size() - 1);// 最大的一个
-//            S result = service.cast(extension.newInstance());
             S result = initInstance(service, extension);
             if (!foundFromCache && LOGGER.isInfoEnabled()) {
                 LOGGER.info("load " + service.getSimpleName() + "[" + activateName + "] extension by class[" + extension.getName() + "]");
@@ -287,13 +287,14 @@ public class EnhancedServiceLoader {
     }
 
     /**
-     * 实例初始化
-     * @param service
-     * @param implClazz
-     * @param <S>
-     * @return
-     * @throws IllegalAccessException
-     * @throws InstantiationException
+     * init instance
+     *
+     * @param <S>       the type parameter
+     * @param service   the service
+     * @param implClazz the impl clazz
+     * @return s
+     * @throws IllegalAccessException the illegal access exception
+     * @throws InstantiationException the instantiation exception
      */
     protected static <S> S initInstance(Class<S> service, Class implClazz) throws IllegalAccessException, InstantiationException {
         S s = service.cast(implClazz.newInstance());

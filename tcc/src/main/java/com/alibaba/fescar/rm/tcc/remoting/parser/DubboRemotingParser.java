@@ -63,7 +63,7 @@ public class DubboRemotingParser extends AbstractedRemotingParser {
             serviceBeanDesc.setInterfaceClassName(interfaceClassName);
             serviceBeanDesc.setUniqueId(version);
             serviceBeanDesc.setGroup(group);
-            serviceBeanDesc.setProtocol(Protocols.DUBBO.getCode());
+            serviceBeanDesc.setProtocol(Protocols.DUBBO);
             if(isService(bean, beanName)){
                 Object targetBean = ReflectionUtil.getFieldValue(bean, "ref");
                 serviceBeanDesc.setTargetBean(targetBean);
@@ -75,7 +75,7 @@ public class DubboRemotingParser extends AbstractedRemotingParser {
     }
 
     @Override
-    public Protocols getProtocol() {
+    public short getProtocol() {
         return Protocols.DUBBO;
     }
 }

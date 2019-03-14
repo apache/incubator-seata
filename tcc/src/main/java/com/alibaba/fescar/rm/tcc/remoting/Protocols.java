@@ -23,62 +23,31 @@ import com.alibaba.fescar.common.exception.FrameworkException;
  *
  * @author zhangsen
  */
-public enum Protocols {
+public class Protocols {
 
 	/**
 	 * sofa-rpc service
 	 */
-	SOFA_RPC(2),
+	public static short SOFA_RPC = 2;
 
 	/**
 	 * dubbo service
 	 */
-	DUBBO(3),
+	public static short DUBBO = 3;
 
 	/**
 	 * restful service
 	 */
-	RESTFUL(4),
+	public static short RESTFUL = 4;
 
 	/**
 	 * local bean
 	 */
-	IN_JVM(5),
+	public static short IN_JVM = 5;
 
 	/**
 	 * hsf service
 	 */
-	HSF(8)
-	;
-
-	private int code;
-	
-	Protocols(int code){
-		this.code = code;
-	}
-
-	/**
-	 * Gets code.
-	 *
-	 * @return the code
-	 */
-	public int getCode() {
-		return code;
-	}
-
-	/**
-	 * Value of protocols.
-	 *
-	 * @param code the code
-	 * @return the protocols
-	 */
-	public static Protocols valueOf(int code){
-		for(Protocols p : values()){
-			if(p.getCode() == code){
-				return p;
-			}
-		}
-		throw new FrameworkException("Unknown Protocols, code:" + code);
-	}
+	public static short HSF = 8;
 
 }
