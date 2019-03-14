@@ -22,7 +22,7 @@ public class CollectionUtils {
      * @param coll the coll
      * @return the boolean
      */
-    public static boolean isEmpty(Collection<?> collection) {
-        return null == collection || collection.isEmpty();
+    public static boolean isEmpty(Collection<?> coll) {
+        return null == coll || coll.isEmpty();
     }
 }
