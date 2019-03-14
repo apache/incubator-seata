@@ -18,7 +18,7 @@ package com.alibaba.fescar.rm.datasource.undo.mysql.keyword;
 
 import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 
 /**
  * The type My sql keyword checker.

@@ -41,7 +41,6 @@ import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
 import com.alibaba.fescar.core.service.ServiceManager;
 import com.alibaba.fescar.core.service.ServiceManagerStaticConfigImpl;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
-import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -332,7 +331,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         List<String> availList = new ArrayList<>();
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance().lookup(
             transactionServiceGroup);
-        if (!CollectionUtils.isEmpty(availInetSocketAddressList)) {
+        if (null != availInetSocketAddressList && !availInetSocketAddressList.isEmpty()) {
             for (InetSocketAddress address : availInetSocketAddressList) {
                 availList.add(NetUtil.toStringAddress(address));
             }

@@ -47,10 +47,12 @@
         <dependency>
             <groupId>com.alibaba.nacos</groupId>
             <artifactId>nacos-client</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.ctrip.framework.apollo</groupId>
             <artifactId>apollo-client</artifactId>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

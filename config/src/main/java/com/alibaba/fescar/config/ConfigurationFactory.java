@@ -17,9 +17,7 @@
 package com.alibaba.fescar.config;
 
 import com.alibaba.fescar.common.exception.NotSupportYetException;
-import com.alibaba.nacos.api.exception.NacosException;
 
-import com.ctrip.framework.apollo.exceptions.ApolloConfigException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,16 +57,12 @@ public final class ConfigurationFactory {
             case Nacos:
                 try {
                     configuration = new NacosConfiguration();
-                } catch (NacosException e) {
+                } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
                 break;
             case Apollo:
-                try {
-                    configuration = ApolloConfiguration.getInstance();
-                } catch (ApolloConfigException e) {
-                    throw new RuntimeException(e);
-                }
+                configuration = ApolloConfiguration.getInstance();
                 break;
             case File:
                 String pathDataId = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR

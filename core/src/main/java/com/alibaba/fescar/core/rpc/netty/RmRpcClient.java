@@ -41,7 +41,6 @@ import com.alibaba.fescar.core.protocol.HeartbeatMessage;
 import com.alibaba.fescar.core.protocol.RegisterRMRequest;
 import com.alibaba.fescar.core.protocol.RegisterRMResponse;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
-import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -203,7 +202,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         } catch (Exception exx) {
             LOGGER.error(exx.getMessage());
         }
-        if (CollectionUtils.isEmpty(availList)) {
+        if (availList == null || availList.isEmpty()) {
             LOGGER.error("no available server to connect.");
             return;
         }

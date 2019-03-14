@@ -46,7 +46,6 @@ import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
 import com.alibaba.fescar.core.service.ConfigurationKeys;
 import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
-import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -177,7 +176,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
         } catch (Exception exx) {
             LOGGER.error(exx.getMessage());
         }
-        if (CollectionUtils.isEmpty(availList)) {
+        if (null == availList || availList.isEmpty()) {
             LOGGER.error("no available server to connect.");
             return;
         }
