@@ -44,7 +44,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     private static JdbcTemplate jdbcTemplate;
     private static JdbcTemplate directJdbcTemplate;
 
-    private abstract static class LockConflictExecuteTemplate {
+    private abstract static class AbstractLockConflictExecuteTemplate {
         public void execute() {
             synchronized (LocalTransactionWithGlobalLockDataSourceBasicTest.class) {
                 DataSourceManager.set(new MockDataSourceManager() {
@@ -89,7 +89,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     @Test
     public void testInsertWithLock() {
         RootContext.bindGlobalLockFlag();
-        new LockConflictExecuteTemplate() {
+        new AbstractLockConflictExecuteTemplate() {
             @Override
             public void doExecute() {
                 jdbcTemplate.update("insert into user0 (id, name, gmt) values (?, ?, ?)",
@@ -111,7 +111,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     public void testUpdateWithLock() {
         RootContext.bindGlobalLockFlag();
         RootContext.bindGlobalLockFlag();
-        new LockConflictExecuteTemplate() {
+        new AbstractLockConflictExecuteTemplate() {
             @Override
             public void doExecute() {
                 jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.id = ?", new Object[] {1});
@@ -144,7 +144,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
             new Object[] {1, "xxx", new Date()});
 
         RootContext.bindGlobalLockFlag();
-        new LockConflictExecuteTemplate() {
+        new AbstractLockConflictExecuteTemplate() {
 
             @Override
             public void doExecute() {
@@ -169,7 +169,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     @Test
     public void testDeleteForLockConflict() {
         RootContext.bindGlobalLockFlag();
-        new LockConflictExecuteTemplate() {
+        new AbstractLockConflictExecuteTemplate() {
 
             @Override
             public void doExecute() {
@@ -193,7 +193,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     @Test
     public void testSelectForUpdateWithLockConflict() {
         RootContext.bindGlobalLockFlag();
-        new LockConflictExecuteTemplate() {
+        new AbstractLockConflictExecuteTemplate() {
 
             @Override
             public void doExecute() {
