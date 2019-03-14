@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.alibaba.fescar.common.exception.FrameworkErrorCode;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
+import com.alibaba.fescar.common.util.CollectionUtils;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 import com.alibaba.fescar.core.protocol.HeartbeatMessage;
@@ -331,7 +332,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         List<String> availList = new ArrayList<>();
         List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance().lookup(
             transactionServiceGroup);
-        if (null != availInetSocketAddressList && !availInetSocketAddressList.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(availInetSocketAddressList)) {
             for (InetSocketAddress address : availInetSocketAddressList) {
                 availList.add(NetUtil.toStringAddress(address));
             }

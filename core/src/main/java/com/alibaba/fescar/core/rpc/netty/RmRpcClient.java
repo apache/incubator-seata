@@ -32,6 +32,7 @@ import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.exception.FrameworkErrorCode;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
+import com.alibaba.fescar.common.util.CollectionUtils;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.model.Resource;
@@ -202,7 +203,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         } catch (Exception exx) {
             LOGGER.error(exx.getMessage());
         }
-        if (availList == null || availList.isEmpty()) {
+        if (CollectionUtils.isEmpty(availList)) {
             LOGGER.error("no available server to connect.");
             return;
         }

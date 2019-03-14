@@ -18,6 +18,8 @@ package com.alibaba.fescar.discovery.loadbalance;
 
 import java.util.List;
 
+import com.alibaba.fescar.common.util.CollectionUtils;
+
 /**
  * The type Abstract load balance.
  *
@@ -28,7 +30,7 @@ public abstract class AbstractLoadBalance implements LoadBalance {
 
     @Override
     public <T> T select(List<T> invokers) {
-        if (null == invokers || invokers.isEmpty()) {
+        if (CollectionUtils.isEmpty(invokers)) {
             return null;
         }
         if (invokers.size() == 1) {
