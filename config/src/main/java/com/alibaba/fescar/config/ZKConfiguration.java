@@ -32,8 +32,9 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String SESSION_TIME_OUT_KEY = "session.timeout";
     private static final String CONNECT_TIME_OUT_KEY = "connect.timeout";
+    private static final int THREAD_POOL_NUM = 5;
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
-    private static final Executor executor= Executors.newSingleThreadExecutor();
+    private static final Executor executor= Executors.newFixedThreadPool(THREAD_POOL_NUM);
     private static volatile ZkClient zkClient;
 
     public ZKConfiguration () {
