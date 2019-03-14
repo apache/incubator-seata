@@ -28,7 +28,7 @@ public class Field {
      */
     public String name;
 
-	private KeyType keyType = KeyType.NULL;
+    private KeyType keyType = KeyType.NULL;
 
     /**
      * The Type.
@@ -54,10 +54,10 @@ public class Field {
      * @param value the value
      */
     public Field(String name, int type, Object value) {
-		this.name = name;
-		this.type = type;
-		this.value = value;
-	}
+        this.name = name;
+        this.type = type;
+        this.value = value;
+    }
 
     /**
      * Gets name.
@@ -65,8 +65,8 @@ public class Field {
      * @return the name
      */
     public String getName() {
-		return name;
-	}
+        return name;
+    }
 
     /**
      * Sets name.
@@ -74,8 +74,8 @@ public class Field {
      * @param attrName the attr name
      */
     public void setName(String attrName) {
-		this.name = attrName;
-	}
+        this.name = attrName;
+    }
 
     /**
      * Gets key type.
@@ -83,8 +83,8 @@ public class Field {
      * @return the key type
      */
     public KeyType getKeyType() {
-		return keyType;
-	}
+        return keyType;
+    }
 
     /**
      * Sets key type.
@@ -92,8 +92,8 @@ public class Field {
      * @param keyType the key type
      */
     public void setKeyType(KeyType keyType) {
-		this.keyType = keyType;
-	}
+        this.keyType = keyType;
+    }
 
     /**
      * Gets type.
@@ -101,8 +101,8 @@ public class Field {
      * @return the type
      */
     public int getType() {
-		return type;
-	}
+        return type;
+    }
 
     /**
      * Sets type.
@@ -110,8 +110,8 @@ public class Field {
      * @param attrType the attr type
      */
     public void setType(int attrType) {
-		this.type = attrType;
-	}
+        this.type = attrType;
+    }
 
     /**
      * Gets value.
@@ -119,8 +119,8 @@ public class Field {
      * @return the value
      */
     public Object getValue() {
-		return value;
-	}
+        return value;
+    }
 
     /**
      * Sets value.
@@ -128,8 +128,8 @@ public class Field {
      * @param value the value
      */
     public void setValue(Object value) {
-		this.value = value;
-	}
+        this.value = value;
+    }
 
     /**
      * Is key boolean.
@@ -138,8 +138,8 @@ public class Field {
      * @return the boolean
      */
     public boolean isKey(String pkname) {
-		return name.equalsIgnoreCase(pkname);
-	}
+        return name.equalsIgnoreCase(pkname);
+    }
 
 	@Override
 	public String toString() {
@@ -162,4 +162,5 @@ public class Field {
 	public int hashCode() {
 		return Objects.hash(name, type, String.valueOf(value));
 	}
+
 }

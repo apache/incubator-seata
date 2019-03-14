@@ -191,8 +191,10 @@ public abstract class AbstractConnectionProxy implements Connection {
     }
 
     @Override
-    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-        PreparedStatement preparedStatement = targetConnection.prepareStatement(sql, resultSetType, resultSetConcurrency);
+    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
+        throws SQLException {
+        PreparedStatement preparedStatement = targetConnection.prepareStatement(sql, resultSetType,
+            resultSetConcurrency);
         return new PreparedStatementProxy(this, preparedStatement, sql);
     }
 
@@ -247,19 +249,24 @@ public abstract class AbstractConnectionProxy implements Connection {
     }
 
     @Override
-    public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        Statement statement = targetConnection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
+    public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
+        throws SQLException {
+        Statement statement = targetConnection.createStatement(resultSetType, resultSetConcurrency,
+            resultSetHoldability);
         return new StatementProxy<Statement>(this, statement);
     }
 
     @Override
-    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        PreparedStatement preparedStatement = targetConnection.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
+                                              int resultSetHoldability) throws SQLException {
+        PreparedStatement preparedStatement = targetConnection.prepareStatement(sql, resultSetType,
+            resultSetConcurrency, resultSetHoldability);
         return new PreparedStatementProxy(this, preparedStatement, sql);
     }
 
     @Override
-    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
+                                         int resultSetHoldability) throws SQLException {
         RootContext.assertNotInGlobalTransaction();
         return targetConnection.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
     }

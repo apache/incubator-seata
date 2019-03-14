@@ -17,24 +17,17 @@
 package com.alibaba.fescar.discovery.registry;
 
 import com.alibaba.fescar.common.exception.NotSupportYetException;
-import com.alibaba.fescar.config.ConfigType;
+import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.config.ConfigurationKeys;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.alibaba.fescar.config.ConfigurationFactory.FILE_CONFIG_SPLIT_CHAR;
-import static com.alibaba.fescar.config.ConfigurationFactory.FILE_INSTANCE;
-import static com.alibaba.fescar.config.ConfigurationFactory.FILE_ROOT_REGISTRY;
-import static com.alibaba.fescar.config.ConfigurationFactory.FILE_ROOT_TYPE;
-
 /**
  * The type Registry factory.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar -all
- * @DateTime: 2019 /2/1 5:57 PM
- * @FileName: RegistryFactory
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /2/1
  */
 public class RegistryFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistryFactory.class);
@@ -45,23 +38,32 @@ public class RegistryFactory {
      * @return the instance
      */
     public static RegistryService getInstance() {
-        ConfigType configType = null;
+        RegistryType registryType = null;
         try {
-            configType = ConfigType.getType(
-                FILE_INSTANCE.getConfig(FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + FILE_ROOT_TYPE));
+            registryType = RegistryType.getType(
+                ConfigurationFactory.FILE_INSTANCE.getConfig(
+                    ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                        + ConfigurationKeys.FILE_ROOT_TYPE));
         } catch (Exception exx) {
             LOGGER.error(exx.getMessage());
         }
         RegistryService registryService;
-        switch (configType) {
+        switch (registryType) {
             case Nacos:
                 registryService = NacosRegistryServiceImpl.getInstance();
+                break;
+            case Redis:
+                registryService = RedisRegistryServiceImpl.getInstance();
+                break;
+            case Eureka:
+                registryService = EurekaRegistryServiceImpl.getInstance();
                 break;
             case File:
                 registryService = FileRegistryServiceImpl.getInstance();
                 break;
             default:
-                throw new NotSupportYetException("not support register type:" + configType);
+                throw new NotSupportYetException("not support register type:" + registryType);
+
         }
         return registryService;
     }

@@ -21,7 +21,7 @@
 
     <groupId>com.alibaba.fescar</groupId>
     <artifactId>fescar-all</artifactId>
-    <version>0.2.1</version>
+    <version>0.3.1-SNAPSHOT</version>
     <modules>
         <module>config</module>
         <module>common</module>
@@ -93,7 +93,7 @@
         <fastjson.version>1.2.48</fastjson.version>
         <config.version>1.2.1</config.version>
         <slf4j-api.version>1.7.22</slf4j-api.version>
-        <logback-classic.version>1.1.6</logback-classic.version>
+        <logback-classic.version>1.2.0</logback-classic.version>
         <commons-lang.version>2.6</commons-lang.version>
         <commons-pool2.version>2.4.2</commons-pool2.version>
         <commons-pool.version>1.6</commons-pool.version>
@@ -104,7 +104,27 @@
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <testng.version>6.4</testng.version>
         <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
+        <apollo-client.version>1.1.0</apollo-client.version>
+        <redis-clients.version>2.9.0</redis-clients.version>
+        <eureka-clients.version>1.9.5</eureka-clients.version>
+        <javax-inject.version>1</javax-inject.version>
+        <archaius-core.version>0.7.6</archaius-core.version>
     </properties>
+    <!--test-->
+    <dependencies>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>2.6.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>2.23.4</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -246,6 +266,31 @@
                 <groupId>com.alibaba.nacos</groupId>
                 <artifactId>nacos-client</artifactId>
                 <version>0.8.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.framework.apollo</groupId>
+                <artifactId>apollo-client</artifactId>
+                <version>${apollo-client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>redis.clients</groupId>
+                <artifactId>jedis</artifactId>
+                <version>${redis-clients.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.netflix.eureka</groupId>
+                <artifactId>eureka-client</artifactId>
+                <version>${eureka-clients.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.inject</groupId>
+                <artifactId>javax.inject</artifactId>
+                <version>${javax-inject.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.netflix.archaius</groupId>
+                <artifactId>archaius-core</artifactId>
+                <version>${archaius-core.version}</version>
             </dependency>
         </dependencies>
 

@@ -53,7 +53,8 @@ public final class UndoLogManager {
     private static String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + "\n" +
         "\tWHERE branch_id = ? AND xid = ?";
 
-    private static String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME + " WHERE log_status = 0 AND branch_id = ? AND xid = ? FOR UPDATE";
+    private static String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME
+        + " WHERE log_status = 0 AND branch_id = ? AND xid = ? FOR UPDATE";
 
     private UndoLogManager() {
 
@@ -92,7 +93,7 @@ public final class UndoLogManager {
             pst.executeUpdate();
         } catch (Exception e) {
             if (e instanceof SQLException) {
-                throw (SQLException) e;
+                throw (SQLException)e;
             } else {
                 throw new SQLException(e);
             }
