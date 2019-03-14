@@ -62,7 +62,7 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
         }
         RemotingDesc remotingDesc = new RemotingDesc();
         remotingDesc.setReference(true);
-        remotingDesc.setProtocol(Protocols.IN_JVM.getCode());
+        remotingDesc.setProtocol(Protocols.IN_JVM);
         Class<?> classType = bean.getClass();
         Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);
         for(Class<?> interClass : interfaceClasses){
@@ -77,7 +77,7 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
     }
 
     @Override
-    public Protocols getProtocol() {
+    public short getProtocol() {
         return Protocols.IN_JVM;
     }
 }

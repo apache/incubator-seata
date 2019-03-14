@@ -70,9 +70,9 @@ public interface RemotingParser {
     /**
      * the remoting protocol
      *
-     * @return protocol protocol
+     * @return
      */
-    public Protocols getProtocol();
+    public short getProtocol();
 
 
 }

@@ -249,7 +249,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         //is remoting bean
         if(isRemotingBean) {
             remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-            if(remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM.getCode()){
+            if(remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM){
                 //LocalTCC
                 return isTccProxyTargetBean(remotingDesc);
             }else {
@@ -324,9 +324,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         if(!isTccClazz){
             return false;
         }
-        Protocols protocols = Protocols.valueOf(remotingDesc.getProtocol());
+        short protocols = remotingDesc.getProtocol();
         //LocalTCC
-        if(Protocols.IN_JVM.equals(protocols)){
+        if(Protocols.IN_JVM == protocols){
             //in jvm TCC bean , AOP
             return true;
         }

@@ -74,7 +74,7 @@ public class SofaRpcRemotingParser extends AbstractedRemotingParser {
             serviceBeanDesc.setInterfaceClass(interfaceClass);
             serviceBeanDesc.setInterfaceClassName(interfaceClassName);
             serviceBeanDesc.setUniqueId(uniqueId);
-            serviceBeanDesc.setProtocol(Protocols.SOFA_RPC.getCode());
+            serviceBeanDesc.setProtocol(Protocols.SOFA_RPC);
             if(isService(bean, beanName)){
                 Object targetBean = ReflectionUtil.getFieldValue(bean, "ref");
                 serviceBeanDesc.setTargetBean(targetBean);
@@ -86,7 +86,7 @@ public class SofaRpcRemotingParser extends AbstractedRemotingParser {
     }
 
     @Override
-    public Protocols getProtocol() {
+    public short getProtocol() {
         return Protocols.SOFA_RPC;
     }
 }
