@@ -31,6 +31,10 @@ public enum ConfigType {
      */
     File,
     /**
+     * zookeeper config type.
+     */
+    ZK,
+    /**
      * Nacos config type.
      */
     Nacos,
