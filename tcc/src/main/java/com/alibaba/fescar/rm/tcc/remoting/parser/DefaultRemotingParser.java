@@ -165,7 +165,6 @@ public class DefaultRemotingParser {
      * @return remoting desc
      */
     public RemotingDesc parserRemotingServiceInfo(Object bean, String beanName)  {
-        //remoting bean 信息
         RemotingDesc remotingBeanDesc = getServiceDesc(bean, beanName);
         if(remotingBeanDesc == null){
             return null;
@@ -175,13 +174,13 @@ public class DefaultRemotingParser {
         Class<?> interfaceClass = remotingBeanDesc.getInterfaceClass();
         Method[] methods = interfaceClass.getMethods();
         if(isService(bean, beanName)){
-            try{
+            try {
                 //service bean， registry resource
                 Object targetBean = remotingBeanDesc.getTargetBean();
                 for(Method m : methods){
                     TwoPhaseBusinessAction twoPhaseBusinessAction = m.getAnnotation(TwoPhaseBusinessAction.class);
                     if(twoPhaseBusinessAction != null){
-                        //一阶段方法, 提取TCC 服务 信息，注册TCC资源
+                        //
                         TCCResource tccResource = new TCCResource();
                         tccResource.setActionName(twoPhaseBusinessAction.name());
                         tccResource.setTargetBean(targetBean);
