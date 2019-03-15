@@ -9,9 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import static com.alibaba.fescar.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 
@@ -32,7 +33,7 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     private static final String CONNECT_TIME_OUT_KEY = "connect.timeout";
     private static final int THREAD_POOL_NUM = 5;
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
-    private static final Executor executor= Executors.newFixedThreadPool(THREAD_POOL_NUM);
+    private static final ExecutorService executor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM, Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
     private static volatile ZkClient zkClient;
 
     public ZKConfiguration () {
