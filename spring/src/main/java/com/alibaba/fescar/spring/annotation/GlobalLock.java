@@ -16,16 +16,21 @@
 
 package com.alibaba.fescar.spring.annotation;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class BusinessImpl implements Business {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BusinessImpl.class);
-
-    @Override
-    @GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
-    public String doBiz(String msg) {
-        LOGGER.info("Business doBiz");
-        return "hello " + msg;
-    }
+/**
+ * declare the transaction only execute in single local RM,<br/>
+ * but the transaction need to ensure records to update(or select for update) is not in global transaction middle
+ * stage<br/>
+ *
+ * use this annotation instead of GlobalTransaction in the situation mentioned above will help performance.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@Inherited
+public @interface GlobalLock {
 }
