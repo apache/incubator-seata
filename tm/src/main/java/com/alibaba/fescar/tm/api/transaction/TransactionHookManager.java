@@ -15,7 +15,6 @@
  */
 package com.alibaba.fescar.tm.api.transaction;
 
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

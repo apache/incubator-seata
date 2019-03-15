@@ -28,7 +28,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TransactionHookManagerTest {
 
-
     @After
     public void clear() {
         TransactionHookManager.clear();
@@ -50,7 +49,6 @@ public class TransactionHookManagerTest {
         assertThat(TransactionHookManager.getHooks()).isNotEmpty();
     }
 
-
     @Test
     public void testClear() {
         assertThat(TransactionHookManager.getHooks()).isEmpty();
@@ -59,6 +57,5 @@ public class TransactionHookManagerTest {
         TransactionHookManager.clear();
         assertThat(TransactionHookManager.getHooks()).isEmpty();
     }
-
 
 }
