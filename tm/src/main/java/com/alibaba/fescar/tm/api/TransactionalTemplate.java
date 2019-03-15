@@ -37,7 +37,7 @@ public class TransactionalTemplate {
      *
      * @param business the business
      * @return the object
-     * @throws ExecutionException the execution exception
+     * @throws TransactionalExecutor.ExecutionException the execution exception
      */
     public Object execute(TransactionalExecutor business) throws TransactionalExecutor.ExecutionException {
 
@@ -101,73 +101,72 @@ public class TransactionalTemplate {
 
 
     private void triggerBeforeBegin() {
-        try {
-            for (TransactionHook hook : getCurrentHooks()) {
+        for (TransactionHook hook : getCurrentHooks()) {
+            try {
                 hook.beforeBegin();
+            } catch (Exception e) {
+                LOGGER.error("Failed execute beforeBegin in hook " + e.getMessage());
             }
-        } catch (Exception e) {
-            LOGGER.error("Failed execute beforeBegin in hook " + e.getMessage());
         }
     }
 
     private void triggerAfterBegin() {
-        try {
-            for (TransactionHook hook : getCurrentHooks()) {
+        for (TransactionHook hook : getCurrentHooks()) {
+            try {
                 hook.afterBegin();
+            } catch (Exception e) {
+                LOGGER.error("Failed execute afterBegin in hook " + e.getMessage());
             }
-        } catch (Exception e) {
-            LOGGER.error("Failed execute afterBegin in hook " + e.getMessage());
         }
-
     }
 
     private void triggerBeforeRollback() {
-        try {
-            for (TransactionHook hook : getCurrentHooks()) {
+        for (TransactionHook hook : getCurrentHooks()) {
+            try {
                 hook.beforeRollback();
+            } catch (Exception e) {
+                LOGGER.error("Failed execute beforeRollback in hook " + e.getMessage());
             }
-        } catch (Exception e) {
-            LOGGER.error("Failed execute beforeRollback in hook " + e.getMessage());
         }
     }
 
     private void triggerAfterRollback() {
-        try {
-            for (TransactionHook hook : getCurrentHooks()) {
+        for (TransactionHook hook : getCurrentHooks()) {
+            try {
                 hook.afterRollback();
+            } catch (Exception e) {
+                LOGGER.error("Failed execute afterRollback in hook " + e.getMessage());
             }
-        } catch (Exception e) {
-            LOGGER.error("Failed execute afterRollback in hook " + e.getMessage());
         }
     }
 
     private void triggerBeforeCommit() {
-        try {
-            for (TransactionHook hook : getCurrentHooks()) {
+        for (TransactionHook hook : getCurrentHooks()) {
+            try {
                 hook.beforeCommit();
+            } catch (Exception e) {
+                LOGGER.error("Failed execute beforeCommit in hook " + e.getMessage());
             }
-        } catch (Exception e) {
-            LOGGER.error("Failed execute beforeCommit in hook " + e.getMessage());
         }
     }
 
     private void triggerAfterCommit() {
-        try {
-            for (TransactionHook hook : getCurrentHooks()) {
+        for (TransactionHook hook : getCurrentHooks()) {
+            try {
                 hook.afterCommit();
+            } catch (Exception e) {
+                LOGGER.error("Failed execute afterCommit in hook " + e.getMessage());
             }
-        } catch (Exception e) {
-            LOGGER.error("Failed execute afterCommit in hook " + e.getMessage());
         }
     }
 
     private void triggerAfterCompletion() {
-        try {
-            for (TransactionHook hook : getCurrentHooks()) {
+        for (TransactionHook hook : getCurrentHooks()) {
+            try {
                 hook.afterCompletion();
+            } catch (Exception e) {
+                LOGGER.error("Failed execute afterCompletion in hook " + e.getMessage());
             }
-        } catch (Exception e) {
-            LOGGER.error("Failed execute afterCompletion in hook " + e.getMessage());
         }
     }
 
