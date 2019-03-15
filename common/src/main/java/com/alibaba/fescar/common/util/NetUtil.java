@@ -36,7 +36,7 @@ public class NetUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetUtil.class);
     private static final String LOCALHOST = "127.0.0.1";
 
-    private static final String ANYHOST = "0.0.0.0";
+    private static final String ANY_HOST = "0.0.0.0";
 
     private static volatile InetAddress LOCAL_ADDRESS = null;
 
@@ -202,6 +202,7 @@ public class NetUtil {
             return false;
         }
         String name = address.getHostAddress();
-        return (name != null && !ANYHOST.equals(name) && !LOCALHOST.equals(name) && IP_PATTERN.matcher(name).matches());
+        return (name != null && !ANY_HOST.equals(name) && !LOCALHOST.equals(name) && IP_PATTERN.matcher(name)
+            .matches());
     }
 }

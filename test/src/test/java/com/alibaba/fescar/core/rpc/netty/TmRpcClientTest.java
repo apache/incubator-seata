@@ -41,7 +41,7 @@ public class TmRpcClientTest {
 
     private static final ThreadPoolExecutor
         workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
-        new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+                                                new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
     /**
      * Client rely on server's starting first
@@ -74,7 +74,7 @@ public class TmRpcClientTest {
         Method doConnectMethod = TmRpcClient.class.getDeclaredMethod("doConnect", String.class);
         doConnectMethod.setAccessible(true);
         String serverAddress = "0.0.0.0:8091";
-        Channel channel = (Channel)doConnectMethod.invoke(tmRpcClient, serverAddress);
+        Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
         System.out.print("channel = ");
         Assert.assertNotNull(channel);
     }
@@ -138,7 +138,7 @@ public class TmRpcClientTest {
         Method doConnectMethod = TmRpcClient.class.getDeclaredMethod("doConnect", String.class);
         doConnectMethod.setAccessible(true);
         String serverAddress = "0.0.0.0:8091";
-        Channel channel = (Channel)doConnectMethod.invoke(tmRpcClient, serverAddress);
+        Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
         System.out.print("channel = " + channel);
         Assert.assertNotNull(channel);
 
@@ -146,12 +146,11 @@ public class TmRpcClientTest {
         request.setTransactionId(123456L);
         request.setLockKey("lock key testSendMsgWithResponse");
         request.setResourceId("resoutceId1");
-        BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse)tmRpcClient.sendMsgWithResponse(
-            request);
+        BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse)tmRpcClient.sendMsgWithResponse(request);
         Assert.assertNotNull(branchRegisterResponse);
         //we have not init SessionManager
         Assert.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
         Assert.assertEquals("RuntimeException[SessionManager is NOT init!]",
-            branchRegisterResponse.getMsg());
+                            branchRegisterResponse.getMsg());
     }
 }
