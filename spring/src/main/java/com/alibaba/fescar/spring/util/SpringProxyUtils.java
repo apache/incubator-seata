@@ -102,23 +102,23 @@ public class SpringProxyUtils {
             return p.getClass().getInterfaces()[0];
         }
 
-        return getTarget(proxy).getClass();
+        return getTargetClass(proxy);
     }
 
     /**
-     * Get the proxy target object
+     * Get the class type of the proxy target object, if hadn't a target object, return the interface of the proxy
      *
-     * @param proxy 代理对象
-     * @return target target
-     * @throws Exception the exception
+     * @param proxy
+     * @return
+     * @throws Exception
      */
-    public static Object getTarget(Object proxy) throws Exception {
+    protected static Class getTargetClass(Object proxy) throws Exception {
         if(proxy == null){
             throw new java.lang.IllegalArgumentException("proxy can not be null");
         }
-        //非代理类
+        //not proxy
         if(!AopUtils.isAopProxy(proxy)) {
-            return proxy;
+            return proxy.getClass();
         }
         AdvisedSupport advisedSupport = getAdvisedSupport(proxy);
         Object target = advisedSupport.getTargetSource().getTarget();
@@ -130,10 +130,10 @@ public class SpringProxyUtils {
                 return advisedSupport.getProxiedInterfaces()[0];
             }else{
                 //拿不到interface，返回原对象
-                return proxy;
+                return proxy.getClass();
             }
         }else{
-            return getTarget(target);
+            return getTargetClass(target);
         }
     }
 
