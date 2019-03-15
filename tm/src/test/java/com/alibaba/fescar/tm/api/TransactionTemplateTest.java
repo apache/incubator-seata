@@ -20,6 +20,7 @@ import com.alibaba.fescar.core.model.TransactionManager;
 import com.alibaba.fescar.tm.DefaultTransactionManager;
 import com.alibaba.fescar.tm.api.transaction.TransactionHook;
 import com.alibaba.fescar.tm.api.transaction.TransactionHookManager;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +39,6 @@ public class TransactionTemplateTest {
     private static final String DEFAULT_NAME = "test";
     private static final int DEFAULT_TIME_OUT = 30000;
 
-
     @Before
     public void init() throws Exception {
         TransactionManager transactionManager = mock(TransactionManager.class);
@@ -53,7 +53,6 @@ public class TransactionTemplateTest {
     public void assertHooks() {
         assertThat(TransactionHookManager.getHooks()).isEmpty();
     }
-
 
     @Test
     public void testTransactionCommitHook() throws Exception {

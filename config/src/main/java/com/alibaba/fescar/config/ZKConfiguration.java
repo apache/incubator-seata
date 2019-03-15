@@ -1,12 +1,30 @@
+/*
+ *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+
 package com.alibaba.fescar.config;
 
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.util.StringUtils;
+
 import org.I0Itec.zkclient.IZkDataListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -14,6 +32,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.FutureTask;
+
 import static com.alibaba.fescar.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 
 /**
@@ -32,16 +51,18 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     private static final String SESSION_TIME_OUT_KEY = "session.timeout";
     private static final String CONNECT_TIME_OUT_KEY = "connect.timeout";
     private static final int THREAD_POOL_NUM = 5;
-    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
-    private static final ExecutorService executor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM, Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
+        + FILE_CONFIG_SPLIT_CHAR;
+    private static final ExecutorService executor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
+        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
     private static volatile ZkClient zkClient;
 
-    public ZKConfiguration () {
+    public ZKConfiguration() {
         if (zkClient == null) {
             zkClient = new ZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
-                    FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY),
-                    FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY));
-            if(!zkClient.exists(ROOT_PATH)){
+                FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY),
+                FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY));
+            if (!zkClient.exists(ROOT_PATH)) {
                 zkClient.createPersistent(ROOT_PATH, true);
             }
         }
@@ -58,7 +79,7 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
             public String call() throws Exception {
                 String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
                 String value = zkClient.readData(path);
-                if(StringUtils.isNullOrEmpty(value)) {
+                if (StringUtils.isNullOrEmpty(value)) {
                     return defaultValue;
                 }
                 return value;
@@ -78,9 +99,9 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
         FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
             public Boolean call() throws Exception {
                 String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
-                if(!zkClient.exists(path)){
+                if (!zkClient.exists(path)) {
                     zkClient.create(path, content, CreateMode.PERSISTENT);
-                }else {
+                } else {
                     zkClient.writeData(path, content);
                 }
                 return true;
@@ -121,7 +142,7 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     @Override
     public void addConfigListener(String dataId, IZkDataListener listener) {
         String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
-        if(zkClient.exists(path)) {
+        if (zkClient.exists(path)) {
             zkClient.subscribeDataChanges(path, listener);
         }
     }

@@ -19,6 +19,7 @@ package com.alibaba.fescar.tm.api;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.tm.api.transaction.TransactionHook;
 import com.alibaba.fescar.tm.api.transaction.TransactionHookManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,7 +54,7 @@ public class TransactionalTemplate {
                 triggerAfterBegin();
             } catch (TransactionException txe) {
                 throw new TransactionalExecutor.ExecutionException(tx, txe,
-                        TransactionalExecutor.Code.BeginFailure);
+                    TransactionalExecutor.Code.BeginFailure);
 
             }
             Object rs = null;
@@ -75,7 +76,7 @@ public class TransactionalTemplate {
                 } catch (TransactionException txe) {
                     // 3.2 Failed to rollback
                     throw new TransactionalExecutor.ExecutionException(tx, txe,
-                            TransactionalExecutor.Code.RollbackFailure, ex);
+                        TransactionalExecutor.Code.RollbackFailure, ex);
 
                 }
 
@@ -88,17 +89,16 @@ public class TransactionalTemplate {
             } catch (TransactionException txe) {
                 // 4.1 Failed to commit
                 throw new TransactionalExecutor.ExecutionException(tx, txe,
-                        TransactionalExecutor.Code.CommitFailure);
+                    TransactionalExecutor.Code.CommitFailure);
             }
 
             return rs;
-        }finally {
+        } finally {
             //5. clear
             triggerAfterCompletion();
             cleanUp();
         }
     }
-
 
     private void triggerBeforeBegin() {
         for (TransactionHook hook : getCurrentHooks()) {

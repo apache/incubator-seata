@@ -26,6 +26,7 @@ import com.alibaba.fescar.rm.datasource.ConnectionProxy;
 import com.alibaba.fescar.rm.datasource.DataSourceProxy;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMetaCache;
+
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -162,7 +163,8 @@ public final class UndoLogManager {
                     for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
                         TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
                         sqlUndoLog.setTableMeta(tableMeta);
-                        AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(dataSourceProxy.getDbType(),
+                        AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
+                            dataSourceProxy.getDbType(),
                             sqlUndoLog);
                         undoExecutor.executeOn(conn);
                     }
@@ -202,7 +204,8 @@ public final class UndoLogManager {
                         LOGGER.warn("Failed to close JDBC resource while undo ... ", rollbackEx);
                     }
                 }
-                throw new TransactionException(BranchRollbackFailed_Retriable, String.format("%s/%s", branchId, xid), e);
+                throw new TransactionException(BranchRollbackFailed_Retriable, String.format("%s/%s", branchId, xid),
+                    e);
 
             } finally {
                 try {
@@ -238,17 +241,17 @@ public final class UndoLogManager {
     }
 
     private static void insertUndoLogWithNormal(String xid, long branchID,
-        String undoLogContent, Connection conn) throws SQLException {
+                                                String undoLogContent, Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, undoLogContent, State.Normal, conn);
     }
 
     private static void insertUndoLogWithGlobalFinished(String xid, long branchID,
-        Connection conn) throws SQLException {
+                                                        Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, "{}", State.GlobalFinished, conn);
     }
 
     private static void insertUndoLog(String xid, long branchID,
-        String undoLogContent, State state, Connection conn) throws SQLException {
+                                      String undoLogContent, State state, Connection conn) throws SQLException {
         PreparedStatement pst = null;
         try {
             pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL);
@@ -259,7 +262,7 @@ public final class UndoLogManager {
             pst.executeUpdate();
         } catch (Exception e) {
             if (e instanceof SQLException) {
-                throw (SQLException) e;
+                throw (SQLException)e;
             } else {
                 throw new SQLException(e);
             }
