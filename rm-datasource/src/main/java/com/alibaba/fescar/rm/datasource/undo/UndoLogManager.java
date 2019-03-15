@@ -180,7 +180,7 @@ public final class UndoLogManager {
                 if (exists) {
                     deleteUndoLog(xid, branchId, conn);
                     conn.commit();
-                    LOGGER.info("xid {} branch {}, undo_log deleted",
+                    LOGGER.info("xid {} branch {}, undo_log deleted with {}",
                         xid, branchId, State.GlobalFinished.name());
                 } else {
                     insertUndoLogWithGlobalFinished(xid, branchId, conn);
