@@ -13,19 +13,46 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package com.alibaba.fescar.tm.api.transaction;
 
-package com.alibaba.fescar.spring.annotation;
+/**
+ * @author guoyao
+ * @date 2019/3/4
+ */
+public interface TransactionHook {
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+    /**
+     * before tx begin
+     */
+    void beforeBegin();
 
-public class BusinessImpl implements Business {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BusinessImpl.class);
+    /**
+     * after tx begin
+     */
+    void afterBegin();
 
-    @Override
-    @GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
-    public String doBiz(String msg) {
-        LOGGER.info("Business doBiz");
-        return "hello " + msg;
-    }
+    /**
+     * before tx commit
+     */
+    void beforeCommit();
+
+    /**
+     * after tx commit
+     */
+    void afterCommit();
+
+    /**
+     * before tx rollback
+     */
+    void beforeRollback();
+
+    /**
+     * after tx rollback
+     */
+    void afterRollback();
+
+    /**
+     * after tx all Completed
+     */
+    void afterCompletion();
 }

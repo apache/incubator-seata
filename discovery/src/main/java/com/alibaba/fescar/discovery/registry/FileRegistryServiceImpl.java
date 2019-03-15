@@ -20,11 +20,10 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.config.ConfigChangeListener;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
-
-import org.apache.commons.lang.StringUtils;
 
 /**
  * The type File registry service.
@@ -85,7 +84,7 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
         }
         String endpointStr = CONFIG.getConfig(
             PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + clusterName + POSTFIX_GROUPLIST);
-        if (StringUtils.isEmpty(endpointStr)) {
+        if (StringUtils.isNullOrEmpty(endpointStr)) {
             throw new IllegalArgumentException(clusterName + POSTFIX_GROUPLIST + " is required");
         }
         String[] endpoints = endpointStr.split(ENDPOINT_SPLIT_CHAR);
