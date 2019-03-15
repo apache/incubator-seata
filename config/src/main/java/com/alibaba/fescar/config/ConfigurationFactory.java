@@ -77,6 +77,13 @@ public final class ConfigurationFactory {
                 String name = FILE_INSTANCE.getConfig(pathDataId);
                 configuration = new FileConfiguration(name);
                 break;
+            case ZK:
+                try {
+                    configuration = new ZKConfiguration();
+                } catch (Exception e) {
+                    throw new RuntimeException(e);
+                }
+                break;
             default:
                 throw new NotSupportYetException("not support register type:" + configType);
         }
