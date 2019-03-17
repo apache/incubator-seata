@@ -16,19 +16,23 @@
 
 package com.alibaba.fescar.spring.annotation;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.concurrent.Callable;
+import java.util.Arrays;
+
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.common.util.StringUtils;
+import com.alibaba.fescar.rm.GlobalLockTemplate;
 import com.alibaba.fescar.tm.api.DefaultFailureHandlerImpl;
 import com.alibaba.fescar.tm.api.FailureHandler;
 import com.alibaba.fescar.tm.api.TransactionalExecutor;
 import com.alibaba.fescar.tm.api.TransactionalTemplate;
+
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.lang.reflect.Method;
-import java.util.Arrays;
 
 /**
  * The type Global transactional interceptor.
@@ -39,6 +43,7 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
 
     private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
+    private final GlobalLockTemplate<Object> globalLockTemplate = new GlobalLockTemplate<>();
     private final FailureHandler failureHandler;
 
     /**
@@ -55,11 +60,37 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
-        final GlobalTransactional anno = getAnnotation(methodInvocation.getMethod());
-        if (anno == null) {
+        final GlobalTransactional globalTrxAnno = getAnnotation(methodInvocation.getMethod(),
+            GlobalTransactional.class);
+        final GlobalLock globalLockAnno = getAnnotation(methodInvocation.getMethod(), GlobalLock.class);
+        if (globalTrxAnno != null) {
+            return handleGlobalTransaction(methodInvocation, globalTrxAnno);
+        } else if (globalLockAnno != null) {
+            return handleGlobalLock(methodInvocation);
+        } else {
             return methodInvocation.proceed();
         }
+    }
 
+    private Object handleGlobalLock(final MethodInvocation methodInvocation) throws Exception {
+        return globalLockTemplate.execute(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                try {
+                    return methodInvocation.proceed();
+                } catch (Throwable e) {
+                    if (e instanceof Exception) {
+                        throw (Exception)e;
+                    } else {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        });
+    }
+
+    private Object handleGlobalTransaction(final MethodInvocation methodInvocation,
+                                           final GlobalTransactional globalTrxAnno) throws Throwable {
         try {
             return transactionalTemplate.execute(new TransactionalExecutor() {
                 @Override
@@ -69,13 +100,13 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
 
                 @Override
                 public int timeout() {
-                    return anno.timeoutMills();
+                    return globalTrxAnno.timeoutMills();
                 }
 
                 @Override
                 public String name() {
-                    String name = anno.name();
-                    if (!StringUtils.isEmpty(name)) {
+                    String name = globalTrxAnno.name();
+                    if (!StringUtils.isNullOrEmpty(name)) {
                         return name;
                     }
                     return formatMethod(methodInvocation.getMethod());
@@ -102,11 +133,11 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
         }
     }
 
-    private GlobalTransactional getAnnotation(Method method) {
+    private <T extends Annotation> T getAnnotation(Method method, Class<T> clazz) {
         if (method == null) {
             return null;
         }
-        return method.getAnnotation(GlobalTransactional.class);
+        return method.getAnnotation(clazz);
     }
 
     private String formatMethod(Method method) {

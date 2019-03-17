@@ -259,7 +259,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             }
             super.destroy();
         } catch (Exception exx) {
-            LOGGER.error("shutdown error: {}", exx.getMessage());
+            LOGGER.error("shutdown error:" + exx.getMessage());
         }
     }
 
@@ -338,7 +338,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         try {
             availList = getAvailServerList(transactionServiceGroup);
         } catch (Exception exx) {
-            LOGGER.error(exx.getMessage());
+            LOGGER.error("failed to get available server to connect," + exx.getMessage());
         }
         if (CollectionUtils.isEmpty(availList)) {
             LOGGER.error("no available server to connect.");
