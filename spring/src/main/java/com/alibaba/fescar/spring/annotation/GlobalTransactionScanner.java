@@ -60,7 +60,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     private static final int ORDER_NUM = 1024;
     private static final int DEFAULT_MODE = AT_MODE;
 
-    private static final Set<String> PROXIED_SET = new HashSet<>();
+    private static final Set<String> PROXYED_SET = new HashSet<>();
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
 
     private GlobalTransactionalInterceptor interceptor;
@@ -179,8 +179,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
             return bean;
         }
         try {
-            synchronized (PROXIED_SET) {
-                if (PROXIED_SET.contains(beanName)) {
+            synchronized (PROXYED_SET) {
+                if (PROXYED_SET.contains(beanName)) {
                     return bean;
                 }
                 Class<?> serviceInterface = findTargetClass(bean);
@@ -216,7 +216,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                         advised.addAdvisor(0, avr);
                     }
                 }
-                PROXIED_SET.add(beanName);
+                PROXYED_SET.add(beanName);
                 return bean;
             }
         } catch (Exception exx) {
