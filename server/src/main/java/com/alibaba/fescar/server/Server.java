@@ -22,6 +22,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fescar.common.XID;
+import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.rpc.netty.RpcServer;
 import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
@@ -32,8 +33,14 @@ import com.alibaba.fescar.server.session.SessionHolder;
  */
 public class Server {
 
-    private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
-        new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+    private static final int MIN_SERVER_POOL_SIZE = 100;
+    private static final int MAX_SERVER_POOL_SIZE = 500;
+    private static final int MAX_TASK_QUEUE_SIZE = 20000;
+    private static final int KEEP_ALIVE_TIME = 500;
+    private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(MIN_SERVER_POOL_SIZE,
+        MAX_SERVER_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
+        new LinkedBlockingQueue(MAX_TASK_QUEUE_SIZE),
+        new NamedThreadFactory("ServerHandlerThread", MAX_SERVER_POOL_SIZE), new ThreadPoolExecutor.CallerRunsPolicy());
 
     /**
      * The entry point of application.

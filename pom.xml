@@ -377,7 +377,7 @@
                 <version>3.8</version>
                 <configuration>
                     <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
-                    <minimumPriority>1</minimumPriority>
+                    <minimumPriority>2</minimumPriority>
                     <printFailingErrors>true</printFailingErrors>
                     <rulesets>
                         <ruleset>rulesets/java/ali-comment.xml</ruleset>
