@@ -40,8 +40,8 @@ import static com.alibaba.fescar.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
  * @author crazier.huang
  * @date 2019/2/18
  */
-public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
-    private final static Logger LOGGER = LoggerFactory.getLogger(ZKConfiguration.class);
+public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListener> {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ZookeeperConfiguration.class);
 
     private static final String REGISTRY_TYPE = "zk";
     private static final String ZK_PATH_SPLIT_CHAR = "/";
@@ -59,7 +59,7 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
         new NamedThreadFactory("ZKConfigThread", THREAD_POOL_NUM));
     private static volatile ZkClient zkClient;
 
-    public ZKConfiguration() {
+    public ZookeeperConfiguration() {
         if (zkClient == null) {
             zkClient = new ZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
                 FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY),
