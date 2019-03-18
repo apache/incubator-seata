@@ -93,6 +93,7 @@ public class TCCResourceManager extends AbstractResourceManager {
 			//BusinessActionContext
 			BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId, applicationData);
 			Object ret = commitMethod.invoke(targetTCCBean, businessActionContext);
+			LOGGER.info("TCC resource commit result :" + ret + ", xid:" + xid + ", branchId:" + branchId + ", resourceId:" + resourceId);
 			if(ret != null && ret instanceof TwoPhaseResult){
 				result = ((TwoPhaseResult)ret).isSuccess();
 			}else {
@@ -132,6 +133,7 @@ public class TCCResourceManager extends AbstractResourceManager {
 			//BusinessActionContext
 			BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId, applicationData);
 			Object ret = rollbackMethod.invoke(targetTCCBean, businessActionContext);
+			LOGGER.info("TCC resource rollback result :" + ret + ", xid:" + xid + ", branchId:" + branchId + ", resourceId:" + resourceId);
 			if (ret != null && ret instanceof TwoPhaseResult) {
 				result = ((TwoPhaseResult) ret).isSuccess();
 			} else {

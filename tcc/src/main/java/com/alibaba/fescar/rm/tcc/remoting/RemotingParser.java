@@ -35,7 +35,7 @@ public interface RemotingParser {
      * @return boolean boolean
      * @throws FrameworkException the framework exception
      */
-    public boolean isRemoting(Object bean, String beanName) throws FrameworkException;
+    boolean isRemoting(Object bean, String beanName) throws FrameworkException;
 
     /**
      * if it is reference bean ?
@@ -45,7 +45,7 @@ public interface RemotingParser {
      * @return boolean boolean
      * @throws FrameworkException the framework exception
      */
-    public boolean isReference(Object bean, String beanName) throws FrameworkException;
+    boolean isReference(Object bean, String beanName) throws FrameworkException;
 
     /**
      * if it is service bean ?
@@ -55,7 +55,7 @@ public interface RemotingParser {
      * @return boolean boolean
      * @throws FrameworkException the framework exception
      */
-    public boolean isService(Object bean, String beanName) throws FrameworkException;
+    boolean isService(Object bean, String beanName) throws FrameworkException;
 
     /**
      * get the remoting bean info
@@ -65,14 +65,14 @@ public interface RemotingParser {
      * @return service desc
      * @throws FrameworkException the framework exception
      */
-    public RemotingDesc getServiceDesc(Object bean, String beanName) throws FrameworkException;
+    RemotingDesc getServiceDesc(Object bean, String beanName) throws FrameworkException;
 
     /**
      * the remoting protocol
      *
      * @return protocol
      */
-    public short getProtocol();
+    short getProtocol();
 
 
 }

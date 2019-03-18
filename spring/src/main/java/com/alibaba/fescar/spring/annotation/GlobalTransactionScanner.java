@@ -19,12 +19,9 @@ package com.alibaba.fescar.spring.annotation;
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.rm.RMClient;
-import com.alibaba.fescar.rm.tcc.api.TwoPhaseBusinessAction;
-import com.alibaba.fescar.rm.tcc.remoting.Protocols;
-import com.alibaba.fescar.rm.tcc.remoting.RemotingDesc;
-import com.alibaba.fescar.rm.tcc.remoting.parser.DefaultRemotingParser;
 import com.alibaba.fescar.spring.tcc.TccActionInterceptor;
 import com.alibaba.fescar.spring.util.SpringProxyUtils;
+import com.alibaba.fescar.spring.util.TCCBeanParserUtils;
 import com.alibaba.fescar.tm.TMClient;
 import com.alibaba.fescar.tm.api.DefaultFailureHandlerImpl;
 import com.alibaba.fescar.tm.api.FailureHandler;
@@ -187,10 +184,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                 }
                 interceptor = null;
                 //check TCC proxy
-                if(isTccAutoProxy(bean, beanName)){
+                if(TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)){
                     //TCC interceptor， proxy bean of sofa:reference/dubbo:reference, and LocalTCC
-                    RemotingDesc remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-                    interceptor = new TccActionInterceptor(remotingDesc);
+                    interceptor = new TccActionInterceptor(TCCBeanParserUtils.getRemotingDesc(beanName));
                 }else {
                     Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
                     Method[] methods = serviceInterface.getMethods();
@@ -234,121 +230,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         } catch (Exception exx) {
             throw new RuntimeException(exx);
         }
-    }
-
-    /**
-     * is auto proxy TCC bean
-     *
-     * @param bean the bean
-     * @param beanName the bean name
-     * @return boolean boolean
-     */
-    protected boolean isTccAutoProxy(Object bean, String beanName){
-        RemotingDesc remotingDesc = null;
-        boolean isRemotingBean = parserRemotingServiceInfo(bean, beanName);
-        //is remoting bean
-        if(isRemotingBean) {
-            remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-            if(remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM){
-                //LocalTCC
-                return isTccProxyTargetBean(remotingDesc);
-            }else {
-                // sofa:reference / dubbo:reference, factory bean 不代理
-                return false;
-            }
-        }else{
-            //get RemotingBean description
-            remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-            if(remotingDesc == null){
-                //check FactoryBean
-                if(isRemotingFactoryBean(bean, beanName)){
-                    remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-                    return isTccProxyTargetBean(remotingDesc);
-                }else {
-                    return false;
-                }
-            }else {
-                //判断是否需要代理
-                return isTccProxyTargetBean(remotingDesc);
-            }
-        }
-    }
-
-    /**
-     * if it is proxy bean, check if the FactoryBean is Remoting bean
-     *
-     * @param bean the bean
-     * @param beanName the bean name
-     * @return boolean boolean
-     */
-    protected boolean isRemotingFactoryBean(Object bean, String beanName) {
-        if(!SpringProxyUtils.isProxy(bean)){
-            return false;
-        }
-        //the FactoryBean of proxy bean
-        String factoryBeanName = new StringBuilder().append("&").append(beanName).toString();
-        Object factoryBean = null;
-        if(applicationContext != null && applicationContext.containsBean(factoryBeanName)){
-            factoryBean = applicationContext.getBean(factoryBeanName);
-        }
-        //not factory bean，needn't proxy
-        if(factoryBean == null ){
-            return false;
-        }
-        //get FactoryBean info
-        return parserRemotingServiceInfo(factoryBean, beanName);
-    }
-
-    /**
-     * is TCC proxy-bean/target-bean: LocalTCC , the proxy bean of sofa:reference/dubbo:reference
-     *
-     * @param remotingDesc the remoting desc
-     * @return boolean boolean
-     */
-    protected boolean isTccProxyTargetBean(RemotingDesc remotingDesc){
-        if(remotingDesc == null) {
-            return false;
-        }
-        //check if it is TCC bean
-        boolean isTccClazz = false;
-        Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
-        Method[] methods = tccInterfaceClazz.getMethods();
-        TwoPhaseBusinessAction twoPhaseBusinessAction = null;
-        for (Method method : methods) {
-            twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
-            if(twoPhaseBusinessAction != null ){
-                isTccClazz = true;
-                break;
-            }
-        }
-        if(!isTccClazz){
-            return false;
-        }
-        short protocols = remotingDesc.getProtocol();
-        //LocalTCC
-        if(Protocols.IN_JVM == protocols){
-            //in jvm TCC bean , AOP
-            return true;
-        }
-        // sofa:reference /  dubbo:reference, AOP
-        if(remotingDesc.isReference()){
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * get remoting bean info: sofa:service、sofa:reference、dubbo:reference、dubbo:service
-     *
-     * @param bean the bean
-     * @param beanName the bean name
-     * @return if sofa:service、sofa:reference、dubbo:reference、dubbo:service return true，else return false
-     */
-    protected boolean parserRemotingServiceInfo(Object bean, String beanName) {
-        if(DefaultRemotingParser.get().isRemoting(bean, beanName)) {
-            return null != DefaultRemotingParser.get().parserRemotingServiceInfo(bean, beanName);
-        }
-        return false;
     }
 
     private MethodDesc makeMethodDesc(GlobalTransactional anno, Method method) {
