@@ -18,6 +18,8 @@ package com.alibaba.fescar.common.exception;
 
 /**
  * The type Not support yet exception.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class NotSupportYetException extends RuntimeException {
 

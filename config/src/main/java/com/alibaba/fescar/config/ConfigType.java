@@ -16,9 +16,6 @@
 
 package com.alibaba.fescar.config;
 
-
-import com.alibaba.fescar.common.exception.NotSupportYetException;
-
 /**
  * The enum Config type.
  *

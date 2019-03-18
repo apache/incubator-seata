@@ -26,6 +26,8 @@ import javax.sql.rowset.serial.SerialBlob;
 
 /**
  * The type String utils.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class StringUtils {
 

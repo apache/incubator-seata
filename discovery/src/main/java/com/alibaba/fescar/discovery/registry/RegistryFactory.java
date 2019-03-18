@@ -62,7 +62,7 @@ public class RegistryFactory {
                 registryService = FileRegistryServiceImpl.getInstance();
                 break;
             case ZK:
-                registryService = ZKRegisterServiceImpl.getInstance();
+                registryService = ZookeeperRegisterServiceImpl.getInstance();
                 break;
             default:
                 throw new NotSupportYetException("not support register type:" + registryType);

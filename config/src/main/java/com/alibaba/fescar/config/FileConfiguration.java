@@ -60,9 +60,9 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
 
     private static final String REGISTRY_TYPE = "file";
 
-    private final ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = new ConcurrentHashMap<>(8);
 
-    private final ConcurrentMap<String, String> listenedConfigMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, String> listenedConfigMap = new ConcurrentHashMap<>(8);
 
     /**
      * Instantiates a new File configuration.
@@ -242,8 +242,8 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
                 try {
                     Map<String, List<ConfigChangeListener>> configListenerMap;
                     if (null != dataId && null != listener) {
-                        configListenerMap = new ConcurrentHashMap<>();
-                        configListenerMap.put(dataId, new ArrayList<ConfigChangeListener>());
+                        configListenerMap = new ConcurrentHashMap<>(8);
+                        configListenerMap.put(dataId, new ArrayList<>());
                         configListenerMap.get(dataId).add(listener);
                     } else {
                         configListenerMap = configListenersMap;

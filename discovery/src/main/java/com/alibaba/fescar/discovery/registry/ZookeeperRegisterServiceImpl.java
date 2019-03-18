@@ -16,6 +16,12 @@
 
 package com.alibaba.fescar.discovery.registry;
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
@@ -26,12 +32,6 @@ import org.I0Itec.zkclient.ZkClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import static com.alibaba.fescar.common.Constants.IP_PORT_SPLIT_CHAR;
 
 /**
@@ -40,10 +40,10 @@ import static com.alibaba.fescar.common.Constants.IP_PORT_SPLIT_CHAR;
  * @author crazier.huang
  * @date 2019/2/15
  */
-public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ZKRegisterServiceImpl.class);
+public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildListener> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ZookeeperRegisterServiceImpl.class);
 
-    private static volatile ZKRegisterServiceImpl instance;
+    private static volatile ZookeeperRegisterServiceImpl instance;
     private static volatile ZkClient zkClient;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
     private static final String ZK_PATH_SPLIT_CHAR = "/";
@@ -63,13 +63,13 @@ public class ZKRegisterServiceImpl implements RegistryService<IZkChildListener> 
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<IZkChildListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
 
-    private ZKRegisterServiceImpl() {}
+    private ZookeeperRegisterServiceImpl() {}
 
-    public static ZKRegisterServiceImpl getInstance() {
+    public static ZookeeperRegisterServiceImpl getInstance() {
         if (null == instance) {
-            synchronized (ZKRegisterServiceImpl.class) {
+            synchronized (ZookeeperRegisterServiceImpl.class) {
                 if (null == instance) {
-                    instance = new ZKRegisterServiceImpl();
+                    instance = new ZookeeperRegisterServiceImpl();
                 }
             }
         }

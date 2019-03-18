@@ -18,6 +18,8 @@ package com.alibaba.fescar.common.exception;
 
 /**
  * The type Should never happen exception.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class ShouldNeverHappenException extends RuntimeException {
 

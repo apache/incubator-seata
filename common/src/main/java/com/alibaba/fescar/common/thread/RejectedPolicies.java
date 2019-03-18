@@ -23,7 +23,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 /**
  * Policies for RejectedExecutionHandler
  *
- * Created by guoyao on 2019/2/26.
+ * @author guoyao
  */
 public final class RejectedPolicies {
 
