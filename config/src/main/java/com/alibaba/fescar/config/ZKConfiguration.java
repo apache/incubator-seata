@@ -16,7 +16,16 @@
 
 package com.alibaba.fescar.config;
 
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import com.alibaba.fescar.common.exception.NotSupportYetException;
+import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.common.util.StringUtils;
 
 import org.I0Itec.zkclient.IZkDataListener;
@@ -24,14 +33,6 @@ import org.I0Itec.zkclient.ZkClient;
 import org.apache.zookeeper.CreateMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.FutureTask;
 
 import static com.alibaba.fescar.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 
@@ -50,11 +51,12 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String SESSION_TIME_OUT_KEY = "session.timeout";
     private static final String CONNECT_TIME_OUT_KEY = "connect.timeout";
-    private static final int THREAD_POOL_NUM = 5;
+    private static final int THREAD_POOL_NUM = 1;
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
         + FILE_CONFIG_SPLIT_CHAR;
-    private static final ExecutorService executor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>());
+    private static final ExecutorService CONFIG_EXECUTOR = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
+        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+        new NamedThreadFactory("ZKConfigThread", THREAD_POOL_NUM));
     private static volatile ZkClient zkClient;
 
     public ZKConfiguration() {
@@ -76,6 +78,7 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
         FutureTask<String> future = new FutureTask<String>(new Callable<String>() {
+            @Override
             public String call() throws Exception {
                 String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
                 String value = zkClient.readData(path);
@@ -85,7 +88,7 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
                 return value;
             }
         });
-        executor.execute(future);
+        CONFIG_EXECUTOR.execute(future);
         try {
             return future.get(timeoutMills, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
@@ -97,6 +100,7 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
+            @Override
             public Boolean call() throws Exception {
                 String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
                 if (!zkClient.exists(path)) {
@@ -107,7 +111,7 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
                 return true;
             }
         });
-        executor.execute(future);
+        CONFIG_EXECUTOR.execute(future);
         try {
             return future.get(timeoutMills, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
@@ -124,12 +128,13 @@ public class ZKConfiguration extends AbstractConfiguration<IZkDataListener> {
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
         FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
+            @Override
             public Boolean call() throws Exception {
                 String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
                 return zkClient.delete(path);
             }
         });
-        executor.execute(future);
+        CONFIG_EXECUTOR.execute(future);
         try {
             return future.get(timeoutMills, TimeUnit.MILLISECONDS);
         } catch (Exception e) {
