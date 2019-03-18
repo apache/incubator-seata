@@ -13,45 +13,46 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
-package com.alibaba.fescar.config;
+package com.alibaba.fescar.tm.api.transaction;
 
 /**
- * The enum Config type.
- *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /2/1
+ * @author guoyao
+ * @date 2019/3/4
  */
-public enum ConfigType {
-    /**
-     * File config type.
-     */
-    File,
-    /**
-     * zookeeper config type.
-     */
-    ZK,
-    /**
-     * Nacos config type.
-     */
-    Nacos,
-    /**
-     * Apollo config type.
-     */
-    Apollo;
+public interface TransactionHook {
 
     /**
-     * Gets type.
-     *
-     * @param name the name
-     * @return the type
+     * before tx begin
      */
-    public static ConfigType getType(String name) {
-        for (ConfigType configType : values()) {
-            if (configType.name().equalsIgnoreCase(name)) {
-                return configType;
-            }
-        }
-        throw new IllegalArgumentException("illegal type:" + name);
-    }
+    void beforeBegin();
+
+    /**
+     * after tx begin
+     */
+    void afterBegin();
+
+    /**
+     * before tx commit
+     */
+    void beforeCommit();
+
+    /**
+     * after tx commit
+     */
+    void afterCommit();
+
+    /**
+     * before tx rollback
+     */
+    void beforeRollback();
+
+    /**
+     * after tx rollback
+     */
+    void afterRollback();
+
+    /**
+     * after tx all Completed
+     */
+    void afterCompletion();
 }

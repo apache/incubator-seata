@@ -16,6 +16,8 @@
 
 package com.alibaba.fescar.rm.tcc;
 
+import com.alibaba.fescar.common.util.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,9 +36,7 @@ public class TwoPhaseResult {
     /**
      * result message
      */
-    private String              msg;
-
-    private Map<String, Object> context = new HashMap<String, Object>();
+    private String              message;
 
     /**
      * Instantiates a new Two phase result.
@@ -46,7 +46,7 @@ public class TwoPhaseResult {
      */
     public TwoPhaseResult(boolean isSuccess, String msg) {
         this.isSuccess = isSuccess;
-        this.msg = msg;
+        this.message = msg;
     }
 
     /**
@@ -68,63 +68,32 @@ public class TwoPhaseResult {
     }
 
     /**
-     * Gets msg.
+     * Gets message.
      *
-     * @return the msg
+     * @return the message
      */
-    public String getMsg() {
-        return msg;
+    public String getMessage() {
+        return message;
     }
 
     /**
-     * Sets msg.
+     * Sets message.
      *
-     * @param msg the msg
+     * @param msg the message
      */
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
-
-    /**
-     * Gets context.
-     *
-     * @return the context
-     */
-    public Map<String, Object> getContext() {
-        return context;
-    }
-
-    /**
-     * Gets context.
-     *
-     * @param key the key
-     * @return the context
-     */
-    public Object getContext(String key) {
-        return context.get(key);
-    }
-
-    /**
-     * Sets context.
-     *
-     * @param context the context
-     */
-    public void setContext(Map<String, Object> context) {
-        this.context = context;
-    }
-
-    /**
-     * Add context.
-     *
-     * @param key   the key
-     * @param value the value
-     */
-    public void addContext(String key, Object value) {
-        context.put(key, value);
+    public void setMessage(String msg) {
+        this.message = msg;
     }
 
     @Override
     public String toString() {
-        return String.valueOf(isSuccess);
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
+        sb.append("isSuccess:").append(isSuccess);
+        if(StringUtils.isNotBlank(message)){
+            sb.append(", msg").append(message);
+        }
+        sb.append("]");
+        return sb.toString();
     }
 }
