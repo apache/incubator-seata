@@ -16,53 +16,26 @@
 
 package com.alibaba.fescar.rm;
 
-import com.alibaba.fescar.core.exception.TransactionException;
-import com.alibaba.fescar.core.model.BranchStatus;
-import com.alibaba.fescar.core.protocol.transaction.BranchCommitRequest;
-import com.alibaba.fescar.core.protocol.transaction.BranchCommitResponse;
-import com.alibaba.fescar.core.protocol.transaction.BranchRollbackRequest;
-import com.alibaba.fescar.core.protocol.transaction.BranchRollbackResponse;
-import com.alibaba.fescar.core.protocol.transaction.RMInboundHandler;
-import com.alibaba.fescar.core.rpc.TransactionMessageHandler;
-import com.alibaba.fescar.rm.datasource.DataSourceManager;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.alibaba.fescar.core.model.BranchType;
+import com.alibaba.fescar.core.model.ResourceManager;
 
 /**
  * The type Rm handler at.
  */
-public class RMHandlerAT extends AbstractRMHandlerAT implements RMInboundHandler, TransactionMessageHandler {
+public class RMHandlerAT extends AbstractRMHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RMHandlerAT.class);
-
-    private DataSourceManager dataSourceManager = DataSourceManager.get();
-
+    /**
+     * get AT resource managerDataSourceManager.java
+     * @return
+     */
     @Override
-    protected void doBranchCommit(BranchCommitRequest request, BranchCommitResponse response)
-        throws TransactionException {
-        String xid = request.getXid();
-        long branchId = request.getBranchId();
-        String resourceId = request.getResourceId();
-        String applicationData = request.getApplicationData();
-        LOGGER.info("AT Branch committing: " + xid + " " + branchId + " " + resourceId + " " + applicationData);
-        BranchStatus status = dataSourceManager.branchCommit(xid, branchId, resourceId, applicationData);
-        response.setBranchStatus(status);
-        LOGGER.info("AT Branch commit result: " + status);
-
+    protected ResourceManager getResourceManager() {
+        return DefaultResourceManager.get().getResourceManager(BranchType.AT);
     }
 
     @Override
-    protected void doBranchRollback(BranchRollbackRequest request, BranchRollbackResponse response)
-        throws TransactionException {
-        String xid = request.getXid();
-        long branchId = request.getBranchId();
-        String resourceId = request.getResourceId();
-        String applicationData = request.getApplicationData();
-        LOGGER.info("AT Branch rolling back: " + xid + " " + branchId + " " + resourceId);
-        BranchStatus status = dataSourceManager.branchRollback(xid, branchId, resourceId, applicationData);
-        response.setBranchStatus(status);
-        LOGGER.info("AT Branch rollback result: " + status);
-
+    public BranchType getBranchType(){
+        return BranchType.AT;
     }
+
 }
