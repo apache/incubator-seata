@@ -51,7 +51,7 @@ public class ConfigFutureTest {
         // return content value when future not set result
         Assert.assertEquals(CONTENT, configFuture.get());
         configFuture.setResult(RESULT);
-        Assert.assertEquals(RESULT,configFuture.get());
+        Assert.assertEquals(RESULT, configFuture.get());
     }
 
     /**
@@ -61,7 +61,7 @@ public class ConfigFutureTest {
     public void testConfigGetCustomeOutTime() {
         Assert.assertEquals(CONTENT, configFuture.get(10L, TimeUnit.MILLISECONDS));
         configFuture.setResult(RESULT);
-        Assert.assertEquals(RESULT,configFuture.get());
+        Assert.assertEquals(RESULT, configFuture.get());
     }
 
     /**
@@ -70,9 +70,9 @@ public class ConfigFutureTest {
     @Test
     public void testConfigGetWithPutOperation() {
         configFuture.setOperation(ConfigFuture.ConfigOperation.PUT);
-        Assert.assertEquals(false,configFuture.get());
+        Assert.assertEquals(false, configFuture.get());
         configFuture.setResult(RESULT);
-        Assert.assertEquals(RESULT,configFuture.get());
+        Assert.assertEquals(RESULT, configFuture.get());
     }
 
     @Test
@@ -102,7 +102,7 @@ public class ConfigFutureTest {
     @Test
     public void testSetResult() {
         configFuture.setResult(RESULT);
-        Assert.assertEquals(RESULT,configFuture.get());
+        Assert.assertEquals(RESULT, configFuture.get());
     }
 
     @Test
@@ -119,7 +119,9 @@ public class ConfigFutureTest {
 
     @Test
     public void testIsTimeout() {
-        configFuture.get(TIME_MILLS, TimeUnit.MILLISECONDS);
+        Assert.assertFalse(configFuture.isTimeout());
+        //TIME_MILLS + 1 ensure timeout occur
+        configFuture.get(TIME_MILLS + 1, TimeUnit.MILLISECONDS);
         Assert.assertTrue(configFuture.isTimeout());
     }
 
