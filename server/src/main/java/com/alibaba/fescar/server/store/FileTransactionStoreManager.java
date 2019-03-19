@@ -98,6 +98,10 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
         try {
             currDataFile = new File(currFullFileName);
             if (!currDataFile.exists()) {
+                //create parent dir first
+                if (currDataFile.getParentFile() != null && !currDataFile.getParentFile().exists()) {
+                    currDataFile.getParentFile().mkdirs();
+                }
                 currDataFile.createNewFile();
                 trxStartTimeMills = System.currentTimeMillis();
             } else {

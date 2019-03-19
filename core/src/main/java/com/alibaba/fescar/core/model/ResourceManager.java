@@ -43,4 +43,10 @@ public interface ResourceManager extends ResourceManagerInbound, ResourceManager
      * @return resourceId -> Resource Map
      */
     Map<String, Resource> getManagedResources();
+
+    /**
+     * get the BranchType
+     * @return
+     */
+    BranchType getBranchType();
 }

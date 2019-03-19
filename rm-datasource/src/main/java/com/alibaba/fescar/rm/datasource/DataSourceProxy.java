@@ -20,7 +20,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.Resource;
+import com.alibaba.fescar.rm.DefaultResourceManager;
 
 /**
  * The type Data source proxy.
@@ -53,7 +55,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private void assertManaged() {
         if (!managed) {
-            DataSourceManager.get().registerResource(this);
+            DefaultResourceManager.get().registerResource(this);
             managed = true;
         }
     }
@@ -99,5 +101,10 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     @Override
     public String getResourceId() {
         return targetDataSource.getUrl();
+    }
+
+    @Override
+    public BranchType getBranchType() {
+        return BranchType.AT;
     }
 }

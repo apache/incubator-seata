@@ -37,4 +37,11 @@ public interface Resource {
      */
     String getResourceId();
 
+    /**
+     * get resource type, AT、TCC etc.
+     *
+     * @return
+     */
+    BranchType getBranchType();
+
 }

@@ -16,21 +16,20 @@
 
 package com.alibaba.fescar.test;
 
-import java.util.Date;
-
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.Resource;
 import com.alibaba.fescar.rm.datasource.DataSourceManager;
-
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+
+import java.util.Date;
 
 /**
  * The type Data source basic test.
@@ -129,12 +128,12 @@ public class DataSourceBasicTest {
 
             @Override
             public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
-                                       String lockKeys) throws TransactionException {
+                                       String applicationData, String lockKeys) throws TransactionException {
                 return 123456L;
             }
 
             @Override
-            public void branchReport(String xid, long branchId, BranchStatus status, String applicationData)
+            public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData)
                 throws TransactionException {
 
             }
@@ -156,13 +155,13 @@ public class DataSourceBasicTest {
             }
 
             @Override
-            public BranchStatus branchCommit(String xid, long branchId, String resourceId, String applicationData)
+            public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
                 throws TransactionException {
                 return BranchStatus.PhaseTwo_Committed;
             }
 
             @Override
-            public BranchStatus branchRollback(String xid, long branchId, String resourceId, String applicationData)
+            public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
                 throws TransactionException {
                 return BranchStatus.PhaseTwo_Rollbacked;
             }

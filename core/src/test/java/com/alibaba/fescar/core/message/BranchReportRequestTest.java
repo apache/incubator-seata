@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import com.alibaba.fescar.core.model.BranchStatus;
+import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.protocol.transaction.BranchReportRequest;
 
 import org.junit.Assert;
@@ -75,7 +76,7 @@ public class BranchReportRequestTest {
 
         Assert.assertEquals(
             "[0, 0, 0, 0, 0, 19, 18, 61, 0, 0, 0, 0, 0, 0, 0, 3, 4, 0, 11, 114, 101, 115, 111, 117, 114, 99, 101, 48,"
-                + " 48, 51, 0, 0, 0, 13, 116, 101, 115, 116, 32, 97, 112, 112, 32, 100, 97, 116, 97]",
+                + " 48, 51, 0, 0, 0, 13, 116, 101, 115, 116, 32, 97, 112, 112, 32, 100, 97, 116, 97, 0]",
             encodeResultStr);
     }
 
@@ -93,6 +94,7 @@ public class BranchReportRequestTest {
         branchReportRequest.setResourceId("resource003");
         branchReportRequest.setStatus(BranchStatus.PhaseOne_Timeout);
         branchReportRequest.setApplicationData("test app data");
+        branchReportRequest.setBranchType(BranchType.AT);
 
         byte[] encodeResult = branchReportRequest.encode();
 
@@ -108,5 +110,6 @@ public class BranchReportRequestTest {
         Assert.assertEquals(branchReportRequest.getResourceId(), decodeBranchReportRequest.getResourceId());
         Assert.assertEquals(branchReportRequest.getStatus(), decodeBranchReportRequest.getStatus());
         Assert.assertEquals(branchReportRequest.getApplicationData(), decodeBranchReportRequest.getApplicationData());
+        Assert.assertEquals(branchReportRequest.getBranchType(), decodeBranchReportRequest.getBranchType());
     }
 }

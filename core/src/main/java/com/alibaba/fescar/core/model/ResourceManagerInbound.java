@@ -26,6 +26,7 @@ public interface ResourceManagerInbound {
     /**
      * Commit a branch transaction.
      *
+     * s@param branchType the branch type
      * @param xid             Transaction id.
      * @param branchId        Branch id.
      * @param resourceId      Resource id.
@@ -34,12 +35,12 @@ public interface ResourceManagerInbound {
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
      * out.
      */
-    BranchStatus branchCommit(String xid, long branchId, String resourceId, String applicationData)
-        throws TransactionException;
+    BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException;
 
     /**
      * Rollback a branch transaction.
      *
+     * @param branchType the branch type
      * @param xid             Transaction id.
      * @param branchId        Branch id.
      * @param resourceId      Resource id.
@@ -48,6 +49,5 @@ public interface ResourceManagerInbound {
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
      * out.
      */
-    BranchStatus branchRollback(String xid, long branchId, String resourceId, String applicationData)
-        throws TransactionException;
+    BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException;
 }

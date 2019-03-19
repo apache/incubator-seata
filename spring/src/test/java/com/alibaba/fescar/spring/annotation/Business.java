@@ -16,6 +16,15 @@
 
 package com.alibaba.fescar.spring.annotation;
 
+/**
+ * The interface Business.
+ */
 public interface Business {
+    /**
+     * Do biz string.
+     *
+     * @param msg the msg
+     * @return the string
+     */
     String doBiz(String msg);
 }
