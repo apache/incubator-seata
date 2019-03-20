@@ -20,6 +20,12 @@ import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 /**
  * The type My sql keyword checker.
  *
@@ -29,7 +35,10 @@ import org.apache.commons.lang3.StringUtils;
 public class MySQLKeywordChecker implements KeywordChecker {
     private static volatile KeywordChecker keywordChecker;
 
-    private MySQLKeywordChecker() {}
+    private static final Set<String> KEYWORD_SET = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
+
+    private MySQLKeywordChecker() {
+    }
 
     /**
      * get instance of type MySQL keyword checker
@@ -524,24 +533,16 @@ public class MySQLKeywordChecker implements KeywordChecker {
          */
         public final String name;
 
-        MySQLKeyword() {
-            this(null);
-        }
-
         MySQLKeyword(String name) {
             this.name = name;
         }
     }
 
+
     @Override
     public boolean check(String fieldOrTableName) {
-        try {
-            if (StringUtils.isNotBlank(fieldOrTableName)) {
-                MySQLKeyword.valueOf(fieldOrTableName.toUpperCase());
-                return true;
-            }
-        } catch (IllegalArgumentException e) {
-            //do nothing
+        if (null != fieldOrTableName) {
+            return KEYWORD_SET.contains(fieldOrTableName.toUpperCase());
         }
         return false;
     }
@@ -550,4 +551,5 @@ public class MySQLKeywordChecker implements KeywordChecker {
     public String checkAndReplace(String fieldOrTableName) {
         return check(fieldOrTableName) ? "`" + fieldOrTableName + "`" : fieldOrTableName;
     }
+
 }
