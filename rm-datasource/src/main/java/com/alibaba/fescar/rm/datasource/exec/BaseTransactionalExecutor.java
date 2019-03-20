@@ -20,15 +20,13 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.rm.datasource.ConnectionProxy;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
-import com.alibaba.fescar.rm.datasource.sql.struct.Field;
-import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
-import com.alibaba.fescar.rm.datasource.sql.struct.TableMetaCache;
-import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
+import com.alibaba.fescar.rm.datasource.sql.struct.*;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 
 /**
@@ -162,7 +160,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (tableMeta != null) {
             return tableMeta;
         }
-        tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
+        if(JdbcConstants.ORACLE.equalsIgnoreCase(statementProxy.getConnectionProxy().getDbType())) {
+            tableMeta = TableMetaCacheOracle.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
+        } else {
+            tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
+        }
         return tableMeta;
     }
 

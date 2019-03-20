@@ -29,6 +29,10 @@ import com.alibaba.fescar.rm.datasource.sql.druid.MySQLDeleteRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.druid.MySQLInsertRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.druid.MySQLUpdateRecognizer;
+import com.alibaba.fescar.rm.datasource.sql.druid.oracle.ORACLEDeleteRecognizer;
+import com.alibaba.fescar.rm.datasource.sql.druid.oracle.ORACLEInsertRecognizer;
+import com.alibaba.fescar.rm.datasource.sql.druid.oracle.ORACLESelectForUpdateRecognizer;
+import com.alibaba.fescar.rm.datasource.sql.druid.oracle.ORACLEUpdateRecognizer;
 
 /**
  * The type Sql visitor factory.
@@ -61,7 +65,19 @@ public class SQLVisitorFactory {
                     recognizer = new MySQLSelectForUpdateRecognizer(sql, ast);
                 }
             }
-        } else {
+        }  else if (JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
+            if (ast instanceof SQLInsertStatement) {
+                recognizer = new ORACLEInsertRecognizer(sql, ast);
+            } else if (ast instanceof SQLUpdateStatement) {
+                recognizer = new ORACLEUpdateRecognizer(sql, ast);
+            } else if (ast instanceof SQLDeleteStatement) {
+                recognizer = new ORACLEDeleteRecognizer(sql, ast);
+            } else if (ast instanceof SQLSelectStatement) {
+                if (((SQLSelectStatement) ast).getSelect().getQueryBlock().isForUpdate()) {
+                    recognizer = new ORACLESelectForUpdateRecognizer(sql, ast);
+                }
+            }
+        }else {
             throw new UnsupportedOperationException("Just support MySQL by now!");
         }
         return recognizer;

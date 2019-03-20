@@ -19,6 +19,7 @@ package com.alibaba.fescar.rm.datasource;
 import java.sql.Connection;
 import java.sql.SQLException;
 
+import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
@@ -27,6 +28,7 @@ import com.alibaba.fescar.rm.datasource.exec.LockConflictException;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
 
+import com.alibaba.fescar.rm.datasource.undo.UndoLogManagerOracle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,7 +179,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
         try {
             if (context.hasUndoLog()) {
-                UndoLogManager.flushUndoLogs(this);
+               if(JdbcConstants.ORACLE.equalsIgnoreCase(this.getDbType())) {
+                   UndoLogManagerOracle.flushUndoLogs(this);
+               } else {
+                   UndoLogManager.flushUndoLogs(this);
+               }
             }
             targetConnection.commit();
         } catch (Throwable ex) {

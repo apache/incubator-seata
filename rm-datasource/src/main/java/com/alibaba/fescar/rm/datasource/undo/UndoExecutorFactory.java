@@ -22,6 +22,7 @@ import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
 import com.alibaba.fescar.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
 import com.alibaba.fescar.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
+import com.alibaba.fescar.rm.datasource.undo.oracle.ORACLEUndoInsertExecutor;
 
 /**
  * The type Undo executor factory.
@@ -36,18 +37,31 @@ public class UndoExecutorFactory {
      * @return the undo executor
      */
     public static AbstractUndoExecutor getUndoExecutor(String dbType, SQLUndoLog sqlUndoLog) {
-        if (!dbType.equals(JdbcConstants.MYSQL)) {
+        if (!dbType.equalsIgnoreCase(JdbcConstants.MYSQL)&&!dbType.equalsIgnoreCase(JdbcConstants.ORACLE)) {
             throw new NotSupportYetException(dbType);
         }
-        switch (sqlUndoLog.getSqlType()) {
-            case INSERT:
-                return new MySQLUndoInsertExecutor(sqlUndoLog);
-            case UPDATE:
-                return new MySQLUndoUpdateExecutor(sqlUndoLog);
-            case DELETE:
-                return new MySQLUndoDeleteExecutor(sqlUndoLog);
-            default:
-                throw new ShouldNeverHappenException();
-        }
+          if(dbType.equalsIgnoreCase(JdbcConstants.ORACLE)) {
+            switch (sqlUndoLog.getSqlType()) {
+                case INSERT:
+                    return new ORACLEUndoInsertExecutor(sqlUndoLog);
+                case UPDATE:
+                    return new ORACLEUndoInsertExecutor(sqlUndoLog);
+                case DELETE:
+                    return new ORACLEUndoInsertExecutor(sqlUndoLog);
+                default:
+                    throw new ShouldNeverHappenException();
+            }
+        } else {
+              switch (sqlUndoLog.getSqlType()) {
+                  case INSERT:
+                      return new MySQLUndoInsertExecutor(sqlUndoLog);
+                  case UPDATE:
+                      return new MySQLUndoUpdateExecutor(sqlUndoLog);
+                  case DELETE:
+                      return new MySQLUndoDeleteExecutor(sqlUndoLog);
+                  default:
+                      throw new ShouldNeverHappenException();
+              }
+          }
     }
 }
