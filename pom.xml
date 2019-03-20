@@ -21,7 +21,7 @@
 
     <groupId>com.alibaba.fescar</groupId>
     <artifactId>fescar-all</artifactId>
-    <version>0.4.0</version>
+    <version>0.4.1-SNAPSHOT</version>
     <modules>
         <module>config</module>
         <module>common</module>
@@ -83,7 +83,7 @@
 
         <!-- Maven properties -->
         <maven.test.skip>false</maven.test.skip>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <!--<maven.javadoc.skip>true</maven.javadoc.skip>-->
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -334,6 +334,7 @@
                         <version>3.0.0</version>
                         <configuration>
                             <charset>UTF-8</charset>
+                            <failOnError>false</failOnError>
                         </configuration>
                         <executions>
                             <execution>
