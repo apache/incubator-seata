@@ -57,8 +57,8 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     @Override
     protected TableRecords beforeImage() throws SQLException {
-        SQLDeleteRecognizer visitor = (SQLDeleteRecognizer)sqlRecognizer;
-        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+        SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) sqlRecognizer;
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
 
         TableMeta tmeta = getTableMeta(visitor.getTableName());
         List<String> columns = new ArrayList<>();
@@ -77,7 +77,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         String whereCondition = null;
         ArrayList<Object> paramAppender = new ArrayList<>();
         if (statementProxy instanceof ParametersHolder) {
-            whereCondition = visitor.getWhereCondition((ParametersHolder)statementProxy, paramAppender);
+            whereCondition = visitor.getWhereCondition((ParametersHolder) statementProxy, paramAppender);
         } else {
             whereCondition = visitor.getWhereCondition();
         }
