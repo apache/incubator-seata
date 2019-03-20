@@ -38,8 +38,6 @@ import com.alibaba.fescar.core.rpc.ClientMessageListener;
 import com.alibaba.fescar.core.rpc.ClientMessageSender;
 import com.alibaba.fescar.core.rpc.RemotingService;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
-import com.alibaba.fescar.core.service.ServiceManager;
-import com.alibaba.fescar.core.service.ServiceManagerStaticConfigImpl;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
 import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
@@ -90,10 +88,6 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     private static final int MAX_MERGE_SEND_MILLS = 1;
     private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
 
-    /**
-     * The Service manager.
-     */
-    protected ServiceManager serviceManager;
 
     /**
      * The Netty client key pool.
@@ -142,7 +136,6 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         NettyPoolableFactory keyPoolableFactory = new NettyPoolableFactory(this);
         nettyClientKeyPool = new GenericKeyedObjectPool(keyPoolableFactory);
         nettyClientKeyPool.setConfig(getNettyPoolConfig());
-        serviceManager = new ServiceManagerStaticConfigImpl();
         super.init();
     }
 

@@ -14,10 +14,12 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.core.service;
+package com.alibaba.fescar.core.constants;
 
 /**
  * The type Configuration keys.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class ConfigurationKeys {
 
