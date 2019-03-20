@@ -17,12 +17,7 @@
 package com.alibaba.fescar.rm.datasource.undo.mysql.keyword;
 
 import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
-
-import org.apache.commons.lang3.StringUtils;
-
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
