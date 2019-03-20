@@ -17,7 +17,7 @@
 package com.alibaba.fescar.rm.datasource.exec;
 
 import com.alibaba.fescar.config.ConfigurationFactory;
-import com.alibaba.fescar.core.service.ConfigurationKeys;
+import com.alibaba.fescar.core.constants.ConfigurationKeys;
 
 /**
  * The type Lock retry controller.

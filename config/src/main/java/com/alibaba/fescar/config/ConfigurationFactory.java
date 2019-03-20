@@ -79,7 +79,7 @@ public final class ConfigurationFactory {
                 break;
             case ZK:
                 try {
-                    configuration = new ZKConfiguration();
+                    configuration = new ZookeeperConfiguration();
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

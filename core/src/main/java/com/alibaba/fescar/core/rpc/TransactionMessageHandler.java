@@ -21,6 +21,8 @@ import com.alibaba.fescar.core.protocol.AbstractResultMessage;
 
 /**
  * To handle the received RPC message on upper level.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public interface TransactionMessageHandler {
 

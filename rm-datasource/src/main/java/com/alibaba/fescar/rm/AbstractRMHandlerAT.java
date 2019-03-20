@@ -33,6 +33,7 @@ import com.alibaba.fescar.core.rpc.TransactionMessageHandler;
 /**
  * The type Abstract rm handler at.
  */
+@Deprecated
 public abstract class AbstractRMHandlerAT extends AbstractExceptionHandler
     implements RMInboundHandler, TransactionMessageHandler {
 

@@ -399,7 +399,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                 String serverAddress = entry.getKey();
                 Channel rmChannel = entry.getValue();
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("register AT resourceId:" + resourceId);
+                    LOGGER.info("register resource, resourceId:" + resourceId);
                 }
                 sendRegisterMessage(serverAddress, rmChannel, resourceId);
             }
@@ -462,6 +462,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
      * @return the merged resource keys
      */
     public String getMergedResourceKeys(ResourceManager resourceManager) {
+        //TODO
         Map<String, Resource> managedResources = resourceManager.getManagedResources();
         Set<String> resourceIds = managedResources.keySet();
         if (!resourceIds.isEmpty()) {
