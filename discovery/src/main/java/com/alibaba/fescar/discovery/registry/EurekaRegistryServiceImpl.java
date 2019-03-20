@@ -68,7 +68,6 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static final ConcurrentMap<String, Set<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
 
     private static volatile boolean subscribeListener = false;
-    private static volatile boolean needNotRegister = false;
     private static volatile ApplicationInfoManager applicationInfoManager;
     private static volatile CustomEurekaInstanceConfig instanceConfig;
     private static volatile EurekaRegistryServiceImpl instance;
@@ -98,7 +97,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             instanceConfig.setApplicationName(getApplicationName());
             instanceConfig.setInstanceId(getInstanceId());
         }
-        getEurekaClient();
+        getEurekaClient(true);
         applicationInfoManager.setInstanceStatus(InstanceInfo.InstanceStatus.UP);
     }
 
@@ -115,13 +114,13 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     @Override
     public void subscribe(String cluster, EurekaEventListener listener) throws Exception {
         subscribeListener = true;
-        getEurekaClientNoRegister().registerEventListener(listener);
+        getEurekaClient(false).registerEventListener(listener);
     }
 
     @Override
     public void unsubscribe(String cluster, EurekaEventListener listener) throws Exception {
         subscribeListener = false;
-        getEurekaClientNoRegister().unregisterEventListener(listener);
+        getEurekaClient(false).unregisterEventListener(listener);
     }
 
     @Override
@@ -150,7 +149,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     }
 
     private static void refreshCluster() throws Exception{
-        Applications applications = getEurekaClientNoRegister().getApplications();
+        Applications applications = getEurekaClient(false).getApplications();
         List<Application> list = applications.getRegisteredApplications();
         if (list == null || list.isEmpty()) {
             CLUSTER_ADDRESS_MAP.clear();
@@ -175,7 +174,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         eurekaClient = null;
     }
 
-    private static Properties getEurekaProperties() {
+    private static Properties getEurekaProperties(boolean needRegister) {
         Properties eurekaProperties = new Properties();
         eurekaProperties.setProperty(EUREKA_CONFIG_REFRESH_KEY, String.valueOf(EUREKA_REFRESH_INTERVAL));
 
@@ -192,7 +191,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             eurekaProperties.setProperty(EUREKA_CONFIG_METADATA_WEIGHT, DEFAULT_WEIGHT);
         }
 
-        if (needNotRegister) {
+        if (!needRegister) {
             eurekaProperties.setProperty(EUREKA_CONFIG_SHOULD_REGISTER, "false");
         }
 
@@ -207,29 +206,20 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         return application;
     }
 
-    private static EurekaClient getEurekaClientNoRegister () throws  Exception {
-        if (eurekaClient == null ) {
-            synchronized (EurekaRegistryServiceImpl.class){
-                if (eurekaClient == null){
-                    instanceConfig = new CustomEurekaInstanceConfig();
-                    needNotRegister = true;
-                    getEurekaClient();
-                }
-            }
-        }
-        return eurekaClient;
-    }
-
-    private static EurekaClient getEurekaClient() throws Exception {
+    private static EurekaClient getEurekaClient(boolean needRegister) throws Exception {
         if (eurekaClient == null) {
             synchronized (EurekaRegistryServiceImpl.class) {
                 try {
-                    if (eurekaClient == null) {
-                        ConfigurationManager.loadProperties(getEurekaProperties());
-                        InstanceInfo instanceInfo = new EurekaConfigBasedInstanceInfoProvider(instanceConfig).get();
-                        applicationInfoManager = new ApplicationInfoManager(instanceConfig, instanceInfo);
-                        eurekaClient = new DiscoveryClient(applicationInfoManager, new DefaultEurekaClientConfig());
+                    if (eurekaClient != null) {
+                        return eurekaClient;
                     }
+                    if (!needRegister){
+                        instanceConfig = new CustomEurekaInstanceConfig();
+                    }
+                    ConfigurationManager.loadProperties(getEurekaProperties(needRegister));
+                    InstanceInfo instanceInfo = new EurekaConfigBasedInstanceInfoProvider(instanceConfig).get();
+                    applicationInfoManager = new ApplicationInfoManager(instanceConfig, instanceInfo);
+                    eurekaClient = new DiscoveryClient(applicationInfoManager, new DefaultEurekaClientConfig());
                 } catch (Exception e) {
                     close();
                     throw new EurekaRegistryException("register eureka is error!", e);
