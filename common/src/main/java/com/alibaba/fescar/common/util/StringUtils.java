@@ -26,6 +26,8 @@ import javax.sql.rowset.serial.SerialBlob;
 
 /**
  * The type String utils.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class StringUtils {
 
@@ -39,8 +41,49 @@ public class StringUtils {
      * @param str the str
      * @return the boolean
      */
-    public static final boolean isEmpty(String str) {
+    public static final boolean isNullOrEmpty(String str) {
         return (str == null) || (str.isEmpty());
+    }
+
+    /**
+     * Is blank string ?
+     *
+     * @param str the str
+     * @return boolean
+     */
+    public static boolean isBlank(String str) {
+        int length;
+
+        if ((str == null) || ((length = str.length()) == 0)) {
+            return true;
+        }
+        for (int i = 0; i < length; i++) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Is Not blank string ?
+     *
+     * @param str the str
+     * @return boolean
+     */
+    public static boolean isNotBlank(String str) {
+        int length;
+
+        if ((str == null) || ((length = str.length()) == 0)) {
+            return false;
+        }
+
+        for (int i = 0; i < length; i++) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

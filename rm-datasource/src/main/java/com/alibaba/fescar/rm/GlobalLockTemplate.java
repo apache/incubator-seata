@@ -21,12 +21,11 @@ import java.util.concurrent.Callable;
 import com.alibaba.fescar.core.context.RootContext;
 
 /**
- *  Template of executing business logic in a local transaction with Global lock.
- * 
+ * Template of executing business logic in a local transaction with Global lock.
+ *
+ * @param <T>
  * @author deyou
  * @date 2019.03.07
- * 
- * @param <T>
  */
 public class GlobalLockTemplate<T> {
 
@@ -35,7 +34,7 @@ public class GlobalLockTemplate<T> {
      *
      * @param business the business
      * @return the object
-     * @throws Exception 
+     * @throws Exception
      */
     public Object execute(Callable<T> business) throws Exception {
 
@@ -43,7 +42,7 @@ public class GlobalLockTemplate<T> {
         try {
             // add global lock declare
             RootContext.bindGlobalLockFlag();
-            
+
             // Do Your Business
             rs = business.call();
         } finally {

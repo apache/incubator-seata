@@ -21,11 +21,11 @@ import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 
 /**
- * policys for RejectedExecutionHandler
+ * Policies for RejectedExecutionHandler
  *
- * Created by guoyao on 2019/2/26.
+ * @author guoyao
  */
-public final class RejectedPolicys {
+public final class RejectedPolicies {
 
     /**
      * when rejected happened ,add the new task and run the oldest task

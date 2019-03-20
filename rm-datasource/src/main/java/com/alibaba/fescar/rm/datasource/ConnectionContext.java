@@ -32,11 +32,10 @@ public class ConnectionContext {
     private boolean isGlobalLockRequire;
     private List<String> lockKeysBuffer = new ArrayList<>();
     private List<SQLUndoLog> sqlUndoItemsBuffer = new ArrayList<>();
-    
-    
 
     /**
      * whether requires global lock in this connection
+     *
      * @return
      */
     boolean isGlobalLockRequire() {
@@ -45,7 +44,8 @@ public class ConnectionContext {
 
     /**
      * set whether requires global lock in this connection
-     * @param isGlobalLockRequires
+     *
+     * @param isGlobalLockRequire
      */
     void setGlobalLockRequire(boolean isGlobalLockRequire) {
         this.isGlobalLockRequire = isGlobalLockRequire;
@@ -181,7 +181,7 @@ public class ConnectionContext {
         if (lockKeysBuffer.isEmpty()) {
             return null;
         }
-        StringBuffer appender = new StringBuffer();
+        StringBuilder appender = new StringBuilder();
         Iterator<String> iterable = lockKeysBuffer.iterator();
         while (iterable.hasNext()) {
             appender.append(iterable.next());

@@ -29,6 +29,7 @@ import com.alibaba.fescar.rm.datasource.sql.SQLDeleteRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
+
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -53,7 +54,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     @Override
     protected TableRecords beforeImage() throws SQLException {
-        SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) sqlRecognizer;
+        SQLDeleteRecognizer visitor = (SQLDeleteRecognizer)sqlRecognizer;
 
         TableMeta tmeta = getTableMeta(visitor.getTableName());
         List<String> columns = new ArrayList<>();
@@ -72,7 +73,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         String whereCondition = null;
         ArrayList<Object> paramAppender = new ArrayList<>();
         if (statementProxy instanceof ParametersHolder) {
-            whereCondition = visitor.getWhereCondition((ParametersHolder) statementProxy, paramAppender);
+            whereCondition = visitor.getWhereCondition((ParametersHolder)statementProxy, paramAppender);
         } else {
             whereCondition = visitor.getWhereCondition();
         }

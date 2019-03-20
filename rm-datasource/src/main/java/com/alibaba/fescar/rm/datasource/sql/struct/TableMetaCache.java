@@ -144,7 +144,7 @@ public class TableMetaCache {
             col.setTableName(tableName);
             col.setColumnName(rs2.getString("COLUMN_NAME"));
             String datatype = rs2.getString("DATA_TYPE");
-            if (StringUtils.equalsIgnoreCase(datatype, "NUMBER")) {
+            if (com.alibaba.druid.util.StringUtils.equalsIgnoreCase(datatype, "NUMBER")) {
                 col.setDataType(java.sql.Types.BIGINT);
             } else if (StringUtils.equalsIgnoreCase(datatype, "VARCHAR2")) {
                 col.setDataType(java.sql.Types.VARCHAR);

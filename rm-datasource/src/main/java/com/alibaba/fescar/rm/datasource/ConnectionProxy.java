@@ -16,19 +16,19 @@
 
 package com.alibaba.fescar.rm.datasource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
+import com.alibaba.fescar.rm.DefaultResourceManager;
 import com.alibaba.fescar.rm.datasource.exec.LockConflictException;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * The type Connection proxy.
@@ -67,7 +67,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     public void bind(String xid) {
         context.bind(xid);
     }
-    
+
     /**
      * set global lock requires flag
      *
@@ -76,10 +76,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     public void setGlobalLockRequire(boolean isLock) {
         context.setGlobalLockRequire(isLock);
     }
-    
+
     /**
      * get global lock requires flag
-     *
      */
     public boolean isGlobalLockRequire() {
         return context.isGlobalLockRequire();
@@ -94,8 +93,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     public void checkLock(String lockKeys) throws SQLException {
         // Just check lock without requiring lock by now.
         try {
-            boolean lockable = DataSourceManager.get().lockQuery(BranchType.AT, getDataSourceProxy().getResourceId(),
-                context.getXid(), lockKeys);
+            boolean lockable = DefaultResourceManager.get().lockQuery(BranchType.AT, getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
             if (!lockable) {
                 throw new LockConflictException();
             }
@@ -113,8 +111,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     public void register(String lockKeys) throws SQLException {
         // Just check lock without requiring lock by now.
         try {
-            DataSourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(), null,
-                context.getXid(), lockKeys);
+            DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(), null, context.getXid(), null, lockKeys);
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e);
         }
@@ -151,7 +148,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     public void commit() throws SQLException {
         if (context.inGlobalTransaction()) {
             processGlobalTransactionCommit();
-        } else if(context.isGlobalLockRequire()) {
+        } else if (context.isGlobalLockRequire()) {
             processLocalCommitWithGlobalLocks();
         } else {
             targetConnection.commit();
@@ -159,7 +156,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void processLocalCommitWithGlobalLocks() throws SQLException {
-        
+
         checkLock(context.buildLockKeys());
         try {
             targetConnection.commit();
@@ -192,8 +189,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void register() throws TransactionException {
-        Long branchId = DataSourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
-            null, context.getXid(), context.buildLockKeys());
+        Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
+                null, context.getXid(), null, context.buildLockKeys());
         context.setBranchId(branchId);
     }
 
@@ -221,8 +218,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         int retry = 5; // TODO: configure
         while (retry > 0) {
             try {
-                DataSourceManager.get().branchReport(context.getXid(), context.getBranchId(),
-                    (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
+                DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),
+                        (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["

@@ -31,10 +31,11 @@ import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.exception.FrameworkErrorCode;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
-import com.alibaba.fescar.common.thread.RejectedPolicys;
+import com.alibaba.fescar.common.thread.RejectedPolicies;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.core.constants.ConfigurationKeys;
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 import com.alibaba.fescar.core.protocol.HeartbeatMessage;
@@ -43,7 +44,6 @@ import com.alibaba.fescar.core.protocol.RegisterTMResponse;
 import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.GlobalBeginResponse;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
-import com.alibaba.fescar.core.service.ConfigurationKeys;
 import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
 import com.alibaba.nacos.client.naming.utils.CollectionUtils;
@@ -126,7 +126,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
                         new LinkedBlockingQueue(MAX_QUEUE_SIZE),
                         new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()),
-                        RejectedPolicys.runsOldestTaskPolicy());
+                        RejectedPolicies.runsOldestTaskPolicy());
                     instance = new TmRpcClient(nettyClientConfig, null, threadPoolExecutor);
                 }
             }

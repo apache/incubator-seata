@@ -70,7 +70,7 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
         } else {
             whereCondition = recognizer.getWhereCondition();
         }
-        if (!StringUtils.isEmpty(whereCondition)) {
+        if (!StringUtils.isNullOrEmpty(whereCondition)) {
             selectSQLAppender.append(" WHERE " + whereCondition);
         }
         selectSQLAppender.append(" FOR UPDATE");
@@ -102,12 +102,13 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
 
                     TableRecords selectPKRows = TableRecords.buildRecords(getTableMeta(), rsPK);
                     String lockKeys = buildLockKey(selectPKRows);
-                    
-                    if(RootContext.inGlobalTransaction()) {
+
+                    if (RootContext.inGlobalTransaction()) {
                         //do as usual
                         statementProxy.getConnectionProxy().checkLock(lockKeys);
-                    } else if(RootContext.requireGlobalLock()) {
-                        //check lock key before commit just like DML to avoid reentrant lock problem(no xid thus can not reentrant)
+                    } else if (RootContext.requireGlobalLock()) {
+                        //check lock key before commit just like DML to avoid reentrant lock problem(no xid thus can
+                        // not reentrant)
                         statementProxy.getConnectionProxy().appendLockKey(lockKeys);
                     } else {
                         throw new RuntimeException("Unknown situation!");
