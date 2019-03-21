@@ -148,7 +148,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         return Lists.newArrayList(CLUSTER_ADDRESS_MAP.get(clusterName.toUpperCase()));
     }
 
-    private static void refreshCluster() throws Exception{
+    private static void refreshCluster() throws EurekaRegistryException{
         Applications applications = getEurekaClient(false).getApplications();
         List<Application> list = applications.getRegisteredApplications();
         if (list == null || list.isEmpty()) {
@@ -206,7 +206,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         return application;
     }
 
-    private static EurekaClient getEurekaClient(boolean needRegister) throws Exception {
+    private static EurekaClient getEurekaClient(boolean needRegister) throws EurekaRegistryException{
         if (eurekaClient == null) {
             synchronized (EurekaRegistryServiceImpl.class) {
                 try {
