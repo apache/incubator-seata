@@ -16,14 +16,6 @@
 
 package com.alibaba.fescar.rm.datasource.exec;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.rm.datasource.PreparedStatementProxy;
@@ -31,8 +23,17 @@ import com.alibaba.fescar.rm.datasource.StatementProxy;
 import com.alibaba.fescar.rm.datasource.sql.SQLInsertRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.struct.ColumnMeta;
+import com.alibaba.fescar.rm.datasource.sql.struct.Null;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
+
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type Insert executor.
@@ -61,72 +62,86 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        SQLInsertRecognizer recogizier = (SQLInsertRecognizer)sqlRecognizer;
-        List<String> insertColumns = recogizier.getInsertColumns();
-        TableMeta tmeta = getTableMeta();
-        TableRecords afterImage = null;
-        if (tmeta.containsPK(insertColumns)) {
-            // insert values including PK
-            List<Object> pkValues = null;
-            String pk = tmeta.getPkName();
-            for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
-                if (insertColumns.get(paramIdx).equalsIgnoreCase(pk)) {
-                    if (statementProxy instanceof PreparedStatementProxy) {
-                        pkValues = ((PreparedStatementProxy)statementProxy).getParamsByIndex(paramIdx);
-                    } else {
-                        List<List<Object>> insertRows = recogizier.getInsertRows();
-                        pkValues = new ArrayList<>(insertRows.size());
-                        for (List<Object> row : insertRows) {
-                            pkValues.add(row.get(paramIdx));
-                        }
-                    }
-                    break;
-                }
-            }
-            if (pkValues == null) {
-                throw new ShouldNeverHappenException();
-            }
-            afterImage = getTableRecords(pkValues);
+        //Pk column exists or PK is just auto generated
+        List<Object> pkValues = containsPK()?getPkValuesByColumn():getPkValuesByAuto();
 
-        } else {
-            // PK is just auto generated
-            Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
-            if (pkMetaMap.size() != 1) {
-                throw new NotSupportYetException();
-            }
-            ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
-            if (!pkMeta.isAutoincrement()) {
-                throw new ShouldNeverHappenException();
-            }
-
-            ResultSet genKeys = null;
-            try {
-                genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
-            } catch (SQLException e) {
-                // java.sql.SQLException: Generated keys not requested. You need to
-                // specify Statement.RETURN_GENERATED_KEYS to
-                // Statement.executeUpdate() or Connection.prepareStatement().
-                if ("S1009".equalsIgnoreCase(e.getSQLState())) {
-                    genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
-                } else {
-                    throw e;
-                }
-            }
-            List<Object> pkValues = new ArrayList<>();
-            while (genKeys.next()) {
-                Object v = genKeys.getObject(1);
-                pkValues.add(v);
-            }
-
-            afterImage = getTableRecords(pkValues);
-
-        }
+        TableRecords afterImage = getTableRecords(pkValues);
 
         if (afterImage == null) {
             throw new SQLException("Failed to build after-image for insert");
         }
 
         return afterImage;
+    }
+
+    private boolean containsPK() {
+        SQLInsertRecognizer recogizier = (SQLInsertRecognizer)sqlRecognizer;
+        List<String> insertColumns = recogizier.getInsertColumns();
+        TableMeta tmeta = getTableMeta();
+        return tmeta.containsPK(insertColumns);
+    }
+
+    private List<Object> getPkValuesByColumn() throws SQLException {
+        // insert values including PK
+        SQLInsertRecognizer recogizier = (SQLInsertRecognizer)sqlRecognizer;
+        List<String> insertColumns = recogizier.getInsertColumns();
+        String pk = getTableMeta().getPkName();
+        List<Object> pkValues = null;
+        for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
+            if (insertColumns.get(paramIdx).equalsIgnoreCase(pk)) {
+                if (statementProxy instanceof PreparedStatementProxy) {
+                    pkValues = ((PreparedStatementProxy)statementProxy).getParamsByIndex(paramIdx);
+                } else {
+                    List<List<Object>> insertRows = recogizier.getInsertRows();
+                    pkValues = new ArrayList<>(insertRows.size());
+                    for (List<Object> row : insertRows) {
+                        pkValues.add(row.get(paramIdx));
+                    }
+                }
+                break;
+            }
+        }
+        if (pkValues == null) {
+            throw new ShouldNeverHappenException();
+        }
+        //pk auto generated while column exists and value is null
+        if (pkValues.size() == 1 && pkValues.get(0) instanceof Null) {
+            pkValues=getPkValuesByAuto();
+        }
+        return pkValues;
+    }
+
+
+    private List<Object> getPkValuesByAuto() throws SQLException {
+        // PK is just auto generated
+        Map<String, ColumnMeta> pkMetaMap=getTableMeta().getPrimaryKeyMap();
+        if (pkMetaMap.size() != 1) {
+            throw new NotSupportYetException();
+        }
+        ColumnMeta pkMeta=pkMetaMap.values().iterator().next();
+        if (!pkMeta.isAutoincrement()) {
+            throw new ShouldNeverHappenException();
+        }
+
+        ResultSet genKeys=null;
+        try {
+            genKeys=statementProxy.getTargetStatement().getGeneratedKeys();
+        } catch (SQLException e) {
+            // java.sql.SQLException: Generated keys not requested. You need to
+            // specify Statement.RETURN_GENERATED_KEYS to
+            // Statement.executeUpdate() or Connection.prepareStatement().
+            if ("S1009".equalsIgnoreCase(e.getSQLState())) {
+                genKeys=statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
+            } else {
+                throw e;
+            }
+        }
+        List<Object> pkValues=new ArrayList<>();
+        while (genKeys.next()) {
+            Object v=genKeys.getObject(1);
+            pkValues.add(v);
+        }
+        return pkValues;
     }
 
     private TableRecords getTableRecords(List<Object> pkValues) throws SQLException {
