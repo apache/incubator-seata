@@ -22,6 +22,8 @@ import io.netty.channel.Channel;
 
 /**
  * The type Netty client config.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class NettyClientConfig extends NettyBaseConfig {
 
