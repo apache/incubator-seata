@@ -40,8 +40,12 @@ import java.util.Map;
  *
  * @param <T> the type parameter
  * @param <S> the type parameter
+ * @author yuanguoyao
+ * @date 2019-03-21 21:30:02
  */
 public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
+
+    private static final String ERR_SQL_STATE = "S1009";
 
     /**
      * Instantiates a new Insert executor.
@@ -114,31 +118,31 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     private List<Object> getPkValuesByAuto() throws SQLException {
         // PK is just auto generated
-        Map<String, ColumnMeta> pkMetaMap=getTableMeta().getPrimaryKeyMap();
+        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
         if (pkMetaMap.size() != 1) {
             throw new NotSupportYetException();
         }
-        ColumnMeta pkMeta=pkMetaMap.values().iterator().next();
+        ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
         if (!pkMeta.isAutoincrement()) {
             throw new ShouldNeverHappenException();
         }
 
-        ResultSet genKeys=null;
+        ResultSet genKeys = null;
         try {
-            genKeys=statementProxy.getTargetStatement().getGeneratedKeys();
+            genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
         } catch (SQLException e) {
             // java.sql.SQLException: Generated keys not requested. You need to
             // specify Statement.RETURN_GENERATED_KEYS to
             // Statement.executeUpdate() or Connection.prepareStatement().
-            if ("S1009".equalsIgnoreCase(e.getSQLState())) {
-                genKeys=statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
+            if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
+                genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
             } else {
                 throw e;
             }
         }
-        List<Object> pkValues=new ArrayList<>();
+        List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {
-            Object v=genKeys.getObject(1);
+            Object v = genKeys.getObject(1);
             pkValues.add(v);
         }
         return pkValues;
