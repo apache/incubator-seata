@@ -252,7 +252,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             }
             super.destroy();
         } catch (Exception exx) {
-            LOGGER.error("shutdown error:" + exx.getMessage());
+            LOGGER.error("Failed to shutdown: {}", exx.getMessage());
         }
     }
 
@@ -262,7 +262,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             RpcMessage rpcMessage = (RpcMessage)msg;
             if (rpcMessage.getBody() == HeartbeatMessage.PONG) {
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("received PONG from " + ctx.channel().remoteAddress());
+                    LOGGER.debug("received PONG from {}", ctx.channel().remoteAddress());
                 }
                 return;
             }
@@ -277,7 +277,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                 MessageFuture future = futures.remove(msgId);
                 if (future == null) {
                     if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("msg:" + msgId + " is not found in futures.");
+                        LOGGER.info("msg: {} is not found in futures.", msgId);
                     }
                 } else {
                     future.setResultMessage(results.getMsgs()[i]);
@@ -286,6 +286,18 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             return;
         }
         super.channelRead(ctx, msg);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        if (messageExecutor.isShutdown()) {
+            return;
+        }
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("channel inactive: {}", ctx.channel());
+        }
+        releaseChannel(ctx.channel(), NetUtil.toStringAddress(ctx.channel().remoteAddress()));
+        super.channelInactive(ctx);
     }
 
     /**
@@ -311,6 +323,27 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         if (clientMessageListener != null) {
             String remoteAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
             clientMessageListener.onMessage(msgId, remoteAddress, msg, this);
+        }
+    }
+
+    protected void reconnect(String transactionServiceGroup) {
+        List<String> availList = null;
+        try {
+            availList = getAvailServerList(transactionServiceGroup);
+        } catch (Exception exx) {
+            LOGGER.error("Failed to get available servers: {}" + exx.getMessage());
+        }
+        if (CollectionUtils.isEmpty(availList)) {
+            LOGGER.error("no available server to connect.");
+            return;
+        }
+        for (String serverAddress : availList) {
+            try {
+                connect(serverAddress);
+            } catch (Exception e) {
+                LOGGER.error(FrameworkErrorCode.NetConnect.errCode,
+                        "can not connect to " + serverAddress + " cause:" + e.getMessage(), e);
+            }
         }
     }
 
@@ -350,6 +383,14 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
      * @return the channel
      */
     protected abstract Channel connect(String serverAddress);
+
+    /**
+     * Release channel.
+     *
+     * @param channel       the channel
+     * @param serverAddress the server address
+     */
+    protected abstract void releaseChannel(Channel channel, String serverAddress);
 
     /**
      * Gets netty pool config.
