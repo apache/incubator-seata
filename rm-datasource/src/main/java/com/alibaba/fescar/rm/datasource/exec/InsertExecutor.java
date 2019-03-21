@@ -78,14 +78,14 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return afterImage;
     }
 
-    private boolean containsPK() {
+    protected boolean containsPK() {
         SQLInsertRecognizer recogizier = (SQLInsertRecognizer)sqlRecognizer;
         List<String> insertColumns = recogizier.getInsertColumns();
         TableMeta tmeta = getTableMeta();
         return tmeta.containsPK(insertColumns);
     }
 
-    private List<Object> getPkValuesByColumn() throws SQLException {
+    protected List<Object> getPkValuesByColumn() throws SQLException {
         // insert values including PK
         SQLInsertRecognizer recogizier = (SQLInsertRecognizer)sqlRecognizer;
         List<String> insertColumns = recogizier.getInsertColumns();
@@ -116,7 +116,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
 
-    private List<Object> getPkValuesByAuto() throws SQLException {
+    protected List<Object> getPkValuesByAuto() throws SQLException {
         // PK is just auto generated
         Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
         if (pkMetaMap.size() != 1) {
@@ -148,7 +148,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return pkValues;
     }
 
-    private TableRecords getTableRecords(List<Object> pkValues) throws SQLException {
+    protected TableRecords getTableRecords(List<Object> pkValues) throws SQLException {
         TableRecords afterImage;
         String pk = getTableMeta().getPkName();
         StringBuffer selectSQLAppender = new StringBuffer("SELECT * FROM " + getTableMeta().getTableName() + " WHERE ");
