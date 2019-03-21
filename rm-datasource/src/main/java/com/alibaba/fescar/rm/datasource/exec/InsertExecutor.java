@@ -63,7 +63,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         //Pk column exists or PK is just auto generated
-        List<Object> pkValues = containsPK()?getPkValuesByColumn():getPkValuesByAuto();
+        List<Object> pkValues = containsPK() ? getPkValuesByColumn() : getPkValuesByAuto();
 
         TableRecords afterImage = getTableRecords(pkValues);
 
@@ -106,7 +106,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         //pk auto generated while column exists and value is null
         if (pkValues.size() == 1 && pkValues.get(0) instanceof Null) {
-            pkValues=getPkValuesByAuto();
+            pkValues = getPkValuesByAuto();
         }
         return pkValues;
     }
