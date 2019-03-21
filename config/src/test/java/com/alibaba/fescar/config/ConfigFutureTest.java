@@ -120,8 +120,8 @@ public class ConfigFutureTest {
     @Test
     public void testIsTimeout() {
         Assert.assertFalse(configFuture.isTimeout());
-        //TIME_MILLS + 1 ensure timeout occur
-        configFuture.get(TIME_MILLS + 1, TimeUnit.MILLISECONDS);
+        //TIME_MILLS * 10 ensure timeout occur
+        configFuture.get(TIME_MILLS * 10, TimeUnit.MILLISECONDS);
         Assert.assertTrue(configFuture.isTimeout());
     }
 
