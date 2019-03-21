@@ -18,18 +18,22 @@ package com.alibaba.fescar.rm.datasource.undo.mysql.keyword;
 
 import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * The type My sql keyword checker.
  *
- * @author Wu
- * @date 2019 /3/5 MySQL keyword checker
+ * @author xingfudeshi@gmail.com
+ * @date 2019/3/5 MySQL keyword checker
  */
 public class MySQLKeywordChecker implements KeywordChecker {
-    private static volatile KeywordChecker keywordChecker;
+    private static volatile KeywordChecker keywordChecker = null;
+    private static volatile Set<String> keywordSet = null;
 
-    private MySQLKeywordChecker() {}
+    private MySQLKeywordChecker() {
+    }
 
     /**
      * get instance of type MySQL keyword checker
@@ -41,6 +45,7 @@ public class MySQLKeywordChecker implements KeywordChecker {
             synchronized (MySQLKeywordChecker.class) {
                 if (keywordChecker == null) {
                     keywordChecker = new MySQLKeywordChecker();
+                    keywordSet = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
                 }
             }
         }
@@ -524,30 +529,27 @@ public class MySQLKeywordChecker implements KeywordChecker {
          */
         public final String name;
 
-        MySQLKeyword() {
-            this(null);
-        }
-
         MySQLKeyword(String name) {
             this.name = name;
         }
     }
 
+
     @Override
     public boolean check(String fieldOrTableName) {
-        try {
-            if (StringUtils.isNotBlank(fieldOrTableName)) {
-                MySQLKeyword.valueOf(fieldOrTableName.toUpperCase());
-                return true;
-            }
-        } catch (IllegalArgumentException e) {
-            //do nothing
+        if (keywordSet.contains(fieldOrTableName)) {
+            return true;
         }
-        return false;
+        if (null != fieldOrTableName) {
+            fieldOrTableName = fieldOrTableName.toUpperCase();
+        }
+        return keywordSet.contains(fieldOrTableName);
+
     }
 
     @Override
     public String checkAndReplace(String fieldOrTableName) {
         return check(fieldOrTableName) ? "`" + fieldOrTableName + "`" : fieldOrTableName;
     }
+
 }
