@@ -17,6 +17,7 @@
 package com.alibaba.fescar.rm.datasource.undo.mysql.keyword;
 
 import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
+
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -24,13 +25,12 @@ import java.util.stream.Collectors;
 /**
  * The type My sql keyword checker.
  *
- * @author Wu
- * @date 2019 /3/5 MySQL keyword checker
+ * @author xingfudeshi@gmail.com
+ * @date 2019/3/5 MySQL keyword checker
  */
 public class MySQLKeywordChecker implements KeywordChecker {
-    private static volatile KeywordChecker keywordChecker;
-
-    private static final Set<String> KEYWORD_SET = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
+    private static volatile KeywordChecker keywordChecker = null;
+    private static volatile Set<String> keywordSet = null;
 
     private MySQLKeywordChecker() {
     }
@@ -45,6 +45,7 @@ public class MySQLKeywordChecker implements KeywordChecker {
             synchronized (MySQLKeywordChecker.class) {
                 if (keywordChecker == null) {
                     keywordChecker = new MySQLKeywordChecker();
+                    keywordSet = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
                 }
             }
         }
@@ -536,10 +537,14 @@ public class MySQLKeywordChecker implements KeywordChecker {
 
     @Override
     public boolean check(String fieldOrTableName) {
-        if (null != fieldOrTableName) {
-            return KEYWORD_SET.contains(fieldOrTableName.toUpperCase());
+        if (keywordSet.contains(fieldOrTableName)) {
+            return true;
         }
-        return false;
+        if (null != fieldOrTableName) {
+            fieldOrTableName = fieldOrTableName.toUpperCase();
+        }
+        return keywordSet.contains(fieldOrTableName);
+
     }
 
     @Override
