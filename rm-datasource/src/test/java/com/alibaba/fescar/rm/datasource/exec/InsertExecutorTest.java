@@ -215,11 +215,11 @@ public class InsertExecutorTest {
         when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
-        ResultSet resultSet=mock(ResultSet.class);
+        ResultSet resultSet = mock(ResultSet.class);
         when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(false);
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
-        List pkValuesByAuto=insertExecutor.getPkValuesByAuto();
+        List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
         Assertions.assertThat(pkValuesByAuto).isEmpty();
     }
 
@@ -233,13 +233,13 @@ public class InsertExecutorTest {
         when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
-        ResultSet resultSet=mock(ResultSet.class);
+        ResultSet resultSet = mock(ResultSet.class);
         when(preparedStatement.getGeneratedKeys()).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(false);
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
-        List pkValuesByAuto=insertExecutor.getPkValuesByAuto();
+        List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
         Assertions.assertThat(pkValuesByAuto).isEqualTo(pkValues);
     }
 
@@ -254,13 +254,13 @@ public class InsertExecutorTest {
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
         when(preparedStatement.getGeneratedKeys()).thenThrow(new SQLException("", InsertExecutor.ERR_SQL_STATE));
-        ResultSet resultSet=mock(ResultSet.class);
+        ResultSet resultSet = mock(ResultSet.class);
         when(preparedStatement.executeQuery(anyString())).thenReturn(resultSet);
         when(resultSet.next()).thenReturn(true).thenReturn(false);
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
-        List pkValuesByAuto=insertExecutor.getPkValuesByAuto();
+        List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
         Assertions.assertThat(pkValuesByAuto).isEqualTo(pkValues);
     }
 
