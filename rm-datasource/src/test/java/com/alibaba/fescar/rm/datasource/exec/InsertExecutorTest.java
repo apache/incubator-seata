@@ -111,7 +111,7 @@ public class InsertExecutorTest {
         Assertions.assertThat(resultTableRecords).isEqualTo(tableRecords);
     }
 
-    @Test(expected=SQLException.class)
+    @Test(expected = SQLException.class)
     public void testAfterImage_Exception() throws SQLException {
         doReturn(false).when(insertExecutor).containsPK();
         List<Object> pkValues = new ArrayList<>();
@@ -143,7 +143,7 @@ public class InsertExecutorTest {
         Assertions.assertThat(pkValuesByColumn).isEqualTo(pkValues);
     }
 
-    @Test(expected =ShouldNeverHappenException.class)
+    @Test(expected = ShouldNeverHappenException.class)
     public void testGetPkValuesByColumn_Exception() throws SQLException {
         mockInsertColumns();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
@@ -170,7 +170,7 @@ public class InsertExecutorTest {
         Assertions.assertThat(pkValuesByColumn).isEqualTo(pkValuesAuto);
     }
 
-    @Test(expected =NotSupportYetException.class)
+    @Test(expected = NotSupportYetException.class)
     public void testGetPkValuesByAuto_NotSupportYetException() throws SQLException {
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
@@ -180,7 +180,7 @@ public class InsertExecutorTest {
         insertExecutor.getPkValuesByAuto();
     }
 
-    @Test(expected =ShouldNeverHappenException.class)
+    @Test(expected = ShouldNeverHappenException.class)
     public void testGetPkValuesByAuto_ShouldNeverHappenException() throws SQLException {
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
