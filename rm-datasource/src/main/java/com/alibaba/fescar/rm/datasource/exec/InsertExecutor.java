@@ -45,7 +45,7 @@ import java.util.Map;
  */
 public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
-    private static final String ERR_SQL_STATE = "S1009";
+    protected static final String ERR_SQL_STATE = "S1009";
 
     /**
      * Instantiates a new Insert executor.
