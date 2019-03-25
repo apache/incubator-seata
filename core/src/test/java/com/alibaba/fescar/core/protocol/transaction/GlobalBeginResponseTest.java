@@ -19,6 +19,8 @@ import com.alibaba.fescar.core.protocol.ResultCode;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.nio.ByteBuffer;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -53,14 +55,15 @@ public class GlobalBeginResponseTest {
     }
 
     @Test
-    public void testDoEncodeAndDeode() {
-        GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
-        globalBeginResponse.setXid(XID);
-        globalBeginResponse.setExtraData(EXTRA_DATA);
-        globalBeginResponse.setResultCode(RESULT_CODE);
-        globalBeginResponse.doEncode();
-        globalBeginResponse.decode(globalBeginResponse.byteBuffer);
-        assertThat(globalBeginResponse.getXid()).isEqualTo(XID);
-        assertThat(globalBeginResponse.getExtraData()).isEqualTo(EXTRA_DATA);
+    public void testDoEncodeAndDecode() {
+        GlobalBeginResponse globalBeginResponseOne = new GlobalBeginResponse();
+        globalBeginResponseOne.setXid(XID);
+        globalBeginResponseOne.setExtraData(EXTRA_DATA);
+        globalBeginResponseOne.setResultCode(RESULT_CODE);
+        byte[] encode = globalBeginResponseOne.encode();
+        GlobalBeginResponse globalBeginResponseTwo = new GlobalBeginResponse();
+        globalBeginResponseTwo.decode(ByteBuffer.wrap(encode));
+        assertThat(globalBeginResponseOne.getXid()).isEqualTo(globalBeginResponseTwo.getXid());
+        assertThat(globalBeginResponseOne.getExtraData()).isEqualTo(globalBeginResponseTwo.getExtraData());
     }
 }
