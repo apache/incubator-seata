@@ -1,3 +1,4 @@
+
 /*
  *  Copyright 1999-2018 Alibaba Group Holding Ltd.
  *
@@ -17,175 +18,402 @@
 package com.alibaba.fescar.rm.datasource.undo.oracle.keyword;
 
 import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
-import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * @author Wu
- * @date 2019/3/5
- * MySQL keyword checker
+ * The type oracle sql keyword checker.
+ *
+ * @author ccg
+ * @date 2019/3/25 oracle keyword checker
  */
 public class ORACLEKeywordChecker implements KeywordChecker {
-    private static volatile KeywordChecker keywordChecker;
+    private static volatile KeywordChecker keywordChecker = null;
+    private static volatile Set<String> keywordSet = null;
 
-    private ORACLEKeywordChecker(){}
+    private ORACLEKeywordChecker() {
+    }
 
     /**
-     * get instance of type MySQL keyword checker
-     * @return
+     * get instance of type oracle keyword checker
+     *
+     * @return instance
      */
-    public static KeywordChecker getInstance(){
-        if(keywordChecker==null){
-            synchronized (ORACLEKeywordChecker.class){
-                if(keywordChecker==null){
-                    keywordChecker=new ORACLEKeywordChecker();
+    public static KeywordChecker getInstance() {
+        if (keywordChecker == null) {
+            synchronized (ORACLEKeywordChecker.class) {
+                if (keywordChecker == null) {
+                    keywordChecker = new ORACLEKeywordChecker();
+                    keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
                 }
             }
         }
         return keywordChecker;
     }
+
     /**
-     * MySQL keyword
+     * oracle keyword
      */
-    private enum MySQLKeyword {
+    private enum OracleKeyword {
+        /**
+         * Select sql keyword.
+         */
         SELECT("SELECT"),
+        /**
+         * Delete sql keyword.
+         */
         DELETE("DELETE"),
+        /**
+         * Insert sql keyword.
+         */
         INSERT("INSERT"),
+        /**
+         * Update sql keyword.
+         */
         UPDATE("UPDATE"),
 
+        /**
+         * From sql keyword.
+         */
         FROM("FROM"),
+        /**
+         * Having sql keyword.
+         */
         HAVING("HAVING"),
+        /**
+         * Where sql keyword.
+         */
         WHERE("WHERE"),
+        /**
+         * Order sql keyword.
+         */
         ORDER("ORDER"),
+        /**
+         * By sql keyword.
+         */
         BY("BY"),
+        /**
+         * Group sql keyword.
+         */
         GROUP("GROUP"),
+        /**
+         * Into sql keyword.
+         */
         INTO("INTO"),
+        /**
+         * As sql keyword.
+         */
         AS("AS"),
 
+        /**
+         * Create sql keyword.
+         */
         CREATE("CREATE"),
+        /**
+         * Alter sql keyword.
+         */
         ALTER("ALTER"),
+        /**
+         * Drop sql keyword.
+         */
         DROP("DROP"),
+        /**
+         * Set sql keyword.
+         */
         SET("SET"),
 
+        /**
+         * Null sql keyword.
+         */
         NULL("NULL"),
+        /**
+         * Not sql keyword.
+         */
         NOT("NOT"),
+        /**
+         * Distinct sql keyword.
+         */
         DISTINCT("DISTINCT"),
 
+        /**
+         * Table sql keyword.
+         */
         TABLE("TABLE"),
+        /**
+         * Tablespace sql keyword.
+         */
         TABLESPACE("TABLESPACE"),
+        /**
+         * View sql keyword.
+         */
         VIEW("VIEW"),
+        /**
+         * Sequence sql keyword.
+         */
         SEQUENCE("SEQUENCE"),
+        /**
+         * Trigger sql keyword.
+         */
         TRIGGER("TRIGGER"),
+        /**
+         * User sql keyword.
+         */
         USER("USER"),
+        /**
+         * Index sql keyword.
+         */
         INDEX("INDEX"),
+        /**
+         * Session sql keyword.
+         */
         SESSION("SESSION"),
+        /**
+         * Procedure sql keyword.
+         */
         PROCEDURE("PROCEDURE"),
+        /**
+         * Function sql keyword.
+         */
         FUNCTION("FUNCTION"),
 
+        /**
+         * Primary sql keyword.
+         */
         PRIMARY("PRIMARY"),
+        /**
+         * Key sql keyword.
+         */
         KEY("KEY"),
+        /**
+         * Default sql keyword.
+         */
         DEFAULT("DEFAULT"),
+        /**
+         * Constraint sql keyword.
+         */
         CONSTRAINT("CONSTRAINT"),
+        /**
+         * Check sql keyword.
+         */
         CHECK("CHECK"),
+        /**
+         * Unique sql keyword.
+         */
         UNIQUE("UNIQUE"),
+        /**
+         * Foreign sql keyword.
+         */
         FOREIGN("FOREIGN"),
+        /**
+         * References sql keyword.
+         */
         REFERENCES("REFERENCES"),
 
+        /**
+         * Explain sql keyword.
+         */
         EXPLAIN("EXPLAIN"),
+        /**
+         * For sql keyword.
+         */
         FOR("FOR"),
+        /**
+         * If sql keyword.
+         */
         IF("IF"),
+        /**
+         * Sort sql keyword.
+         */
         SORT("SORT"),
 
-
+        /**
+         * All sql keyword.
+         */
         ALL("ALL"),
+        /**
+         * Union sql keyword.
+         */
         UNION("UNION"),
+        /**
+         * Except sql keyword.
+         */
         EXCEPT("EXCEPT"),
+        /**
+         * Intersect sql keyword.
+         */
         INTERSECT("INTERSECT"),
+        /**
+         * Minus sql keyword.
+         */
         MINUS("MINUS"),
+        /**
+         * Inner sql keyword.
+         */
         INNER("INNER"),
+        /**
+         * Left sql keyword.
+         */
         LEFT("LEFT"),
+        /**
+         * Right sql keyword.
+         */
         RIGHT("RIGHT"),
+        /**
+         * Full sql keyword.
+         */
         FULL("FULL"),
+        /**
+         * Outer sql keyword.
+         */
         OUTER("OUTER"),
+        /**
+         * Join sql keyword.
+         */
         JOIN("JOIN"),
+        /**
+         * On sql keyword.
+         */
         ON("ON"),
+        /**
+         * Schema sql keyword.
+         */
         SCHEMA("SCHEMA"),
+        /**
+         * Cast sql keyword.
+         */
         CAST("CAST"),
+        /**
+         * Column sql keyword.
+         */
         COLUMN("COLUMN"),
+        /**
+         * Use sql keyword.
+         */
         USE("USE"),
+        /**
+         * Database sql keyword.
+         */
         DATABASE("DATABASE"),
+        /**
+         * To sql keyword.
+         */
         TO("TO"),
 
+        /**
+         * And sql keyword.
+         */
         AND("AND"),
+        /**
+         * Or sql keyword.
+         */
         OR("OR"),
+        /**
+         * Xor sql keyword.
+         */
         XOR("XOR"),
+        /**
+         * Case sql keyword.
+         */
         CASE("CASE"),
+        /**
+         * When sql keyword.
+         */
         WHEN("WHEN"),
+        /**
+         * Then sql keyword.
+         */
         THEN("THEN"),
+        /**
+         * Else sql keyword.
+         */
         ELSE("ELSE"),
+        /**
+         * Elsif sql keyword.
+         */
         ELSIF("ELSIF"),
+        /**
+         * End sql keyword.
+         */
         END("END"),
+        /**
+         * Exists sql keyword.
+         */
         EXISTS("EXISTS"),
+        /**
+         * In sql keyword.
+         */
         IN("IN"),
+        /**
+         * Contains sql keyword.
+         */
         CONTAINS("CONTAINS"),
+        /**
+         * Rlike sql keyword.
+         */
         RLIKE("RLIKE"),
+        /**
+         * Fulltext sql keyword.
+         */
         FULLTEXT("FULLTEXT"),
 
+        /**
+         * New sql keyword.
+         */
         NEW("NEW"),
+        /**
+         * Asc sql keyword.
+         */
         ASC("ASC"),
+        /**
+         * Desc sql keyword.
+         */
         DESC("DESC"),
+        /**
+         * Is sql keyword.
+         */
         IS("IS"),
+        /**
+         * Like sql keyword.
+         */
         LIKE("LIKE"),
+        /**
+         * Escape sql keyword.
+         */
         ESCAPE("ESCAPE"),
+        /**
+         * Between sql keyword.
+         */
         BETWEEN("BETWEEN"),
+        /**
+         * Values sql keyword.
+         */
         VALUES("VALUES"),
+        /**
+         * Interval sql keyword.
+         */
         INTERVAL("INTERVAL"),
 
+        /**
+         * Lock sql keyword.
+         */
         LOCK("LOCK"),
-        SOME("SOME"),
-        ANY("ANY"),
-        TRUNCATE("TRUNCATE"),
+       
+        /**
+         * Some sql keyword.
+         */
+        
 
-        RETURN("RETURN"),
-
-        // mysql
-        TRUE("TRUE"),
-        FALSE("FALSE"),
-        LIMIT("LIMIT"),
-        KILL("KILL"),
-        IDENTIFIED("IDENTIFIED"),
-        PASSWORD("PASSWORD"),
-        ALGORITHM("ALGORITHM"),
-        DUAL("DUAL"),
-        BINARY("BINARY"),
-        SHOW("SHOW"),
-        REPLACE("REPLACE"),
+        SOME("SOME");
 
 
-        // MySql procedure add by zz
-        WHILE("WHILE"),
-        DO("DO"),
-        LEAVE("LEAVE"),
-        ITERATE("ITERATE"),
-        REPEAT("REPEAT"),
-        UNTIL("UNTIL"),
-        OPEN("OPEN"),
-        CLOSE("CLOSE"),
-        OUT("OUT"),
-        INOUT("INOUT"),
-        EXIT("EXIT"),
-        UNDO("UNDO"),
-        SQLSTATE("SQLSTATE"),
-        CONDITION("CONDITION"),
-        DIV("DIV");
-
+        /**
+         * The Name.
+         */
         public final String name;
 
-        MySQLKeyword() {
-            this(null);
-        }
-
-        MySQLKeyword(String name) {
+        OracleKeyword(String name) {
             this.name = name;
         }
     }
@@ -193,15 +421,14 @@ public class ORACLEKeywordChecker implements KeywordChecker {
 
     @Override
     public boolean check(String fieldOrTableName) {
-        try {
-            if (StringUtils.isNotBlank(fieldOrTableName)) {
-                MySQLKeyword.valueOf(fieldOrTableName.toUpperCase());
-                return true;
-            }
-        } catch (IllegalArgumentException e) {
-            //do nothing
+        if (keywordSet.contains(fieldOrTableName)) {
+            return true;
         }
-        return false;
+        if (null != fieldOrTableName) {
+            fieldOrTableName = fieldOrTableName.toUpperCase();
+        }
+        return keywordSet.contains(fieldOrTableName);
+
     }
 
     @Override
