@@ -65,5 +65,6 @@ public class GlobalBeginResponseTest {
         globalBeginResponseTwo.decode(ByteBuffer.wrap(encode));
         assertThat(globalBeginResponseOne.getXid()).isEqualTo(globalBeginResponseTwo.getXid());
         assertThat(globalBeginResponseOne.getExtraData()).isEqualTo(globalBeginResponseTwo.getExtraData());
+        assertThat(globalBeginResponseOne.getResultCode()).isEqualTo(globalBeginResponseTwo.getResultCode());
     }
 }
