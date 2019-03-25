@@ -31,7 +31,9 @@ import com.alibaba.fescar.rm.datasource.sql.druid.BaseRecognizer;
 import java.util.ArrayList;
 
 /**
- * The type My sql select for update recognizer.
+ * The type oralceselect for update recognizer.
+ * @author ccg
+ * @date 2019/3/25
  */
 
 public class ORACLESelectForUpdateRecognizer extends BaseRecognizer implements SQLSelectRecognizer {

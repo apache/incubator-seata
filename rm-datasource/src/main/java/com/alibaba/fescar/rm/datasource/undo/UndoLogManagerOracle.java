@@ -41,6 +41,8 @@ import static com.alibaba.fescar.core.exception.TransactionExceptionCode.BranchR
 
 /**
  * The type Undo log manager.
+ * @author ccg
+ * @date 2019/3/25
  */
 public final class UndoLogManagerOracle {
 

@@ -33,7 +33,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type My sql undo insert executor.
+ * The type oralce undo insert executor.
+ * @author ccg
+ * @date 2019/3/25
  */
 public class ORACLEUndoInsertExecutor extends AbstractUndoExecutor {
 

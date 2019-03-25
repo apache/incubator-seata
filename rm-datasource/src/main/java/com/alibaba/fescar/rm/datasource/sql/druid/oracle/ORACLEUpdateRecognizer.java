@@ -36,7 +36,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type My sql update recognizer.
+ * The type oracle update recognizer.
+ * @author ccg
+ * @date 2019/3/25
  */
 public class ORACLEUpdateRecognizer extends BaseRecognizer implements SQLUpdateRecognizer {
 

@@ -33,7 +33,9 @@ import com.alibaba.fescar.rm.datasource.sql.druid.BaseRecognizer;
 import java.util.ArrayList;
 
 /**
- * The type My sql delete recognizer.
+ * The type oralce delete recognizer.
+ * @author ccg
+ * @date 2019/3/25
  */
 public class ORACLEDeleteRecognizer extends BaseRecognizer implements SQLDeleteRecognizer {
 

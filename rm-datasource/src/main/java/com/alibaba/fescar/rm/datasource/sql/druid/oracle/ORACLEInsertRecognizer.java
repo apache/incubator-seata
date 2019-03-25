@@ -36,7 +36,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type My sql insert recognizer.
+ * The type oralce insert recognizer.
+ * @author ccg
+ * @date 2019/3/25
  */
 public class ORACLEInsertRecognizer extends BaseRecognizer implements SQLInsertRecognizer {
 

@@ -30,7 +30,9 @@ import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import java.util.List;
 
 /**
- * The type My sql undo delete executor.
+ * The type oracle undo delete executor.
+ * @author ccg
+ * @date 2019/3/25
  */
 public class ORACLEUndoDeleteExecutor extends AbstractUndoExecutor {
 
