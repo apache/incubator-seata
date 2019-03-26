@@ -25,13 +25,15 @@ import io.netty.channel.Channel;
 
 /**
  * The type Version.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class Version {
 
     /**
      * The constant CURRENT.
      */
-    public static final String CURRENT = "0.3.1";
+    public static final String CURRENT = "0.4.1";
 
     /**
      * The constant VERSION_MAP.

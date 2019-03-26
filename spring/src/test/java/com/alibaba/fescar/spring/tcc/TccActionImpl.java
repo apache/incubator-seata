@@ -14,17 +14,29 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.core.service;
+package com.alibaba.fescar.spring.tcc;
+
+import com.alibaba.fescar.rm.tcc.api.BusinessActionContext;
 
 /**
- * Watch for server address list change
+ * The type Tcc action.
+ *
+ * @author zhangsen
  */
-public interface AddressWatcher {
+public class TccActionImpl implements TccAction {
 
-    /**
-     * On change.
-     *
-     * @param serverAddressArray the server address array
-     */
-    void onChange(String[] serverAddressArray);
+    @Override
+    public boolean prepare(BusinessActionContext actionContext, int i) {
+        return true;
+    }
+
+    @Override
+    public boolean commit(BusinessActionContext actionContext) {
+        return true;
+    }
+
+    @Override
+    public boolean rollback(BusinessActionContext actionContext) {
+        return true;
+    }
 }

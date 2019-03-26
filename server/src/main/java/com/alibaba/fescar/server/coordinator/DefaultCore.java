@@ -56,12 +56,12 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String lockKeys)
-        throws TransactionException {
+    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
+                               String applicationData, String lockKeys) throws TransactionException {
         GlobalSession globalSession = assertGlobalSession(XID.getTransactionId(xid), GlobalStatus.Begin);
 
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId, lockKeys,
-            clientId);
+        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
+            applicationData, lockKeys, clientId);
 
         if (!branchSession.lock()) {
             throw new TransactionException(LockKeyConflict);
@@ -91,8 +91,8 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public void branchReport(String xid, long branchId, BranchStatus status, String applicationData)
-        throws TransactionException {
+    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status,
+                             String applicationData) throws TransactionException {
         GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
         if (globalSession == null) {
             throw new TransactionException(TransactionExceptionCode.GlobalTransactionNotExist,
@@ -158,7 +158,7 @@ public class DefaultCore implements Core {
                 continue;
             }
             try {
-                BranchStatus branchStatus = resourceManagerInbound.branchCommit(
+                BranchStatus branchStatus = resourceManagerInbound.branchCommit(branchSession.getBranchType(),
                     XID.generateXID(branchSession.getTransactionId()), branchSession.getBranchId(),
                     branchSession.getResourceId(), branchSession.getApplicationData());
 
@@ -264,7 +264,7 @@ public class DefaultCore implements Core {
                 continue;
             }
             try {
-                BranchStatus branchStatus = resourceManagerInbound.branchRollback(
+                BranchStatus branchStatus = resourceManagerInbound.branchRollback(branchSession.getBranchType(),
                     XID.generateXID(branchSession.getTransactionId()), branchSession.getBranchId(),
                     branchSession.getResourceId(), branchSession.getApplicationData());
 

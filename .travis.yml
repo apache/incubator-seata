@@ -12,7 +12,7 @@ cache:
 install: true
 
 script:
-  - mvn clean package
+- mvn clean package verify
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

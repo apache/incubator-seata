@@ -19,6 +19,7 @@ package com.alibaba.fescar.spring.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.concurrent.Callable;
+import java.util.Arrays;
 
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.common.util.StringUtils;
@@ -140,21 +141,10 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
     }
 
     private String formatMethod(Method method) {
-        StringBuilder sb = new StringBuilder();
-
-        String methodName = method.getName();
-        Class<?>[] params = method.getParameterTypes();
-        sb.append(methodName);
-        sb.append("(");
-
-        int paramPos = 0;
-        for (Class<?> clazz : params) {
-            sb.append(clazz.getName());
-            if (++paramPos < params.length) {
-                sb.append(",");
-            }
-        }
-        sb.append(")");
-        return sb.toString();
+        String paramTypes = Arrays.stream(method.getParameterTypes())
+            .map(Class::getName)
+            .reduce((p1, p2) -> String.format("%s, %s", p1, p2))
+            .orElse("");
+        return method.getName() + "(" + paramTypes + ")";
     }
 }

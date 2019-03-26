@@ -24,39 +24,39 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public class DefaultRegistry implements Registry {
-  private static final Map<UUID, Meter> meters;
+  private static final Map<UUID, Meter> METERS;
 
   static {
-    meters = new ConcurrentHashMap<>();
+    METERS = new ConcurrentHashMap<>();
   }
 
   @Override
   public <T extends Number> Gauge<T> getGauge(Id id, Supplier<T> supplier) {
-    return (Gauge<T>) DefaultRegistry.meters.computeIfAbsent(id.getId(), key -> new DefaultGauge<>(id, supplier));
+    return (Gauge<T>)DefaultRegistry.METERS.computeIfAbsent(id.getId(), key -> new DefaultGauge<>(id, supplier));
   }
 
   @Override
   public Counter getCounter(Id id) {
-    return (Counter) DefaultRegistry.meters.computeIfAbsent(id.getId(), key -> new DefaultCounter(id));
+    return (Counter)DefaultRegistry.METERS.computeIfAbsent(id.getId(), key -> new DefaultCounter(id));
   }
 
   @Override
   public Summary getSummary(Id id) {
-    return (Summary) DefaultRegistry.meters.computeIfAbsent(id.getId(), key -> new DefaultSummary(id));
+    return (Summary)DefaultRegistry.METERS.computeIfAbsent(id.getId(), key -> new DefaultSummary(id));
   }
 
   @Override
   public Timer getTimer(Id id) {
-    return (Timer) DefaultRegistry.meters.computeIfAbsent(id.getId(), key -> new DefaultTimer(id));
+    return (Timer)DefaultRegistry.METERS.computeIfAbsent(id.getId(), key -> new DefaultTimer(id));
   }
 
   @Override
   public Iterable<Measurement> measure() {
     List<Measurement> measurements = new ArrayList<>();
-    if (DefaultRegistry.meters.size() == 0) {
+    if (DefaultRegistry.METERS.size() == 0) {
       return measurements;
     }
-    DefaultRegistry.meters.values().iterator().forEachRemaining(meter -> meter.measure().forEach(measurements::add));
+    DefaultRegistry.METERS.values().iterator().forEachRemaining(meter -> meter.measure().forEach(measurements::add));
     return measurements;
   }
 }

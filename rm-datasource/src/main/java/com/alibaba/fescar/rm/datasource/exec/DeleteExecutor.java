@@ -23,6 +23,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fescar.rm.datasource.ParametersHolder;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
 import com.alibaba.fescar.rm.datasource.sql.SQLDeleteRecognizer;
@@ -30,6 +31,8 @@ import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 
+import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
+import com.alibaba.fescar.rm.datasource.undo.KeywordCheckerFactory;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -55,11 +58,12 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     @Override
     protected TableRecords beforeImage() throws SQLException {
         SQLDeleteRecognizer visitor = (SQLDeleteRecognizer)sqlRecognizer;
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
 
         TableMeta tmeta = getTableMeta(visitor.getTableName());
         List<String> columns = new ArrayList<>();
         for (String column : tmeta.getAllColumns().keySet()) {
-            columns.add(column);
+            columns.add(keywordChecker.checkAndReplace(column));
         }
 
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
@@ -77,7 +81,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         } else {
             whereCondition = visitor.getWhereCondition();
         }
-        selectSQLAppender.append(" FROM " + getFromTableInSQL());
+        selectSQLAppender.append(" FROM " + keywordChecker.checkAndReplace(getFromTableInSQL()));
         if (StringUtils.isNotBlank(whereCondition)) {
             selectSQLAppender.append(" WHERE " + whereCondition);
         }
