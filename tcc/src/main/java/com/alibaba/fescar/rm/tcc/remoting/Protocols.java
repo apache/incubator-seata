@@ -14,17 +14,40 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.core.service;
+package com.alibaba.fescar.rm.tcc.remoting;
+
+import com.alibaba.fescar.common.exception.FrameworkException;
 
 /**
- * Watch for server address list change
+ * remoting protocols enum
+ *
+ * @author zhangsen
  */
-public interface AddressWatcher {
+public class Protocols {
 
-    /**
-     * On change.
-     *
-     * @param serverAddressArray the server address array
-     */
-    void onChange(String[] serverAddressArray);
+	/**
+	 * sofa-rpc service
+	 */
+	public static short SOFA_RPC = 2;
+
+	/**
+	 * dubbo service
+	 */
+	public static short DUBBO = 3;
+
+	/**
+	 * restful service
+	 */
+	public static short RESTFUL = 4;
+
+	/**
+	 * local bean
+	 */
+	public static short IN_JVM = 5;
+
+	/**
+	 * hsf service
+	 */
+	public static short HSF = 8;
+
 }

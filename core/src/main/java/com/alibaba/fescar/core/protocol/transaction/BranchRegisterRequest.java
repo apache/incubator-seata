@@ -37,6 +37,8 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
 
     private String lockKey;
 
+    private String applicationData;
+
     /**
      * Gets transaction id.
      *
@@ -114,15 +116,32 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
         return TYPE_BRANCH_REGISTER;
     }
 
+    public String getApplicationData() {
+        return applicationData;
+    }
+
+    public void setApplicationData(String applicationData) {
+        this.applicationData = applicationData;
+    }
+
     @Override
     public byte[] encode() {
+        int byteLenth = 0;
         byte[] lockKeyBytes = null;
         if (this.lockKey != null) {
             lockKeyBytes = lockKey.getBytes(UTF8);
             if (lockKeyBytes.length > 512) {
-                byteBuffer = ByteBuffer.allocate(lockKeyBytes.length + 1024);
+                byteLenth += lockKeyBytes.length;
             }
         }
+        byte[] applicationDataBytes = null;
+        if (this.applicationData != null) {
+            applicationDataBytes = applicationData.getBytes(UTF8);
+            if (applicationDataBytes.length > 512) {
+                byteLenth += applicationDataBytes.length;
+            }
+        }
+        byteBuffer = ByteBuffer.allocate(byteLenth + 1024);
 
         // 1. Transaction Id
         byteBuffer.putLong(this.transactionId);
@@ -144,6 +163,16 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
             byteBuffer.putInt(lockKeyBytes.length);
             if (lockKeyBytes.length > 0) {
                 byteBuffer.put(lockKeyBytes);
+            }
+        } else {
+            byteBuffer.putInt(0);
+        }
+
+        //5. applicationData
+        if (this.applicationData != null) {
+            byteBuffer.putInt(applicationDataBytes.length);
+            if (applicationDataBytes.length > 0) {
+                byteBuffer.put(applicationDataBytes);
             }
         } else {
             byteBuffer.putInt(0);
@@ -171,6 +200,13 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
             byte[] bs = new byte[iLen];
             byteBuffer.get(bs);
             this.setLockKey(new String(bs, UTF8));
+        }
+
+        int applicationDataLen = byteBuffer.getInt();
+        if (applicationDataLen > 0) {
+            byte[] bs = new byte[applicationDataLen];
+            byteBuffer.get(bs);
+            setApplicationData(new String(bs, UTF8));
         }
     }
 

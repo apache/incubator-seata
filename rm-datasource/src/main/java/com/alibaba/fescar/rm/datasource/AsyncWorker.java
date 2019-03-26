@@ -33,13 +33,14 @@ import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
+import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.ResourceManagerInbound;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.alibaba.fescar.core.service.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
+import static com.alibaba.fescar.core.constants.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 
 /**
  * The type Async worker.
@@ -53,16 +54,18 @@ public class AsyncWorker implements ResourceManagerInbound {
         /**
          * Instantiates a new Phase 2 context.
          *
+         * @param branchType      the branchType
          * @param xid             the xid
          * @param branchId        the branch id
          * @param resourceId      the resource id
          * @param applicationData the application data
          */
-        public Phase2Context(String xid, long branchId, String resourceId, String applicationData) {
+        public Phase2Context(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) {
             this.xid = xid;
             this.branchId = branchId;
             this.resourceId = resourceId;
             this.applicationData = applicationData;
+            this.branchType = branchType;
         }
 
         /**
@@ -81,6 +84,11 @@ public class AsyncWorker implements ResourceManagerInbound {
          * The Application data.
          */
         String applicationData;
+
+        /**
+         * the branch Type
+         */
+        BranchType branchType;
     }
 
     private static final List<Phase2Context> ASYNC_COMMIT_BUFFER = Collections.synchronizedList(
@@ -92,13 +100,11 @@ public class AsyncWorker implements ResourceManagerInbound {
     private static ScheduledExecutorService timerExecutor;
 
     @Override
-    public BranchStatus branchCommit(String xid, long branchId, String resourceId, String applicationData)
-        throws TransactionException {
+    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
         if (ASYNC_COMMIT_BUFFER.size() < ASYNC_COMMIT_BUFFER_LIMIT) {
-            ASYNC_COMMIT_BUFFER.add(new Phase2Context(xid, branchId, resourceId, applicationData));
+            ASYNC_COMMIT_BUFFER.add(new Phase2Context(branchType, xid, branchId, resourceId, applicationData));
         } else {
-            LOGGER.warn("Async commit buffer is FULL. Rejected branch [" + branchId + "/" + xid
-                + "] will be handled by housekeeping later.");
+            LOGGER.warn("Async commit buffer is FULL. Rejected branch [" + branchId + "/" + xid + "] will be handled by housekeeping later.");
         }
         return BranchStatus.PhaseTwo_Committed;
     }
@@ -177,8 +183,7 @@ public class AsyncWorker implements ResourceManagerInbound {
     }
 
     @Override
-    public BranchStatus branchRollback(String xid, long branchId, String resourceId, String applicationData)
-        throws TransactionException {
+    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
         throw new NotSupportYetException();
 
     }
