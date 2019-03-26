@@ -28,6 +28,10 @@ public class SessionHelper {
 
     private SessionHelper() {}
 
+    public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType, String resourceId, String lockKeys, String clientId) {
+        return newBranchByGlobal(globalSession, branchType, resourceId, null, lockKeys, clientId);
+    }
+
     /**
      * New branch by global branch session.
      *
@@ -39,7 +43,7 @@ public class SessionHelper {
      * @return the branch session
      */
     public static BranchSession newBranchByGlobal(GlobalSession globalSession, BranchType branchType, String resourceId,
-                                                  String lockKeys, String clientId) {
+            String applicationData, String lockKeys, String clientId) {
         BranchSession branchSession = new BranchSession();
 
         branchSession.setTransactionId(globalSession.getTransactionId());
@@ -48,6 +52,7 @@ public class SessionHelper {
         branchSession.setResourceId(resourceId);
         branchSession.setLockKey(lockKeys);
         branchSession.setClientId(clientId);
+        branchSession.setApplicationData(applicationData);
 
         return branchSession;
     }

@@ -24,8 +24,8 @@ import java.util.Map;
 
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.core.constants.ConfigurationKeys;
 import com.alibaba.fescar.core.model.GlobalStatus;
-import com.alibaba.fescar.core.service.ConfigurationKeys;
 import com.alibaba.fescar.server.store.FileTransactionStoreManager;
 import com.alibaba.fescar.server.store.SessionStorable;
 import com.alibaba.fescar.server.store.TransactionStoreManager;
@@ -51,6 +51,7 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
         transactionStoreManager = new FileTransactionStoreManager(sessionStoreFilePath + name, this);
     }
 
+    @Override
     public void reload() {
         restoreSessions();
         washSessions();
