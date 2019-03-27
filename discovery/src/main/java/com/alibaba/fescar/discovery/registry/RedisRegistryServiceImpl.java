@@ -16,6 +16,21 @@
 
 package com.alibaba.fescar.discovery.registry;
 
+import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
+import com.alibaba.fescar.common.thread.NamedThreadFactory;
+import com.alibaba.fescar.common.util.NetUtil;
+import com.alibaba.fescar.common.util.StringUtils;
+import com.alibaba.fescar.config.Configuration;
+import com.alibaba.fescar.config.ConfigurationFactory;
+import com.google.common.collect.Lists;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPubSub;
+import redis.clients.jedis.Protocol;
+
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -27,22 +42,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-
-import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
-import com.alibaba.fescar.common.thread.NamedThreadFactory;
-import com.alibaba.fescar.common.util.NetUtil;
-import com.alibaba.fescar.common.util.StringUtils;
-import com.alibaba.fescar.config.Configuration;
-import com.alibaba.fescar.config.ConfigurationFactory;
-
-import com.google.common.collect.Lists;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPubSub;
-import redis.clients.jedis.Protocol;
 
 /**
  * The type Redis registry service.
@@ -68,7 +67,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         new NamedThreadFactory("RedisRegistryService", 1));
 
     private RedisRegistryServiceImpl() {
-        Configuration fescarConfig = ConfigurationFactory.getInstance();
+        Configuration fescarConfig = ConfigurationFactory.FILE_INSTANCE;
         this.clusterName = fescarConfig.getConfig(REDIS_FILEKEY_PREFIX + REGISTRY_CLUSTER_KEY, DEFAULT_CLUSTER);
         String password = fescarConfig.getConfig(getRedisPasswordFileKey());
         String serverAddr = fescarConfig.getConfig(getRedisAddrFileKey());
@@ -146,9 +145,16 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         try {
             jedis.hset(getRedisRegistryKey(), serverAddr, ManagementFactory.getRuntimeMXBean().getName());
             jedis.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.REGISTER);
+            // it can't prevent kill -9
+            registerShutdownHook(address);
         } finally {
             jedis.close();
         }
+    }
+
+    private void registerShutdownHook(InetSocketAddress address) {
+        final InetSocketAddress finalAddress = address;
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> unregister(finalAddress)));
     }
 
     @Override
