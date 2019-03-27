@@ -68,7 +68,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         new NamedThreadFactory("RedisRegistryService", 1));
 
     private RedisRegistryServiceImpl() {
-        Configuration fescarConfig = ConfigurationFactory.getInstance();
+        Configuration fescarConfig = ConfigurationFactory.FILE_INSTANCE;
         this.clusterName = fescarConfig.getConfig(REDIS_FILEKEY_PREFIX + REGISTRY_CLUSTER_KEY, DEFAULT_CLUSTER);
         String password = fescarConfig.getConfig(getRedisPasswordFileKey());
         String serverAddr = fescarConfig.getConfig(getRedisAddrFileKey());
@@ -146,9 +146,19 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         try {
             jedis.hset(getRedisRegistryKey(), serverAddr, ManagementFactory.getRuntimeMXBean().getName());
             jedis.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.REGISTER);
+            // it can't prevent kill -9
+            registerShutdownHook(address);
         } finally {
             jedis.close();
         }
+    }
+
+    /**
+     * register vm shutdownHook
+     * @param address
+     */
+    private void registerShutdownHook(InetSocketAddress address) {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> unregister(address)));
     }
 
     @Override
