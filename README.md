@@ -95,9 +95,10 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 ## Contact
 
 * [Twitter](): TBD. Follow along for latest Fescar news on Twitter.
-* Email Group:
-     * dev.fescar@gmail.com: Fescar developer discussion (APIs, feature design, etc).
 
+* Mailing list: 
+  * dev-fescar@googlegroups.com , for dev/user discussion. [subscribe](mailto:dev-fescar+subscribe@googlegroups.com), [unsubscribe](mailto:dev-fescar+unsubscribe@googlegroups.com), [archive](https://groups.google.com/forum/#!forum/dev-fescar)
+  
 **Dingtalk**
 
 <img src="https://upload-images.jianshu.io/upload_images/4420767-4e95b186a1a1bfba.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240"  height="300" width="300">
