@@ -117,6 +117,9 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
      * Init.
      */
     public void init() {
+        //register shutdownHook
+        FescarShutdownHook.getInstance().addAbstractRpcRemoting(this);
+
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {

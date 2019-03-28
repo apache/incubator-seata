@@ -18,6 +18,9 @@ package com.alibaba.fescar.spring.annotation;
 
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.core.rpc.netty.FescarShutdownHook;
+import com.alibaba.fescar.core.rpc.netty.RmRpcClient;
+import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
 import com.alibaba.fescar.rm.RMClient;
 import com.alibaba.fescar.spring.tcc.TccActionInterceptor;
 import com.alibaba.fescar.spring.util.SpringProxyUtils;
@@ -39,8 +42,11 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.ApplicationContextAware;
-
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.ApplicationEvent;
 /**
  * The type Global transaction scanner.
  *
@@ -170,6 +176,18 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Global Transaction Clients are initialized. ");
         }
+        registerSpringShutdownHook();
+
+    }
+
+    private void registerSpringShutdownHook() {
+        if (applicationContext instanceof ConfigurableApplicationContext) {
+            ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
+            FescarShutdownHook.removeRuntimeShutdownHook();
+            FescarShutdownHook.getInstance().addAbstractRpcRemoting(TmRpcClient.getInstance(applicationId, txServiceGroup));
+            FescarShutdownHook.getInstance().addAbstractRpcRemoting(RmRpcClient.getInstance(applicationId, txServiceGroup));
+            ((ConfigurableApplicationContext) applicationContext).addApplicationListener(ShutdownHookListener.getInstance());
+        }
     }
 
     @Override
@@ -258,5 +276,22 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
+    }
+
+    private static class ShutdownHookListener implements ApplicationListener {
+
+        private static final ShutdownHookListener shutdownHookListener = new ShutdownHookListener();
+
+        @Override
+        public void onApplicationEvent(ApplicationEvent event) {
+            if (event instanceof ContextClosedEvent) {
+                FescarShutdownHook shutdownHook = FescarShutdownHook.getInstance();
+                shutdownHook.destroyAll();
+            }
+        }
+
+        public static ShutdownHookListener getInstance(){
+            return shutdownHookListener;
+        }
     }
 }

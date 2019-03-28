@@ -107,8 +107,6 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             return;
         }
         applicationInfoManager.setInstanceStatus(InstanceInfo.InstanceStatus.DOWN);
-        eurekaClient.shutdown();
-        close();
     }
 
     @Override
@@ -148,6 +146,14 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         return Lists.newArrayList(CLUSTER_ADDRESS_MAP.get(clusterName.toUpperCase()));
     }
 
+    @Override
+    public void close() throws Exception {
+        if (eurekaClient != null){
+            eurekaClient.shutdown();
+        }
+        clean();
+    }
+
     private static void refreshCluster() throws EurekaRegistryException{
         Applications applications = getEurekaClient(false).getApplications();
         List<Application> list = applications.getRegisteredApplications();
@@ -168,11 +174,6 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         }
     }
 
-    private static void close() {
-        applicationInfoManager = null;
-        instanceConfig = null;
-        eurekaClient = null;
-    }
 
     private static Properties getEurekaProperties(boolean needRegister) {
         Properties eurekaProperties = new Properties();
@@ -221,12 +222,18 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
                     applicationInfoManager = new ApplicationInfoManager(instanceConfig, instanceInfo);
                     eurekaClient = new DiscoveryClient(applicationInfoManager, new DefaultEurekaClientConfig());
                 } catch (Exception e) {
-                    close();
+                    clean();
                     throw new EurekaRegistryException("register eureka is error!", e);
                 }
             }
         }
         return eurekaClient;
+    }
+
+    private static void clean() {
+        eurekaClient = null;
+        applicationInfoManager = null;
+        instanceConfig = null;
     }
 
     private static String getInstanceId() {
