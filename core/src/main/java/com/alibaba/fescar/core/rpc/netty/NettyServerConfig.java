@@ -45,6 +45,12 @@ public class NettyServerConfig extends NettyBaseConfig {
     private static final String NIO_WORKER_THREAD_PREFIX = "NettyServerNIOWorker";
     private static final String DEFAULT_EXECUTOR_THREAD_PREFIX = "NettyServerBizHandler";
     private static final int DEFAULT_BOSS_THREAD_SIZE = 1;
+
+    /**
+     * Shutdown timeout default 1s
+     */
+    private static final int DEFAULT_SHUTDOWN_TIMEOUT_SEC = 1;
+
     /**
      * The Server channel clazz.
      */
@@ -296,4 +302,12 @@ public class NettyServerConfig extends NettyBaseConfig {
         return CONFIG.getInt("transport.thread-factory.boss-thread-size", DEFAULT_BOSS_THREAD_SIZE);
     }
 
+    /**
+     * Get the timeout seconds of shutdown.
+     *
+     * @return the int
+     */
+    public int getServerShutdownWaitTime() {
+        return CONFIG.getInt("transport.shutdown.wait", DEFAULT_SHUTDOWN_TIMEOUT_SEC);
+    }
 }
