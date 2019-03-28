@@ -18,6 +18,7 @@ package com.alibaba.fescar.core.rpc.netty;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
@@ -150,6 +151,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
             ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
             LOGGER.info("Server started ... ");
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+            registerShutdownHook();
             future.channel().closeFuture().sync();
         } catch (Exception exx) {
             throw new RuntimeException(exx);
@@ -157,9 +159,24 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
 
     }
 
+    /**
+     * Register vm shutdown hook to shutdown gracefully
+     * can't prevent kill -9
+     */
+    private void registerShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdown()));
+    }
+
     @Override
     public void shutdown() {
         try {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Shuting server down. ");
+            }
+            RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+            //wait a few seconds for server transport
+            TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
+
             this.eventLoopGroupBoss.shutdownGracefully();
             this.eventLoopGroupWorker.shutdownGracefully();
         } catch (Exception exx) {
