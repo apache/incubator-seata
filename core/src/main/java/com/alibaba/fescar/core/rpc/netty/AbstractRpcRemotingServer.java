@@ -150,6 +150,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
             ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
             LOGGER.info("Server started ... ");
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+            registerShutdownHook();
             future.channel().closeFuture().sync();
         } catch (Exception exx) {
             throw new RuntimeException(exx);
@@ -157,9 +158,22 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
 
     }
 
+    /**
+     * regiter vm shutdown hook for graceful shutdown
+     * can't prevent kill -9
+     */
+    private void registerShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdown()));
+    }
+
     @Override
     public void shutdown() {
         try {
+            LOGGER.info("Server shutdown ... ");
+            RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+            //wait a few seconds for server transport
+            Thread.sleep(nettyServerConfig.getServerShutdownWaitTime());
+
             this.eventLoopGroupBoss.shutdownGracefully();
             this.eventLoopGroupWorker.shutdownGracefully();
         } catch (Exception exx) {

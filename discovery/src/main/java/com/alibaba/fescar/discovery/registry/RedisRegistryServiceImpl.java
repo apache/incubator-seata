@@ -146,19 +146,9 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         try {
             jedis.hset(getRedisRegistryKey(), serverAddr, ManagementFactory.getRuntimeMXBean().getName());
             jedis.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.REGISTER);
-            // it can't prevent kill -9
-            registerShutdownHook(address);
         } finally {
             jedis.close();
         }
-    }
-
-    /**
-     * register vm shutdownHook
-     * @param address
-     */
-    private void registerShutdownHook(InetSocketAddress address) {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> unregister(address)));
     }
 
     @Override
