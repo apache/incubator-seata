@@ -18,6 +18,7 @@ package com.alibaba.fescar.core.rpc.netty;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
@@ -159,7 +160,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     }
 
     /**
-     * regiter vm shutdown hook for graceful shutdown
+     * Register vm shutdown hook to shutdown gracefully
      * can't prevent kill -9
      */
     private void registerShutdownHook() {
@@ -169,10 +170,12 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     @Override
     public void shutdown() {
         try {
-            LOGGER.info("Server shutdown ... ");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Start to shutdown server. ");
+            }
             RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             //wait a few seconds for server transport
-            Thread.sleep(nettyServerConfig.getServerShutdownWaitTime());
+            TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
 
             this.eventLoopGroupBoss.shutdownGracefully();
             this.eventLoopGroupWorker.shutdownGracefully();

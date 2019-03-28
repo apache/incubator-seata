@@ -47,9 +47,10 @@ public class NettyServerConfig extends NettyBaseConfig {
     private static final int DEFAULT_BOSS_THREAD_SIZE = 1;
 
     /**
-     * default 1000ms
+     * Shutdown timeout default 1s
      */
-    private static final int DEFAULT_SHUTDOWN_WAIT = 1000;
+    private static final int DEFAULT_SHUTDOWN_TIMEOUT_SEC = 1;
+
     /**
      * The Server channel clazz.
      */
@@ -300,12 +301,13 @@ public class NettyServerConfig extends NettyBaseConfig {
     public int getBossThreadSize() {
         return CONFIG.getInt("transport.thread-factory.boss-thread-size", DEFAULT_BOSS_THREAD_SIZE);
     }
+
     /**
-     * Get shutdown Timeout.
+     * Get the timeout seconds of shutdown.
      *
      * @return the int
      */
     public int getServerShutdownWaitTime() {
-        return CONFIG.getInt("transport.shutdown.wait", DEFAULT_SHUTDOWN_WAIT);
+        return CONFIG.getInt("transport.shutdown.wait", DEFAULT_SHUTDOWN_TIMEOUT_SEC);
     }
 }
