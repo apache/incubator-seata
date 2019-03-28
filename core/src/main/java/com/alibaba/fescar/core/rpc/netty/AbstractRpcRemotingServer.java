@@ -171,7 +171,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     public void shutdown() {
         try {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Start to shutdown server. ");
+                LOGGER.debug("Shuting server down. ");
             }
             RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             //wait a few seconds for server transport
