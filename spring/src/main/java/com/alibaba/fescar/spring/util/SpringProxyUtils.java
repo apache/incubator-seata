@@ -16,8 +16,10 @@
 
 package com.alibaba.fescar.spring.util;
 
+import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.aop.target.EmptyTargetSource;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
@@ -39,10 +41,23 @@ public class SpringProxyUtils {
     public static Class<?> findTargetClass(Object proxy) throws Exception {
         if (AopUtils.isAopProxy(proxy)) {
             AdvisedSupport advised = getAdvisedSupport(proxy);
+            if(AopUtils.isJdkDynamicProxy(proxy)){
+                TargetSource targetSource = advised.getTargetSource();
+                return targetSource instanceof EmptyTargetSource ?  getFirstInterfaceByAdvised(advised): targetSource.getTarget().getClass();
+            }
             Object target = advised.getTargetSource().getTarget();
             return findTargetClass(target);
         } else {
             return proxy.getClass();
+        }
+    }
+
+    private static Class<?> getFirstInterfaceByAdvised(AdvisedSupport advised) {
+        Class<?>[] interfaces = advised.getProxiedInterfaces();
+        if(interfaces.length > 0){
+            return interfaces[0];
+        }else{
+            throw new IllegalStateException("Find the jdk dynamic proxy class that does not implement the interface");
         }
     }
 
