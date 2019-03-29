@@ -206,19 +206,19 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     private static String getNacosAddrFileKey() {
         return ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + PRO_SERVER_ADDR_KEY;
+            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+            + PRO_SERVER_ADDR_KEY;
     }
 
     private static String getNacosNameSpaceFileKey() {
         return ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + PRO_NAMESPACE_KEY;
+            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+            + PRO_NAMESPACE_KEY;
     }
 
     private static String getNacosClusterFileKey() {
         return ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + REGISTRY_CLUSTER;
+            + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+            + REGISTRY_CLUSTER;
     }
 }
