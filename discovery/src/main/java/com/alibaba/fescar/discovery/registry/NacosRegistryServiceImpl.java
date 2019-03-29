@@ -41,7 +41,6 @@ import com.alibaba.nacos.client.naming.utils.CollectionUtils;
  * @date 2019 /1/31
  */
 public class NacosRegistryServiceImpl implements RegistryService<EventListener> {
-
     private static final String DEFAULT_NAMESPACE = "public";
     private static final String DEFAULT_CLUSTER = "default";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
@@ -54,7 +53,8 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static volatile NacosRegistryServiceImpl instance;
 
-    private NacosRegistryServiceImpl() {}
+    private NacosRegistryServiceImpl() {
+    }
 
     /**
      * Gets instance.
@@ -75,15 +75,13 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     @Override
     public void register(InetSocketAddress address) throws Exception {
         validAddress(address);
-        getNamingInstance().registerInstance(PRO_SERVER_ADDR_KEY, address.getHostName(), address.getPort(),
-            getClusterName());
+        getNamingInstance().registerInstance(PRO_SERVER_ADDR_KEY, address.getAddress().getHostAddress(), address.getPort(), getClusterName());
     }
 
     @Override
     public void unregister(InetSocketAddress address) throws Exception {
         validAddress(address);
-        getNamingInstance().deregisterInstance(PRO_SERVER_ADDR_KEY, address.getHostName(), address.getPort(),
-            getClusterName());
+        getNamingInstance().deregisterInstance(PRO_SERVER_ADDR_KEY, address.getAddress().getHostAddress(), address.getPort(), getClusterName());
     }
 
     @Override
@@ -135,7 +133,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
             subscribe(clusterName, new EventListener() {
                 @Override
                 public void onEvent(Event event) {
-                    List<Instance> instances = ((NamingEvent)event).getInstances();
+                    List<Instance> instances = ((NamingEvent) event).getInstances();
                     if (null == instances && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
                         CLUSTER_ADDRESS_MAP.remove(clusterName);
                     } else if (!CollectionUtils.isEmpty(instances)) {
