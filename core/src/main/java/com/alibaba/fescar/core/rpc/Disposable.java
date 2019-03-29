@@ -16,7 +16,6 @@
 package com.alibaba.fescar.core.rpc;
 
 /**
- * ensure the shutdownHook is singleton
  *
  * @author 563868273@qq.com
  * @date 2019/3/29
