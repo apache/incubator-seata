@@ -69,7 +69,21 @@ For more details about principle and design, please go to [Fescar wiki page](htt
 
 <dependency>
     <groupId>com.alibaba.fescar</groupId>
-    <artifactId>fescar-all</artifactId>
+    <artifactId>fescar-spring</artifactId>
+    <version>${fescar.version}</version>
+</dependency>
+
+<!--dependency for Apache Dubbo-->
+<dependency>
+    <groupId>com.alibaba.fescar</groupId>
+    <artifactId>fescar-dubbo</artifactId>
+    <version>${fescar.version}</version>
+</dependency>
+
+<!--dependency for Alibaba Dubbo-->
+<dependency>
+    <groupId>com.alibaba.fescar</groupId>
+    <artifactId>fescar-dubbo-alibaba</artifactId>
     <version>${fescar.version}</version>
 </dependency>
 
