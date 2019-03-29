@@ -175,7 +175,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
             }
 
             this.eventLoopGroupBoss.shutdownGracefully();
-            this.eventLoopGroupBoss.shutdownGracefully();
+            this.eventLoopGroupWorker.shutdownGracefully();
         } catch (Exception exx) {
             LOGGER.error(exx.getMessage());
         }
