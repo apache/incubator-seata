@@ -41,14 +41,32 @@ public class SpringProxyUtils {
     public static Class<?> findTargetClass(Object proxy) throws Exception {
         if (AopUtils.isAopProxy(proxy)) {
             AdvisedSupport advised = getAdvisedSupport(proxy);
-            if(AopUtils.isJdkDynamicProxy(proxy)){
-                TargetSource targetSource = advised.getTargetSource();
-                return targetSource instanceof EmptyTargetSource ?  getFirstInterfaceByAdvised(advised): targetSource.getTarget().getClass();
-            }
             Object target = advised.getTargetSource().getTarget();
             return findTargetClass(target);
         } else {
+            if(proxy == null){
+                return null;
+            }
             return proxy.getClass();
+        }
+    }
+
+    public static Class<?>[] findInterfaces(Object proxy) throws Exception {
+        if(AopUtils.isJdkDynamicProxy(proxy)){
+            AdvisedSupport advised = getAdvisedSupport(proxy);
+            TargetSource targetSource = advised.getTargetSource();
+            return targetSource instanceof EmptyTargetSource ?  getInterfacesByAdvised(advised) : null;
+        }else{
+            return null;
+        }
+    }
+
+    private static Class<?>[] getInterfacesByAdvised(AdvisedSupport advised) {
+        Class<?>[] interfaces = advised.getProxiedInterfaces();
+        if(interfaces.length > 0){
+            return interfaces;
+        }else{
+            throw new IllegalStateException("Find the jdk dynamic proxy class that does not implement the interface");
         }
     }
 

@@ -189,23 +189,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                     interceptor = new TccActionInterceptor(TCCBeanParserUtils.getRemotingDesc(beanName));
                 }else {
                     Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
-                    Method[] methods = serviceInterface.getMethods();
-                    boolean shouldSkip = true;
-                    for (Method method : methods) {
-                        GlobalTransactional trxAnno = method.getAnnotation(GlobalTransactional.class);
-                        if (trxAnno != null) {
-                            shouldSkip = false;
-                            break;
-                        }
+                    Class<?>[] interfacesIfJdk = SpringProxyUtils.findInterfaces(bean);
 
-                        GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);
-                        if (lockAnno != null) {
-                            shouldSkip = false;
-                            break;
-                        }
-                    }
-
-                    if (shouldSkip) {
+                    if(!existsAnnotation(new Class[]{serviceInterface})
+                        && !existsAnnotation(interfacesIfJdk)){
                         return bean;
                     }
 
@@ -230,6 +217,29 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         } catch (Exception exx) {
             throw new RuntimeException(exx);
         }
+    }
+
+    private boolean existsAnnotation(Class<?>[] classes) {
+        if(classes != null && classes.length > 0){
+            for (Class clazz : classes){
+                if(clazz == null){
+                    continue;
+                }
+                Method[] methods = clazz.getMethods();
+                for (Method method : methods) {
+                    GlobalTransactional trxAnno = method.getAnnotation(GlobalTransactional.class);
+                    if (trxAnno != null) {
+                        return true;
+                    }
+
+                    GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);
+                    if (lockAnno != null) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     private MethodDesc makeMethodDesc(GlobalTransactional anno, Method method) {
