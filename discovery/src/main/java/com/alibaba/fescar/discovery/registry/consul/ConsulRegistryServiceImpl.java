@@ -177,7 +177,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      */
     private String getClusterName() {
         String clusterConfigName = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-                + REGISTRY_CLUSTER;
+            + REGISTRY_CLUSTER;
         return FILE_CONFIG.getConfig(clusterConfigName);
     }
 
@@ -231,10 +231,10 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      */
     private Response<List<HealthService>> getHealthyServices(String service, long index, long watchTimeout) {
         return getConsulClient().getHealthServices(service, HealthServicesRequest.newBuilder()
-                .setTag(SERVICE_TAG)
-                .setQueryParams(new QueryParams(watchTimeout, index))
-                .setPassing(true)
-                .build());
+            .setTag(SERVICE_TAG)
+            .setQueryParams(new QueryParams(watchTimeout, index))
+            .setPassing(true)
+            .build());
     }
 
     /**
@@ -276,9 +276,9 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
             return;
         }
         clusterAddressMap.put(cluster, services.stream()
-                .map(HealthService::getService)
-                .map(service -> new InetSocketAddress(service.getAddress(), service.getPort()))
-                .collect(Collectors.toList()));
+            .map(HealthService::getService)
+            .map(service -> new InetSocketAddress(service.getAddress(), service.getPort()))
+            .collect(Collectors.toList()));
     }
 
     /**
