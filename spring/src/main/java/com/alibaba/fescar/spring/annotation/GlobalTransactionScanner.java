@@ -156,8 +156,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
 
     @Override
     public void destroy() {
-        ShutdownHook shutdownHook = ShutdownHook.getInstance();
-        shutdownHook.destroyAll();
+        ShutdownHook.getInstance().destroyAll();
     }
 
     private void initClient() {
