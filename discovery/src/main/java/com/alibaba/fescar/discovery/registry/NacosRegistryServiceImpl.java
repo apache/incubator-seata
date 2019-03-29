@@ -119,7 +119,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         }
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
             List<String> clusters = new ArrayList<>();
-            clusters.add(getClusterName());
+            clusters.add(clusterName);
             List<Instance> firstAllInstances = getNamingInstance().getAllInstances(PRO_SERVER_ADDR_KEY, clusters);
             if (null != firstAllInstances) {
                 List<InetSocketAddress> newAddressList = new ArrayList<>();
