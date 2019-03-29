@@ -17,11 +17,12 @@
 package com.alibaba.fescar.core.rpc.netty;
 
 import com.alibaba.fescar.common.util.CollectionUtils;
+import com.alibaba.fescar.core.rpc.Disposable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -36,9 +37,14 @@ public class ShutdownHook extends Thread {
 
     private static final ShutdownHook SHUTDOWN_HOOK = new ShutdownHook("ShutdownHook");
 
-    private Set<AbstractRpcRemoting> abstractRpcRemotings = new HashSet<>();
+    private Set<Disposable> disposables = new TreeSet<>();
 
     private final AtomicBoolean destroyed = new AtomicBoolean(false);
+
+    /**
+     * default 10. Lower values have higher priority
+     */
+    private static final int DEFAULT_PRIORITY = 10;
 
     static {
         Runtime.getRuntime().addShutdownHook(SHUTDOWN_HOOK);
@@ -52,8 +58,12 @@ public class ShutdownHook extends Thread {
         return SHUTDOWN_HOOK;
     }
 
-    public void addAbstractRpcRemoting(AbstractRpcRemoting abstractRpcRemoting){
-        abstractRpcRemotings.add(abstractRpcRemoting);
+    public void addDisposable(Disposable disposable){
+        addDisposable(disposable, DEFAULT_PRIORITY);
+    }
+
+    public void addDisposable(Disposable disposable, int priority){
+        disposables.add(new DisposablePriorityWrapper(disposable, priority));
     }
 
     @Override
@@ -64,13 +74,13 @@ public class ShutdownHook extends Thread {
     public void destroyAll() {
 
         if (LOGGER.isDebugEnabled()){
-            LOGGER.debug("DestoryAll starting");
+            LOGGER.debug("destoryAll starting");
         }
-        if (!destroyed.compareAndSet(false, true) && CollectionUtils.isEmpty(abstractRpcRemotings)){
+        if (!destroyed.compareAndSet(false, true) && CollectionUtils.isEmpty(disposables)){
             return;
         }
-        for (AbstractRpcRemoting abstractRpcRemoting : abstractRpcRemotings) {
-            abstractRpcRemoting.destroy();
+        for (Disposable disposable : disposables) {
+            disposable.destroy();
         }
     }
 
@@ -81,4 +91,27 @@ public class ShutdownHook extends Thread {
         Runtime.getRuntime().removeShutdownHook(SHUTDOWN_HOOK);
     }
 
+    private static class DisposablePriorityWrapper implements Comparable<DisposablePriorityWrapper>, Disposable {
+
+        private Disposable disposable;
+
+        private int priority;
+
+        public DisposablePriorityWrapper(Disposable disposable, int priority) {
+            this.disposable = disposable;
+            this.priority = priority;
+        }
+
+        @Override
+        public int compareTo(DisposablePriorityWrapper disposablePriorityWrapper) {
+            return priority - disposablePriorityWrapper.priority;
+        }
+
+        @Override
+        public void destroy() {
+            disposable.destroy();
+        }
+    }
+
 }
+

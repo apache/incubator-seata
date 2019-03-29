@@ -41,6 +41,7 @@ import com.alibaba.fescar.core.protocol.MergeMessage;
 import com.alibaba.fescar.core.protocol.MessageFuture;
 import com.alibaba.fescar.core.protocol.RpcMessage;
 
+import com.alibaba.fescar.core.rpc.Disposable;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFuture;
@@ -57,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * @author jimin.jm @alibaba-inc.com
  * @date 2018 /9/12
  */
-public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
+public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implements Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemoting.class);
     /**
@@ -118,7 +119,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
      */
     public void init() {
         //register shutdownHook
-        ShutdownHook.getInstance().addAbstractRpcRemoting(this);
+        ShutdownHook.getInstance().addDisposable(this);
 
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -146,6 +147,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
     /**
      * Destroy.
      */
+    @Override
     public void destroy() {
         timerExecutor.shutdown();
     }

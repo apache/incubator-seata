@@ -43,11 +43,9 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.ApplicationEvent;
+
 /**
  * The type Global transaction scanner.
  *
@@ -191,8 +189,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         if (applicationContext instanceof ConfigurableApplicationContext) {
             ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
-            ShutdownHook.getInstance().addAbstractRpcRemoting(TmRpcClient.getInstance(applicationId, txServiceGroup));
-            ShutdownHook.getInstance().addAbstractRpcRemoting(RmRpcClient.getInstance(applicationId, txServiceGroup));
+            ShutdownHook.getInstance().addDisposable(TmRpcClient.getInstance(applicationId, txServiceGroup));
+            ShutdownHook.getInstance().addDisposable(RmRpcClient.getInstance(applicationId, txServiceGroup));
         }
     }
 
