@@ -18,7 +18,7 @@ package com.alibaba.fescar.spring.annotation;
 
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.config.ConfigurationFactory;
-import com.alibaba.fescar.core.rpc.netty.FescarShutdownHook;
+import com.alibaba.fescar.core.rpc.netty.ShutdownHook;
 import com.alibaba.fescar.core.rpc.netty.RmRpcClient;
 import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
 import com.alibaba.fescar.rm.RMClient;
@@ -40,6 +40,7 @@ import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
@@ -53,7 +54,8 @@ import org.springframework.context.ApplicationEvent;
  * @author jimin.jm @alibaba-inc.com
  * @date 2018 /12/28
  */
-public class GlobalTransactionScanner extends AbstractAutoProxyCreator implements InitializingBean,ApplicationContextAware {
+public class GlobalTransactionScanner extends AbstractAutoProxyCreator implements InitializingBean,ApplicationContextAware,
+        DisposableBean {
 
     /**
      *
@@ -152,6 +154,12 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         this.failureHandlerHook = failureHandlerHook;
     }
 
+    @Override
+    public void destroy() {
+        ShutdownHook shutdownHook = ShutdownHook.getInstance();
+        shutdownHook.destroyAll();
+    }
+
     private void initClient() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Initializing Global Transaction Clients ... ");
@@ -183,10 +191,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     private void registerSpringShutdownHook() {
         if (applicationContext instanceof ConfigurableApplicationContext) {
             ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
-            FescarShutdownHook.removeRuntimeShutdownHook();
-            FescarShutdownHook.getInstance().addAbstractRpcRemoting(TmRpcClient.getInstance(applicationId, txServiceGroup));
-            FescarShutdownHook.getInstance().addAbstractRpcRemoting(RmRpcClient.getInstance(applicationId, txServiceGroup));
-            ((ConfigurableApplicationContext) applicationContext).addApplicationListener(ShutdownHookListener.getInstance());
+            ShutdownHook.removeRuntimeShutdownHook();
+            ShutdownHook.getInstance().addAbstractRpcRemoting(TmRpcClient.getInstance(applicationId, txServiceGroup));
+            ShutdownHook.getInstance().addAbstractRpcRemoting(RmRpcClient.getInstance(applicationId, txServiceGroup));
         }
     }
 
@@ -278,20 +285,4 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         this.applicationContext = applicationContext;
     }
 
-    private static class ShutdownHookListener implements ApplicationListener {
-
-        private static final ShutdownHookListener shutdownHookListener = new ShutdownHookListener();
-
-        @Override
-        public void onApplicationEvent(ApplicationEvent event) {
-            if (event instanceof ContextClosedEvent) {
-                FescarShutdownHook shutdownHook = FescarShutdownHook.getInstance();
-                shutdownHook.destroyAll();
-            }
-        }
-
-        public static ShutdownHookListener getInstance(){
-            return shutdownHookListener;
-        }
-    }
 }

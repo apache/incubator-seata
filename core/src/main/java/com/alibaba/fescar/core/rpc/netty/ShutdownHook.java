@@ -30,26 +30,26 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author 563868273@qq.com
  * @date 2019/3/29
  */
-public class FescarShutdownHook extends Thread {
+public class ShutdownHook extends Thread {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FescarShutdownHook.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShutdownHook.class);
 
-    private static final FescarShutdownHook FESCAR_SHUTDOWN_HOOK = new FescarShutdownHook("FescarShutdownHook");
+    private static final ShutdownHook SHUTDOWN_HOOK = new ShutdownHook("ShutdownHook");
 
     private Set<AbstractRpcRemoting> abstractRpcRemotings = new HashSet<>();
 
     private final AtomicBoolean destroyed= new AtomicBoolean(false);
 
     static {
-        Runtime.getRuntime().addShutdownHook(FESCAR_SHUTDOWN_HOOK);
+        Runtime.getRuntime().addShutdownHook(SHUTDOWN_HOOK);
     }
 
-    public FescarShutdownHook(String name) {
+    public ShutdownHook(String name) {
         super(name);
     }
 
-    public static FescarShutdownHook getInstance(){
-        return FESCAR_SHUTDOWN_HOOK;
+    public static ShutdownHook getInstance(){
+        return SHUTDOWN_HOOK;
     }
 
     public void addAbstractRpcRemoting(AbstractRpcRemoting abstractRpcRemoting){
@@ -74,7 +74,7 @@ public class FescarShutdownHook extends Thread {
      * for spring context
      */
     public static void removeRuntimeShutdownHook(){
-        Runtime.getRuntime().removeShutdownHook(FESCAR_SHUTDOWN_HOOK);
+        Runtime.getRuntime().removeShutdownHook(SHUTDOWN_HOOK);
     }
 
 }
