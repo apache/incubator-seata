@@ -91,7 +91,7 @@ public class ShutdownHook extends Thread {
         Runtime.getRuntime().removeShutdownHook(SHUTDOWN_HOOK);
     }
 
-    private static class DisposablePriorityWrapper implements Comparable<DisposablePriorityWrapper>, Disposable {
+    private class DisposablePriorityWrapper implements Comparable<DisposablePriorityWrapper>, Disposable {
 
         private Disposable disposable;
 
