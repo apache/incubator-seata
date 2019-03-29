@@ -46,7 +46,6 @@ import com.alibaba.fescar.core.protocol.transaction.GlobalBeginResponse;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
 import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
-import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -228,8 +227,8 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
             }
             if (idleStateEvent == IdleStateEvent.WRITER_IDLE_STATE_EVENT) {
                 try {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("will send ping msg,channel" + ctx.channel());
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("will send ping msg,channel" + ctx.channel());
                     }
                     sendRequest(ctx.channel(), HeartbeatMessage.PING);
                 } catch (Throwable throwable) {
