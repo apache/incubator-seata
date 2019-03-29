@@ -38,13 +38,13 @@ public class ShutdownHook extends Thread {
 
     private Set<AbstractRpcRemoting> abstractRpcRemotings = new HashSet<>();
 
-    private final AtomicBoolean destroyed= new AtomicBoolean(false);
+    private final AtomicBoolean destroyed = new AtomicBoolean(false);
 
     static {
         Runtime.getRuntime().addShutdownHook(SHUTDOWN_HOOK);
     }
 
-    public ShutdownHook(String name) {
+    private ShutdownHook(String name) {
         super(name);
     }
 
@@ -62,6 +62,10 @@ public class ShutdownHook extends Thread {
     }
 
     public void destroyAll() {
+
+        if (LOGGER.isDebugEnabled()){
+            LOGGER.debug("DestoryAll starting");
+        }
         if (!destroyed.compareAndSet(false, true) && CollectionUtils.isEmpty(abstractRpcRemotings)){
             return;
         }
