@@ -53,7 +53,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
     private static final String REGISTRY_TYPE = "consul";
     private static final String SERVER_ADDR_KEY = "serverAddr";
-    private static final String REGISTRY_CLUSTER = "name";
+    private static final String REGISTRY_CLUSTER = "cluster";
     private static final String SERVICE_TAG = "fescar";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
 
