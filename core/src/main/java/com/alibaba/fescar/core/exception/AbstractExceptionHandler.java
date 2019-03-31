@@ -22,6 +22,8 @@ import com.alibaba.fescar.core.protocol.transaction.AbstractTransactionResponse;
 
 /**
  * The type Abstract exception handler.
+ *
+ * @author sharajava
  */
 public abstract class AbstractExceptionHandler {
 

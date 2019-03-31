@@ -32,6 +32,8 @@ import com.alibaba.fescar.rm.datasource.sql.druid.MySQLUpdateRecognizer;
 
 /**
  * The type Sql visitor factory.
+ *
+ * @author sharajava
  */
 public class SQLVisitorFactory {
 

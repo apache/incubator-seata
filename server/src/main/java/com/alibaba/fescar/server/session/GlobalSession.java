@@ -29,6 +29,8 @@ import com.alibaba.fescar.server.store.SessionStorable;
 
 /**
  * The type Global session.
+ *
+ * @author sharajava
  */
 public class GlobalSession implements SessionLifecycle, SessionStorable {
 

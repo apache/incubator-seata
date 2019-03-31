@@ -32,6 +32,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The type Default lock manager.
+ *
+ * @author sharajava
  */
 public class DefaultLockManagerImpl implements LockManager {
 

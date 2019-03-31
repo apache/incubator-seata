@@ -33,6 +33,8 @@ import com.alibaba.fescar.server.store.TransactionWriteStore;
 
 /**
  * The type File based session manager.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class FileBasedSessionManager extends AbstractSessionManager implements Reloadable {
 

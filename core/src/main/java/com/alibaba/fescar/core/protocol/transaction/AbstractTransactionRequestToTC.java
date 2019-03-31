@@ -20,6 +20,8 @@ import java.nio.ByteBuffer;
 
 /**
  * The type Abstract transaction request to tc.
+ *
+ * @author sharajava
  */
 public abstract class AbstractTransactionRequestToTC extends AbstractTransactionRequest {
 

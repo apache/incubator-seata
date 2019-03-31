@@ -21,6 +21,8 @@ import com.alibaba.fescar.server.session.BranchSession;
 
 /**
  * The interface Lock manager.
+ *
+ * @author sharajava
  */
 public interface LockManager {
 

@@ -18,6 +18,8 @@ package com.alibaba.fescar.rm.datasource.undo;
 
 /**
  * The interface Undo log parser.
+ *
+ * @author sharajava
  */
 public interface UndoLogParser {
 

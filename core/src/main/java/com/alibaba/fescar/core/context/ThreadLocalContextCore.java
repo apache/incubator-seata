@@ -23,6 +23,8 @@ import com.alibaba.fescar.common.loader.LoadLevel;
 
 /**
  * The type Thread local context core.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 @LoadLevel(name = "ThreadLocalContextCore", order = Integer.MIN_VALUE)
 public class ThreadLocalContextCore implements ContextCore {

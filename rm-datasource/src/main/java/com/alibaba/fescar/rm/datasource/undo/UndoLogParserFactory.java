@@ -18,6 +18,8 @@ package com.alibaba.fescar.rm.datasource.undo;
 
 /**
  * The type Undo log parser factory.
+ *
+ * @author sharajava
  */
 public class UndoLogParserFactory {
 

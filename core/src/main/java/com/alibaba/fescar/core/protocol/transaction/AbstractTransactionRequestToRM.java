@@ -20,6 +20,8 @@ import java.nio.ByteBuffer;
 
 /**
  * The type Abstract transaction request to rm.
+ *
+ * @author sharajava
  */
 public abstract class AbstractTransactionRequestToRM extends AbstractTransactionRequest {
 

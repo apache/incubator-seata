@@ -21,6 +21,8 @@ import java.util.Map;
 
 /**
  * Status of global transaction.
+ *
+ * @author sharajava
  */
 public enum GlobalStatus {
 

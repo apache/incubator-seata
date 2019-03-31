@@ -32,6 +32,8 @@ import com.alibaba.fescar.core.rpc.TransactionMessageHandler;
 
 /**
  * The type Abstract rm handler at.
+ *
+ * @author sharajava
  */
 @Deprecated
 public abstract class AbstractRMHandlerAT extends AbstractExceptionHandler

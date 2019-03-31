@@ -18,6 +18,8 @@ package com.alibaba.fescar.core.protocol.transaction;
 
 /**
  * The type Global commit response.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class GlobalCommitResponse extends AbstractGlobalEndResponse {
 

@@ -24,6 +24,8 @@ import com.alibaba.fescar.server.store.TransactionWriteStore;
 
 /**
  * The type Default session manager.
+ *
+ * @author sharajava
  */
 public class DefaultSessionManager extends AbstractSessionManager {
 

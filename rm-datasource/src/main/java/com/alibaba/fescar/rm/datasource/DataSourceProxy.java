@@ -26,6 +26,8 @@ import com.alibaba.fescar.rm.DefaultResourceManager;
 
 /**
  * The type Data source proxy.
+ *
+ * @author sharajava
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
 

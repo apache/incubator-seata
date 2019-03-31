@@ -25,6 +25,8 @@ import com.alibaba.fescar.core.rpc.RpcContext;
 
 /**
  * The type Branch report request.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class BranchReportRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 

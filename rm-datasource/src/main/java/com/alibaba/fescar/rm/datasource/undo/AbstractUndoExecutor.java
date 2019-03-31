@@ -28,6 +28,8 @@ import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 
 /**
  * The type Abstract undo executor.
+ *
+ * @author sharajava
  */
 public abstract class AbstractUndoExecutor {
 

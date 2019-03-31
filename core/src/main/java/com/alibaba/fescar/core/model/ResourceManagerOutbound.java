@@ -20,6 +20,8 @@ import com.alibaba.fescar.core.exception.TransactionException;
 
 /**
  * Resource Manager: send outbound request to TC.
+ *
+ * @author sharajava
  */
 public interface ResourceManagerOutbound {
 

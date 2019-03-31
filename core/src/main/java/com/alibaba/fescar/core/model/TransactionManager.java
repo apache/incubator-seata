@@ -22,6 +22,8 @@ import com.alibaba.fescar.core.exception.TransactionException;
  * Transaction Manager.
  *
  * Define a global transaction and control it.
+ *
+ * @author sharajava
  */
 public interface TransactionManager {
 

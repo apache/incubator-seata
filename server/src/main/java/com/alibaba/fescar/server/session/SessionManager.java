@@ -25,6 +25,8 @@ import com.alibaba.fescar.core.model.GlobalStatus;
 
 /**
  * The interface Session manager.
+ *
+ * @author sharajava
  */
 public interface SessionManager extends SessionLifecycleListener {
 

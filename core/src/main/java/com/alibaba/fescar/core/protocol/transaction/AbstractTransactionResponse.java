@@ -25,6 +25,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * The type Abstract transaction response.
+ *
+ * @author sharajava
  */
 public abstract class AbstractTransactionResponse extends AbstractResultMessage {
 

@@ -34,6 +34,8 @@ import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 
 /**
  * The type My sql undo insert executor.
+ *
+ * @author sharajava
  */
 public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
 

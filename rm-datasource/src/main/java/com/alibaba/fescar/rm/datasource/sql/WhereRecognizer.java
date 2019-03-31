@@ -22,6 +22,8 @@ import com.alibaba.fescar.rm.datasource.ParametersHolder;
 
 /**
  * The interface Where recognizer.
+ *
+ * @author sharajava
  */
 public interface WhereRecognizer extends SQLRecognizer {
 

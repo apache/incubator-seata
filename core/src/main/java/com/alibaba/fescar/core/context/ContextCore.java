@@ -18,6 +18,8 @@ package com.alibaba.fescar.core.context;
 
 /**
  * The interface Context core.
+ *
+ * @author sharajava
  */
 public interface ContextCore {
 

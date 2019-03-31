@@ -44,6 +44,8 @@ import static com.alibaba.fescar.core.constants.ConfigurationKeys.CLIENT_ASYNC_C
 
 /**
  * The type Async worker.
+ *
+ * @author sharajava
  */
 public class AsyncWorker implements ResourceManagerInbound {
 

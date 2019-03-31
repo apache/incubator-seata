@@ -20,6 +20,8 @@ import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
 
 /**
  * The type Tm client.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class TMClient {
 

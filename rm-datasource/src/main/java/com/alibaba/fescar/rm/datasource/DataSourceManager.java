@@ -26,9 +26,9 @@ import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
+import com.alibaba.fescar.common.executor.Initialize;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.context.RootContext;
-import com.alibaba.fescar.common.executor.Initialize;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
@@ -53,6 +53,8 @@ import static com.alibaba.fescar.common.exception.FrameworkErrorCode.NoAvailable
 
 /**
  * The type Data source manager.
+ *
+ * @author sharajava
  */
 public class DataSourceManager extends AbstractResourceManager implements Initialize {
 

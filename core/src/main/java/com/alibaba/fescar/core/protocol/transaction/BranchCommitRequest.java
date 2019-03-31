@@ -21,6 +21,8 @@ import com.alibaba.fescar.core.rpc.RpcContext;
 
 /**
  * The type Branch commit request.
+ *
+ * @author sharajava
  */
 public class BranchCommitRequest extends AbstractBranchEndRequest {
 

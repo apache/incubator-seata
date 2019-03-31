@@ -27,6 +27,8 @@ import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 
 /**
  * The type Table records.
+ *
+ * @author sharajava
  */
 public class TableRecords {
 

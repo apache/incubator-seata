@@ -20,6 +20,8 @@ import com.alibaba.fescar.core.rpc.RpcContext;
 
 /**
  * The interface Tc inbound handler.
+ *
+ * @author sharajava
  */
 public interface TCInboundHandler {
 

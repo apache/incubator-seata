@@ -18,6 +18,8 @@ package com.alibaba.fescar.rm.datasource.sql.struct;
 
 /**
  * The type Null.
+ *
+ * @author sharajava
  */
 public class Null {
     private static Null instance = new Null();

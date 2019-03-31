@@ -20,6 +20,8 @@ import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 
 /**
  * The type Base recognizer.
+ *
+ * @author sharajava
  */
 public abstract class BaseRecognizer implements SQLRecognizer {
 

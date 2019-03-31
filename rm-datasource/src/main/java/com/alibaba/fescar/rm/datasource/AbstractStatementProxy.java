@@ -28,6 +28,8 @@ import com.alibaba.fescar.core.context.RootContext;
 /**
  * The type Abstract statement proxy.
  *
+ * @author sharajava
+ *
  * @param <T> the type parameter
  */
 public abstract class AbstractStatementProxy<T extends Statement> implements Statement {

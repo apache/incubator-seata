@@ -23,6 +23,8 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
 
 /**
  * The type Row.
+ *
+ * @author sharajava
  */
 public class Row {
 

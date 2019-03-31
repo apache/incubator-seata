@@ -24,6 +24,8 @@ import com.alibaba.fescar.server.session.GlobalSession;
 
 /**
  * The interface Core.
+ *
+ * @author sharajava
  */
 public interface Core extends TransactionManager, ResourceManagerOutbound {
 

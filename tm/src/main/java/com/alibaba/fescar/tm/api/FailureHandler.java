@@ -18,6 +18,8 @@ package com.alibaba.fescar.tm.api;
 
 /**
  * Callback on failure.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public interface FailureHandler {
 

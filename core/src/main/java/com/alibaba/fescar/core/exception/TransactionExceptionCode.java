@@ -21,6 +21,8 @@ import java.util.Map;
 
 /**
  * The enum Transaction exception code.
+ *
+ * @author sharajava
  */
 public enum TransactionExceptionCode {
 

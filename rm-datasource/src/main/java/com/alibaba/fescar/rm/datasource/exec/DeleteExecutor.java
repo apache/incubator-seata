@@ -30,13 +30,15 @@ import com.alibaba.fescar.rm.datasource.sql.SQLDeleteRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
-
 import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
 import com.alibaba.fescar.rm.datasource.undo.KeywordCheckerFactory;
+
 import org.apache.commons.lang.StringUtils;
 
 /**
  * The type Delete executor.
+ *
+ * @author sharajava
  *
  * @param <T> the type parameter
  * @param <S> the type parameter

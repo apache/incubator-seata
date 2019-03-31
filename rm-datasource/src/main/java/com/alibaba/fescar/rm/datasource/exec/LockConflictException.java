@@ -20,6 +20,8 @@ import java.sql.SQLException;
 
 /**
  * The type Lock conflict exception.
+ *
+ * @author sharajava
  */
 public class LockConflictException extends SQLException {
 

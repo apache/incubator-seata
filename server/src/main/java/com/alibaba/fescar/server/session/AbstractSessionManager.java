@@ -33,6 +33,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The type Abstract session manager.
+ *
+ * @author sharajava
  */
 public abstract class AbstractSessionManager implements SessionManager, SessionLifecycleListener {
 

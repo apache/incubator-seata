@@ -18,6 +18,8 @@ package com.alibaba.fescar.core.protocol.transaction;
 
 /**
  * The interface Rm inbound handler.
+ *
+ * @author sharajava
  */
 public interface RMInboundHandler {
 

@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The type Abstract identify request.
+ *
+ * @author sharajava
  */
 public abstract class AbstractIdentifyRequest extends AbstractMessage {
 
