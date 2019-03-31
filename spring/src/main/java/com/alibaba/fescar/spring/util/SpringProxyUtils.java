@@ -48,7 +48,29 @@ public class SpringProxyUtils {
             Object target = advised.getTargetSource().getTarget();
             return findTargetClass(target);
         } else {
+            if(proxy == null){
+                return null;
+            }
             return proxy.getClass();
+        }
+    }
+
+    @Deprecated
+    public static Class<?>[] findInterfaces(Object proxy) throws Exception {
+        if(AopUtils.isJdkDynamicProxy(proxy)){
+            AdvisedSupport advised = getAdvisedSupport(proxy);
+            return getInterfacesByAdvised(advised);
+        }else{
+            return null;
+        }
+    }
+
+    private static Class<?>[] getInterfacesByAdvised(AdvisedSupport advised) {
+        Class<?>[] interfaces = advised.getProxiedInterfaces();
+        if(interfaces.length > 0){
+            return interfaces;
+        }else{
+            throw new IllegalStateException("Find the jdk dynamic proxy class that does not implement the interface");
         }
     }
 
