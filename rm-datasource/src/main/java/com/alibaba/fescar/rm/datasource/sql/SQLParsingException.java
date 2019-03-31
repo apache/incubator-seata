@@ -18,6 +18,8 @@ package com.alibaba.fescar.rm.datasource.sql;
 
 /**
  * The type Sql parsing exception.
+ *
+ * @author sharajava
  */
 public class SQLParsingException extends RuntimeException {
     /**

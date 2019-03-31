@@ -18,6 +18,8 @@ package com.alibaba.fescar.server.lock;
 
 /**
  * The type Lock manager factory.
+ *
+ * @author sharajava
  */
 public class LockManagerFactory {
 

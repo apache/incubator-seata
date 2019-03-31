@@ -20,6 +20,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * The type Abstract identify response.
+ *
+ * @author sharajava
  */
 public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
 

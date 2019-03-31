@@ -24,6 +24,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * The type Abstract branch end response.
+ *
+ * @author sharajava
  */
 public abstract class AbstractBranchEndResponse extends AbstractTransactionResponse {
 

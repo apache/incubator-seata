@@ -44,6 +44,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The type File transaction store manager.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class FileTransactionStoreManager implements TransactionStoreManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileTransactionStoreManager.class);

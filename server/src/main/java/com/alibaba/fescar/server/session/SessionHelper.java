@@ -23,6 +23,8 @@ import com.alibaba.fescar.server.UUIDGenerator;
 
 /**
  * The type Session helper.
+ *
+ * @author sharajava
  */
 public class SessionHelper {
 

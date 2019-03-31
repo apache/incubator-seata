@@ -18,6 +18,8 @@ package com.alibaba.fescar.rm.datasource.sql;
 
 /**
  * The enum Sql type.
+ *
+ * @author sharajava
  */
 public enum SQLType {
 

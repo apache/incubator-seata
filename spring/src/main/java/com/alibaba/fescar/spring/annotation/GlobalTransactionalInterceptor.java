@@ -18,8 +18,8 @@ package com.alibaba.fescar.spring.annotation;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.concurrent.Callable;
 import java.util.Arrays;
+import java.util.concurrent.Callable;
 
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.common.util.StringUtils;
@@ -36,6 +36,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The type Global transactional interceptor.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class GlobalTransactionalInterceptor implements MethodInterceptor {
 

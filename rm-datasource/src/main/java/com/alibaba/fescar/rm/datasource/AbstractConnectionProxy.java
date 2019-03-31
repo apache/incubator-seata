@@ -39,6 +39,8 @@ import com.alibaba.fescar.core.context.RootContext;
 
 /**
  * The type Abstract connection proxy.
+ *
+ * @author sharajava
  */
 public abstract class AbstractConnectionProxy implements Connection {
 

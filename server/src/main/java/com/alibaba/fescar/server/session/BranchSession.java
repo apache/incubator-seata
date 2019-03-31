@@ -30,6 +30,8 @@ import com.alibaba.fescar.server.store.SessionStorable;
 
 /**
  * The type Branch session.
+ *
+ * @author sharajava
  */
 public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable {
 
