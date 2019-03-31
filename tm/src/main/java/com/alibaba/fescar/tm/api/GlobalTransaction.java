@@ -21,6 +21,8 @@ import com.alibaba.fescar.core.model.GlobalStatus;
 
 /**
  * Global transaction.
+ *
+ * @author sharajava
  */
 public interface GlobalTransaction {
 

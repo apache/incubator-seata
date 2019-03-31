@@ -22,6 +22,8 @@ import com.alibaba.fescar.core.model.GlobalStatus;
 
 /**
  * The type Abstract global end response.
+ *
+ * @author sharajava
  */
 public abstract class AbstractGlobalEndResponse extends AbstractTransactionResponse {
 

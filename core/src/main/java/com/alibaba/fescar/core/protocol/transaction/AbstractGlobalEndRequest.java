@@ -22,6 +22,8 @@ import com.alibaba.fescar.core.protocol.MergedMessage;
 
 /**
  * The type Abstract global end request.
+ *
+ * @author sharajava
  */
 public abstract class AbstractGlobalEndRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 

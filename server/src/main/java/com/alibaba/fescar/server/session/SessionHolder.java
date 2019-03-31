@@ -30,6 +30,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The type Session holder.
+ *
+ * @author sharajava
  */
 public class SessionHolder {
 

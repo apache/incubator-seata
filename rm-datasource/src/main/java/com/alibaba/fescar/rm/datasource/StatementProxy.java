@@ -26,6 +26,8 @@ import com.alibaba.fescar.rm.datasource.exec.StatementCallback;
 /**
  * The type Statement proxy.
  *
+ * @author sharajava
+ *
  * @param <T> the type parameter
  */
 public class StatementProxy<T extends Statement> extends AbstractStatementProxy<T> {

@@ -31,6 +31,8 @@ import com.alibaba.fescar.rm.datasource.sql.SQLType;
 
 /**
  * The type My sql delete recognizer.
+ *
+ * @author sharajava
  */
 public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRecognizer {
 

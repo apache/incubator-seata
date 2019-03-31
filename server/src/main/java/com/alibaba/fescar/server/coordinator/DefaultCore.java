@@ -41,6 +41,8 @@ import static com.alibaba.fescar.core.exception.TransactionExceptionCode.LockKey
 
 /**
  * The type Default core.
+ *
+ * @author sharajava
  */
 public class DefaultCore implements Core {
 

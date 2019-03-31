@@ -16,6 +16,8 @@
 
 package com.alibaba.fescar.tm.api;
 
+import java.util.List;
+
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.tm.api.transaction.TransactionHook;
 import com.alibaba.fescar.tm.api.transaction.TransactionHookManager;
@@ -23,10 +25,10 @@ import com.alibaba.fescar.tm.api.transaction.TransactionHookManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
 /**
  * Template of executing business logic with a global transaction.
+ *
+ * @author sharajava
  */
 public class TransactionalTemplate {
 
