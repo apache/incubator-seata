@@ -32,6 +32,8 @@ import com.alibaba.fescar.server.store.SessionStorable;
  */
 public class GlobalSession implements SessionLifecycle, SessionStorable {
 
+    private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(512));
+
     private long transactionId;
 
     private GlobalStatus status;
@@ -366,7 +368,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public byte[] encode() {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(512);
+        ByteBuffer byteBuffer = byteBufferThreadLocal.get();
+        //recycle
+        byteBuffer.clear();
+
         byteBuffer.putLong(transactionId);
         byteBuffer.putInt(timeout);
         if (null != applicationId) {

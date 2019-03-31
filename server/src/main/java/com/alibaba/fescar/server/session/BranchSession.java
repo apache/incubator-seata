@@ -33,6 +33,8 @@ import com.alibaba.fescar.server.store.SessionStorable;
  */
 public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable {
 
+    private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(2048));
+
     private long transactionId;
 
     private long branchId;
@@ -268,7 +270,10 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public byte[] encode() {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(2048);
+        ByteBuffer byteBuffer = byteBufferThreadLocal.get();
+        //recycle
+        byteBuffer.clear();
+
         byteBuffer.putLong(transactionId);
         byteBuffer.putLong(branchId);
         if (null != resourceId) {

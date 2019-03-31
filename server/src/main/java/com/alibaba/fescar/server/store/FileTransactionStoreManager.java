@@ -262,6 +262,8 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
      */
     class WriteDataFileRunnable implements Runnable {
 
+        private ThreadLocal<ByteBuffer> writeBufferLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(4096));
+
         @Override
         public void run() {
             while (!stopping) {
@@ -299,8 +301,10 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
 
         private boolean writeDataFile(byte[] bs) {
             int retry = 0;
-            byte[] byWrite = new byte[bs.length + 4];
-            ByteBuffer byteBuffer = ByteBuffer.wrap(byWrite);
+            ByteBuffer byteBuffer = writeBufferLocal.get();
+            //recycle
+            byteBuffer.clear();
+
             byteBuffer.putInt(bs.length);
             byteBuffer.put(bs);
             for (; retry < MAX_WRITE_RETRY; retry++) {
