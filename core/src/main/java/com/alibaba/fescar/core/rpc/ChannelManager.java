@@ -334,7 +334,7 @@ public class ChannelManager {
         ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer,
             RpcContext>>> applicationIdMap = RM_CHANNELS.get(resourceId);
 
-        if (targetApplicationId == null || applicationIdMap.isEmpty()) {
+        if (targetApplicationId == null || applicationIdMap == null ||  applicationIdMap.isEmpty()) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("No channel is available for resource[" + resourceId + "]");
             }

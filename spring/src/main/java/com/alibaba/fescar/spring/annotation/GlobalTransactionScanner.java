@@ -71,7 +71,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     private final String txServiceGroup;
     private final int mode;
     private final boolean disableGlobalTransaction =
-            ConfigurationFactory.getInstance().getBoolean("service.disableGlobalTransaction", false);
+        ConfigurationFactory.getInstance().getBoolean("service.disableGlobalTransaction", false);
 
     private final FailureHandler failureHandlerHook;
 
@@ -152,14 +152,14 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         }
         if (StringUtils.isNullOrEmpty(applicationId) || StringUtils.isNullOrEmpty(txServiceGroup)) {
             throw new IllegalArgumentException(
-                    "applicationId: " + applicationId + ", txServiceGroup: " + txServiceGroup);
+                "applicationId: " + applicationId + ", txServiceGroup: " + txServiceGroup);
         }
         //init TM
         TMClient.init(applicationId, txServiceGroup);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(
-                    "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
-                            + txServiceGroup + "]");
+                "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
+                    + txServiceGroup + "]");
         }
         //init RM
         RMClient.init(applicationId, txServiceGroup);
@@ -189,10 +189,23 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
                     interceptor = new TccActionInterceptor(TCCBeanParserUtils.getRemotingDesc(beanName));
                 }else {
                     Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
-                    Class<?>[] interfacesIfJdk = SpringProxyUtils.findInterfaces(bean);
+                    Method[] methods = serviceInterface.getMethods();
+                    boolean shouldSkip = true;
+                    for (Method method : methods) {
+                        GlobalTransactional trxAnno = method.getAnnotation(GlobalTransactional.class);
+                        if (trxAnno != null) {
+                            shouldSkip = false;
+                            break;
+                        }
 
-                    if(!existsAnnotation(new Class[]{serviceInterface})
-                            && !existsAnnotation(interfacesIfJdk)){
+                        GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);
+                        if (lockAnno != null) {
+                            shouldSkip = false;
+                            break;
+                        }
+                    }
+
+                    if (shouldSkip) {
                         return bean;
                     }
 
@@ -219,29 +232,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         }
     }
 
-    private boolean existsAnnotation(Class<?>[] classes) {
-        if(classes != null && classes.length > 0){
-            for (Class clazz : classes){
-                if(clazz == null){
-                    continue;
-                }
-                Method[] methods = clazz.getMethods();
-                for (Method method : methods) {
-                    GlobalTransactional trxAnno = method.getAnnotation(GlobalTransactional.class);
-                    if (trxAnno != null) {
-                        return true;
-                    }
-
-                    GlobalLock lockAnno = method.getAnnotation(GlobalLock.class);
-                    if (lockAnno != null) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     private MethodDesc makeMethodDesc(GlobalTransactional anno, Method method) {
         return new MethodDesc(anno, method);
     }
@@ -249,7 +239,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
 
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
-            throws BeansException {
+        throws BeansException {
         return new Object[] {interceptor};
     }
 
