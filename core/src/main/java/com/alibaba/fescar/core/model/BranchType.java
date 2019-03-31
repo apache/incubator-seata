@@ -18,6 +18,8 @@ package com.alibaba.fescar.core.model;
 
 /**
  * The enum Branch type.
+ *
+ * @author sharajava
  */
 public enum BranchType {
 

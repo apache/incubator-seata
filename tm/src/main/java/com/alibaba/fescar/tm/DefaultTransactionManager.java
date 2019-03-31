@@ -37,6 +37,8 @@ import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
 
 /**
  * The type Default transaction manager.
+ *
+ * @author sharajava
  */
 public class DefaultTransactionManager implements TransactionManager {
 

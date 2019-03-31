@@ -33,6 +33,8 @@ import com.alibaba.fescar.rm.datasource.sql.SQLType;
 
 /**
  * The type My sql insert recognizer.
+ *
+ * @author sharajava
  */
 public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRecognizer {
 

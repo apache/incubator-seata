@@ -18,6 +18,8 @@ package com.alibaba.fescar.core.model;
 
 /**
  * Resource that can be managed by Resource Manager and involved into global transaction.
+ *
+ * @author sharajava
  */
 public interface Resource {
 

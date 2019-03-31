@@ -20,6 +20,8 @@ import com.alibaba.fescar.core.exception.TransactionException;
 
 /**
  * The interface Lockable.
+ *
+ * @author sharajava
  */
 public interface Lockable {
 

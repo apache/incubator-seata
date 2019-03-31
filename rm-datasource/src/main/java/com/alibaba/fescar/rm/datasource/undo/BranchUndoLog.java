@@ -20,6 +20,8 @@ import java.util.List;
 
 /**
  * The type Branch undo log.
+ *
+ * @author sharajava
  */
 public class BranchUndoLog {
 

@@ -18,6 +18,8 @@ package com.alibaba.fescar.rm.datasource.sql;
 
 /**
  * The interface Sql recognizer.
+ *
+ * @author sharajava
  */
 public interface SQLRecognizer {
 

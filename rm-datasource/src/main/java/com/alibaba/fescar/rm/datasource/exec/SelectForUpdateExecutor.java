@@ -34,6 +34,8 @@ import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 /**
  * The type Select for update executor.
  *
+ * @author sharajava
+ *
  * @param <S> the type parameter
  */
 public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactionalExecutor<ResultSet, S> {
