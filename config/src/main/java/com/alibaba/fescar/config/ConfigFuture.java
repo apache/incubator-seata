@@ -68,10 +68,11 @@ public class ConfigFuture {
     /**
      * Gets timeout mills.
      *
-     * @return the timeout mills
+     * @return true if get is timeout;
+     *         false otherwise.
      */
     public boolean isTimeout() {
-        return System.currentTimeMillis() - start > timeoutMills;
+        return System.currentTimeMillis() - start >= timeoutMills;
     }
 
     /**
