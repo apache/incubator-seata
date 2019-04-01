@@ -32,7 +32,7 @@ public class ConfigFuture {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFuture.class);
     private static final long DEFAULT_CONFIG_TIMEOUT = 5 * 1000;
     private long timeoutMills;
-    private long start = System.currentTimeMillis();
+    private long start = System.nanoTime();
     private volatile Object result;
     private String dataId;
     private String content;
@@ -72,7 +72,7 @@ public class ConfigFuture {
      *         false otherwise.
      */
     public boolean isTimeout() {
-        return System.currentTimeMillis() - start >= timeoutMills;
+        return System.nanoTime() - start > TimeUnit.NANOSECONDS.convert(timeoutMills,TimeUnit.MILLISECONDS);
     }
 
     /**
