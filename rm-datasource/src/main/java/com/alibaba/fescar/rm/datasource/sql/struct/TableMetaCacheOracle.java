@@ -16,7 +16,11 @@
 
 package com.alibaba.fescar.rm.datasource.sql.struct;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSetMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
