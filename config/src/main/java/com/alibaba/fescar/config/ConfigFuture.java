@@ -32,7 +32,7 @@ public class ConfigFuture {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFuture.class);
     private static final long DEFAULT_CONFIG_TIMEOUT = 5 * 1000;
     private long timeoutMills;
-    private long start = System.nanoTime();
+    private long start = System.currentTimeMillis();
     private volatile Object result;
     private String dataId;
     private String content;
@@ -72,7 +72,7 @@ public class ConfigFuture {
      *         false otherwise.
      */
     public boolean isTimeout() {
-        return System.nanoTime() - start > TimeUnit.NANOSECONDS.convert(timeoutMills,TimeUnit.MILLISECONDS);
+        return System.currentTimeMillis() - start > timeoutMills;
     }
 
     /**
@@ -99,9 +99,9 @@ public class ConfigFuture {
             boolean success = latch.await(timeout, unit);
             if (!success) {
                 LOGGER.error(
-                    "config operation timeout,cost:" + (System.currentTimeMillis() - start) + " ms,op:" + operation
-                        .name()
-                        + ",dataId:" + dataId);
+                        "config operation timeout,cost:" + (System.currentTimeMillis() - start) + " ms,op:" + operation
+                                .name()
+                                + ",dataId:" + dataId);
                 return getFailResult();
             }
         } catch (InterruptedException exx) {
