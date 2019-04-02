@@ -37,6 +37,7 @@
         <module>dubbo-alibaba</module>
         <module>tcc</module>
         <module>rm</module>
+        <module>fescar-scf</module>
     </modules>
     <packaging>pom</packaging>
 

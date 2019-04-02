@@ -44,10 +44,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      *
      * @param dataSourceProxy  the data source proxy
      * @param targetConnection the target connection
-     * @param dbType           the db type
      */
-    public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection, String dbType) {
-        super(dataSourceProxy, targetConnection, dbType);
+    public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
+        super(dataSourceProxy, targetConnection);
     }
 
     /**

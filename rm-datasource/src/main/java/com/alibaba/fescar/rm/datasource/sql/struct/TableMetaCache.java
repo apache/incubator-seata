@@ -34,6 +34,8 @@ import com.alibaba.fescar.rm.datasource.DataSourceProxy;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 
+import javax.sql.DataSource;
+
 /**
  * The type Table meta cache.
  */
@@ -53,23 +55,12 @@ public class TableMetaCache {
      * @param tableName       the table name
      * @return the table meta
      */
-    public static TableMeta getTableMeta(DataSourceProxy dataSourceProxy, String tableName) {
-        return getTableMeta(dataSourceProxy.getTargetDataSource(), tableName);
-    }
-
-    /**
-     * Gets table meta.
-     *
-     * @param druidDataSource the druid data source
-     * @param tableName       the table name
-     * @return the table meta
-     */
-    public static TableMeta getTableMeta(final DruidDataSource druidDataSource, final String tableName) {
+    public static TableMeta getTableMeta(final DataSourceProxy dataSourceProxy, final String tableName) {
         if (StringUtils.isEmpty(tableName)) {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
-        String dataSourceKey = druidDataSource.getUrl();
+        String dataSourceKey = dataSourceProxy.getResourceId();
 
         TableMeta tmeta = null;
         final String key = dataSourceKey + "." + tableName;
@@ -77,7 +68,7 @@ public class TableMetaCache {
             tmeta = TABLE_META_CACHE.get(key, new Callable<TableMeta>() {
                 @Override
                 public TableMeta call() throws Exception {
-                    return fetchSchema(druidDataSource, tableName);
+                    return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
                 }
             });
         } catch (ExecutionException e) {
@@ -85,7 +76,7 @@ public class TableMetaCache {
 
         if (tmeta == null) {
             try {
-                tmeta = fetchSchema(druidDataSource, tableName);
+                tmeta = fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
             }
         }
@@ -96,17 +87,17 @@ public class TableMetaCache {
         return tmeta;
     }
 
-    private static TableMeta fetchSchema(DruidDataSource druidDataSource, String tableName) throws SQLException {
-        return fetchSchemeInDefaultWay(druidDataSource, tableName);
+    private static TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
+        return fetchSchemeInDefaultWay(dataSource, tableName);
     }
 
-    private static TableMeta fetchSchemeInDefaultWay(DruidDataSource druidDataSource, String tableName)
+    private static TableMeta fetchSchemeInDefaultWay(DataSource dataSource, String tableName)
         throws SQLException {
         Connection conn = null;
         java.sql.Statement stmt = null;
         java.sql.ResultSet rs = null;
         try {
-            conn = druidDataSource.getConnection();
+            conn = dataSource.getConnection();
             stmt = conn.createStatement();
             StringBuffer sb = new StringBuffer("SELECT * FROM " + tableName + " LIMIT 1");
             rs = stmt.executeQuery(sb.toString());
