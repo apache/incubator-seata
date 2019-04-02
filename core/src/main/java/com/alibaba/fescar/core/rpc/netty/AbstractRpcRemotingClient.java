@@ -257,6 +257,12 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     }
 
     @Override
+    public void destroy() {
+        super.destroy();
+        shutdown();
+    }
+
+    @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof RpcMessage) {
             RpcMessage rpcMessage = (RpcMessage)msg;

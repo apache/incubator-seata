@@ -18,6 +18,9 @@ package com.alibaba.fescar.spring.annotation;
 
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.core.rpc.netty.ShutdownHook;
+import com.alibaba.fescar.core.rpc.netty.RmRpcClient;
+import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
 import com.alibaba.fescar.rm.RMClient;
 import com.alibaba.fescar.spring.tcc.TccActionInterceptor;
 import com.alibaba.fescar.spring.util.SpringProxyUtils;
@@ -37,9 +40,11 @@ import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ConfigurableApplicationContext;
 
 /**
  * The type Global transaction scanner.
@@ -47,7 +52,8 @@ import org.springframework.context.ApplicationContextAware;
  * @author jimin.jm @alibaba-inc.com
  * @date 2018 /12/28
  */
-public class GlobalTransactionScanner extends AbstractAutoProxyCreator implements InitializingBean,ApplicationContextAware {
+public class GlobalTransactionScanner extends AbstractAutoProxyCreator implements InitializingBean,ApplicationContextAware,
+        DisposableBean {
 
     /**
      *
@@ -146,6 +152,11 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
         this.failureHandlerHook = failureHandlerHook;
     }
 
+    @Override
+    public void destroy() {
+        ShutdownHook.getInstance().destroyAll();
+    }
+
     private void initClient() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Initializing Global Transaction Clients ... ");
@@ -169,6 +180,17 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
 
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Global Transaction Clients are initialized. ");
+        }
+        registerSpringShutdownHook();
+
+    }
+
+    private void registerSpringShutdownHook() {
+        if (applicationContext instanceof ConfigurableApplicationContext) {
+            ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
+            ShutdownHook.removeRuntimeShutdownHook();
+            ShutdownHook.getInstance().addDisposable(TmRpcClient.getInstance(applicationId, txServiceGroup));
+            ShutdownHook.getInstance().addDisposable(RmRpcClient.getInstance(applicationId, txServiceGroup));
         }
     }
 
@@ -259,4 +281,5 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator implement
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
+
 }

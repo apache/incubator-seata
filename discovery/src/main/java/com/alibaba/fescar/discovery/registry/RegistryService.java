@@ -83,4 +83,10 @@ public interface RegistryService<T> {
      * @throws Exception the exception
      */
     List<InetSocketAddress> lookup(String key) throws Exception;
+
+    /**
+     * Close.
+     * @throws Exception
+     */
+    void close() throws Exception;
 }

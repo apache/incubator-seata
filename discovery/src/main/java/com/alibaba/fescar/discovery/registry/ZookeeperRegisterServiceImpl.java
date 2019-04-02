@@ -156,6 +156,11 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         return CLUSTER_ADDRESS_MAP.get(clusterName);
     }
 
+    @Override
+    public void close() throws Exception {
+        getClientInstance().close();
+    }
+
     private ZkClient getClientInstance() {
         if (zkClient == null) {
             zkClient = new ZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
