@@ -17,6 +17,7 @@ package com.alibaba.fescar.tm.api;
 
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.model.TransactionManager;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.tm.DefaultTransactionManager;
 import com.alibaba.fescar.tm.api.transaction.TransactionHook;
 import com.alibaba.fescar.tm.api.transaction.TransactionHookManager;
@@ -35,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class TransactionTemplateTest {
 
-    private static final String DEFAULT_XID = "123456789";
+    private static final FragmentXID DEFAULT_XID = FragmentXID.from(123456789L);
     private static final String DEFAULT_NAME = "test";
     private static final int DEFAULT_TIME_OUT = 30000;
 

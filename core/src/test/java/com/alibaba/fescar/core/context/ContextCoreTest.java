@@ -56,13 +56,13 @@ public class ContextCoreTest {
         ContextCore load = ContextCoreLoader.load();
         load.put(FIRST_KEY, FIRST_VALUE);
         load.put(SECOND_KEY, FIRST_VALUE);
-        assertThat(load.get(FIRST_KEY)).isEqualTo(FIRST_VALUE);
-        assertThat(load.get(SECOND_KEY)).isEqualTo(FIRST_VALUE);
+        assertThat((String)load.get(FIRST_KEY)).isEqualTo(FIRST_VALUE);
+        assertThat((String)load.get(SECOND_KEY)).isEqualTo(FIRST_VALUE);
         load.put(FIRST_KEY, SECOND_VALUE);
         load.put(SECOND_KEY, SECOND_VALUE);
-        assertThat(load.get(FIRST_KEY)).isEqualTo(SECOND_VALUE);
-        assertThat(load.get(SECOND_KEY)).isEqualTo(SECOND_VALUE);
-        assertThat(load.get(NOT_EXIST_KEY)).isNull();
+        assertThat((String)load.get(FIRST_KEY)).isEqualTo(SECOND_VALUE);
+        assertThat((String)load.get(SECOND_KEY)).isEqualTo(SECOND_VALUE);
+        assertThat((String)load.get(NOT_EXIST_KEY)).isNull();
         //clear keys
         load.remove(FIRST_KEY);
         load.remove(SECOND_KEY);
@@ -77,9 +77,9 @@ public class ContextCoreTest {
         ContextCore load = ContextCoreLoader.load();
         load.put(FIRST_KEY, FIRST_VALUE);
         load.put(SECOND_KEY, SECOND_VALUE);
-        assertThat(load.remove(FIRST_KEY)).isEqualTo(FIRST_VALUE);
-        assertThat(load.remove(SECOND_KEY)).isEqualTo(SECOND_VALUE);
-        assertThat(load.remove(NOT_EXIST_KEY)).isNull();
+        assertThat((String)load.remove(FIRST_KEY)).isEqualTo(FIRST_VALUE);
+        assertThat((String)load.remove(SECOND_KEY)).isEqualTo(SECOND_VALUE);
+        assertThat((String)load.remove(NOT_EXIST_KEY)).isNull();
     }
 
 }

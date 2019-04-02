@@ -17,6 +17,7 @@
 package com.alibaba.fescar.core.model;
 
 import com.alibaba.fescar.core.exception.TransactionException;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 
 /**
  * Transaction Manager.
@@ -36,7 +37,7 @@ public interface TransactionManager {
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
      * out.
      */
-    String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
+    FragmentXID begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException;
 
     /**
@@ -47,7 +48,7 @@ public interface TransactionManager {
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
      * out.
      */
-    GlobalStatus commit(String xid) throws TransactionException;
+    GlobalStatus commit(FragmentXID xid) throws TransactionException;
 
     /**
      * Global rollback.
@@ -57,7 +58,7 @@ public interface TransactionManager {
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
      * out.
      */
-    GlobalStatus rollback(String xid) throws TransactionException;
+    GlobalStatus rollback(FragmentXID xid) throws TransactionException;
 
     /**
      * Get current status of the give transaction.
@@ -67,5 +68,5 @@ public interface TransactionManager {
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
      * out.
      */
-    GlobalStatus getStatus(String xid) throws TransactionException;
+    GlobalStatus getStatus(FragmentXID xid) throws TransactionException;
 }

@@ -16,6 +16,7 @@
 
 package com.alibaba.fescar.rm.datasource.undo;
 
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import java.sql.Types;
 import java.util.ArrayList;
 
@@ -40,7 +41,7 @@ public class BranchUndoLogTest {
     public void testEncodeUndoLog() {
         BranchUndoLog branchUndoLog = new BranchUndoLog();
         branchUndoLog.setBranchId(641789253L);
-        branchUndoLog.setXid("xid:xxx");
+        branchUndoLog.setXid(FragmentXID.from(100L));
 
         ArrayList<SQLUndoLog> items = new ArrayList<>();
         SQLUndoLog item = new SQLUndoLog();

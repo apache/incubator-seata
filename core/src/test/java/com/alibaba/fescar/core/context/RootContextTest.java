@@ -17,6 +17,7 @@ package com.alibaba.fescar.core.context;
 
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class RootContextTest {
 
-    private final String DEFAULT_XID = "default_xid";
+    private final FragmentXID DEFAULT_XID = FragmentXID.from(0);
 
     /**
      * Test bind and unbind.

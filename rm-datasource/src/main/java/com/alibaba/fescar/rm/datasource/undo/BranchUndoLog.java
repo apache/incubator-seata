@@ -16,6 +16,7 @@
 
 package com.alibaba.fescar.rm.datasource.undo;
 
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import java.util.List;
 
 /**
@@ -23,7 +24,7 @@ import java.util.List;
  */
 public class BranchUndoLog {
 
-    private String xid;
+    private FragmentXID xid;
 
     private long branchId;
 
@@ -34,7 +35,7 @@ public class BranchUndoLog {
      *
      * @return the xid
      */
-    public String getXid() {
+    public FragmentXID getXid() {
         return xid;
     }
 
@@ -43,7 +44,7 @@ public class BranchUndoLog {
      *
      * @param xid the xid
      */
-    public void setXid(String xid) {
+    public void setXid(FragmentXID xid) {
         this.xid = xid;
     }
 

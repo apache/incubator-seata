@@ -16,7 +16,6 @@
 
 package com.alibaba.fescar.server.coordinator;
 
-import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
@@ -25,6 +24,7 @@ import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.model.ResourceManagerInbound;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 import com.alibaba.fescar.core.protocol.AbstractResultMessage;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.core.protocol.transaction.AbstractTransactionRequestToTC;
 import com.alibaba.fescar.core.protocol.transaction.AbstractTransactionResponse;
 import com.alibaba.fescar.core.protocol.transaction.BranchCommitRequest;
@@ -52,14 +52,13 @@ import com.alibaba.fescar.server.AbstractTCInboundHandler;
 import com.alibaba.fescar.server.session.BranchSession;
 import com.alibaba.fescar.server.session.GlobalSession;
 import com.alibaba.fescar.server.session.SessionHolder;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.alibaba.fescar.core.exception.TransactionExceptionCode.FailedToSendBranchCommitRequest;
 import static com.alibaba.fescar.core.exception.TransactionExceptionCode.FailedToSendBranchRollbackRequest;
@@ -96,37 +95,37 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     @Override
     protected void doGlobalCommit(GlobalCommitRequest request, GlobalCommitResponse response, RpcContext rpcContext)
         throws TransactionException {
-        response.setGlobalStatus(core.commit(XID.generateXID(request.getTransactionId())));
+        response.setGlobalStatus(core.commit(FragmentXID.from(request.getTransactionId())));
 
     }
 
     @Override
     protected void doGlobalRollback(GlobalRollbackRequest request, GlobalRollbackResponse response,
-                                    RpcContext rpcContext) throws TransactionException {
-        response.setGlobalStatus(core.rollback(XID.generateXID(request.getTransactionId())));
+        RpcContext rpcContext) throws TransactionException {
+        response.setGlobalStatus(core.rollback(FragmentXID.from(request.getTransactionId())));
 
     }
 
     @Override
     protected void doGlobalStatus(GlobalStatusRequest request, GlobalStatusResponse response, RpcContext rpcContext)
         throws TransactionException {
-        response.setGlobalStatus(core.getStatus(XID.generateXID(request.getTransactionId())));
+        response.setGlobalStatus(core.getStatus(FragmentXID.from(request.getTransactionId())));
     }
 
     @Override
     protected void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response,
-                                    RpcContext rpcContext) throws TransactionException {
+        RpcContext rpcContext) throws TransactionException {
         response.setTransactionId(request.getTransactionId());
         response.setBranchId(
             core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
-                XID.generateXID(request.getTransactionId()), request.getApplicationData(), request.getLockKey()));
+                FragmentXID.from(request.getTransactionId()), request.getApplicationData(), request.getLockKey()));
 
     }
 
     @Override
     protected void doBranchReport(BranchReportRequest request, BranchReportResponse response, RpcContext rpcContext)
         throws TransactionException {
-        core.branchReport(request.getBranchType(), XID.generateXID(request.getTransactionId()), request.getBranchId(), request.getStatus(),
+        core.branchReport(request.getBranchType(), request.getResourceId(), FragmentXID.from(request.getTransactionId()), request.getBranchId(), request.getStatus(),
             request.getApplicationData());
 
     }
@@ -135,11 +134,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     protected void doLockCheck(GlobalLockQueryRequest request, GlobalLockQueryResponse response, RpcContext rpcContext)
         throws TransactionException {
         response.setLockable(core.lockQuery(request.getBranchType(), request.getResourceId(),
-            XID.generateXID(request.getTransactionId()), request.getLockKey()));
+            FragmentXID.from(request.getTransactionId()), request.getLockKey()));
     }
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+    public BranchStatus branchCommit(BranchType branchType, FragmentXID xid, long branchId, String resourceId,
+        String applicationData)
         throws TransactionException {
         try {
             BranchCommitRequest request = new BranchCommitRequest();
@@ -149,10 +149,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             request.setApplicationData(applicationData);
             request.setBranchType(branchType);
 
-            GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+            GlobalSession globalSession = SessionHolder.findGlobalSession(xid.getTransactionId());
             BranchSession branchSession = globalSession.getBranch(branchId);
 
-            BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
+            BranchCommitResponse response = (BranchCommitResponse) messageSender.sendSyncRequest(resourceId,
                 branchSession.getClientId(), request);
             return response.getBranchStatus();
         } catch (IOException e) {
@@ -163,7 +163,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     }
 
     @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+    public BranchStatus branchRollback(BranchType branchType, FragmentXID xid, long branchId, String resourceId,
+        String applicationData)
         throws TransactionException {
         try {
             BranchRollbackRequest
@@ -174,10 +175,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             request.setApplicationData(applicationData);
             request.setBranchType(branchType);
 
-            GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+            GlobalSession globalSession = SessionHolder.findGlobalSession(xid.getTransactionId());
             BranchSession branchSession = globalSession.getBranch(branchId);
 
-            BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSyncRequest(resourceId,
+            BranchRollbackResponse response = (BranchRollbackResponse) messageSender.sendSyncRequest(resourceId,
                 branchSession.getClientId(), request);
             return response.getBranchStatus();
         } catch (IOException e) {
@@ -326,7 +327,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         if (!(request instanceof AbstractTransactionRequestToTC)) {
             throw new IllegalArgumentException();
         }
-        AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC)request;
+        AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC) request;
         transactionRequest.setTCInboundHandler(this);
 
         return transactionRequest.handle(context);

@@ -21,6 +21,7 @@ import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.model.TransactionManager;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.tm.DefaultTransactionManager;
 
 import org.slf4j.Logger;
@@ -39,7 +40,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private TransactionManager transactionManager;
 
-    private String xid;
+    private FragmentXID xid;
 
     private GlobalStatus status;
 
@@ -59,7 +60,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
      * @param status the status
      * @param role   the role
      */
-    DefaultGlobalTransaction(String xid, GlobalStatus status, GlobalTransactionRole role) {
+    DefaultGlobalTransaction(FragmentXID xid, GlobalStatus status, GlobalTransactionRole role) {
         this.transactionManager = DefaultTransactionManager.get();
         this.xid = xid;
         this.status = status;
@@ -154,7 +155,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     }
 
     @Override
-    public String getXid() {
+    public FragmentXID getXid() {
         return xid;
     }
 

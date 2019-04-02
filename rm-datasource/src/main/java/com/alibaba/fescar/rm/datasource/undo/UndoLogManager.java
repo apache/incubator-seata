@@ -21,6 +21,7 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.util.BlobUtils;
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.core.exception.TransactionException;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.rm.datasource.ConnectionContext;
 import com.alibaba.fescar.rm.datasource.ConnectionProxy;
 import com.alibaba.fescar.rm.datasource.DataSourceProxy;
@@ -91,7 +92,7 @@ public final class UndoLogManager {
         assertDbSupport(cp.getDbType());
 
         ConnectionContext connectionContext = cp.getContext();
-        String xid = connectionContext.getXid();
+        FragmentXID xid = connectionContext.getXid();
         long branchID = connectionContext.getBranchId();
 
         BranchUndoLog branchUndoLog = new BranchUndoLog();
@@ -122,7 +123,7 @@ public final class UndoLogManager {
      * @param branchId the branch id
      * @throws TransactionException the transaction exception
      */
-    public static void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {
+    public static void undo(DataSourceProxy dataSourceProxy, FragmentXID xid, long branchId) throws TransactionException {
         assertDbSupport(dataSourceProxy.getTargetDataSource().getDbType());
 
         Connection conn = null;
@@ -139,7 +140,7 @@ public final class UndoLogManager {
                 // Find UNDO LOG
                 selectPST = conn.prepareStatement(SELECT_UNDO_LOG_SQL);
                 selectPST.setLong(1, branchId);
-                selectPST.setString(2, xid);
+                selectPST.setString(2, xid.toHexString());
                 rs = selectPST.executeQuery();
 
                 boolean exists = false;
@@ -233,30 +234,30 @@ public final class UndoLogManager {
      * @param conn the conn
      * @throws SQLException the sql exception
      */
-    public static void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
+    public static void deleteUndoLog(FragmentXID xid, long branchId, Connection conn) throws SQLException {
         PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
         deletePST.setLong(1, branchId);
-        deletePST.setString(2, xid);
+        deletePST.setString(2, xid.toHexString());
         deletePST.executeUpdate();
     }
 
-    private static void insertUndoLogWithNormal(String xid, long branchID,
+    private static void insertUndoLogWithNormal(FragmentXID xid, long branchID,
                                                 String undoLogContent, Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, undoLogContent, State.Normal, conn);
     }
 
-    private static void insertUndoLogWithGlobalFinished(String xid, long branchID,
+    private static void insertUndoLogWithGlobalFinished(FragmentXID xid, long branchID,
                                                         Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, "{}", State.GlobalFinished, conn);
     }
 
-    private static void insertUndoLog(String xid, long branchID,
+    private static void insertUndoLog(FragmentXID xid, long branchID,
                                       String undoLogContent, State state, Connection conn) throws SQLException {
         PreparedStatement pst = null;
         try {
             pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL);
             pst.setLong(1, branchID);
-            pst.setString(2, xid);
+            pst.setString(2, xid.toHexString());
             pst.setBlob(3, BlobUtils.string2blob(undoLogContent));
             pst.setInt(4, state.getValue());
             pst.executeUpdate();

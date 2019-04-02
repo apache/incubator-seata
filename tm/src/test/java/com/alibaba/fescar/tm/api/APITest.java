@@ -20,6 +20,7 @@ import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.model.TransactionManager;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.tm.DefaultTransactionManager;
 
 import org.junit.After;
@@ -32,7 +33,7 @@ import org.junit.Test;
  */
 public class APITest {
 
-    private static final String DEFAULT_XID = "1234567890";
+    private static final FragmentXID DEFAULT_XID = FragmentXID.from(1234567890L);
 
     /**
      * Init.
@@ -41,23 +42,23 @@ public class APITest {
     public static void init() {
         DefaultTransactionManager.set(new TransactionManager() {
             @Override
-            public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
+            public FragmentXID begin(String applicationId, String transactionServiceGroup, String name, int timeout)
                 throws TransactionException {
                 return DEFAULT_XID;
             }
 
             @Override
-            public GlobalStatus commit(String xid) throws TransactionException {
+            public GlobalStatus commit(FragmentXID xid) throws TransactionException {
                 return GlobalStatus.Committed;
             }
 
             @Override
-            public GlobalStatus rollback(String xid) throws TransactionException {
+            public GlobalStatus rollback(FragmentXID xid) throws TransactionException {
                 return GlobalStatus.Rollbacked;
             }
 
             @Override
-            public GlobalStatus getStatus(String xid) throws TransactionException {
+            public GlobalStatus getStatus(FragmentXID xid) throws TransactionException {
                 return GlobalStatus.Begin;
             }
         });

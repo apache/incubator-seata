@@ -16,13 +16,13 @@
 
 package com.alibaba.fescar.rm.datasource;
 
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
-import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
@@ -72,11 +72,12 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     }
 
     @Override
-    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
+    public boolean lockQuery(BranchType branchType, String resourceId, FragmentXID xid, String lockKeys)
         throws TransactionException {
         try {
             GlobalLockQueryRequest request = new GlobalLockQueryRequest();
-            request.setTransactionId(XID.getTransactionId(xid));
+            request.setTransactionId(xid.getTransactionId());
+            request.setFragmentId(xid.getFragmentId());
             request.setLockKey(lockKeys);
             request.setResourceId(resourceId);
 
@@ -193,12 +194,12 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     }
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(BranchType branchType, FragmentXID xid, long branchId, String resourceId, String applicationData) throws TransactionException {
         return asyncWorker.branchCommit(branchType, xid, branchId, resourceId, applicationData);
     }
 
     @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(BranchType branchType, FragmentXID xid, long branchId, String resourceId, String applicationData) throws TransactionException {
         DataSourceProxy dataSourceProxy = get(resourceId);
         if (dataSourceProxy == null) {
             throw new ShouldNeverHappenException();

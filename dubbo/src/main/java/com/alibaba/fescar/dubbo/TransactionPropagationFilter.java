@@ -17,7 +17,7 @@
 package com.alibaba.fescar.dubbo;
 
 import com.alibaba.fescar.core.context.RootContext;
-
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import org.apache.dubbo.common.Constants;
 import org.apache.dubbo.common.extension.Activate;
 import org.apache.dubbo.rpc.Filter;
@@ -39,14 +39,14 @@ public class TransactionPropagationFilter implements Filter {
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
-        String xid = RootContext.getXID();
-        String rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID);
+        FragmentXID xid = RootContext.getXID();
+        FragmentXID rpcXid = FragmentXID.from(RpcContext.getContext().getAttachment(RootContext.KEY_XID));
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RootContext[" + xid + "] xid in RpcContext[" + rpcXid + "]");
         }
         boolean bind = false;
         if (xid != null) {
-            RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid);
+            RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid.toHexString());
         } else {
             if (rpcXid != null) {
                 RootContext.bind(rpcXid);
@@ -61,11 +61,11 @@ public class TransactionPropagationFilter implements Filter {
 
         } finally {
             if (bind) {
-                String unbindXid = RootContext.unbind();
+                FragmentXID unbindXid = RootContext.unbind();
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("unbind[" + unbindXid + "] from RootContext");
                 }
-                if (!rpcXid.equalsIgnoreCase(unbindXid)) {
+                if (!rpcXid.equals(unbindXid)) {
                     LOGGER.warn("xid in change during RPC from " + rpcXid + " to " + unbindXid);
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);

@@ -20,15 +20,15 @@ import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.rm.DefaultResourceManager;
 import com.alibaba.fescar.rm.datasource.exec.LockConflictException;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.Connection;
 import java.sql.SQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Connection proxy.
@@ -42,9 +42,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     /**
      * Instantiates a new Connection proxy.
      *
-     * @param dataSourceProxy  the data source proxy
+     * @param dataSourceProxy the data source proxy
      * @param targetConnection the target connection
-     * @param dbType           the db type
+     * @param dbType the db type
      */
     public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection, String dbType) {
         super(dataSourceProxy, targetConnection, dbType);
@@ -64,7 +64,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      *
      * @param xid the xid
      */
-    public void bind(String xid) {
+    public void bind(FragmentXID xid) {
         context.bind(xid);
     }
 
@@ -190,7 +190,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private void register() throws TransactionException {
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
-                null, context.getXid(), null, context.buildLockKeys());
+            null, context.getXid(), null, context.buildLockKeys());
         context.setBranchId(branchId);
     }
 
@@ -218,8 +218,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         int retry = 5; // TODO: configure
         while (retry > 0) {
             try {
-                DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),
-                        (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
+                DefaultResourceManager.get().branchReport(BranchType.AT, getDataSourceProxy().getResourceId(), context.getXid(), context.getBranchId(),
+                    (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["

@@ -47,7 +47,7 @@ public class BranchRegisterRequestTest {
 
         System.out.println(branchRegisterRequest.toString());
 
-        Assert.assertEquals("transactionId=123456,branchType=AT,resourceId=resource1,lockKey=lock_key_1",
+        Assert.assertEquals("transactionId=123456,fragmentId=0,branchType=AT,resourceId=resource1,lockKey=lock_key_1",
             branchRegisterRequest.toString());
 
     }

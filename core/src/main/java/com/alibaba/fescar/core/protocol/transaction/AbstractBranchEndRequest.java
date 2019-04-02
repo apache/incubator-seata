@@ -16,11 +16,11 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
 import com.alibaba.fescar.core.model.BranchType;
-
+import com.alibaba.fescar.core.protocol.CodecHelper;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import io.netty.buffer.ByteBuf;
+import java.nio.ByteBuffer;
 
 /**
  * The type Abstract branch end request.
@@ -32,7 +32,7 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
     /**
      * The Xid.
      */
-    protected String xid;
+    protected FragmentXID xid;
 
     /**
      * The Branch id.
@@ -59,7 +59,7 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
      *
      * @return the xid
      */
-    public String getXid() {
+    public FragmentXID getXid() {
         return xid;
     }
 
@@ -68,7 +68,7 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
      *
      * @param xid the xid
      */
-    public void setXid(String xid) {
+    public void setXid(FragmentXID xid) {
         this.xid = xid;
     }
 
@@ -155,28 +155,21 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
         }
 
         // 1. xid
-        if (this.xid != null) {
-            byte[] bs = xid.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
-            if (bs.length > 0) {
-                byteBuffer.put(bs);
-            }
-        } else {
-            byteBuffer.putShort((short)0);
-        }
+        byteBuffer.put(xid.toBytes());
+
         // 2. Branch Id
         byteBuffer.putLong(this.branchId);
         // 3. Branch Type
-        byteBuffer.put((byte)this.branchType.ordinal());
+        byteBuffer.put((byte) this.branchType.ordinal());
         // 4. Resource Id
         if (this.resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
+            byteBuffer.putShort((short) bs.length);
             if (bs.length > 0) {
                 byteBuffer.put(bs);
             }
         } else {
-            byteBuffer.putShort((short)0);
+            byteBuffer.putShort((short) 0);
         }
 
         // 5. Application Data
@@ -197,54 +190,20 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
 
     @Override
     public boolean decode(ByteBuf in) {
-        int leftLen = in.readableBytes();
-        int read = 0;
-        int xidLen = in.readShort();
-        if (xidLen > 0) {
-            if (leftLen < xidLen) {
-                return false;
-            }
-            byte[] bs = new byte[xidLen];
-            in.readBytes(bs);
-            setXid(new String(bs, UTF8));
-            leftLen -= xidLen;
-        }
-        this.branchId = in.readLong();
-        leftLen -= 8;
-        this.branchType = BranchType.get(in.readByte());
-        leftLen--;
-
-        int resourceIdLen = in.readShort();
-        if (resourceIdLen > 0) {
-            if (leftLen < resourceIdLen) {
-                return false;
-            }
-            byte[] bs = new byte[resourceIdLen];
-            in.readBytes(bs);
-            setResourceId(new String(bs, UTF8));
-            leftLen -= resourceIdLen;
-        }
-
-        int applicationDataLen = in.readInt();
-        if (applicationDataLen > 0) {
-            if (leftLen < applicationDataLen) {
-                return false;
-            }
-            byte[] bs = new byte[applicationDataLen];
-            in.readBytes(bs);
-            setApplicationData(new String(bs, UTF8));
-            leftLen -= applicationDataLen;
-        }
-
+        xid = FragmentXID.from(CodecHelper.readBytes(in, FragmentXID.FIXED_BYTES));
+        branchId = CodecHelper.readLong(in);
+        branchType = BranchType.get(in.readByte());
+        resourceId = CodecHelper.readString(in);
+        applicationData = CodecHelper.readBigString(in);
         return true;
     }
 
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append("xid=");
+        result.append("xid=<");
         result.append(xid);
-        result.append(",");
+        result.append(">,");
         result.append("branchId=");
         result.append(branchId);
         result.append(",");

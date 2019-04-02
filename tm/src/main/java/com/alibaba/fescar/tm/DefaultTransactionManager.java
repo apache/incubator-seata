@@ -16,13 +16,11 @@
 
 package com.alibaba.fescar.tm;
 
-import java.util.concurrent.TimeoutException;
-
-import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.model.TransactionManager;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.core.protocol.transaction.AbstractTransactionRequest;
 import com.alibaba.fescar.core.protocol.transaction.AbstractTransactionResponse;
 import com.alibaba.fescar.core.protocol.transaction.GlobalBeginRequest;
@@ -34,6 +32,7 @@ import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackResponse;
 import com.alibaba.fescar.core.protocol.transaction.GlobalStatusRequest;
 import com.alibaba.fescar.core.protocol.transaction.GlobalStatusResponse;
 import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
+import java.util.concurrent.TimeoutException;
 
 /**
  * The type Default transaction manager.
@@ -67,45 +66,45 @@ public class DefaultTransactionManager implements TransactionManager {
     }
 
     @Override
-    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
+    public FragmentXID begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException {
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName(name);
         request.setTimeout(timeout);
-        GlobalBeginResponse response = (GlobalBeginResponse)syncCall(request);
+        GlobalBeginResponse response = (GlobalBeginResponse) syncCall(request);
         return response.getXid();
     }
 
     @Override
-    public GlobalStatus commit(String xid) throws TransactionException {
-        long txId = XID.getTransactionId(xid);
+    public GlobalStatus commit(FragmentXID xid) throws TransactionException {
         GlobalCommitRequest globalCommit = new GlobalCommitRequest();
-        globalCommit.setTransactionId(txId);
-        GlobalCommitResponse response = (GlobalCommitResponse)syncCall(globalCommit);
+        globalCommit.setTransactionId(xid.getTransactionId());
+        globalCommit.setFragmentId(xid.getFragmentId());
+        GlobalCommitResponse response = (GlobalCommitResponse) syncCall(globalCommit);
         return response.getGlobalStatus();
     }
 
     @Override
-    public GlobalStatus rollback(String xid) throws TransactionException {
-        long txId = XID.getTransactionId(xid);
+    public GlobalStatus rollback(FragmentXID xid) throws TransactionException {
         GlobalRollbackRequest globalRollback = new GlobalRollbackRequest();
-        globalRollback.setTransactionId(txId);
-        GlobalRollbackResponse response = (GlobalRollbackResponse)syncCall(globalRollback);
+        globalRollback.setTransactionId(xid.getTransactionId());
+        globalRollback.setFragmentId(xid.getFragmentId());
+        GlobalRollbackResponse response = (GlobalRollbackResponse) syncCall(globalRollback);
         return response.getGlobalStatus();
     }
 
     @Override
-    public GlobalStatus getStatus(String xid) throws TransactionException {
-        long txId = XID.getTransactionId(xid);
+    public GlobalStatus getStatus(FragmentXID xid) throws TransactionException {
         GlobalStatusRequest queryGlobalStatus = new GlobalStatusRequest();
-        queryGlobalStatus.setTransactionId(txId);
-        GlobalStatusResponse response = (GlobalStatusResponse)syncCall(queryGlobalStatus);
+        queryGlobalStatus.setTransactionId(xid.getTransactionId());
+        queryGlobalStatus.setFragmentId(xid.getFragmentId());
+        GlobalStatusResponse response = (GlobalStatusResponse) syncCall(queryGlobalStatus);
         return response.getGlobalStatus();
     }
 
     private AbstractTransactionResponse syncCall(AbstractTransactionRequest request) throws TransactionException {
         try {
-            return (AbstractTransactionResponse)TmRpcClient.getInstance().sendMsgWithResponse(request);
+            return (AbstractTransactionResponse) TmRpcClient.getInstance().sendMsgWithResponse(request);
         } catch (TimeoutException toe) {
             throw new TransactionException(TransactionExceptionCode.IO, toe);
         }

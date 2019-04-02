@@ -70,7 +70,7 @@ public class TccActionInterceptor implements MethodInterceptor {
 		TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);	
 		//try method
 	    if(businessAction != null) {
-			if(StringUtils.isBlank(RootContext.getXID())){
+			if(null == RootContext.getXID()){
 				//not in distribute transaction
 				return invocation.proceed();
 			}

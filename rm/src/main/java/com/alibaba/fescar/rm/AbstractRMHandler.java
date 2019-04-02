@@ -24,6 +24,7 @@ import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.ResourceManager;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 import com.alibaba.fescar.core.protocol.AbstractResultMessage;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.core.protocol.transaction.*;
 import com.alibaba.fescar.core.rpc.RpcContext;
 import com.alibaba.fescar.core.rpc.TransactionMessageHandler;
@@ -41,6 +42,8 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
     @Override
     public BranchCommitResponse handle(BranchCommitRequest request) {
         BranchCommitResponse response = new BranchCommitResponse();
+        response.setXid(request.getXid());
+        response.setBranchId(request.getBranchId());
         exceptionHandleTemplate(new AbstractExceptionHandler.Callback<BranchCommitRequest, BranchCommitResponse>() {
             @Override
             public void execute(BranchCommitRequest request, BranchCommitResponse response) throws TransactionException {
@@ -54,6 +57,8 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
     @Override
     public BranchRollbackResponse handle(BranchRollbackRequest request) {
         BranchRollbackResponse response = new BranchRollbackResponse();
+        response.setXid(request.getXid());
+        response.setBranchId(request.getBranchId());
         exceptionHandleTemplate(new Callback<BranchRollbackRequest, BranchRollbackResponse>() {
             @Override
             public void execute(BranchRollbackRequest request, BranchRollbackResponse response) throws TransactionException {
@@ -71,7 +76,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
      * @throws TransactionException the transaction exception
      */
     protected void doBranchCommit(BranchCommitRequest request, BranchCommitResponse response) throws TransactionException {
-        String xid = request.getXid();
+        FragmentXID xid = request.getXid();
         long branchId = request.getBranchId();
         String resourceId = request.getResourceId();
         String applicationData = request.getApplicationData();
@@ -90,7 +95,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
      * @throws TransactionException the transaction exception
      */
     protected void doBranchRollback(BranchRollbackRequest request, BranchRollbackResponse response) throws TransactionException {
-        String xid = request.getXid();
+        FragmentXID xid = request.getXid();
         long branchId = request.getBranchId();
         String resourceId = request.getResourceId();
         String applicationData = request.getApplicationData();

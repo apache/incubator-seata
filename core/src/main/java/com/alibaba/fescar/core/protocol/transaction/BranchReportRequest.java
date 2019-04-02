@@ -30,6 +30,8 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
 
     private long transactionId;
 
+    private long fragmentId;
+
     private long branchId;
 
     private String resourceId;
@@ -56,6 +58,24 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
      */
     public void setTransactionId(long transactionId) {
         this.transactionId = transactionId;
+    }
+
+    /**
+     * Gets fragment id.
+     *
+     * @return the fragment id
+     */
+    public long getFragmentId() {
+        return fragmentId;
+    }
+
+    /**
+     * Sets fragment id.
+     *
+     * @param fragmentId the fragment id
+     */
+    public void setFragmentId(long fragmentId) {
+        this.fragmentId = fragmentId;
     }
 
     /**
@@ -165,11 +185,13 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
 
         // 1. Transaction Id
         byteBuffer.putLong(this.transactionId);
-        // 2. Branch Id
+        // 2. FragmentId Id
+        byteBuffer.putLong(this.fragmentId);
+        // 3. Branch Id
         byteBuffer.putLong(this.branchId);
-        // 3. Branch Status
+        // 4. Branch Status
         byteBuffer.put((byte)this.status.getCode());
-        // 4. Resource Id
+        // 5. Resource Id
         if (this.resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
             byteBuffer.putShort((short)bs.length);
@@ -180,7 +202,7 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
             byteBuffer.putShort((short)0);
         }
 
-        // 5. Application Data
+        // 6. Application Data
         if (this.applicationData != null) {
             byteBuffer.putInt(applicationDataBytes.length);
             if (applicationDataBytes.length > 0) {
@@ -189,7 +211,7 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
         } else {
             byteBuffer.putInt(0);
         }
-        //6. branchType
+        // 7. branchType
         byteBuffer.put((byte) this.branchType.ordinal());
 
         byteBuffer.flip();
@@ -201,6 +223,7 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
     @Override
     public void decode(ByteBuffer byteBuffer) {
         this.transactionId = byteBuffer.getLong();
+        this.fragmentId = byteBuffer.getLong();
         this.branchId = byteBuffer.getLong();
         this.status = BranchStatus.get(byteBuffer.get());
         short len = byteBuffer.getShort();
@@ -229,6 +252,9 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
         StringBuilder result = new StringBuilder();
         result.append("transactionId=");
         result.append(transactionId);
+        result.append(",");
+        result.append("fragmentId=");
+        result.append(fragmentId);
         result.append(",");
         result.append("branchId=");
         result.append(branchId);

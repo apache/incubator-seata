@@ -16,12 +16,12 @@
 
 package com.alibaba.fescar.server;
 
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.rpc.netty.RpcServer;
@@ -79,11 +79,11 @@ public class Server {
         UUIDGenerator.init(1);
 
         if (args.length > 2) {
-            XID.setIpAddress(args[2]);
+            FragmentXID.setServerIPAddress(args[2]);
         } else {
-            XID.setIpAddress(NetUtil.getLocalIp());
+            FragmentXID.setServerIPAddress(NetUtil.getLocalIp());
         }
-        XID.setPort(rpcServer.getListenPort());
+        FragmentXID.setServerPort(rpcServer.getListenPort());
 
         rpcServer.init();
 

@@ -16,6 +16,7 @@
 package com.alibaba.fescar.core.message;
 
 import com.alibaba.fescar.core.model.BranchStatus;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.BranchCommitResponse;
 
@@ -38,13 +39,14 @@ public class BranchCommitResponseTest {
     public void toStringTest() throws Exception {
         BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
 
+        branchCommitResponse.setXid(FragmentXID.from(1L));
         branchCommitResponse.setBranchStatus(BranchStatus.PhaseOne_Done);
         branchCommitResponse.setResultCode(ResultCode.Success);
         branchCommitResponse.setMsg("");
 
         System.out.println(branchCommitResponse.toString());
 
-        Assert.assertEquals("branchStatus=PhaseOne_Done,result code =Success,getMsg =",
+        Assert.assertEquals("xid=<ip=127.0.0.1,port=8080,transactionId=1,fragmentId=0>,branchId=0,branchStatus=PhaseOne_Done,result code =Success,getMsg =",
             branchCommitResponse.toString());
 
     }

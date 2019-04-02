@@ -15,16 +15,14 @@
  */
 package com.alibaba.fescar.server.coordinator;
 
-import java.util.Collection;
-
-import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.GlobalStatus;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.server.session.BranchSession;
 import com.alibaba.fescar.server.session.GlobalSession;
 import com.alibaba.fescar.server.session.SessionHolder;
-
+import java.util.Collection;
 import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
@@ -76,10 +74,10 @@ public class DefaultCoreTest {
      * @throws Exception the exception
      */
     @Test(dataProvider = "xidProvider")
-    public void branchRegisterTest(String xid) throws Exception {
+    public void branchRegisterTest(FragmentXID xid) throws Exception {
         core.branchRegister(BranchType.AT, resourceId, clientId, xid, "abc", lockKeys_1);
 
-        long transactionId = XID.getTransactionId(xid);
+        long transactionId = xid.getTransactionId();
         GlobalSession globalSession = SessionHolder.findGlobalSession(transactionId);
         Assert.assertEquals(globalSession.getSortedBranches().size(), 1);
     }
@@ -87,15 +85,15 @@ public class DefaultCoreTest {
     /**
      * Branch report test.
      *
-     * @param xid      the xid
+     * @param xid the xid
      * @param branchId the branch id
      * @throws Exception the exception
      */
     @Test(dataProvider = "xidAndBranchIdProvider")
-    public void branchReportTest(String xid, Long branchId) throws Exception {
-        core.branchReport(BranchType.AT, xid, branchId, BranchStatus.PhaseOne_Done, applicationData);
+    public void branchReportTest(FragmentXID xid, Long branchId) throws Exception {
+        core.branchReport(BranchType.AT, "", xid, branchId, BranchStatus.PhaseOne_Done, applicationData);
 
-        long transactionId = XID.getTransactionId(xid);
+        long transactionId = xid.getTransactionId();
         GlobalSession globalSession = SessionHolder.findGlobalSession(transactionId);
         BranchSession branchSession = globalSession.getBranch(branchId);
         Assert.assertEquals(branchSession.getStatus(), BranchStatus.PhaseOne_Done);
@@ -108,9 +106,9 @@ public class DefaultCoreTest {
      */
     @Test
     public void beginTest() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        FragmentXID xid = core.begin(applicationId, txServiceGroup, txName, timeout);
 
-        long transactionId = XID.getTransactionId(xid);
+        long transactionId = xid.getTransactionId();
         GlobalSession globalSession = SessionHolder.findGlobalSession(transactionId);
         Assert.assertNotNull(globalSession);
     }
@@ -122,7 +120,7 @@ public class DefaultCoreTest {
      * @throws Exception the exception
      */
     @Test(dataProvider = "xidProvider")
-    public void commitTest(String xid) throws Exception {
+    public void commitTest(FragmentXID xid) throws Exception {
         GlobalStatus globalStatus = core.commit(xid);
         Assert.assertNotEquals(globalStatus, GlobalStatus.Begin);
     }
@@ -134,8 +132,8 @@ public class DefaultCoreTest {
      * @throws Exception the exception
      */
     @Test(dataProvider = "xidProvider")
-    public void doGlobalCommitTest(String xid) throws Exception {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+    public void doGlobalCommitTest(FragmentXID xid) throws Exception {
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid.getTransactionId());
         core.doGlobalCommit(globalSession, false);
         Assert.assertEquals(globalSession.getStatus(), GlobalStatus.Committed);
     }
@@ -147,7 +145,7 @@ public class DefaultCoreTest {
      * @throws Exception the exception
      */
     @Test(dataProvider = "xidProvider")
-    public void rollBackTest(String xid) throws Exception {
+    public void rollBackTest(FragmentXID xid) throws Exception {
         GlobalStatus globalStatus = core.rollback(xid);
         Assert.assertEquals(globalStatus, GlobalStatus.Rollbacked);
     }
@@ -159,8 +157,8 @@ public class DefaultCoreTest {
      * @throws Exception the exception
      */
     @Test(dataProvider = "xidProvider")
-    public void doGlobalRollBackTest(String xid) throws Exception {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+    public void doGlobalRollBackTest(FragmentXID xid) throws Exception {
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid.getTransactionId());
         core.doGlobalRollback(globalSession, false);
         Assert.assertEquals(globalSession.getStatus(), GlobalStatus.Rollbacked);
     }
@@ -173,7 +171,7 @@ public class DefaultCoreTest {
      */
     @DataProvider
     public static Object[][] xidProvider() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        FragmentXID xid = core.begin(applicationId, txServiceGroup, txName, timeout);
         return new Object[][] {{xid}};
     }
 
@@ -185,7 +183,7 @@ public class DefaultCoreTest {
      */
     @DataProvider
     public static Object[][] xidAndBranchIdProvider() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+        FragmentXID xid = core.begin(applicationId, txServiceGroup, txName, timeout);
         Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, null, lockKeys_2);
         return new Object[][] {{xid, branchId}};
     }

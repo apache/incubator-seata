@@ -16,10 +16,9 @@
 
 package com.alibaba.fescar.core.context;
 
+import com.alibaba.fescar.common.loader.LoadLevel;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.alibaba.fescar.common.loader.LoadLevel;
 
 /**
  * The type Thread local context core.
@@ -27,26 +26,20 @@ import com.alibaba.fescar.common.loader.LoadLevel;
 @LoadLevel(name = "ThreadLocalContextCore", order = Integer.MIN_VALUE)
 public class ThreadLocalContextCore implements ContextCore {
 
-    private ThreadLocal<Map<String, String>> threadLocal = new ThreadLocal<Map<String, String>>() {
-        @Override
-        protected Map<String, String> initialValue() {
-            return new HashMap<String, String>();
-        }
-
-    };
+    private ThreadLocal<Map<String, Object>> threadLocal = ThreadLocal.withInitial(() -> new HashMap<>());
 
     @Override
-    public String put(String key, String value) {
-        return threadLocal.get().put(key, value);
+    public <T> T put(String key, T value) {
+        return (T) threadLocal.get().put(key, value);
     }
 
     @Override
-    public String get(String key) {
-        return threadLocal.get().get(key);
+    public <T> T get(String key) {
+        return (T) threadLocal.get().get(key);
     }
 
     @Override
-    public String remove(String key) {
-        return threadLocal.get().remove(key);
+    public <T> T remove(String key) {
+        return (T) threadLocal.get().remove(key);
     }
 }

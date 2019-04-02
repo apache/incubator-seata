@@ -18,6 +18,7 @@ package com.alibaba.fescar.core.context;
 
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +43,7 @@ public class RootContext {
      *
      * @return the xid
      */
-    public static String getXID() {
+    public static FragmentXID getXID() {
         return CONTEXT_HOLDER.get(KEY_XID);
     }
 
@@ -51,7 +52,7 @@ public class RootContext {
      *
      * @param xid the xid
      */
-    public static void bind(String xid) {
+    public static void bind(FragmentXID xid) {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind " + xid);
         }
@@ -74,10 +75,10 @@ public class RootContext {
     /**
      * Unbind string.
      *
-     * @return the string
+     * @return the xid
      */
-    public static String unbind() {
-        String xid = CONTEXT_HOLDER.remove(KEY_XID);
+    public static FragmentXID unbind() {
+        FragmentXID xid = CONTEXT_HOLDER.remove(KEY_XID);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("unbind " + xid);
         }

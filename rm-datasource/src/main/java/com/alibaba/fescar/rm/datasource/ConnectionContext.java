@@ -16,6 +16,7 @@
 
 package com.alibaba.fescar.rm.datasource;
 
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -27,7 +28,7 @@ import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
  * The type Connection context.
  */
 public class ConnectionContext {
-    private String xid;
+    private FragmentXID xid;
     private Long branchId;
     private boolean isGlobalLockRequire;
     private List<String> lockKeysBuffer = new ArrayList<>();
@@ -92,7 +93,7 @@ public class ConnectionContext {
      *
      * @param xid the xid
      */
-    void bind(String xid) {
+    void bind(FragmentXID xid) {
         if (xid == null) {
             throw new IllegalArgumentException("xid should not be null");
         }
@@ -119,7 +120,7 @@ public class ConnectionContext {
      *
      * @return the xid
      */
-    public String getXid() {
+    public FragmentXID getXid() {
         return xid;
     }
 
@@ -128,7 +129,7 @@ public class ConnectionContext {
      *
      * @param xid the xid
      */
-    void setXid(String xid) {
+    void setXid(FragmentXID xid) {
         this.xid = xid;
     }
 
@@ -165,7 +166,7 @@ public class ConnectionContext {
      *
      * @param xid the xid
      */
-    void reset(String xid) {
+    void reset(FragmentXID xid) {
         this.xid = xid;
         branchId = null;
         lockKeysBuffer.clear();

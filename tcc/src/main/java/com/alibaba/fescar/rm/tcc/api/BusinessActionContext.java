@@ -16,6 +16,7 @@
 
 package com.alibaba.fescar.rm.tcc.api;
 
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import java.io.Serializable;
 import java.util.Map;
 
@@ -32,7 +33,7 @@ public class BusinessActionContext implements Serializable {
     /**
      * xid
      */
-    private String xid;
+    private FragmentXID xid;
 
     /**
      * the branch id
@@ -62,7 +63,7 @@ public class BusinessActionContext implements Serializable {
      * @param actionName    the action name
      * @param actionContext the action context
      */
-    public BusinessActionContext(String xid, String actionName, Map<String, Object> actionContext) {
+    public BusinessActionContext(FragmentXID xid, String actionName, Map<String, Object> actionContext) {
         this.xid = xid;
         this.actionName = actionName;
         this.setActionContext(actionContext);
@@ -119,7 +120,7 @@ public class BusinessActionContext implements Serializable {
      *
      * @return the xid
      */
-    public String getXid() {
+    public FragmentXID getXid() {
         return xid;
     }
 
@@ -128,7 +129,7 @@ public class BusinessActionContext implements Serializable {
      *
      * @param xid the xid
      */
-    public void setXid(String xid) {
+    public void setXid(FragmentXID xid) {
         this.xid = xid;
     }
 

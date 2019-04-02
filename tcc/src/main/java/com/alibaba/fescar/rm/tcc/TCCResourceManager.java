@@ -25,6 +25,7 @@ import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.Resource;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.rm.AbstractResourceManager;
 import com.alibaba.fescar.rm.tcc.api.BusinessActionContext;
 
@@ -78,7 +79,7 @@ public class TCCResourceManager extends AbstractResourceManager {
 	 * @throws TransactionException
 	 */
 	@Override
-	public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+	public BranchStatus branchCommit(BranchType branchType, FragmentXID xid, long branchId, String resourceId, String applicationData) throws TransactionException {
 		TCCResource tccResource = (TCCResource) tccResourceCache.get(resourceId);
 		if(tccResource == null){
 			throw new ShouldNeverHappenException("TCC resource is not exist, resourceId:" + resourceId);
@@ -118,7 +119,7 @@ public class TCCResourceManager extends AbstractResourceManager {
 	 * @throws TransactionException
 	 */
 	@Override
-	public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+	public BranchStatus branchRollback(BranchType branchType, FragmentXID xid, long branchId, String resourceId, String applicationData) throws TransactionException {
 		TCCResource tccResource = (TCCResource) tccResourceCache.get(resourceId);
 		if (tccResource == null) {
 			throw new ShouldNeverHappenException("TCC resource is not exist, resourceId:" + resourceId);
@@ -156,7 +157,7 @@ public class TCCResourceManager extends AbstractResourceManager {
      * @param applicationData the application data
      * @return business action context
      */
-    protected BusinessActionContext getBusinessActionContext(String xid, long branchId, String resourceId, String applicationData){
+    protected BusinessActionContext getBusinessActionContext(FragmentXID xid, long branchId, String resourceId, String applicationData){
 		//transfer tcc applicationData to Context
 		Map tccContext = StringUtils.isBlank(applicationData)?new HashMap():(Map) JSON.parse(applicationData);
 		Map actionContextMap = (Map) tccContext.get(Constants.TCC_ACTION_CONTEXT);

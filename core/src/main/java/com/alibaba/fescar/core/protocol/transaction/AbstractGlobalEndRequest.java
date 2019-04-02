@@ -16,9 +16,9 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
+import com.alibaba.fescar.core.protocol.CodecHelper;
 import com.alibaba.fescar.core.protocol.MergedMessage;
+import java.nio.ByteBuffer;
 
 /**
  * The type Abstract global end request.
@@ -29,6 +29,11 @@ public abstract class AbstractGlobalEndRequest extends AbstractTransactionReques
      * The Transaction id.
      */
     protected long transactionId;
+
+    /**
+     * The Fragment id
+     */
+    private long fragmentId;
 
     /**
      * The Extra data.
@@ -54,6 +59,24 @@ public abstract class AbstractGlobalEndRequest extends AbstractTransactionReques
     }
 
     /**
+     * Gets fragment id.
+     *
+     * @return the fragment id
+     */
+    public long getFragmentId() {
+        return fragmentId;
+    }
+
+    /**
+     * Sets fragment id.
+     *
+     * @param fragmentId the fragment id
+     */
+    public void setFragmentId(long fragmentId) {
+        this.fragmentId = fragmentId;
+    }
+
+    /**
      * Gets extra data.
      *
      * @return the extra data
@@ -75,14 +98,15 @@ public abstract class AbstractGlobalEndRequest extends AbstractTransactionReques
     public byte[] encode() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(256);
         byteBuffer.putLong(this.transactionId);
+        byteBuffer.putLong(this.fragmentId);
         if (this.extraData != null) {
             byte[] bs = extraData.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
+            byteBuffer.putShort((short) bs.length);
             if (bs.length > 0) {
                 byteBuffer.put(bs);
             }
         } else {
-            byteBuffer.putShort((short)0);
+            byteBuffer.putShort((short) 0);
         }
 
         byteBuffer.flip();
@@ -93,13 +117,9 @@ public abstract class AbstractGlobalEndRequest extends AbstractTransactionReques
 
     @Override
     public void decode(ByteBuffer byteBuffer) {
-        this.transactionId = byteBuffer.getLong();
-        short len = byteBuffer.getShort();
-        if (len > 0) {
-            byte[] bs = new byte[len];
-            byteBuffer.get(bs);
-            this.setExtraData(new String(bs, UTF8));
-        }
+        transactionId = CodecHelper.readLong(byteBuffer);
+        fragmentId = CodecHelper.readLong(byteBuffer);
+        extraData = CodecHelper.readString(byteBuffer);
     }
 
     @Override
@@ -107,6 +127,9 @@ public abstract class AbstractGlobalEndRequest extends AbstractTransactionReques
         StringBuilder result = new StringBuilder();
         result.append("transactionId=");
         result.append(transactionId);
+        result.append(",");
+        result.append("fragmentId=");
+        result.append(fragmentId);
         result.append(",");
         result.append("extraData=");
         result.append(extraData);

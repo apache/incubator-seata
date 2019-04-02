@@ -22,27 +22,27 @@ package com.alibaba.fescar.core.context;
 public interface ContextCore {
 
     /**
-     * Put string.
+     * Put value.
      *
      * @param key   the key
      * @param value the value
-     * @return the string
+     * @return the value
      */
-    String put(String key, String value);
+    <T> T  put(String key, T value);
 
     /**
-     * Get string.
+     * Get value.
      *
      * @param key the key
-     * @return the string
+     * @return the value
      */
-    String get(String key);
+    <T> T get(String key);
 
     /**
-     * Remove string.
+     * Remove value.
      *
      * @param key the key
-     * @return the string
+     * @return the value
      */
-    String remove(String key);
+    <T> T remove(String key);
 }

@@ -19,6 +19,7 @@ package com.alibaba.fescar.tm.api;
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.GlobalStatus;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 
 /**
  * GlobalTransaction API
@@ -44,7 +45,7 @@ public class GlobalTransactionContext {
      * @return null if no transaction context there.
      */
     private static GlobalTransaction getCurrent() {
-        String xid = RootContext.getXID();
+        FragmentXID xid = RootContext.getXID();
         if (xid == null) {
             return null;
         }
@@ -71,7 +72,7 @@ public class GlobalTransactionContext {
      * @return reloaded transaction instance.
      * @throws TransactionException the transaction exception
      */
-    public static GlobalTransaction reload(String xid) throws TransactionException {
+    public static GlobalTransaction reload(FragmentXID xid) throws TransactionException {
         GlobalTransaction tx = new DefaultGlobalTransaction(xid, GlobalStatus.UnKnown, GlobalTransactionRole.Launcher) {
             @Override
             public void begin(int timeout, String name) throws TransactionException {

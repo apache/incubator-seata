@@ -42,6 +42,7 @@ public class BranchReportRequestTest {
     public void testToString() throws Exception {
         BranchReportRequest branchReportRequest = new BranchReportRequest();
 
+        branchReportRequest.setFragmentId(1L);
         branchReportRequest.setTransactionId(1249853);
         branchReportRequest.setBranchId(3);
         branchReportRequest.setResourceId("resource003");
@@ -49,7 +50,7 @@ public class BranchReportRequestTest {
         branchReportRequest.setApplicationData("test app data");
 
         Assert.assertEquals(
-            "transactionId=1249853,branchId=3,resourceId=resource003,status=PhaseOne_Timeout,applicationData=test app"
+            "transactionId=1249853,fragmentId=1,branchId=3,resourceId=resource003,status=PhaseOne_Timeout,applicationData=test app"
                 + " data",
             branchReportRequest.toString());
     }
@@ -63,6 +64,7 @@ public class BranchReportRequestTest {
     public void testEncode() throws Exception {
         BranchReportRequest branchReportRequest = new BranchReportRequest();
 
+        branchReportRequest.setFragmentId(1L);
         branchReportRequest.setTransactionId(1249853);
         branchReportRequest.setBranchId(3);
         branchReportRequest.setResourceId("resource003");
@@ -75,7 +77,7 @@ public class BranchReportRequestTest {
         System.out.println(encodeResultStr);
 
         Assert.assertEquals(
-            "[0, 0, 0, 0, 0, 19, 18, 61, 0, 0, 0, 0, 0, 0, 0, 3, 4, 0, 11, 114, 101, 115, 111, 117, 114, 99, 101, 48,"
+            "[0, 0, 0, 0, 0, 19, 18, 61, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 3, 4, 0, 11, 114, 101, 115, 111, 117, 114, 99, 101, 48,"
                 + " 48, 51, 0, 0, 0, 13, 116, 101, 115, 116, 32, 97, 112, 112, 32, 100, 97, 116, 97, 0]",
             encodeResultStr);
     }
@@ -89,6 +91,7 @@ public class BranchReportRequestTest {
     public void testDecode() throws Exception {
         BranchReportRequest branchReportRequest = new BranchReportRequest();
 
+        branchReportRequest.setFragmentId(1L);
         branchReportRequest.setTransactionId(1249853);
         branchReportRequest.setBranchId(3);
         branchReportRequest.setResourceId("resource003");
@@ -105,6 +108,7 @@ public class BranchReportRequestTest {
         BranchReportRequest decodeBranchReportRequest = new BranchReportRequest();
         decodeBranchReportRequest.decode(byteBuffer);
         System.out.println(decodeBranchReportRequest);
+        Assert.assertEquals(branchReportRequest.getFragmentId(), decodeBranchReportRequest.getFragmentId());
         Assert.assertEquals(branchReportRequest.getTransactionId(), decodeBranchReportRequest.getTransactionId());
         Assert.assertEquals(branchReportRequest.getBranchId(), decodeBranchReportRequest.getBranchId());
         Assert.assertEquals(branchReportRequest.getResourceId(), decodeBranchReportRequest.getResourceId());

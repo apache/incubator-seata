@@ -16,17 +16,15 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
-import java.nio.ByteBuffer;
-import java.util.List;
-
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 import com.alibaba.fescar.core.protocol.HeartbeatMessage;
 import com.alibaba.fescar.core.protocol.MessageCodec;
 import com.alibaba.fescar.core.protocol.RpcMessage;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
+import java.nio.ByteBuffer;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,12 +32,11 @@ import org.slf4j.LoggerFactory;
  * The type Message codec handler.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/14
  */
 public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageCodecHandler.class);
-    private static short MAGIC = (short)0xdada;
+    private static short MAGIC = (short) 0xdada;
     private static int HEAD_LENGTH = 14;
     private static final int FLAG_REQUEST = 0x80;
     private static final int FLAG_ASYNC = 0x40;
@@ -53,7 +50,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
         MessageCodec msgCodec = null;
         ByteBuffer byteBuffer = ByteBuffer.allocate(128);
         if (msg.getBody() instanceof MessageCodec) {
-            msgCodec = (MessageCodec)msg.getBody();
+            msgCodec = (MessageCodec) msg.getBody();
         }
         byteBuffer.putShort(MAGIC);
         int flag = (msg.isAsync() ? FLAG_ASYNC : 0)
@@ -61,10 +58,10 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
             | (msg.isRequest() ? FLAG_REQUEST : 0)
             | (msgCodec != null ? FLAG_FESCAR_CODEC : 0);
 
-        byteBuffer.putShort((short)flag);
+        byteBuffer.putShort((short) flag);
 
         if (msg.getBody() instanceof HeartbeatMessage) {
-            byteBuffer.putShort((short)0);
+            byteBuffer.putShort((short) 0);
             byteBuffer.putLong(msg.getId());
             byteBuffer.flip();
             byte[] content = new byte[byteBuffer.limit()];
@@ -82,13 +79,16 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 byte[] content = new byte[byteBuffer.limit()];
                 byteBuffer.get(content);
                 out.writeBytes(content);
-                out.writeBytes(msgCodec.encode());
+                // add body size
+                byte[] body = msgCodec.encode();
+                out.writeInt(body.length);
+                out.writeBytes(body);
             } else {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("msg:" + msg.getBody().toString());
                 }
                 byte[] body = hessianSerialize(msg.getBody());
-                byteBuffer.putShort((short)body.length);
+                byteBuffer.putShort((short) body.length);
                 byteBuffer.putLong(msg.getId());
                 byteBuffer.put(body);
 
@@ -140,14 +140,36 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
         short bodyLength = 0;
         short typeCode = 0;
-        if (!isFescarCodec) { bodyLength = byteBuffer.getShort(); } else { typeCode = byteBuffer.getShort(); }
+        if (!isFescarCodec) {
+            bodyLength = byteBuffer.getShort();
+        } else {
+            // add by infinivision begin
+            // check type code and body size
+            if (!isHeartbeat) {
+                // body size 4 bytes not enough
+                if (in.readableBytes() < 4) {
+                    in.readerIndex(begin);
+                    return;
+                }
+
+                // body size not enough
+                int body = in.readInt();
+                if (in.readableBytes() < body) {
+                    in.readerIndex(begin);
+                    return;
+                }
+            }
+
+            typeCode = byteBuffer.getShort();
+            // add by infinivision end
+        }
         long msgId = byteBuffer.getLong();
 
         if (isHeartbeat) {
             RpcMessage rpcMessage = new RpcMessage();
             rpcMessage.setId(msgId);
             rpcMessage.setAsync(true);
-            rpcMessage.setHeartbeat(isHeartbeat);
+            rpcMessage.setHeartbeat(true);
             rpcMessage.setRequest(isRequest);
 
             if (isRequest) {

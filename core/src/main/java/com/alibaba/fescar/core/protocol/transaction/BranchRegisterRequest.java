@@ -16,11 +16,10 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.protocol.MergedMessage;
 import com.alibaba.fescar.core.rpc.RpcContext;
+import java.nio.ByteBuffer;
 
 /**
  * The type Branch register request.
@@ -30,6 +29,8 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
     private static final long serialVersionUID = 1242711598812634704L;
 
     private long transactionId;
+
+    private long fragmentId;
 
     private BranchType branchType = BranchType.AT;
 
@@ -55,6 +56,24 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
      */
     public void setTransactionId(long transactionId) {
         this.transactionId = transactionId;
+    }
+
+    /**
+     * Gets fragment id.
+     *
+     * @return the fragment id
+     */
+    public long getFragmentId() {
+        return fragmentId;
+    }
+
+    /**
+     * Sets fragment id.
+     *
+     * @param fragmentId the fragment id
+     */
+    public void setFragmentId(long fragmentId) {
+        this.fragmentId = fragmentId;
     }
 
     /**
@@ -145,20 +164,22 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
 
         // 1. Transaction Id
         byteBuffer.putLong(this.transactionId);
-        // 2. Branch Type
-        byteBuffer.put((byte)this.branchType.ordinal());
-        // 3. Resource Id
+        // 2. Fragment Id
+        byteBuffer.putLong(this.fragmentId);
+        // 3. Branch Type
+        byteBuffer.put((byte) this.branchType.ordinal());
+        // 4. Resource Id
         if (this.resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
+            byteBuffer.putShort((short) bs.length);
             if (bs.length > 0) {
                 byteBuffer.put(bs);
             }
         } else {
-            byteBuffer.putShort((short)0);
+            byteBuffer.putShort((short) 0);
         }
 
-        // 4. Lock Key
+        // 5. Lock Key
         if (this.lockKey != null) {
             byteBuffer.putInt(lockKeyBytes.length);
             if (lockKeyBytes.length > 0) {
@@ -168,7 +189,7 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
             byteBuffer.putInt(0);
         }
 
-        //5. applicationData
+        // 6. applicationData
         if (this.applicationData != null) {
             byteBuffer.putInt(applicationDataBytes.length);
             if (applicationDataBytes.length > 0) {
@@ -187,6 +208,7 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
     @Override
     public void decode(ByteBuffer byteBuffer) {
         this.transactionId = byteBuffer.getLong();
+        this.fragmentId = byteBuffer.getLong();
         this.branchType = BranchType.get(byteBuffer.get());
         short len = byteBuffer.getShort();
         if (len > 0) {
@@ -220,6 +242,9 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
         StringBuilder result = new StringBuilder();
         result.append("transactionId=");
         result.append(transactionId);
+        result.append(",");
+        result.append("fragmentId=");
+        result.append(fragmentId);
         result.append(",");
         result.append("branchType=");
         result.append(branchType);

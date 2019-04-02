@@ -18,6 +18,7 @@ package com.alibaba.fescar.tm.api;
 
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.GlobalStatus;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 
 /**
  * Global transaction.
@@ -82,6 +83,6 @@ public interface GlobalTransaction {
      *
      * @return XID. xid
      */
-    String getXid();
+    FragmentXID getXid();
 
 }

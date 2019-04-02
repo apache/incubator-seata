@@ -16,15 +16,14 @@
 
 package com.alibaba.fescar.test;
 
-import java.util.Date;
-
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.Resource;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.rm.datasource.DataSourceManager;
-
+import java.util.Date;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -49,7 +48,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
             synchronized (LocalTransactionWithGlobalLockDataSourceBasicTest.class) {
                 DataSourceManager.set(new MockDataSourceManager() {
                     @Override
-                    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
+                    public boolean lockQuery(BranchType branchType, String resourceId, FragmentXID xid, String lockKeys)
                         throws TransactionException {
                         return false;
                     }
@@ -205,18 +204,20 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     public static class MockDataSourceManager extends DataSourceManager {
 
         @Override
-        public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys)
-                throws TransactionException {
+        public Long branchRegister(BranchType branchType, String resourceId, String clientId, FragmentXID xid,
+            String applicationData, String lockKeys)
+            throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
 
         @Override
-        public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
+        public void branchReport(BranchType branchType, String resourceId, FragmentXID xid, long branchId,
+            BranchStatus status, String applicationData) throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
 
         @Override
-        public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
+        public boolean lockQuery(BranchType branchType, String resourceId, FragmentXID xid, String lockKeys)
             throws TransactionException {
             return true;
         }
@@ -232,12 +233,14 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
         }
 
         @Override
-        public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+        public BranchStatus branchCommit(BranchType branchType, FragmentXID xid, long branchId, String resourceId,
+            String applicationData) throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
 
         @Override
-        public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+        public BranchStatus branchRollback(BranchType branchType, FragmentXID xid, long branchId, String resourceId,
+            String applicationData)
             throws TransactionException {
             throw new RuntimeException("this method should not be called!");
         }
@@ -253,9 +256,9 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
 
         context = new ClassPathXmlApplicationContext(
             "basic-test-context.xml");
-        jdbcTemplate = (JdbcTemplate)context
+        jdbcTemplate = (JdbcTemplate) context
             .getBean("jdbcTemplate");
-        directJdbcTemplate = (JdbcTemplate)context
+        directJdbcTemplate = (JdbcTemplate) context
             .getBean("directJdbcTemplate");
 
         directJdbcTemplate.execute("delete from user0");

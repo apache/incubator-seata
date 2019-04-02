@@ -23,6 +23,7 @@ import com.alibaba.fescar.common.executor.Callback;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.model.BranchType;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.rm.DefaultResourceManager;
 import com.alibaba.fescar.rm.tcc.api.BusinessActionContext;
 import com.alibaba.fescar.rm.tcc.api.BusinessActionContextParameter;
@@ -60,7 +61,7 @@ public class ActionInterceptorHandler {
 		
 		//TCC name
         String actionName = businessAction.name();
-        String xid = RootContext.getXID();
+        FragmentXID xid = RootContext.getXID();
         BusinessActionContext actionContext = new BusinessActionContext();
         actionContext.setXid(xid);
         //set action anme
@@ -99,7 +100,7 @@ public class ActionInterceptorHandler {
      */
     protected String doTccActionLogStore(Method method, Object[] arguments, TwoPhaseBusinessAction businessAction, BusinessActionContext actionContext) {
 		String actionName = actionContext.getActionName();
-        String xid = actionContext.getXid();
+        FragmentXID xid = actionContext.getXid();
         //
         Map<String, Object> context = fetchActionRequestContext(method, arguments);
         context.put(Constants.ACTION_START_TIME, System.currentTimeMillis());

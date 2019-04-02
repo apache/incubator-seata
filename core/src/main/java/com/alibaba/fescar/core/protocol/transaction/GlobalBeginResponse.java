@@ -16,6 +16,8 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
+import com.alibaba.fescar.core.protocol.FragmentXID;
+import com.alibaba.fescar.core.protocol.CodecHelper;
 import java.nio.ByteBuffer;
 
 import com.alibaba.fescar.core.protocol.AbstractMessage;
@@ -27,7 +29,7 @@ public class GlobalBeginResponse extends AbstractTransactionResponse {
 
     private static final long serialVersionUID = -5947172130577163908L;
 
-    private String xid;
+    private FragmentXID xid;
 
     private String extraData;
 
@@ -36,7 +38,7 @@ public class GlobalBeginResponse extends AbstractTransactionResponse {
      *
      * @return the xid
      */
-    public String getXid() {
+    public FragmentXID getXid() {
         return xid;
     }
 
@@ -45,7 +47,7 @@ public class GlobalBeginResponse extends AbstractTransactionResponse {
      *
      * @param xid the xid
      */
-    public void setXid(String xid) {
+    public void setXid(FragmentXID xid) {
         this.xid = xid;
     }
 
@@ -76,15 +78,7 @@ public class GlobalBeginResponse extends AbstractTransactionResponse {
     protected void doEncode() {
         super.doEncode();
 
-        if (this.xid != null) {
-            byte[] bs = xid.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
-            if (bs.length > 0) {
-                byteBuffer.put(bs);
-            }
-        } else {
-            byteBuffer.putShort((short)0);
-        }
+        byteBuffer.put(xid.toBytes());
 
         if (this.extraData != null) {
             byte[] bs = extraData.getBytes(UTF8);
@@ -101,14 +95,9 @@ public class GlobalBeginResponse extends AbstractTransactionResponse {
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
 
-        short len = byteBuffer.getShort();
-        if (len > 0) {
-            byte[] bs = new byte[len];
-            byteBuffer.get(bs);
-            setXid(new String(bs, UTF8));
-        }
+        xid = FragmentXID.from(CodecHelper.readBytes(byteBuffer, FragmentXID.FIXED_BYTES));
 
-        len = byteBuffer.getShort();
+        short len = byteBuffer.getShort();
         if (len > 0) {
             byte[] bs = new byte[len];
             byteBuffer.get(bs);

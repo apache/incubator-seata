@@ -16,6 +16,7 @@
 
 package com.alibaba.fescar.rm.datasource.exec;
 
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
@@ -73,7 +74,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     @Override
     public Object execute(Object... args) throws Throwable {
         if (RootContext.inGlobalTransaction()) {
-            String xid = RootContext.getXID();
+            FragmentXID xid = RootContext.getXID();
             statementProxy.getConnectionProxy().bind(xid);
         }
 

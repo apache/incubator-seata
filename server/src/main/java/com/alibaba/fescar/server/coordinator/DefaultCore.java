@@ -16,20 +16,19 @@
 
 package com.alibaba.fescar.server.coordinator;
 
-import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.core.model.ResourceManagerInbound;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.server.lock.LockManager;
 import com.alibaba.fescar.server.lock.LockManagerFactory;
 import com.alibaba.fescar.server.session.BranchSession;
 import com.alibaba.fescar.server.session.GlobalSession;
 import com.alibaba.fescar.server.session.SessionHelper;
 import com.alibaba.fescar.server.session.SessionHolder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,8 +55,9 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
-        GlobalSession globalSession = assertGlobalSession(XID.getTransactionId(xid), GlobalStatus.Begin);
+    public Long branchRegister(BranchType branchType, String resourceId, String clientId, FragmentXID xid,
+        String applicationData, String lockKeys) throws TransactionException {
+        GlobalSession globalSession = assertGlobalSession(xid.getTransactionId(), GlobalStatus.Begin);
 
         BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId, applicationData, lockKeys, clientId);
 
@@ -89,10 +89,12 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+    public void branchReport(BranchType branchType, String resourceId, FragmentXID xid, long branchId,
+        BranchStatus status,
+        String applicationData) throws TransactionException {
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid.getTransactionId());
         if (globalSession == null) {
-            throw new TransactionException(TransactionExceptionCode.GlobalTransactionNotExist, "" + XID.getTransactionId(xid) + "");
+            throw new TransactionException(TransactionExceptionCode.GlobalTransactionNotExist, "" + xid.getTransactionId() + "");
         }
         BranchSession branchSession = globalSession.getBranch(branchId);
         if (branchSession == null) {
@@ -102,9 +104,10 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
+    public boolean lockQuery(BranchType branchType, String resourceId, FragmentXID xid,
+        String lockKeys) throws TransactionException {
         if (branchType == BranchType.AT) {
-            return lockManager.isLockable(XID.getTransactionId(xid), resourceId, lockKeys);
+            return lockManager.isLockable(xid.getTransactionId(), resourceId, lockKeys);
         } else {
             return true;
         }
@@ -112,19 +115,19 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout) throws TransactionException {
+    public FragmentXID begin(String applicationId, String transactionServiceGroup, String name,
+        int timeout) throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession(
             applicationId, transactionServiceGroup, name, timeout);
         session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
 
         session.begin();
-
-        return XID.generateXID(session.getTransactionId());
+        return FragmentXID.from(session.getTransactionId());
     }
 
     @Override
-    public GlobalStatus commit(String xid) throws TransactionException {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+    public GlobalStatus commit(FragmentXID xid) throws TransactionException {
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid.getTransactionId());
         if (globalSession == null) {
             return GlobalStatus.Finished;
         }
@@ -152,7 +155,7 @@ public class DefaultCore implements Core {
                 continue;
             }
             try {
-                BranchStatus branchStatus = resourceManagerInbound.branchCommit(branchSession.getBranchType(), XID.generateXID(branchSession.getTransactionId()), branchSession.getBranchId(),
+                BranchStatus branchStatus = resourceManagerInbound.branchCommit(branchSession.getBranchType(), FragmentXID.from(branchSession.getTransactionId()), branchSession.getBranchId(),
                     branchSession.getResourceId(), branchSession.getApplicationData());
 
                 switch (branchStatus) {
@@ -191,7 +194,7 @@ public class DefaultCore implements Core {
                 if (!retrying) {
                     queueToRetryCommit(globalSession);
                     if (ex instanceof TransactionException) {
-                        throw (TransactionException)ex;
+                        throw (TransactionException) ex;
                     } else {
                         throw new TransactionException(ex);
                     }
@@ -232,8 +235,8 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public GlobalStatus rollback(String xid) throws TransactionException {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+    public GlobalStatus rollback(FragmentXID xid) throws TransactionException {
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid.getTransactionId());
         if (globalSession == null) {
             return GlobalStatus.Finished;
         }
@@ -257,7 +260,7 @@ public class DefaultCore implements Core {
                 continue;
             }
             try {
-                BranchStatus branchStatus = resourceManagerInbound.branchRollback(branchSession.getBranchType(), XID.generateXID(branchSession.getTransactionId()), branchSession.getBranchId(),
+                BranchStatus branchStatus = resourceManagerInbound.branchRollback(branchSession.getBranchType(), FragmentXID.from(branchSession.getTransactionId()), branchSession.getBranchId(),
                     branchSession.getResourceId(), branchSession.getApplicationData());
 
                 switch (branchStatus) {
@@ -283,7 +286,7 @@ public class DefaultCore implements Core {
                 if (!retrying) {
                     queueToRetryRollback(globalSession);
                     if (ex instanceof TransactionException) {
-                        throw (TransactionException)ex;
+                        throw (TransactionException) ex;
                     } else {
                         throw new TransactionException(ex);
                     }
@@ -300,8 +303,8 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public GlobalStatus getStatus(String xid) throws TransactionException {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+    public GlobalStatus getStatus(FragmentXID xid) throws TransactionException {
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid.getTransactionId());
         return globalSession.getStatus();
     }
 }

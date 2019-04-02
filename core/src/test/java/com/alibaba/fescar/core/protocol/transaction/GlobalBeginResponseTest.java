@@ -15,11 +15,11 @@
  */
 package com.alibaba.fescar.core.protocol.transaction;
 
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.core.protocol.ResultCode;
+import java.nio.ByteBuffer;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.nio.ByteBuffer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,10 +27,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * A unit test for {@link GlobalBeginResponse}
  *
  * @author liujc
- * @date 2019/3/22 11:09
  **/
 public class GlobalBeginResponseTest {
-    private final String XID = "test_xid";
+    private final FragmentXID XID = FragmentXID.from(0L);
     private final String EXTRA_DATA = "test_extra_data";
     private final ResultCode RESULT_CODE = ResultCode.Success;
 
@@ -38,7 +37,7 @@ public class GlobalBeginResponseTest {
     public void testGetSetXid() {
         GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
         globalBeginResponse.setXid(XID);
-        Assert.assertEquals(XID, globalBeginResponse.getXid());
+        assertThat(globalBeginResponse.getXid()).isEqualTo(XID);
     }
 
     @Test

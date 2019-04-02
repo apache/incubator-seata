@@ -21,15 +21,15 @@ import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.Resource;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.rm.datasource.DataSourceManager;
+import java.util.Date;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
-
-import java.util.Date;
 
 /**
  * The type Data source basic test.
@@ -53,7 +53,7 @@ public class DataSourceBasicTest {
      */
     @Test
     public void testInsert() {
-        RootContext.bind("mock.xid");
+        RootContext.bind(FragmentXID.from(100));
         jdbcTemplate.update("insert into user0 (id, name, gmt) values (?, ?, ?)",
             new Object[] {2, "xxx", new Date()});
     }
@@ -63,7 +63,7 @@ public class DataSourceBasicTest {
      */
     @Test
     public void testUpdate() {
-        RootContext.bind("mock.xid");
+        RootContext.bind(FragmentXID.from(100));
         jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.id = ?", new Object[] {1});
     }
 
@@ -78,7 +78,7 @@ public class DataSourceBasicTest {
         directJdbcTemplate.update("insert into User1 (Id, Name, gMt) values (?, ?, ?)",
             new Object[] {1, "xxx", new Date()});
 
-        RootContext.bind("mock.xid");
+        RootContext.bind(FragmentXID.from(100));
         jdbcTemplate.update("update User1 a set a.Name = 'yyy' where a.Name = ?", new Object[] {"xxx"});
     }
 
@@ -87,7 +87,7 @@ public class DataSourceBasicTest {
      */
     @Test
     public void testUpdateWithAlias() {
-        RootContext.bind("mock.xid");
+        RootContext.bind(FragmentXID.from(100));
         jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.name = ?", new Object[] {"yyyy"});
     }
 
@@ -96,7 +96,7 @@ public class DataSourceBasicTest {
      */
     @Test
     public void testDelete() {
-        RootContext.bind("mock.xid");
+        RootContext.bind(FragmentXID.from(100));
         jdbcTemplate.update("delete from user0 where id = ?", new Object[] {2});
     }
 
@@ -105,7 +105,7 @@ public class DataSourceBasicTest {
      */
     @Test
     public void testSelectForUpdate() {
-        RootContext.bind("mock.xid");
+        RootContext.bind(FragmentXID.from(100));
         jdbcTemplate.queryForRowSet("select a.name from user0 a where a.id = ? for update", new Object[] {1});
     }
 
@@ -114,7 +114,7 @@ public class DataSourceBasicTest {
      */
     @Test
     public void testSelectForUpdateWithAlias() {
-        RootContext.bind("mock.xid");
+        RootContext.bind(FragmentXID.from(100));
         jdbcTemplate.queryForRowSet("select a.name from user0 a where a.id = ? for update", new Object[] {1});
     }
 
@@ -127,19 +127,20 @@ public class DataSourceBasicTest {
         DataSourceManager.set(new DataSourceManager() {
 
             @Override
-            public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
-                                       String applicationData, String lockKeys) throws TransactionException {
+            public Long branchRegister(BranchType branchType, String resourceId, String clientId, FragmentXID xid,
+                String applicationData, String lockKeys) throws TransactionException {
                 return 123456L;
             }
 
             @Override
-            public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData)
+            public void branchReport(BranchType branchType, String resourceId, FragmentXID xid, long branchId,
+                BranchStatus status, String applicationData)
                 throws TransactionException {
 
             }
 
             @Override
-            public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
+            public boolean lockQuery(BranchType branchType, String resourceId, FragmentXID xid, String lockKeys)
                 throws TransactionException {
                 return true;
             }
@@ -155,13 +156,15 @@ public class DataSourceBasicTest {
             }
 
             @Override
-            public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+            public BranchStatus branchCommit(BranchType branchType, FragmentXID xid, long branchId, String resourceId,
+                String applicationData)
                 throws TransactionException {
                 return BranchStatus.PhaseTwo_Committed;
             }
 
             @Override
-            public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+            public BranchStatus branchRollback(BranchType branchType, FragmentXID xid, long branchId, String resourceId,
+                String applicationData)
                 throws TransactionException {
                 return BranchStatus.PhaseTwo_Rollbacked;
             }
@@ -169,9 +172,9 @@ public class DataSourceBasicTest {
 
         context = new ClassPathXmlApplicationContext(
             "basic-test-context.xml");
-        jdbcTemplate = (JdbcTemplate)context
+        jdbcTemplate = (JdbcTemplate) context
             .getBean("jdbcTemplate");
-        directJdbcTemplate = (JdbcTemplate)context
+        directJdbcTemplate = (JdbcTemplate) context
             .getBean("directJdbcTemplate");
 
     }

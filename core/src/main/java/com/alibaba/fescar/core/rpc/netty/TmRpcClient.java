@@ -16,6 +16,7 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -27,7 +28,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.exception.FrameworkErrorCode;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
@@ -171,8 +171,8 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
 
     @Override
     public Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException {
-        String svrAddr = XID.getServerAddress(RootContext.getXID());
-        String validAddress = svrAddr != null ? svrAddr : loadBalance();
+        FragmentXID xid = RootContext.getXID();
+        String validAddress = xid != null ? xid.getIpAndPort() : loadBalance();
         Channel acquireChannel = connect(validAddress);
         Object result = super.sendAsyncRequestWithResponse(validAddress, acquireChannel, msg, timeout);
         if (result instanceof GlobalBeginResponse

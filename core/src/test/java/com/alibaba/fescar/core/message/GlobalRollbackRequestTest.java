@@ -40,12 +40,13 @@ public class GlobalRollbackRequestTest {
     public void testToString() throws Exception {
         GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
 
+        globalRollbackRequest.setFragmentId(1L);
         globalRollbackRequest.setTransactionId(1249853);
         globalRollbackRequest.setExtraData("test_extra_data");
 
         System.out.println(globalRollbackRequest.toString());
 
-        Assert.assertEquals("transactionId=1249853,extraData=test_extra_data", globalRollbackRequest.toString());
+        Assert.assertEquals("transactionId=1249853,fragmentId=1,extraData=test_extra_data", globalRollbackRequest.toString());
     }
 
     /**
@@ -57,6 +58,7 @@ public class GlobalRollbackRequestTest {
     public void testEncode() throws Exception {
         GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
 
+        globalRollbackRequest.setFragmentId(1L);
         globalRollbackRequest.setTransactionId(1249853);
         globalRollbackRequest.setExtraData("test_extra_data");
 
@@ -68,7 +70,7 @@ public class GlobalRollbackRequestTest {
         System.out.println(encodeResultStr);
 
         Assert.assertEquals(
-            "[0, 0, 0, 0, 0, 19, 18, 61, 0, 15, 116, 101, 115, 116, 95, 101, 120, 116, 114, 97, 95, 100, 97, 116, 97]",
+            "[0, 0, 0, 0, 0, 19, 18, 61, 0, 0, 0, 0, 0, 0, 0, 1, 0, 15, 116, 101, 115, 116, 95, 101, 120, 116, 114, 97, 95, 100, 97, 116, 97]",
             encodeResultStr);
     }
 
