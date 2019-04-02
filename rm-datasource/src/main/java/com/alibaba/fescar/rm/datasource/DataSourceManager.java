@@ -38,7 +38,6 @@ import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
 import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
 import com.alibaba.fescar.rm.AbstractResourceManager;
-import com.alibaba.fescar.rm.DefaultResourceManager;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -121,28 +120,6 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
         return NetUtil.toStringAddress(address);
     }
 
-    private static class SingletonHolder {
-        private static DataSourceManager INSTANCE = (DataSourceManager)DefaultResourceManager.get().getResourceManager(BranchType.AT);
-    }
-
-    /**
-     * Get data source manager.
-     *
-     * @return the data source manager
-     */
-    public static DataSourceManager get() {
-        return SingletonHolder.INSTANCE;
-    }
-
-    /**
-     * Set.
-     *
-     * @param mock the mock
-     */
-    public static void set(DataSourceManager mock) {
-        SingletonHolder.INSTANCE = mock;
-    }
-
     /**
      * Init.
      *
@@ -150,19 +127,6 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
      */
     public synchronized void initAsyncWorker(ResourceManagerInbound asyncWorker) {
         setAsyncWorker(asyncWorker);
-    }
-
-    /**
-     * Instantiates a new Data source manager.
-     */
-    public DataSourceManager() {
-    }
-
-    public DataSourceManager(boolean isInit) {
-        if(isInit){
-            init();
-        }
-
     }
 
     @Override

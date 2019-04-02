@@ -18,7 +18,6 @@ package com.alibaba.fescar.rm;
 
 import com.alibaba.fescar.core.rpc.netty.RmMessageListener;
 import com.alibaba.fescar.core.rpc.netty.RmRpcClient;
-import com.alibaba.fescar.rm.datasource.DataSourceManager;
 
 /**
  * The type Rm client at.
@@ -39,7 +38,7 @@ public class RMClientAT {
 //        AsyncWorker asyncWorker = new AsyncWorker();
 //        asyncWorker.init();
 //        DataSourceManager.init(asyncWorker);
-        rmRpcClient.setResourceManager(DataSourceManager.get());
+//        rmRpcClient.setResourceManager(DataSourceManager.get());
         rmRpcClient.setClientMessageListener(new RmMessageListener(new RMHandlerAT()));
         rmRpcClient.init();
     }
