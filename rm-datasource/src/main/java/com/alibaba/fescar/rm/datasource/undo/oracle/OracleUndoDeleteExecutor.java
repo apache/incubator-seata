@@ -34,14 +34,14 @@ import java.util.List;
  * @author ccg
  * @date 2019/3/25
  */
-public class ORACLEUndoDeleteExecutor extends AbstractUndoExecutor {
+public class OracleUndoDeleteExecutor extends AbstractUndoExecutor {
 
     /**
      * Instantiates a new My sql undo delete executor.
      *
      * @param sqlUndoLog the sql undo log
      */
-    public ORACLEUndoDeleteExecutor(SQLUndoLog sqlUndoLog) {
+    public OracleUndoDeleteExecutor(SQLUndoLog sqlUndoLog) {
         super(sqlUndoLog);
     }
 

@@ -40,7 +40,7 @@ import java.util.List;
  * @author ccg
  * @date 2019/3/25
  */
-public class ORACLEUpdateRecognizer extends BaseRecognizer implements SQLUpdateRecognizer {
+public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateRecognizer {
 
     private OracleUpdateStatement ast;
 
@@ -50,7 +50,7 @@ public class ORACLEUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
      * @param originalSQL the original sql
      * @param ast         the ast
      */
-    public ORACLEUpdateRecognizer(String originalSQL, SQLStatement ast) {
+    public OracleUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
         this.ast = (OracleUpdateStatement) ast;
     }

@@ -22,7 +22,7 @@ import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
 import com.alibaba.fescar.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
 import com.alibaba.fescar.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
-import com.alibaba.fescar.rm.datasource.undo.oracle.ORACLEUndoInsertExecutor;
+import com.alibaba.fescar.rm.datasource.undo.oracle.OracleUndoInsertExecutor;
 
 /**
  * The type Undo executor factory.
@@ -43,11 +43,11 @@ public class UndoExecutorFactory {
           if(dbType.equalsIgnoreCase(JdbcConstants.ORACLE)) {
             switch (sqlUndoLog.getSqlType()) {
                 case INSERT:
-                    return new ORACLEUndoInsertExecutor(sqlUndoLog);
+                    return new OracleUndoInsertExecutor(sqlUndoLog);
                 case UPDATE:
-                    return new ORACLEUndoInsertExecutor(sqlUndoLog);
+                    return new OracleUndoInsertExecutor(sqlUndoLog);
                 case DELETE:
-                    return new ORACLEUndoInsertExecutor(sqlUndoLog);
+                    return new OracleUndoInsertExecutor(sqlUndoLog);
                 default:
                     throw new ShouldNeverHappenException();
             }

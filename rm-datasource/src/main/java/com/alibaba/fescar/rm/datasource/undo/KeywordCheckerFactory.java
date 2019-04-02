@@ -19,7 +19,7 @@ package com.alibaba.fescar.rm.datasource.undo;
 import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
-import com.alibaba.fescar.rm.datasource.undo.oracle.keyword.ORACLEKeywordChecker;
+import com.alibaba.fescar.rm.datasource.undo.oracle.keyword.OracleKeywordChecker;
 
 /**
  * @author Wu
@@ -38,7 +38,7 @@ public class KeywordCheckerFactory {
         if (dbType.equals(JdbcConstants.MYSQL)) {
             return MySQLKeywordChecker.getInstance();
         } else  if (dbType.equals(JdbcConstants.ORACLE)) {
-            return ORACLEKeywordChecker.getInstance();
+            return OracleKeywordChecker.getInstance();
         } else {
             throw new NotSupportYetException(dbType);
         }

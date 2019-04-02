@@ -40,7 +40,7 @@ import java.util.List;
  * @author ccg
  * @date 2019/3/25
  */
-public class ORACLEInsertRecognizer extends BaseRecognizer implements SQLInsertRecognizer {
+public class OracleInsertRecognizer extends BaseRecognizer implements SQLInsertRecognizer {
 
     private final OracleInsertStatement ast;
 
@@ -50,7 +50,7 @@ public class ORACLEInsertRecognizer extends BaseRecognizer implements SQLInsertR
      * @param originalSQL the original sql
      * @param ast         the ast
      */
-    public ORACLEInsertRecognizer(String originalSQL, SQLStatement ast) {
+    public OracleInsertRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
         this.ast = (OracleInsertStatement) ast;
     }

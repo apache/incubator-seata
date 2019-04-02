@@ -36,7 +36,7 @@ import java.util.ArrayList;
  * @date 2019/3/25
  */
 
-public class ORACLESelectForUpdateRecognizer extends BaseRecognizer implements SQLSelectRecognizer {
+public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements SQLSelectRecognizer {
 
     private final SQLSelectStatement ast;
 
@@ -46,7 +46,7 @@ public class ORACLESelectForUpdateRecognizer extends BaseRecognizer implements S
      * @param originalSQL the original sql
      * @param ast         the ast
      */
-    public ORACLESelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
+    public OracleSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
         this.ast = (SQLSelectStatement) ast;
     }

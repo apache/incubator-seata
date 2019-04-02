@@ -34,7 +34,7 @@ import java.util.List;
  * @author ccg
  * @date 2019/3/25
  */
-public class ORACLEUndoUpdateExecutor extends AbstractUndoExecutor {
+public class OracleUndoUpdateExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
@@ -69,7 +69,7 @@ public class ORACLEUndoUpdateExecutor extends AbstractUndoExecutor {
      *
      * @param sqlUndoLog the sql undo log
      */
-    public ORACLEUndoUpdateExecutor(SQLUndoLog sqlUndoLog) {
+    public OracleUndoUpdateExecutor(SQLUndoLog sqlUndoLog) {
         super(sqlUndoLog);
     }
 

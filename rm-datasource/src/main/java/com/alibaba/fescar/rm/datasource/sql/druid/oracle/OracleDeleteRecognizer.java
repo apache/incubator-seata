@@ -37,7 +37,7 @@ import java.util.ArrayList;
  * @author ccg
  * @date 2019/3/25
  */
-public class ORACLEDeleteRecognizer extends BaseRecognizer implements SQLDeleteRecognizer {
+public class OracleDeleteRecognizer extends BaseRecognizer implements SQLDeleteRecognizer {
 
     private final OracleDeleteStatement ast;
 
@@ -47,7 +47,7 @@ public class ORACLEDeleteRecognizer extends BaseRecognizer implements SQLDeleteR
      * @param originalSQL the original sql
      * @param ast         the ast
      */
-    public ORACLEDeleteRecognizer(String originalSQL, SQLStatement ast) {
+    public OracleDeleteRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
         this.ast = (OracleDeleteStatement) ast;
     }
