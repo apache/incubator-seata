@@ -61,6 +61,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
             | (msg.isRequest() ? FLAG_REQUEST : 0)
             | (msgCodec != null ? FLAG_FESCAR_CODEC : 0);
 
+
         byteBuffer.putShort((short)flag);
 
         if (msg.getBody() instanceof HeartbeatMessage) {

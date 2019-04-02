@@ -47,7 +47,7 @@ public class WriteStoreTest {
     private static String vgroup = "vgroupMock";
     private static String appname = "appnameMock";
     private static String instname = "fescarMocK";
-    private static int trx_num = 65535 * 5;
+    private static int trx_num = 10;
     private static int trx_begin = 0;
 
     /**
@@ -59,7 +59,7 @@ public class WriteStoreTest {
      */
     public static void main(String[] args) throws InterruptedException, IOException {
         TransactionStoreManager transactionStoreManager = new FileTransactionStoreManager(
-            "/Users/min.ji/Documents/test/data",
+            "/Users/lizhao/Downloads/data",
             new SessionManager() {
                 @Override
                 public void addGlobalSession(GlobalSession session) throws TransactionException {
@@ -204,7 +204,9 @@ public class WriteStoreTest {
             BranchSession branchSession2 = new BranchSession();
             branchSession2.setTransactionId(globalSession.getTransactionId());
             branchSession2.setBranchId(trx_begin + (i - trx_begin) + i * 2 + 1);
+            branchSession2.setLockKey(getLongKey());
             branchSession2.setResourceId("mockDbkeY2");
+
             transactionStoreManager.writeSession(LogOperation.BRANCH_ADD, branchSession2);
             transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, branchSession2);
             transactionStoreManager.writeSession(LogOperation.BRANCH_REMOVE, branchSession2);
@@ -212,6 +214,14 @@ public class WriteStoreTest {
             transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, globalSession);
             transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, globalSession);
         }
+    }
+
+    private static String getLongKey() {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < 512; i++) {
+            stringBuilder.append(1);
+        }
+        return stringBuilder.toString();
     }
 
     private static Map<SessionStorable, LogOperation> readAll(TransactionStoreManager transactionStoreManager) {
@@ -250,7 +260,7 @@ public class WriteStoreTest {
             BranchSession branchSession = (BranchSession)transactionWriteStore.getSessionRequest();
             System.out.print(
                 "xid:" + branchSession.getTransactionId() + ",branchId:" + branchSession.getBranchId() + ","
-                    + branchSession.getResourceId());
+                    + branchSession.getResourceId() + ",lockKey:" + branchSession.getLockKey());
         }
         System.out.println(",op:" + transactionWriteStore.getOperate().name());
     }
