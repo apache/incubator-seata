@@ -151,6 +151,11 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
         return CLUSTER_ADDRESS_MAP.get(clusterName);
     }
 
+    @Override
+    public void close() throws Exception {
+
+    }
+
     private void validAddress(InetSocketAddress address) {
         if (null == address.getHostName() || 0 == address.getPort()) {
             throw new IllegalArgumentException("invalid address:" + address);
