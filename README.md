@@ -2,9 +2,9 @@
 
 # Seata: Simple Extensible Autonomous Transaction Architecture
 
-[![Build Status](https://travis-ci.org/alibaba/fescar.svg?branch=develop)](https://travis-ci.org/alibaba/fescar)
-[![codecov](https://codecov.io/gh/alibaba/fescar/branch/develop/graph/badge.svg)](https://codecov.io/gh/alibaba/fescar)
-![license](https://img.shields.io/github/license/alibaba/fescar.svg)
+[![Build Status](https://travis-ci.org/seata/seata.svg?branch=develop)](https://travis-ci.org/seata/seata)
+[![codecov](https://codecov.io/gh/seata/seata/branch/develop/graph/badge.svg)](https://codecov.io/gh/seata/seata)
+![license](https://img.shields.io/github/license/seata/seata.svg)
 ![maven](https://img.shields.io/maven-central/v/com.alibaba.fescar/fescar-all.svg)
 
 ## What is Seata?
