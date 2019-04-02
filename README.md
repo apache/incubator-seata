@@ -94,7 +94,7 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ## Documentation
 
-You can view the full documentation from the wiki: [Fescar wiki page](https://github.com/seata/seata/wiki).
+You can view the full documentation from the wiki: [Seata wiki page](https://github.com/seata/seata/wiki).
 
 ## Reporting bugs
 
@@ -120,11 +120,11 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 
 ## Seata ecosystem
 
-* [Seata Ecosystem Entry](https://github.com/fescar-group) - A GitHub group `fescar-group` to gather all Fescar relevant projects not appropriate in [alibaba](https://github.com/alibaba) group yet
-* [Seata Samples](https://github.com/fescar-group/fescar-samples) - Samples for Fescar
+* [Seata Ecosystem Entry](https://github.com/fescar-group) - A GitHub group `seata-group` to gather all Seata relevant projects not appropriate in [seata](https://github.com/seata) group yet
+* [Seata Samples](https://github.com/fescar-group/fescar-samples) - Samples for Seata
 * [Seata Docker](https://github.com/fescar-group/fescar-docker) - Seata integration with docker
 * [Seata K8s](https://github.com/fescar-group/fescar-k8s) - Seata integration with k8s
-* [Awesome Seata](https://github.com/fescar-group/awesome-fescar) - Description of Fescar related projects 
+* [Awesome Seata](https://github.com/fescar-group/awesome-fescar) - Description of Seata related projects 
 * [Seata Website](https://github.com/fescar-group/fescar.io) - Seata official website （***In the process of design***）
 
 ## Contributors
