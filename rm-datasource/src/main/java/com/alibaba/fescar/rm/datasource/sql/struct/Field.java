@@ -18,6 +18,8 @@ package com.alibaba.fescar.rm.datasource.sql.struct;
 
 /**
  * Field
+ *
+ * @author sharajava
  */
 public class Field {
 

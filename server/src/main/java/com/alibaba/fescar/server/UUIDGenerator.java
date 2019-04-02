@@ -26,6 +26,8 @@ import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 
 /**
  * The type Uuid generator.
+ *
+ * @author sharajava
  */
 public class UUIDGenerator {
 

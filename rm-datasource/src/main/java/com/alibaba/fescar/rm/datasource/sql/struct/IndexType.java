@@ -18,6 +18,8 @@ package com.alibaba.fescar.rm.datasource.sql.struct;
 
 /**
  * The enum Index type.
+ *
+ * @author sharajava
  */
 public enum IndexType {
     /**

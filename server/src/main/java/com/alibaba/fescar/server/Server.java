@@ -30,6 +30,8 @@ import com.alibaba.fescar.server.session.SessionHolder;
 
 /**
  * The type Server.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class Server {
 

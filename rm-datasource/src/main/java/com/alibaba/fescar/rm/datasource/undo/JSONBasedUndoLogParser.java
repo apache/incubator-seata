@@ -21,6 +21,8 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 
 /**
  * The type Json based undo log parser.
+ *
+ * @author sharajava
  */
 public class JSONBasedUndoLogParser implements UndoLogParser {
 

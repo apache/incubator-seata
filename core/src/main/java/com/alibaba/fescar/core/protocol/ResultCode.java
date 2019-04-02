@@ -18,6 +18,8 @@ package com.alibaba.fescar.core.protocol;
 
 /**
  * The enum Result code.
+ *
+ * @author sharajava
  */
 public enum ResultCode {
 

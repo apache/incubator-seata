@@ -22,6 +22,8 @@ import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 
 /**
  * The type Sql undo log.
+ *
+ * @author sharajava
  */
 public class SQLUndoLog {
 

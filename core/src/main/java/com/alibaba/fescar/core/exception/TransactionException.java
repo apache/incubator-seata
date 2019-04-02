@@ -18,6 +18,8 @@ package com.alibaba.fescar.core.exception;
 
 /**
  * The type Transaction exception.
+ *
+ * @author sharajava
  */
 public class TransactionException extends Exception {
 
