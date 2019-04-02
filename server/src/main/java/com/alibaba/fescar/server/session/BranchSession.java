@@ -49,10 +49,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
             MAX_BRANCH_SESSION_SIZE));
 
-    private static final byte NOT_COMPRESS_LOCK_KEY_FLAG = 0;
-
-    private static final byte COMPRESS_LOCK_KEY_FLAG = 1;
-
     private long transactionId;
 
     private long branchId;
@@ -299,7 +295,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes);
 
-        byte compressLockKeyFlag = NOT_COMPRESS_LOCK_KEY_FLAG;
 
         if (size > MAX_BRANCH_SESSION_SIZE){
             if (lockKeyBytes == null){
@@ -309,7 +304,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             try {
                 size -= lockKeyBytes.length;
                 lockKeyBytes = CompressUtil.compress(lockKeyBytes);
-                compressLockKeyFlag = COMPRESS_LOCK_KEY_FLAG;
             }catch (IOException e){
                 LOGGER.error("compress lockKey error", e);
             }finally {
@@ -338,8 +332,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         if (null != lockKeyBytes) {
             byteBuffer.putInt(lockKeyBytes.length);
-            // compress flag
-            byteBuffer.put(compressLockKeyFlag);
             byteBuffer.put(lockKeyBytes);
         } else {
             byteBuffer.putInt(0);
@@ -395,10 +387,9 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         }
         int lockKeyLen = byteBuffer.getInt();
         if (lockKeyLen > 0) {
-            byte compressLockKeyFlag = byteBuffer.get();
             byte[] byLockKey = new byte[lockKeyLen];
             byteBuffer.get(byLockKey);
-            if (compressLockKeyFlag == COMPRESS_LOCK_KEY_FLAG){
+            if (CompressUtil.isCompressData(byLockKey)){
                 try {
                     this.lockKey = new String(CompressUtil.uncompress(byLockKey));
                 }catch (IOException e){
