@@ -13,24 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
-package com.alibaba.fescar.rm.datasource.exec;
+package com.alibaba.fescar.core.rpc;
 
 /**
- * The interface Executor.
  *
- * @author sharajava
- *
- * @param <T> the type parameter
+ * @author 563868273@qq.com
+ * @date 2019/3/29
  */
-public interface Executor<T> {
+public interface Disposable {
 
-    /**
-     * Execute t.
-     *
-     * @param args the args
-     * @return the t
-     * @throws Throwable the throwable
-     */
-    T execute(Object... args) throws Throwable;
+    void destroy();
+
 }

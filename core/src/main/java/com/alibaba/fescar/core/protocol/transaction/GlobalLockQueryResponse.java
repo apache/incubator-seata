@@ -20,6 +20,8 @@ import java.nio.ByteBuffer;
 
 /**
  * The type Global lock query response.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class GlobalLockQueryResponse extends AbstractTransactionResponse {
 

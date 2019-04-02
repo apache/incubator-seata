@@ -24,6 +24,8 @@ import java.util.logging.Logger;
 
 /**
  * The type Abstract data source proxy.
+ *
+ * @author sharajava
  */
 public abstract class AbstractDataSourceProxy implements DataSource {
 

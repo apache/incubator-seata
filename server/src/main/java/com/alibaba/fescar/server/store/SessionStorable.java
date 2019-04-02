@@ -18,6 +18,8 @@ package com.alibaba.fescar.server.store;
 
 /**
  * The interface Session storable.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public interface SessionStorable {
 

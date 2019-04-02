@@ -29,8 +29,14 @@ import com.alibaba.fescar.server.store.SessionStorable;
 
 /**
  * The type Global session.
+ *
+ * @author sharajava
  */
 public class GlobalSession implements SessionLifecycle, SessionStorable {
+
+    public static final int DEFAULT_GLOBAL_SESSION_BUFFER_SIZE = 512;
+
+    private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(DEFAULT_GLOBAL_SESSION_BUFFER_SIZE));
 
     private long transactionId;
 
@@ -366,7 +372,10 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public byte[] encode() {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(512);
+        ByteBuffer byteBuffer = byteBufferThreadLocal.get();
+        //recycle
+        byteBuffer.clear();
+
         byteBuffer.putLong(transactionId);
         byteBuffer.putInt(timeout);
         if (null != applicationId) {

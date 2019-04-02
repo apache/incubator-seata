@@ -18,6 +18,8 @@ package com.alibaba.fescar.tm.api;
 
 /**
  * Role of current thread involve in a global transaction.
+ *
+ * @author sharajava
  */
 public enum GlobalTransactionRole {
 

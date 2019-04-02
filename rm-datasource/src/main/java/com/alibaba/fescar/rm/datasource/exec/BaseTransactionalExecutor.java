@@ -34,6 +34,8 @@ import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 /**
  * The type Base transactional executor.
  *
+ * @author sharajava
+ *
  * @param <T> the type parameter
  * @param <S> the type parameter
  */

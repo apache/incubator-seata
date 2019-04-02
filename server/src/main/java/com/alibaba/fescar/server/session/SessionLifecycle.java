@@ -22,6 +22,8 @@ import com.alibaba.fescar.core.model.GlobalStatus;
 
 /**
  * The interface Session lifecycle.
+ *
+ * @author sharajava
  */
 public interface SessionLifecycle {
 

@@ -19,7 +19,9 @@ package com.alibaba.fescar.core.model;
 import com.alibaba.fescar.core.exception.TransactionException;
 
 /**
- * Resource Manager: receive inbound request from TC.
+ *
+ *
+ * @author sharajava
  */
 public interface ResourceManagerInbound {
 

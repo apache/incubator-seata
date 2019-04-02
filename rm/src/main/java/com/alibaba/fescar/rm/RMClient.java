@@ -22,6 +22,7 @@ import com.alibaba.fescar.core.rpc.netty.RmRpcClient;
 /**
  * The Rm client Initiator.
  *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class RMClient {
 

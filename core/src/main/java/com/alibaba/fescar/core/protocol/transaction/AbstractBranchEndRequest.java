@@ -24,6 +24,8 @@ import io.netty.buffer.ByteBuf;
 
 /**
  * The type Abstract branch end request.
+ *
+ * @author sharajava
  */
 public abstract class AbstractBranchEndRequest extends AbstractTransactionRequestToRM {
 

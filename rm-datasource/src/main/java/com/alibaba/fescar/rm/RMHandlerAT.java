@@ -21,6 +21,8 @@ import com.alibaba.fescar.core.model.ResourceManager;
 
 /**
  * The type Rm handler at.
+ *
+ * @author sharajava
  */
 public class RMHandlerAT extends AbstractRMHandler {
 

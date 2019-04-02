@@ -36,6 +36,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * The type Data source basic test.
+ *
+ * @author fescar
  */
 @Ignore
 public class LocalTransactionWithGlobalLockDataSourceBasicTest {

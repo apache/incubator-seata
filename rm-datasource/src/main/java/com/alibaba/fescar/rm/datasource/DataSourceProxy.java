@@ -27,6 +27,8 @@ import java.sql.SQLException;
 
 /**
  * The type Data source proxy.
+ *
+ * @author sharajava
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
 
