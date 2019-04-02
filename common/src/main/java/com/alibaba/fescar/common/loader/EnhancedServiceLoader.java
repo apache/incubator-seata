@@ -16,6 +16,14 @@
 
 package com.alibaba.fescar.common.loader;
 
+import com.alibaba.fescar.common.executor.Initialize;
+import com.alibaba.fescar.common.util.CollectionUtils;
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -27,12 +35,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Enhanced service loader.
@@ -101,6 +103,29 @@ public class EnhancedServiceLoader {
     }
 
     /**
+     * get all implements
+     *
+     * @param <S>     the type parameter
+     * @param service the service
+     * @return list
+     */
+    public static <S> List<S> loadAll(Class<S> service){
+        List<S> allInstances = new ArrayList<>();
+        List<Class> allClazzs = getAllExtensionClass(service);
+        if(CollectionUtils.isEmpty(allClazzs)){
+            return allInstances;
+        }
+        try {
+            for(Class clazz : allClazzs){
+                allInstances.add(initInstance(service, clazz));
+            }
+        } catch (Throwable t) {
+            throw new EnhancedServiceNotFoundException(t);
+        }
+        return allInstances;
+    }
+
+    /**
      * 获取所有的扩展类，按照{@linkplain LoadLevel}定义的order顺序进行排序
      *
      * @param <S>     the type parameter
@@ -163,20 +188,18 @@ public class EnhancedServiceLoader {
                     "not found service provider for : " + service.getName() + "[" + activateName
                         + "] and classloader : " + ObjectUtils.toString(loader));
             }
-            Class<?> extension = extensions.get(extensions.size() - 1);
-            S result = service.cast(extension.newInstance());
+            Class<?> extension = extensions.get(extensions.size() - 1);// 最大的一个
+            S result = initInstance(service, extension);
             if (!foundFromCache && LOGGER.isInfoEnabled()) {
-                LOGGER.info("load " + service.getSimpleName() + "[" + activateName + "] extension by class[" + extension
-                    .getName() + "]");
+                LOGGER.info("load " + service.getSimpleName() + "[" + activateName + "] extension by class[" + extension.getName() + "]");
             }
             return result;
         } catch (Throwable e) {
             if (e instanceof EnhancedServiceNotFoundException) {
-                throw (EnhancedServiceNotFoundException)e;
+                throw (EnhancedServiceNotFoundException) e;
             } else {
                 throw new EnhancedServiceNotFoundException(
-                    "not found service provider for : " + service.getName() + " caused by " + ExceptionUtils
-                        .getFullStackTrace(e));
+                    "not found service provider for : " + service.getName() + " caused by " + ExceptionUtils.getFullStackTrace(e));
             }
         }
     }
@@ -261,6 +284,24 @@ public class EnhancedServiceLoader {
                 }
             }
         }
+    }
+
+    /**
+     * init instance
+     *
+     * @param <S>       the type parameter
+     * @param service   the service
+     * @param implClazz the impl clazz
+     * @return s
+     * @throws IllegalAccessException the illegal access exception
+     * @throws InstantiationException the instantiation exception
+     */
+    protected static <S> S initInstance(Class<S> service, Class implClazz) throws IllegalAccessException, InstantiationException {
+        S s = service.cast(implClazz.newInstance());
+        if(s instanceof Initialize){
+            ((Initialize)s).init();
+        }
+        return s;
     }
 
     private static ClassLoader findClassLoader() {

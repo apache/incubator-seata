@@ -16,7 +16,6 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,7 +40,6 @@ import com.alibaba.fescar.core.protocol.HeartbeatMessage;
 import com.alibaba.fescar.core.protocol.RegisterRMRequest;
 import com.alibaba.fescar.core.protocol.RegisterRMResponse;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
-import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -149,7 +147,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
             timerExecutor.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
-                    reconnect();
+                    reconnect(transactionServiceGroup);
                 }
             }, SCHEDULE_INTERVAL_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.SECONDS);
             ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
@@ -194,39 +192,6 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     @Override
     protected TransactionRole getTransactionRole() {
         return TransactionRole.RMROLE;
-    }
-
-    private void reconnect() {
-        List<String> availList = null;
-        try {
-            availList = getAvailServerList(transactionServiceGroup);
-        } catch (Exception exx) {
-            LOGGER.error(exx.getMessage());
-        }
-        if (CollectionUtils.isEmpty(availList)) {
-            LOGGER.error("no available server to connect.");
-            return;
-        }
-        for (String serverAddress : availList) {
-            try {
-                connect(serverAddress);
-            } catch (Exception e) {
-                LOGGER.error(FrameworkErrorCode.NetConnect.errCode,
-                    "can not connect to " + serverAddress + " cause:" + e.getMessage(), e);
-            }
-        }
-    }
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        if (messageExecutor.isShutdown()) {
-            return;
-        }
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("channel inactive:" + ctx.channel());
-        }
-        releaseChannel(ctx.channel(), NetUtil.toStringAddress(ctx.channel().remoteAddress()));
-        super.channelInactive(ctx);
     }
 
     @Override
@@ -281,13 +246,8 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         }
     }
 
-    /**
-     * Release channel.
-     *
-     * @param channel       the channel
-     * @param serverAddress the server address
-     */
-    public void releaseChannel(Channel channel, String serverAddress) {
+    @Override
+    protected void releaseChannel(Channel channel, String serverAddress) {
         if (null == channel || null == serverAddress) { return; }
         Object connectLock = channelLocks.get(serverAddress);
         try {
@@ -439,7 +399,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                 String serverAddress = entry.getKey();
                 Channel rmChannel = entry.getValue();
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("register AT resourceId:" + resourceId);
+                    LOGGER.info("register resource, resourceId:" + resourceId);
                 }
                 sendRegisterMessage(serverAddress, rmChannel, resourceId);
             }
@@ -502,6 +462,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
      * @return the merged resource keys
      */
     public String getMergedResourceKeys(ResourceManager resourceManager) {
+        //TODO
         Map<String, Resource> managedResources = resourceManager.getManagedResources();
         Set<String> resourceIds = managedResources.keySet();
         if (!resourceIds.isEmpty()) {
