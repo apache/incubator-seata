@@ -25,10 +25,11 @@ import com.alibaba.fescar.rm.DefaultResourceManager;
 import com.alibaba.fescar.rm.datasource.exec.LockConflictException;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
-import java.sql.Connection;
-import java.sql.SQLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * The type Connection proxy.
@@ -42,9 +43,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     /**
      * Instantiates a new Connection proxy.
      *
-     * @param dataSourceProxy the data source proxy
+     * @param dataSourceProxy  the data source proxy
      * @param targetConnection the target connection
-     * @param dbType the db type
+     * @param dbType           the db type
      */
     public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection, String dbType) {
         super(dataSourceProxy, targetConnection, dbType);

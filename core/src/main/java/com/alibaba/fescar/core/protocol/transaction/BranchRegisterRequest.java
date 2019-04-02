@@ -23,6 +23,8 @@ import java.nio.ByteBuffer;
 
 /**
  * The type Branch register request.
+ *
+ * @author sharajava
  */
 public class BranchRegisterRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 

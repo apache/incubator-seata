@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The type Default global transaction.
+ *
+ * @author sharajava
  */
 public class DefaultGlobalTransaction implements GlobalTransaction {
 

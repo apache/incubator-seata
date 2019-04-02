@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The type Root context.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class RootContext {
 

@@ -23,6 +23,8 @@ import com.alibaba.fescar.core.protocol.FragmentXID;
 
 /**
  * GlobalTransaction API
+ *
+ * @author sharajava
  */
 public class GlobalTransactionContext {
 

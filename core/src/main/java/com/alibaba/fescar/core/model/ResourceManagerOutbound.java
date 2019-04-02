@@ -21,6 +21,8 @@ import com.alibaba.fescar.core.protocol.FragmentXID;
 
 /**
  * Resource Manager: send outbound request to TC.
+ *
+ * @author sharajava
  */
 public interface ResourceManagerOutbound {
 

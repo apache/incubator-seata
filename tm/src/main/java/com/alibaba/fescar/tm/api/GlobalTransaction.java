@@ -22,6 +22,8 @@ import com.alibaba.fescar.core.protocol.FragmentXID;
 
 /**
  * Global transaction.
+ *
+ * @author sharajava
  */
 public interface GlobalTransaction {
 

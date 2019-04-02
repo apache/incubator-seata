@@ -23,6 +23,8 @@ import com.alibaba.fescar.core.protocol.FragmentXID;
  * Transaction Manager.
  *
  * Define a global transaction and control it.
+ *
+ * @author sharajava
  */
 public interface TransactionManager {
 

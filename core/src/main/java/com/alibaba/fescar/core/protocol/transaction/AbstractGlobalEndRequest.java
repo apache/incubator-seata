@@ -22,6 +22,8 @@ import java.nio.ByteBuffer;
 
 /**
  * The type Abstract global end request.
+ *
+ * @author sharajava
  */
 public abstract class AbstractGlobalEndRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 

@@ -20,7 +20,9 @@ import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.protocol.FragmentXID;
 
 /**
- * Resource Manager: receive inbound request from TC.
+ *
+ *
+ * @author sharajava
  */
 public interface ResourceManagerInbound {
 

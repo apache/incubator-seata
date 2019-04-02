@@ -27,6 +27,8 @@ import com.alibaba.druid.pool.DruidDataSource;
 
 /**
  * The type Abstract data source proxy.
+ *
+ * @author sharajava
  */
 public abstract class AbstractDataSourceProxy implements DataSource {
 

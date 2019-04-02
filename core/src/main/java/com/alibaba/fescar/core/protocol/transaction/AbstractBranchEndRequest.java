@@ -24,6 +24,8 @@ import java.nio.ByteBuffer;
 
 /**
  * The type Abstract branch end request.
+ *
+ * @author sharajava
  */
 public abstract class AbstractBranchEndRequest extends AbstractTransactionRequestToRM {
 

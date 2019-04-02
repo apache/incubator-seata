@@ -26,6 +26,8 @@ import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 
 /**
  * The type Connection context.
+ *
+ * @author sharajava
  */
 public class ConnectionContext {
     private FragmentXID xid;
