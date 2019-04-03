@@ -37,6 +37,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * The type Branch session.
+ *
+ * @author sharajava
  */
 public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable {
 
