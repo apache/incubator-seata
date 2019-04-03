@@ -23,7 +23,7 @@ import com.alibaba.fescar.config.ConfigurationFactory;
  */
 public class StoreConfig {
 
-    private static Configuration fileConfiguration = ConfigurationFactory.getInstance();
+    private static final Configuration configuration = ConfigurationFactory.getInstance();
 
     private static final String STORE_PREFIX = "store.";
 
@@ -37,14 +37,14 @@ public class StoreConfig {
     public static final int DEFAULT_WRITE_BUFFER_SIZE = 1024 * 16;
 
     public static int getMaxBranchSessionSize() {
-        return fileConfiguration.getInt(STORE_PREFIX + "max-branch-session-size", DEFAULT_MAX_BRANCH_SESSION_SIZE);
+        return configuration.getInt(STORE_PREFIX + "max-branch-session-size", DEFAULT_MAX_BRANCH_SESSION_SIZE);
     }
 
     public static int getMaxGlobalSessionSize() {
-        return fileConfiguration.getInt(STORE_PREFIX + "max-global-session-size", DEFAULT_MAX_GLOBAL_SESSION_SIZE);
+        return configuration.getInt(STORE_PREFIX + "max-global-session-size", DEFAULT_MAX_GLOBAL_SESSION_SIZE);
     }
 
     public static int getFileWriteBufferCacheSize() {
-        return fileConfiguration.getInt(STORE_PREFIX + "file-write-buffer-cache-size", DEFAULT_WRITE_BUFFER_SIZE);
+        return configuration.getInt(STORE_PREFIX + "file-write-buffer-cache-size", DEFAULT_WRITE_BUFFER_SIZE);
     }
 }
