@@ -76,6 +76,8 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
     private String currFullFileName;
     private String hisFullFileName;
 
+    private static final int MAX_WRITE_BUFFER_SIZE = StoreConfig.getFileWriteBufferCacheSize();
+
     /**
      * Instantiates a new File transaction store manager.
      *
@@ -262,15 +264,15 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
      */
     class WriteDataFileRunnable implements Runnable {
 
-        public static final int DEFAULT_WRITE_BUFFER_SIZE = 4096;
 
-        ByteBuffer wireteBuffer =  ByteBuffer.allocateDirect(DEFAULT_WRITE_BUFFER_SIZE);
+        ByteBuffer wireteBuffer =  ByteBuffer.allocateDirect(MAX_WRITE_BUFFER_SIZE);
 
         @Override
         public void run() {
             while (!stopping) {
+                TransactionWriteFuture transactionWriteFuture = null;
                 try {
-                    TransactionWriteFuture transactionWriteFuture = transactionWriteFutureQueue.poll(
+                    transactionWriteFuture = transactionWriteFutureQueue.poll(
                         MAX_POOL_TIME_MILLS,
                         TimeUnit.MILLISECONDS);
                     if (null == transactionWriteFuture) {
@@ -296,6 +298,10 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                     stopping = true;
                 } catch (Exception exx) {
                     LOGGER.error(exx.getMessage());
+                    if (transactionWriteFuture != null){
+                        // fast fail
+                        transactionWriteFuture.setResult(Boolean.FALSE);
+                    }
                 }
             }
 
@@ -303,9 +309,19 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
 
         private boolean writeDataFile(byte[] bs) {
             int retry = 0;
-            ByteBuffer byteBuffer = wireteBuffer;
-            //recycle
-            byteBuffer.clear();
+            if (bs == null){
+                return false;
+            }
+            ByteBuffer byteBuffer = null;
+
+            if (bs.length > MAX_WRITE_BUFFER_SIZE){
+                //allocateNew
+                byteBuffer = ByteBuffer.allocateDirect(bs.length);
+            }else {
+                byteBuffer = wireteBuffer;
+                //recycle
+                byteBuffer.clear();
+            }
 
             byteBuffer.putInt(bs.length);
             byteBuffer.put(bs);
