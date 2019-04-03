@@ -47,6 +47,8 @@ public class AsyncWorker implements ResourceManagerInbound {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncWorker.class);
 
+    private static final int DEFAUL_RESOURCE_SIZE = 16;
+
     private static class Phase2Context {
 
         /**
@@ -133,7 +135,7 @@ public class AsyncWorker implements ResourceManagerInbound {
         if (ASYNC_COMMIT_BUFFER.size() == 0) {
             return;
         }
-        Map<String, List<Phase2Context>> mappedContexts = new HashMap<>();
+        Map<String, List<Phase2Context>> mappedContexts = new HashMap<>(DEFAUL_RESOURCE_SIZE);
         Iterator<Phase2Context> iterator = ASYNC_COMMIT_BUFFER.iterator();
         while (iterator.hasNext()) {
             Phase2Context commitContext = iterator.next();
