@@ -16,3 +16,7 @@ service.disable=false
 client.async.commit.buffer.limit=10000
 client.lock.retry.internal=10
 client.lock.retry.times=30
+store.max-branch-session-size=16384
+store.max-global-session-size=512
+store.file-write-buffer-cache-size=16384
+store.session.reload.read_size=100
