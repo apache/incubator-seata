@@ -152,10 +152,10 @@ public class AsyncWorker implements ResourceManagerInbound {
             Connection conn = null;
             try {
                 try {
-                    DataSourceManager resourceManager=(DataSourceManager)DefaultResourceManager.get().getResourceManager(BranchType.AT);
+                    DataSourceManager resourceManager = (DataSourceManager) DefaultResourceManager.get().getResourceManager(BranchType.AT);
                     DataSourceProxy dataSourceProxy = resourceManager.get(entry.getKey());
                     if (dataSourceProxy == null) {
-                        throw new ShouldNeverHappenException("Failed to find resourceId:" + entry.getKey());
+                        throw new ShouldNeverHappenException("Failed to find resource on " + entry.getKey());
                     }
                     conn = dataSourceProxy.getPlainConnection();
                 } catch (SQLException sqle) {
