@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileTransactionStoreManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BranchSession.class);
 
     private static final int MAX_BRANCH_SESSION_SIZE =  StoreConfig.getMaxBranchSessionSize();
 
