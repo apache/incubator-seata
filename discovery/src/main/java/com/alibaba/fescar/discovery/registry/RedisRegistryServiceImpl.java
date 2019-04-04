@@ -235,6 +235,11 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         return Lists.newArrayList(CLUSTER_ADDRESS_MAP.get(clusterName));
     }
 
+    @Override
+    public void close() throws Exception {
+        jedisPool.destroy();
+    }
+
     private class NotifySub extends JedisPubSub {
 
         private final List<RedisListener> redisListeners;
