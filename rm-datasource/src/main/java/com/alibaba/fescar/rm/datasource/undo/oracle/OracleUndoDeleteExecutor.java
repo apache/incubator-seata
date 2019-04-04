@@ -37,7 +37,7 @@ import java.util.List;
 public class OracleUndoDeleteExecutor extends AbstractUndoExecutor {
 
     /**
-     * Instantiates a new My sql undo delete executor.
+     * Instantiates a new oracle undo delete executor.
      *
      * @param sqlUndoLog the sql undo log
      */
