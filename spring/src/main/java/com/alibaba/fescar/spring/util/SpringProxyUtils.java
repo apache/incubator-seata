@@ -165,7 +165,6 @@ public class SpringProxyUtils {
             if(advisedSupport.getProxiedInterfaces() != null && advisedSupport.getProxiedInterfaces().length > 0){
                 return advisedSupport.getProxiedInterfaces()[0];
             }else{
-                //拿不到interface，返回原对象
                 return proxy.getClass();
             }
         }else{
