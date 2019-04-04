@@ -320,4 +320,8 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         }
     }
 
+    @Override
+    public void close() throws Exception {
+        client = null;
+    }
 }
