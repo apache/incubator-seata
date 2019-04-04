@@ -22,8 +22,9 @@ import org.junit.Test;
 import java.net.InetSocketAddress;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+
 
 /**
  * @author xingfudeshi@gmail.com
