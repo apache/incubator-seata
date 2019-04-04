@@ -125,6 +125,7 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
         setChannelHandlers(RpcServer.this);
         DefaultServerMessageListenerImpl defaultServerMessageListenerImpl = new DefaultServerMessageListenerImpl(
             transactionMessageHandler);
+        defaultServerMessageListenerImpl.init();
         defaultServerMessageListenerImpl.setServerMessageSender(this);
         this.setServerMessageListener(defaultServerMessageListenerImpl);
         super.start();
