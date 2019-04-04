@@ -19,9 +19,13 @@ package com.alibaba.fescar.core.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.ByteBufUtil;
-import java.util.Arrays;
+import io.netty.util.NetUtil;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.Objects;
 import org.apache.commons.lang3.StringUtils;
+import sun.net.util.IPAddressUtil;
 
 /**
  * FragmentXID is used for support golang distributed cluster server supporting fragmentation
@@ -29,10 +33,20 @@ import org.apache.commons.lang3.StringUtils;
  * @author fagongzi(zhangxu19830126 @ gmail.com)
  */
 public class FragmentXID {
+    private static final byte FLAG_IPV4 = 0;
+    private static final byte FLAG_IPV6 = 1;
+
     /**
-     * Fragment Id has fixed length, ip(4bytes) + port(4bytes) + transactionId(8bytes) + fragmentId(8bytes) = 24 bytes
+     * Fragment Id has fixed length for ipv4 format, ip(4bytes) + port(4bytes) + transactionId(8bytes) +
+     * fragmentId(8bytes) = 24 bytes
      */
-    public static final short FIXED_BYTES = 24;
+    public static final short FIXED_IPV4_BYTES = 24;
+
+    /**
+     * Fragment Id has fixed length for ipv6 format, ip(16bytes) + port(4bytes) + transactionId(8bytes) +
+     * fragmentId(8bytes) = 36 bytes
+     */
+    public static final short FIXED_IPV6_BYTES = 36;
 
     private static int serverPort = 8080;
 
@@ -101,19 +115,38 @@ public class FragmentXID {
         this.port = port;
         this.transactionId = transactionId;
         this.fragmentId = fragmentId;
-        this.ipAndPort = ip + ":" + port;
+        this.ipAndPort = NetUtil.toSocketAddressString(this.ip, port);
     }
 
     private FragmentXID(ByteBuf buf) {
-        if (buf.readableBytes() < FIXED_BYTES) {
-            throw new RuntimeException("create FragmentXID failed, expect " + FIXED_BYTES + " bytes but " + buf.readableBytes());
+        byte flag = buf.readByte();
+        if (flag != FLAG_IPV4 || flag != FLAG_IPV6) {
+            throw new RuntimeException("create FragmentXID failed, invalid ip version flag: " + flag);
         }
 
         StringBuffer ip = new StringBuffer();
-        for (int i = 0; i < 4; i++) {
-            ip.append(buf.readByte() & 0xff);
-            if (i < 3) {
-                ip.append('.');
+        if (flag == FLAG_IPV4) {
+            if (buf.readableBytes() < FIXED_IPV4_BYTES) {
+                throw new RuntimeException("create FragmentXID with ipv4 format failed, expect " + FIXED_IPV4_BYTES + " bytes but " + buf.readableBytes());
+            }
+
+            for (int i = 0; i < 4; i++) {
+                ip.append(buf.readByte() & 0xff);
+                if (i < 3) {
+                    ip.append('.');
+                }
+            }
+        } else {
+            if (buf.readableBytes() < FIXED_IPV6_BYTES) {
+                throw new RuntimeException("create FragmentXID with ipv6 format failed, expect " + FIXED_IPV6_BYTES + " bytes but " + buf.readableBytes());
+            }
+
+            for (int i = 0; i < 8; i++) {
+                ip.append(buf.readByte() & 0xff);
+                ip.append(buf.readByte() & 0xff);
+                if (i < 7) {
+                    ip.append(':');
+                }
             }
         }
 
@@ -121,7 +154,46 @@ public class FragmentXID {
         this.port = buf.readInt();
         this.transactionId = buf.readLong();
         this.fragmentId = buf.readLong();
-        this.ipAndPort = ip + ":" + port;
+        this.ipAndPort = NetUtil.toSocketAddressString(this.ip, port);
+    }
+
+    private FragmentXID(ByteBuffer buf) {
+        byte flag = buf.get();
+        if (flag != FLAG_IPV4 && flag != FLAG_IPV6) {
+            throw new RuntimeException("create FragmentXID failed, invalid ip version flag: " + flag);
+        }
+
+        StringBuffer ip = new StringBuffer();
+        if (flag == FLAG_IPV4) {
+            if (buf.remaining() < FIXED_IPV4_BYTES) {
+                throw new RuntimeException("create FragmentXID with ipv4 format failed, expect " + FIXED_IPV4_BYTES + " bytes but " + buf.remaining());
+            }
+
+            for (int i = 0; i < 4; i++) {
+                ip.append(buf.get() & 0xff);
+                if (i < 3) {
+                    ip.append('.');
+                }
+            }
+        } else {
+            if (buf.remaining() < FIXED_IPV6_BYTES) {
+                throw new RuntimeException("create FragmentXID with ipv6 format failed, expect " + FIXED_IPV6_BYTES + " bytes but " + buf.remaining());
+            }
+
+            for (int i = 0; i < 8; i++) {
+                ip.append(buf.get() & 0xff);
+                ip.append(buf.get() & 0xff);
+                if (i < 7) {
+                    ip.append(':');
+                }
+            }
+        }
+
+        this.ip = ip.toString();
+        this.port = buf.getInt();
+        this.transactionId = buf.getLong();
+        this.fragmentId = buf.getLong();
+        this.ipAndPort = NetUtil.toSocketAddressString(this.ip, port);
     }
 
     /**
@@ -168,6 +240,16 @@ public class FragmentXID {
      * @return FragmentXID
      */
     public static FragmentXID from(ByteBuf buf) {
+        return new FragmentXID(buf);
+    }
+
+    /**
+     * get FragmentXID from byte array
+     *
+     * @param buf byte buf value
+     * @return FragmentXID
+     */
+    public static FragmentXID from(ByteBuffer buf) {
         return new FragmentXID(buf);
     }
 
@@ -218,7 +300,18 @@ public class FragmentXID {
      */
     public byte[] toBytes() {
         ByteBuf buf = ByteBufAllocator.DEFAULT.buffer();
-        Arrays.stream(ip.split("\\.")).forEach(e -> buf.writeByte(Integer.valueOf(e) & 0xff));
+        if (IPAddressUtil.isIPv4LiteralAddress(ip)) {
+            buf.writeByte(FLAG_IPV4);
+        } else {
+            buf.writeByte(FLAG_IPV6);
+        }
+        try {
+            for (byte e : InetAddress.getByName(ip).getAddress()) {
+                buf.writeByte(e & 0xff);
+            }
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
         buf.writeInt(port);
         buf.writeLong(transactionId);
         buf.writeLong(fragmentId);
@@ -250,7 +343,7 @@ public class FragmentXID {
         return port == xid.port &&
             transactionId == xid.transactionId &&
             fragmentId == xid.fragmentId &&
-            ip.equals(xid.ip);
+            getFullIP().equals(xid.getFullIP());
     }
 
     @Override
@@ -273,5 +366,13 @@ public class FragmentXID {
         result.append("fragmentId=");
         result.append(fragmentId);
         return result.toString();
+    }
+
+    private String getFullIP() {
+        try {
+            return NetUtil.bytesToIpAddress(InetAddress.getByName(ip).getAddress());
+        } catch (UnknownHostException e) {
+            throw new RuntimeException((e));
+        }
     }
 }

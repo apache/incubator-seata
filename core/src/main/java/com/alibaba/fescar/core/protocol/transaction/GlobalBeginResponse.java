@@ -16,11 +16,10 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
-import com.alibaba.fescar.core.protocol.FragmentXID;
-import com.alibaba.fescar.core.protocol.CodecHelper;
-import java.nio.ByteBuffer;
-
 import com.alibaba.fescar.core.protocol.AbstractMessage;
+import com.alibaba.fescar.core.protocol.CodecHelper;
+import com.alibaba.fescar.core.protocol.FragmentXID;
+import java.nio.ByteBuffer;
 
 /**
  * The type Global begin response.
@@ -81,29 +80,14 @@ public class GlobalBeginResponse extends AbstractTransactionResponse {
         super.doEncode();
 
         byteBuffer.put(xid.toBytes());
-
-        if (this.extraData != null) {
-            byte[] bs = extraData.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
-            if (bs.length > 0) {
-                byteBuffer.put(bs);
-            }
-        } else {
-            byteBuffer.putShort((short)0);
-        }
+        CodecHelper.write(byteBuffer, extraData);
     }
 
     @Override
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
 
-        xid = FragmentXID.from(CodecHelper.readBytes(byteBuffer, FragmentXID.FIXED_BYTES));
-
-        short len = byteBuffer.getShort();
-        if (len > 0) {
-            byte[] bs = new byte[len];
-            byteBuffer.get(bs);
-            setExtraData(new String(bs, UTF8));
-        }
+        xid = CodecHelper.readFragmentXID(byteBuffer);
+        extraData = CodecHelper.readString(byteBuffer);
     }
 }

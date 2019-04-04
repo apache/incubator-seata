@@ -248,6 +248,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
      * @param channel the channel
      * @param serverAddress the server address
      */
+    @Override
     public void releaseChannel(Channel channel, String serverAddress) {
         if (null == channel || null == serverAddress) {
             return;

@@ -101,7 +101,7 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
     @Override
     protected void doEncode() {
         super.doEncode();
-        byteBuffer.put(xid.toBytes());
+        CodecHelper.write(byteBuffer, xid);
         CodecHelper.write(byteBuffer, branchId);
         byteBuffer.put((byte) branchStatus.getCode());
     }
@@ -109,7 +109,7 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
     @Override
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
-        xid = FragmentXID.from(CodecHelper.readBytes(byteBuffer, FragmentXID.FIXED_BYTES));
+        xid = CodecHelper.readFragmentXID(byteBuffer);
         branchId = CodecHelper.readLong(byteBuffer);
         branchStatus = BranchStatus.get(byteBuffer.get());
     }
@@ -120,7 +120,7 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
             return false;
         }
 
-        xid = FragmentXID.from(CodecHelper.readBytes(in, FragmentXID.FIXED_BYTES));
+        xid = CodecHelper.readFragmentXID(in);
         branchId = CodecHelper.readLong(in);
         branchStatus = BranchStatus.get(in.readByte());
         return true;

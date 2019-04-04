@@ -192,7 +192,7 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
 
     @Override
     public boolean decode(ByteBuf in) {
-        xid = FragmentXID.from(CodecHelper.readBytes(in, FragmentXID.FIXED_BYTES));
+        xid =CodecHelper.readFragmentXID(in);
         branchId = CodecHelper.readLong(in);
         branchType = BranchType.get(in.readByte());
         resourceId = CodecHelper.readString(in);

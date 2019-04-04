@@ -32,7 +32,17 @@ public class CodecHelper {
 
     }
 
+    /**
+     * write the string value to buf
+     *
+     * @param buf the byte buf
+     * @param value the value
+     */
     public static void write(ByteBuffer buf, String value) {
+        if (null == buf) {
+            return;
+        }
+
         if (null != value) {
             byte[] bs = value.getBytes(UTF8);
             buf.putShort((short) bs.length);
@@ -44,45 +54,180 @@ public class CodecHelper {
         }
     }
 
+    /**
+     * write the long value to buf
+     *
+     * @param buf the byte buf
+     * @param value the value
+     */
     public static void write(ByteBuffer buf, long value) {
         buf.putLong(value);
     }
 
+    /**
+     * write the {@link FragmentXID} to buf
+     *
+     * @param buf the byte buf
+     * @param value the value
+     */
+    public static void write(ByteBuffer buf, FragmentXID value) {
+        if (null == buf || null == value) {
+            return;
+        }
+
+        buf.put(value.toBytes());
+    }
+
+    /**
+     * read the string value from the buf, using UTF-8
+     *
+     * @param in buf
+     * @return UTF-8 string,  null if size is 0
+     */
     public static String readString(ByteBuf in) {
-        byte[] value = new byte[in.readShort()];
+        if (null == in) {
+            return null;
+        }
+
+        short size = in.readShort();
+        if (size == 0) {
+            return null;
+        }
+
+        byte[] value = new byte[size];
         in.readBytes(value);
         return new String(value, UTF8);
     }
 
+    /**
+     * read the string value from the buf, using UTF-8
+     *
+     * @param in buf
+     * @return UTF-8 string,  null if size is 0
+     */
     public static String readBigString(ByteBuf in) {
-        byte[] value = new byte[in.readInt()];
+        if (null == in) {
+            return null;
+        }
+
+        int size = in.readInt();
+        if (size == 0) {
+            return null;
+        }
+
+        byte[] value = new byte[size];
         in.readBytes(value);
         return new String(value, UTF8);
     }
 
+    /**
+     * read the string value from the buf, using UTF-8
+     *
+     * @param buf buf
+     * @return UTF-8 string,  null if size is 0
+     */
     public static String readString(ByteBuffer buf) {
-        byte[] value = new byte[buf.getShort()];
+        if (null == buf) {
+            return null;
+        }
+
+        short size = buf.getShort();
+        if (size == 0) {
+            return null;
+        }
+
+        byte[] value = new byte[size];
         buf.get(value);
         return new String(value, UTF8);
     }
 
+    /**
+     * read the long value from the buf
+     *
+     * @param in the buf
+     * @return the value
+     */
     public static long readLong(ByteBuf in) {
+        if (null == in) {
+            return 0;
+        }
+
         return in.readLong();
     }
 
+    /**
+     * read the long value from the buf
+     *
+     * @param buf the buf
+     * @return the value
+     */
     public static long readLong(ByteBuffer buf) {
+        if (null == buf) {
+            return 0;
+        }
+
         return buf.getLong();
     }
 
+    /**
+     * read byte array value from buf
+     *
+     * @param in the buf
+     * @param size number of byte
+     * @return the value
+     */
     public static byte[] readBytes(ByteBuf in, int size) {
+        if (null == in || size <= 0 || in.readableBytes() < size) {
+            return null;
+        }
+
         byte[] data = new byte[size];
         in.readBytes(data);
         return data;
     }
 
+    /**
+     * read byte array value from buf
+     *
+     * @param buf the buf
+     * @param size number of byte
+     * @return the value
+     */
     public static byte[] readBytes(ByteBuffer buf, int size) {
+        if (null == buf || size <= 0 || buf.remaining() < size) {
+            return null;
+        }
+
         byte[] data = new byte[size];
         buf.get(data);
         return data;
+    }
+
+    /**
+     * read {@link FragmentXID} value from buf
+     *
+     * @param buf the buf
+     * @return the value
+     */
+    public static FragmentXID readFragmentXID(ByteBuffer buf) {
+        if (null == buf) {
+            return null;
+        }
+
+        return FragmentXID.from(buf);
+    }
+
+    /**
+     * read {@link FragmentXID} value from buf
+     *
+     * @param in the buf
+     * @return the value
+     */
+    public static FragmentXID readFragmentXID(ByteBuf in) {
+        if (null == in) {
+            return null;
+        }
+
+        return FragmentXID.from(in);
     }
 }
