@@ -30,44 +30,20 @@ public class TCCResource implements Resource {
 
     private String resourceGroupId = "DEFAULT";
 
-    /**
-     * 应用名称
-     */
     private String appName;
 
-    /**
-     * TCC 参与者名称，全局唯一
-     */
     private String actionName;
 
-    /**
-     * TCC 服务实现类
-     */
     private Object targetBean;
 
-    /**
-     * Prepare method
-     */
     private Method prepareMethod;
 
-    /**
-     * 提交方法
-     */
     private String commitMethodName;
 
-    /**
-     * 提交方法
-     */
     private Method commitMethod;
 
-    /**
-     * 回滚方法
-     */
     private String rollbackMethodName;
 
-    /**
-     * 回滚方法
-     */
     private Method rollbackMethod;
 
 

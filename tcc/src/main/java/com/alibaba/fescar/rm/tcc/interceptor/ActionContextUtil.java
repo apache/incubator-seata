@@ -49,16 +49,13 @@ public class ActionContextUtil {
             getAllField(targetParam.getClass(), fields);
             for (Field f : fields) {
                 String fieldName = f.getName();
-                //1、获取属性上的指定类型的注释
                 Annotation annotation = f.getAnnotation(BusinessActionContextParameter.class);
 
-                //打了注解
                 if (annotation != null) {
                     BusinessActionContextParameter param = (BusinessActionContextParameter) annotation;
                     f.setAccessible(true);
                     Object paramObject = f.get(targetParam);
                     int index = param.index();
-                    //如果是，则找到特定参数
                     if (index >= 0) {
                         @SuppressWarnings("unchecked")
 						Object targetObject = ((List<Object>) paramObject).get(index);

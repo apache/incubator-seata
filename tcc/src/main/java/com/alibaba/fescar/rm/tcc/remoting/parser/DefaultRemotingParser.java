@@ -49,9 +49,6 @@ public class DefaultRemotingParser {
     protected static Map<String, RemotingDesc> remotingServiceMap = new ConcurrentHashMap<String,RemotingDesc>();
 
 
-    /**
-     * 单实例
-     */
     private static class SingletonHolder {
         private static DefaultRemotingParser INSTANCE = new DefaultRemotingParser();
     }
