@@ -26,6 +26,7 @@ import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.server.UUIDGenerator;
 import com.alibaba.fescar.server.store.SessionStorable;
+import com.alibaba.fescar.server.store.StoreConfig;
 
 /**
  * The type Global session.
@@ -34,9 +35,11 @@ import com.alibaba.fescar.server.store.SessionStorable;
  */
 public class GlobalSession implements SessionLifecycle, SessionStorable {
 
-    public static final int DEFAULT_GLOBAL_SESSION_BUFFER_SIZE = 512;
 
-    private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(DEFAULT_GLOBAL_SESSION_BUFFER_SIZE));
+    private static final int MAX_GLOBAL_SESSION_SIZE =  StoreConfig.getMaxGlobalSessionSize();
+
+    private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
+            MAX_GLOBAL_SESSION_SIZE));
 
     private long transactionId;
 
@@ -372,30 +375,40 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public byte[] encode() {
+
+        byte[] byApplicationIdBytes = applicationId != null ? applicationId.getBytes() : null;
+
+        byte[] byServiceGroupBytes = transactionServiceGroup != null ? transactionServiceGroup.getBytes() : null;
+
+        byte[] byTxNameBytes = transactionName != null ? transactionName.getBytes() : null;
+
+        int size = calGlobalSessionSize(byApplicationIdBytes, byServiceGroupBytes, byTxNameBytes);
+
+        if (size > MAX_GLOBAL_SESSION_SIZE) {
+            throw new RuntimeException("global session size exceeded, size : " + size + " maxBranchSessionSize : " +
+                    MAX_GLOBAL_SESSION_SIZE);
+        }
         ByteBuffer byteBuffer = byteBufferThreadLocal.get();
         //recycle
         byteBuffer.clear();
 
         byteBuffer.putLong(transactionId);
         byteBuffer.putInt(timeout);
-        if (null != applicationId) {
-            byte[] byApplicationId = applicationId.getBytes();
-            byteBuffer.putShort((short)byApplicationId.length);
-            byteBuffer.put(byApplicationId);
+        if (null != byApplicationIdBytes) {
+            byteBuffer.putShort((short)byApplicationIdBytes.length);
+            byteBuffer.put(byApplicationIdBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
-        if (null != transactionServiceGroup) {
-            byte[] byServiceGroup = transactionServiceGroup.getBytes();
-            byteBuffer.putShort((short)byServiceGroup.length);
-            byteBuffer.put(byServiceGroup);
+        if (null != byServiceGroupBytes) {
+            byteBuffer.putShort((short)byServiceGroupBytes.length);
+            byteBuffer.put(byServiceGroupBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
-        if (null != transactionName) {
-            byte[] byTxName = transactionName.getBytes();
-            byteBuffer.putShort((short)byTxName.length);
-            byteBuffer.put(byTxName);
+        if (null != byTxNameBytes) {
+            byteBuffer.putShort((short)byTxNameBytes.length);
+            byteBuffer.put(byTxNameBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
@@ -405,6 +418,20 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
         return result;
+    }
+
+    private int calGlobalSessionSize(byte[] byApplicationIdBytes, byte[] byServiceGroupBytes, byte[] byTxNameBytes) {
+        final int size = 8 // trascationId
+                + 4 // timeout
+                + 2 // byApplicationIdBytes.length
+                + 2 // byServiceGroupBytes.length
+                + 2 // byTxNameBytes.length
+                + 8 // beginTime
+                + 1 // statusCode
+                + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
+                + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
+                + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
+        return size;
     }
 
     @Override
