@@ -59,13 +59,28 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ### History
 
+##### Ant Financial
+
+- **XTS**: Extended Transaction Service. Ant Financial middleware team developed the distributed transaction middleware since 2007, which is widely used in Ant Financial and solves the problems of data consistency across databases and services.
+
+- **DTX**: Distributed Transaction Extended. Since 2013, XTS has been published on the Ant Financial Cloud, with the name of DTX .
+
+##### Alibaba
+
 - **TXC**: Taobao Transaction Constructor. Alibaba middleware team start this project since 2014 to meet distributed transaction problem caused by application architecture change from monolithic to microservices.
 - **GTS**: Global Transaction Service. TXC as an Aliyun middleware product with new name GTS was published since 2016.
 - **Fescar**: we start the open source project Fescar based on TXC/GTS since 2019 to work closely with the community in the future.
 
+
+##### Seata Community
+
+- **Seata** :Simple Extensible Autonomous Transaction Architecture. Ant Financial joins Fescar, which make it to be a more neutral and open community for distributed transaction，and Fescar be rename to Seata.
+
+
+
 ## Maven dependency
 ```xml
-<fescar.version>0.4.0</fescar.version>
+<fescar.version>0.4.1</fescar.version>
 
 <dependency>
     <groupId>com.alibaba.fescar</groupId>
