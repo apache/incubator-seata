@@ -109,7 +109,7 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
                 configFuture.setResult(result);
             }
         });
-        return (String)configFuture.get(timeoutMills, TimeUnit.MILLISECONDS);
+        return (String)configFuture.get();
     }
 
     @Override
