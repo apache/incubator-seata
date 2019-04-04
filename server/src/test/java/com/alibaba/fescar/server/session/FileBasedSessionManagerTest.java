@@ -23,6 +23,7 @@ import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.GlobalStatus;
 
+import com.alibaba.fescar.server.session.file.FileBasedSessionManager;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;

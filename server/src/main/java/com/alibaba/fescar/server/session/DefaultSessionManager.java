@@ -18,6 +18,7 @@ package com.alibaba.fescar.server.session;
 
 import java.util.List;
 
+import com.alibaba.fescar.common.loader.LoadLevel;
 import com.alibaba.fescar.server.store.SessionStorable;
 import com.alibaba.fescar.server.store.TransactionStoreManager;
 import com.alibaba.fescar.server.store.TransactionWriteStore;
@@ -27,6 +28,7 @@ import com.alibaba.fescar.server.store.TransactionWriteStore;
  *
  * @author sharajava
  */
+@LoadLevel(name = "default")
 public class DefaultSessionManager extends AbstractSessionManager {
 
     /**

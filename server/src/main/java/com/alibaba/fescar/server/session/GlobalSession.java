@@ -300,7 +300,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      *
      * @param status the status
      */
-    void setStatus(GlobalStatus status) {
+    public void setStatus(GlobalStatus status) {
         this.status = status;
     }
 

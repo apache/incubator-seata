@@ -1,6 +1,8 @@
 package com.alibaba.fescar.core.store.db;
 
 import com.alibaba.fescar.common.loader.LoadLevel;
+import com.alibaba.fescar.config.Configuration;
+import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.core.store.BranchTransactionDO;
 import com.alibaba.fescar.core.store.GlobalTransactionDO;
 import com.alibaba.fescar.core.store.LogStore;
@@ -16,15 +18,23 @@ import javax.sql.DataSource;
 @LoadLevel(name = "db")
 public class LogStoreDataBaseDAO implements LogStore {
 
+    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
     /**
      * The Log store data source.
      */
     protected DataSource logStoreDataSource = null;
 
+    protected String globalTable;
+
+    protected String brachTable;
+
     /**
      * Instantiates a new Log store data base dao.
      */
     public LogStoreDataBaseDAO(){
+        globalTable = CONFIG.getConfig("store.db.global.table", "global_table");
+        brachTable = CONFIG.getConfig("store.db.branch.table", "branch_table");
     }
 
     /**

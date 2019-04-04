@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.server.session;
+package com.alibaba.fescar.server.session.file;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,9 +23,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
+import com.alibaba.fescar.common.loader.LoadLevel;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.core.constants.ConfigurationKeys;
 import com.alibaba.fescar.core.model.GlobalStatus;
+import com.alibaba.fescar.server.session.AbstractSessionManager;
+import com.alibaba.fescar.server.session.BranchSession;
+import com.alibaba.fescar.server.session.GlobalSession;
+import com.alibaba.fescar.server.session.Reloadable;
 import com.alibaba.fescar.server.store.file.FileTransactionStoreManager;
 import com.alibaba.fescar.server.store.SessionStorable;
 import com.alibaba.fescar.server.store.TransactionStoreManager;
@@ -36,6 +41,7 @@ import com.alibaba.fescar.server.store.TransactionWriteStore;
  *
  * @author jimin.jm @alibaba-inc.com
  */
+@LoadLevel(name = "file")
 public class FileBasedSessionManager extends AbstractSessionManager implements Reloadable {
 
     private static final int READ_SIZE = ConfigurationFactory.getInstance().getInt(

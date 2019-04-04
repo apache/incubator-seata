@@ -16,7 +16,6 @@
 
 package com.alibaba.fescar.server.session;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,6 +29,7 @@ import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.GlobalStatus;
 
 import com.alibaba.fescar.core.store.StoreMode;
+import com.alibaba.fescar.server.session.file.FileBasedSessionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

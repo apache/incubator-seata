@@ -24,12 +24,10 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.alibaba.fescar.common.util.CompressUtil;
-import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.server.lock.LockManagerFactory;
-import com.alibaba.fescar.server.store.FileTransactionStoreManager;
 import com.alibaba.fescar.server.store.SessionStorable;
 import com.alibaba.fescar.server.store.StoreConfig;
 import org.slf4j.Logger;
@@ -192,7 +190,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      *
      * @param status the status
      */
-    void setStatus(BranchStatus status) {
+    public void setStatus(BranchStatus status) {
         this.status = status;
     }
 
