@@ -26,7 +26,7 @@ import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.core.constants.ConfigurationKeys;
 import com.alibaba.fescar.core.model.GlobalStatus;
-import com.alibaba.fescar.server.store.FileTransactionStoreManager;
+import com.alibaba.fescar.server.store.file.FileTransactionStoreManager;
 import com.alibaba.fescar.server.store.SessionStorable;
 import com.alibaba.fescar.server.store.TransactionStoreManager;
 import com.alibaba.fescar.server.store.TransactionWriteStore;

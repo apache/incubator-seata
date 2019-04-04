@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.server.store;
+package com.alibaba.fescar.server.store.file;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,6 +32,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.alibaba.fescar.common.loader.LoadLevel;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.server.session.BranchSession;
@@ -39,6 +40,10 @@ import com.alibaba.fescar.server.session.GlobalSession;
 import com.alibaba.fescar.server.session.SessionCondition;
 import com.alibaba.fescar.server.session.SessionManager;
 
+import com.alibaba.fescar.server.store.SessionStorable;
+import com.alibaba.fescar.server.store.TransactionStoreManager;
+import com.alibaba.fescar.server.store.TransactionWriteFuture;
+import com.alibaba.fescar.server.store.TransactionWriteStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +52,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author jimin.jm @alibaba-inc.com
  */
+@LoadLevel(name = "file")
 public class FileTransactionStoreManager implements TransactionStoreManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileTransactionStoreManager.class);
     private BlockingQueue<TransactionWriteFuture> transactionWriteFutureQueue

@@ -9,28 +9,69 @@ package com.alibaba.fescar.core.store;
 public interface LogStore {
 
     /**
-     * 查询全局事务记录
+     * Query global transaction do global transaction do.
      *
-     * @param transactionId the transaction id
-     * @return global transaction do
+     * @param xid the xid
+     * @return the global transaction do
      */
-    GlobalTransactionDO getGlobalTransactionDO(String transactionId);
+    GlobalTransactionDO queryGlobalTransactionDO(String xid);
 
     /**
-     * Write global transaction do boolean.
+     * Insert global transaction do boolean.
      *
      * @param globalTransactionDO the global transaction do
-     * @return boolean
+     * @return the boolean
      */
-    boolean writeGlobalTransactionDO(GlobalTransactionDO globalTransactionDO);
+    boolean insertGlobalTransactionDO(GlobalTransactionDO globalTransactionDO);
 
     /**
-     * Write branch transaction do boolean.
+     * Update global transaction do boolean.
+     *
+     * @param globalTransactionDO the global transaction do
+     * @return the boolean
+     */
+    boolean updateGlobalTransactionDO(GlobalTransactionDO globalTransactionDO);
+
+    /**
+     * Delete global transaction do boolean.
+     *
+     * @param globalTransactionDO the global transaction do
+     * @return the boolean
+     */
+    boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO);
+
+    /**
+     * Query branch transaction do boolean.
+     *
+     * @param xid the xid
+     * @return the boolean
+     */
+    boolean queryBranchTransactionDO(String xid);
+
+    /**
+     * Insert branch transaction do boolean.
      *
      * @param branchTransactionDO the branch transaction do
-     * @return boolean
+     * @return the boolean
      */
-    boolean writeBranchTransactionDO(BranchTransactionDO branchTransactionDO);
+    boolean insertBranchTransactionDO(BranchTransactionDO branchTransactionDO);
+
+    /**
+     * Update branch transaction do boolean.
+     *
+     * @param branchTransactionDO the branch transaction do
+     * @return the boolean
+     */
+    boolean updateBranchTransactionDO(BranchTransactionDO branchTransactionDO);
+
+    /**
+     * Delete branch transaction do boolean.
+     *
+     * @param branchTransactionDO the branch transaction do
+     * @return the boolean
+     */
+    boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO);
+
 
 
 }

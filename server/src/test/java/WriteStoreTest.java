@@ -28,7 +28,7 @@ import com.alibaba.fescar.server.session.BranchSession;
 import com.alibaba.fescar.server.session.GlobalSession;
 import com.alibaba.fescar.server.session.SessionCondition;
 import com.alibaba.fescar.server.session.SessionManager;
-import com.alibaba.fescar.server.store.FileTransactionStoreManager;
+import com.alibaba.fescar.server.store.file.FileTransactionStoreManager;
 import com.alibaba.fescar.server.store.SessionStorable;
 import com.alibaba.fescar.server.store.TransactionStoreManager;
 import com.alibaba.fescar.server.store.TransactionStoreManager.LogOperation;

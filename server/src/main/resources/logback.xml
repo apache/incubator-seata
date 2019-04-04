@@ -41,7 +41,7 @@
         </encoder>
     </appender>
 
-    <logger name="com.alibaba.fescar.server.store.FileTransactionStoreManager" additivity="false">
+    <logger name="com.alibaba.fescar.server.store.file.FileTransactionStoreManager" additivity="false">
         <level value="INFO"/>
         <appender-ref ref="fescar-default"/>
     </logger>

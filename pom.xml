@@ -66,16 +66,7 @@
         <url>https://github.com/alibaba</url>
     </organization>
 
-    <issueManagement>
-        <system>github</system>
-        <url>https://github.com/alibaba/fescar/issues</url>
-    </issueManagement>
-
-    <scm>
-        <url>git@github.com:alibaba/fescar.git</url>
-        <connection>scm:git@github.com:alibaba/fescar.git</connection>
-        <developerConnection>scm:git@github.com:alibaba/fescar.git</developerConnection>
-    </scm>
+    AbstractPreparedStatementProxy
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -111,6 +102,7 @@
         <eureka-clients.version>1.9.5</eureka-clients.version>
         <javax-inject.version>1</javax-inject.version>
         <archaius-core.version>0.7.6</archaius-core.version>
+        <commons-dbcp.version>1.3</commons-dbcp.version>
     </properties>
     <!--test-->
     <dependencies>
@@ -303,6 +295,11 @@
                 <groupId>com.netflix.archaius</groupId>
                 <artifactId>archaius-core</artifactId>
                 <version>${archaius-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-dbcp</groupId>
+                <artifactId>commons-dbcp</artifactId>
+                <version>${commons-dbcp.version}</version>
             </dependency>
         </dependencies>
 

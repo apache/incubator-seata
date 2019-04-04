@@ -80,10 +80,7 @@ public class SessionHolder {
             mode = CONFIG.getConfig("store.mode");
         }
         StoreMode storeMode = StoreMode.valueOf(mode);
-        if(StoreMode.DB.equals(storeMode)){
-            //TODO database store
-
-        }else if(StoreMode.FILE.equals(storeMode)){
+        if(StoreMode.FILE.equals(storeMode)){
             //file store
             String sessionStorePath = CONFIG.getConfig("store.file.dir");
             if (sessionStorePath == null) {
@@ -93,7 +90,11 @@ public class SessionHolder {
             ASYNC_COMMITTING_SESSION_MANAGER = new DefaultSessionManager(ASYNC_COMMITTING_SESSION_MANAGER_NAME);
             RETRY_COMMITTING_SESSION_MANAGER = new DefaultSessionManager(RETRY_COMMITTING_SESSION_MANAGER_NAME);
             RETRY_ROLLBACKING_SESSION_MANAGER = new DefaultSessionManager(RETRY_ROLLBACKING_SESSION_MANAGER_NAME);
-        }else  {
+        }else if(StoreMode.DB.equals(storeMode)){
+            //TODO database store
+
+        }
+        else  {
             //default store
             ROOT_SESSION_MANAGER = new DefaultSessionManager(ROOT_SESSION_MANAGER_NAME);
             ASYNC_COMMITTING_SESSION_MANAGER = new DefaultSessionManager(ASYNC_COMMITTING_SESSION_MANAGER_NAME);
