@@ -95,7 +95,7 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigOperation.GET, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (String)configFuture.get(timeoutMills, TimeUnit.MILLISECONDS);
+        return (String)configFuture.get();
     }
 
     @Override
@@ -109,14 +109,14 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigOperation.PUTIFABSENT, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get(timeoutMills, TimeUnit.MILLISECONDS);
+        return (Boolean)configFuture.get();
     }
 
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigOperation.REMOVE, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get(timeoutMills, TimeUnit.MILLISECONDS);
+        return (Boolean)configFuture.get();
     }
 
     @Override
