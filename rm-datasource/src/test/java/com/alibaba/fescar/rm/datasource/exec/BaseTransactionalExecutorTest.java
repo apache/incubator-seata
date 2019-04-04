@@ -43,7 +43,7 @@ public class BaseTransactionalExecutorTest {
     public void testExecuteWithGlobalLockSet() throws Exception {
 
         //initial objects
-        ConnectionProxy connectionProxy = new ConnectionProxy(null, null, null);
+        ConnectionProxy connectionProxy = new ConnectionProxy(null, null);
         StatementProxy statementProxy = new StatementProxy<>(connectionProxy, null);
 
         BaseTransactionalExecutor<Object, Statement> baseTransactionalExecutor
