@@ -189,7 +189,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      * @return serviceId
      */
     private String createServiceId(InetSocketAddress address) {
-        return getClusterName() + "-" + address.getHostName();
+        return getClusterName() + "-" + address.getAddress().getHostAddress()+":"+address.getPort();
     }
 
     /**
