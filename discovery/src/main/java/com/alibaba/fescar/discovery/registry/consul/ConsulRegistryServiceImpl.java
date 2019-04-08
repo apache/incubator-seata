@@ -33,12 +33,14 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static java.util.concurrent.Executors.newCachedThreadPool;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -63,6 +65,8 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static ConcurrentMap<String, Set<ConsulListener>> listenerMap = null;
     private static ExecutorService notifierExecutor = null;
     private static ConcurrentMap<String, ConsulNotifier> notifiers = null;
+
+    private static final int THREAD_POOL_NUM = 1;
 
     /**
      * default tcp check interval
@@ -98,8 +102,11 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
                     clusterAddressMap = new ConcurrentHashMap<>(1 << 3);
                     listenerMap = new ConcurrentHashMap<>(1 << 3);
                     notifiers = new ConcurrentHashMap<>(1 << 3);
-                    notifierExecutor = newCachedThreadPool(new NamedThreadFactory("fescar-consul-notifier", 1));
+                    notifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
+                            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+                            new NamedThreadFactory("fescar-consul-notifier", THREAD_POOL_NUM));
                     instance = new ConsulRegistryServiceImpl();
+
                 }
             }
         }
