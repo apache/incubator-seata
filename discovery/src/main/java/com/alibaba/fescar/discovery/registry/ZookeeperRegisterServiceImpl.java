@@ -69,7 +69,8 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<IZkChildListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
 
-    private static final Set<String> REGISTERED_PATH_SET = Collections.synchronizedSet(new HashSet<>(1));
+    private static final int REGISTERED_PATH_SET_SIZE = 1;
+    private static final Set<String> REGISTERED_PATH_SET = Collections.synchronizedSet(new HashSet<>(REGISTERED_PATH_SET_SIZE));
 
     private ZookeeperRegisterServiceImpl() {}
 
