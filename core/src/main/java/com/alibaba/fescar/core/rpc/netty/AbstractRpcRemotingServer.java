@@ -16,10 +16,16 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
+import java.net.InetSocketAddress;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.core.rpc.RemotingServer;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -32,9 +38,6 @@ import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
-import java.net.InetSocketAddress;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +45,7 @@ import org.slf4j.LoggerFactory;
  * The type Rpc remoting server.
  *
  * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/12
  */
 public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements RemotingServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingServer.class);
@@ -50,7 +54,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     private final EventLoopGroup eventLoopGroupBoss;
     private final NettyServerConfig nettyServerConfig;
     private int listenPort;
-
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
     /**
      * Sets listen port.
      *
@@ -86,11 +90,11 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
      * Instantiates a new Rpc remoting server.
      *
      * @param nettyServerConfig the netty server config
-     * @param messageExecutor the message executor
-     * @param handlers the handlers
+     * @param messageExecutor   the message executor
+     * @param handlers          the handlers
      */
     public AbstractRpcRemotingServer(final NettyServerConfig nettyServerConfig,
-        final ThreadPoolExecutor messageExecutor, final ChannelHandler... handlers) {
+                                     final ThreadPoolExecutor messageExecutor, final ChannelHandler... handlers) {
         super(messageExecutor);
         this.serverBootstrap = new ServerBootstrap();
         this.nettyServerConfig = nettyServerConfig;
@@ -148,7 +152,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
             ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
             LOGGER.info("Server started ... ");
             RegistryFactory.getInstance().register(new InetSocketAddress(FragmentXID.getServerIPAddress(), FragmentXID.getServerPort()));
-            registerShutdownHook();
+            initialized.set(true);
             future.channel().closeFuture().sync();
         } catch (Exception exx) {
             throw new RuntimeException(exx);
@@ -156,12 +160,6 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
 
     }
 
-    /**
-     * Register vm shutdown hook to shutdown gracefully can't prevent kill -9
-     */
-    private void registerShutdownHook() {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> shutdown()));
-    }
 
     @Override
     public void shutdown() {
@@ -169,9 +167,12 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Shuting server down. ");
             }
-            RegistryFactory.getInstance().unregister(new InetSocketAddress(FragmentXID.getServerIPAddress(), FragmentXID.getServerPort()));
-            //wait a few seconds for server transport
-            TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
+            if (initialized.get()){
+                RegistryFactory.getInstance().unregister(new InetSocketAddress(FragmentXID.getServerIPAddress(), FragmentXID.getServerPort()));
+                RegistryFactory.getInstance().close();
+                //wait a few seconds for server transport
+                TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
+            }
 
             this.eventLoopGroupBoss.shutdownGracefully();
             this.eventLoopGroupWorker.shutdownGracefully();
