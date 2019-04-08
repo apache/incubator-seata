@@ -67,6 +67,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static ConcurrentMap<String, ConsulNotifier> notifiers = null;
 
     private static final int THREAD_POOL_NUM = 1;
+    private static final int MAP_INITIAL_CAPACITY = 8;
 
     /**
      * default tcp check interval
@@ -99,9 +100,9 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
             synchronized (ConsulRegistryServiceImpl.class) {
                 if (null == instance) {
                     //initial the capacity with 8
-                    clusterAddressMap = new ConcurrentHashMap<>(1 << 3);
-                    listenerMap = new ConcurrentHashMap<>(1 << 3);
-                    notifiers = new ConcurrentHashMap<>(1 << 3);
+                    clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+                    listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+                    notifiers = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
                     notifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
                         Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
                         new NamedThreadFactory("fescar-consul-notifier", THREAD_POOL_NUM));
