@@ -120,7 +120,7 @@ public class FragmentXID {
 
     private FragmentXID(ByteBuf buf) {
         byte flag = buf.readByte();
-        if (flag != FLAG_IPV4 || flag != FLAG_IPV6) {
+        if (flag != FLAG_IPV4 && flag != FLAG_IPV6) {
             throw new RuntimeException("create FragmentXID failed, invalid ip version flag: " + flag);
         }
 
