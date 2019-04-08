@@ -264,7 +264,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
                     exceptionOccour = true;
                     Assert.assertTrue("not lock Conflict exception", e.getMessage().contains("LockConflict"));
                 } finally {
-                    DataSourceManager.set(new MockDataSourceManager());
+                    DefaultResourceManager.mockResourceManager(BranchType.AT, new MockDataSourceManager());
                 }
 
                 Assert.assertTrue("Lock Exception not occur!", exceptionOccour);
