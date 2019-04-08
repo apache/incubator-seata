@@ -65,7 +65,9 @@ public class AppTest {
             transactionalTemplate.execute(new TransactionalExecutor() {
                 @Override
                 public Object execute() throws Throwable {
-                    LOGGER.info("Exception Rollback Business Begin ...");
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("Exception Rollback Business Begin ...");
+                    }
                     jdbcTemplate.update("update user0 set name = 'xxx' where id = ?", new Object[] {1});
                     jdbcTemplate.update("insert into user1 (id, name, gmt) values (1, 'user1', '2019-01-01')");
                     throw bizException;
@@ -86,15 +88,11 @@ public class AppTest {
             if (code == TransactionalExecutor.Code.RollbackDone) {
                 Throwable businessEx = e.getOriginalException();
                 if (businessEx instanceof MyBusinessException) {
-                    if (LOGGER.isInfoEnabled()) {
-                        Assert.assertEquals(((MyBusinessException)businessEx).getBusinessErrorCode(),
-                            bizException.businessErrorCode);
-                    }
+                    Assert.assertEquals(((MyBusinessException)businessEx).getBusinessErrorCode(),
+                        bizException.businessErrorCode);
                 }
             } else {
-                if (LOGGER.isInfoEnabled()) {
-                    Assert.assertFalse("Not expected," + e.getMessage(), false);
-                }
+                Assert.assertFalse("Not expected," + e.getMessage(), false);
 
             }
         }

@@ -51,7 +51,7 @@ public class EnhancedServiceLoader {
     private static Map<Class, List<Class>> providers = new ConcurrentHashMap<Class, List<Class>>();
 
     /**
-     * 指定classLoader加载server provider
+     * Specify classLoader to load the service provider
      *
      * @param <S>     the type parameter
      * @param service the service
@@ -64,7 +64,7 @@ public class EnhancedServiceLoader {
     }
 
     /**
-     * 加载server provider
+     * load service provider
      *
      * @param <S>     the type parameter
      * @param service the service
@@ -76,7 +76,7 @@ public class EnhancedServiceLoader {
     }
 
     /**
-     * 加载server provider
+     * load service provider
      *
      * @param <S>          the type parameter
      * @param service      the service
@@ -89,7 +89,7 @@ public class EnhancedServiceLoader {
     }
 
     /**
-     * 指定classLoader加载server provider
+     * Specify classLoader to load the service provider
      *
      * @param <S>          the type parameter
      * @param service      the service
@@ -110,14 +110,14 @@ public class EnhancedServiceLoader {
      * @param service the service
      * @return list
      */
-    public static <S> List<S> loadAll(Class<S> service){
+    public static <S> List<S> loadAll(Class<S> service) {
         List<S> allInstances = new ArrayList<>();
         List<Class> allClazzs = getAllExtensionClass(service);
-        if(CollectionUtils.isEmpty(allClazzs)){
+        if (CollectionUtils.isEmpty(allClazzs)) {
             return allInstances;
         }
         try {
-            for(Class clazz : allClazzs){
+            for (Class clazz : allClazzs) {
                 allInstances.add(initInstance(service, clazz));
             }
         } catch (Throwable t) {
@@ -127,7 +127,7 @@ public class EnhancedServiceLoader {
     }
 
     /**
-     * 获取所有的扩展类，按照{@linkplain LoadLevel}定义的order顺序进行排序
+     * Get all the extension classes, follow {@linkplain LoadLevel} defined and sort order
      *
      * @param <S>     the type parameter
      * @param service the service
@@ -139,7 +139,7 @@ public class EnhancedServiceLoader {
     }
 
     /**
-     * 获取所有的扩展类，按照{@linkplain LoadLevel}定义的order顺序进行排序
+     * Get all the extension classes, follow {@linkplain LoadLevel} defined and sort order
      *
      * @param <S>     the type parameter
      * @param service the service
@@ -190,15 +190,17 @@ public class EnhancedServiceLoader {
             Class<?> extension = extensions.get(extensions.size() - 1);
             S result = initInstance(service, extension);
             if (!foundFromCache && LOGGER.isInfoEnabled()) {
-                LOGGER.info("load " + service.getSimpleName() + "[" + activateName + "] extension by class[" + extension.getName() + "]");
+                LOGGER.info("load " + service.getSimpleName() + "[" + activateName + "] extension by class[" + extension
+                    .getName() + "]");
             }
             return result;
         } catch (Throwable e) {
             if (e instanceof EnhancedServiceNotFoundException) {
-                throw (EnhancedServiceNotFoundException) e;
+                throw (EnhancedServiceNotFoundException)e;
             } else {
                 throw new EnhancedServiceNotFoundException(
-                    "not found service provider for : " + service.getName() + " caused by " + ExceptionUtils.getFullStackTrace(e));
+                    "not found service provider for : " + service.getName() + " caused by " + ExceptionUtils
+                        .getFullStackTrace(e));
             }
         }
     }
@@ -295,16 +297,21 @@ public class EnhancedServiceLoader {
      * @throws IllegalAccessException the illegal access exception
      * @throws InstantiationException the instantiation exception
      */
-    protected static <S> S initInstance(Class<S> service, Class implClazz) throws IllegalAccessException, InstantiationException {
+    protected static <S> S initInstance(Class<S> service, Class implClazz)
+        throws IllegalAccessException, InstantiationException {
         S s = service.cast(implClazz.newInstance());
-        if(s instanceof Initialize){
+        if (s instanceof Initialize) {
             ((Initialize)s).init();
         }
         return s;
     }
 
+    /**
+     * Cannot use TCCL, in the pandora container will cause the class in the plugin not to be loaded
+     *
+     * @return
+     */
     private static ClassLoader findClassLoader() {
-        // 不能使用TCCL,在pandora容器中会导致无法加载plugin中的类
         return EnhancedServiceLoader.class.getClassLoader();
     }
 }
