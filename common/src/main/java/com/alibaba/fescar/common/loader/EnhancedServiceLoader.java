@@ -16,14 +16,6 @@
 
 package com.alibaba.fescar.common.loader;
 
-import com.alibaba.fescar.common.executor.Initialize;
-import com.alibaba.fescar.common.util.CollectionUtils;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -35,6 +27,15 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.alibaba.fescar.common.executor.Initialize;
+import com.alibaba.fescar.common.util.CollectionUtils;
+
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Enhanced service loader.
@@ -165,8 +166,6 @@ public class EnhancedServiceLoader {
                     }
                 }
             }
-
-            // 为避免被覆盖，每个activateName的查找，允许再加一层子目录
             if (StringUtils.isNotEmpty(activateName)) {
                 loadFile(service, FESCAR_DIRECTORY + activateName.toLowerCase() + "/", loader, extensions);
 
@@ -188,7 +187,7 @@ public class EnhancedServiceLoader {
                     "not found service provider for : " + service.getName() + "[" + activateName
                         + "] and classloader : " + ObjectUtils.toString(loader));
             }
-            Class<?> extension = extensions.get(extensions.size() - 1);// 最大的一个
+            Class<?> extension = extensions.get(extensions.size() - 1);
             S result = initInstance(service, extension);
             if (!foundFromCache && LOGGER.isInfoEnabled()) {
                 LOGGER.info("load " + service.getSimpleName() + "[" + activateName + "] extension by class[" + extension.getName() + "]");
