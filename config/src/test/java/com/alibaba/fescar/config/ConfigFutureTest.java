@@ -124,7 +124,7 @@ public class ConfigFutureTest {
         //TIME_MILLS + 1000 ensure timeout occur
         configFuture.get(TIME_MILLS + 1000, TimeUnit.MILLISECONDS);
         //spin
-        Thread.sleep(100);
+        TimeUnit.MILLISECONDS.sleep(100);
         Assert.assertTrue(configFuture.isTimeout());
     }
 
