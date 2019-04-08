@@ -94,9 +94,10 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         if (null == instance) {
             synchronized (ConsulRegistryServiceImpl.class) {
                 if (null == instance) {
-                    clusterAddressMap = new ConcurrentHashMap<>();
-                    listenerMap = new ConcurrentHashMap<>();
-                    notifiers = new ConcurrentHashMap<>();
+                    //initial the capacity with 8
+                    clusterAddressMap = new ConcurrentHashMap<>(1 << 3);
+                    listenerMap = new ConcurrentHashMap<>(1 << 3);
+                    notifiers = new ConcurrentHashMap<>(1 << 3);
                     notifierExecutor = newCachedThreadPool(new NamedThreadFactory("fescar-consul-notifier", 1));
                     instance = new ConsulRegistryServiceImpl();
                 }
@@ -179,7 +180,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      */
     private String getClusterName() {
         String clusterConfigName = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-            + REGISTRY_CLUSTER;
+                + REGISTRY_CLUSTER;
         return FILE_CONFIG.getConfig(clusterConfigName, DEFAULT_CLUSTER_NAME);
     }
 
@@ -233,10 +234,10 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      */
     private Response<List<HealthService>> getHealthyServices(String service, long index, long watchTimeout) {
         return getConsulClient().getHealthServices(service, HealthServicesRequest.newBuilder()
-            .setTag(SERVICE_TAG)
-            .setQueryParams(new QueryParams(watchTimeout, index))
-            .setPassing(true)
-            .build());
+                .setTag(SERVICE_TAG)
+                .setQueryParams(new QueryParams(watchTimeout, index))
+                .setPassing(true)
+                .build());
     }
 
     /**
@@ -246,9 +247,8 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      * @return clusterNameKey
      */
     private String getServiceGroup(String key) {
-        Configuration configuration = ConfigurationFactory.getInstance();
         String clusterNameKey = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
-        return configuration.getConfig(clusterNameKey);
+        return FILE_CONFIG.getConfig(clusterNameKey);
     }
 
     /**
@@ -278,9 +278,9 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
             return;
         }
         clusterAddressMap.put(cluster, services.stream()
-            .map(HealthService::getService)
-            .map(service -> new InetSocketAddress(service.getAddress(), service.getPort()))
-            .collect(Collectors.toList()));
+                .map(HealthService::getService)
+                .map(service -> new InetSocketAddress(service.getAddress(), service.getPort()))
+                .collect(Collectors.toList()));
     }
 
     /**
@@ -325,4 +325,5 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     public void close() throws Exception {
         client = null;
     }
+
 }
