@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -68,7 +69,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<IZkChildListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
 
-    private static final ConcurrentMap<String,String> REGISTERED_PATH_MAP = new ConcurrentHashMap<>();
+    private static final Set<String> REGISTERED_PATH_SET = Collections.synchronizedSet(new HashSet<>());
 
     private ZookeeperRegisterServiceImpl() {}
 
@@ -96,7 +97,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
             return false;
         }
         getClientInstance().createEphemeral(path, true);
-        REGISTERED_PATH_MAP.putIfAbsent(path, null);
+        REGISTERED_PATH_SET.add(path);
         return true;
     }
 
@@ -111,7 +112,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
         String path = getRegisterPathByPath(address);
         getClientInstance().delete(path);
-        REGISTERED_PATH_MAP.remove(path);
+        REGISTERED_PATH_SET.remove(path);
     }
 
     @Override
@@ -214,8 +215,8 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
     private void recover() throws Exception {
         // recover Server
-        if (!REGISTERED_PATH_MAP.isEmpty()){
-            List<String> pathList = new ArrayList<>(REGISTERED_PATH_MAP.keySet());
+        if (!REGISTERED_PATH_SET.isEmpty()){
+            List<String> pathList = new ArrayList<>(REGISTERED_PATH_SET);
             for (String path : pathList) {
                 doRegister(path);
             }
