@@ -40,10 +40,11 @@ public class DefaultResourceManager implements ResourceManager {
     /**
      * all resource managers
      */
-    protected static Map<BranchType, ResourceManager> resourceManagers = new ConcurrentHashMap<BranchType, ResourceManager>();
+    protected static Map<BranchType, ResourceManager> resourceManagers
+        = new ConcurrentHashMap<>();
 
-    private static class SingletonHolder {
-        private static DefaultResourceManager INSTANCE = new DefaultResourceManager();
+    private DefaultResourceManager() {
+        initResourceManagers();
     }
 
     /**
@@ -55,8 +56,14 @@ public class DefaultResourceManager implements ResourceManager {
         return SingletonHolder.INSTANCE;
     }
 
-    private DefaultResourceManager() {
-        initResourceManagers();
+    /**
+     * only for mock
+     *
+     * @param branchType
+     * @param rm
+     */
+    public static void mockResourceManager(BranchType branchType, ResourceManager rm) {
+        resourceManagers.put(branchType, rm);
     }
 
     protected void initResourceManagers() {
@@ -87,7 +94,8 @@ public class DefaultResourceManager implements ResourceManager {
     public Long branchRegister(BranchType branchType, String resourceId,
         String clientId, FragmentXID xid, String applicationData, String lockKeys)
         throws TransactionException {
-        return getResourceManager(branchType).branchRegister(branchType, resourceId, clientId, xid, applicationData, lockKeys);
+        return getResourceManager(branchType).branchRegister(branchType, resourceId, clientId, xid, applicationData,
+            lockKeys);
     }
 
     @Override
@@ -142,6 +150,10 @@ public class DefaultResourceManager implements ResourceManager {
     @Override
     public BranchType getBranchType() {
         throw new FrameworkException("DefaultResourceManager isn't a real ResourceManager");
+    }
+
+    private static class SingletonHolder {
+        private static DefaultResourceManager INSTANCE = new DefaultResourceManager();
     }
 
 }

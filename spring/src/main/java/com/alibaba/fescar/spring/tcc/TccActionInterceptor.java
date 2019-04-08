@@ -82,13 +82,6 @@ public class TccActionInterceptor implements MethodInterceptor {
 					return invocation.proceed();
 				}
 	    	});
-	    	//reset the parameters of try method
-	    	Object[] targetArguments = (Object[]) ret.get(Constants.TCC_METHOD_ARGUMENTS);
-	    	if(targetArguments != null && methodArgs != null){
-	    		for(int i = 0; i < targetArguments.length; i ++){
-	    			methodArgs[i] = targetArguments[i];
-	    		}
-	    	}
 	    	//return the final result
 	    	return ret.get(Constants.TCC_METHOD_RESULT);
 	    }

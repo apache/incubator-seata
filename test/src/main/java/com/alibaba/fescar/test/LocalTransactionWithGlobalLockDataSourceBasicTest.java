@@ -22,7 +22,10 @@ import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.Resource;
 import com.alibaba.fescar.core.protocol.FragmentXID;
+import com.alibaba.fescar.rm.DefaultResourceManager;
+import com.alibaba.fescar.rm.RMClient;
 import com.alibaba.fescar.rm.datasource.DataSourceManager;
+import com.alibaba.fescar.tm.TMClient;
 import java.util.Date;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -44,33 +47,26 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
     private static ClassPathXmlApplicationContext context;
     private static JdbcTemplate jdbcTemplate;
     private static JdbcTemplate directJdbcTemplate;
+    private static final String APPLICATION_ID = "my_test_app";
+    private static final String TX_SERVICE_GROUP = "my_test_tx_group";
 
-    private abstract static class AbstractLockConflictExecuteTemplate {
-        public void execute() {
-            synchronized (LocalTransactionWithGlobalLockDataSourceBasicTest.class) {
-                DataSourceManager.set(new MockDataSourceManager() {
-                    @Override
-                    public boolean lockQuery(BranchType branchType, String resourceId, FragmentXID xid, String lockKeys)
-                        throws TransactionException {
-                        return false;
-                    }
-                });
+    /**
+     * Before.
+     */
+    @BeforeClass
+    public static void before() {
+        // Mock DataSourceManager
+        initClient();
+        DefaultResourceManager.mockResourceManager(BranchType.AT, new MockDataSourceManager());
+        context = new ClassPathXmlApplicationContext(
+            "basic-test-context.xml");
+        jdbcTemplate = (JdbcTemplate) context
+            .getBean("jdbcTemplate");
+        directJdbcTemplate = (JdbcTemplate) context
+            .getBean("directJdbcTemplate");
 
-                boolean exceptionOccour = false;
-                try {
-                    doExecute();
-                } catch (UncategorizedSQLException e) {
-                    exceptionOccour = true;
-                    Assert.assertTrue("not lock Conflict exception", e.getMessage().contains("LockConflict"));
-                } finally {
-                    DataSourceManager.set(new MockDataSourceManager());
-                }
-
-                Assert.assertTrue("Lock Exception not occur!", exceptionOccour);
-            }
-        }
-
-        public abstract void doExecute();
+        directJdbcTemplate.execute("delete from user0");
+        directJdbcTemplate.execute("delete from user1");
 
     }
 
@@ -248,23 +244,37 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
         }
     }
 
-    /**
-     * Before.
-     */
-    @BeforeClass
-    public static void before() {
-        // Mock DataSourceManager
-        DataSourceManager.set(new MockDataSourceManager());
+    private static void initClient() {
+        TMClient.init(APPLICATION_ID, TX_SERVICE_GROUP);
+        RMClient.init(APPLICATION_ID, TX_SERVICE_GROUP);
+    }
 
-        context = new ClassPathXmlApplicationContext(
-            "basic-test-context.xml");
-        jdbcTemplate = (JdbcTemplate) context
-            .getBean("jdbcTemplate");
-        directJdbcTemplate = (JdbcTemplate) context
-            .getBean("directJdbcTemplate");
+    private abstract static class AbstractLockConflictExecuteTemplate {
+        public void execute() {
+            synchronized (LocalTransactionWithGlobalLockDataSourceBasicTest.class) {
+                DefaultResourceManager.mockResourceManager(BranchType.AT, new MockDataSourceManager() {
+                    @Override
+                    public boolean lockQuery(BranchType branchType, String resourceId, FragmentXID xid, String lockKeys)
+                        throws TransactionException {
+                        return false;
+                    }
+                });
 
-        directJdbcTemplate.execute("delete from user0");
-        directJdbcTemplate.execute("delete from user1");
+                boolean exceptionOccour = false;
+                try {
+                    doExecute();
+                } catch (UncategorizedSQLException e) {
+                    exceptionOccour = true;
+                    Assert.assertTrue("not lock Conflict exception", e.getMessage().contains("LockConflict"));
+                } finally {
+                    DefaultResourceManager.mockResourceManager(BranchType.AT, new MockDataSourceManager());
+                }
+
+                Assert.assertTrue("Lock Exception not occur!", exceptionOccour);
+            }
+        }
+
+        public abstract void doExecute();
 
     }
 
