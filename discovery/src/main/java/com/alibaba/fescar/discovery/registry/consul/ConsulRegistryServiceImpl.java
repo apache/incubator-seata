@@ -29,9 +29,10 @@ import com.ecwid.consul.v1.health.HealthServicesRequest;
 import com.ecwid.consul.v1.health.model.HealthService;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -59,7 +60,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
 
     private static ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap = null;
-    private static ConcurrentMap<String, List<ConsulListener>> listenerMap = null;
+    private static ConcurrentMap<String, Set<ConsulListener>> listenerMap = null;
     private static ExecutorService notifierExecutor = null;
     private static ConcurrentMap<String, ConsulNotifier> notifiers = null;
 
@@ -119,7 +120,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     @Override
     public void subscribe(String cluster, ConsulListener listener) throws Exception {
         //1.add listener to subscribe list
-        listenerMap.putIfAbsent(cluster, new ArrayList<>());
+        listenerMap.putIfAbsent(cluster, new HashSet<>());
         listenerMap.get(cluster).add(listener);
         //2.get healthy services
         Response<List<HealthService>> response = getHealthyServices(cluster, -1, DEFAULT_WATCH_TIMEOUT);
