@@ -20,33 +20,18 @@ import java.io.Serializable;
 import java.util.Map;
 
 /**
- * TCC Method context
- *
- * @author zhangsen
+ * The type Business action context.
  */
 public class BusinessActionContext implements Serializable {
 
-    /**  */
     private static final long serialVersionUID = 6539226288677737991L;
 
-    /**
-     * xid
-     */
     private String xid;
 
-    /**
-     * the branch id
-     */
     private String branchId;
 
-    /**
-     * tcc bean name
-     */
     private String actionName;
 
-    /**
-     * TCC's parameters witch is set by @BusinessActionContextParameter
-     */
     private Map<String, Object> actionContext;
 
     /**
@@ -69,10 +54,10 @@ public class BusinessActionContext implements Serializable {
     }
 
     /**
-     * 获取action级别的参数
+     * Gets action context.
      *
      * @param key the key
-     * @return action context
+     * @return the action context
      */
     public Object getActionContext(String key) {
         return actionContext.get(key);

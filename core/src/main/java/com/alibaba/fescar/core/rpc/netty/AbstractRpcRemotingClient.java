@@ -257,6 +257,12 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     }
 
     @Override
+    public void destroy() {
+        super.destroy();
+        shutdown();
+    }
+
+    @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof RpcMessage) {
             RpcMessage rpcMessage = (RpcMessage)msg;
@@ -433,13 +439,21 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                     if (mergeMessage.msgIds.size() > 1) {
                         printMergeMessageLog(mergeMessage);
                     }
-                    Channel sendChannel = connect(address);
+                    Channel sendChannel = null;
                     try {
+                        sendChannel = connect(address);
                         sendRequest(sendChannel, mergeMessage);
                     } catch (FrameworkException e) {
                         if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable
-                            && address != null) {
+                            && address != null && sendChannel != null) {
                             destroyChannel(address, sendChannel);
+                        }
+                        // fast fail
+                        for (Long msgId : mergeMessage.msgIds) {
+                            MessageFuture messageFuture = futures.remove(msgId);
+                            if (messageFuture != null){
+                                messageFuture.setResultMessage(null);
+                            }
                         }
                         LOGGER.error("", "client merge call failed", e);
                     }
