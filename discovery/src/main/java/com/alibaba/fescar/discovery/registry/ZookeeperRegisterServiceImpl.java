@@ -216,10 +216,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private void recover() throws Exception {
         // recover Server
         if (!REGISTERED_PATH_SET.isEmpty()){
-            List<String> pathList = new ArrayList<>(REGISTERED_PATH_SET);
-            for (String path : pathList) {
-                doRegister(path);
-            }
+            REGISTERED_PATH_SET.forEach(path -> doRegister(path));
         }
         // recover client
         if (!LISTENER_SERVICE_MAP.isEmpty()){
