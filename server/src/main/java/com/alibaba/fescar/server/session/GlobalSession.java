@@ -35,11 +35,10 @@ import com.alibaba.fescar.server.store.StoreConfig;
  */
 public class GlobalSession implements SessionLifecycle, SessionStorable {
 
-
-    private static final int MAX_GLOBAL_SESSION_SIZE =  StoreConfig.getMaxGlobalSessionSize();
+    private static final int MAX_GLOBAL_SESSION_SIZE = StoreConfig.getMaxGlobalSessionSize();
 
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
-            MAX_GLOBAL_SESSION_SIZE));
+        MAX_GLOBAL_SESSION_SIZE));
 
     private long transactionId;
 
@@ -88,8 +87,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public boolean canBeCommittedAsync() {
         for (BranchSession branchSession : branchSessions) {
-            if (branchSession.getBranchType() == BranchType.MT
-                    || branchSession.getBranchType() == BranchType.TCC) {
+            if (branchSession.getBranchType() == BranchType.TCC) {
                 return false;
             }
         }
@@ -386,7 +384,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         if (size > MAX_GLOBAL_SESSION_SIZE) {
             throw new RuntimeException("global session size exceeded, size : " + size + " maxBranchSessionSize : " +
-                    MAX_GLOBAL_SESSION_SIZE);
+                MAX_GLOBAL_SESSION_SIZE);
         }
         ByteBuffer byteBuffer = byteBufferThreadLocal.get();
         //recycle
@@ -422,15 +420,15 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private int calGlobalSessionSize(byte[] byApplicationIdBytes, byte[] byServiceGroupBytes, byte[] byTxNameBytes) {
         final int size = 8 // trascationId
-                + 4 // timeout
-                + 2 // byApplicationIdBytes.length
-                + 2 // byServiceGroupBytes.length
-                + 2 // byTxNameBytes.length
-                + 8 // beginTime
-                + 1 // statusCode
-                + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
-                + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
-                + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
+            + 4 // timeout
+            + 2 // byApplicationIdBytes.length
+            + 2 // byServiceGroupBytes.length
+            + 2 // byTxNameBytes.length
+            + 8 // beginTime
+            + 1 // statusCode
+            + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
+            + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
+            + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
         return size;
     }
 
