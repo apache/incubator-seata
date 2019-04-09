@@ -61,9 +61,13 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
 
     public ZookeeperConfiguration() {
         if (zkClient == null) {
-            zkClient = new ZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
-                FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY),
-                FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY));
+            synchronized (ZookeeperConfiguration.class) {
+                if (null == zkClient) {
+                    zkClient = new ZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
+                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY),
+                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY));
+                }
+            }
             if (!zkClient.exists(ROOT_PATH)) {
                 zkClient.createPersistent(ROOT_PATH, true);
             }
