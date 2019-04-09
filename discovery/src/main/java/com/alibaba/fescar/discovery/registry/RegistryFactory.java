@@ -20,6 +20,7 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.config.ConfigurationKeys;
 
+import com.alibaba.fescar.discovery.registry.consul.ConsulRegistryServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,6 +64,9 @@ public class RegistryFactory {
                 break;
             case ZK:
                 registryService = ZookeeperRegisterServiceImpl.getInstance();
+                break;
+            case Consul:
+                registryService = ConsulRegistryServiceImpl.getInstance();
                 break;
             default:
                 throw new NotSupportYetException("not support register type:" + registryType);
