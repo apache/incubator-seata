@@ -256,7 +256,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      */
     private String getServiceGroup(String key) {
         String clusterNameKey = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
-        return FILE_CONFIG.getConfig(clusterNameKey);
+        return ConfigurationFactory.getInstance().getConfig(clusterNameKey);
     }
 
     /**
