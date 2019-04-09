@@ -31,7 +31,7 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
 
     private static final long serialVersionUID = 1242711598812634704L;
 
-    private long transactionId;
+    private String xid;
 
     private BranchType branchType = BranchType.AT;
 
@@ -41,22 +41,12 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
 
     private String applicationData;
 
-    /**
-     * Gets transaction id.
-     *
-     * @return the transaction id
-     */
-    public long getTransactionId() {
-        return transactionId;
+    public String getXid() {
+        return xid;
     }
 
-    /**
-     * Sets transaction id.
-     *
-     * @param transactionId the transaction id
-     */
-    public void setTransactionId(long transactionId) {
-        this.transactionId = transactionId;
+    public void setXid(String xid) {
+        this.xid = xid;
     }
 
     /**
@@ -145,8 +135,16 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
         }
         byteBuffer = ByteBuffer.allocate(byteLenth + 1024);
 
-        // 1. Transaction Id
-        byteBuffer.putLong(this.transactionId);
+        // 1. Xid
+        if (this.xid != null) {
+            byte[] bs = xid.getBytes(UTF8);
+            byteBuffer.putShort((short)bs.length);
+            if (bs.length > 0) {
+                byteBuffer.put(bs);
+            }
+        } else {
+            byteBuffer.putShort((short)0);
+        }
         // 2. Branch Type
         byteBuffer.put((byte)this.branchType.ordinal());
         // 3. Resource Id
@@ -188,7 +186,12 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
 
     @Override
     public void decode(ByteBuffer byteBuffer) {
-        this.transactionId = byteBuffer.getLong();
+        short xidlen = byteBuffer.getShort();
+        if (xidlen > 0) {
+            byte[] bs = new byte[xidlen];
+            byteBuffer.get(bs);
+            this.setXid(new String(bs, UTF8));
+        }
         this.branchType = BranchType.get(byteBuffer.get());
         short len = byteBuffer.getShort();
         if (len > 0) {
@@ -220,8 +223,8 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append("transactionId=");
-        result.append(transactionId);
+        result.append("xid=");
+        result.append(xid);
         result.append(",");
         result.append("branchType=");
         result.append(branchType);

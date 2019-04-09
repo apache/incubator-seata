@@ -58,7 +58,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
         try {
             BranchRegisterRequest request = new BranchRegisterRequest();
-            request.setTransactionId(XID.getTransactionId(xid));
+            request.setXid(xid);
             request.setLockKey(lockKeys);
             request.setResourceId(resourceId);
             request.setBranchType(branchType);
@@ -89,7 +89,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
     public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
         try {
             BranchReportRequest request = new BranchReportRequest();
-            request.setTransactionId(XID.getTransactionId(xid));
+            request.setXid(xid);
             request.setBranchId(branchId);
             request.setStatus(status);
             request.setApplicationData(applicationData);

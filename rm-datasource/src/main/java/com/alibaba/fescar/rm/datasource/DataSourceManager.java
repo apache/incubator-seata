@@ -77,7 +77,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
         throws TransactionException {
         try {
             GlobalLockQueryRequest request = new GlobalLockQueryRequest();
-            request.setTransactionId(XID.getTransactionId(xid));
+            request.setXid(xid);
             request.setLockKey(lockKeys);
             request.setResourceId(resourceId);
 

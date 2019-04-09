@@ -119,17 +119,17 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     @Override
     protected void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response,
                                     RpcContext rpcContext) throws TransactionException {
-        response.setTransactionId(request.getTransactionId());
+        response.setXid(request.getXid());
         response.setBranchId(
             core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
-                XID.generateXID(request.getTransactionId()), request.getApplicationData(), request.getLockKey()));
+                request.getXid(), request.getApplicationData(), request.getLockKey()));
 
     }
 
     @Override
     protected void doBranchReport(BranchReportRequest request, BranchReportResponse response, RpcContext rpcContext)
         throws TransactionException {
-        core.branchReport(request.getBranchType(), XID.generateXID(request.getTransactionId()), request.getBranchId(), request.getStatus(),
+        core.branchReport(request.getBranchType(), request.getXid(), request.getBranchId(), request.getStatus(),
             request.getApplicationData());
 
     }
@@ -138,7 +138,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     protected void doLockCheck(GlobalLockQueryRequest request, GlobalLockQueryResponse response, RpcContext rpcContext)
         throws TransactionException {
         response.setLockable(core.lockQuery(request.getBranchType(), request.getResourceId(),
-            XID.generateXID(request.getTransactionId()), request.getLockKey()));
+            request.getXid(), request.getLockKey()));
     }
 
     @Override

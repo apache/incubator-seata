@@ -30,26 +30,16 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
 
     private static final long serialVersionUID = 8317040433102745774L;
 
-    private long transactionId;
+    private String xid;
 
     private long branchId;
 
-    /**
-     * Gets transaction id.
-     *
-     * @return the transaction id
-     */
-    public long getTransactionId() {
-        return transactionId;
+    public String getXid() {
+        return xid;
     }
 
-    /**
-     * Sets transaction id.
-     *
-     * @param transactionId the transaction id
-     */
-    public void setTransactionId(long transactionId) {
-        this.transactionId = transactionId;
+    public void setXid(String xid) {
+        this.xid = xid;
     }
 
     /**
@@ -78,7 +68,15 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
     @Override
     protected void doEncode() {
         super.doEncode();
-        byteBuffer.putLong(transactionId);
+        if (this.xid != null) {
+            byte[] bs = xid.getBytes(UTF8);
+            byteBuffer.putShort((short)bs.length);
+            if (bs.length > 0) {
+                byteBuffer.put(bs);
+            }
+        } else {
+            byteBuffer.putShort((short)0);
+        }
         byteBuffer.putLong(branchId);
 
     }
@@ -86,15 +84,20 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
     @Override
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
-        this.transactionId = byteBuffer.getLong();
+        short xidlen = byteBuffer.getShort();
+        if (xidlen > 0) {
+            byte[] bs = new byte[xidlen];
+            byteBuffer.get(bs);
+            this.setXid(new String(bs, UTF8));
+        }
         this.branchId = byteBuffer.getLong();
     }
 
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append("BranchRegisterResponse: transactionId=");
-        result.append(transactionId);
+        result.append("BranchRegisterResponse: xid=");
+        result.append(xid);
         result.append(",");
         result.append("branchId=");
         result.append(branchId);
