@@ -17,6 +17,7 @@
 package com.alibaba.fescar.server.coordinator;
 
 import com.alibaba.fescar.common.XID;
+import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
@@ -58,10 +59,12 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
+                               String applicationData, String lockKeys) throws TransactionException {
         GlobalSession globalSession = assertGlobalSession(XID.getTransactionId(xid), GlobalStatus.Begin);
 
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId, applicationData, lockKeys, clientId);
+        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
+            applicationData, lockKeys, clientId);
 
         if (!branchSession.lock()) {
             throw new TransactionException(LockKeyConflict);
@@ -91,10 +94,12 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
+    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status,
+                             String applicationData) throws TransactionException {
         GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
         if (globalSession == null) {
-            throw new TransactionException(TransactionExceptionCode.GlobalTransactionNotExist, "" + XID.getTransactionId(xid) + "");
+            throw new TransactionException(TransactionExceptionCode.GlobalTransactionNotExist,
+                "" + XID.getTransactionId(xid) + "");
         }
         BranchSession branchSession = globalSession.getBranch(branchId);
         if (branchSession == null) {
@@ -104,7 +109,8 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
+    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
+        throws TransactionException {
         if (branchType == BranchType.AT) {
             return lockManager.isLockable(XID.getTransactionId(xid), resourceId, lockKeys);
         } else {
@@ -114,7 +120,8 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout) throws TransactionException {
+    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
+        throws TransactionException {
         GlobalSession session = GlobalSession.createGlobalSession(
             applicationId, transactionServiceGroup, name, timeout);
         session.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -154,7 +161,8 @@ public class DefaultCore implements Core {
                 continue;
             }
             try {
-                BranchStatus branchStatus = resourceManagerInbound.branchCommit(branchSession.getBranchType(), XID.generateXID(branchSession.getTransactionId()), branchSession.getBranchId(),
+                BranchStatus branchStatus = resourceManagerInbound.branchCommit(branchSession.getBranchType(),
+                    XID.generateXID(branchSession.getTransactionId()), branchSession.getBranchId(),
                     branchSession.getResourceId(), branchSession.getApplicationData());
 
                 switch (branchStatus) {
@@ -192,11 +200,7 @@ public class DefaultCore implements Core {
                 LOGGER.info("Exception committing branch {}", branchSession, ex);
                 if (!retrying) {
                     queueToRetryCommit(globalSession);
-                    if (ex instanceof TransactionException) {
-                        throw (TransactionException)ex;
-                    } else {
-                        throw new TransactionException(ex);
-                    }
+                    throw new TransactionException(ex);
                 }
 
             }
@@ -259,7 +263,8 @@ public class DefaultCore implements Core {
                 continue;
             }
             try {
-                BranchStatus branchStatus = resourceManagerInbound.branchRollback(branchSession.getBranchType(), XID.generateXID(branchSession.getTransactionId()), branchSession.getBranchId(),
+                BranchStatus branchStatus = resourceManagerInbound.branchRollback(branchSession.getBranchType(),
+                    XID.generateXID(branchSession.getTransactionId()), branchSession.getBranchId(),
                     branchSession.getResourceId(), branchSession.getApplicationData());
 
                 switch (branchStatus) {
@@ -284,18 +289,13 @@ public class DefaultCore implements Core {
                 LOGGER.info("Exception rollbacking branch " + branchSession, ex);
                 if (!retrying) {
                     queueToRetryRollback(globalSession);
-                    if (ex instanceof TransactionException) {
-                        throw (TransactionException)ex;
-                    } else {
-                        throw new TransactionException(ex);
-                    }
                 }
-
+                throw new TransactionException(ex);
             }
 
         }
         if (globalSession.hasBranch()) {
-            SessionHelper.endRollbackFailed(globalSession);
+            throw new ShouldNeverHappenException("GlobalRollback error,GID:" + globalSession.getTransactionId());
         } else {
             SessionHelper.endRollbacked(globalSession);
         }
