@@ -36,7 +36,7 @@ public class GlobalSessionTest {
      *
      * @param globalSession the global session
      */
-    @Test(dataProvider = "branchSessionMTProvider")
+    @Test(dataProvider = "branchSessionTCCProvider")
     public void canBeCommittedAsyncTest(GlobalSession globalSession) {
         Assert.assertFalse(globalSession.canBeCommittedAsync());
     }
@@ -169,7 +169,6 @@ public class GlobalSessionTest {
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
-        branchSession.setBranchType(BranchType.AT);
         globalSession.add(branchSession);
         return new Object[][] {{globalSession, branchSession}};
     }
@@ -180,7 +179,7 @@ public class GlobalSessionTest {
      * @return the object [ ] [ ]
      */
     @DataProvider
-    public static Object[][] branchSessionMTProvider() {
+    public static Object[][] branchSessionTCCProvider() {
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(globalSession.getTransactionId());
@@ -188,9 +187,8 @@ public class GlobalSessionTest {
         branchSession.setResourceGroupId("my_test_tx_group");
         branchSession.setResourceId("tb_1");
         branchSession.setLockKey("t_1");
-        branchSession.setBranchType(BranchType.AT);
+        branchSession.setBranchType(BranchType.TCC);
         branchSession.setApplicationData("{\"data\":\"test\"}");
-        branchSession.setBranchType(BranchType.MT);
         globalSession.add(branchSession);
         return new Object[][] {{globalSession}};
     }
