@@ -340,7 +340,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     }
 
     /**
-     * 用于测试。发现线程池满时可以打开这个变量，把堆栈打出来分享
+     * For testing. When the thread pool is full, you can change this variable and share the stack
      */
     boolean allowDumpStack = false;
 

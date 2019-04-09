@@ -16,13 +16,6 @@
 
 package com.alibaba.fescar.rm.datasource;
 
-import com.alibaba.fescar.core.protocol.FragmentXID;
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
-
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
@@ -35,6 +28,7 @@ import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.Resource;
 import com.alibaba.fescar.core.model.ResourceManagerInbound;
+import com.alibaba.fescar.core.protocol.FragmentXID;
 import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryRequest;
 import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryResponse;
@@ -45,7 +39,11 @@ import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
 import com.alibaba.fescar.rm.AbstractResourceManager;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
-
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,9 +83,9 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
 
             GlobalLockQueryResponse response = null;
             if (RootContext.inGlobalTransaction()) {
-                response = (GlobalLockQueryResponse)RmRpcClient.getInstance().sendMsgWithResponse(request);
+                response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
             } else if (RootContext.requireGlobalLock()) {
-                response = (GlobalLockQueryResponse)RmRpcClient.getInstance().sendMsgWithResponse(loadBalance(),
+                response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(loadBalance(),
                     request, NettyClientConfig.getRpcRequestTimeout());
             } else {
                 throw new RuntimeException("unknow situation!");
@@ -122,28 +120,6 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
         return NetUtil.toStringAddress(address);
     }
 
-    private static class SingletonHolder {
-        private static DataSourceManager INSTANCE = new DataSourceManager(true);
-    }
-
-    /**
-     * Get data source manager.
-     *
-     * @return the data source manager
-     */
-    public static DataSourceManager get() {
-        return SingletonHolder.INSTANCE;
-    }
-
-    /**
-     * Set.
-     *
-     * @param mock the mock
-     */
-    public static void set(DataSourceManager mock) {
-        SingletonHolder.INSTANCE = mock;
-    }
-
     /**
      * Init.
      *
@@ -159,15 +135,8 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     public DataSourceManager() {
     }
 
-    public DataSourceManager(boolean isInit) {
-        if(isInit){
-            init();
-        }
-
-    }
-
     @Override
-    public void init(){
+    public void init() {
         AsyncWorker asyncWorker = new AsyncWorker();
         asyncWorker.init();
         initAsyncWorker(asyncWorker);
@@ -192,16 +161,18 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
      * @return the data source proxy
      */
     public DataSourceProxy get(String resourceId) {
-        return (DataSourceProxy)dataSourceCache.get(resourceId);
+        return (DataSourceProxy) dataSourceCache.get(resourceId);
     }
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, FragmentXID xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(BranchType branchType, FragmentXID xid, long branchId, String resourceId,
+        String applicationData) throws TransactionException {
         return asyncWorker.branchCommit(branchType, xid, branchId, resourceId, applicationData);
     }
 
     @Override
-    public BranchStatus branchRollback(BranchType branchType, FragmentXID xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(BranchType branchType, FragmentXID xid, long branchId, String resourceId,
+        String applicationData) throws TransactionException {
         DataSourceProxy dataSourceProxy = get(resourceId);
         if (dataSourceProxy == null) {
             throw new ShouldNeverHappenException();
@@ -225,7 +196,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     }
 
     @Override
-    public BranchType getBranchType(){
+    public BranchType getBranchType() {
         return BranchType.AT;
     }
 

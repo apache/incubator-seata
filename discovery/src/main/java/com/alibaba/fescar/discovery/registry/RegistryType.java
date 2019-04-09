@@ -44,7 +44,11 @@ public enum RegistryType {
     /**
      * Eureka registry type.
      */
-    Eureka;
+    Eureka,
+    /**
+     * Consul registry type
+     */
+    Consul;
 
     /**
      * Gets type.
@@ -63,8 +67,10 @@ public enum RegistryType {
             return Eureka;
         } else if (ZK.name().equalsIgnoreCase(name)) {
             return ZK;
+        } else if (Consul.name().equalsIgnoreCase(name)) {
+            return Consul;
         } else {
-            throw new NotSupportYetException("unsupport type:" + name);
+            throw new NotSupportYetException("unsupported type:" + name);
         }
     }
 }
