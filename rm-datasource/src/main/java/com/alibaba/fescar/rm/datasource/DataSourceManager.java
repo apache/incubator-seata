@@ -16,19 +16,13 @@
 
 package com.alibaba.fescar.rm.datasource;
 
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
-
 import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
+import com.alibaba.fescar.common.executor.Initialize;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.context.RootContext;
-import com.alibaba.fescar.common.executor.Initialize;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
@@ -45,14 +39,21 @@ import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
 import com.alibaba.fescar.rm.AbstractResourceManager;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
 
 import static com.alibaba.fescar.common.exception.FrameworkErrorCode.NoAvailableService;
 
 /**
  * The type Data source manager.
+ *
+ * @author sharajava
  */
 public class DataSourceManager extends AbstractResourceManager implements Initialize {
 
@@ -119,28 +120,6 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
         return NetUtil.toStringAddress(address);
     }
 
-    private static class SingletonHolder {
-        private static DataSourceManager INSTANCE = new DataSourceManager(true);
-    }
-
-    /**
-     * Get data source manager.
-     *
-     * @return the data source manager
-     */
-    public static DataSourceManager get() {
-        return SingletonHolder.INSTANCE;
-    }
-
-    /**
-     * Set.
-     *
-     * @param mock the mock
-     */
-    public static void set(DataSourceManager mock) {
-        SingletonHolder.INSTANCE = mock;
-    }
-
     /**
      * Init.
      *
@@ -154,13 +133,6 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
      * Instantiates a new Data source manager.
      */
     public DataSourceManager() {
-    }
-
-    public DataSourceManager(boolean isInit) {
-        if(isInit){
-            init();
-        }
-
     }
 
     @Override

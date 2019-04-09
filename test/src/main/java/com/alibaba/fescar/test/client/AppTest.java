@@ -16,12 +16,13 @@
 
 package com.alibaba.fescar.test.client;
 
-import com.alibaba.fescar.rm.RMClientAT;
+import com.alibaba.fescar.rm.RMClient;
 import com.alibaba.fescar.test.common.ApplicationKeeper;
 import com.alibaba.fescar.tm.TMClient;
 import com.alibaba.fescar.tm.api.TransactionalExecutor;
 import com.alibaba.fescar.tm.api.TransactionalTemplate;
 
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -29,6 +30,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * The type App test.
+ *
+ * @author sharajava
  */
 public class AppTest {
 
@@ -44,7 +47,7 @@ public class AppTest {
      */
     public static void main(String[] args) {
         TMClient.init(APPLICATION_ID, TX_SERVICE_GROUP);
-        RMClientAT.init(APPLICATION_ID, TX_SERVICE_GROUP);
+        RMClient.init(APPLICATION_ID, TX_SERVICE_GROUP);
 
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
             "basic-test-context.xml");
@@ -53,57 +56,21 @@ public class AppTest {
             .getBean("jdbcTemplate");
 
         jdbcTemplate.update("delete from undo_log");
-        jdbcTemplate.update("update user0 set name = 'yyy' where id = 1");
-        jdbcTemplate.update("delete from user0 where id = 2");
-        jdbcTemplate.update("delete from user0 where id = 3");
-        jdbcTemplate.update("insert into user0 (id, name, gmt) values (3, '2bd', '2019-01-01')");
+        jdbcTemplate.update("delete from user0");
+        jdbcTemplate.update("insert into user0 (id, name, gmt) values (1, 'user0', '2019-01-01')");
         jdbcTemplate.update("delete from user1");
-
-        // 0.1 prepare for the template instance
+        final MyBusinessException bizException = new MyBusinessException("mock bizException");
         TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
-
         try {
-            // run you business in template
-            //            transactionalTemplate.execute(new TransactionalExecutor() {
-            //                @Override
-            //                public Object execute() throws Throwable {
-            //                    LOGGER.info("Normal Committing Business Begin ...");
-            //                    jdbcTemplate.update("update user0 set name = 'xxx' where id = ?", new Object[]{1});
-            //                    return null;
-            //                }
-            //
-            //                @Override
-            //                public int timeout() {
-            //                    return 10000;
-            //                }
-            //
-            //                @Override
-            //                public String name() {
-            //                    return "my_tx_instance";
-            //                }
-            //            });
-
             transactionalTemplate.execute(new TransactionalExecutor() {
                 @Override
                 public Object execute() throws Throwable {
-                    LOGGER.info("Exception Rollback Business Begin ...");
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("Exception Rollback Business Begin ...");
+                    }
                     jdbcTemplate.update("update user0 set name = 'xxx' where id = ?", new Object[] {1});
-                    //                    jdbcTemplate.update("insert into user0 (id, name, gmt) values (?, ?, now())
-                    // ", new Object[] {2, "abc"});
-                    //                    jdbcTemplate.update("insert into user1 (name, gmt) values (?, now())", new
-                    // Object[] {"abc"});
-                    //                    jdbcTemplate.update(new PreparedStatementCreator() {
-                    //                        @Override
-                    //                        public PreparedStatement createPreparedStatement(Connection con) throws
-                    // SQLException {
-                    //                            PreparedStatement pst = con.prepareStatement("insert into user1
-                    // (name, gmt) values (?, now())", Statement.RETURN_GENERATED_KEYS);
-                    //                            pst.setObject(1, "abc");
-                    //                            return pst;
-                    //                        }
-                    //                    });
-                    //                    jdbcTemplate.update("delete from user0 where id = ?", new Object[] {3});
-                    throw new MyBusinessException("xxxxxx");
+                    jdbcTemplate.update("insert into user1 (id, name, gmt) values (1, 'user1', '2019-01-01')");
+                    throw bizException;
                 }
 
                 @Override
@@ -116,41 +83,19 @@ public class AppTest {
                     return "my_tx_instance";
                 }
             });
-
-            //            transactionalTemplate.execute(new TransactionalExecutor() {
-            //                @Override
-            //                public Object execute() throws Throwable {
-            //                    LOGGER.info("Timeout Business Begin ...");
-            //                    jdbcTemplate.update("update user0 set name = 'xxx' where id = ?", new Object[] {1});
-            //                    Thread.sleep(20000); // Test timeout
-            //                    return null;
-            //                }
-            //
-            //                @Override
-            //                public int timeout() {
-            //                    return 10000;
-            //                }
-            //
-            //                @Override
-            //                public String name() {
-            //                    return "my_tx_instance";
-            //                }
-            //            });
         } catch (TransactionalExecutor.ExecutionException e) {
             TransactionalExecutor.Code code = e.getCode();
             if (code == TransactionalExecutor.Code.RollbackDone) {
                 Throwable businessEx = e.getOriginalException();
                 if (businessEx instanceof MyBusinessException) {
-                    LOGGER.info(((MyBusinessException)businessEx).getBusinessErrorCode());
+                    Assert.assertEquals(((MyBusinessException)businessEx).getBusinessErrorCode(),
+                        bizException.businessErrorCode);
                 }
-
             } else {
-                Throwable cause = e.getCause();
-                cause.printStackTrace();
+                Assert.assertFalse("Not expected," + e.getMessage(), false);
 
             }
         }
-
         new ApplicationKeeper(context).keep();
 
     }

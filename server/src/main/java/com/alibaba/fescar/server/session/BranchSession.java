@@ -16,22 +16,38 @@
 
 package com.alibaba.fescar.server.session;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.alibaba.fescar.common.util.CompressUtil;
+import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.server.lock.LockManagerFactory;
+import com.alibaba.fescar.server.store.FileTransactionStoreManager;
 import com.alibaba.fescar.server.store.SessionStorable;
+import com.alibaba.fescar.server.store.StoreConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Branch session.
+ *
+ * @author sharajava
  */
 public class BranchSession implements Lockable, Comparable<BranchSession>, SessionStorable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(BranchSession.class);
+
+    private static final int MAX_BRANCH_SESSION_SIZE =  StoreConfig.getMaxBranchSessionSize();
+
+    private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
+            MAX_BRANCH_SESSION_SIZE));
 
     private long transactionId;
 
@@ -268,42 +284,94 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public byte[] encode() {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(2048);
+
+        byte[] resourceIdBytes = resourceId != null ? resourceId.getBytes() : null;
+
+        byte[] lockKeyBytes = lockKey != null ? lockKey.getBytes() : null;
+
+        byte[] clientIdBytes = clientId != null ? clientId.getBytes() : null;
+
+        byte[] applicationDataBytes = applicationData != null ? applicationData.getBytes() : null;
+
+        int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes);
+
+
+        if (size > MAX_BRANCH_SESSION_SIZE){
+            if (lockKeyBytes == null){
+                throw new RuntimeException("branch session size exceeded, size : " + size + " maxBranchSessionSize : " + MAX_BRANCH_SESSION_SIZE);
+            }
+            // try compress lockkey
+            try {
+                size -= lockKeyBytes.length;
+                lockKeyBytes = CompressUtil.compress(lockKeyBytes);
+            }catch (IOException e){
+                LOGGER.error("compress lockKey error", e);
+            }finally {
+                size += lockKeyBytes.length;
+            }
+
+            if (size > MAX_BRANCH_SESSION_SIZE){
+                throw new RuntimeException("compress branch session size exceeded, compressSize : " + size + " maxBranchSessionSize : " + MAX_BRANCH_SESSION_SIZE);
+            }
+        }
+
+        ByteBuffer byteBuffer = byteBufferThreadLocal.get();
+        //recycle
+        byteBuffer.clear();
+
+
         byteBuffer.putLong(transactionId);
         byteBuffer.putLong(branchId);
-        if (null != resourceId) {
-            byte[] resourceIdBytes = resourceId.getBytes();
+
+        if (null != resourceIdBytes) {
             byteBuffer.putInt(resourceIdBytes.length);
             byteBuffer.put(resourceIdBytes);
         } else {
             byteBuffer.putInt(0);
         }
-        if (null != lockKey) {
-            byte[] lockKeyBytes = lockKey.getBytes();
+
+        if (null != lockKeyBytes) {
             byteBuffer.putInt(lockKeyBytes.length);
             byteBuffer.put(lockKeyBytes);
         } else {
             byteBuffer.putInt(0);
         }
-        if (null != clientId) {
-            byte[] clientIdBytes = clientId.getBytes();
+
+        if (null != clientIdBytes) {
             byteBuffer.putShort((short)clientIdBytes.length);
             byteBuffer.put(clientIdBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
-        if (null != applicationData) {
-            byte[] applicationDataBytes = applicationData.getBytes();
+
+        if (null != applicationDataBytes) {
             byteBuffer.putInt(applicationDataBytes.length);
             byteBuffer.put(applicationDataBytes);
         } else {
             byteBuffer.putInt(0);
         }
+
         byteBuffer.put((byte)status.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
         return result;
+    }
+
+    private int calBranchSessionSize(byte[] resourceIdBytes, byte[] lockKeyBytes, byte[] clientIdBytes,
+                                     byte[] applicationDataBytes) {
+        final int size = 8 // trascationId
+                + 8 // branchId
+                + 4 // resourceIdBytes.length
+                + 4 // lockKeyBytes.length
+                + 2 // clientIdBytes.length
+                + 4 // applicationDataBytes.length
+                + 1 // statusCode
+                + (resourceIdBytes == null ? 0 : resourceIdBytes.length)
+                + (lockKeyBytes == null ? 0 : lockKeyBytes.length)
+                + (clientIdBytes == null ? 0 : clientIdBytes.length)
+                + (applicationDataBytes == null ? 0 : applicationDataBytes.length);
+        return size;
     }
 
     @Override
@@ -321,7 +389,16 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         if (lockKeyLen > 0) {
             byte[] byLockKey = new byte[lockKeyLen];
             byteBuffer.get(byLockKey);
-            this.lockKey = new String(byLockKey);
+            if (CompressUtil.isCompressData(byLockKey)){
+                try {
+                    this.lockKey = new String(CompressUtil.uncompress(byLockKey));
+                }catch (IOException e){
+                    throw new RuntimeException("uncompress lockKey error", e);
+                }
+            }else {
+                this.lockKey = new String(byLockKey);
+            }
+
         }
         short clientIdLen = byteBuffer.getShort();
         if (clientIdLen > 0) {

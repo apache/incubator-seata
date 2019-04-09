@@ -18,6 +18,8 @@ package com.alibaba.fescar.core.model;
 
 /**
  * The enum Branch type.
+ *
+ * @author sharajava
  */
 public enum BranchType {
 
@@ -26,12 +28,6 @@ public enum BranchType {
      */
     // AT Branch
     AT,
-
-    /**
-     * The Mt.
-     */
-    // MT Branch
-    MT,
     
     /**
      * The TCC.

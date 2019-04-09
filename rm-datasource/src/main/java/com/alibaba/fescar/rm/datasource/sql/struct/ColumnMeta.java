@@ -18,6 +18,8 @@ package com.alibaba.fescar.rm.datasource.sql.struct;
 
 /**
  * The type Column meta.
+ *
+ * @author sharajava
  */
 public class ColumnMeta {
     private String tableCat;

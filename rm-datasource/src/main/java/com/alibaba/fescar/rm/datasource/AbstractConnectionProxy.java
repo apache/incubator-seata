@@ -16,6 +16,8 @@
 
 package com.alibaba.fescar.rm.datasource;
 
+import com.alibaba.fescar.core.context.RootContext;
+
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -35,10 +37,10 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-import com.alibaba.fescar.core.context.RootContext;
-
 /**
  * The type Abstract connection proxy.
+ *
+ * @author sharajava
  */
 public abstract class AbstractConnectionProxy implements Connection {
 
@@ -53,21 +55,14 @@ public abstract class AbstractConnectionProxy implements Connection {
     protected Connection targetConnection;
 
     /**
-     * The Db type.
-     */
-    protected String dbType;
-
-    /**
      * Instantiates a new Abstract connection proxy.
      *
      * @param dataSourceProxy  the data source proxy
      * @param targetConnection the target connection
-     * @param dbType           the db type
      */
-    public AbstractConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection, String dbType) {
+    public AbstractConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
         this.dataSourceProxy = dataSourceProxy;
         this.targetConnection = targetConnection;
-        this.dbType = dbType;
     }
 
     /**
@@ -94,7 +89,7 @@ public abstract class AbstractConnectionProxy implements Connection {
      * @return the db type
      */
     public String getDbType() {
-        return dbType;
+        return dataSourceProxy.getDbType();
     }
 
     @Override

@@ -22,6 +22,8 @@ import com.alibaba.fescar.core.protocol.AbstractMessage;
 
 /**
  * The type Global begin response.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class GlobalBeginResponse extends AbstractTransactionResponse {
 

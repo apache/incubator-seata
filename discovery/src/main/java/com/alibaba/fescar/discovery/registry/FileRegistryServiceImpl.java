@@ -98,4 +98,9 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
         }
         return inetSocketAddresses;
     }
+
+    @Override
+    public void close() throws Exception {
+
+    }
 }

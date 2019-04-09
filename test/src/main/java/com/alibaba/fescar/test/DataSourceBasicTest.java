@@ -16,12 +16,18 @@
 
 package com.alibaba.fescar.test;
 
+import java.util.Date;
+import java.util.concurrent.atomic.AtomicLong;
+
 import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
-import com.alibaba.fescar.core.model.Resource;
+import com.alibaba.fescar.rm.DefaultResourceManager;
+import com.alibaba.fescar.rm.RMClient;
 import com.alibaba.fescar.rm.datasource.DataSourceManager;
+import com.alibaba.fescar.tm.TMClient;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -29,93 +35,26 @@ import org.junit.Test;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import java.util.Date;
-
 /**
  * The type Data source basic test.
+ *
+ * @author sharajava
  */
 @Ignore
 public class DataSourceBasicTest {
-
-    private static String TABLE_CREATE_SQL = "CREATE TABLE `user0` (\n"
-        + "  `id` int(11) NOT NULL,\n"
-        + "  `name` varchar(255) DEFAULT NULL,\n"
-        + "  `gmt` datetime DEFAULT NULL,\n"
-        + "  PRIMARY KEY (`id`)\n"
-        + ") ENGINE=InnoDB DEFAULT CHARSET=utf8";
 
     private static ClassPathXmlApplicationContext context;
     private static JdbcTemplate jdbcTemplate;
     private static JdbcTemplate directJdbcTemplate;
 
-    /**
-     * Test insert.
-     */
-    @Test
-    public void testInsert() {
-        RootContext.bind("mock.xid");
-        jdbcTemplate.update("insert into user0 (id, name, gmt) values (?, ?, ?)",
-            new Object[] {2, "xxx", new Date()});
-    }
+    private static final String APPLICATION_ID = "my_test_app";
+    private static final String TX_SERVICE_GROUP = "my_test_tx_group";
+    private static final long GID = 12345678L;
+    private static final AtomicLong INC_LONG = new AtomicLong(1);
 
-    /**
-     * Test update.
-     */
-    @Test
-    public void testUpdate() {
-        RootContext.bind("mock.xid");
-        jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.id = ?", new Object[] {1});
-    }
-
-    /**
-     * Test update with alias 1.
-     */
-    @Test
-    public void testUpdateWithAlias1() {
-
-        directJdbcTemplate.update("delete from User1 where Id = ?",
-            new Object[] {1});
-        directJdbcTemplate.update("insert into User1 (Id, Name, gMt) values (?, ?, ?)",
-            new Object[] {1, "xxx", new Date()});
-
-        RootContext.bind("mock.xid");
-        jdbcTemplate.update("update User1 a set a.Name = 'yyy' where a.Name = ?", new Object[] {"xxx"});
-    }
-
-    /**
-     * Test update with alias.
-     */
-    @Test
-    public void testUpdateWithAlias() {
-        RootContext.bind("mock.xid");
-        jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.name = ?", new Object[] {"yyyy"});
-    }
-
-    /**
-     * Test delete.
-     */
-    @Test
-    public void testDelete() {
-        RootContext.bind("mock.xid");
-        jdbcTemplate.update("delete from user0 where id = ?", new Object[] {2});
-    }
-
-    /**
-     * Test select for update.
-     */
-    @Test
-    public void testSelectForUpdate() {
-        RootContext.bind("mock.xid");
-        jdbcTemplate.queryForRowSet("select a.name from user0 a where a.id = ? for update", new Object[] {1});
-    }
-
-    /**
-     * Test select for update with alias.
-     */
-    @Test
-    public void testSelectForUpdateWithAlias() {
-        RootContext.bind("mock.xid");
-        jdbcTemplate.queryForRowSet("select a.name from user0 a where a.id = ? for update", new Object[] {1});
+    private static void initClient() {
+        TMClient.init(APPLICATION_ID, TX_SERVICE_GROUP);
+        RMClient.init(APPLICATION_ID, TX_SERVICE_GROUP);
     }
 
     /**
@@ -123,46 +62,36 @@ public class DataSourceBasicTest {
      */
     @BeforeClass
     public static void before() {
+        initClient();
         // Mock DataSourceManager
-        DataSourceManager.set(new DataSourceManager() {
+        DefaultResourceManager.mockResourceManager(BranchType.AT, new DataSourceManager() {
 
             @Override
             public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                        String applicationData, String lockKeys) throws TransactionException {
-                return 123456L;
+                return GID + INC_LONG.incrementAndGet();
             }
 
             @Override
-            public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData)
-                throws TransactionException {
+            public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status,
+                                     String applicationData) {
 
             }
 
             @Override
-            public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
-                throws TransactionException {
+            public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) {
                 return true;
             }
 
             @Override
-            public void registerResource(Resource resource) {
-
-            }
-
-            @Override
-            public void unregisterResource(Resource resource) {
-
-            }
-
-            @Override
-            public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
-                throws TransactionException {
+            public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
+                                             String applicationData) {
                 return BranchStatus.PhaseTwo_Committed;
             }
 
             @Override
-            public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
-                throws TransactionException {
+            public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
+                                               String applicationData) {
                 return BranchStatus.PhaseTwo_Rollbacked;
             }
         });
@@ -173,6 +102,8 @@ public class DataSourceBasicTest {
             .getBean("jdbcTemplate");
         directJdbcTemplate = (JdbcTemplate)context
             .getBean("directJdbcTemplate");
+        RootContext.bind("127.0.0.1:8091:" + GID);
+        directJdbcTemplate.update("delete from undo_log");
 
     }
 
@@ -181,8 +112,73 @@ public class DataSourceBasicTest {
      */
     @AfterClass
     public static void after() {
+        RootContext.unbind();
         if (context != null) {
             context.close();
         }
+    }
+
+    /**
+     * Test update.
+     */
+    @Test
+    public void testUpdate() {
+        jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.id = ?", new Object[] {1});
+    }
+
+    /**
+     * Test update with alias.
+     */
+    @Test
+    public void testUpdateWithAlias() {
+        jdbcTemplate.update("update user0 a set a.name = 'yyyy' where a.name = ?", new Object[] {"yyyy"});
+    }
+
+    /**
+     * Test delete.
+     */
+    @Test
+    public void testDelete() {
+        jdbcTemplate.update("delete from user0 where id = ?", new Object[] {2});
+    }
+
+    /**
+     * Test select for update.
+     */
+    @Test
+    public void testSelectForUpdate() {
+        jdbcTemplate.queryForRowSet("select a.name from user0 a where a.id = ? for update", new Object[] {1});
+    }
+
+    /**
+     * Test select for update with alias.
+     */
+    @Test
+    public void testSelectForUpdateWithAlias() {
+        jdbcTemplate.queryForRowSet("select a.name from user0 a where a.id = ? for update", new Object[] {1});
+    }
+
+    /**
+     * Test insert.
+     */
+    @Test
+    public void testInsert() {
+        directJdbcTemplate.update("delete from user0 where id = ?",
+            new Object[] {2});
+        jdbcTemplate.update("insert into user0 (id, name, gmt) values (?, ?, ?)",
+            new Object[] {2, "xxx", new Date()});
+    }
+
+    /**
+     * Test update with alias 1.
+     */
+    @Test
+    public void testUpdateWithAlias1() {
+
+        directJdbcTemplate.update("delete from user1 where Id = ?",
+            new Object[] {1});
+        directJdbcTemplate.update("insert into user1 (Id, Name, gMt) values (?, ?, ?)",
+            new Object[] {1, "xxx", new Date()});
+        jdbcTemplate.update("update user1 a set a.Name = 'yyy' where a.Name = ?", new Object[] {"xxx"});
     }
 }

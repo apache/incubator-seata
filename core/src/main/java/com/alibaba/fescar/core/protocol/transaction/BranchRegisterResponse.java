@@ -23,6 +23,8 @@ import com.alibaba.fescar.core.protocol.AbstractMessage;
 
 /**
  * The type Branch register response.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class BranchRegisterResponse extends AbstractTransactionResponse implements Serializable {
 

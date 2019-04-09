@@ -35,6 +35,8 @@ import com.alibaba.fescar.rm.datasource.sql.SQLType;
 
 /**
  * The type My sql select for update recognizer.
+ *
+ * @author sharajava
  */
 public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQLSelectRecognizer {
 

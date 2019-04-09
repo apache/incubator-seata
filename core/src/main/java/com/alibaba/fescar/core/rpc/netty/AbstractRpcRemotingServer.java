@@ -18,6 +18,8 @@ package com.alibaba.fescar.core.rpc.netty;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
@@ -52,7 +54,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     private final EventLoopGroup eventLoopGroupBoss;
     private final NettyServerConfig nettyServerConfig;
     private int listenPort;
-
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
     /**
      * Sets listen port.
      *
@@ -150,6 +152,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
             ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
             LOGGER.info("Server started ... ");
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+            initialized.set(true);
             future.channel().closeFuture().sync();
         } catch (Exception exx) {
             throw new RuntimeException(exx);
@@ -157,9 +160,20 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
 
     }
 
+
     @Override
     public void shutdown() {
         try {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Shuting server down. ");
+            }
+            if (initialized.get()){
+                RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+                RegistryFactory.getInstance().close();
+                //wait a few seconds for server transport
+                TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
+            }
+
             this.eventLoopGroupBoss.shutdownGracefully();
             this.eventLoopGroupWorker.shutdownGracefully();
         } catch (Exception exx) {

@@ -23,6 +23,8 @@ import com.alibaba.fescar.core.rpc.RpcContext;
 
 /**
  * The type Global begin request.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class GlobalBeginRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 

@@ -20,6 +20,8 @@ import com.alibaba.fescar.core.rpc.RpcContext;
 
 /**
  * The type Global rollback request.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class GlobalRollbackRequest extends AbstractGlobalEndRequest {
     @Override

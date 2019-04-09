@@ -21,6 +21,8 @@ import com.alibaba.fescar.core.constants.ConfigurationKeys;
 
 /**
  * The type Lock retry controller.
+ *
+ * @author sharajava
  */
 public class LockRetryController {
 
