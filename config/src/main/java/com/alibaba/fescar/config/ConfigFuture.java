@@ -81,7 +81,7 @@ public class ConfigFuture {
      * @throws InterruptedException the interrupted exception
      */
     public Object get() {
-        return get(DEFAULT_CONFIG_TIMEOUT, TimeUnit.MILLISECONDS);
+        return get(this.timeoutMills, TimeUnit.MILLISECONDS);
     }
 
     /**

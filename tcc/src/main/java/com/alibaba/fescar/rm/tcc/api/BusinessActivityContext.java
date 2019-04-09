@@ -23,7 +23,7 @@ import java.util.Map;
 import com.alibaba.fescar.common.Constants;
 
 /**
- * 主事务记录上下文信息
+ * The type Business activity context.
  *
  * @author zhangsen
  */
@@ -60,16 +60,16 @@ public class BusinessActivityContext implements Serializable {
     }
 
     /**
-     * 获取本次分布式事务的开启时间
+     * Fetch start time long.
      *
-     * @return long long
+     * @return the long
      */
     public Long fetchStartTime() {
         return (Long) context.get(Constants.START_TIME);
     }
 
     /**
-     * 获取应用自定义的参数
+     * Get context object.
      *
      * @param key the key
      * @return the object

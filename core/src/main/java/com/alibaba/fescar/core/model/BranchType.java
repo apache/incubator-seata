@@ -28,12 +28,6 @@ public enum BranchType {
      */
     // AT Branch
     AT,
-
-    /**
-     * The Mt.
-     */
-    // MT Branch
-    MT,
     
     /**
      * The TCC.

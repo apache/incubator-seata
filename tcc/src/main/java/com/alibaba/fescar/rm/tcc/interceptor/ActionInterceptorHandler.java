@@ -65,8 +65,8 @@ public class ActionInterceptorHandler {
         actionContext.setXid(xid);
         //set action anme
         actionContext.setActionName(actionName);
-        //TODO fescar当前版本暂无主事务记录上下文
-        
+        //TODO fescar
+
         //Creating Branch Record
         String branchId = doTccActionLogStore(method, arguments, businessAction, actionContext);
         actionContext.setBranchId(branchId);
