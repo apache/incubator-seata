@@ -158,6 +158,7 @@ public class DefaultCore implements Core {
         for (BranchSession branchSession : globalSession.getSortedBranches()) {
             BranchStatus currentStatus = branchSession.getStatus();
             if (currentStatus == BranchStatus.PhaseOne_Failed) {
+                globalSession.removeBranch(branchSession);
                 continue;
             }
             try {
@@ -260,6 +261,7 @@ public class DefaultCore implements Core {
         for (BranchSession branchSession : globalSession.getReverseSortedBranches()) {
             BranchStatus currentBranchStatus = branchSession.getStatus();
             if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
+                globalSession.removeBranch(branchSession);
                 continue;
             }
             try {
