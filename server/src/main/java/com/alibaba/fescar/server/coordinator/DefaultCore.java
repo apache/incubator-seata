@@ -197,7 +197,7 @@ public class DefaultCore implements Core {
                 }
 
             } catch (Exception ex) {
-                LOGGER.info("Exception committing branch {}", branchSession, ex);
+                LOGGER.error("Exception committing branch {}", branchSession, ex);
                 if (!retrying) {
                     queueToRetryCommit(globalSession);
                     throw new TransactionException(ex);
@@ -287,7 +287,7 @@ public class DefaultCore implements Core {
 
                 }
             } catch (Exception ex) {
-                LOGGER.info("Exception rollbacking branch " + branchSession, ex);
+                LOGGER.error("Exception rollbacking branch " + branchSession, ex);
                 if (!retrying) {
                     queueToRetryRollback(globalSession);
                 }
