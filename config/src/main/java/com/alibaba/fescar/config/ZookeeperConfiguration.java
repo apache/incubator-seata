@@ -49,9 +49,11 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
     private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_CONFIG;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
     private static final String SERVER_ADDR_KEY = "serverAddr";
-    private static final String SESSION_TIME_OUT_KEY = "session.timeout";
-    private static final String CONNECT_TIME_OUT_KEY = "connect.timeout";
+    private static final String SESSION_TIMEOUT_KEY = "session.timeout";
+    private static final String CONNECT_TIMEOUT_KEY = "connect.timeout";
     private static final int THREAD_POOL_NUM = 1;
+    private static final int DEFAULT_SESSION_TIMEOUT = 6000;
+    private static final int DEFAULT_CONNECT_TIMEOUT = 2000;
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
         + FILE_CONFIG_SPLIT_CHAR;
     private static final ExecutorService CONFIG_EXECUTOR = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
@@ -61,9 +63,13 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
 
     public ZookeeperConfiguration() {
         if (zkClient == null) {
-            zkClient = new ZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
-                FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY),
-                FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY));
+            synchronized (ZookeeperConfiguration.class) {
+                if (null == zkClient) {
+                    zkClient = new ZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
+                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIMEOUT_KEY, DEFAULT_SESSION_TIMEOUT),
+                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIMEOUT_KEY, DEFAULT_CONNECT_TIMEOUT));
+                }
+            }
             if (!zkClient.exists(ROOT_PATH)) {
                 zkClient.createPersistent(ROOT_PATH, true);
             }
