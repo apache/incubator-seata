@@ -295,9 +295,7 @@ public class DefaultCore implements Core {
             }
 
         }
-        if (!globalSession.hasBranch()) {
-            SessionHelper.endRollbacked(globalSession);
-        }
+        SessionHelper.endRollbacked(globalSession);
     }
 
     @Override
