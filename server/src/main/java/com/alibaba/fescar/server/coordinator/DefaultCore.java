@@ -17,7 +17,6 @@
 package com.alibaba.fescar.server.coordinator;
 
 import com.alibaba.fescar.common.XID;
-import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
@@ -296,9 +295,7 @@ public class DefaultCore implements Core {
             }
 
         }
-        if (globalSession.hasBranch()) {
-            throw new ShouldNeverHappenException("GlobalRollback error,GID:" + globalSession.getTransactionId());
-        } else {
+        if (!globalSession.hasBranch()) {
             SessionHelper.endRollbacked(globalSession);
         }
     }
