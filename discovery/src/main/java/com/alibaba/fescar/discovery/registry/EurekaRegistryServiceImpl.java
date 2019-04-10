@@ -212,9 +212,6 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         if (eurekaClient == null) {
             synchronized (EurekaRegistryServiceImpl.class) {
                 try {
-                    if (eurekaClient != null) {
-                        return eurekaClient;
-                    }
                     if (!needRegister) {
                         instanceConfig = new CustomEurekaInstanceConfig();
                     }
