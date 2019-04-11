@@ -127,7 +127,6 @@ public class TmRpcClientTest {
         String applicationId = "app 1";
         String transactionServiceGroup = "my_test_tx_group";
         TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
-
         tmRpcClient.init();
 
         Method doConnectMethod = TmRpcClient.class.getDeclaredMethod("doConnect", String.class);
