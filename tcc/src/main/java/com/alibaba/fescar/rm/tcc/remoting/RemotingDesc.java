@@ -44,17 +44,17 @@ public class RemotingDesc {
 	private String interfaceClassName ;
 	
 	/**
-	 * rpc uniqueId: hsf、dubbo的version、sofa-rpc 的 uniqueId
+	 * rpc uniqueId: hsf、dubbo's version、sofa-rpc's uniqueId
 	 */
 	private String uniqueId ;
 	
 	/**
-	 * dubbo/hsf 的group 分组
+	 * dubbo/hsf 's group
 	 */
 	private String group;
 	
 	/**
-	 * protocol: sofa-rpc、dubbo、injvm 等
+	 * protocol: sofa-rpc、dubbo、injvm etc.
 	 */
 	private short protocol;
 

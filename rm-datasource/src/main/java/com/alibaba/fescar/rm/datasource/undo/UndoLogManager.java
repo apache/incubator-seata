@@ -126,7 +126,7 @@ public final class UndoLogManager {
      * @throws TransactionException the transaction exception
      */
     public static void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {
-        assertDbSupport(dataSourceProxy.getTargetDataSource().getDbType());
+        assertDbSupport(dataSourceProxy.getDbType());
 
         Connection conn = null;
         ResultSet rs = null;

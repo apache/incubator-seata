@@ -16,21 +16,27 @@
 
 package com.alibaba.fescar.discovery.registry;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
+import com.alibaba.fescar.common.util.CollectionUtils;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
-import com.alibaba.nacos.client.naming.utils.CollectionUtils;
-
 import org.I0Itec.zkclient.IZkChildListener;
+import org.I0Itec.zkclient.IZkStateListener;
 import org.I0Itec.zkclient.ZkClient;
+import org.apache.zookeeper.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static com.alibaba.fescar.common.Constants.IP_PORT_SPLIT_CHAR;
 
@@ -63,6 +69,9 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<IZkChildListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
 
+    private static final int REGISTERED_PATH_SET_SIZE = 1;
+    private static final Set<String> REGISTERED_PATH_SET = Collections.synchronizedSet(new HashSet<>(REGISTERED_PATH_SET_SIZE));
+
     private ZookeeperRegisterServiceImpl() {}
 
     public static ZookeeperRegisterServiceImpl getInstance() {
@@ -81,7 +90,21 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         NetUtil.validAddress(address);
 
         String path = getRegisterPathByPath(address);
-        getClientInstance().createPersistent(path, true);
+        doRegister(path);
+    }
+
+    private boolean doRegister(String path) {
+        if (checkExists(path)) {
+            return false;
+        }
+        getClientInstance().createEphemeral(path, true);
+        REGISTERED_PATH_SET.add(path);
+        return true;
+    }
+
+
+    private boolean checkExists(String path) {
+        return getClientInstance().exists(path);
     }
 
     @Override
@@ -90,6 +113,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
         String path = getRegisterPathByPath(address);
         getClientInstance().delete(path);
+        REGISTERED_PATH_SET.remove(path);
     }
 
     @Override
@@ -156,6 +180,11 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         return CLUSTER_ADDRESS_MAP.get(clusterName);
     }
 
+    @Override
+    public void close() throws Exception {
+        getClientInstance().close();
+    }
+
     private ZkClient getClientInstance() {
         if (zkClient == null) {
             zkClient = new ZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
@@ -164,8 +193,45 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
             if (!zkClient.exists(ROOT_PATH_WITHOUT_SUFFIX)) {
                 zkClient.createPersistent(ROOT_PATH_WITHOUT_SUFFIX, true);
             }
+            zkClient.subscribeStateChanges(new IZkStateListener() {
+
+                @Override
+                public void handleStateChanged(Watcher.Event.KeeperState keeperState) throws Exception {
+                    //ignore
+                }
+
+                @Override
+                public void handleNewSession() throws Exception {
+                    recover();
+                }
+
+                @Override
+                public void handleSessionEstablishmentError(Throwable throwable) throws Exception {
+                    //ignore
+                }
+            });
         }
         return zkClient;
+    }
+
+    private void recover() throws Exception {
+        // recover Server
+        if (!REGISTERED_PATH_SET.isEmpty()){
+            REGISTERED_PATH_SET.forEach(path -> doRegister(path));
+        }
+        // recover client
+        if (!LISTENER_SERVICE_MAP.isEmpty()){
+            Map<String, List<IZkChildListener>> listenerMap = new HashMap<>(LISTENER_SERVICE_MAP);
+            for (Map.Entry<String, List<IZkChildListener>> listenerEntry : listenerMap.entrySet()){
+                List<IZkChildListener> iZkChildListeners = listenerEntry.getValue();
+                if (CollectionUtils.isEmpty(iZkChildListeners)){
+                    continue;
+                }
+                for (IZkChildListener listener : iZkChildListeners){
+                    subscribe(listenerEntry.getKey(), listener);
+                }
+            }
+        }
     }
 
     private void subscribeCluster(String clusterName) throws Exception {

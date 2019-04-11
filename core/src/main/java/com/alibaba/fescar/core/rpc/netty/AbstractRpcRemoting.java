@@ -41,6 +41,7 @@ import com.alibaba.fescar.core.protocol.MergeMessage;
 import com.alibaba.fescar.core.protocol.MessageFuture;
 import com.alibaba.fescar.core.protocol.RpcMessage;
 
+import com.alibaba.fescar.core.rpc.Disposable;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFuture;
@@ -57,7 +58,7 @@ import org.slf4j.LoggerFactory;
  * @author jimin.jm @alibaba-inc.com
  * @date 2018 /9/12
  */
-public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
+public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implements Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemoting.class);
     /**
@@ -117,6 +118,9 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
      * Init.
      */
     public void init() {
+        //register shutdownHook
+        ShutdownHook.getInstance().addDisposable(this);
+
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -143,6 +147,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
     /**
      * Destroy.
      */
+    @Override
     public void destroy() {
         timerExecutor.shutdown();
     }
@@ -335,7 +340,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
     }
 
     /**
-     * 用于测试。发现线程池满时可以打开这个变量，把堆栈打出来分享
+     * For testing. When the thread pool is full, you can change this variable and share the stack
      */
     boolean allowDumpStack = false;
 
@@ -512,4 +517,6 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
         }
         return address;
     }
+
+
 }
