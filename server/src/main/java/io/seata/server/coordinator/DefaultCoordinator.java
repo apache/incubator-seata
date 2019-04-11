@@ -125,6 +125,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
     private Core core = CoreFactory.get();
 
+    private EventBus eventBus = EventBusManager.get();
+
     /**
      * Instantiates a new Default coordinator.
      *
@@ -140,6 +142,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         throws TransactionException {
         response.setXid(core.begin(rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(),
             request.getTransactionName(), request.getTimeout()));
+
+        GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(response.getXid()));
+        eventBus.post(new TransactionStartEvent(TransactionEvent.ROLE_TC,globalSession.getTransactionName(),
+            globalSession.getBeginTime()));
     }
 
     @Override
@@ -147,6 +153,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         throws TransactionException {
         response.setGlobalStatus(core.commit(request.getXid()));
 
+        eventBus.post(new TransactionCommitEvent(TransactionEvent.ROLE_TC,globalSession.getTransactionName(),
+            globalSession.getBeginTime(),System.currentTimeMillis()));
     }
 
     @Override
@@ -154,6 +162,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                                     RpcContext rpcContext) throws TransactionException {
         response.setGlobalStatus(core.rollback(request.getXid()));
 
+        eventBus.post(new TransactionRollbackEvent(TransactionEvent.ROLE_TC,globalSession.getTransactionName(),
+            globalSession.getBeginTime(),System.currentTimeMillis()));
     }
 
     @Override
