@@ -16,32 +16,38 @@
 
 package com.alibaba.fescar.core.event;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.google.common.eventbus.Subscribe;
 
 public class GuavaEventBusTest {
   @Test
   public void test() {
+
+    AtomicInteger counter = new AtomicInteger(0);
     EventBus eventBus = new GuavaEventBus("test");
-    TransactionEventListener listener = new TransactionEventListener();
-    eventBus.register(listener);
 
-    eventBus.post(new TransactionStartEvent(TransactionEvent.ROLE_TC,"test",System.currentTimeMillis()));
-    eventBus.post(new TransactionCommitEvent(TransactionEvent.ROLE_TC,"test",System.currentTimeMillis(),System.currentTimeMillis()));
-    eventBus.post(new TransactionRollbackEvent(TransactionEvent.ROLE_TC,"test",System.currentTimeMillis(),System.currentTimeMillis()));
+    class TestSubscriber {
+      @Subscribe
+      public void process(Integer event) {
+        counter.addAndGet(event);
+      }
+    }
 
-    Assert.assertEquals(listener.getStartEventCount().get(),1);
-    Assert.assertEquals(listener.getCommitEventCount().get(),1);
-    Assert.assertEquals(listener.getRollbackEventCount().get(),1);
+    TestSubscriber subscriber = new TestSubscriber();
+    eventBus.register(subscriber);
 
-    eventBus.unregister(listener);
+    eventBus.post(1);
 
-    eventBus.post(new TransactionStartEvent(TransactionEvent.ROLE_TC,"test",System.currentTimeMillis()));
-    eventBus.post(new TransactionCommitEvent(TransactionEvent.ROLE_TC,"test",System.currentTimeMillis(),System.currentTimeMillis()));
-    eventBus.post(new TransactionRollbackEvent(TransactionEvent.ROLE_TC,"test",System.currentTimeMillis(),System.currentTimeMillis()));
+    Assert.assertEquals(1, counter.get());
 
-    Assert.assertEquals(listener.getStartEventCount().get(),1);
-    Assert.assertEquals(listener.getCommitEventCount().get(),1);
-    Assert.assertEquals(listener.getRollbackEventCount().get(),1);
+    eventBus.unregister(subscriber);
+
+    eventBus.post(1);
+
+    Assert.assertEquals(1, counter.get());
   }
 }

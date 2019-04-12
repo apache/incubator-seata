@@ -142,10 +142,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         throws TransactionException {
         response.setXid(core.begin(rpcContext.getApplicationId(), rpcContext.getTransactionServiceGroup(),
             request.getTransactionName(), request.getTimeout()));
-
-        GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(response.getXid()));
-        eventBus.post(new TransactionStartEvent(TransactionEvent.ROLE_TC,globalSession.getTransactionName(),
-            globalSession.getBeginTime()));
     }
 
     @Override
@@ -153,8 +149,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         throws TransactionException {
         response.setGlobalStatus(core.commit(request.getXid()));
 
-        eventBus.post(new TransactionCommitEvent(TransactionEvent.ROLE_TC,globalSession.getTransactionName(),
-            globalSession.getBeginTime(),System.currentTimeMillis()));
     }
 
     @Override
@@ -162,8 +156,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                                     RpcContext rpcContext) throws TransactionException {
         response.setGlobalStatus(core.rollback(request.getXid()));
 
-        eventBus.post(new TransactionRollbackEvent(TransactionEvent.ROLE_TC,globalSession.getTransactionName(),
-            globalSession.getBeginTime(),System.currentTimeMillis()));
     }
 
     @Override
@@ -275,17 +267,20 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 globalSession.close();
                 globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
+
+              //transaction timeout and start rollbacking event
+              eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+                  globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
+
                 return true;
             });
             if (!shouldTimeout) {
                 continue;
             }
-            LOGGER.info(
-                "Global transaction[" + globalSession.getXid() + "] is timeout and will be rolled back.");
 
-            globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
-            SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
-
+            if (globalSession.getStatus() != GlobalStatus.Begin || !globalSession.isTimeout()) {
+                continue;
+            }
         }
         if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
             LOGGER.debug("Transaction Timeout Check End. ");
