@@ -119,11 +119,12 @@ public class ConfigFutureTest {
     }
 
     @Test
-    @Ignore
-    public void testIsTimeout() {
+    public void testIsTimeout() throws InterruptedException {
         Assert.assertFalse(configFuture.isTimeout());
-        //TIME_MILLS + 1 ensure timeout occur
-        configFuture.get(TIME_MILLS + 1, TimeUnit.MILLISECONDS);
+        //TIME_MILLS + 1000 ensure timeout occur
+        configFuture.get(TIME_MILLS + 1000, TimeUnit.MILLISECONDS);
+        //spin
+        TimeUnit.MILLISECONDS.sleep(100);
         Assert.assertTrue(configFuture.isTimeout());
     }
 

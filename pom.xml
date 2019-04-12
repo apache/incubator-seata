@@ -21,7 +21,7 @@
 
     <groupId>com.alibaba.fescar</groupId>
     <artifactId>fescar-all</artifactId>
-    <version>0.4.1</version>
+    <version>0.4.2</version>
     <modules>
         <module>config</module>
         <module>common</module>
@@ -109,6 +109,7 @@
         <apollo-client.version>1.1.0</apollo-client.version>
         <redis-clients.version>2.9.0</redis-clients.version>
         <eureka-clients.version>1.9.5</eureka-clients.version>
+        <consul-clients.version>1.4.2</consul-clients.version>
         <javax-inject.version>1</javax-inject.version>
         <archaius-core.version>0.7.6</archaius-core.version>
     </properties>
@@ -293,6 +294,11 @@
                 <groupId>com.netflix.eureka</groupId>
                 <artifactId>eureka-client</artifactId>
                 <version>${eureka-clients.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ecwid.consul</groupId>
+                <artifactId>consul-api</artifactId>
+                <version>${consul-clients.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.inject</groupId>

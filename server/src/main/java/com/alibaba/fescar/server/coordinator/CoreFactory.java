@@ -18,6 +18,8 @@ package com.alibaba.fescar.server.coordinator;
 
 /**
  * The type Core factory.
+ *
+ * @author sharajava
  */
 public class CoreFactory {
 

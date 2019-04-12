@@ -23,6 +23,8 @@ import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 
 /**
  * Status of branch transaction.
+ *
+ * @author sharajava
  */
 public enum BranchStatus {
 

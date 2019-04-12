@@ -16,6 +16,19 @@
 
 package com.alibaba.fescar.rm.datasource;
 
+import com.alibaba.fescar.common.exception.NotSupportYetException;
+import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
+import com.alibaba.fescar.common.thread.NamedThreadFactory;
+import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.core.exception.TransactionException;
+import com.alibaba.fescar.core.model.BranchStatus;
+import com.alibaba.fescar.core.model.BranchType;
+import com.alibaba.fescar.core.model.ResourceManagerInbound;
+import com.alibaba.fescar.rm.DefaultResourceManager;
+import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -28,26 +41,18 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.alibaba.fescar.common.exception.NotSupportYetException;
-import com.alibaba.fescar.common.thread.NamedThreadFactory;
-import com.alibaba.fescar.config.ConfigurationFactory;
-import com.alibaba.fescar.core.exception.TransactionException;
-import com.alibaba.fescar.core.model.BranchStatus;
-import com.alibaba.fescar.core.model.BranchType;
-import com.alibaba.fescar.core.model.ResourceManagerInbound;
-import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import static com.alibaba.fescar.core.constants.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 
 /**
  * The type Async worker.
+ *
+ * @author sharajava
  */
 public class AsyncWorker implements ResourceManagerInbound {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AsyncWorker.class);
+
+    private static final int DEFAULT_RESOURCE_SIZE = 16;
 
     private static class Phase2Context {
 
@@ -135,7 +140,7 @@ public class AsyncWorker implements ResourceManagerInbound {
         if (ASYNC_COMMIT_BUFFER.size() == 0) {
             return;
         }
-        Map<String, List<Phase2Context>> mappedContexts = new HashMap<>();
+        Map<String, List<Phase2Context>> mappedContexts = new HashMap<>(DEFAULT_RESOURCE_SIZE);
         Iterator<Phase2Context> iterator = ASYNC_COMMIT_BUFFER.iterator();
         while (iterator.hasNext()) {
             Phase2Context commitContext = iterator.next();
@@ -154,7 +159,11 @@ public class AsyncWorker implements ResourceManagerInbound {
             Connection conn = null;
             try {
                 try {
-                    DataSourceProxy dataSourceProxy = DataSourceManager.get().get(entry.getKey());
+                    DataSourceManager resourceManager = (DataSourceManager) DefaultResourceManager.get().getResourceManager(BranchType.AT);
+                    DataSourceProxy dataSourceProxy = resourceManager.get(entry.getKey());
+                    if (dataSourceProxy == null) {
+                        throw new ShouldNeverHappenException("Failed to find resource on " + entry.getKey());
+                    }
                     conn = dataSourceProxy.getPlainConnection();
                 } catch (SQLException sqle) {
                     LOGGER.warn("Failed to get connection for async committing on " + entry.getKey(), sqle);

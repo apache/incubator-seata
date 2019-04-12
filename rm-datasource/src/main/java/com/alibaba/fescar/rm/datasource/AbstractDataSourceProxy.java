@@ -16,31 +16,30 @@
 
 package com.alibaba.fescar.rm.datasource;
 
+import javax.sql.DataSource;
 import java.io.PrintWriter;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
-import javax.sql.DataSource;
-
-import com.alibaba.druid.pool.DruidDataSource;
-
 /**
  * The type Abstract data source proxy.
+ *
+ * @author sharajava
  */
 public abstract class AbstractDataSourceProxy implements DataSource {
 
     /**
      * The Target data source.
      */
-    protected DruidDataSource targetDataSource;
+    protected DataSource targetDataSource;
 
     /**
      * Instantiates a new Abstract data source proxy.
      *
      * @param targetDataSource the target data source
      */
-    public AbstractDataSourceProxy(DruidDataSource targetDataSource) {
+    public AbstractDataSourceProxy(DataSource targetDataSource) {
         this.targetDataSource = targetDataSource;
     }
 
@@ -49,7 +48,7 @@ public abstract class AbstractDataSourceProxy implements DataSource {
      *
      * @return the target data source
      */
-    public DruidDataSource getTargetDataSource() {
+    public DataSource getTargetDataSource() {
         return targetDataSource;
     }
 

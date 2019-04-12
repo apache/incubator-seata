@@ -16,6 +16,13 @@
 
 package com.alibaba.fescar.rm.datasource.undo;
 
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+
 import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.util.BlobUtils;
@@ -27,12 +34,6 @@ import com.alibaba.fescar.rm.datasource.DataSourceProxy;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMetaCache;
 
-import java.sql.Blob;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,6 +41,8 @@ import static com.alibaba.fescar.core.exception.TransactionExceptionCode.BranchR
 
 /**
  * The type Undo log manager.
+ *
+ * @author sharajava
  */
 public final class UndoLogManager {
     private enum State {
@@ -123,7 +126,7 @@ public final class UndoLogManager {
      * @throws TransactionException the transaction exception
      */
     public static void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {
-        assertDbSupport(dataSourceProxy.getTargetDataSource().getDbType());
+        assertDbSupport(dataSourceProxy.getDbType());
 
         Connection conn = null;
         ResultSet rs = null;

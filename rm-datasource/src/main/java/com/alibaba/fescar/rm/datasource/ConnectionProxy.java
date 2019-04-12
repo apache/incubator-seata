@@ -16,6 +16,9 @@
 
 package com.alibaba.fescar.rm.datasource;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
@@ -24,14 +27,14 @@ import com.alibaba.fescar.rm.DefaultResourceManager;
 import com.alibaba.fescar.rm.datasource.exec.LockConflictException;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
 /**
  * The type Connection proxy.
+ *
+ * @author sharajava
  */
 public class ConnectionProxy extends AbstractConnectionProxy {
 
@@ -44,10 +47,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      *
      * @param dataSourceProxy  the data source proxy
      * @param targetConnection the target connection
-     * @param dbType           the db type
      */
-    public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection, String dbType) {
-        super(dataSourceProxy, targetConnection, dbType);
+    public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
+        super(dataSourceProxy, targetConnection);
     }
 
     /**

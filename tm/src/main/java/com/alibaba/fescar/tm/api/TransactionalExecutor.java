@@ -18,6 +18,8 @@ package com.alibaba.fescar.tm.api;
 
 /**
  * Callback for executing business logic in a global transaction.
+ *
+ * @author sharajava
  */
 public interface TransactionalExecutor {
 

@@ -26,6 +26,8 @@ import com.alibaba.fescar.common.exception.NotSupportYetException;
 
 /**
  * The type Table meta.
+ *
+ * @author sharajava
  */
 public class TableMeta {
     private String tableName;

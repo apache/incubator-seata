@@ -39,6 +39,8 @@ import com.alibaba.fescar.rm.datasource.sql.SQLUpdateRecognizer;
 
 /**
  * The type My sql update recognizer.
+ *
+ * @author sharajava
  */
 public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRecognizer {
 
