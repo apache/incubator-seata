@@ -16,6 +16,7 @@
 
 package com.alibaba.fescar.discovery.registry;
 
+import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.loader.EnhancedServiceLoader;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.config.ConfigurationKeys;
@@ -40,14 +41,14 @@ public class RegistryFactory {
      * @return the instance
      */
     public static RegistryService getInstance() {
-        RegistryType registryType = null;
+        RegistryType registryType;
+        String registryTypeName = ConfigurationFactory.FILE_INSTANCE.getConfig(
+            ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                + ConfigurationKeys.FILE_ROOT_TYPE);
         try {
-            registryType = RegistryType.getType(
-                ConfigurationFactory.FILE_INSTANCE.getConfig(
-                    ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                        + ConfigurationKeys.FILE_ROOT_TYPE));
+            registryType = RegistryType.getType(registryTypeName);
         } catch (Exception exx) {
-            LOGGER.error(exx.getMessage());
+            throw new NotSupportYetException("not support registry type: " + registryTypeName);
         }
         if (RegistryType.File == registryType) {
             return FileRegistryServiceImpl.getInstance();
