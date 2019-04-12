@@ -38,6 +38,7 @@ import com.alibaba.fescar.core.protocol.transaction.BranchCommitResponse;
 import com.alibaba.fescar.core.protocol.transaction.BranchRegisterRequest;
 import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
 import com.alibaba.fescar.core.protocol.transaction.BranchReportRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchReportResponse;
 import com.alibaba.fescar.core.protocol.transaction.BranchRollbackRequest;
 import com.alibaba.fescar.core.protocol.transaction.BranchRollbackResponse;
 import com.alibaba.fescar.core.protocol.transaction.GlobalBeginRequest;
@@ -125,7 +126,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     }
 
     @Override
-    protected void doBranchReport(BranchReportRequest request, RpcContext rpcContext)
+    protected void doBranchReport(BranchReportRequest request, BranchReportResponse response, RpcContext rpcContext)
         throws TransactionException {
         core.branchReport(request.getBranchType(), request.getXid(), request.getBranchId(),
             request.getStatus(),

@@ -144,7 +144,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
             @Override
             public void execute(BranchReportRequest request, BranchReportResponse response)
                 throws TransactionException {
-                doBranchReport(request, rpcContext);
+                doBranchReport(request, response, rpcContext);
             }
         }, request, response);
         return response;
@@ -157,7 +157,8 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
      * @param rpcContext the rpc context
      * @throws TransactionException the transaction exception
      */
-    protected abstract void doBranchReport(BranchReportRequest request, RpcContext rpcContext)
+    protected abstract void doBranchReport(BranchReportRequest request, BranchReportResponse response,
+                                           RpcContext rpcContext)
         throws TransactionException;
 
     @Override
