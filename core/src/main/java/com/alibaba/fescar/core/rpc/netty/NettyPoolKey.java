@@ -16,7 +16,6 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 
 /**
@@ -115,7 +114,17 @@ public class NettyPoolKey {
 
     @Override
     public String toString() {
-        return JSON.toJSONString(this);
+        StringBuilder sb = new StringBuilder();
+        sb.append("transactionRole:");
+        sb.append(transactionRole.name());
+        sb.append(",");
+        sb.append("address:");
+        sb.append(address);
+        sb.append(",");
+        sb.append("msg:< ");
+        sb.append(message.toString());
+        sb.append(" >");
+        return sb.toString();
     }
 
     /**
@@ -136,7 +145,7 @@ public class NettyPoolKey {
          */
         SERVERROLE(3);
 
-        private TransactionRole(int value) {
+        TransactionRole(int value) {
             this.value = value;
         }
 
