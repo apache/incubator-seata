@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
+import com.alibaba.fescar.common.util.CollectionUtils;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.server.session.BranchSession;
 import com.alibaba.fescar.server.session.GlobalSession;
@@ -362,7 +363,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                 List<GlobalSession> globalSessionsOverMaxTimeout = sessionManager.findGlobalSessions(
                     new SessionCondition(
                         GlobalStatus.Begin, MAX_TRX_TIMEOUT_MILLS));
-                if (null != globalSessionsOverMaxTimeout) {
+                if (CollectionUtils.isNotEmpty(globalSessionsOverMaxTimeout)) {
                     for (GlobalSession globalSession : globalSessionsOverMaxTimeout) {
                         TransactionWriteStore globalWriteStore = new TransactionWriteStore(globalSession,
                             LogOperation.GLOBAL_ADD);

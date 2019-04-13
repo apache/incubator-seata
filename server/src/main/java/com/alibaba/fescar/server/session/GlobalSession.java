@@ -19,6 +19,8 @@ package com.alibaba.fescar.server.session;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.LockSupport;
 
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
@@ -42,7 +44,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private long transactionId;
 
-    private GlobalStatus status;
+    private volatile GlobalStatus status;
 
     private String applicationId;
 
@@ -58,6 +60,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
+    private GlobalSessionSpinLock globalSessionSpinLock = new GlobalSessionSpinLock();
+
     /**
      * Add boolean.
      *
@@ -65,7 +69,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the boolean
      */
     public boolean add(BranchSession branchSession) {
-        return branchSessions.add(branchSession);
+        this.lock();
+        try {
+            return branchSessions.add(branchSession);
+        }finally {
+            this.unlock();
+        }
     }
 
     /**
@@ -466,5 +475,73 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public boolean hasBranch() {
         return branchSessions.size() > 0;
+    }
+
+    public void lock() {
+        globalSessionSpinLock.lock();
+    }
+
+    public void unlock(){
+        globalSessionSpinLock.unlock();
+    }
+
+    public void lockAndExcute(LockRunnable excuteRunnable) throws TransactionException{
+        this.lock();
+        try {
+            excuteRunnable.run();
+        }finally {
+            this.unlock();
+        }
+    }
+
+    public <T> T lockAndExcute(LockCallable<T> lockCallable) throws TransactionException{
+        this.lock();
+        try {
+            return lockCallable.call();
+        }finally {
+            this.unlock();
+        }
+    }
+    /**
+     * globalsession is low race conditions, so use spinlock
+     */
+    private class GlobalSessionSpinLock{
+        /**
+         * true: Can lock, false : in lock.
+         */
+        private AtomicBoolean globalSessionSpinLock = new AtomicBoolean(true);
+
+        private static final int PARK_TIMES_BASE = 10;
+
+        public void lock() {
+            boolean flag;
+            int times = 0;
+            do {
+                // Pause every PARK_TIMES_BASE times,yield the CPU
+                if (times % PARK_TIMES_BASE == 0){
+                    LockSupport.parkNanos(1);
+                }
+                flag = this.globalSessionSpinLock.compareAndSet(true, false);
+                times++;
+            }
+            while (!flag);
+        }
+
+
+        public void unlock() {
+            this.globalSessionSpinLock.compareAndSet(false, true);
+        }
+
+    }
+
+    @FunctionalInterface
+    public interface LockRunnable {
+
+        void run() throws TransactionException;
+    }
+    @FunctionalInterface
+    public interface LockCallable<V> {
+
+        V call() throws TransactionException;
     }
 }
