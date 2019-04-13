@@ -53,9 +53,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      */
     public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
         super(dataSourceProxy, targetConnection);
-        String retryReportTimesStr = dataSourceProxy.getParameter(DatabaseConstants.DATABASE_PROXY_KEY_RETRY_REPORT_TIMES);
-        if (StringUtils.isNotBlank(retryReportTimesStr)) {
-            this.retryReportTimes = Integer.parseInt(retryReportTimesStr);
+        if (dataSourceProxy != null) {
+            String retryReportTimesStr = dataSourceProxy.getParameter(DatabaseConstants.DATABASE_PROXY_KEY_RETRY_REPORT_TIMES);
+            if (StringUtils.isNotBlank(retryReportTimesStr)) {
+                this.retryReportTimes = Integer.parseInt(retryReportTimesStr);
+            }
         }
     }
 
