@@ -25,5 +25,5 @@ public class DatabaseConstants {
      * config key
      */
 
-    public static final String DATABASE_PROXY_KEY_RETRY_REPORT_TIMES = "retry.report.times";
+    public static final String DATABASE_PROXY_KEY_RETRY_REPORT_COUNT = "retry.report.count";
 }

@@ -43,7 +43,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private ConnectionContext context = new ConnectionContext();
 
-    private int retryReportTimes = 5;
+    private int retryReportCount = 5;
 
     /**
      * Instantiates a new Connection proxy.
@@ -54,9 +54,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
         super(dataSourceProxy, targetConnection);
         if (dataSourceProxy != null) {
-            String retryReportTimesStr = dataSourceProxy.getParameter(DatabaseConstants.DATABASE_PROXY_KEY_RETRY_REPORT_TIMES);
-            if (StringUtils.isNotBlank(retryReportTimesStr)) {
-                this.retryReportTimes = Integer.parseInt(retryReportTimesStr);
+            String retryReportCountStr = dataSourceProxy.getParameter(DatabaseConstants.DATABASE_PROXY_KEY_RETRY_REPORT_COUNT);
+            if (StringUtils.isNotBlank(retryReportCountStr)) {
+                this.retryReportCount = Integer.parseInt(retryReportCountStr);
             }
         }
     }
@@ -226,7 +226,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void report(boolean commitDone) throws SQLException {
-        int retry = retryReportTimes;
+        int retry = retryReportCount;
         while (retry > 0) {
             try {
                 DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),

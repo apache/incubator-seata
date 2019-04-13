@@ -36,9 +36,9 @@ public class DataSourceProxyTest {
         final String times = "10";
 
         Map<String, String> parameters = new ConcurrentHashMap<>();
-        parameters.put(DatabaseConstants.DATABASE_PROXY_KEY_RETRY_REPORT_TIMES, times);
+        parameters.put(DatabaseConstants.DATABASE_PROXY_KEY_RETRY_REPORT_COUNT, times);
         DataSourceProxy dataSourceProxy = new DataSourceProxy(dataSource, "resourceGroupId", parameters);
-        String result = dataSourceProxy.getParameter(DatabaseConstants.DATABASE_PROXY_KEY_RETRY_REPORT_TIMES);
+        String result = dataSourceProxy.getParameter(DatabaseConstants.DATABASE_PROXY_KEY_RETRY_REPORT_COUNT);
         Assert.assertEquals(times, result);
     }
 
