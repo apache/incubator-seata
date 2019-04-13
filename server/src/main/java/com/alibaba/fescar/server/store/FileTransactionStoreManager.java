@@ -31,6 +31,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.core.model.GlobalStatus;
@@ -78,6 +79,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
     private String currFullFileName;
     private String hisFullFileName;
 
+    private ReentrantLock writeSessionLock = new ReentrantLock();
     private static final int MAX_WRITE_BUFFER_SIZE = StoreConfig.getFileWriteBufferCacheSize();
 
     /**
@@ -122,6 +124,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
 
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
+        writeSessionLock.lock();
         TransactionWriteFuture writeFutureRequest = new TransactionWriteFuture(session, logOperation);
         try {
             if (transactionWriteFutureQueue.offer(writeFutureRequest, MAX_ENQUEUE_MILLS, TimeUnit.MILLISECONDS)) {
