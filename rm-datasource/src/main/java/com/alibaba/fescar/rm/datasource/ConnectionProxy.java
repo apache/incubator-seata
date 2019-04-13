@@ -16,20 +16,21 @@
 
 package com.alibaba.fescar.rm.datasource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
+import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.rm.DefaultResourceManager;
+import com.alibaba.fescar.rm.datasource.constants.DatabaseConstants;
 import com.alibaba.fescar.rm.datasource.exec.LockConflictException;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * The type Connection proxy.
@@ -42,6 +43,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private ConnectionContext context = new ConnectionContext();
 
+    private int retryReportTimes = 5;
+
     /**
      * Instantiates a new Connection proxy.
      *
@@ -50,6 +53,10 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      */
     public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
         super(dataSourceProxy, targetConnection);
+        String retryReportTimesStr = dataSourceProxy.getParameter(DatabaseConstants.DATABASE_PROXY_KEY_RETRY_REPORT_TIMES);
+        if (StringUtils.isNotBlank(retryReportTimesStr)) {
+            this.retryReportTimes = Integer.parseInt(retryReportTimesStr);
+        }
     }
 
     /**
@@ -217,7 +224,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void report(boolean commitDone) throws SQLException {
-        int retry = 5; // TODO: configure
+        int retry = retryReportTimes;
         while (retry > 0) {
             try {
                 DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),
@@ -225,7 +232,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["
-                    + commitDone + "] Retry Countdown: " + retry);
+                        + commitDone + "] Retry Countdown: " + retry);
                 retry--;
 
                 if (retry == 0) {
