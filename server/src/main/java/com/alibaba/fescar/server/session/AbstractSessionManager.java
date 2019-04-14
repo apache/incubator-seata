@@ -137,8 +137,8 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
         List<GlobalSession> found = new ArrayList<>();
         for (GlobalSession globalSession : sessionMap.values()) {
-            if (globalSession.getStatus() == condition.getStatus()) {
-                if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
+            if (condition.getStatuses().contains(globalSession.getStatus())) {
+                if (System.currentTimeMillis() - globalSession.getStatusUpdateTime() > condition.getOverTimeAliveMills()) {
                     found.add(globalSession);
                 }
             }

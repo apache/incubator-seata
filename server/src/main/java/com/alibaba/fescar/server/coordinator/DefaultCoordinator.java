@@ -51,9 +51,11 @@ import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackRequest;
 import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackResponse;
 import com.alibaba.fescar.core.protocol.transaction.GlobalStatusRequest;
 import com.alibaba.fescar.core.protocol.transaction.GlobalStatusResponse;
+import com.alibaba.fescar.core.rpc.Disposable;
 import com.alibaba.fescar.core.rpc.RpcContext;
 import com.alibaba.fescar.core.rpc.ServerMessageSender;
 import com.alibaba.fescar.core.rpc.TransactionMessageHandler;
+import com.alibaba.fescar.core.rpc.netty.ShutdownHook;
 import com.alibaba.fescar.server.AbstractTCInboundHandler;
 import com.alibaba.fescar.server.session.BranchSession;
 import com.alibaba.fescar.server.session.GlobalSession;
@@ -71,7 +73,7 @@ import static com.alibaba.fescar.core.exception.TransactionExceptionCode.FailedT
  * @author sharajava
  */
 public class DefaultCoordinator extends AbstractTCInboundHandler
-    implements TransactionMessageHandler, ResourceManagerInbound {
+    implements TransactionMessageHandler, ResourceManagerInbound, Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCoordinator.class);
 
@@ -321,7 +323,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
             }
         }, 0, 2, TimeUnit.MILLISECONDS);
-
+        // last shutdown
+        ShutdownHook.getInstance().addDisposable(this, Integer.MIN_VALUE);
     }
 
     @Override
@@ -341,5 +344,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             throw new IllegalArgumentException();
         }
 
+    }
+
+    @Override
+    public void destroy() {
+        retryRollbacking.shutdown();
+        retryCommitting.shutdown();
+        asyncCommitting.shutdown();
+        timeoutCheck.shutdown();
+        SessionHolder.destory();
     }
 }

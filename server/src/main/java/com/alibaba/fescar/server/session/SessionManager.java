@@ -22,13 +22,14 @@ import java.util.List;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.GlobalStatus;
+import com.alibaba.fescar.core.rpc.Disposable;
 
 /**
  * The interface Session manager.
  *
  * @author sharajava
  */
-public interface SessionManager extends SessionLifecycleListener {
+public interface SessionManager extends SessionLifecycleListener, Disposable {
 
     /**
      * Add global session.

@@ -18,6 +18,8 @@ package com.alibaba.fescar.server.session;
 
 import com.alibaba.fescar.core.model.GlobalStatus;
 
+import java.util.Set;
+
 /**
  * The type Session condition.
  *
@@ -25,17 +27,17 @@ import com.alibaba.fescar.core.model.GlobalStatus;
  * @date 2018 /12/13
  */
 public class SessionCondition {
-    private GlobalStatus status;
+    private Set<GlobalStatus> statuses;
     private long overTimeAliveMills;
 
     /**
      * Instantiates a new Session condition.
      *
-     * @param status             the status
+     * @param statuses             the statuses
      * @param overTimeAliveMills the over time alive mills
      */
-    public SessionCondition(GlobalStatus status, long overTimeAliveMills) {
-        this.status = status;
+    public SessionCondition(Set<GlobalStatus> statuses, long overTimeAliveMills) {
+        this.statuses = statuses;
         this.overTimeAliveMills = overTimeAliveMills;
     }
 
@@ -44,8 +46,8 @@ public class SessionCondition {
      *
      * @return the status
      */
-    public GlobalStatus getStatus() {
-        return status;
+    public Set<GlobalStatus> getStatuses() {
+        return statuses;
     }
 
     /**
@@ -53,8 +55,8 @@ public class SessionCondition {
      *
      * @param status the status
      */
-    public void setStatus(GlobalStatus status) {
-        this.status = status;
+    public void setStatuses(Set<GlobalStatus> status) {
+        this.statuses = status;
     }
 
     /**

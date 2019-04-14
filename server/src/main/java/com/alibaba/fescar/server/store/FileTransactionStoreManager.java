@@ -25,11 +25,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -81,7 +77,9 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
 
     private ReentrantLock writeSessionLock = new ReentrantLock();
     private static final int MAX_WRITE_BUFFER_SIZE = StoreConfig.getFileWriteBufferCacheSize();
+    private final ByteBuffer wireteBuffer =  ByteBuffer.allocateDirect(MAX_WRITE_BUFFER_SIZE);
 
+    private static final FlushDiskMode FLUSH_DISK_MODE =  StoreConfig.getFlushDiskMode();
     /**
      * Instantiates a new File transaction store manager.
      *
@@ -125,15 +123,65 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
         writeSessionLock.lock();
-        TransactionWriteFuture writeFutureRequest = new TransactionWriteFuture(session, logOperation);
-        try {
-            if (transactionWriteFutureQueue.offer(writeFutureRequest, MAX_ENQUEUE_MILLS, TimeUnit.MILLISECONDS)) {
-                return writeFutureRequest.get();
+        long curFileTrxNum;
+        try{
+            if (writeDataFile(new TransactionWriteStore(session, logOperation).encode())){
+                return false;
             }
-        } catch (InterruptedException exx) {
-            LOGGER.error("write data file error," + exx.getMessage());
+            curFileTrxNum = FILE_TRX_NUM.incrementAndGet();
+            if (curFileTrxNum % PER_FILE_BLOCK_SIZE == 0
+                    && (System.currentTimeMillis() - trxStartTimeMills) > MAX_TRX_TIMEOUT_MILLS) {
+                saveHistory();
+            }
+        } catch (Exception exx) {
+            LOGGER.error("writeSession error," + exx.getMessage());
+            return false;
+        }finally {
+            writeSessionLock.unlock();
         }
+        flushDisk(curFileTrxNum, currFileChannel);
         return false;
+    }
+
+    private void flushDisk(long curFileNum, FileChannel currFileChannel) {
+
+        if (FLUSH_DISK_MODE == FlushDiskMode.SYNC_MODEL){
+
+        }else {
+
+        }
+    }
+
+    private void saveHistory() throws IOException {
+        try {
+            List<GlobalSession> globalSessionsOverMaxTimeout = sessionManager.findGlobalSessions(
+                    new SessionCondition(
+                            GlobalStatus.BEGIN_AND_DOING_SET, MAX_TRX_TIMEOUT_MILLS));
+            if (null != globalSessionsOverMaxTimeout) {
+                for (GlobalSession globalSession : globalSessionsOverMaxTimeout) {
+                    TransactionWriteStore globalWriteStore = new TransactionWriteStore(globalSession,
+                            LogOperation.GLOBAL_ADD);
+                    writeDataFile(globalWriteStore.encode());
+                    List<BranchSession> branchSessIonsOverMaXTimeout = globalSession.getSortedBranches();
+                    if (null != branchSessIonsOverMaXTimeout) {
+                        for (BranchSession branchSession : branchSessIonsOverMaXTimeout) {
+                            TransactionWriteStore branchWriteStore = new TransactionWriteStore(branchSession,
+                                    LogOperation.BRANCH_ADD);
+                            writeDataFile(branchWriteStore.encode());
+                        }
+                    }
+                }
+            }
+            currFileChannel.force(true);
+            closeFile(currRaf);
+            Files.move(currDataFile.toPath(), new File(hisFullFileName).toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException exx) {
+            LOGGER.error("save history data file error," + exx.getMessage());
+        } finally {
+            initFile(currFullFileName);
+        }
+
     }
 
     @Override
@@ -264,41 +312,100 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
         }
     }
 
+    private boolean writeDataFile(byte[] bs) {
+        int retry = 0;
+        if (bs == null){
+            return false;
+        }
+        ByteBuffer byteBuffer = null;
+
+        if (bs.length > MAX_WRITE_BUFFER_SIZE){
+            //allocateNew
+            byteBuffer = ByteBuffer.allocateDirect(bs.length);
+        }else {
+            byteBuffer = wireteBuffer;
+            //recycle
+            byteBuffer.clear();
+        }
+
+        byteBuffer.putInt(bs.length);
+        byteBuffer.put(bs);
+        for (; retry < MAX_WRITE_RETRY; retry++) {
+            try {
+                byteBuffer.flip();
+                while (byteBuffer.hasRemaining()) {
+                    currFileChannel.write(byteBuffer);
+                }
+                return true;
+            } catch (IOException exx) {
+                LOGGER.error("write data file error:" + exx.getMessage());
+            }
+        }
+        LOGGER.error("write dataFile failed,retry more than :" + MAX_WRITE_RETRY);
+        return false;
+    }
+
+    interface StoreRequest{
+
+    }
+
+    class SyncRequest implements StoreRequest{
+        private final long curFileTrxNum;
+        private final FileChannel curFileChannel;
+        private final CountDownLatch countDownLatch = new CountDownLatch(1);
+        private volatile boolean flushOK = false;
+
+        public SyncRequest(long curFileTrxNum, FileChannel curFileChannel) {
+            this.curFileTrxNum = curFileTrxNum;
+            this.curFileChannel = curFileChannel;
+        }
+
+
+        public void wakeupCustomer(final boolean flushOK) {
+            this.flushOK = flushOK;
+            this.countDownLatch.countDown();
+        }
+
+        public boolean waitForFlush(long timeout) {
+            try {
+                this.countDownLatch.await(timeout, TimeUnit.MILLISECONDS);
+                return this.flushOK;
+            } catch (InterruptedException e) {
+                LOGGER.error("Interrupted", e);
+                return false;
+            }
+        }
+
+        public long getCurFileTrxNum() {
+            return curFileTrxNum;
+        }
+
+        public FileChannel getCurFileChannel() {
+            return curFileChannel;
+        }
+    }
+
     /**
      * The type Write data file runnable.
      */
     class WriteDataFileRunnable implements Runnable {
 
+        private volatile List<StoreRequest> requestsWrite = new ArrayList<StoreRequest>();
+        private volatile List<StoreRequest> requestsRead = new ArrayList<StoreRequest>();
 
-        ByteBuffer wireteBuffer =  ByteBuffer.allocateDirect(MAX_WRITE_BUFFER_SIZE);
+        private void swapRequests() {
+            List<GroupCommitRequest> tmp = this.requestsWrite;
+            this.requestsWrite = this.requestsRead;
+            this.requestsRead = tmp;
+        }
 
         @Override
         public void run() {
             while (!stopping) {
                 TransactionWriteFuture transactionWriteFuture = null;
                 try {
-                    transactionWriteFuture = transactionWriteFutureQueue.poll(
-                        MAX_POOL_TIME_MILLS,
-                        TimeUnit.MILLISECONDS);
-                    if (null == transactionWriteFuture) {
-                        flushOnCondition();
-                        continue;
-                    }
-                    if (transactionWriteFuture.isTimeout()) {
-                        transactionWriteFuture.setResult(Boolean.FALSE);
-                        continue;
-                    }
-                    if (writeDataFile(transactionWriteFuture.getWriteStore().encode())) {
-                        transactionWriteFuture.setResult(Boolean.TRUE);
-                        FILE_TRX_NUM.incrementAndGet();
-                        flushOnCondition();
-                    } else {
-                        transactionWriteFuture.setResult(Boolean.FALSE);
-                    }
-                    if (FILE_TRX_NUM.get() % PER_FILE_BLOCK_SIZE == 0
-                        && (System.currentTimeMillis() - trxStartTimeMills) > MAX_TRX_TIMEOUT_MILLS) {
-                        saveHistory();
-                    }
+                    this.waitForRunning(10);
+                    this.doCommit();
                 } catch (InterruptedException exx) {
                     stopping = true;
                 } catch (Exception exx) {
@@ -312,38 +419,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
 
         }
 
-        private boolean writeDataFile(byte[] bs) {
-            int retry = 0;
-            if (bs == null){
-                return false;
-            }
-            ByteBuffer byteBuffer = null;
 
-            if (bs.length > MAX_WRITE_BUFFER_SIZE){
-                //allocateNew
-                byteBuffer = ByteBuffer.allocateDirect(bs.length);
-            }else {
-                byteBuffer = wireteBuffer;
-                //recycle
-                byteBuffer.clear();
-            }
-
-            byteBuffer.putInt(bs.length);
-            byteBuffer.put(bs);
-            for (; retry < MAX_WRITE_RETRY; retry++) {
-                try {
-                    byteBuffer.flip();
-                    while (byteBuffer.hasRemaining()) {
-                        currFileChannel.write(byteBuffer);
-                    }
-                    return true;
-                } catch (IOException exx) {
-                    LOGGER.error("write data file error:" + exx.getMessage());
-                }
-            }
-            LOGGER.error("write dataFile failed,retry more than :" + MAX_WRITE_RETRY);
-            return false;
-        }
 
         private void flushOnCondition() {
             if (!ENABLE_SCHEDULE_FLUSH) { return; }
@@ -358,38 +434,6 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                 }
                 FILE_FLUSH_NUM.addAndGet(diff);
             }
-        }
-
-        private void saveHistory() throws IOException {
-            try {
-                List<GlobalSession> globalSessionsOverMaxTimeout = sessionManager.findGlobalSessions(
-                    new SessionCondition(
-                        GlobalStatus.Begin, MAX_TRX_TIMEOUT_MILLS));
-                if (null != globalSessionsOverMaxTimeout) {
-                    for (GlobalSession globalSession : globalSessionsOverMaxTimeout) {
-                        TransactionWriteStore globalWriteStore = new TransactionWriteStore(globalSession,
-                            LogOperation.GLOBAL_ADD);
-                        writeDataFile(globalWriteStore.encode());
-                        List<BranchSession> branchSessIonsOverMaXTimeout = globalSession.getSortedBranches();
-                        if (null != branchSessIonsOverMaXTimeout) {
-                            for (BranchSession branchSession : branchSessIonsOverMaXTimeout) {
-                                TransactionWriteStore branchWriteStore = new TransactionWriteStore(branchSession,
-                                    LogOperation.BRANCH_ADD);
-                                writeDataFile(branchWriteStore.encode());
-                            }
-                        }
-                    }
-                }
-                currFileChannel.force(true);
-                closeFile(currRaf);
-                Files.move(currDataFile.toPath(), new File(hisFullFileName).toPath(),
-                    StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException exx) {
-                LOGGER.error("save history data file error," + exx.getMessage());
-            } finally {
-                initFile(currFullFileName);
-            }
-
         }
     }
 }

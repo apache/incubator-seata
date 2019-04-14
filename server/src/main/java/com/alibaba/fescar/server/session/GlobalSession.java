@@ -54,6 +54,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private long beginTime;
 
+    private long statusUpdateTime;
+
     private boolean active;
 
     private ArrayList<BranchSession> branchSessions = new ArrayList<>();
@@ -107,6 +109,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void begin() throws TransactionException {
         this.status = GlobalStatus.Begin;
         this.beginTime = System.currentTimeMillis();
+        this.statusUpdateTime = System.currentTimeMillis();
         this.active = true;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBegin(this);
@@ -116,6 +119,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     @Override
     public void changeStatus(GlobalStatus status) throws TransactionException {
         this.status = status;
+        this.statusUpdateTime = System.currentTimeMillis();
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, status);
         }
@@ -345,6 +349,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public long getBeginTime() {
         return beginTime;
+    }
+
+    /**
+     * Gets status update time.
+     * @return the status update time
+     */
+    public long getStatusUpdateTime() {
+        return statusUpdateTime;
     }
 
     /**

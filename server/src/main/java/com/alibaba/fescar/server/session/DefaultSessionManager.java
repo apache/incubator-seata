@@ -58,4 +58,9 @@ public class DefaultSessionManager extends AbstractSessionManager {
             }
         };
     }
+
+    @Override
+    public void destroy() {
+        transactionStoreManager.shutdown();
+    }
 }
