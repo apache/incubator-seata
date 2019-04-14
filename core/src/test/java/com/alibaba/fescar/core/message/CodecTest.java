@@ -21,10 +21,13 @@ import java.nio.ByteBuffer;
 import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
  * The type Codec test.
+ *
+ * @author jimin.jm @alibaba-inc.com
  */
 public class CodecTest {
 
@@ -33,17 +36,11 @@ public class CodecTest {
      */
     @Test
     public void testA() {
-
-        long tid = 232323L;
         long bid = 43554545L;
-
         BranchRegisterResponse response = new BranchRegisterResponse();
         response.setResultCode(ResultCode.Failed);
-        response.setTransactionId(tid);
         response.setBranchId(bid);
-
         byte[] bytes = response.encode();
-
         ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
         byteBuffer.put(bytes);
         byteBuffer.flip();
@@ -51,6 +48,7 @@ public class CodecTest {
         BranchRegisterResponse rs = new BranchRegisterResponse();
         rs.decode(byteBuffer);
 
-        System.out.println(rs.getTransactionId());
+        Assert.assertEquals(response.getBranchId(), rs.getBranchId());
+        Assert.assertEquals(response.getResultCode(), rs.getResultCode());
     }
 }

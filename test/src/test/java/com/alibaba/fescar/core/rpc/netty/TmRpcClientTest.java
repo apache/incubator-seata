@@ -75,7 +75,6 @@ public class TmRpcClientTest {
         doConnectMethod.setAccessible(true);
         String serverAddress = "0.0.0.0:8091";
         Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
-        System.out.print("channel = ");
         Assert.assertNotNull(channel);
     }
 
@@ -114,8 +113,6 @@ public class TmRpcClientTest {
 
     @Test
     public void testSendMsgWithResponse() throws Exception {
-
-        //start fescar server first
         workingThreads.submit(new Runnable() {
             @Override
             public void run() {
@@ -125,30 +122,25 @@ public class TmRpcClientTest {
                 rpcServer.init();
             }
         });
-
-        //then test client
         Thread.sleep(3000);
 
         String applicationId = "app 1";
         String transactionServiceGroup = "my_test_tx_group";
         TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
-
         tmRpcClient.init();
 
         Method doConnectMethod = TmRpcClient.class.getDeclaredMethod("doConnect", String.class);
         doConnectMethod.setAccessible(true);
         String serverAddress = "0.0.0.0:8091";
         Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
-        System.out.print("channel = " + channel);
         Assert.assertNotNull(channel);
 
         BranchRegisterRequest request = new BranchRegisterRequest();
-        request.setTransactionId(123456L);
+        request.setXid("127.0.0.1:8091:1249853");
         request.setLockKey("lock key testSendMsgWithResponse");
         request.setResourceId("resoutceId1");
         BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse)tmRpcClient.sendMsgWithResponse(request);
         Assert.assertNotNull(branchRegisterResponse);
-        //we have not init SessionManager
         Assert.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
         Assert.assertEquals("RuntimeException[SessionManager is NOT init!]",
                             branchRegisterResponse.getMsg());
