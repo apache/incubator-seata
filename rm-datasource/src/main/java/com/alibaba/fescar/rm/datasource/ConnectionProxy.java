@@ -16,13 +16,13 @@
 
 package com.alibaba.fescar.rm.datasource;
 
-import com.alibaba.fescar.common.util.StringUtils;
+import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.core.constants.ConfigurationKeys;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.rm.DefaultResourceManager;
-import com.alibaba.fescar.rm.datasource.constants.DatabaseConstants;
 import com.alibaba.fescar.rm.datasource.exec.LockConflictException;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
@@ -43,7 +43,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private ConnectionContext context = new ConnectionContext();
 
-    private int retryReportCount = 5;
+    private static int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, 5);
 
     /**
      * Instantiates a new Connection proxy.
@@ -53,12 +53,6 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      */
     public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
         super(dataSourceProxy, targetConnection);
-        if (dataSourceProxy != null) {
-            String retryReportCountStr = dataSourceProxy.getParameter(DatabaseConstants.DATABASE_PROXY_KEY_RETRY_REPORT_COUNT);
-            if (StringUtils.isNotBlank(retryReportCountStr)) {
-                this.retryReportCount = Integer.parseInt(retryReportCountStr);
-            }
-        }
     }
 
     /**
@@ -226,7 +220,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void report(boolean commitDone) throws SQLException {
-        int retry = retryReportCount;
+        int retry = REPORT_RETRY_COUNT;
         while (retry > 0) {
             try {
                 DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),

@@ -24,8 +24,6 @@ import com.alibaba.fescar.rm.DefaultResourceManager;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The type Data source proxy.
@@ -44,8 +42,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private boolean managed = false;
 
-    private Map<String, String> parameters = new ConcurrentHashMap<String, String>();
-
     /**
      * Instantiates a new Data source proxy.
      *
@@ -62,25 +58,12 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * @param resourceGroupId  the resource group id
      */
     public DataSourceProxy(DataSource targetDataSource, String resourceGroupId) {
-        this(targetDataSource, resourceGroupId, new ConcurrentHashMap<String, String>());
-    }
-
-
-    /**
-     * Instantiates a new Data source proxy.
-     *
-     * @param targetDataSource the target data source
-     * @param resourceGroupId  the resource group id
-     * @param resourceGroupId  custom parameters for proxy
-     */
-    public DataSourceProxy(DataSource targetDataSource, String resourceGroupId, Map<String, String> parameters) {
         super(targetDataSource);
-        init(targetDataSource, resourceGroupId, parameters);
+        init(targetDataSource, resourceGroupId);
     }
 
-    private void init(DataSource dataSource, String resourceGroupId, Map<String, String> parameters) {
+    private void init(DataSource dataSource, String resourceGroupId) {
         this.resourceGroupId = resourceGroupId;
-        this.parameters = parameters;
         try (Connection connection = dataSource.getConnection()) {
             jdbcUrl = connection.getMetaData().getURL();
             dbType = JdbcUtils.getDbType(jdbcUrl, null);
@@ -142,9 +125,5 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     @Override
     public BranchType getBranchType() {
         return BranchType.AT;
-    }
-
-    public String getParameter(String key) {
-        return parameters.get(key);
     }
 }
