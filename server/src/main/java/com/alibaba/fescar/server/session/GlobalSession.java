@@ -237,6 +237,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public ArrayList<BranchSession> getSortedBranches() {
         ArrayList<BranchSession> sorted = new ArrayList();
         sorted.addAll(branchSessions);
+        Collections.sort(sorted);
         return sorted;
     }
 

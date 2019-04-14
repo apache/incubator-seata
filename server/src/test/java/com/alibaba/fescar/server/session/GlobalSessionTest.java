@@ -23,6 +23,8 @@ import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+
 /**
  * The type Global session test.
  *
@@ -191,5 +193,27 @@ public class GlobalSessionTest {
         branchSession.setApplicationData("{\"data\":\"test\"}");
         globalSession.add(branchSession);
         return new Object[][] {{globalSession}};
+    }
+
+
+    @Test
+    public void testSort(){
+        GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+
+        BranchSession branchSession2 = new BranchSession();
+        branchSession2.setBranchId(2);
+        globalSession.add(branchSession2);
+
+        BranchSession branchSession1 = new BranchSession();
+        branchSession1.setBranchId(1);
+        globalSession.add(branchSession1);
+
+        BranchSession branchSession3 = new BranchSession();
+        branchSession3.setBranchId(3);
+        globalSession.add(branchSession3);
+
+        ArrayList<BranchSession> result = globalSession.getSortedBranches();
+        Assert.assertEquals(1,result.get(0).getBranchId());
+
     }
 }
