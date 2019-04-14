@@ -25,6 +25,7 @@ import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.rpc.netty.RpcServer;
+import com.alibaba.fescar.core.rpc.netty.ShutdownHook;
 import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
 import com.alibaba.fescar.server.session.SessionHolder;
 
@@ -76,7 +77,9 @@ public class Server {
 
         DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
         coordinator.init();
-        rpcServer.setHandler(new DefaultCoordinator(rpcServer));
+        rpcServer.setHandler(coordinator);
+        // register ShutdownHook
+        ShutdownHook.getInstance().addDisposable(coordinator);
 
         UUIDGenerator.init(1);
 

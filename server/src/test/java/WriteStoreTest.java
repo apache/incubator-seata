@@ -62,6 +62,11 @@ public class WriteStoreTest {
             "/Users/min.ji/Documents/test/data",
             new SessionManager() {
                 @Override
+                public void destroy() {
+
+                }
+
+                @Override
                 public void addGlobalSession(GlobalSession session) throws TransactionException {
 
                 }

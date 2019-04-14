@@ -423,6 +423,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             byteBuffer.putShort((short)0);
         }
         byteBuffer.putLong(beginTime);
+        byteBuffer.putLong(statusUpdateTime);
         byteBuffer.put((byte)status.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
@@ -432,12 +433,13 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private int calGlobalSessionSize(byte[] byApplicationIdBytes, byte[] byServiceGroupBytes, byte[] byTxNameBytes) {
         final int size = 8 // trascationId
-            + 4 // timeout
-            + 2 // byApplicationIdBytes.length
-            + 2 // byServiceGroupBytes.length
-            + 2 // byTxNameBytes.length
-            + 8 // beginTime
-            + 1 // statusCode
+                + 4 // timeout
+                + 2 // byApplicationIdBytes.length
+                + 2 // byServiceGroupBytes.length
+                + 2 // byTxNameBytes.length
+                + 8 // beginTime
+                + 8 //statusUpdateTime
+                + 1 // statusCode
             + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
             + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
             + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
@@ -468,6 +470,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             this.transactionName = new String(byTxName);
         }
         this.beginTime = byteBuffer.getLong();
+        this.statusUpdateTime = byteBuffer.getLong();
         this.status = GlobalStatus.get(byteBuffer.get());
     }
 

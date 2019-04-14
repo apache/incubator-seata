@@ -55,6 +55,7 @@ import com.alibaba.fescar.core.rpc.Disposable;
 import com.alibaba.fescar.core.rpc.RpcContext;
 import com.alibaba.fescar.core.rpc.ServerMessageSender;
 import com.alibaba.fescar.core.rpc.TransactionMessageHandler;
+import com.alibaba.fescar.core.rpc.netty.RpcServer;
 import com.alibaba.fescar.core.rpc.netty.ShutdownHook;
 import com.alibaba.fescar.server.AbstractTCInboundHandler;
 import com.alibaba.fescar.server.session.BranchSession;
@@ -76,6 +77,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     implements TransactionMessageHandler, ResourceManagerInbound, Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCoordinator.class);
+
+    private static final int TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS = 5000;
 
     private ServerMessageSender messageSender;
 
@@ -323,8 +326,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
             }
         }, 0, 2, TimeUnit.MILLISECONDS);
-        // last shutdown
-        ShutdownHook.getInstance().addDisposable(this, Integer.MIN_VALUE);
     }
 
     @Override
@@ -348,10 +349,24 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
     @Override
     public void destroy() {
+        // 1. first shutdown timed task
         retryRollbacking.shutdown();
         retryCommitting.shutdown();
         asyncCommitting.shutdown();
         timeoutCheck.shutdown();
+        try {
+            retryRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ingore) {
+
+        }
+        // 2. sencond close netty flow
+        if (messageSender instanceof RpcServer){
+            ((RpcServer) messageSender).destroy();
+        }
+        // 3. last destory SessionHolder
         SessionHolder.destory();
     }
 }
