@@ -60,15 +60,6 @@ public class XIDTest {
     }
 
     /**
-     * Test get server address.
-     */
-    @Test
-    public void testGetServerAddress() {
-        assertThat(XID.getServerAddress(null)).isNull();
-        assertThat(XID.getServerAddress("127.0.0.1:8080:8577662204289747564")).isEqualTo("127.0.0.1:8080");
-    }
-
-    /**
      * Test get transaction id.
      */
     @Test

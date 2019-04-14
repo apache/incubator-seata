@@ -27,12 +27,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.exception.FrameworkErrorCode;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.common.util.NetUtil;
-import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.model.Resource;
 import com.alibaba.fescar.core.model.ResourceManager;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
@@ -196,23 +194,14 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
 
     @Override
     public Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException {
-        return super.sendAsyncRequestWithResponse(XID.getServerAddress(RootContext.getXID()),
-            getRemoteServerChannel(), msg,
-            timeout);
+        String validAddress = loadBalance(transactionServiceGroup);
+        Channel acquireChannel = connect(validAddress);
+        return super.sendAsyncRequestWithResponse(validAddress, acquireChannel, msg, timeout);
     }
 
     @Override
     public Object sendMsgWithResponse(String serverAddress, Object msg, long timeout) throws TimeoutException {
         return super.sendAsyncRequestWithResponse(serverAddress, connect(serverAddress), msg, timeout);
-    }
-
-    private Channel getRemoteServerChannel() {
-        String serverAddress = null;
-        if (!RootContext.inGlobalTransaction()) {
-            return null;
-        }
-        serverAddress = XID.getServerAddress(RootContext.getXID());
-        return connect(serverAddress);
     }
 
     @Override

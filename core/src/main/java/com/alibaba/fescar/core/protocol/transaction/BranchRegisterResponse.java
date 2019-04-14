@@ -29,28 +29,7 @@ import com.alibaba.fescar.core.protocol.AbstractMessage;
 public class BranchRegisterResponse extends AbstractTransactionResponse implements Serializable {
 
     private static final long serialVersionUID = 8317040433102745774L;
-
-    private long transactionId;
-
     private long branchId;
-
-    /**
-     * Gets transaction id.
-     *
-     * @return the transaction id
-     */
-    public long getTransactionId() {
-        return transactionId;
-    }
-
-    /**
-     * Sets transaction id.
-     *
-     * @param transactionId the transaction id
-     */
-    public void setTransactionId(long transactionId) {
-        this.transactionId = transactionId;
-    }
 
     /**
      * Gets branch id.
@@ -78,7 +57,6 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
     @Override
     protected void doEncode() {
         super.doEncode();
-        byteBuffer.putLong(transactionId);
         byteBuffer.putLong(branchId);
 
     }
@@ -86,17 +64,13 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
     @Override
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
-        this.transactionId = byteBuffer.getLong();
         this.branchId = byteBuffer.getLong();
     }
 
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append("BranchRegisterResponse: transactionId=");
-        result.append(transactionId);
-        result.append(",");
-        result.append("branchId=");
+        result.append("BranchRegisterResponse: branchId=");
         result.append(branchId);
         result.append(",");
         result.append("result code =");

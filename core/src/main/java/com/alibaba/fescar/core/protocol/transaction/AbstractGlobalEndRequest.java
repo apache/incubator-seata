@@ -27,10 +27,7 @@ import com.alibaba.fescar.core.protocol.MergedMessage;
  */
 public abstract class AbstractGlobalEndRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 
-    /**
-     * The Transaction id.
-     */
-    protected long transactionId;
+    private String xid;
 
     /**
      * The Extra data.
@@ -38,21 +35,21 @@ public abstract class AbstractGlobalEndRequest extends AbstractTransactionReques
     protected String extraData;
 
     /**
-     * Gets transaction id.
+     * Gets xid.
      *
-     * @return the transaction id
+     * @return the xid
      */
-    public long getTransactionId() {
-        return transactionId;
+    public String getXid() {
+        return xid;
     }
 
     /**
-     * Sets transaction id.
+     * Sets xid.
      *
-     * @param transactionId the transaction id
+     * @param xid the xid
      */
-    public void setTransactionId(long transactionId) {
-        this.transactionId = transactionId;
+    public void setXid(String xid) {
+        this.xid = xid;
     }
 
     /**
@@ -76,7 +73,16 @@ public abstract class AbstractGlobalEndRequest extends AbstractTransactionReques
     @Override
     public byte[] encode() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(256);
-        byteBuffer.putLong(this.transactionId);
+        // 1. xid
+        if (this.xid != null) {
+            byte[] bs = xid.getBytes(UTF8);
+            byteBuffer.putShort((short)bs.length);
+            if (bs.length > 0) {
+                byteBuffer.put(bs);
+            }
+        } else {
+            byteBuffer.putShort((short)0);
+        }
         if (this.extraData != null) {
             byte[] bs = extraData.getBytes(UTF8);
             byteBuffer.putShort((short)bs.length);
@@ -95,7 +101,12 @@ public abstract class AbstractGlobalEndRequest extends AbstractTransactionReques
 
     @Override
     public void decode(ByteBuffer byteBuffer) {
-        this.transactionId = byteBuffer.getLong();
+        short xidLen = byteBuffer.getShort();
+        if (xidLen > 0) {
+            byte[] bs = new byte[xidLen];
+            byteBuffer.get(bs);
+            this.setXid(new String(bs, UTF8));
+        }
         short len = byteBuffer.getShort();
         if (len > 0) {
             byte[] bs = new byte[len];
@@ -107,8 +118,8 @@ public abstract class AbstractGlobalEndRequest extends AbstractTransactionReques
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append("transactionId=");
-        result.append(transactionId);
+        result.append("xid=");
+        result.append(xid);
         result.append(",");
         result.append("extraData=");
         result.append(extraData);

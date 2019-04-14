@@ -18,7 +18,6 @@ package com.alibaba.fescar.tm;
 
 import java.util.concurrent.TimeoutException;
 
-import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.GlobalStatus;
@@ -80,27 +79,24 @@ public class DefaultTransactionManager implements TransactionManager {
 
     @Override
     public GlobalStatus commit(String xid) throws TransactionException {
-        long txId = XID.getTransactionId(xid);
         GlobalCommitRequest globalCommit = new GlobalCommitRequest();
-        globalCommit.setTransactionId(txId);
+        globalCommit.setXid(xid);
         GlobalCommitResponse response = (GlobalCommitResponse)syncCall(globalCommit);
         return response.getGlobalStatus();
     }
 
     @Override
     public GlobalStatus rollback(String xid) throws TransactionException {
-        long txId = XID.getTransactionId(xid);
         GlobalRollbackRequest globalRollback = new GlobalRollbackRequest();
-        globalRollback.setTransactionId(txId);
+        globalRollback.setXid(xid);
         GlobalRollbackResponse response = (GlobalRollbackResponse)syncCall(globalRollback);
         return response.getGlobalStatus();
     }
 
     @Override
     public GlobalStatus getStatus(String xid) throws TransactionException {
-        long txId = XID.getTransactionId(xid);
         GlobalStatusRequest queryGlobalStatus = new GlobalStatusRequest();
-        queryGlobalStatus.setTransactionId(txId);
+        queryGlobalStatus.setXid(xid);
         GlobalStatusResponse response = (GlobalStatusResponse)syncCall(queryGlobalStatus);
         return response.getGlobalStatus();
     }

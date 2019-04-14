@@ -72,21 +72,6 @@ public class XID {
     }
 
     /**
-     * Gets server address.
-     *
-     * @param xid the xid
-     * @return the server address
-     */
-    public static String getServerAddress(String xid) {
-        if (xid == null) {
-            return null;
-        }
-
-        int idx = xid.lastIndexOf(":");
-        return xid.substring(0, idx);
-    }
-
-    /**
      * Gets port.
      *
      * @return the port

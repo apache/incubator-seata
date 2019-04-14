@@ -16,7 +16,6 @@
 package com.alibaba.fescar.core.message;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
@@ -27,57 +26,25 @@ import org.junit.Test;
 
 /**
  * The type Branch report request test.
- *
- * @author xiajun.0706 @163.com
- * @since 2019 /1/24
  */
 public class BranchReportRequestTest {
 
     /**
      * Test to string.
-     *
-     * @throws Exception the exception
      */
     @Test
-    public void testToString() throws Exception {
+    public void testToString() {
         BranchReportRequest branchReportRequest = new BranchReportRequest();
-
-        branchReportRequest.setTransactionId(1249853);
+        branchReportRequest.setXid("127.0.0.1:8091:1249853");
         branchReportRequest.setBranchId(3);
         branchReportRequest.setResourceId("resource003");
         branchReportRequest.setStatus(BranchStatus.PhaseOne_Timeout);
         branchReportRequest.setApplicationData("test app data");
-
         Assert.assertEquals(
-            "transactionId=1249853,branchId=3,resourceId=resource003,status=PhaseOne_Timeout,applicationData=test app"
+            "xid=127.0.0.1:8091:1249853,branchId=3,resourceId=resource003,status=PhaseOne_Timeout,"
+                + "applicationData=test app"
                 + " data",
             branchReportRequest.toString());
-    }
-
-    /**
-     * Test encode.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testEncode() throws Exception {
-        BranchReportRequest branchReportRequest = new BranchReportRequest();
-
-        branchReportRequest.setTransactionId(1249853);
-        branchReportRequest.setBranchId(3);
-        branchReportRequest.setResourceId("resource003");
-        branchReportRequest.setStatus(BranchStatus.PhaseOne_Timeout);
-        branchReportRequest.setApplicationData("test app data");
-
-        byte[] encodeResult = branchReportRequest.encode();
-        System.out.println(encodeResult);
-        String encodeResultStr = Arrays.toString(encodeResult);
-        System.out.println(encodeResultStr);
-
-        Assert.assertEquals(
-            "[0, 0, 0, 0, 0, 19, 18, 61, 0, 0, 0, 0, 0, 0, 0, 3, 4, 0, 11, 114, 101, 115, 111, 117, 114, 99, 101, 48,"
-                + " 48, 51, 0, 0, 0, 13, 116, 101, 115, 116, 32, 97, 112, 112, 32, 100, 97, 116, 97, 0]",
-            encodeResultStr);
     }
 
     /**
@@ -86,10 +53,9 @@ public class BranchReportRequestTest {
      * @throws Exception the exception
      */
     @Test
-    public void testDecode() throws Exception {
+    public void testDecode() {
         BranchReportRequest branchReportRequest = new BranchReportRequest();
-
-        branchReportRequest.setTransactionId(1249853);
+        branchReportRequest.setXid("127.0.0.1:8091:1249853");
         branchReportRequest.setBranchId(3);
         branchReportRequest.setResourceId("resource003");
         branchReportRequest.setStatus(BranchStatus.PhaseOne_Timeout);
@@ -97,15 +63,13 @@ public class BranchReportRequestTest {
         branchReportRequest.setBranchType(BranchType.AT);
 
         byte[] encodeResult = branchReportRequest.encode();
-
         ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
         byteBuffer.put(encodeResult);
         byteBuffer.flip();
 
         BranchReportRequest decodeBranchReportRequest = new BranchReportRequest();
         decodeBranchReportRequest.decode(byteBuffer);
-        System.out.println(decodeBranchReportRequest);
-        Assert.assertEquals(branchReportRequest.getTransactionId(), decodeBranchReportRequest.getTransactionId());
+        Assert.assertEquals(branchReportRequest.getXid(), decodeBranchReportRequest.getXid());
         Assert.assertEquals(branchReportRequest.getBranchId(), decodeBranchReportRequest.getBranchId());
         Assert.assertEquals(branchReportRequest.getResourceId(), decodeBranchReportRequest.getResourceId());
         Assert.assertEquals(branchReportRequest.getStatus(), decodeBranchReportRequest.getStatus());

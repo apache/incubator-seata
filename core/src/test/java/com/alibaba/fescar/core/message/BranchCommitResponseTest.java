@@ -32,19 +32,17 @@ public class BranchCommitResponseTest {
     /**
      * To string test.
      *
-     * @throws Exception the exception
      */
     @Test
-    public void toStringTest() throws Exception {
+    public void toStringTest() {
         BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
-
+        branchCommitResponse.setXid("127.0.0.1:8091:123456");
+        branchCommitResponse.setBranchId(2345678L);
         branchCommitResponse.setBranchStatus(BranchStatus.PhaseOne_Done);
         branchCommitResponse.setResultCode(ResultCode.Success);
         branchCommitResponse.setMsg("");
-
-        System.out.println(branchCommitResponse.toString());
-
-        Assert.assertEquals("branchStatus=PhaseOne_Done,result code =Success,getMsg =",
+        Assert.assertEquals(
+            "xid=127.0.0.1:8091:123456,branchId=2345678,branchStatus=PhaseOne_Done,result code =Success,getMsg =",
             branchCommitResponse.toString());
 
     }

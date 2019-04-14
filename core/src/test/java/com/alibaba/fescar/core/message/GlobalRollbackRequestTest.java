@@ -16,7 +16,6 @@
 package com.alibaba.fescar.core.message;
 
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackRequest;
 
@@ -25,75 +24,35 @@ import org.junit.Test;
 
 /**
  * The type Global rollback request test.
- *
- * @author xiajun.0706 @163.com
- * @since 2019 /1/24
  */
 public class GlobalRollbackRequestTest {
 
     /**
      * Test to string.
-     *
-     * @throws Exception the exception
      */
     @Test
-    public void testToString() throws Exception {
+    public void testToString() {
         GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
-
-        globalRollbackRequest.setTransactionId(1249853);
+        globalRollbackRequest.setXid("127.0.0.1:8091:1249853");
         globalRollbackRequest.setExtraData("test_extra_data");
-
-        System.out.println(globalRollbackRequest.toString());
-
-        Assert.assertEquals("transactionId=1249853,extraData=test_extra_data", globalRollbackRequest.toString());
-    }
-
-    /**
-     * Test encode.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testEncode() throws Exception {
-        GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
-
-        globalRollbackRequest.setTransactionId(1249853);
-        globalRollbackRequest.setExtraData("test_extra_data");
-
-        System.out.println(globalRollbackRequest.toString());
-
-        byte[] encodeResult = globalRollbackRequest.encode();
-        System.out.println(encodeResult);
-        String encodeResultStr = Arrays.toString(encodeResult);
-        System.out.println(encodeResultStr);
-
-        Assert.assertEquals(
-            "[0, 0, 0, 0, 0, 19, 18, 61, 0, 15, 116, 101, 115, 116, 95, 101, 120, 116, 114, 97, 95, 100, 97, 116, 97]",
-            encodeResultStr);
+        Assert.assertEquals("xid=127.0.0.1:8091:1249853,extraData=test_extra_data", globalRollbackRequest.toString());
     }
 
     /**
      * Test decode.
-     *
-     * @throws Exception the exception
      */
     @Test
-    public void testDecode() throws Exception {
+    public void testDecode() {
         GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
-
-        globalRollbackRequest.setTransactionId(1249853L);
+        globalRollbackRequest.setXid("127.0.0.1:8091:1249853");
         globalRollbackRequest.setExtraData("test_extra_data");
-
         byte[] encodeResult = globalRollbackRequest.encode();
-
         ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
         byteBuffer.put(encodeResult);
         byteBuffer.flip();
-
         GlobalRollbackRequest decodeGlobalRollbackRequest = new GlobalRollbackRequest();
         decodeGlobalRollbackRequest.decode(byteBuffer);
-        System.out.println(decodeGlobalRollbackRequest);
-        Assert.assertEquals(globalRollbackRequest.getTransactionId(), decodeGlobalRollbackRequest.getTransactionId());
+        Assert.assertEquals(globalRollbackRequest.getXid(), decodeGlobalRollbackRequest.getXid());
         Assert.assertEquals(globalRollbackRequest.getExtraData(), decodeGlobalRollbackRequest.getExtraData());
     }
 }

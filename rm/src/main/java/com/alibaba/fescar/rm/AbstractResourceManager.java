@@ -16,7 +16,8 @@
 
 package com.alibaba.fescar.rm;
 
-import com.alibaba.fescar.common.XID;
+import java.util.concurrent.TimeoutException;
+
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
@@ -30,10 +31,9 @@ import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
 import com.alibaba.fescar.core.protocol.transaction.BranchReportRequest;
 import com.alibaba.fescar.core.protocol.transaction.BranchReportResponse;
 import com.alibaba.fescar.core.rpc.netty.RmRpcClient;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.TimeoutException;
 
 /**
  * abstract ResourceManager
@@ -58,7 +58,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
         try {
             BranchRegisterRequest request = new BranchRegisterRequest();
-            request.setTransactionId(XID.getTransactionId(xid));
+            request.setXid(xid);
             request.setLockKey(lockKeys);
             request.setResourceId(resourceId);
             request.setBranchType(branchType);
@@ -89,7 +89,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
     public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
         try {
             BranchReportRequest request = new BranchReportRequest();
-            request.setTransactionId(XID.getTransactionId(xid));
+            request.setXid(xid);
             request.setBranchId(branchId);
             request.setStatus(status);
             request.setApplicationData(applicationData);

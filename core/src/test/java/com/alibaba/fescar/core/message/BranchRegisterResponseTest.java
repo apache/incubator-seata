@@ -32,15 +32,13 @@ public class BranchRegisterResponseTest {
      * @throws Exception the exception
      */
     @Test
-    public void toStringTest() throws Exception {
+    public void toStringTest() {
         BranchRegisterResponse branchRegisterResponse = new BranchRegisterResponse();
-
-        branchRegisterResponse.setTransactionId(123456L);
         branchRegisterResponse.setBranchId(123457L);
         branchRegisterResponse.setResultCode(ResultCode.Success);
         branchRegisterResponse.setMsg("");
         Assert.assertEquals(
-            "BranchRegisterResponse: transactionId=123456,branchId=123457,result code =Success,getMsg =",
+            "BranchRegisterResponse: branchId=123457,result code =Success,getMsg =",
             branchRegisterResponse.toString());
 
     }
