@@ -80,7 +80,7 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ## Maven dependency
 ```xml
-<fescar.version>0.4.1</fescar.version>
+<fescar.version>0.4.2</fescar.version>
 
 <dependency>
     <groupId>com.alibaba.fescar</groupId>
