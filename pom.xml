@@ -112,6 +112,7 @@
         <nacos-client.version>0.9.1</nacos-client.version>
         <javax-inject.version>1</javax-inject.version>
         <archaius-core.version>0.7.6</archaius-core.version>
+        <sofa.registry.version>5.2.0</sofa.registry.version>
     </properties>
     <!--test-->
     <dependencies>
@@ -324,6 +325,11 @@
                 <groupId>com.101tec</groupId>
                 <artifactId>zkclient</artifactId>
                 <version>${zkclient.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>registry-client-all</artifactId>
+                <version>${sofa.registry.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba.spring</groupId>
