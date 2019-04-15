@@ -87,5 +87,5 @@ public class ConfigurationKeys {
     /**
      * The constant SERVICE_SESSION_RELOAD_READ_SIZE
      */
-    public static final String SERVICE_SESSION_RELOAD_READ_SIZE = STORE_PREFIX + STORE_FILE_PREFIX + "session.reload.read_size";
+    public static final String SERVICE_SESSION_RELOAD_READ_SIZE = STORE_FILE_PREFIX + "session.reload.read_size";
 }
