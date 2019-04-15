@@ -31,6 +31,7 @@ import com.alibaba.fescar.config.ConfigFuture.ConfigOperation;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import org.apache.commons.lang3.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,6 +124,7 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
     public void addConfigListener(String dataId, ConfigChangeListener listener) {
         configListenersMap.putIfAbsent(dataId, new ArrayList<ConfigChangeListener>());
         configListenersMap.get(dataId).add(listener);
+        listenedConfigMap.putIfAbsent(dataId, getConfig(dataId));
         if (null != listener.getExecutor()) {
             ConfigChangeRunnable configChangeTask = new ConfigChangeRunnable(dataId, listener);
             listener.getExecutor().submit(configChangeTask);
@@ -142,6 +144,9 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
             }
         }
         configListenersMap.put(dataId, newChangeListenerList);
+        if (newChangeListenerList.isEmpty()){
+            listenedConfigMap.remove(dataId);
+        }
         if (null != listener.getExecutor()) {
             listener.getExecutor().shutdownNow();
         }
@@ -251,12 +256,10 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
                     for (Map.Entry<String, List<ConfigChangeListener>> entry : configListenerMap.entrySet()) {
                         String configId = entry.getKey();
                         String currentConfig = getConfig(configId);
-                        if (null != currentConfig && currentConfig.equals(listenedConfigMap.get(configId))) {
+                        if (ObjectUtils.notEqual(currentConfig, listenedConfigMap.get(configId))) {
                             listenedConfigMap.put(configId, currentConfig);
                             notifyAllListener(configId, configListenerMap.get(configId));
 
-                        } else if (null == currentConfig && null != listenedConfigMap.get(configId)) {
-                            notifyAllListener(configId, configListenerMap.get(configId));
                         }
                     }
                     Thread.sleep(LISTENER_CONFIG_INTERNAL);

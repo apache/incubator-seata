@@ -30,7 +30,7 @@ import com.alibaba.fescar.core.rpc.RpcContext;
  */
 public class BranchReportRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 
-    private long transactionId;
+    private String xid;
 
     private long branchId;
 
@@ -43,21 +43,21 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
     private BranchType branchType = BranchType.AT;
 
     /**
-     * Gets transaction id.
+     * Gets xid.
      *
-     * @return the transaction id
+     * @return the xid
      */
-    public long getTransactionId() {
-        return transactionId;
+    public String getXid() {
+        return xid;
     }
 
     /**
-     * Sets transaction id.
+     * Sets xid.
      *
-     * @param transactionId the transaction id
+     * @param xid the xid
      */
-    public void setTransactionId(long transactionId) {
-        this.transactionId = transactionId;
+    public void setXid(String xid) {
+        this.xid = xid;
     }
 
     /**
@@ -165,8 +165,16 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
             }
         }
 
-        // 1. Transaction Id
-        byteBuffer.putLong(this.transactionId);
+        // 1. xid
+        if (this.xid != null) {
+            byte[] bs = xid.getBytes(UTF8);
+            byteBuffer.putShort((short)bs.length);
+            if (bs.length > 0) {
+                byteBuffer.put(bs);
+            }
+        } else {
+            byteBuffer.putShort((short)0);
+        }
         // 2. Branch Id
         byteBuffer.putLong(this.branchId);
         // 3. Branch Status
@@ -202,7 +210,12 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
 
     @Override
     public void decode(ByteBuffer byteBuffer) {
-        this.transactionId = byteBuffer.getLong();
+        short xidLen = byteBuffer.getShort();
+        if (xidLen > 0) {
+            byte[] bs = new byte[xidLen];
+            byteBuffer.get(bs);
+            this.setXid(new String(bs, UTF8));
+        }
         this.branchId = byteBuffer.getLong();
         this.status = BranchStatus.get(byteBuffer.get());
         short len = byteBuffer.getShort();
@@ -229,8 +242,8 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append("transactionId=");
-        result.append(transactionId);
+        result.append("xid=");
+        result.append(xid);
         result.append(",");
         result.append("branchId=");
         result.append(branchId);
