@@ -43,7 +43,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private ConnectionContext context = new ConnectionContext();
 
-    private static int DEFAULT_REPORT_RETRY_COUNT = 5;
+    private static final int DEFAULT_REPORT_RETRY_COUNT = 5;
 
     private static int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
 
