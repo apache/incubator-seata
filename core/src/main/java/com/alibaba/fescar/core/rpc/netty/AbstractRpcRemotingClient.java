@@ -38,6 +38,7 @@ import com.alibaba.fescar.core.rpc.ClientMessageListener;
 import com.alibaba.fescar.core.rpc.ClientMessageSender;
 import com.alibaba.fescar.core.rpc.RemotingService;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
+import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
 import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
@@ -65,6 +66,8 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.alibaba.fescar.common.exception.FrameworkErrorCode.NoAvailableService;
 
 /**
  * The type Rpc remoting client.
@@ -370,6 +373,21 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             }
         }
         return availList;
+    }
+
+    protected String loadBalance(String transactionServiceGroup) {
+        InetSocketAddress address = null;
+        try {
+            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(
+                transactionServiceGroup);
+            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
+        } catch (Exception ignore) {
+            LOGGER.error(ignore.getMessage());
+        }
+        if (address == null) {
+            throw new FrameworkException(NoAvailableService);
+        }
+        return NetUtil.toStringAddress(address);
     }
 
     /**
