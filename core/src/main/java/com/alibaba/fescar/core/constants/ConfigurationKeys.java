@@ -34,9 +34,19 @@ public class ConfigurationKeys {
     public static final String STORE_PREFIX = "store.";
 
     /**
+     * The constant STORE_MODE.
+     */
+    public static final String STORE_MODE =  STORE_PREFIX + "mode";
+
+    /**
      * The constant STORE_FILE_PREFIX
      */
     public static final String STORE_FILE_PREFIX = "file.";
+
+    /**
+     * The constant STORE_FILE_DIR
+     */
+    public static final String STORE_FILE_DIR =  STORE_PREFIX + STORE_FILE_PREFIX + "dir";
 
     /**
      * The constant SERVICE_GROUP_MAPPING_PREFIX.

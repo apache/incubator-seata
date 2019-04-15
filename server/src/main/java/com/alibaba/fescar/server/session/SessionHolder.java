@@ -26,6 +26,7 @@ import com.alibaba.fescar.common.exception.StoreException;
 import com.alibaba.fescar.common.util.StringUtils;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.core.constants.ConfigurationKeys;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.model.GlobalStatus;
 
@@ -77,7 +78,7 @@ public class SessionHolder {
      */
     public static void init(String mode) throws IOException {
         if(StringUtils.isBlank(mode)){
-            mode = CONFIG.getConfig("store.mode");
+            mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         }
         StoreMode storeMode = StoreMode.valueof(mode);
         if(StoreMode.DB.equals(storeMode)){
@@ -85,7 +86,7 @@ public class SessionHolder {
 
         }else if(StoreMode.FILE.equals(storeMode)){
             //file store
-            String sessionStorePath = CONFIG.getConfig("store.file.dir");
+            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
             if (sessionStorePath == null) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
