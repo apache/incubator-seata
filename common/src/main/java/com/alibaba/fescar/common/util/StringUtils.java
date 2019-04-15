@@ -165,8 +165,8 @@ public class StringUtils {
                 for(Object o : (Collection)obj){
                     sb.append(toString(o)).append(",");
                 }
+                sb.deleteCharAt(sb.length()-1);
             }
-            sb.deleteCharAt(sb.length()-1);
             sb.append("]");
             return sb.toString();
         }
@@ -178,8 +178,8 @@ public class StringUtils {
                     Object v = ((Map)obj).get(k);
                     sb.append(toString(k)).append("->").append(toString(v)).append(",");
                 }
+                sb.deleteCharAt(sb.length()-1);
             }
-            sb.deleteCharAt(sb.length()-1);
             sb.append("}");
         }
         StringBuilder sb = new StringBuilder();
