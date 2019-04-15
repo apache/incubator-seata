@@ -69,7 +69,8 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFile() throws Exception {
-        SessionHolder.init(".");
+//        SessionHolder.init(".");
+        SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -96,7 +97,8 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "tb:3"));
 
         // Re-init SessionHolder: restore sessions from file
-        SessionHolder.init(".");
+//        SessionHolder.init(".");
+        SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
         GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
@@ -109,6 +111,9 @@ public class SessionStoreTest {
         Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "tb:3"));
         Assert.assertTrue(lockManager.isLockable(globalSession.getTransactionId(), RESOURCE_ID, "tb:3"));
 
+        //clear
+        reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+        reloadSession.end();
     }
 
     /**
@@ -118,14 +123,16 @@ public class SessionStoreTest {
      */
     //@Test
     public void testRestoredFromFile2() throws Exception {
-        SessionHolder.init(".");
+//        SessionHolder.init(".");
+        SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.begin();
 
         // Re-init SessionHolder: restore sessions from file
-        SessionHolder.init(".");
+//        SessionHolder.init(".");
+        SessionHolder.init("file");
     }
 
     /**
@@ -135,7 +142,8 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFileAsyncCommitting() throws Exception {
-        SessionHolder.init(".");
+//        SessionHolder.init(".");
+        SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -157,7 +165,8 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
-        SessionHolder.init(".");
+//        SessionHolder.init(".");
+        SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
         GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
@@ -170,6 +179,9 @@ public class SessionStoreTest {
         // No locking for session in AsyncCommitting status
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
+        //clear
+        reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+        reloadSession.end();
     }
 
     /**
@@ -179,7 +191,8 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFileCommitRetry() throws Exception {
-        SessionHolder.init(".");
+//        SessionHolder.init(".");
+        SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -203,7 +216,8 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
-        SessionHolder.init(".");
+//        SessionHolder.init(".");
+        SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
         GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
@@ -218,6 +232,9 @@ public class SessionStoreTest {
         // Lock is held by session in CommitRetrying status
         Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
+        //clear
+        reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+        reloadSession.end();
     }
 
     /**
@@ -227,7 +244,9 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFileRollbackRetry() throws Exception {
-        SessionHolder.init(".");
+//        SessionHolder.init(".");
+        SessionHolder.init("file");
+
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -251,7 +270,8 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
-        SessionHolder.init(".");
+//        SessionHolder.init(".");
+        SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
         GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
@@ -266,6 +286,9 @@ public class SessionStoreTest {
         // Lock is held by session in RollbackRetrying status
         Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
+        //clear
+        reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+        reloadSession.end();
     }
 
     /**
@@ -275,7 +298,9 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFileRollbackFailed() throws Exception {
-        SessionHolder.init(".");
+//        SessionHolder.init(".");
+        SessionHolder.init("file");
+
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -302,11 +327,11 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
-        SessionHolder.init(".");
+//        SessionHolder.init(".");
+        SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
         GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
         Assert.assertNull(reloadSession);
-
     }
 }
