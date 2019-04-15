@@ -41,12 +41,12 @@ public class ConfigurationKeys {
     /**
      * The constant STORE_FILE_PREFIX
      */
-    public static final String STORE_FILE_PREFIX = "file.";
+    public static final String STORE_FILE_PREFIX = STORE_PREFIX + "file.";
 
     /**
      * The constant STORE_FILE_DIR
      */
-    public static final String STORE_FILE_DIR =  STORE_PREFIX + STORE_FILE_PREFIX + "dir";
+    public static final String STORE_FILE_DIR = STORE_FILE_PREFIX + "dir";
 
     /**
      * The constant SERVICE_GROUP_MAPPING_PREFIX.

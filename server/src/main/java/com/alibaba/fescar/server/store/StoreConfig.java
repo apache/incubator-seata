@@ -40,14 +40,14 @@ public class StoreConfig {
     public static final int DEFAULT_WRITE_BUFFER_SIZE = 1024 * 16;
 
     public static int getMaxBranchSessionSize() {
-        return CONFIGURATION.getInt(STORE_PREFIX + STORE_FILE_PREFIX + "max-branch-session-size", DEFAULT_MAX_BRANCH_SESSION_SIZE);
+        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "max-branch-session-size", DEFAULT_MAX_BRANCH_SESSION_SIZE);
     }
 
     public static int getMaxGlobalSessionSize() {
-        return CONFIGURATION.getInt(STORE_PREFIX + STORE_FILE_PREFIX + "max-global-session-size", DEFAULT_MAX_GLOBAL_SESSION_SIZE);
+        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "max-global-session-size", DEFAULT_MAX_GLOBAL_SESSION_SIZE);
     }
 
     public static int getFileWriteBufferCacheSize() {
-        return CONFIGURATION.getInt(STORE_PREFIX  + STORE_FILE_PREFIX + "file-write-buffer-cache-size", DEFAULT_WRITE_BUFFER_SIZE);
+        return CONFIGURATION.getInt(STORE_FILE_PREFIX + "file-write-buffer-cache-size", DEFAULT_WRITE_BUFFER_SIZE);
     }
 }
