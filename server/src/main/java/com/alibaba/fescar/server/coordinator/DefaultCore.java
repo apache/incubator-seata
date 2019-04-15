@@ -230,11 +230,18 @@ public class DefaultCore implements Core {
         globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
         SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
         GlobalStatus currentStatus = globalSession.getStatus();
-        if (currentStatus.name().startsWith("Timeout")) {
+        if (isTimeoutGlobalStatus(currentStatus)) {
             globalSession.changeStatus(GlobalStatus.TimeoutRollbackRetrying);
         } else {
             globalSession.changeStatus(GlobalStatus.RollbackRetrying);
         }
+    }
+
+    private boolean isTimeoutGlobalStatus(GlobalStatus status) {
+        return status == GlobalStatus.TimeoutRollbacked
+                || status == GlobalStatus.TimeoutRollbackFailed
+                || status == GlobalStatus.TimeoutRollbacking
+                || status == GlobalStatus.TimeoutRollbackRetrying;
     }
 
     @Override
