@@ -30,9 +30,54 @@ import io.netty.buffer.ByteBuf;
 public abstract class AbstractBranchEndResponse extends AbstractTransactionResponse {
 
     /**
+     * The Xid.
+     */
+    protected String xid;
+
+    /**
+     * The Branch id.
+     */
+    protected long branchId;
+    /**
      * The Branch status.
      */
     protected BranchStatus branchStatus;
+
+    /**
+     * Gets xid.
+     *
+     * @return the xid
+     */
+    public String getXid() {
+        return xid;
+    }
+
+    /**
+     * Sets xid.
+     *
+     * @param xid the xid
+     */
+    public void setXid(String xid) {
+        this.xid = xid;
+    }
+
+    /**
+     * Gets branch id.
+     *
+     * @return the branch id
+     */
+    public long getBranchId() {
+        return branchId;
+    }
+
+    /**
+     * Sets branch id.
+     *
+     * @param branchId the branch id
+     */
+    public void setBranchId(long branchId) {
+        this.branchId = branchId;
+    }
 
     /**
      * Gets branch status.
@@ -55,12 +100,29 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
     @Override
     protected void doEncode() {
         super.doEncode();
+        if (this.xid != null) {
+            byte[] bs = xid.getBytes(UTF8);
+            byteBuffer.putShort((short)bs.length);
+            if (bs.length > 0) {
+                byteBuffer.put(bs);
+            }
+        } else {
+            byteBuffer.putShort((short)0);
+        }
+        byteBuffer.putLong(this.branchId);
         byteBuffer.put((byte)branchStatus.getCode());
     }
 
     @Override
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
+        short xidLen = byteBuffer.getShort();
+        if (xidLen > 0) {
+            byte[] bs = new byte[xidLen];
+            byteBuffer.get(bs);
+            this.setXid(new String(bs, UTF8));
+        }
+        branchId = byteBuffer.getLong();
         branchStatus = BranchStatus.get(byteBuffer.get());
     }
 
@@ -77,6 +139,12 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
+        result.append("xid=");
+        result.append(xid);
+        result.append(",");
+        result.append("branchId=");
+        result.append(branchId);
+        result.append(",");
         result.append("branchStatus=");
         result.append(branchStatus);
         result.append(",");

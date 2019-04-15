@@ -31,7 +31,7 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
 
     private static final long serialVersionUID = 1242711598812634704L;
 
-    private long transactionId;
+    private String xid;
 
     private BranchType branchType = BranchType.AT;
 
@@ -42,21 +42,21 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
     private String applicationData;
 
     /**
-     * Gets transaction id.
+     * Gets xid.
      *
-     * @return the transaction id
+     * @return the xid
      */
-    public long getTransactionId() {
-        return transactionId;
+    public String getXid() {
+        return xid;
     }
 
     /**
-     * Sets transaction id.
+     * Sets xid.
      *
-     * @param transactionId the transaction id
+     * @param xid the xid
      */
-    public void setTransactionId(long transactionId) {
-        this.transactionId = transactionId;
+    public void setXid(String xid) {
+        this.xid = xid;
     }
 
     /**
@@ -118,10 +118,20 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
         return TYPE_BRANCH_REGISTER;
     }
 
+    /**
+     * Gets application data.
+     *
+     * @return the application data
+     */
     public String getApplicationData() {
         return applicationData;
     }
 
+    /**
+     * Sets application data.
+     *
+     * @param applicationData the application data
+     */
     public void setApplicationData(String applicationData) {
         this.applicationData = applicationData;
     }
@@ -145,8 +155,16 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
         }
         byteBuffer = ByteBuffer.allocate(byteLenth + 1024);
 
-        // 1. Transaction Id
-        byteBuffer.putLong(this.transactionId);
+        // 1. xid
+        if (this.xid != null) {
+            byte[] bs = xid.getBytes(UTF8);
+            byteBuffer.putShort((short)bs.length);
+            if (bs.length > 0) {
+                byteBuffer.put(bs);
+            }
+        } else {
+            byteBuffer.putShort((short)0);
+        }
         // 2. Branch Type
         byteBuffer.put((byte)this.branchType.ordinal());
         // 3. Resource Id
@@ -188,7 +206,12 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
 
     @Override
     public void decode(ByteBuffer byteBuffer) {
-        this.transactionId = byteBuffer.getLong();
+        short xidLen = byteBuffer.getShort();
+        if (xidLen > 0) {
+            byte[] bs = new byte[xidLen];
+            byteBuffer.get(bs);
+            this.setXid(new String(bs, UTF8));
+        }
         this.branchType = BranchType.get(byteBuffer.get());
         short len = byteBuffer.getShort();
         if (len > 0) {
@@ -220,8 +243,8 @@ public class BranchRegisterRequest extends AbstractTransactionRequestToTC implem
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        result.append("transactionId=");
-        result.append(transactionId);
+        result.append("xid=");
+        result.append(xid);
         result.append(",");
         result.append("branchType=");
         result.append(branchType);

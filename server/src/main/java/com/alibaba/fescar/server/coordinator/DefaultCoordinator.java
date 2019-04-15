@@ -104,37 +104,37 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     @Override
     protected void doGlobalCommit(GlobalCommitRequest request, GlobalCommitResponse response, RpcContext rpcContext)
         throws TransactionException {
-        response.setGlobalStatus(core.commit(XID.generateXID(request.getTransactionId())));
+        response.setGlobalStatus(core.commit(request.getXid()));
 
     }
 
     @Override
     protected void doGlobalRollback(GlobalRollbackRequest request, GlobalRollbackResponse response,
                                     RpcContext rpcContext) throws TransactionException {
-        response.setGlobalStatus(core.rollback(XID.generateXID(request.getTransactionId())));
+        response.setGlobalStatus(core.rollback(request.getXid()));
 
     }
 
     @Override
     protected void doGlobalStatus(GlobalStatusRequest request, GlobalStatusResponse response, RpcContext rpcContext)
         throws TransactionException {
-        response.setGlobalStatus(core.getStatus(XID.generateXID(request.getTransactionId())));
+        response.setGlobalStatus(core.getStatus(request.getXid()));
     }
 
     @Override
     protected void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response,
                                     RpcContext rpcContext) throws TransactionException {
-        response.setTransactionId(request.getTransactionId());
         response.setBranchId(
             core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
-                XID.generateXID(request.getTransactionId()), request.getApplicationData(), request.getLockKey()));
+                request.getXid(), request.getApplicationData(), request.getLockKey()));
 
     }
 
     @Override
     protected void doBranchReport(BranchReportRequest request, BranchReportResponse response, RpcContext rpcContext)
         throws TransactionException {
-        core.branchReport(request.getBranchType(), XID.generateXID(request.getTransactionId()), request.getBranchId(), request.getStatus(),
+        core.branchReport(request.getBranchType(), request.getXid(), request.getBranchId(),
+            request.getStatus(),
             request.getApplicationData());
 
     }
@@ -143,11 +143,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     protected void doLockCheck(GlobalLockQueryRequest request, GlobalLockQueryResponse response, RpcContext rpcContext)
         throws TransactionException {
         response.setLockable(core.lockQuery(request.getBranchType(), request.getResourceId(),
-            XID.generateXID(request.getTransactionId()), request.getLockKey()));
+            request.getXid(), request.getLockKey()));
     }
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
+                                     String applicationData)
         throws TransactionException {
         try {
             BranchCommitRequest request = new BranchCommitRequest();
@@ -171,7 +172,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     }
 
     @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData)
+    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
+                                       String applicationData)
         throws TransactionException {
         try {
             BranchRollbackRequest
