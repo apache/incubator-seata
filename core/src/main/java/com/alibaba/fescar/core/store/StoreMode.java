@@ -24,7 +24,7 @@ public enum StoreMode {
      * @param mode the mode
      * @return the store mode
      */
-    public StoreMode valueof(String mode) {
+    public static StoreMode valueof(String mode) {
         for (StoreMode sm : values()) {
             if (sm.name().equalsIgnoreCase(mode)) {
                 return sm;

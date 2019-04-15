@@ -79,7 +79,7 @@ public class SessionHolder {
         if(StringUtils.isBlank(mode)){
             mode = CONFIG.getConfig("store.mode");
         }
-        StoreMode storeMode = StoreMode.valueOf(mode);
+        StoreMode storeMode = StoreMode.valueof(mode);
         if(StoreMode.DB.equals(storeMode)){
             //TODO database store
 
