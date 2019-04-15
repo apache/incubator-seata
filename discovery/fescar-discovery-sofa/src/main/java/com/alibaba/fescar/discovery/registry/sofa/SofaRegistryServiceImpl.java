@@ -112,17 +112,17 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
         String serviceData = address.getAddress().getHostAddress() + HOST_SEPERATOR + address.getPort();
 
-        getNamingInstance().register(publisherRegistration, serviceData);
+        getRegistryInstance().register(publisherRegistration, serviceData);
     }
 
     @Override
     public void unregister(InetSocketAddress address) throws Exception {
         validAddress(address);
         String clusterName = registryProps.getProperty(PRO_CLUSTER_KEY);
-        getNamingInstance().unregister(clusterName, registryProps.getProperty(PRO_GROUP_KEY), RegistryType.PUBLISHER);
+        getRegistryInstance().unregister(clusterName, registryProps.getProperty(PRO_GROUP_KEY), RegistryType.PUBLISHER);
     }
 
-    private RegistryClient getNamingInstance() {
+    private RegistryClient getRegistryInstance() {
         if (null == registryClient) {
             synchronized (SofaRegistryServiceImpl.class) {
                 if (null == registryClient) {
@@ -152,12 +152,12 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
         LISTENER_SERVICE_MAP.putIfAbsent(cluster, new ArrayList<>());
         LISTENER_SERVICE_MAP.get(cluster).add(listener);
-        getNamingInstance().register(subscriberRegistration);
+        getRegistryInstance().register(subscriberRegistration);
     }
 
     @Override
     public void unsubscribe(String cluster, SubscriberDataObserver listener) throws Exception {
-        getNamingInstance().unregister(cluster, registryProps.getProperty(PRO_GROUP_KEY), RegistryType.SUBSCRIBER);
+        getRegistryInstance().unregister(cluster, registryProps.getProperty(PRO_GROUP_KEY), RegistryType.SUBSCRIBER);
     }
 
     @Override
