@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.alibaba.fescar.common.exception.FrameworkErrorCode;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
+import com.alibaba.fescar.common.util.CollectionUtils;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 import com.alibaba.fescar.core.protocol.HeartbeatMessage;
@@ -38,10 +39,9 @@ import com.alibaba.fescar.core.rpc.ClientMessageListener;
 import com.alibaba.fescar.core.rpc.ClientMessageSender;
 import com.alibaba.fescar.core.rpc.RemotingService;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
+
 import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
-import com.alibaba.nacos.client.naming.utils.CollectionUtils;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -268,7 +268,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof RpcMessage) {
-            RpcMessage rpcMessage = (RpcMessage)msg;
+            RpcMessage rpcMessage = (RpcMessage) msg;
             if (rpcMessage.getBody() == HeartbeatMessage.PONG) {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("received PONG from {}", ctx.channel().remoteAddress());
@@ -277,9 +277,9 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             }
         }
 
-        if (((RpcMessage)msg).getBody() instanceof MergeResultMessage) {
-            MergeResultMessage results = (MergeResultMessage)((RpcMessage)msg).getBody();
-            MergedWarpMessage mergeMessage = (MergedWarpMessage)mergeMsgMap.remove(((RpcMessage)msg).getId());
+        if (((RpcMessage) msg).getBody() instanceof MergeResultMessage) {
+            MergeResultMessage results = (MergeResultMessage) ((RpcMessage) msg).getBody();
+            MergedWarpMessage mergeMessage = (MergedWarpMessage) mergeMsgMap.remove(((RpcMessage) msg).getId());
             int num = mergeMessage.msgs.size();
             for (int i = 0; i < num; i++) {
                 long msgId = mergeMessage.msgIds.get(i);
@@ -351,7 +351,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                 connect(serverAddress);
             } catch (Exception e) {
                 LOGGER.error(FrameworkErrorCode.NetConnect.errCode,
-                        "can not connect to " + serverAddress + " cause:" + e.getMessage(), e);
+                    "can not connect to " + serverAddress + " cause:" + e.getMessage(), e);
             }
         }
     }
@@ -441,17 +441,20 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                 synchronized (mergeLock) {
                     try {
                         mergeLock.wait(MAX_MERGE_SEND_MILLS);
-                    } catch (InterruptedException e) {}
+                    } catch (InterruptedException e) {
+                    }
                 }
                 isSending = true;
                 for (String address : basketMap.keySet()) {
                     BlockingQueue<RpcMessage> basket = basketMap.get(address);
-                    if (basket.isEmpty()) { continue; }
+                    if (basket.isEmpty()) {
+                        continue;
+                    }
 
                     MergedWarpMessage mergeMessage = new MergedWarpMessage();
                     while (!basket.isEmpty()) {
                         RpcMessage msg = basket.poll();
-                        mergeMessage.msgs.add((AbstractMessage)msg.getBody());
+                        mergeMessage.msgs.add((AbstractMessage) msg.getBody());
                         mergeMessage.msgIds.add(msg.getId());
                     }
                     if (mergeMessage.msgIds.size() > 1) {
@@ -469,7 +472,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                         // fast fail
                         for (Long msgId : mergeMessage.msgIds) {
                             MessageFuture messageFuture = futures.remove(msgId);
-                            if (messageFuture != null){
+                            if (messageFuture != null) {
                                 messageFuture.setResultMessage(null);
                             }
                         }
@@ -483,11 +486,17 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         private void printMergeMessageLog(MergedWarpMessage mergeMessage) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("merge msg size:" + mergeMessage.msgIds.size());
-                for (AbstractMessage cm : mergeMessage.msgs) { LOGGER.debug(cm.toString()); }
+                for (AbstractMessage cm : mergeMessage.msgs) {
+                    LOGGER.debug(cm.toString());
+                }
                 StringBuffer sb = new StringBuffer();
-                for (long l : mergeMessage.msgIds) { sb.append(MSG_ID_PREFIX).append(l).append(SINGLE_LOG_POSTFIX); }
+                for (long l : mergeMessage.msgIds) {
+                    sb.append(MSG_ID_PREFIX).append(l).append(SINGLE_LOG_POSTFIX);
+                }
                 sb.append("\n");
-                for (long l : futures.keySet()) { sb.append(FUTURES_PREFIX).append(l).append(SINGLE_LOG_POSTFIX); }
+                for (long l : futures.keySet()) {
+                    sb.append(FUTURES_PREFIX).append(l).append(SINGLE_LOG_POSTFIX);
+                }
                 LOGGER.debug(sb.toString());
             }
         }
