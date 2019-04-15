@@ -20,7 +20,13 @@ package com.alibaba.fescar.server.store;
  * @author lizhao
  */
 public enum  FlushDiskMode {
+    /**
+     * sync flush disk
+     */
     SYNC_MODEL("sync"),
+    /**
+     * async flush disk
+     */
     ASYNC_MODEL("async");
 
     private String modeStr;
