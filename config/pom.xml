@@ -24,40 +24,26 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>fescar-config</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <name>fescar-config ${project.version}</name>
+    <modules>
+        <module>fescar-config-core</module>
+        <module>fescar-config-apollo</module>
+        <module>fescar-config-nacos</module>
+        <module>fescar-config-zk</module>
+        <module>fescar-config-all</module>
+    </modules>
 
     <dependencies>
-        <dependency>
-            <groupId>com.typesafe</groupId>
-            <artifactId>config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>fescar-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba.nacos</groupId>
-            <artifactId>nacos-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.ctrip.framework.apollo</groupId>
-            <artifactId>apollo-client</artifactId>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>com.101tec</groupId>
-            <artifactId>zkclient</artifactId>
-            <exclusions>
-                <exclusion>
-                    <artifactId>slf4j-log4j12</artifactId>
-                    <groupId>org.slf4j</groupId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
