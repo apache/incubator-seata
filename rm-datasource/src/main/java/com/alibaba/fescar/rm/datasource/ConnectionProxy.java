@@ -16,9 +16,8 @@
 
 package com.alibaba.fescar.rm.datasource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
+import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.core.constants.ConfigurationKeys;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
@@ -27,9 +26,11 @@ import com.alibaba.fescar.rm.DefaultResourceManager;
 import com.alibaba.fescar.rm.datasource.exec.LockConflictException;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * The type Connection proxy.
@@ -41,6 +42,10 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProxy.class);
 
     private ConnectionContext context = new ConnectionContext();
+
+    private static final int DEFAULT_REPORT_RETRY_COUNT = 5;
+
+    private static int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
 
     /**
      * Instantiates a new Connection proxy.
@@ -217,7 +222,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void report(boolean commitDone) throws SQLException {
-        int retry = 5; // TODO: configure
+        int retry = REPORT_RETRY_COUNT;
         while (retry > 0) {
             try {
                 DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),
@@ -225,7 +230,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["
-                    + commitDone + "] Retry Countdown: " + retry);
+                        + commitDone + "] Retry Countdown: " + retry);
                 retry--;
 
                 if (retry == 0) {
