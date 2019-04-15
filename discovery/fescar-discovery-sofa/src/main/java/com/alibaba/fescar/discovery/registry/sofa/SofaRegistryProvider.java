@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+
 package com.alibaba.fescar.discovery.registry.sofa;
 
 import com.alibaba.fescar.common.loader.LoadLevel;
@@ -20,8 +21,8 @@ import com.alibaba.fescar.discovery.registry.RegistryProvider;
 import com.alibaba.fescar.discovery.registry.RegistryService;
 
 /**
- * @author xingfudeshi@gmail.com
- * @date 2019/04/12
+ * @author leizhiyuan
+ * @date 2019/04/15
  */
 @LoadLevel(name = "Sofa", order = 1)
 public class SofaRegistryProvider implements RegistryProvider {
