@@ -79,7 +79,6 @@ public class DefaultCoreTest {
     @Test(dataProvider = "xidProvider")
     public void branchRegisterTest(String xid) throws Exception {
         core.branchRegister(BranchType.AT, resourceId, clientId, xid, "abc", lockKeys_1);
-
         long transactionId = XID.getTransactionId(xid);
         GlobalSession globalSession = SessionHolder.findGlobalSession(transactionId);
         Assert.assertEquals(globalSession.getSortedBranches().size(), 1);
@@ -95,7 +94,6 @@ public class DefaultCoreTest {
     @Test(dataProvider = "xidAndBranchIdProvider")
     public void branchReportTest(String xid, Long branchId) throws Exception {
         core.branchReport(BranchType.AT, xid, branchId, BranchStatus.PhaseOne_Done, applicationData);
-
         long transactionId = XID.getTransactionId(xid);
         GlobalSession globalSession = SessionHolder.findGlobalSession(transactionId);
         BranchSession branchSession = globalSession.getBranch(branchId);
@@ -110,7 +108,6 @@ public class DefaultCoreTest {
     @Test
     public void beginTest() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-
         long transactionId = XID.getTransactionId(xid);
         GlobalSession globalSession = SessionHolder.findGlobalSession(transactionId);
         Assert.assertNotNull(globalSession);
@@ -140,10 +137,7 @@ public class DefaultCoreTest {
         BranchSession branchSession = new BranchSession();
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseOne_Done));
-
-
         core.doGlobalCommit(globalSession, false);
         Assert.assertEquals(globalSession.getStatus(), GlobalStatus.Committed);
     }
@@ -161,10 +155,7 @@ public class DefaultCoreTest {
         BranchSession branchSession = new BranchSession();
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_CommitFailed_Unretryable, BranchStatus.PhaseOne_Done));
-
-
         core.doGlobalCommit(globalSession, false);
         Assert.assertEquals(globalSession.getStatus(), GlobalStatus.Begin);
     }
@@ -181,10 +172,7 @@ public class DefaultCoreTest {
         BranchSession branchSession = new BranchSession();
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseOne_Timeout, BranchStatus.PhaseOne_Done));
-
-
         core.doGlobalCommit(globalSession, false);
         Assert.assertEquals(globalSession.getStatus(), GlobalStatus.CommitRetrying);
     }

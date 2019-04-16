@@ -39,6 +39,11 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.TimeoutException;
 
+/**
+ * The type DefaultCoordinator test.
+ *
+ * @author leizhiyuan
+ */
 public class DefaultCoordinatorTest {
     private static ServerMessageSender serverMessageSender;
     private static DefaultCoordinator defaultCoordinator;
@@ -79,7 +84,7 @@ public class DefaultCoordinatorTest {
         try {
             result = defaultCoordinator.branchCommit(BranchType.AT, xid, branchId, resourceId, applicationData);
         } catch (TransactionException e) {
-            e.printStackTrace();
+            Assert.fail(e.getMessage());
         }
         Assert.assertEquals(result, BranchStatus.PhaseTwo_Committed);
 
