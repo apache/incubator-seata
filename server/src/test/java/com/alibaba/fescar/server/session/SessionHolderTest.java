@@ -18,7 +18,9 @@ package com.alibaba.fescar.server.session;
 
 import com.alibaba.fescar.core.constants.ConfigurationKeys;
 import com.alibaba.fescar.core.store.StoreMode;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
@@ -33,19 +35,33 @@ import static com.alibaba.fescar.server.session.SessionHolder.ROOT_SESSION_MANAG
  * @date 2019 /3/6 The type Session holder test.
  */
 public class SessionHolderTest {
+    private String pathname;
+
+    @Before
+    public void before() {
+        String sessionStorePath = SessionHolder.CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
+        //delete file previously created
+        pathname = sessionStorePath + File.separator + ROOT_SESSION_MANAGER_NAME;
+    }
 
     @Test
     public void testInit() throws IOException {
-        String sessionStorePath = SessionHolder.CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
-        //delete file previously created
-        File rootSessionFile = new File(sessionStorePath + File.separator + ROOT_SESSION_MANAGER_NAME);
+        File rootSessionFile = new File(pathname);
         if (rootSessionFile.exists()) {
             rootSessionFile.delete();
         }
         final String mode = StoreMode.FILE.toString();
         SessionHolder.init(mode);
-        final File actual = new File(sessionStorePath + File.separator + ROOT_SESSION_MANAGER_NAME);
+        final File actual = new File(pathname);
         Assert.assertTrue(actual.exists());
         Assert.assertTrue(actual.isFile());
+    }
+
+    @After
+    public void after() {
+        final File actual = new File(pathname);
+        if (actual.exists()) {
+            actual.delete();
+        }
     }
 }
