@@ -16,12 +16,6 @@
 
 package com.alibaba.fescar.server.session;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.core.constants.ConfigurationKeys;
@@ -31,6 +25,13 @@ import com.alibaba.fescar.server.store.SessionStorable;
 import com.alibaba.fescar.server.store.TransactionStoreManager;
 import com.alibaba.fescar.server.store.TransactionWriteStore;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 /**
  * The type File based session manager.
  *
@@ -39,7 +40,7 @@ import com.alibaba.fescar.server.store.TransactionWriteStore;
 public class FileBasedSessionManager extends AbstractSessionManager implements Reloadable {
 
     private static final int READ_SIZE = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.SERVICE_SESSION_RELOAD_READ_SIZE, 100);
+            ConfigurationKeys.SERVICE_SESSION_RELOAD_READ_SIZE, 100);
 
     /**
      * Instantiates a new File based session manager.
@@ -50,7 +51,7 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
      */
     public FileBasedSessionManager(String name, String sessionStoreFilePath) throws IOException {
         super(name);
-        transactionStoreManager = new FileTransactionStoreManager(sessionStoreFilePath + name, this);
+        transactionStoreManager = new FileTransactionStoreManager(sessionStoreFilePath + File.separator + name, this);
     }
 
     @Override
@@ -128,7 +129,7 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
             switch (logOperation) {
                 case GLOBAL_ADD:
                 case GLOBAL_UPDATE: {
-                    GlobalSession globalSession = (GlobalSession)sessionStorable;
+                    GlobalSession globalSession = (GlobalSession) sessionStorable;
                     long tid = globalSession.getTransactionId();
                     GlobalSession foundGlobalSession = sessionMap.get(tid);
                     if (foundGlobalSession == null) {
@@ -139,7 +140,7 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
                     break;
                 }
                 case GLOBAL_REMOVE: {
-                    GlobalSession globalSession = (GlobalSession)sessionStorable;
+                    GlobalSession globalSession = (GlobalSession) sessionStorable;
                     long tid = globalSession.getTransactionId();
                     if (sessionMap.remove(tid) == null) {
                         if (LOGGER.isInfoEnabled()) {
@@ -150,7 +151,7 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
                 }
                 case BRANCH_ADD:
                 case BRANCH_UPDATE: {
-                    BranchSession branchSession = (BranchSession)sessionStorable;
+                    BranchSession branchSession = (BranchSession) sessionStorable;
                     long tid = branchSession.getTransactionId();
                     GlobalSession foundGlobalSession = sessionMap.get(tid);
                     if (foundGlobalSession == null) {
@@ -166,15 +167,15 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
                     break;
                 }
                 case BRANCH_REMOVE: {
-                    BranchSession branchSession = (BranchSession)sessionStorable;
+                    BranchSession branchSession = (BranchSession) sessionStorable;
                     long tid = branchSession.getTransactionId();
                     long bid = branchSession.getBranchId();
                     GlobalSession found = sessionMap.get(tid);
                     if (found == null) {
                         if (LOGGER.isInfoEnabled()) {
                             LOGGER.info(
-                                "GlobalSession To Be Updated (Remove Branch) Does Not Exists [" + bid + "/" + tid
-                                    + "]");
+                                    "GlobalSession To Be Updated (Remove Branch) Does Not Exists [" + bid + "/" + tid
+                                            + "]");
                         }
                     } else {
                         BranchSession theBranch = found.getBranch(bid);
