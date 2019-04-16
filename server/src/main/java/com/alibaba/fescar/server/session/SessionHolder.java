@@ -78,8 +78,10 @@ public class SessionHolder {
      */
     public static void init(String mode) throws IOException {
         if(StringUtils.isBlank(mode)){
+            //use default
             mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         }
+        //the store mode
         StoreMode storeMode = StoreMode.valueof(mode);
         if(StoreMode.DB.equals(storeMode)){
             //TODO database store
@@ -95,11 +97,8 @@ public class SessionHolder {
             RETRY_COMMITTING_SESSION_MANAGER = new DefaultSessionManager(RETRY_COMMITTING_SESSION_MANAGER_NAME);
             RETRY_ROLLBACKING_SESSION_MANAGER = new DefaultSessionManager(RETRY_ROLLBACKING_SESSION_MANAGER_NAME);
         }else  {
-            //default store
-            ROOT_SESSION_MANAGER = new DefaultSessionManager(ROOT_SESSION_MANAGER_NAME);
-            ASYNC_COMMITTING_SESSION_MANAGER = new DefaultSessionManager(ASYNC_COMMITTING_SESSION_MANAGER_NAME);
-            RETRY_COMMITTING_SESSION_MANAGER = new DefaultSessionManager(RETRY_COMMITTING_SESSION_MANAGER_NAME);
-            RETRY_ROLLBACKING_SESSION_MANAGER = new DefaultSessionManager(RETRY_ROLLBACKING_SESSION_MANAGER_NAME);
+            //unknown store
+            throw new IllegalArgumentException("unknown store mode:" + mode);
         }
 
         if (ROOT_SESSION_MANAGER instanceof Reloadable) {

@@ -45,7 +45,7 @@ public enum StoreMode {
                 return sm;
             }
         }
-        return null;
+        throw new IllegalArgumentException("unknown store mode:" + mode);
     }
 
 }
