@@ -34,11 +34,6 @@ import static com.alibaba.fescar.server.session.SessionHolder.ROOT_SESSION_MANAG
  */
 public class SessionHolderTest {
 
-    /**
-     * Test init.
-     *
-     * @throws IOException the io exception
-     */
     @Test
     public void testInit() throws IOException {
         String sessionStorePath = SessionHolder.CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
