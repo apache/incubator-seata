@@ -96,8 +96,7 @@ public class AsyncWorker implements ResourceManagerInbound {
         BranchType branchType;
     }
 
-    private static final List<Phase2Context> ASYNC_COMMIT_BUFFER = Collections.synchronizedList(
-        new ArrayList<Phase2Context>());
+    private static final List<Phase2Context> ASYNC_COMMIT_BUFFER = new ArrayList<Phase2Context>();
 
     private static int ASYNC_COMMIT_BUFFER_LIMIT = ConfigurationFactory.getInstance().getInt(
         CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, 10000);
