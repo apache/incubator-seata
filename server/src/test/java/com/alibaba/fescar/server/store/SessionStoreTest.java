@@ -69,7 +69,6 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFile() throws Exception {
-//        SessionHolder.init(".");
         SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
@@ -97,7 +96,6 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "tb:3"));
 
         // Re-init SessionHolder: restore sessions from file
-//        SessionHolder.init(".");
         SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
@@ -123,7 +121,6 @@ public class SessionStoreTest {
      */
     //@Test
     public void testRestoredFromFile2() throws Exception {
-//        SessionHolder.init(".");
         SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
@@ -131,7 +128,6 @@ public class SessionStoreTest {
         globalSession.begin();
 
         // Re-init SessionHolder: restore sessions from file
-//        SessionHolder.init(".");
         SessionHolder.init("file");
     }
 
@@ -142,7 +138,6 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFileAsyncCommitting() throws Exception {
-//        SessionHolder.init(".");
         SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
@@ -165,7 +160,6 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
-//        SessionHolder.init(".");
         SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
@@ -191,7 +185,6 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFileCommitRetry() throws Exception {
-//        SessionHolder.init(".");
         SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
@@ -216,7 +209,6 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
-//        SessionHolder.init(".");
         SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
@@ -244,7 +236,6 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFileRollbackRetry() throws Exception {
-//        SessionHolder.init(".");
         SessionHolder.init("file");
 
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
@@ -270,7 +261,6 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
-//        SessionHolder.init(".");
         SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
@@ -298,7 +288,6 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFileRollbackFailed() throws Exception {
-//        SessionHolder.init(".");
         SessionHolder.init("file");
 
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
@@ -327,7 +316,6 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
-//        SessionHolder.init(".");
         SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
