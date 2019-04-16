@@ -89,7 +89,7 @@ public class SessionHelper {
      */
     public static void endRollbacked(GlobalSession globalSession) throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
-        if (currentStatus.name().startsWith("Timeout")) {
+        if (isTimeoutGlobalStatus(currentStatus)) {
             globalSession.changeStatus(GlobalStatus.TimeoutRollbacked);
         } else {
             globalSession.changeStatus(GlobalStatus.Rollbacked);
@@ -105,11 +105,18 @@ public class SessionHelper {
      */
     public static void endRollbackFailed(GlobalSession globalSession) throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
-        if (currentStatus.name().startsWith("Timeout")) {
+        if (isTimeoutGlobalStatus(currentStatus)) {
             globalSession.changeStatus(GlobalStatus.TimeoutRollbackFailed);
         } else {
             globalSession.changeStatus(GlobalStatus.RollbackFailed);
         }
         globalSession.end();
+    }
+
+    public static boolean isTimeoutGlobalStatus(GlobalStatus status) {
+        return status == GlobalStatus.TimeoutRollbacked
+                || status == GlobalStatus.TimeoutRollbackFailed
+                || status == GlobalStatus.TimeoutRollbacking
+                || status == GlobalStatus.TimeoutRollbackRetrying;
     }
 }
