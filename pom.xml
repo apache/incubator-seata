@@ -208,6 +208,11 @@
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
+                <artifactId>seata-discovery-sofa</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
                 <artifactId>seata-discovery-nacos</artifactId>
                 <version>${project.version}</version>
             </dependency>
