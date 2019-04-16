@@ -53,7 +53,7 @@
             <destName>NOTICE</destName>
         </file>
         <file>
-            <source>../server/target/fescar-server-${project.version}.jar</source>
+            <source>../server/target/seata-server-${project.version}.jar</source>
             <outputDirectory>/target/</outputDirectory>
         </file>
     </files>
@@ -62,7 +62,7 @@
         <moduleSet>
             <useAllReactorProjects>true</useAllReactorProjects>
             <includes>
-                <include>com.alibaba.fescar:fescar-server</include>
+                <include>io.seata:seata-server</include>
             </includes>
         </moduleSet>
     </moduleSets>
