@@ -18,12 +18,28 @@ package com.alibaba.fescar.core.protocol.transaction;
 
 import java.nio.ByteBuffer;
 
+/**
+ * The type Abstract transaction request to tc.
+ *
+ * @author sharajava
+ */
 public abstract class AbstractTransactionRequestToTC extends AbstractTransactionRequest {
 
+    /**
+     * The Byte buffer.
+     */
     protected ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
 
+    /**
+     * The Handler.
+     */
     protected TCInboundHandler handler;
 
+    /**
+     * Sets tc inbound handler.
+     *
+     * @param handler the handler
+     */
     public void setTCInboundHandler(TCInboundHandler handler) {
         this.handler = handler;
     }

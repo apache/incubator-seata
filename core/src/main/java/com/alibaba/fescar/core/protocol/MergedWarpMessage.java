@@ -26,15 +26,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/10/9 16:55
- * @FileName: MergedWarpMessage
- * @Description:
+ * The type Merged warp message.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/9
  */
-public class MergedWarpMessage extends AbstractMessage implements Serializable,MergeMessage {
+public class MergedWarpMessage extends AbstractMessage implements Serializable, MergeMessage {
     private static final long serialVersionUID = -5758802337446717090L;
+    /**
+     * The Msgs.
+     */
     public List<AbstractMessage> msgs = new ArrayList<AbstractMessage>();
+    /**
+     * The Msg ids.
+     */
     public List<Long> msgIds = new ArrayList<Long>();
     private static final Logger LOGGER = LoggerFactory.getLogger(MergedWarpMessage.class);
 
@@ -47,7 +52,7 @@ public class MergedWarpMessage extends AbstractMessage implements Serializable,M
     public byte[] encode() {
         int bufferSize = msgs.size() * 1024;
         ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
-        byteBuffer.putShort((short) msgs.size());
+        byteBuffer.putShort((short)msgs.size());
         for (AbstractMessage msg : msgs) {
             //msg.setChannelHandlerContext(ctx);
             byte[] data = msg.encode();
@@ -94,7 +99,7 @@ public class MergedWarpMessage extends AbstractMessage implements Serializable,M
             short typeCode = byteBuffer.getShort();
             MergedMessage message = getMergeRequestInstanceByCode(typeCode);
             message.decode(byteBuffer);
-            msgs.add((AbstractMessage) message);
+            msgs.add((AbstractMessage)message);
         }
     }
 

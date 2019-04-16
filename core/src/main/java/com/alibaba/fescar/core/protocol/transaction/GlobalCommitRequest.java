@@ -18,6 +18,11 @@ package com.alibaba.fescar.core.protocol.transaction;
 
 import com.alibaba.fescar.core.rpc.RpcContext;
 
+/**
+ * The type Global commit request.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ */
 public class GlobalCommitRequest extends AbstractGlobalEndRequest {
     @Override
     public short getTypeCode() {

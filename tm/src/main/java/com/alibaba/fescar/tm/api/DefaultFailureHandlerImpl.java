@@ -22,11 +22,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Default failure handler.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: feats -all
- * @DateTime: 2019 /1/8 7:27 PM
- * @FileName: DefaultFailureHandlerImpl
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2019 /1/8
  */
 public class DefaultFailureHandlerImpl implements FailureHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFailureHandlerImpl.class);
@@ -43,6 +40,6 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
 
     @Override
     public void onRollbackFailure(GlobalTransaction tx, Throwable cause) {
-        LOGGER.warn("Failed to begin transaction[" + tx.getXid() + "]", cause);
+        LOGGER.warn("Failed to rollback transaction[" + tx.getXid() + "]", cause);
     }
 }

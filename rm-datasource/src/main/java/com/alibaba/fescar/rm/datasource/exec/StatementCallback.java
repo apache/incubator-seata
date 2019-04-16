@@ -19,7 +19,23 @@ package com.alibaba.fescar.rm.datasource.exec;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * The interface Statement callback.
+ *
+ * @author sharajava
+ *
+ * @param <T> the type parameter
+ * @param <S> the type parameter
+ */
 public interface StatementCallback<T, S extends Statement> {
 
+    /**
+     * Execute t.
+     *
+     * @param statement the statement
+     * @param args      the args
+     * @return the t
+     * @throws SQLException the sql exception
+     */
     T execute(S statement, Object... args) throws SQLException;
 }

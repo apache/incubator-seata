@@ -22,8 +22,18 @@ import com.alibaba.fescar.server.store.SessionStorable;
 import com.alibaba.fescar.server.store.TransactionStoreManager;
 import com.alibaba.fescar.server.store.TransactionWriteStore;
 
+/**
+ * The type Default session manager.
+ *
+ * @author sharajava
+ */
 public class DefaultSessionManager extends AbstractSessionManager {
 
+    /**
+     * Instantiates a new Default session manager.
+     *
+     * @param name the name
+     */
     public DefaultSessionManager(String name) {
         super(name);
         transactionStoreManager = new TransactionStoreManager() {

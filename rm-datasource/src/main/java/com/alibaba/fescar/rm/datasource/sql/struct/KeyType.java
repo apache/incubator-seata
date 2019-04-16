@@ -16,11 +16,22 @@
 
 package com.alibaba.fescar.rm.datasource.sql.struct;
 
+/**
+ * The enum Key type.
+ *
+ * @author sharajava
+ */
 public enum KeyType {
 
+    /**
+     * Null key type.
+     */
     // Null
     NULL,
 
+    /**
+     * The Primary key.
+     */
     // Primary Key
     PrimaryKey
 }

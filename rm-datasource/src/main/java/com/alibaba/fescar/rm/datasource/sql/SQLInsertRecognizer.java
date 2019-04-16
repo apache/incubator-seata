@@ -18,9 +18,24 @@ package com.alibaba.fescar.rm.datasource.sql;
 
 import java.util.List;
 
+/**
+ * The interface Sql insert recognizer.
+ *
+ * @author sharajava
+ */
 public interface SQLInsertRecognizer extends SQLRecognizer {
 
+    /**
+     * Gets insert columns.
+     *
+     * @return the insert columns
+     */
     List<String> getInsertColumns();
 
+    /**
+     * Gets insert rows.
+     *
+     * @return the insert rows
+     */
     List<List<Object>> getInsertRows();
 }

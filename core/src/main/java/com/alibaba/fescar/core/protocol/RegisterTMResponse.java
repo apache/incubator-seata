@@ -19,19 +19,26 @@ package com.alibaba.fescar.core.protocol;
 import java.io.Serializable;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/10/15 17:29
- * @FileName: RegisterTMResponse
- * @Description:
+ * The type Register tm response.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/15
  */
 public class RegisterTMResponse extends AbstractIdentifyResponse implements Serializable {
     private static final long serialVersionUID = 3629846050062228749L;
 
+    /**
+     * Instantiates a new Register tm response.
+     */
     public RegisterTMResponse() {
         this(true);
     }
 
+    /**
+     * Instantiates a new Register tm response.
+     *
+     * @param result the result
+     */
     public RegisterTMResponse(boolean result) {
         super();
         setIdentified(result);

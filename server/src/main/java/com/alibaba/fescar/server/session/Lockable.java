@@ -18,9 +18,26 @@ package com.alibaba.fescar.server.session;
 
 import com.alibaba.fescar.core.exception.TransactionException;
 
+/**
+ * The interface Lockable.
+ *
+ * @author sharajava
+ */
 public interface Lockable {
 
+    /**
+     * Lock boolean.
+     *
+     * @return the boolean
+     * @throws TransactionException the transaction exception
+     */
     boolean lock() throws TransactionException;
 
+    /**
+     * Unlock boolean.
+     *
+     * @return the boolean
+     * @throws TransactionException the transaction exception
+     */
     boolean unlock() throws TransactionException;
 }

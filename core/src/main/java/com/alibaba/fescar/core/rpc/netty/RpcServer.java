@@ -42,11 +42,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Abstract rpc server.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018 /10/15 16:35
- * @FileName: RpcServer
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/15
  */
 @Sharable
 public class RpcServer extends AbstractRpcRemotingServer implements ServerMessageSender {
@@ -128,6 +125,7 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
         setChannelHandlers(RpcServer.this);
         DefaultServerMessageListenerImpl defaultServerMessageListenerImpl = new DefaultServerMessageListenerImpl(
             transactionMessageHandler);
+        defaultServerMessageListenerImpl.init();
         defaultServerMessageListenerImpl.setServerMessageSender(this);
         this.setServerMessageListener(defaultServerMessageListenerImpl);
         super.start();
@@ -205,10 +203,10 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
      * Send request with response object.
      * send syn request for rm
      *
-     * @param resourceId         the db key
-     * @param clientId      the client ip
-     * @param message           the message
-     * @param timeout       the timeout
+     * @param resourceId the db key
+     * @param clientId   the client ip
+     * @param message    the message
+     * @param timeout    the timeout
      * @return the object
      * @throws TimeoutException the timeout exception
      */
@@ -227,9 +225,9 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
     /**
      * Send request with response object.
      *
-     * @param resourceId         the db key
-     * @param clientId      the client ip
-     * @param message           the msg
+     * @param resourceId the db key
+     * @param clientId   the client ip
+     * @param message    the msg
      * @return the object
      * @throws TimeoutException the timeout exception
      */

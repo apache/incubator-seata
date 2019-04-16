@@ -21,11 +21,10 @@ import com.alibaba.fescar.core.protocol.AbstractMessage;
 import io.netty.channel.Channel;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/11/29 17:24
- * @FileName: RegisterMsgListener
- * @Description:
+ * The interface Register msg listener.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /11/29
  */
 public interface RegisterMsgListener {
 

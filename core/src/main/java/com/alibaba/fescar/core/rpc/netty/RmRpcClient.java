@@ -27,12 +27,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.exception.FrameworkErrorCode;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.common.util.NetUtil;
-import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.model.Resource;
 import com.alibaba.fescar.core.model.ResourceManager;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
@@ -55,11 +53,8 @@ import static com.alibaba.fescar.common.Constants.DBKEYS_SPLIT_CHAR;
 /**
  * The type Rm rpc client.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018 /10/10 11:27
- * @FileName: RmRpcClient
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/10
  */
 @Sharable
 public final class RmRpcClient extends AbstractRpcRemotingClient {
@@ -150,7 +145,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
             timerExecutor.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
-                    reconnect();
+                    reconnect(transactionServiceGroup);
                 }
             }, SCHEDULE_INTERVAL_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.SECONDS);
             ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
@@ -188,7 +183,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         poolConfig.maxWait = rmClientConfig.getMaxAcquireConnMills();
         poolConfig.testOnBorrow = rmClientConfig.isPoolTestBorrow();
         poolConfig.testOnReturn = rmClientConfig.isPoolTestReturn();
-        poolConfig.lifo = rmClientConfig.isPoolFifo();
+        poolConfig.lifo = rmClientConfig.isPoolLifo();
         return poolConfig;
     }
 
@@ -197,50 +192,16 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         return TransactionRole.RMROLE;
     }
 
-    private void reconnect() {
-        for (String serverAddress : serviceManager.lookup(transactionServiceGroup)) {
-            if (serverAddress != null) {
-                try {
-                    connect(serverAddress);
-                } catch (Exception e) {
-                    LOGGER.error(FrameworkErrorCode.NetConnect.errCode,
-                        "can not connect to " + serverAddress + " cause:" + e.getMessage(), e);
-                }
-            }
-        }
-    }
-
-    @Override
-    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        if (messageExecutor.isShutdown()) {
-            return;
-        }
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("channel inactive:" + ctx.channel());
-        }
-        releaseChannel(ctx.channel(), NetUtil.toStringAddress(ctx.channel().remoteAddress()));
-        super.channelInactive(ctx);
-    }
-
     @Override
     public Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException {
-        return super.sendAsyncRequestWithResponse(XID.getServerAddress(RootContext.getXID()),
-            getRemoteServerChannel(), msg,
-            timeout);
+        String validAddress = loadBalance(transactionServiceGroup);
+        Channel acquireChannel = connect(validAddress);
+        return super.sendAsyncRequestWithResponse(validAddress, acquireChannel, msg, timeout);
     }
 
     @Override
     public Object sendMsgWithResponse(String serverAddress, Object msg, long timeout) throws TimeoutException {
         return super.sendAsyncRequestWithResponse(serverAddress, connect(serverAddress), msg, timeout);
-    }
-
-    private Channel getRemoteServerChannel() {
-        String serverAddress = null;
-        if (!RootContext.inGlobalTransaction()) {
-            return null;
-        }
-        serverAddress = XID.getServerAddress(RootContext.getXID());
-        return connect(serverAddress);
     }
 
     @Override
@@ -274,13 +235,8 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         }
     }
 
-    /**
-     * Release channel.
-     *
-     * @param channel       the channel
-     * @param serverAddress the server address
-     */
-    public void releaseChannel(Channel channel, String serverAddress) {
+    @Override
+    protected void releaseChannel(Channel channel, String serverAddress) {
         if (null == channel || null == serverAddress) { return; }
         Object connectLock = channelLocks.get(serverAddress);
         try {
@@ -432,7 +388,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                 String serverAddress = entry.getKey();
                 Channel rmChannel = entry.getValue();
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("register AT resourceId:" + resourceId);
+                    LOGGER.info("register resource, resourceId:" + resourceId);
                 }
                 sendRegisterMessage(serverAddress, rmChannel, resourceId);
             }
@@ -495,6 +451,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
      * @return the merged resource keys
      */
     public String getMergedResourceKeys(ResourceManager resourceManager) {
+        //TODO
         Map<String, Resource> managedResources = resourceManager.getManagedResources();
         Set<String> resourceIds = managedResources.keySet();
         if (!resourceIds.isEmpty()) {

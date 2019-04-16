@@ -18,6 +18,11 @@ package com.alibaba.fescar.core.protocol.transaction;
 
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 
+/**
+ * The type Branch commit response.
+ *
+ * @author sharajava
+ */
 public class BranchCommitResponse extends AbstractBranchEndResponse {
 
     @Override

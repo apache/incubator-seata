@@ -16,8 +16,13 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
+/**
+ * The type Branch report response.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ */
 public class BranchReportResponse extends AbstractTransactionResponse {
-    
+
     @Override
     public short getTypeCode() {
         return TYPE_BRANCH_STATUS_REPORT_RESULT;

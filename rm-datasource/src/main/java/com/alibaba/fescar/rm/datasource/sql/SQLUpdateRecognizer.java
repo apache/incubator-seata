@@ -18,9 +18,24 @@ package com.alibaba.fescar.rm.datasource.sql;
 
 import java.util.List;
 
+/**
+ * The interface Sql update recognizer.
+ *
+ * @author sharajava
+ */
 public interface SQLUpdateRecognizer extends WhereRecognizer {
 
+    /**
+     * Gets update columns.
+     *
+     * @return the update columns
+     */
     List<String> getUpdateColumns();
 
+    /**
+     * Gets update values.
+     *
+     * @return the update values
+     */
     List<Object> getUpdateValues();
 }

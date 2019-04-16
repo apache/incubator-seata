@@ -19,12 +19,16 @@ package com.alibaba.fescar.core.protocol;
 import java.nio.ByteBuffer;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/9/17 15:25
- * @FileName: MergedMessage
- * @Description:
+ * The interface Merged message.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/17
  */
 public interface MergedMessage {
+    /**
+     * Decode.
+     *
+     * @param byteBuffer the byte buffer
+     */
     void decode(ByteBuffer byteBuffer);
 }

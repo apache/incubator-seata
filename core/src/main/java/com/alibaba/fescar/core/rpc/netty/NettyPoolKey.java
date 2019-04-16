@@ -16,18 +16,13 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 
 /**
  * The type Netty pool key.
  *
- * @author min.ji
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018 /11/29 15:24
- * @FileName: NettyPoolKey
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /11/29
  */
 public class NettyPoolKey {
 
@@ -39,7 +34,7 @@ public class NettyPoolKey {
      * Instantiates a new Netty pool key.
      *
      * @param transactionRole the client role
-     * @param address    the address
+     * @param address         the address
      */
     public NettyPoolKey(TransactionRole transactionRole, String address) {
         this.transactionRole = transactionRole;
@@ -50,8 +45,8 @@ public class NettyPoolKey {
      * Instantiates a new Netty pool key.
      *
      * @param transactionRole the client role
-     * @param address    the address
-     * @param message    the message
+     * @param address         the address
+     * @param message         the message
      */
     public NettyPoolKey(TransactionRole transactionRole, String address, AbstractMessage message) {
         this.transactionRole = transactionRole;
@@ -119,7 +114,17 @@ public class NettyPoolKey {
 
     @Override
     public String toString() {
-        return JSON.toJSONString(this);
+        StringBuilder sb = new StringBuilder();
+        sb.append("transactionRole:");
+        sb.append(transactionRole.name());
+        sb.append(",");
+        sb.append("address:");
+        sb.append(address);
+        sb.append(",");
+        sb.append("msg:< ");
+        sb.append(message.toString());
+        sb.append(" >");
+        return sb.toString();
     }
 
     /**
@@ -140,14 +145,14 @@ public class NettyPoolKey {
          */
         SERVERROLE(3);
 
-        private TransactionRole(int value) {
+        TransactionRole(int value) {
             this.value = value;
         }
 
         /**
          * Gets value.
          *
-         * @return value
+         * @return value value
          */
         public int getValue() {
             return value;

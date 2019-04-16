@@ -16,17 +16,13 @@
 
 package com.alibaba.fescar.core.rpc;
 
-import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 /**
  * The interface Client message sender.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018 /10/10 12:21
- * @FileName: ClientMessageSender
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /10/10
  */
 public interface ClientMessageSender {
     /**
@@ -35,7 +31,6 @@ public interface ClientMessageSender {
      * @param msg     the msg
      * @param timeout the timeout
      * @return the object
-     * @throws IOException the io exception
      * @throws TimeoutException the timeout exception
      */
     Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException;
@@ -47,7 +42,6 @@ public interface ClientMessageSender {
      * @param msg           the msg
      * @param timeout       the timeout
      * @return the object
-     * @throws IOException the io exception
      * @throws TimeoutException the timeout exception
      */
     Object sendMsgWithResponse(String serverAddress, Object msg, long timeout) throws TimeoutException;
@@ -57,7 +51,6 @@ public interface ClientMessageSender {
      *
      * @param msg the msg
      * @return the object
-     * @throws IOException the io exception
      * @throws TimeoutException the timeout exception
      */
     Object sendMsgWithResponse(Object msg) throws TimeoutException;

@@ -23,12 +23,34 @@ import java.sql.Statement;
 import com.alibaba.fescar.rm.datasource.exec.ExecuteTemplate;
 import com.alibaba.fescar.rm.datasource.exec.StatementCallback;
 
+/**
+ * The type Statement proxy.
+ *
+ * @param <T> the type parameter
+ * @author sharajava
+ */
 public class StatementProxy<T extends Statement> extends AbstractStatementProxy<T> {
 
-    public StatementProxy(AbstractConnectionProxy connectionWrapper, T targetStatement, String targetSQL) throws SQLException {
+    /**
+     * Instantiates a new Statement proxy.
+     *
+     * @param connectionWrapper the connection wrapper
+     * @param targetStatement   the target statement
+     * @param targetSQL         the target sql
+     * @throws SQLException the sql exception
+     */
+    public StatementProxy(AbstractConnectionProxy connectionWrapper, T targetStatement, String targetSQL)
+        throws SQLException {
         super(connectionWrapper, targetStatement, targetSQL);
     }
 
+    /**
+     * Instantiates a new Statement proxy.
+     *
+     * @param connectionWrapper the connection wrapper
+     * @param targetStatement   the target statement
+     * @throws SQLException the sql exception
+     */
     public StatementProxy(AbstractConnectionProxy connectionWrapper, T targetStatement) throws SQLException {
         this(connectionWrapper, targetStatement, null);
     }
@@ -62,8 +84,13 @@ public class StatementProxy<T extends Statement> extends AbstractStatementProxy<
 
     @Override
     public boolean execute(String sql) throws SQLException {
-        // TODO
-        return false;
+        this.targetSQL = sql;
+        return ExecuteTemplate.execute(this, new StatementCallback<Boolean, T>() {
+            @Override
+            public Boolean execute(T statement, Object... args) throws SQLException {
+                return statement.execute((String) args[0]);
+            }
+        }, sql);
     }
 
     @Override

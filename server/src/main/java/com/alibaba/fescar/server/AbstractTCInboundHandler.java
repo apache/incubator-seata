@@ -18,12 +18,29 @@ package com.alibaba.fescar.server;
 
 import com.alibaba.fescar.core.exception.AbstractExceptionHandler;
 import com.alibaba.fescar.core.exception.TransactionException;
-import com.alibaba.fescar.core.protocol.transaction.*;
+import com.alibaba.fescar.core.protocol.transaction.BranchRegisterRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchRegisterResponse;
+import com.alibaba.fescar.core.protocol.transaction.BranchReportRequest;
+import com.alibaba.fescar.core.protocol.transaction.BranchReportResponse;
 import com.alibaba.fescar.core.protocol.transaction.GlobalBeginRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalBeginResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalCommitRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalCommitResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalLockQueryResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalRollbackResponse;
+import com.alibaba.fescar.core.protocol.transaction.GlobalStatusRequest;
+import com.alibaba.fescar.core.protocol.transaction.GlobalStatusResponse;
+import com.alibaba.fescar.core.protocol.transaction.TCInboundHandler;
 import com.alibaba.fescar.core.rpc.RpcContext;
 
+/**
+ * The type Abstract tc inbound handler.
+ *
+ * @author sharajava
+ */
 public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler implements TCInboundHandler {
-
 
     @Override
     public GlobalBeginResponse handle(GlobalBeginRequest request, final RpcContext rpcContext) {
@@ -37,91 +54,159 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
         return response;
     }
 
-    protected abstract void doGlobalBegin(GlobalBeginRequest request, GlobalBeginResponse response, RpcContext rpcContext) throws TransactionException;
+    /**
+     * Do global begin.
+     *
+     * @param request    the request
+     * @param response   the response
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
+    protected abstract void doGlobalBegin(GlobalBeginRequest request, GlobalBeginResponse response,
+                                          RpcContext rpcContext) throws TransactionException;
 
     @Override
     public GlobalCommitResponse handle(GlobalCommitRequest request, final RpcContext rpcContext) {
         GlobalCommitResponse response = new GlobalCommitResponse();
         exceptionHandleTemplate(new Callback<GlobalCommitRequest, GlobalCommitResponse>() {
             @Override
-            public void execute(GlobalCommitRequest request, GlobalCommitResponse response) throws TransactionException {
+            public void execute(GlobalCommitRequest request, GlobalCommitResponse response)
+                throws TransactionException {
                 doGlobalCommit(request, response, rpcContext);
             }
         }, request, response);
         return response;
     }
 
-    protected abstract void doGlobalCommit(GlobalCommitRequest request, GlobalCommitResponse response, RpcContext rpcContext) throws TransactionException;
+    /**
+     * Do global commit.
+     *
+     * @param request    the request
+     * @param response   the response
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
+    protected abstract void doGlobalCommit(GlobalCommitRequest request, GlobalCommitResponse response,
+                                           RpcContext rpcContext) throws TransactionException;
 
     @Override
     public GlobalRollbackResponse handle(GlobalRollbackRequest request, final RpcContext rpcContext) {
         GlobalRollbackResponse response = new GlobalRollbackResponse();
         exceptionHandleTemplate(new Callback<GlobalRollbackRequest, GlobalRollbackResponse>() {
             @Override
-            public void execute(GlobalRollbackRequest request, GlobalRollbackResponse response) throws TransactionException {
+            public void execute(GlobalRollbackRequest request, GlobalRollbackResponse response)
+                throws TransactionException {
                 doGlobalRollback(request, response, rpcContext);
             }
         }, request, response);
         return response;
     }
 
-    protected abstract void doGlobalRollback(GlobalRollbackRequest request, GlobalRollbackResponse response, RpcContext rpcContext) throws TransactionException;
+    /**
+     * Do global rollback.
+     *
+     * @param request    the request
+     * @param response   the response
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
+    protected abstract void doGlobalRollback(GlobalRollbackRequest request, GlobalRollbackResponse response,
+                                             RpcContext rpcContext) throws TransactionException;
 
     @Override
     public BranchRegisterResponse handle(BranchRegisterRequest request, final RpcContext rpcContext) {
         BranchRegisterResponse response = new BranchRegisterResponse();
         exceptionHandleTemplate(new Callback<BranchRegisterRequest, BranchRegisterResponse>() {
             @Override
-            public void execute(BranchRegisterRequest request, BranchRegisterResponse response) throws TransactionException {
+            public void execute(BranchRegisterRequest request, BranchRegisterResponse response)
+                throws TransactionException {
                 doBranchRegister(request, response, rpcContext);
             }
         }, request, response);
         return response;
     }
 
-    protected abstract void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response, RpcContext rpcContext) throws TransactionException;
+    /**
+     * Do branch register.
+     *
+     * @param request    the request
+     * @param response   the response
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
+    protected abstract void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response,
+                                             RpcContext rpcContext) throws TransactionException;
 
     @Override
     public BranchReportResponse handle(BranchReportRequest request, final RpcContext rpcContext) {
         BranchReportResponse response = new BranchReportResponse();
         exceptionHandleTemplate(new Callback<BranchReportRequest, BranchReportResponse>() {
             @Override
-            public void execute(BranchReportRequest request, BranchReportResponse response) throws TransactionException {
+            public void execute(BranchReportRequest request, BranchReportResponse response)
+                throws TransactionException {
                 doBranchReport(request, response, rpcContext);
             }
         }, request, response);
         return response;
     }
 
-    protected abstract void doBranchReport(BranchReportRequest request, BranchReportResponse response, RpcContext rpcContext) throws TransactionException;
+    /**
+     * Do branch report.
+     *
+     * @param request    the request
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
+    protected abstract void doBranchReport(BranchReportRequest request, BranchReportResponse response,
+                                           RpcContext rpcContext)
+        throws TransactionException;
 
     @Override
     public GlobalLockQueryResponse handle(GlobalLockQueryRequest request, final RpcContext rpcContext) {
         GlobalLockQueryResponse response = new GlobalLockQueryResponse();
         exceptionHandleTemplate(new Callback<GlobalLockQueryRequest, GlobalLockQueryResponse>() {
             @Override
-            public void execute(GlobalLockQueryRequest request, GlobalLockQueryResponse response) throws TransactionException {
+            public void execute(GlobalLockQueryRequest request, GlobalLockQueryResponse response)
+                throws TransactionException {
                 doLockCheck(request, response, rpcContext);
             }
         }, request, response);
         return response;
     }
 
-    protected abstract void doLockCheck(GlobalLockQueryRequest request, GlobalLockQueryResponse response, RpcContext rpcContext) throws TransactionException;
+    /**
+     * Do lock check.
+     *
+     * @param request    the request
+     * @param response   the response
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
+    protected abstract void doLockCheck(GlobalLockQueryRequest request, GlobalLockQueryResponse response,
+                                        RpcContext rpcContext) throws TransactionException;
 
     @Override
     public GlobalStatusResponse handle(GlobalStatusRequest request, final RpcContext rpcContext) {
         GlobalStatusResponse response = new GlobalStatusResponse();
         exceptionHandleTemplate(new Callback<GlobalStatusRequest, GlobalStatusResponse>() {
             @Override
-            public void execute(GlobalStatusRequest request, GlobalStatusResponse response) throws TransactionException {
+            public void execute(GlobalStatusRequest request, GlobalStatusResponse response)
+                throws TransactionException {
                 doGlobalStatus(request, response, rpcContext);
             }
         }, request, response);
         return response;
     }
 
-    protected abstract void doGlobalStatus(GlobalStatusRequest request, GlobalStatusResponse response, RpcContext rpcContext) throws TransactionException;
-
+    /**
+     * Do global status.
+     *
+     * @param request    the request
+     * @param response   the response
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
+    protected abstract void doGlobalStatus(GlobalStatusRequest request, GlobalStatusResponse response,
+                                           RpcContext rpcContext) throws TransactionException;
 
 }

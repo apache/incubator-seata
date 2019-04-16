@@ -21,39 +21,64 @@ import java.nio.ByteBuffer;
 import io.netty.buffer.ByteBuf;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/9/14 17:07
- * @FileName: AbstractResultMessage
- * @Description:
+ * The type Abstract result message.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/14
  */
 public abstract class AbstractResultMessage extends AbstractMessage implements MergedMessage {
     private static final long serialVersionUID = 6540352050650203313L;
 
     private ResultCode resultCode;
 
+    /**
+     * The Byte buffer.
+     */
     public ByteBuffer byteBuffer = ByteBuffer.allocate(512);
 
+    /**
+     * Gets result code.
+     *
+     * @return the result code
+     */
     public ResultCode getResultCode() {
         return resultCode;
     }
 
+    /**
+     * Sets result code.
+     *
+     * @param resultCode the result code
+     */
     public void setResultCode(ResultCode resultCode) {
         this.resultCode = resultCode;
     }
 
     private String msg;
 
+    /**
+     * Gets msg.
+     *
+     * @return the msg
+     */
     public String getMsg() {
         return msg;
     }
 
+    /**
+     * Sets msg.
+     *
+     * @param msg the msg
+     */
     public void setMsg(String msg) {
         this.msg = msg;
     }
 
+    /**
+     * Do encode.
+     */
     protected void doEncode() {
-        byteBuffer.put((byte) resultCode.ordinal());
+        byteBuffer.put((byte)resultCode.ordinal());
         if (resultCode == ResultCode.Failed) {
             if (getMsg() != null) {
                 String msg;
@@ -67,12 +92,12 @@ public abstract class AbstractResultMessage extends AbstractMessage implements M
                     msg = getMsg().substring(0, 64);
                     bs = msg.getBytes(UTF8);
                 }
-                byteBuffer.putShort((short) bs.length);
+                byteBuffer.putShort((short)bs.length);
                 if (bs.length > 0) {
                     byteBuffer.put(bs);
                 }
             } else {
-                byteBuffer.putShort((short) 0);
+                byteBuffer.putShort((short)0);
             }
         }
     }

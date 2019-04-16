@@ -19,14 +19,31 @@ package com.alibaba.fescar.core.protocol;
 import io.netty.buffer.ByteBuf;
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/9/14 15:11
- * @FileName: MessageCodec
- * @Description:
+ * The interface Message codec.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/14
  */
 public interface MessageCodec {
+    /**
+     * Gets type code.
+     *
+     * @return the type code
+     */
     short getTypeCode();
+
+    /**
+     * Encode byte [ ].
+     *
+     * @return the byte [ ]
+     */
     byte[] encode();
+
+    /**
+     * Decode boolean.
+     *
+     * @param in the in
+     * @return the boolean
+     */
     boolean decode(ByteBuf in);
 }

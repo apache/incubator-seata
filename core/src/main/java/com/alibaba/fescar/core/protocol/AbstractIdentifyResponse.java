@@ -16,53 +16,88 @@
 
 package com.alibaba.fescar.core.protocol;
 
-import com.alibaba.fescar.common.Constants;
-
 import io.netty.buffer.ByteBuf;
 
+/**
+ * The type Abstract identify response.
+ *
+ * @author sharajava
+ */
 public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
 
-    private String version = Version.CURRENT;;
+    private String version = Version.CURRENT;
+    ;
 
     private String extraData;
 
     private boolean identified;
 
+    /**
+     * Gets version.
+     *
+     * @return the version
+     */
     public String getVersion() {
         return version;
     }
 
+    /**
+     * Sets version.
+     *
+     * @param version the version
+     */
     public void setVersion(String version) {
         this.version = version;
     }
 
+    /**
+     * Gets extra data.
+     *
+     * @return the extra data
+     */
     public String getExtraData() {
         return extraData;
     }
 
+    /**
+     * Sets extra data.
+     *
+     * @param extraData the extra data
+     */
     public void setExtraData(String extraData) {
         this.extraData = extraData;
     }
 
+    /**
+     * Is identified boolean.
+     *
+     * @return the boolean
+     */
     public boolean isIdentified() {
         return identified;
     }
 
+    /**
+     * Sets identified.
+     *
+     * @param identified the identified
+     */
     public void setIdentified(boolean identified) {
         this.identified = identified;
     }
+
     @Override
     public void doEncode() {
-//        super.doEncode();
-        byteBuffer.put(this.identified ? (byte) 1 : (byte) 0);
+        //        super.doEncode();
+        byteBuffer.put(this.identified ? (byte)1 : (byte)0);
         if (this.version != null) {
             byte[] bs = version.getBytes(UTF8);
-            byteBuffer.putShort((short) bs.length);
+            byteBuffer.putShort((short)bs.length);
             if (bs.length > 0) {
                 byteBuffer.put(bs);
             }
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
         }
 
     }
@@ -88,5 +123,26 @@ public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
         }
 
         return true;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("version=");
+        result.append(String.valueOf(version));
+        result.append(",");
+        result.append("extraData=");
+        result.append(String.valueOf(extraData));
+        result.append(",");
+        result.append("identified=");
+        result.append(String.valueOf(identified));
+        result.append(",");
+        result.append("resultCode=");
+        result.append(String.valueOf(getResultCode()));
+        result.append(",");
+        result.append("msg=");
+        result.append(String.valueOf(getMsg()));
+
+        return result.toString();
     }
 }

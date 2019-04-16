@@ -41,6 +41,7 @@ import com.alibaba.fescar.core.protocol.MergeMessage;
 import com.alibaba.fescar.core.protocol.MessageFuture;
 import com.alibaba.fescar.core.protocol.RpcMessage;
 
+import com.alibaba.fescar.core.rpc.Disposable;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelFuture;
@@ -54,13 +55,10 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Abstract rpc remoting.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018 /9/12 16:21
- * @FileName: AbstractRpcRemoting
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/12
  */
-public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
+public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implements Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemoting.class);
     /**
@@ -96,7 +94,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
     /**
      * The Is sending.
      */
-    protected boolean isSending = false;
+    protected volatile boolean isSending = false;
     private String group = "DEFAULT";
     /**
      * The Merge msg map.
@@ -120,6 +118,9 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
      * Init.
      */
     public void init() {
+        //register shutdownHook
+        ShutdownHook.getInstance().addDisposable(this);
+
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -146,6 +147,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
     /**
      * Destroy.
      */
+    @Override
     public void destroy() {
         timerExecutor.shutdown();
     }
@@ -168,7 +170,6 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
      * @param channel the channel
      * @param msg     the msg
      * @return the object
-     * @throws IOException the io exception
      * @throws TimeoutException the timeout exception
      */
     protected Object sendAsyncRequestWithResponse(String address, Channel channel, Object msg) throws TimeoutException {
@@ -183,7 +184,6 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
      * @param msg     the msg
      * @param timeout the timeout
      * @return the object
-     * @throws IOException the io exception
      * @throws TimeoutException the timeout exception
      */
     protected Object sendAsyncRequestWithResponse(String address, Channel channel, Object msg, long timeout) throws
@@ -201,7 +201,6 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
      * @param channel the channel
      * @param msg     the msg
      * @return the object
-     * @throws IOException the io exception
      * @throws TimeoutException the timeout exception
      */
     protected Object sendAsyncRequestWithoutResponse(String address, Channel channel, Object msg) throws
@@ -329,7 +328,8 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
                     tryTimes++;
                     if (tryTimes > NettyClientConfig.getMaxNotWriteableRetry()) {
                         destroyChannel(channel);
-                        throw new FrameworkException("msg:" + ((msg == null) ? "null" : msg.toString()), FrameworkErrorCode.ChannelIsNotWritable);
+                        throw new FrameworkException("msg:" + ((msg == null) ? "null" : msg.toString()),
+                            FrameworkErrorCode.ChannelIsNotWritable);
                     }
                     lock.wait(NOT_WRITEABLE_CHECK_MILLS);
                 } catch (InterruptedException exx) {
@@ -340,7 +340,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
     }
 
     /**
-     * 用于测试。发现线程池满时可以打开这个变量，把堆栈打出来分享
+     * For testing. When the thread pool is full, you can change this variable and share the stack
      */
     boolean allowDumpStack = false;
 
@@ -410,7 +410,8 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOGGER.error(FrameworkErrorCode.ExceptionCaught.errCode, ctx.channel() + " connect exception. " + cause.getMessage(),
+        LOGGER.error(FrameworkErrorCode.ExceptionCaught.errCode,
+            ctx.channel() + " connect exception. " + cause.getMessage(),
             cause);
         try {
             destroyChannel(ctx.channel());
@@ -516,4 +517,6 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler {
         }
         return address;
     }
+
+
 }

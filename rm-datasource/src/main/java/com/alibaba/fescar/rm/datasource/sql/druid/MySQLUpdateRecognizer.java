@@ -21,8 +21,10 @@ import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
+import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
@@ -35,13 +37,24 @@ import com.alibaba.fescar.rm.datasource.sql.SQLParsingException;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
 import com.alibaba.fescar.rm.datasource.sql.SQLUpdateRecognizer;
 
+/**
+ * The type My sql update recognizer.
+ *
+ * @author sharajava
+ */
 public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRecognizer {
 
     private MySqlUpdateStatement ast;
 
+    /**
+     * Instantiates a new My sql update recognizer.
+     *
+     * @param originalSQL the original sql
+     * @param ast         the ast
+     */
     public MySQLUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (MySqlUpdateStatement) ast;
+        this.ast = (MySqlUpdateStatement)ast;
     }
 
     @Override
@@ -56,12 +69,12 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
         for (SQLUpdateSetItem updateSetItem : updateSetItems) {
             SQLExpr expr = updateSetItem.getColumn();
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr) expr).getName());
-            } else if (expr instanceof SQLPropertyExpr){
+                list.add(((SQLIdentifierExpr)expr).getName());
+            } else if (expr instanceof SQLPropertyExpr) {
                 // This is alias case, like UPDATE xxx_tbl a SET a.name = ? WHERE a.id = ?
-                SQLExpr owner = ((SQLPropertyExpr) expr).getOwner();
+                SQLExpr owner = ((SQLPropertyExpr)expr).getOwner();
                 if (owner instanceof SQLIdentifierExpr) {
-                    list.add((((SQLIdentifierExpr)owner).getName() + "." + ((SQLPropertyExpr) expr).getName()));
+                    list.add((((SQLIdentifierExpr)owner).getName() + "." + ((SQLPropertyExpr)expr).getName()));
                 }
             } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
@@ -77,7 +90,7 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
         for (SQLUpdateSetItem updateSetItem : updateSetItems) {
             SQLExpr expr = updateSetItem.getValue();
             if (expr instanceof SQLValuableExpr) {
-                list.add(((SQLValuableExpr) expr).getValue());
+                list.add(((SQLValuableExpr)expr).getValue());
             } else if (expr instanceof SQLVariantRefExpr) {
                 list.add(new VMarker());
             } else {
@@ -105,7 +118,7 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
                 return super.visit(x);
             }
         };
-        visitor.visit((SQLBinaryOpExpr) where);
+        visitor.visit((SQLBinaryOpExpr)where);
         return sb.toString();
     }
 
@@ -115,19 +128,24 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
         if (where == null) {
             return "";
         }
+
         StringBuffer sb = new StringBuffer();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        visitor.visit((SQLBinaryOpExpr) where);
+
+        if (where instanceof SQLBetweenExpr) {
+            visitor.visit((SQLBetweenExpr)where);
+        } else if (where instanceof SQLInListExpr) {
+            visitor.visit((SQLInListExpr)where);
+        } else {
+            visitor.visit((SQLBinaryOpExpr)where);
+        }
+
         return sb.toString();
     }
 
     @Override
-    public String getTableSource() {
-        StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        SQLExprTableSource tableSource = (SQLExprTableSource) ast.getTableSource();
-        visitor.visit(tableSource);
-        return sb.toString();
+    public String getTableAlias() {
+        return ast.getTableSource().getAlias();
     }
 
     @Override
@@ -141,7 +159,7 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
                 return false;
             }
         };
-        SQLExprTableSource tableSource = (SQLExprTableSource) ast.getTableSource();
+        SQLExprTableSource tableSource = (SQLExprTableSource)ast.getTableSource();
         visitor.visit(tableSource);
         return sb.toString();
     }

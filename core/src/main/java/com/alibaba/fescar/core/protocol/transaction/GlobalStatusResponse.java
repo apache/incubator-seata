@@ -16,6 +16,11 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
+/**
+ * The type Global status response.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ */
 public class GlobalStatusResponse extends AbstractGlobalEndResponse {
 
     @Override

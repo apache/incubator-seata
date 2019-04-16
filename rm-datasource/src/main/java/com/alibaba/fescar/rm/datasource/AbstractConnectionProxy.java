@@ -16,6 +16,8 @@
 
 package com.alibaba.fescar.rm.datasource;
 
+import com.alibaba.fescar.core.context.RootContext;
+
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -35,32 +37,59 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.Executor;
 
-import com.alibaba.fescar.core.context.RootContext;
-
+/**
+ * The type Abstract connection proxy.
+ *
+ * @author sharajava
+ */
 public abstract class AbstractConnectionProxy implements Connection {
 
+    /**
+     * The Data source proxy.
+     */
     protected DataSourceProxy dataSourceProxy;
 
+    /**
+     * The Target connection.
+     */
     protected Connection targetConnection;
 
-    protected String dbType;
-
-    public AbstractConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection, String dbType) {
+    /**
+     * Instantiates a new Abstract connection proxy.
+     *
+     * @param dataSourceProxy  the data source proxy
+     * @param targetConnection the target connection
+     */
+    public AbstractConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
         this.dataSourceProxy = dataSourceProxy;
         this.targetConnection = targetConnection;
-        this.dbType = dbType;
     }
 
+    /**
+     * Gets data source proxy.
+     *
+     * @return the data source proxy
+     */
     public DataSourceProxy getDataSourceProxy() {
         return dataSourceProxy;
     }
 
+    /**
+     * Gets target connection.
+     *
+     * @return the target connection
+     */
     public Connection getTargetConnection() {
         return targetConnection;
     }
 
+    /**
+     * Gets db type.
+     *
+     * @return the db type
+     */
     public String getDbType() {
-        return dbType;
+        return dataSourceProxy.getDbType();
     }
 
     @Override
@@ -157,8 +186,10 @@ public abstract class AbstractConnectionProxy implements Connection {
     }
 
     @Override
-    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency) throws SQLException {
-        PreparedStatement preparedStatement = targetConnection.prepareStatement(sql, resultSetType, resultSetConcurrency);
+    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
+        throws SQLException {
+        PreparedStatement preparedStatement = targetConnection.prepareStatement(sql, resultSetType,
+            resultSetConcurrency);
         return new PreparedStatementProxy(this, preparedStatement, sql);
     }
 
@@ -213,19 +244,24 @@ public abstract class AbstractConnectionProxy implements Connection {
     }
 
     @Override
-    public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        Statement statement = targetConnection.createStatement(resultSetType, resultSetConcurrency, resultSetHoldability);
+    public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
+        throws SQLException {
+        Statement statement = targetConnection.createStatement(resultSetType, resultSetConcurrency,
+            resultSetHoldability);
         return new StatementProxy<Statement>(this, statement);
     }
 
     @Override
-    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
-        PreparedStatement preparedStatement = targetConnection.prepareStatement(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
+    public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
+                                              int resultSetHoldability) throws SQLException {
+        PreparedStatement preparedStatement = targetConnection.prepareStatement(sql, resultSetType,
+            resultSetConcurrency, resultSetHoldability);
         return new PreparedStatementProxy(this, preparedStatement, sql);
     }
 
     @Override
-    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency, int resultSetHoldability) throws SQLException {
+    public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
+                                         int resultSetHoldability) throws SQLException {
         RootContext.assertNotInGlobalTransaction();
         return targetConnection.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
     }

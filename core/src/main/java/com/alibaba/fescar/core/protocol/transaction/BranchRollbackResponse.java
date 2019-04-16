@@ -18,6 +18,11 @@ package com.alibaba.fescar.core.protocol.transaction;
 
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 
+/**
+ * The type Branch rollback response.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ */
 public class BranchRollbackResponse extends AbstractBranchEndResponse {
 
     @Override

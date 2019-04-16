@@ -18,14 +18,29 @@ package com.alibaba.fescar.core.protocol.transaction;
 
 import java.nio.ByteBuffer;
 
+/**
+ * The type Global lock query response.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ */
 public class GlobalLockQueryResponse extends AbstractTransactionResponse {
 
     private boolean lockable = false;
 
+    /**
+     * Is lockable boolean.
+     *
+     * @return the boolean
+     */
     public boolean isLockable() {
         return lockable;
     }
 
+    /**
+     * Sets lockable.
+     *
+     * @param lockable the lockable
+     */
     public void setLockable(boolean lockable) {
         this.lockable = lockable;
     }
@@ -35,11 +50,10 @@ public class GlobalLockQueryResponse extends AbstractTransactionResponse {
         return TYPE_GLOBAL_LOCK_QUERY_RESULT;
     }
 
-
     @Override
     protected void doEncode() {
         super.doEncode();
-        byteBuffer.putShort((short) (lockable ? 1 : 0));
+        byteBuffer.putShort((short)(lockable ? 1 : 0));
     }
 
     @Override

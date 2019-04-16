@@ -21,26 +21,30 @@ import java.nio.ByteBuffer;
 
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 
+/**
+ * The type Branch register response.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ */
 public class BranchRegisterResponse extends AbstractTransactionResponse implements Serializable {
 
     private static final long serialVersionUID = 8317040433102745774L;
-
-    private long transactionId;
-
     private long branchId;
 
-    public long getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(long transactionId) {
-        this.transactionId = transactionId;
-    }
-
+    /**
+     * Gets branch id.
+     *
+     * @return the branch id
+     */
     public long getBranchId() {
         return branchId;
     }
 
+    /**
+     * Sets branch id.
+     *
+     * @param branchId the branch id
+     */
     public void setBranchId(long branchId) {
         this.branchId = branchId;
     }
@@ -53,7 +57,6 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
     @Override
     protected void doEncode() {
         super.doEncode();
-        byteBuffer.putLong(transactionId);
         byteBuffer.putLong(branchId);
 
     }
@@ -61,7 +64,21 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
     @Override
     public void decode(ByteBuffer byteBuffer) {
         super.decode(byteBuffer);
-        this.transactionId = byteBuffer.getLong();
         this.branchId = byteBuffer.getLong();
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("BranchRegisterResponse: branchId=");
+        result.append(branchId);
+        result.append(",");
+        result.append("result code =");
+        result.append(getResultCode());
+        result.append(",");
+        result.append("getMsg =");
+        result.append(getMsg());
+
+        return result.toString();
     }
 }

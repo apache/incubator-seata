@@ -29,13 +29,24 @@ import com.alibaba.fescar.rm.datasource.ParametersHolder;
 import com.alibaba.fescar.rm.datasource.sql.SQLDeleteRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLType;
 
+/**
+ * The type My sql delete recognizer.
+ *
+ * @author sharajava
+ */
 public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRecognizer {
 
     private final MySqlDeleteStatement ast;
 
+    /**
+     * Instantiates a new My sql delete recognizer.
+     *
+     * @param originalSQL the original sql
+     * @param ast         the ast
+     */
     public MySQLDeleteRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (MySqlDeleteStatement) ast;
+        this.ast = (MySqlDeleteStatement)ast;
     }
 
     @Override
@@ -44,11 +55,8 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
     }
 
     @Override
-    public String getTableSource() {
-        StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        visitor.visit((SQLExprTableSource)ast.getTableSource());
-        return sb.toString();
+    public String getTableAlias() {
+        return ast.getTableSource().getAlias();
     }
 
     @Override
@@ -84,7 +92,7 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
                 return super.visit(x);
             }
         };
-        visitor.visit((SQLBinaryOpExpr) where);
+        visitor.visit((SQLBinaryOpExpr)where);
         return sb.toString();
     }
 
@@ -96,7 +104,7 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
         }
         StringBuffer sb = new StringBuffer();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        visitor.visit((SQLBinaryOpExpr) where);
+        visitor.visit((SQLBinaryOpExpr)where);
         return sb.toString();
     }
 

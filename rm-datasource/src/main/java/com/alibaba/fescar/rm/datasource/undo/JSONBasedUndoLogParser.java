@@ -19,6 +19,11 @@ package com.alibaba.fescar.rm.datasource.undo;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 
+/**
+ * The type Json based undo log parser.
+ *
+ * @author sharajava
+ */
 public class JSONBasedUndoLogParser implements UndoLogParser {
 
     @Override

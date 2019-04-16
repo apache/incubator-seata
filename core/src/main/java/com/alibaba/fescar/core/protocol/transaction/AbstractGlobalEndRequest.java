@@ -20,24 +20,52 @@ import java.nio.ByteBuffer;
 
 import com.alibaba.fescar.core.protocol.MergedMessage;
 
+/**
+ * The type Abstract global end request.
+ *
+ * @author sharajava
+ */
 public abstract class AbstractGlobalEndRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 
-    protected long transactionId;
+    private String xid;
 
+    /**
+     * The Extra data.
+     */
     protected String extraData;
 
-    public long getTransactionId() {
-        return transactionId;
+    /**
+     * Gets xid.
+     *
+     * @return the xid
+     */
+    public String getXid() {
+        return xid;
     }
 
-    public void setTransactionId(long transactionId) {
-        this.transactionId = transactionId;
+    /**
+     * Sets xid.
+     *
+     * @param xid the xid
+     */
+    public void setXid(String xid) {
+        this.xid = xid;
     }
 
+    /**
+     * Gets extra data.
+     *
+     * @return the extra data
+     */
     public String getExtraData() {
         return extraData;
     }
 
+    /**
+     * Sets extra data.
+     *
+     * @param extraData the extra data
+     */
     public void setExtraData(String extraData) {
         this.extraData = extraData;
     }
@@ -45,15 +73,24 @@ public abstract class AbstractGlobalEndRequest extends AbstractTransactionReques
     @Override
     public byte[] encode() {
         ByteBuffer byteBuffer = ByteBuffer.allocate(256);
-        byteBuffer.putLong(this.transactionId);
-        if (this.extraData != null) {
-            byte[] bs = extraData.getBytes(UTF8);
-            byteBuffer.putShort((short) bs.length);
+        // 1. xid
+        if (this.xid != null) {
+            byte[] bs = xid.getBytes(UTF8);
+            byteBuffer.putShort((short)bs.length);
             if (bs.length > 0) {
                 byteBuffer.put(bs);
             }
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
+        }
+        if (this.extraData != null) {
+            byte[] bs = extraData.getBytes(UTF8);
+            byteBuffer.putShort((short)bs.length);
+            if (bs.length > 0) {
+                byteBuffer.put(bs);
+            }
+        } else {
+            byteBuffer.putShort((short)0);
         }
 
         byteBuffer.flip();
@@ -64,12 +101,29 @@ public abstract class AbstractGlobalEndRequest extends AbstractTransactionReques
 
     @Override
     public void decode(ByteBuffer byteBuffer) {
-        this.transactionId = byteBuffer.getLong();
+        short xidLen = byteBuffer.getShort();
+        if (xidLen > 0) {
+            byte[] bs = new byte[xidLen];
+            byteBuffer.get(bs);
+            this.setXid(new String(bs, UTF8));
+        }
         short len = byteBuffer.getShort();
         if (len > 0) {
             byte[] bs = new byte[len];
             byteBuffer.get(bs);
             this.setExtraData(new String(bs, UTF8));
         }
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("xid=");
+        result.append(xid);
+        result.append(",");
+        result.append("extraData=");
+        result.append(extraData);
+
+        return result.toString();
     }
 }

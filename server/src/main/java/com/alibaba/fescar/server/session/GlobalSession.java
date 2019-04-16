@@ -26,8 +26,19 @@ import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.GlobalStatus;
 import com.alibaba.fescar.server.UUIDGenerator;
 import com.alibaba.fescar.server.store.SessionStorable;
+import com.alibaba.fescar.server.store.StoreConfig;
 
+/**
+ * The type Global session.
+ *
+ * @author sharajava
+ */
 public class GlobalSession implements SessionLifecycle, SessionStorable {
+
+    private static final int MAX_GLOBAL_SESSION_SIZE = StoreConfig.getMaxGlobalSessionSize();
+
+    private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
+        MAX_GLOBAL_SESSION_SIZE));
 
     private long transactionId;
 
@@ -47,25 +58,47 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
+    /**
+     * Add boolean.
+     *
+     * @param branchSession the branch session
+     * @return the boolean
+     */
     public boolean add(BranchSession branchSession) {
         return branchSessions.add(branchSession);
     }
 
+    /**
+     * Remove boolean.
+     *
+     * @param branchSession the branch session
+     * @return the boolean
+     */
     public boolean remove(BranchSession branchSession) {
         return branchSessions.remove(branchSession);
     }
 
     private ArrayList<SessionLifecycleListener> lifecycleListeners = new ArrayList<>();
 
+    /**
+     * Can be committed async boolean.
+     *
+     * @return the boolean
+     */
     public boolean canBeCommittedAsync() {
         for (BranchSession branchSession : branchSessions) {
-            if (branchSession.getBranchType() == BranchType.MT) {
+            if (branchSession.getBranchType() == BranchType.TCC) {
                 return false;
             }
         }
         return true;
     }
 
+    /**
+     * Is timeout boolean.
+     *
+     * @return the boolean
+     */
     public boolean isTimeout() {
         return (System.currentTimeMillis() - beginTime) > timeout;
     }
@@ -82,20 +115,20 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void changeStatus(GlobalStatus status) throws TransactionException {
+        this.status = status;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, status);
         }
-        this.status = status;
 
     }
 
     @Override
     public void changeBranchStatus(BranchSession branchSession, BranchStatus status)
         throws TransactionException {
+        branchSession.setStatus(status);
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBranchStatusChange(this, branchSession, status);
         }
-        branchSession.setStatus(status);
     }
 
     @Override
@@ -114,6 +147,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void end() throws TransactionException {
+        // Clean locks first
+        clean();
+
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onEnd(this);
         }
@@ -127,16 +163,31 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     }
 
+    /**
+     * Close and clean.
+     *
+     * @throws TransactionException the transaction exception
+     */
     public void closeAndClean() throws TransactionException {
         close();
         clean();
 
     }
 
+    /**
+     * Add session lifecycle listener.
+     *
+     * @param sessionLifecycleListener the session lifecycle listener
+     */
     public void addSessionLifecycleListener(SessionLifecycleListener sessionLifecycleListener) {
         lifecycleListeners.add(sessionLifecycleListener);
     }
 
+    /**
+     * Remove session lifecycle listener.
+     *
+     * @param sessionLifecycleListener the session lifecycle listener
+     */
     public void removeSessionLifecycleListener(SessionLifecycleListener sessionLifecycleListener) {
         lifecycleListeners.remove(sessionLifecycleListener);
     }
@@ -159,6 +210,12 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         remove(branchSession);
     }
 
+    /**
+     * Gets branch.
+     *
+     * @param branchId the branch id
+     * @return the branch
+     */
     public BranchSession getBranch(long branchId) {
         synchronized (branchSessions) {
             for (BranchSession branchSession : branchSessions) {
@@ -172,12 +229,22 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     }
 
+    /**
+     * Gets sorted branches.
+     *
+     * @return the sorted branches
+     */
     public ArrayList<BranchSession> getSortedBranches() {
         ArrayList<BranchSession> sorted = new ArrayList();
         sorted.addAll(branchSessions);
         return sorted;
     }
 
+    /**
+     * Gets reverse sorted branches.
+     *
+     * @return the reverse sorted branches
+     */
     public ArrayList<BranchSession> getReverseSortedBranches() {
         ArrayList<BranchSession> reversed = new ArrayList();
         reversed.addAll(branchSessions);
@@ -185,8 +252,19 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return reversed;
     }
 
+    /**
+     * Instantiates a new Global session.
+     */
     public GlobalSession() {}
 
+    /**
+     * Instantiates a new Global session.
+     *
+     * @param applicationId           the application id
+     * @param transactionServiceGroup the transaction service group
+     * @param transactionName         the transaction name
+     * @param timeout                 the timeout
+     */
     public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout) {
         this.transactionId = UUIDGenerator.generateUUID();
         this.status = GlobalStatus.Begin;
@@ -197,79 +275,161 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         this.timeout = timeout;
     }
 
+    /**
+     * Gets transaction id.
+     *
+     * @return the transaction id
+     */
     public long getTransactionId() {
         return transactionId;
     }
 
+    /**
+     * Gets status.
+     *
+     * @return the status
+     */
     public GlobalStatus getStatus() {
         return status;
     }
 
+    /**
+     * Sets status.
+     *
+     * @param status the status
+     */
     void setStatus(GlobalStatus status) {
         this.status = status;
     }
 
+    /**
+     * Gets application id.
+     *
+     * @return the application id
+     */
     public String getApplicationId() {
         return applicationId;
     }
 
+    /**
+     * Gets transaction service group.
+     *
+     * @return the transaction service group
+     */
     public String getTransactionServiceGroup() {
         return transactionServiceGroup;
     }
 
+    /**
+     * Gets transaction name.
+     *
+     * @return the transaction name
+     */
     public String getTransactionName() {
         return transactionName;
     }
 
+    /**
+     * Gets timeout.
+     *
+     * @return the timeout
+     */
     public int getTimeout() {
         return timeout;
     }
 
+    /**
+     * Gets begin time.
+     *
+     * @return the begin time
+     */
     public long getBeginTime() {
         return beginTime;
     }
 
+    /**
+     * Create global session global session.
+     *
+     * @param applicationId  the application id
+     * @param txServiceGroup the tx service group
+     * @param txName         the tx name
+     * @param timeout        the timeout
+     * @return the global session
+     */
     public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
                                                     int timeout) {
         GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout);
         return session;
     }
 
+    /**
+     * Sets active.
+     *
+     * @param active the active
+     */
     public void setActive(boolean active) {
         this.active = active;
     }
 
     @Override
     public byte[] encode() {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(512);
+
+        byte[] byApplicationIdBytes = applicationId != null ? applicationId.getBytes() : null;
+
+        byte[] byServiceGroupBytes = transactionServiceGroup != null ? transactionServiceGroup.getBytes() : null;
+
+        byte[] byTxNameBytes = transactionName != null ? transactionName.getBytes() : null;
+
+        int size = calGlobalSessionSize(byApplicationIdBytes, byServiceGroupBytes, byTxNameBytes);
+
+        if (size > MAX_GLOBAL_SESSION_SIZE) {
+            throw new RuntimeException("global session size exceeded, size : " + size + " maxBranchSessionSize : " +
+                MAX_GLOBAL_SESSION_SIZE);
+        }
+        ByteBuffer byteBuffer = byteBufferThreadLocal.get();
+        //recycle
+        byteBuffer.clear();
+
         byteBuffer.putLong(transactionId);
         byteBuffer.putInt(timeout);
-        if (null != applicationId) {
-            byte[] byApplicationId = applicationId.getBytes();
-            byteBuffer.putShort((short)byApplicationId.length);
-            byteBuffer.put(byApplicationId);
+        if (null != byApplicationIdBytes) {
+            byteBuffer.putShort((short)byApplicationIdBytes.length);
+            byteBuffer.put(byApplicationIdBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
-        if (null != transactionServiceGroup) {
-            byte[] byServiceGroup = transactionServiceGroup.getBytes();
-            byteBuffer.putShort((short)byServiceGroup.length);
-            byteBuffer.put(byServiceGroup);
+        if (null != byServiceGroupBytes) {
+            byteBuffer.putShort((short)byServiceGroupBytes.length);
+            byteBuffer.put(byServiceGroupBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
-        if (null != transactionName) {
-            byte[] byTxName = transactionName.getBytes();
-            byteBuffer.putShort((short)byTxName.length);
-            byteBuffer.put(byTxName);
+        if (null != byTxNameBytes) {
+            byteBuffer.putShort((short)byTxNameBytes.length);
+            byteBuffer.put(byTxNameBytes);
         } else {
             byteBuffer.putShort((short)0);
         }
         byteBuffer.putLong(beginTime);
+        byteBuffer.put((byte)status.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
         byteBuffer.get(result);
         return result;
+    }
+
+    private int calGlobalSessionSize(byte[] byApplicationIdBytes, byte[] byServiceGroupBytes, byte[] byTxNameBytes) {
+        final int size = 8 // trascationId
+            + 4 // timeout
+            + 2 // byApplicationIdBytes.length
+            + 2 // byServiceGroupBytes.length
+            + 2 // byTxNameBytes.length
+            + 8 // beginTime
+            + 1 // statusCode
+            + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
+            + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
+            + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
+        return size;
     }
 
     @Override
@@ -296,8 +456,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             this.transactionName = new String(byTxName);
         }
         this.beginTime = byteBuffer.getLong();
+        this.status = GlobalStatus.get(byteBuffer.get());
     }
 
+    /**
+     * Has branch boolean.
+     *
+     * @return the boolean
+     */
     public boolean hasBranch() {
         return branchSessions.size() > 0;
     }

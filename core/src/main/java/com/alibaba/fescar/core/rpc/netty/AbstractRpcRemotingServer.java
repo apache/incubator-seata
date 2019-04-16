@@ -18,9 +18,13 @@ package com.alibaba.fescar.core.rpc.netty;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
 import com.alibaba.fescar.core.rpc.RemotingServer;
+import com.alibaba.fescar.discovery.registry.RegistryFactory;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -29,6 +33,7 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.WriteBufferWaterMark;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
@@ -39,11 +44,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Rpc remoting server.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018 /9/12 11:25
- * @FileName: AbstractRpcRemotingServer
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/12
  */
 public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements RemotingServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingServer.class);
@@ -52,7 +54,12 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     private final EventLoopGroup eventLoopGroupBoss;
     private final NettyServerConfig nettyServerConfig;
     private int listenPort;
-
+    private final AtomicBoolean initialized = new AtomicBoolean(false);
+    /**
+     * Sets listen port.
+     *
+     * @param listenPort the listen port
+     */
     public void setListenPort(int listenPort) {
 
         if (listenPort <= 0) {
@@ -61,6 +68,11 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         this.listenPort = listenPort;
     }
 
+    /**
+     * Gets listen port.
+     *
+     * @return the listen port
+     */
     public int getListenPort() {
         return listenPort;
     }
@@ -116,9 +128,9 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
             .childOption(ChannelOption.TCP_NODELAY, true)
             .childOption(ChannelOption.SO_SNDBUF, nettyServerConfig.getServerSocketSendBufSize())
             .childOption(ChannelOption.SO_RCVBUF, nettyServerConfig.getServerSocketResvBufSize())
-            .childOption(ChannelOption.WRITE_BUFFER_HIGH_WATER_MARK,
-                nettyServerConfig.getWriteBufferHighWaterMark())
-            .childOption(ChannelOption.WRITE_BUFFER_LOW_WATER_MARK, nettyServerConfig.getWriteBufferLowWaterMark())
+            .childOption(ChannelOption.WRITE_BUFFER_WATER_MARK,
+                new WriteBufferWaterMark(nettyServerConfig.getWriteBufferLowWaterMark(),
+                    nettyServerConfig.getWriteBufferHighWaterMark()))
             .localAddress(new InetSocketAddress(listenPort))
             .childHandler(new ChannelInitializer<SocketChannel>() {
                 @Override
@@ -139,16 +151,29 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         try {
             ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
             LOGGER.info("Server started ... ");
+            RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+            initialized.set(true);
             future.channel().closeFuture().sync();
-        } catch (InterruptedException exx) {
+        } catch (Exception exx) {
             throw new RuntimeException(exx);
         }
 
     }
 
+
     @Override
     public void shutdown() {
         try {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Shuting server down. ");
+            }
+            if (initialized.get()){
+                RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+                RegistryFactory.getInstance().close();
+                //wait a few seconds for server transport
+                TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
+            }
+
             this.eventLoopGroupBoss.shutdownGracefully();
             this.eventLoopGroupWorker.shutdownGracefully();
         } catch (Exception exx) {

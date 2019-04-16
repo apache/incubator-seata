@@ -17,6 +17,8 @@
 package com.alibaba.fescar.core.rpc.netty;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import com.alibaba.fescar.common.exception.FrameworkErrorCode;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
+import com.alibaba.fescar.common.util.CollectionUtils;
 import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 import com.alibaba.fescar.core.protocol.HeartbeatMessage;
@@ -37,8 +40,8 @@ import com.alibaba.fescar.core.rpc.ClientMessageSender;
 import com.alibaba.fescar.core.rpc.RemotingService;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
 
-import com.alibaba.fescar.core.service.ServiceManager;
-import com.alibaba.fescar.core.service.ServiceManagerStaticConfigImpl;
+import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
+import com.alibaba.fescar.discovery.registry.RegistryFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -64,14 +67,13 @@ import org.apache.commons.pool.impl.GenericKeyedObjectPool.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.alibaba.fescar.common.exception.FrameworkErrorCode.NoAvailableService;
+
 /**
  * The type Rpc remoting client.
  *
- * @Author: jimin.jm @alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018 /9/12 11:30
- * @FileName: AbstractRpcRemotingClient
- * @Description:
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /9/12
  */
 public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     implements RemotingService, RegisterMsgListener, ClientMessageSender {
@@ -89,7 +91,6 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     private static final int MAX_MERGE_SEND_MILLS = 1;
     private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
 
-    protected ServiceManager serviceManager;
 
     /**
      * The Netty client key pool.
@@ -138,7 +139,6 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         NettyPoolableFactory keyPoolableFactory = new NettyPoolableFactory(this);
         nettyClientKeyPool = new GenericKeyedObjectPool(keyPoolableFactory);
         nettyClientKeyPool.setConfig(getNettyPoolConfig());
-        serviceManager = new ServiceManagerStaticConfigImpl();
         super.init();
     }
 
@@ -255,32 +255,38 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             }
             super.destroy();
         } catch (Exception exx) {
-            LOGGER.error("shutdown error:" + exx.getMessage());
+            LOGGER.error("Failed to shutdown: {}", exx.getMessage());
         }
+    }
+
+    @Override
+    public void destroy() {
+        super.destroy();
+        shutdown();
     }
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof RpcMessage) {
-            RpcMessage rpcMessage = (RpcMessage)msg;
+            RpcMessage rpcMessage = (RpcMessage) msg;
             if (rpcMessage.getBody() == HeartbeatMessage.PONG) {
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("received PONG from " + ctx.channel().remoteAddress());
+                    LOGGER.debug("received PONG from {}", ctx.channel().remoteAddress());
                 }
                 return;
             }
         }
 
-        if (((RpcMessage)msg).getBody() instanceof MergeResultMessage) {
-            MergeResultMessage results = (MergeResultMessage)((RpcMessage)msg).getBody();
-            MergedWarpMessage mergeMessage = (MergedWarpMessage)mergeMsgMap.remove(((RpcMessage)msg).getId());
+        if (((RpcMessage) msg).getBody() instanceof MergeResultMessage) {
+            MergeResultMessage results = (MergeResultMessage) ((RpcMessage) msg).getBody();
+            MergedWarpMessage mergeMessage = (MergedWarpMessage) mergeMsgMap.remove(((RpcMessage) msg).getId());
             int num = mergeMessage.msgs.size();
             for (int i = 0; i < num; i++) {
                 long msgId = mergeMessage.msgIds.get(i);
                 MessageFuture future = futures.remove(msgId);
                 if (future == null) {
                     if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("msg:" + msgId + " is not found in futures.");
+                        LOGGER.info("msg: {} is not found in futures.", msgId);
                     }
                 } else {
                     future.setResultMessage(results.getMsgs()[i]);
@@ -289,6 +295,18 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             return;
         }
         super.channelRead(ctx, msg);
+    }
+
+    @Override
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        if (messageExecutor.isShutdown()) {
+            return;
+        }
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("channel inactive: {}", ctx.channel());
+        }
+        releaseChannel(ctx.channel(), NetUtil.toStringAddress(ctx.channel().remoteAddress()));
+        super.channelInactive(ctx);
     }
 
     /**
@@ -317,6 +335,61 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         }
     }
 
+    protected void reconnect(String transactionServiceGroup) {
+        List<String> availList = null;
+        try {
+            availList = getAvailServerList(transactionServiceGroup);
+        } catch (Exception exx) {
+            LOGGER.error("Failed to get available servers: {}" + exx.getMessage());
+        }
+        if (CollectionUtils.isEmpty(availList)) {
+            LOGGER.error("no available server to connect.");
+            return;
+        }
+        for (String serverAddress : availList) {
+            try {
+                connect(serverAddress);
+            } catch (Exception e) {
+                LOGGER.error(FrameworkErrorCode.NetConnect.errCode,
+                    "can not connect to " + serverAddress + " cause:" + e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * Gets avail server list.
+     *
+     * @param transactionServiceGroup the transaction service group
+     * @return the avail server list
+     * @throws Exception the exception
+     */
+    protected List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
+        List<String> availList = new ArrayList<>();
+        List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance().lookup(
+            transactionServiceGroup);
+        if (!CollectionUtils.isEmpty(availInetSocketAddressList)) {
+            for (InetSocketAddress address : availInetSocketAddressList) {
+                availList.add(NetUtil.toStringAddress(address));
+            }
+        }
+        return availList;
+    }
+
+    protected String loadBalance(String transactionServiceGroup) {
+        InetSocketAddress address = null;
+        try {
+            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(
+                transactionServiceGroup);
+            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
+        } catch (Exception ignore) {
+            LOGGER.error(ignore.getMessage());
+        }
+        if (address == null) {
+            throw new FrameworkException(NoAvailableService);
+        }
+        return NetUtil.toStringAddress(address);
+    }
+
     /**
      * Gets thread prefix.
      *
@@ -334,6 +407,14 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
      * @return the channel
      */
     protected abstract Channel connect(String serverAddress);
+
+    /**
+     * Release channel.
+     *
+     * @param channel       the channel
+     * @param serverAddress the server address
+     */
+    protected abstract void releaseChannel(Channel channel, String serverAddress);
 
     /**
      * Gets netty pool config.
@@ -360,29 +441,40 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                 synchronized (mergeLock) {
                     try {
                         mergeLock.wait(MAX_MERGE_SEND_MILLS);
-                    } catch (InterruptedException e) {}
+                    } catch (InterruptedException e) {
+                    }
                 }
                 isSending = true;
                 for (String address : basketMap.keySet()) {
                     BlockingQueue<RpcMessage> basket = basketMap.get(address);
-                    if (basket.isEmpty()) { continue; }
+                    if (basket.isEmpty()) {
+                        continue;
+                    }
 
                     MergedWarpMessage mergeMessage = new MergedWarpMessage();
                     while (!basket.isEmpty()) {
                         RpcMessage msg = basket.poll();
-                        mergeMessage.msgs.add((AbstractMessage)msg.getBody());
+                        mergeMessage.msgs.add((AbstractMessage) msg.getBody());
                         mergeMessage.msgIds.add(msg.getId());
                     }
                     if (mergeMessage.msgIds.size() > 1) {
                         printMergeMessageLog(mergeMessage);
                     }
-                    Channel sendChannel = connect(address);
+                    Channel sendChannel = null;
                     try {
+                        sendChannel = connect(address);
                         sendRequest(sendChannel, mergeMessage);
                     } catch (FrameworkException e) {
                         if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable
-                            && address != null) {
+                            && address != null && sendChannel != null) {
                             destroyChannel(address, sendChannel);
+                        }
+                        // fast fail
+                        for (Long msgId : mergeMessage.msgIds) {
+                            MessageFuture messageFuture = futures.remove(msgId);
+                            if (messageFuture != null) {
+                                messageFuture.setResultMessage(null);
+                            }
                         }
                         LOGGER.error("", "client merge call failed", e);
                     }
@@ -394,11 +486,17 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         private void printMergeMessageLog(MergedWarpMessage mergeMessage) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("merge msg size:" + mergeMessage.msgIds.size());
-                for (AbstractMessage cm : mergeMessage.msgs) { LOGGER.debug(cm.toString()); }
+                for (AbstractMessage cm : mergeMessage.msgs) {
+                    LOGGER.debug(cm.toString());
+                }
                 StringBuffer sb = new StringBuffer();
-                for (long l : mergeMessage.msgIds) { sb.append(MSG_ID_PREFIX).append(l).append(SINGLE_LOG_POSTFIX); }
+                for (long l : mergeMessage.msgIds) {
+                    sb.append(MSG_ID_PREFIX).append(l).append(SINGLE_LOG_POSTFIX);
+                }
                 sb.append("\n");
-                for (long l : futures.keySet()) { sb.append(FUTURES_PREFIX).append(l).append(SINGLE_LOG_POSTFIX); }
+                for (long l : futures.keySet()) {
+                    sb.append(FUTURES_PREFIX).append(l).append(SINGLE_LOG_POSTFIX);
+                }
                 LOGGER.debug(sb.toString());
             }
         }

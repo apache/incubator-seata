@@ -16,5 +16,10 @@
 
 package com.alibaba.fescar.rm.datasource.sql;
 
+/**
+ * The interface Sql select recognizer.
+ *
+ * @author sharajava
+ */
 public interface SQLSelectRecognizer extends WhereRecognizer {
 }

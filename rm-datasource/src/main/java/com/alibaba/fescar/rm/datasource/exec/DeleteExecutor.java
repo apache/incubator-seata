@@ -23,32 +23,55 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.fescar.rm.datasource.ParametersHolder;
 import com.alibaba.fescar.rm.datasource.StatementProxy;
 import com.alibaba.fescar.rm.datasource.sql.SQLDeleteRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.SQLRecognizer;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableMeta;
 import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
+import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
+import com.alibaba.fescar.rm.datasource.undo.KeywordCheckerFactory;
 
+import org.apache.commons.lang.StringUtils;
+
+/**
+ * The type Delete executor.
+ *
+ * @author sharajava
+ *
+ * @param <T> the type parameter
+ * @param <S> the type parameter
+ */
 public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
-    public DeleteExecutor(StatementProxy statementProxy, StatementCallback statementCallback, SQLRecognizer sqlRecognizer) {
+    /**
+     * Instantiates a new Delete executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param sqlRecognizer     the sql recognizer
+     */
+    public DeleteExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
+                          SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
     @Override
     protected TableRecords beforeImage() throws SQLException {
         SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) sqlRecognizer;
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+
         TableMeta tmeta = getTableMeta(visitor.getTableName());
         List<String> columns = new ArrayList<>();
         for (String column : tmeta.getAllColumns().keySet()) {
-            columns.add(column);
+            columns.add(keywordChecker.checkAndReplace(column));
         }
 
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
 
         for (int i = 0; i < columns.size(); i++) {
-            selectSQLAppender.append(columns.get(i));
+            selectSQLAppender.append(getColumnNameInSQL(columns.get(i)));
             if (i < (columns.size() - 1)) {
                 selectSQLAppender.append(", ");
             }
@@ -60,7 +83,11 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         } else {
             whereCondition = visitor.getWhereCondition();
         }
-        selectSQLAppender.append(" FROM " + tmeta.getTableName() + " WHERE " + whereCondition + " FOR UPDATE");
+        selectSQLAppender.append(" FROM " + keywordChecker.checkAndReplace(getFromTableInSQL()));
+        if (StringUtils.isNotBlank(whereCondition)) {
+            selectSQLAppender.append(" WHERE " + whereCondition);
+        }
+        selectSQLAppender.append(" FOR UPDATE");
         String selectSQL = selectSQLAppender.toString();
 
         TableRecords beforeImage = null;
@@ -73,7 +100,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 rs = st.executeQuery(selectSQL);
             } else {
                 ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                for (int i = 0; i< paramAppender.size(); i++) {
+                for (int i = 0; i < paramAppender.size(); i++) {
                     ps.setObject(i + 1, paramAppender.get(i));
                 }
                 rs = ps.executeQuery();

@@ -23,6 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.AbstractApplicationContext;
 
+/**
+ * The type Application keeper.
+ *
+ * @author sharajava
+ */
 public class ApplicationKeeper {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationKeeper.class);
@@ -30,6 +35,11 @@ public class ApplicationKeeper {
     private final ReentrantLock LOCK = new ReentrantLock();
     private final Condition STOP = LOCK.newCondition();
 
+    /**
+     * Instantiates a new Application keeper.
+     *
+     * @param applicationContext the application context
+     */
     public ApplicationKeeper(AbstractApplicationContext applicationContext) {
         addShutdownHook(applicationContext);
     }
@@ -55,6 +65,9 @@ public class ApplicationKeeper {
         }));
     }
 
+    /**
+     * Keep.
+     */
     public void keep() {
         synchronized (LOCK) {
             try {

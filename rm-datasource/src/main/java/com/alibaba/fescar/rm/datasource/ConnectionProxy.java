@@ -16,46 +16,91 @@
 
 package com.alibaba.fescar.rm.datasource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-
+import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.core.constants.ConfigurationKeys;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
+import com.alibaba.fescar.rm.DefaultResourceManager;
 import com.alibaba.fescar.rm.datasource.exec.LockConflictException;
-import com.alibaba.fescar.rm.datasource.sql.SQLType;
-import com.alibaba.fescar.rm.datasource.sql.struct.Field;
-import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
 import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+/**
+ * The type Connection proxy.
+ *
+ * @author sharajava
+ */
 public class ConnectionProxy extends AbstractConnectionProxy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionProxy.class);
 
     private ConnectionContext context = new ConnectionContext();
 
-    public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection, String dbType) {
-        super(dataSourceProxy, targetConnection, dbType);
+    private static final int DEFAULT_REPORT_RETRY_COUNT = 5;
+
+    private static int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
+
+    /**
+     * Instantiates a new Connection proxy.
+     *
+     * @param dataSourceProxy  the data source proxy
+     * @param targetConnection the target connection
+     */
+    public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
+        super(dataSourceProxy, targetConnection);
     }
 
+    /**
+     * Gets context.
+     *
+     * @return the context
+     */
     public ConnectionContext getContext() {
         return context;
     }
 
+    /**
+     * Bind.
+     *
+     * @param xid the xid
+     */
     public void bind(String xid) {
         context.bind(xid);
     }
 
-    public void checkLock(TableRecords records) throws SQLException {
+    /**
+     * set global lock requires flag
+     *
+     * @param isLock whether to lock
+     */
+    public void setGlobalLockRequire(boolean isLock) {
+        context.setGlobalLockRequire(isLock);
+    }
+
+    /**
+     * get global lock requires flag
+     */
+    public boolean isGlobalLockRequire() {
+        return context.isGlobalLockRequire();
+    }
+
+    /**
+     * Check lock.
+     *
+     * @param lockKeys the lockKeys
+     * @throws SQLException the sql exception
+     */
+    public void checkLock(String lockKeys) throws SQLException {
         // Just check lock without requiring lock by now.
-        String lockKeys = buildLockKey(records);
         try {
-            boolean lockable = DataSourceManager.get().lockQuery(BranchType.AT, getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
+            boolean lockable = DefaultResourceManager.get().lockQuery(BranchType.AT, getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
             if (!lockable) {
                 throw new LockConflictException();
             }
@@ -63,11 +108,17 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             recognizeLockKeyConflictException(e);
         }
     }
-    public void register(TableRecords records) throws SQLException {
+
+    /**
+     * Register.
+     *
+     * @param lockKeys the lockKeys
+     * @throws SQLException the sql exception
+     */
+    public void register(String lockKeys) throws SQLException {
         // Just check lock without requiring lock by now.
-        String lockKeys = buildLockKey(records);
         try {
-            DataSourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(), null, context.getXid(), lockKeys);
+            DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(), null, context.getXid(), null, lockKeys);
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e);
         }
@@ -82,83 +133,71 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     }
 
-    public void prepareUndoLog(SQLType sqlType, String tableName, TableRecords beforeImage, TableRecords afterImage) throws SQLException {
-        if(beforeImage.getRows().size() == 0 && afterImage.getRows().size() == 0) {
-            return;
-            }
-        
-        TableRecords lockKeyRecords = afterImage;
-        if (sqlType == SQLType.DELETE) {
-            lockKeyRecords = beforeImage;
-        }
-        String lockKeys = buildLockKey(lockKeyRecords);
-        context.appendLockKey(lockKeys);
-        SQLUndoLog sqlUndoLog = buildUndoItem(sqlType, tableName, beforeImage, afterImage);
+    /**
+     * append sqlUndoLog
+     *
+     * @param sqlUndoLog the sql undo log
+     */
+    public void appendUndoLog(SQLUndoLog sqlUndoLog) {
         context.appendUndoItem(sqlUndoLog);
     }
 
-    private SQLUndoLog buildUndoItem(SQLType sqlType, String tableName, TableRecords beforeImage, TableRecords afterImage) {
-        SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        sqlUndoLog.setSqlType(sqlType);
-        sqlUndoLog.setTableName(tableName);
-        sqlUndoLog.setBeforeImage(beforeImage);
-        sqlUndoLog.setAfterImage(afterImage);
-        return sqlUndoLog;
-    }
-
-    private String buildLockKey(TableRecords rowsIncludingPK) {
-        if (rowsIncludingPK.size() == 0) {
-            return null;
-        }
-        StringBuilder sb = new StringBuilder();
-        sb.append(rowsIncludingPK.getTableMeta().getTableName());
-        sb.append(":");
-
-        boolean flag = false;
-        for (Field field : rowsIncludingPK.pkRows()) {
-            if (flag) {
-                sb.append(",");
-            } else {
-                flag = true;
-            }
-            sb.append(field.getValue());
-        }
-        return sb.toString();
+    /**
+     * append lockKey
+     *
+     * @param lockKey the lock key
+     */
+    public void appendLockKey(String lockKey) {
+        context.appendLockKey(lockKey);
     }
 
     @Override
     public void commit() throws SQLException {
         if (context.inGlobalTransaction()) {
-            try {
-                register();
-            } catch (TransactionException e) {
-                recognizeLockKeyConflictException(e);
-            }
-
-            try {
-                if (context.hasUndoLog()) { 
-                    UndoLogManager.flushUndoLogs(this);
-                }
-                targetConnection.commit();
-            } catch (Throwable ex) {
-                report(false);
-                if (ex instanceof SQLException) {
-                    throw (SQLException) ex;
-                } else {
-                    throw new SQLException(ex);
-                }
-            }
-            report(true);
-            context.reset();
-        	
+            processGlobalTransactionCommit();
+        } else if (context.isGlobalLockRequire()) {
+            processLocalCommitWithGlobalLocks();
         } else {
             targetConnection.commit();
         }
     }
 
+    private void processLocalCommitWithGlobalLocks() throws SQLException {
+
+        checkLock(context.buildLockKeys());
+        try {
+            targetConnection.commit();
+        } catch (Throwable ex) {
+            throw new SQLException(ex);
+        }
+        context.reset();
+    }
+
+    private void processGlobalTransactionCommit() throws SQLException {
+        try {
+            register();
+        } catch (TransactionException e) {
+            recognizeLockKeyConflictException(e);
+        }
+
+        try {
+            if (context.hasUndoLog()) {
+                UndoLogManager.flushUndoLogs(this);
+            }
+            targetConnection.commit();
+        } catch (Throwable ex) {
+            report(false);
+            if (ex instanceof SQLException) {
+                throw new SQLException(ex);
+            }
+        }
+        report(true);
+        context.reset();
+    }
+
     private void register() throws TransactionException {
-        Long branchId = DataSourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
-                null, context.getXid(), context.buildLockKeys());
+        Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
+                null, context.getXid(), null, context.buildLockKeys());
         context.setBranchId(branchId);
     }
 
@@ -168,8 +207,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (context.inGlobalTransaction()) {
             if (context.isBranchRegistered()) {
                 report(false);
-            }}
-            context.reset();
+            }
+        }
+        context.reset();
     }
 
     @Override
@@ -182,14 +222,15 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void report(boolean commitDone) throws SQLException {
-        int retry = 5; // TODO: configure
+        int retry = REPORT_RETRY_COUNT;
         while (retry > 0) {
             try {
-                DataSourceManager.get().branchReport(context.getXid(), context.getBranchId(),
+                DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),
                         (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
                 return;
             } catch (Throwable ex) {
-                LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done [" + commitDone + "] Retry Countdown: " + retry);
+                LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["
+                        + commitDone + "] Retry Countdown: " + retry);
                 retry--;
 
                 if (retry == 0) {

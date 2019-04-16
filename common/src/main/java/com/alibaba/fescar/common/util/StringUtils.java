@@ -24,17 +24,75 @@ import java.sql.SQLException;
 
 import javax.sql.rowset.serial.SerialBlob;
 
+/**
+ * The type String utils.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ */
 public class StringUtils {
 
     private StringUtils() {
 
     }
 
-    public static final boolean isEmpty(String str) {
+    /**
+     * Is empty boolean.
+     *
+     * @param str the str
+     * @return the boolean
+     */
+    public static final boolean isNullOrEmpty(String str) {
         return (str == null) || (str.isEmpty());
     }
 
+    /**
+     * Is blank string ?
+     *
+     * @param str the str
+     * @return boolean
+     */
+    public static boolean isBlank(String str) {
+        int length;
 
+        if ((str == null) || ((length = str.length()) == 0)) {
+            return true;
+        }
+        for (int i = 0; i < length; i++) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Is Not blank string ?
+     *
+     * @param str the str
+     * @return boolean
+     */
+    public static boolean isNotBlank(String str) {
+        int length;
+
+        if ((str == null) || ((length = str.length()) == 0)) {
+            return false;
+        }
+
+        for (int i = 0; i < length; i++) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * String 2 blob blob.
+     *
+     * @param str the str
+     * @return the blob
+     * @throws SQLException the sql exception
+     */
     public static Blob string2blob(String str) throws SQLException {
         if (str == null) {
             return null;
@@ -42,14 +100,28 @@ public class StringUtils {
         return new SerialBlob(str.getBytes());
     }
 
+    /**
+     * Blob 2 string string.
+     *
+     * @param blob the blob
+     * @return the string
+     * @throws SQLException the sql exception
+     */
     public static String blob2string(Blob blob) throws SQLException {
         if (blob == null) {
             return null;
         }
 
-        return new String(blob.getBytes((long) 1, (int) blob.length()));
+        return new String(blob.getBytes((long)1, (int)blob.length()));
     }
 
+    /**
+     * Input stream 2 string string.
+     *
+     * @param is the is
+     * @return the string
+     * @throws IOException the io exception
+     */
     public static String inputStream2String(InputStream is) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         int i = -1;

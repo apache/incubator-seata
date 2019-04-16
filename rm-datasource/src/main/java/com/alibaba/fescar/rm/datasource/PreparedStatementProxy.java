@@ -24,7 +24,13 @@ import java.util.ArrayList;
 import com.alibaba.fescar.rm.datasource.exec.ExecuteTemplate;
 import com.alibaba.fescar.rm.datasource.exec.StatementCallback;
 
-public class PreparedStatementProxy extends AbstractPreparedStatementProxy implements PreparedStatement, ParametersHolder {
+/**
+ * The type Prepared statement proxy.
+ *
+ * @author sharajava
+ */
+public class PreparedStatementProxy extends AbstractPreparedStatementProxy
+    implements PreparedStatement, ParametersHolder {
 
     @Override
     public ArrayList<Object>[] getParameters() {
@@ -39,7 +45,16 @@ public class PreparedStatementProxy extends AbstractPreparedStatementProxy imple
         }
     }
 
-    public PreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement, String targetSQL) throws SQLException {
+    /**
+     * Instantiates a new Prepared statement proxy.
+     *
+     * @param connectionProxy the connection proxy
+     * @param targetStatement the target statement
+     * @param targetSQL       the target sql
+     * @throws SQLException the sql exception
+     */
+    public PreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement,
+                                  String targetSQL) throws SQLException {
         super(connectionProxy, targetStatement, targetSQL);
         init();
     }

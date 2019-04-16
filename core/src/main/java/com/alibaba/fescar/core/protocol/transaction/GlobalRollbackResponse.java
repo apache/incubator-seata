@@ -16,8 +16,13 @@
 
 package com.alibaba.fescar.core.protocol.transaction;
 
+/**
+ * The type Global rollback response.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ */
 public class GlobalRollbackResponse extends AbstractGlobalEndResponse {
-    
+
     @Override
     public short getTypeCode() {
         return TYPE_GLOBAL_ROLLBACK_RESULT;

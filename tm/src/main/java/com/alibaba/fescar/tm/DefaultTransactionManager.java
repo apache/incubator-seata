@@ -18,7 +18,6 @@ package com.alibaba.fescar.tm;
 
 import java.util.concurrent.TimeoutException;
 
-import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.core.exception.TransactionException;
 import com.alibaba.fescar.core.exception.TransactionExceptionCode;
 import com.alibaba.fescar.core.model.GlobalStatus;
@@ -37,11 +36,13 @@ import com.alibaba.fescar.core.rpc.netty.TmRpcClient;
 
 /**
  * The type Default transaction manager.
+ *
+ * @author sharajava
  */
 public class DefaultTransactionManager implements TransactionManager {
 
     private static class SingletonHolder {
-        private static final TransactionManager INSTANCE = new DefaultTransactionManager();
+        private static TransactionManager INSTANCE = new DefaultTransactionManager();
     }
 
     /**
@@ -53,49 +54,56 @@ public class DefaultTransactionManager implements TransactionManager {
         return SingletonHolder.INSTANCE;
     }
 
+    /**
+     * Set a TM instance.
+     *
+     * @param mock commonly used for test mocking
+     */
+    public static void set(TransactionManager mock) {
+        SingletonHolder.INSTANCE = mock;
+    }
+
     private DefaultTransactionManager() {
 
     }
 
     @Override
-    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout) throws TransactionException {
+    public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
+        throws TransactionException {
         GlobalBeginRequest request = new GlobalBeginRequest();
         request.setTransactionName(name);
         request.setTimeout(timeout);
-        GlobalBeginResponse response = (GlobalBeginResponse) syncCall(request);
+        GlobalBeginResponse response = (GlobalBeginResponse)syncCall(request);
         return response.getXid();
     }
 
     @Override
     public GlobalStatus commit(String xid) throws TransactionException {
-        long txId = XID.getTransactionId(xid);
         GlobalCommitRequest globalCommit = new GlobalCommitRequest();
-        globalCommit.setTransactionId(txId);
-        GlobalCommitResponse response = (GlobalCommitResponse) syncCall(globalCommit);
+        globalCommit.setXid(xid);
+        GlobalCommitResponse response = (GlobalCommitResponse)syncCall(globalCommit);
         return response.getGlobalStatus();
     }
 
     @Override
     public GlobalStatus rollback(String xid) throws TransactionException {
-        long txId = XID.getTransactionId(xid);
         GlobalRollbackRequest globalRollback = new GlobalRollbackRequest();
-        globalRollback.setTransactionId(txId);
-        GlobalRollbackResponse response = (GlobalRollbackResponse) syncCall(globalRollback);
+        globalRollback.setXid(xid);
+        GlobalRollbackResponse response = (GlobalRollbackResponse)syncCall(globalRollback);
         return response.getGlobalStatus();
     }
 
     @Override
     public GlobalStatus getStatus(String xid) throws TransactionException {
-        long txId = XID.getTransactionId(xid);
         GlobalStatusRequest queryGlobalStatus = new GlobalStatusRequest();
-        queryGlobalStatus.setTransactionId(txId);
-        GlobalStatusResponse response = (GlobalStatusResponse) syncCall(queryGlobalStatus);
+        queryGlobalStatus.setXid(xid);
+        GlobalStatusResponse response = (GlobalStatusResponse)syncCall(queryGlobalStatus);
         return response.getGlobalStatus();
     }
 
     private AbstractTransactionResponse syncCall(AbstractTransactionRequest request) throws TransactionException {
         try {
-            return (AbstractTransactionResponse) TmRpcClient.getInstance().sendMsgWithResponse(request);
+            return (AbstractTransactionResponse)TmRpcClient.getInstance().sendMsgWithResponse(request);
         } catch (TimeoutException toe) {
             throw new TransactionException(TransactionExceptionCode.IO, toe);
         }

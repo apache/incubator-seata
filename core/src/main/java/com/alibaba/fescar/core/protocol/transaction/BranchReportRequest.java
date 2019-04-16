@@ -19,12 +19,18 @@ package com.alibaba.fescar.core.protocol.transaction;
 import java.nio.ByteBuffer;
 
 import com.alibaba.fescar.core.model.BranchStatus;
+import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.protocol.MergedMessage;
 import com.alibaba.fescar.core.rpc.RpcContext;
 
+/**
+ * The type Branch report request.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ */
 public class BranchReportRequest extends AbstractTransactionRequestToTC implements MergedMessage {
 
-    private long transactionId;
+    private String xid;
 
     private long branchId;
 
@@ -34,42 +40,112 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
 
     private String applicationData;
 
-    public long getTransactionId() {
-        return transactionId;
+    private BranchType branchType = BranchType.AT;
+
+    /**
+     * Gets xid.
+     *
+     * @return the xid
+     */
+    public String getXid() {
+        return xid;
     }
 
-    public void setTransactionId(long transactionId) {
-        this.transactionId = transactionId;
+    /**
+     * Sets xid.
+     *
+     * @param xid the xid
+     */
+    public void setXid(String xid) {
+        this.xid = xid;
     }
 
+    /**
+     * Gets branch id.
+     *
+     * @return the branch id
+     */
     public long getBranchId() {
         return branchId;
     }
 
+    /**
+     * Sets branch id.
+     *
+     * @param branchId the branch id
+     */
     public void setBranchId(long branchId) {
         this.branchId = branchId;
     }
 
+    /**
+     * Gets resource id.
+     *
+     * @return the resource id
+     */
     public String getResourceId() {
         return resourceId;
     }
 
+    /**
+     * Sets resource id.
+     *
+     * @param resourceId the resource id
+     */
     public void setResourceId(String resourceId) {
         this.resourceId = resourceId;
     }
 
+    /**
+     * Gets branch type.
+     *
+     * @return the branch type
+     */
+    public BranchType getBranchType() {
+        return branchType;
+    }
+
+    /**
+     * Sets branch type.
+     *
+     * @param branchType the branch type
+     */
+    public void setBranchType(BranchType branchType) {
+        this.branchType = branchType;
+    }
+
+    /**
+     * Gets status.
+     *
+     * @return the status
+     */
     public BranchStatus getStatus() {
         return status;
     }
 
+    /**
+     * Sets status.
+     *
+     * @param status the status
+     */
     public void setStatus(BranchStatus status) {
         this.status = status;
     }
 
+    /**
+     * Gets application data.
+     *
+     * @return the application data
+     */
     public String getApplicationData() {
         return applicationData;
     }
 
+    /**
+     * Sets application data.
+     *
+     * @param applicationData the application data
+     */
     public void setApplicationData(String applicationData) {
         this.applicationData = applicationData;
     }
@@ -89,21 +165,29 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
             }
         }
 
-        // 1. Transaction Id
-        byteBuffer.putLong(this.transactionId);
-        // 2. Branch Id
-        byteBuffer.putLong(this.branchId);
-        // 3. Branch Status
-        byteBuffer.put((byte) this.status.ordinal());
-        // 4. Resource Id
-        if (this.resourceId != null) {
-            byte[] bs = resourceId.getBytes(UTF8);
-            byteBuffer.putShort((short) bs.length);
+        // 1. xid
+        if (this.xid != null) {
+            byte[] bs = xid.getBytes(UTF8);
+            byteBuffer.putShort((short)bs.length);
             if (bs.length > 0) {
                 byteBuffer.put(bs);
             }
         } else {
-            byteBuffer.putShort((short) 0);
+            byteBuffer.putShort((short)0);
+        }
+        // 2. Branch Id
+        byteBuffer.putLong(this.branchId);
+        // 3. Branch Status
+        byteBuffer.put((byte)this.status.getCode());
+        // 4. Resource Id
+        if (this.resourceId != null) {
+            byte[] bs = resourceId.getBytes(UTF8);
+            byteBuffer.putShort((short)bs.length);
+            if (bs.length > 0) {
+                byteBuffer.put(bs);
+            }
+        } else {
+            byteBuffer.putShort((short)0);
         }
 
         // 5. Application Data
@@ -115,6 +199,8 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
         } else {
             byteBuffer.putInt(0);
         }
+        //6. branchType
+        byteBuffer.put((byte) this.branchType.ordinal());
 
         byteBuffer.flip();
         byte[] content = new byte[byteBuffer.limit()];
@@ -124,7 +210,12 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
 
     @Override
     public void decode(ByteBuffer byteBuffer) {
-        this.transactionId = byteBuffer.getLong();
+        short xidLen = byteBuffer.getShort();
+        if (xidLen > 0) {
+            byte[] bs = new byte[xidLen];
+            byteBuffer.get(bs);
+            this.setXid(new String(bs, UTF8));
+        }
         this.branchId = byteBuffer.getLong();
         this.status = BranchStatus.get(byteBuffer.get());
         short len = byteBuffer.getShort();
@@ -140,10 +231,32 @@ public class BranchReportRequest extends AbstractTransactionRequestToTC implemen
             byteBuffer.get(bs);
             this.applicationData = new String(bs, UTF8);
         }
+        this.branchType = BranchType.get(byteBuffer.get());
     }
 
     @Override
     public AbstractTransactionResponse handle(RpcContext rpcContext) {
         return handler.handle(this, rpcContext);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder result = new StringBuilder();
+        result.append("xid=");
+        result.append(xid);
+        result.append(",");
+        result.append("branchId=");
+        result.append(branchId);
+        result.append(",");
+        result.append("resourceId=");
+        result.append(resourceId);
+        result.append(",");
+        result.append("status=");
+        result.append(status);
+        result.append(",");
+        result.append("applicationData=");
+        result.append(applicationData);
+
+        return result.toString();
     }
 }

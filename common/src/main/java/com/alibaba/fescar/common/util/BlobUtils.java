@@ -24,12 +24,23 @@ import javax.sql.rowset.serial.SerialBlob;
 
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 
+/**
+ * The type Blob utils.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ */
 public class BlobUtils {
 
     private BlobUtils() {
 
     }
 
+    /**
+     * String 2 blob blob.
+     *
+     * @param str the str
+     * @return the blob
+     */
     public static Blob string2blob(String str) {
         if (str == null) {
             return null;
@@ -42,18 +53,30 @@ public class BlobUtils {
         }
     }
 
+    /**
+     * Blob 2 string string.
+     *
+     * @param blob the blob
+     * @return the string
+     */
     public static String blob2string(Blob blob) {
         if (blob == null) {
             return null;
         }
 
         try {
-            return new String(blob.getBytes((long) 1, (int) blob.length()));
+            return new String(blob.getBytes((long)1, (int)blob.length()));
         } catch (Exception e) {
             throw new ShouldNeverHappenException(e);
         }
     }
 
+    /**
+     * Input stream 2 string string.
+     *
+     * @param is the is
+     * @return the string
+     */
     public static String inputStream2String(InputStream is) {
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();

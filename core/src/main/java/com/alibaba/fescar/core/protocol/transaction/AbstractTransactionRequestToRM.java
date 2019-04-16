@@ -18,12 +18,28 @@ package com.alibaba.fescar.core.protocol.transaction;
 
 import java.nio.ByteBuffer;
 
+/**
+ * The type Abstract transaction request to rm.
+ *
+ * @author sharajava
+ */
 public abstract class AbstractTransactionRequestToRM extends AbstractTransactionRequest {
 
+    /**
+     * The Byte buffer.
+     */
     protected ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
 
+    /**
+     * The Handler.
+     */
     protected RMInboundHandler handler;
 
+    /**
+     * Sets rm inbound message handler.
+     *
+     * @param handler the handler
+     */
     public void setRMInboundMessageHandler(RMInboundHandler handler) {
         this.handler = handler;
     }
