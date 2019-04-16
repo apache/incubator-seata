@@ -16,6 +16,10 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
@@ -34,9 +38,6 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.NettyRuntime;
 import io.netty.util.internal.PlatformDependent;
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Netty base config.
@@ -71,6 +72,11 @@ public class NettyBaseConfig {
      * The constant WORKER_THREAD_SIZE.
      */
     protected static int WORKER_THREAD_SIZE;
+    
+    /**
+     * The constant RPC_REQUEST_TIMEOUT
+     */
+    protected static int RPC_REQUEST_TIMEOUT;
 
     /**
      * The constant TRANSPORT_SERVER_TYPE.
@@ -94,6 +100,11 @@ public class NettyBaseConfig {
     private static final int DEFAULT_WRITE_IDLE_SECONDS = 5;
 
     private static final int READIDLE_BASE_WRITEIDLE = 3;
+    
+    /**
+     * 设置默认的req超时时间
+     */
+    private static final int DEFAULT_RPC_REQUEST_TIMEOUT = 30*1000;
 
     /**
      * The constant MAX_WRITE_IDLE_SECONDS.
@@ -119,6 +130,17 @@ public class NettyBaseConfig {
             WORKER_THREAD_SIZE = WorkThreadMode.getModeByName(workerThreadSize).getValue();
         } else {
             WORKER_THREAD_SIZE = WorkThreadMode.Default.getValue();
+        }
+        
+        String requestTimeOut =  CONFIG.getConfig("rpc.request.timeout");
+        if (StringUtils.isEmpty(requestTimeOut) || StringUtils.isBlank(requestTimeOut)){
+            RPC_REQUEST_TIMEOUT = DEFAULT_RPC_REQUEST_TIMEOUT;
+        }else {
+            try {
+                RPC_REQUEST_TIMEOUT = Integer.parseInt(requestTimeOut);
+            } catch (NumberFormatException e) {
+                RPC_REQUEST_TIMEOUT = DEFAULT_RPC_REQUEST_TIMEOUT;
+            }
         }
         TRANSPORT_SERVER_TYPE = TransportServerType.valueOf(CONFIG.getConfig("transport.server"));
         switch (TRANSPORT_SERVER_TYPE) {
