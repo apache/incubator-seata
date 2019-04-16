@@ -16,8 +16,9 @@
 
 package com.alibaba.fescar.server.store;
 
-import java.io.File;
-
+import com.alibaba.fescar.config.Configuration;
+import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.core.constants.ConfigurationKeys;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.GlobalStatus;
@@ -27,10 +28,11 @@ import com.alibaba.fescar.server.session.BranchSession;
 import com.alibaba.fescar.server.session.GlobalSession;
 import com.alibaba.fescar.server.session.SessionHelper;
 import com.alibaba.fescar.server.session.SessionHolder;
-
 import org.junit.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.io.File;
 
 /**
  * The type Session store test.
@@ -42,6 +44,9 @@ public class SessionStoreTest {
      */
     public static final String RESOURCE_ID = "mysql:xxx";
 
+
+    private static Configuration CONFIG = ConfigurationFactory.getInstance();
+
     /**
      * Clean.
      *
@@ -49,12 +54,12 @@ public class SessionStoreTest {
      */
     @BeforeMethod
     public void clean() throws Exception {
-        File rootDataFile = new File("./" + SessionHolder.ROOT_SESSION_MANAGER_NAME);
-        File rootDataFileHis = new File("./" + SessionHolder.ROOT_SESSION_MANAGER_NAME + ".1");
+        String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
+        File rootDataFile = new File(sessionStorePath + File.separator + SessionHolder.ROOT_SESSION_MANAGER_NAME);
+        File rootDataFileHis = new File(sessionStorePath + File.separator + SessionHolder.ROOT_SESSION_MANAGER_NAME + ".1");
 
         if (rootDataFile.exists()) {
             rootDataFile.delete();
-            System.currentTimeMillis();
         }
         if (rootDataFileHis.exists()) {
             rootDataFileHis.delete();
@@ -76,7 +81,7 @@ public class SessionStoreTest {
         globalSession.begin();
 
         BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-            "ta:1,2;tb:3", "xxx");
+                "ta:1,2;tb:3", "xxx");
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
@@ -145,7 +150,7 @@ public class SessionStoreTest {
         globalSession.begin();
 
         BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-            "ta:1", "xxx");
+                "ta:1", "xxx");
         Assert.assertTrue(branchSession1.lock());
         globalSession.addBranch(branchSession1);
 
@@ -167,7 +172,7 @@ public class SessionStoreTest {
         Assert.assertEquals(reloadSession.getStatus(), GlobalStatus.AsyncCommitting);
 
         GlobalSession sessionInAsyncCommittingQueue = SessionHolder.getAsyncCommittingSessionManager()
-            .findGlobalSession(tid);
+                .findGlobalSession(tid);
         Assert.assertTrue(reloadSession == sessionInAsyncCommittingQueue);
 
         // No locking for session in AsyncCommitting status
@@ -192,7 +197,7 @@ public class SessionStoreTest {
         globalSession.begin();
 
         BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-            "ta:1", "xxx");
+                "ta:1", "xxx");
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
@@ -216,7 +221,7 @@ public class SessionStoreTest {
         Assert.assertEquals(reloadSession.getStatus(), GlobalStatus.CommitRetrying);
 
         GlobalSession sessionInRetryCommittingQueue = SessionHolder.getRetryCommittingSessionManager()
-            .findGlobalSession(tid);
+                .findGlobalSession(tid);
         Assert.assertTrue(reloadSession == sessionInRetryCommittingQueue);
         BranchSession reloadBranchSession = reloadSession.getBranch(branchSession1.getBranchId());
         Assert.assertEquals(reloadBranchSession.getStatus(), BranchStatus.PhaseTwo_CommitFailed_Retryable);
@@ -244,7 +249,7 @@ public class SessionStoreTest {
         globalSession.begin();
 
         BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-            "ta:1", "xxx");
+                "ta:1", "xxx");
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
@@ -268,7 +273,7 @@ public class SessionStoreTest {
         Assert.assertEquals(reloadSession.getStatus(), GlobalStatus.RollbackRetrying);
 
         GlobalSession sessionInRetryRollbackingQueue = SessionHolder.getRetryRollbackingSessionManager()
-            .findGlobalSession(tid);
+                .findGlobalSession(tid);
         Assert.assertTrue(reloadSession == sessionInRetryRollbackingQueue);
         BranchSession reloadBranchSession = reloadSession.getBranch(branchSession1.getBranchId());
         Assert.assertEquals(reloadBranchSession.getStatus(), BranchStatus.PhaseTwo_RollbackFailed_Retryable);
@@ -296,7 +301,7 @@ public class SessionStoreTest {
         globalSession.begin();
 
         BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-            "ta:1", "xxx");
+                "ta:1", "xxx");
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
