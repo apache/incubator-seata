@@ -106,7 +106,7 @@ public class AsyncWorker implements ResourceManagerInbound {
     private static ScheduledExecutorService timerExecutor;
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public synchronized BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
         if (ASYNC_COMMIT_BUFFER.size() < ASYNC_COMMIT_BUFFER_LIMIT) {
             ASYNC_COMMIT_BUFFER.add(new Phase2Context(branchType, xid, branchId, resourceId, applicationData));
         } else {
@@ -141,19 +141,22 @@ public class AsyncWorker implements ResourceManagerInbound {
         if (ASYNC_COMMIT_BUFFER.size() == 0) {
             return;
         }
+
         Map<String, List<Phase2Context>> mappedContexts = new HashMap<>(DEFAULT_RESOURCE_SIZE);
-        Iterator<Phase2Context> iterator = ASYNC_COMMIT_BUFFER.iterator();
-        while (iterator.hasNext()) {
-            Phase2Context commitContext = iterator.next();
-            List<Phase2Context> contextsGroupedByResourceId = mappedContexts.get(commitContext.resourceId);
-            if (contextsGroupedByResourceId == null) {
-                contextsGroupedByResourceId = new ArrayList<>();
-                mappedContexts.put(commitContext.resourceId, contextsGroupedByResourceId);
+        synchronized(this){
+            Iterator<Phase2Context> iterator = ASYNC_COMMIT_BUFFER.iterator();
+            while (iterator.hasNext()) {
+                Phase2Context commitContext = iterator.next();
+                List<Phase2Context> contextsGroupedByResourceId = mappedContexts.get(commitContext.resourceId);
+                if (contextsGroupedByResourceId == null) {
+                    contextsGroupedByResourceId = new ArrayList<>();
+                    mappedContexts.put(commitContext.resourceId, contextsGroupedByResourceId);
+                }
+                contextsGroupedByResourceId.add(commitContext);
+
+                iterator.remove();
+
             }
-            contextsGroupedByResourceId.add(commitContext);
-
-            iterator.remove();
-
         }
 
         for (Map.Entry<String, List<Phase2Context>> entry : mappedContexts.entrySet()) {
