@@ -57,7 +57,7 @@ public class Server {
         if (args.length == 0) {
             rpcServer.setListenPort(port);
         }
-
+        //server port
         if (args.length > 0) {
             try {
                 port = Integer.parseInt(args[0]);
@@ -68,11 +68,12 @@ public class Server {
             rpcServer.setListenPort(port);
         }
 
-        String dataDir = null;
+        //log store mode : file、db
+        String storeMode = null;
         if (args.length > 1) {
-            dataDir = args[1];
+            storeMode = args[1];
         }
-        SessionHolder.init(dataDir);
+        SessionHolder.init(storeMode);
 
         DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
         coordinator.init();
