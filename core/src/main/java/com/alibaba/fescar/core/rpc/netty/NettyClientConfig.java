@@ -16,6 +16,8 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
 
 import io.netty.channel.Channel;
@@ -35,7 +37,7 @@ public class NettyClientConfig extends NettyBaseConfig {
     private int perHostMaxConn = 2;
     private static final int PER_HOST_MIN_CONN = 2;
     private int pendingConnSize = Integer.MAX_VALUE;
-    private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
+    private static int RPC_REQUEST_TIMEOUT;
     private final boolean useConnPool = false;
     private static String vgroup;
     private static String clientAppName;
@@ -55,7 +57,25 @@ public class NettyClientConfig extends NettyBaseConfig {
     private static final boolean DEFAULT_POOL_TEST_BORROW = true;
     private static final boolean DEFAULT_POOL_TEST_RETURN = true;
     private static final boolean DEFAULT_POOL_LIFO = true;
-
+    
+    /**
+     * 设置默认的req超时时间
+     */
+    private static final int DEFAULT_RPC_REQUEST_TIMEOUT = 30*1000;
+    
+    
+    static {
+        String requestTimeOut =  CONFIG.getConfig("rpc.request.timeout");
+        if (StringUtils.isEmpty(requestTimeOut) || StringUtils.isBlank(requestTimeOut)){
+            RPC_REQUEST_TIMEOUT = DEFAULT_RPC_REQUEST_TIMEOUT;
+        }else {
+            try {
+                RPC_REQUEST_TIMEOUT = Integer.parseInt(requestTimeOut);
+            } catch (NumberFormatException e) {
+                RPC_REQUEST_TIMEOUT = DEFAULT_RPC_REQUEST_TIMEOUT;
+            }
+        }
+    }
     /**
      * Gets connect timeout millis.
      *
