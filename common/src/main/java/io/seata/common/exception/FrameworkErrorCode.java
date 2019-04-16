@@ -30,7 +30,7 @@ public enum FrameworkErrorCode {
     /**
      * The Init services client error.
      */
-    InitFescarClientError("0008", "fescarAppName or fescarServerGroup is null", ""),
+    InitSeataClientError("0008", "seataAppName or seataServerGroup is null", ""),
     /**
      * The Null rule error.
      */
@@ -39,23 +39,23 @@ public enum FrameworkErrorCode {
     /**
      * 0101 ~ 0199 网络有关的错误，连接不上，断开，dispatch等
      */
-    NetConnect("0101", "无法连接服务器", "请检查fescar server是否启动，到fescar server的网络连接是否正常"),
+    NetConnect("0101", "无法连接服务器", "请检查seata server是否启动，到seata server的网络连接是否正常"),
     /**
      * The Net reg appname.
      */
-    NetRegAppname("0102", "register client app name failed", "请检查fescar server是否启动，到fescar server的网络连接是否正常"),
+    NetRegAppname("0102", "register client app name failed", "请检查seata server是否启动，到seata server的网络连接是否正常"),
     /**
      * The Net disconnect.
      */
-    NetDisconnect("0103", "fescarConnection closed", "网络断开，请检查到对端（client 或fescar server）的网络连接"),
+    NetDisconnect("0103", "seataConnection closed", "网络断开，请检查到对端（client 或seata server）的网络连接"),
     /**
      * The Net dispatch.
      */
-    NetDispatch("0104", "dispatch 错误", "网络处理错误，请检查到对端（client 或fescar server）的网络连接 "),
+    NetDispatch("0104", "dispatch 错误", "网络处理错误，请检查到对端（client 或seata server）的网络连接 "),
     /**
      * The Net on message.
      */
-    NetOnMessage("0105", "on message 错误", "网络处理错误，请检查到对端（client 或fescar server）的网络连接 "),
+    NetOnMessage("0105", "on message 错误", "网络处理错误，请检查到对端（client 或seata server）的网络连接 "),
     /**
      * Get channel error framework error code.
      */

@@ -45,7 +45,7 @@ public class MergedWarpMessage extends AbstractMessage implements Serializable, 
 
     @Override
     public short getTypeCode() {
-        return TYPE_FESCAR_MERGE;
+        return TYPE_SEATA_MERGE;
     }
 
     @Override
@@ -105,7 +105,7 @@ public class MergedWarpMessage extends AbstractMessage implements Serializable, 
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder("FescarMergeMessage ");
+        StringBuilder sb = new StringBuilder("SeataMergeMessage ");
         for (AbstractMessage msg : msgs) {
             sb.append(msg.toString()).append("\n");
         }

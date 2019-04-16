@@ -44,7 +44,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
     private static final int FLAG_REQUEST = 0x80;
     private static final int FLAG_ASYNC = 0x40;
     private static final int FLAG_HEARTBEAT = 0x20;
-    private static final int FLAG_FESCAR_CODEC = 0x10;
+    private static final int FLAG_SEATA_CODEC = 0x10;
     private static final int MAGIC_HALF = -38;
     private static final int NOT_FOUND_INDEX = -1;
 
@@ -59,7 +59,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
         int flag = (msg.isAsync() ? FLAG_ASYNC : 0)
             | (msg.isHeartbeat() ? FLAG_HEARTBEAT : 0)
             | (msg.isRequest() ? FLAG_REQUEST : 0)
-            | (msgCodec != null ? FLAG_FESCAR_CODEC : 0);
+            | (msgCodec != null ? FLAG_SEATA_CODEC : 0);
 
         byteBuffer.putShort((short)flag);
 
@@ -136,11 +136,11 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
         int flag = byteBuffer.getShort();
         boolean isHeartbeat = (FLAG_HEARTBEAT & flag) > 0;
         boolean isRequest = (FLAG_REQUEST & flag) > 0;
-        boolean isFescarCodec = (FLAG_FESCAR_CODEC & flag) > 0;
+        boolean isSeataCodec = (FLAG_SEATA_CODEC & flag) > 0;
 
         short bodyLength = 0;
         short typeCode = 0;
-        if (!isFescarCodec) { bodyLength = byteBuffer.getShort(); } else { typeCode = byteBuffer.getShort(); }
+        if (!isSeataCodec) { bodyLength = byteBuffer.getShort(); } else { typeCode = byteBuffer.getShort(); }
         long msgId = byteBuffer.getLong();
 
         if (isHeartbeat) {
@@ -172,7 +172,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
         rpcMessage.setRequest(isRequest);
 
         try {
-            if (isFescarCodec) {
+            if (isSeataCodec) {
                 MessageCodec msgCodec = AbstractMessage.getMsgInstanceByCode(typeCode);
                 if (!msgCodec.decode(in)) {
                     LOGGER.error(msgCodec + " decode error.");

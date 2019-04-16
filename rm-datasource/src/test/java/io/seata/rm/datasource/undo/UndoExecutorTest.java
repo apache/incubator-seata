@@ -108,7 +108,7 @@ public class UndoExecutorTest {
         Field name = new Field();
         name.setName("name");
         name.setType(Types.VARCHAR);
-        name.setValue("FESCAR");
+        name.setValue("SEATA");
         beforeRow.add(name);
 
         Field since = new Field();
@@ -181,7 +181,7 @@ public class UndoExecutorTest {
         Field name = new Field();
         name.setName("name");
         name.setType(Types.VARCHAR);
-        name.setValue("FESCAR");
+        name.setValue("SEATA");
         afterRow1.add(name);
 
         Field since = new Field();
@@ -251,7 +251,7 @@ public class UndoExecutorTest {
         Field name = new Field();
         name.setName("name");
         name.setType(Types.VARCHAR);
-        name.setValue("FESCAR");
+        name.setValue("SEATA");
         afterRow1.add(name);
 
         Field since = new Field();

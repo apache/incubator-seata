@@ -14,5 +14,5 @@
 #  limitations under the License.
 #
 
-com.alibaba.fescar.common.loader.FrenchHello
-com.alibaba.fescar.common.loader.EnglishHello
+io.seata.common.loader.FrenchHello
+io.seata.common.loader.EnglishHello

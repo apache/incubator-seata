@@ -56,7 +56,7 @@ public class MergeResultMessage extends AbstractMessage implements MergeMessage 
 
     @Override
     public short getTypeCode() {
-        return TYPE_FESCAR_MERGE_RESULT;
+        return TYPE_SEATA_MERGE_RESULT;
     }
 
     @Override

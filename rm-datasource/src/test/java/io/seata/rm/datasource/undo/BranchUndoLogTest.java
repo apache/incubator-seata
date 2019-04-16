@@ -52,7 +52,7 @@ public class BranchUndoLogTest {
         TableRecords beforeImage = new TableRecords(tableMeta);
         Row rowb = new Row();
         rowb.add(new Field("id", Types.INTEGER, 1));
-        rowb.add(new Field("name", Types.VARCHAR, "FESCAR"));
+        rowb.add(new Field("name", Types.VARCHAR, "SEATA"));
         rowb.add(new Field("since", Types.VARCHAR, "2014"));
         beforeImage.add(rowb);
         item.setBeforeImage(beforeImage);
@@ -60,7 +60,7 @@ public class BranchUndoLogTest {
         TableRecords afterImage = new TableRecords(tableMeta);
         Row rowa = new Row();
         rowa.add(new Field("id", Types.INTEGER, 1));
-        rowa.add(new Field("name", Types.VARCHAR, "GTS"));
+        rowa.add(new Field("name", Types.VARCHAR, "SEATA_IO"));
         rowa.add(new Field("since", Types.VARCHAR, "2014"));
         afterImage.add(rowa);
         item.setAfterImage(afterImage);

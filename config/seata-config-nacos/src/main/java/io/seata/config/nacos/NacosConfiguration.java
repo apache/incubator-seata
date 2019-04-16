@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
 public class NacosConfiguration extends AbstractConfiguration<Listener> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosConfiguration.class);
-    private static final String FESCAR_GROUP = "FESCAR_GROUP";
+    private static final String SEATA_GROUP = "SEATA_GROUP";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String REGISTRY_TYPE = "nacos";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
@@ -62,7 +62,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
         String value;
         try {
-            value = configService.getConfig(dataId, FESCAR_GROUP, timeoutMills);
+            value = configService.getConfig(dataId, SEATA_GROUP, timeoutMills);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
             value = defaultValue;
@@ -74,7 +74,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         boolean result = false;
         try {
-            result = configService.publishConfig(dataId, FESCAR_GROUP, content);
+            result = configService.publishConfig(dataId, SEATA_GROUP, content);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -90,7 +90,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     public boolean removeConfig(String dataId, long timeoutMills) {
         boolean result = false;
         try {
-            result = configService.removeConfig(dataId, FESCAR_GROUP);
+            result = configService.removeConfig(dataId, SEATA_GROUP);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -100,7 +100,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     @Override
     public void addConfigListener(String dataId, Listener listener) {
         try {
-            configService.addListener(dataId, FESCAR_GROUP, listener);
+            configService.addListener(dataId, SEATA_GROUP, listener);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
         }
@@ -108,7 +108,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
 
     @Override
     public void removeConfigListener(String dataId, Listener listener) {
-        configService.removeListener(dataId, FESCAR_GROUP, listener);
+        configService.removeListener(dataId, SEATA_GROUP, listener);
     }
 
     @Override

@@ -69,49 +69,49 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         new NamedThreadFactory("RedisRegistryService", 1));
 
     private RedisRegistryServiceImpl() {
-        Configuration fescarConfig = ConfigurationFactory.FILE_INSTANCE;
-        this.clusterName = fescarConfig.getConfig(REDIS_FILEKEY_PREFIX + REGISTRY_CLUSTER_KEY, DEFAULT_CLUSTER);
-        String password = fescarConfig.getConfig(getRedisPasswordFileKey());
-        String serverAddr = fescarConfig.getConfig(getRedisAddrFileKey());
+        Configuration seataConfig = ConfigurationFactory.FILE_INSTANCE;
+        this.clusterName = seataConfig.getConfig(REDIS_FILEKEY_PREFIX + REGISTRY_CLUSTER_KEY, DEFAULT_CLUSTER);
+        String password = seataConfig.getConfig(getRedisPasswordFileKey());
+        String serverAddr = seataConfig.getConfig(getRedisAddrFileKey());
         String[] serverArr = serverAddr.split(":");
         String host = serverArr[0];
         int port = Integer.valueOf(serverArr[1]);
-        int db = fescarConfig.getInt(getRedisDbFileKey());
+        int db = seataConfig.getInt(getRedisDbFileKey());
         GenericObjectPoolConfig redisConfig = new GenericObjectPoolConfig();
-        redisConfig.setTestOnBorrow(fescarConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.borrow", true));
-        redisConfig.setTestOnReturn(fescarConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.return", false));
-        redisConfig.setTestWhileIdle(fescarConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.while.idle", false));
-        int maxIdle = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.idle", 0);
+        redisConfig.setTestOnBorrow(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.borrow", true));
+        redisConfig.setTestOnReturn(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.return", false));
+        redisConfig.setTestWhileIdle(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.while.idle", false));
+        int maxIdle = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.idle", 0);
         if (maxIdle > 0) {
             redisConfig.setMaxIdle(maxIdle);
         }
-        int minIdle = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "min.idle", 0);
+        int minIdle = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "min.idle", 0);
         if (minIdle > 0) {
             redisConfig.setMinIdle(minIdle);
         }
-        int maxActive = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.active", 0);
+        int maxActive = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.active", 0);
         if (maxActive > 0) {
             redisConfig.setMaxTotal(maxActive);
         }
-        int maxTotal = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.total", 0);
+        int maxTotal = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.total", 0);
         if (maxTotal > 0) {
             redisConfig.setMaxTotal(maxTotal);
         }
-        int maxWait = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "max.wait",
-            fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0));
+        int maxWait = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.wait",
+                seataConfig.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0));
         if (maxWait > 0) {
             redisConfig.setMaxWaitMillis(maxWait);
         }
-        int numTestsPerEvictionRun = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "num.tests.per.eviction.run", 0);
+        int numTestsPerEvictionRun = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "num.tests.per.eviction.run", 0);
         if (numTestsPerEvictionRun > 0) {
             redisConfig.setNumTestsPerEvictionRun(numTestsPerEvictionRun);
         }
-        int timeBetweenEvictionRunsMillis = fescarConfig.getInt(
+        int timeBetweenEvictionRunsMillis = seataConfig.getInt(
             REDIS_FILEKEY_PREFIX + "time.between.eviction.runs.millis", 0);
         if (timeBetweenEvictionRunsMillis > 0) {
             redisConfig.setTimeBetweenEvictionRunsMillis(timeBetweenEvictionRunsMillis);
         }
-        int minEvictableIdleTimeMillis = fescarConfig.getInt(REDIS_FILEKEY_PREFIX + "min.evictable.idle.time.millis",
+        int minEvictableIdleTimeMillis = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "min.evictable.idle.time.millis",
             0);
         if (minEvictableIdleTimeMillis > 0) {
             redisConfig.setMinEvictableIdleTimeMillis(minEvictableIdleTimeMillis);

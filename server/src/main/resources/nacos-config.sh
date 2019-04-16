@@ -16,7 +16,7 @@ key=${line%%=*}
 value=${line##*=}
 echo "\r\n set "${key}" = "${value}
 
-result=`curl -X POST "http://$nacosIp:8848/nacos/v1/cs/configs?dataId=$key&group=FESCAR_GROUP&content=$value"`
+result=`curl -X POST "http://$nacosIp:8848/nacos/v1/cs/configs?dataId=$key&group=SEATA_GROUP&content=$value"`
 
 if [ "$result"x == "true"x ]; then
 
@@ -34,7 +34,7 @@ done
 
 if [ $error -eq 0 ]; then
 
-echo  "\r\n\033[42;37m init nacos config finished, please start fescar-server. \033[0m"
+echo  "\r\n\033[42;37m init nacos config finished, please start seata-server. \033[0m"
 
 else
 

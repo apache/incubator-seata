@@ -76,7 +76,7 @@ public class Message {
      * Print 6.
      */
     public void print6() {
-        throw new FrameworkException("frameworkException", FrameworkErrorCode.InitFescarClientError);
+        throw new FrameworkException("frameworkException", FrameworkErrorCode.InitSeataClientError);
     }
 
     /**

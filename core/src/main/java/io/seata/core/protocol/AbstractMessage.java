@@ -143,13 +143,13 @@ public abstract class AbstractMessage implements MessageCodec, Serializable {
     public static final short TYPE_BRANCH_STATUS_REPORT_RESULT = 14;
 
     /**
-     * The constant TYPE_FESCAR_MERGE.
+     * The constant TYPE_SEATA_MERGE.
      */
-    public static final short TYPE_FESCAR_MERGE = 59;
+    public static final short TYPE_SEATA_MERGE = 59;
     /**
-     * The constant TYPE_FESCAR_MERGE_RESULT.
+     * The constant TYPE_SEATA_MERGE_RESULT.
      */
-    public static final short TYPE_FESCAR_MERGE_RESULT = 60;
+    public static final short TYPE_SEATA_MERGE_RESULT = 60;
 
     /**
      * The constant TYPE_REG_CLT.
@@ -221,10 +221,10 @@ public abstract class AbstractMessage implements MessageCodec, Serializable {
     public static MessageCodec getMsgInstanceByCode(short typeCode) {
         MessageCodec msgCodec = null;
         switch (typeCode) {
-            case AbstractMessage.TYPE_FESCAR_MERGE:
+            case AbstractMessage.TYPE_SEATA_MERGE:
                 msgCodec = new MergedWarpMessage();
                 break;
-            case AbstractMessage.TYPE_FESCAR_MERGE_RESULT:
+            case AbstractMessage.TYPE_SEATA_MERGE_RESULT:
                 msgCodec = new MergeResultMessage();
                 break;
             case AbstractMessage.TYPE_REG_CLT:

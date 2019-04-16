@@ -180,7 +180,7 @@ public final class UndoLogManager {
                 // For example, the business processing timeout, the global transaction is the initiator rolls back.
                 // To ensure data consistency, we can insert an undo_log with GlobalFinished state
                 // to prevent the local transaction of the first phase of other programs from being correctly submitted.
-                // See https://github.com/alibaba/fescar/issues/489
+                // See https://github.com/seata/seata/issues/489
 
                 if (exists) {
                     deleteUndoLog(xid, branchId, conn);

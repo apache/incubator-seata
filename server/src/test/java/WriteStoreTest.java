@@ -46,7 +46,7 @@ import io.seata.server.store.TransactionWriteStore;
 public class WriteStoreTest {
     private static String vgroup = "vgroupMock";
     private static String appname = "appnameMock";
-    private static String instname = "fescarMocK";
+    private static String instname = "seataMocK";
     private static int trx_num = 65535 * 5;
     private static int trx_begin = 0;
 
@@ -59,7 +59,7 @@ public class WriteStoreTest {
      */
     public static void main(String[] args) throws InterruptedException, IOException {
         TransactionStoreManager transactionStoreManager = new FileTransactionStoreManager(
-            "/Users/min.ji/Documents/test/data",
+        "~/Documents/test/data",
             new SessionManager() {
                 @Override
                 public void addGlobalSession(GlobalSession session) throws TransactionException {

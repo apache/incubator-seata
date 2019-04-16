@@ -208,7 +208,6 @@ public enum SQLType {
     /**
      * Insert ingore sql type.
      */
-    // FESCAR
     INSERT_INGORE(101),
     /**
      * Insert on duplicate update sql type.
