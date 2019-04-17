@@ -19,7 +19,7 @@
 	<!-- 控制台输出日志 -->
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<layout class="ch.qos.logback.classic.PatternLayout">
-			<Pattern>%date [FESCAR] [%thread] %-5level %logger{80} - %msg%n</Pattern>
+			<Pattern>%date [SEATA] [%thread] %-5level %logger{80} - %msg%n</Pattern>
 		</layout>
 	</appender>
 

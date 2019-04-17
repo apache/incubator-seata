@@ -14,7 +14,7 @@
   ~  limitations under the License.
   -->
 
-<code_scheme name="fescar">
+<code_scheme name="Seata">
     <option name="USE_SAME_INDENTS" value="true"/>
     <option name="IGNORE_SAME_INDENTS_FOR_LANGUAGES" value="true"/>
     <option name="OTHER_INDENT_OPTIONS">
