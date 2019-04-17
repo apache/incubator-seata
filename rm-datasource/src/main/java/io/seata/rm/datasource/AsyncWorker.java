@@ -14,7 +14,6 @@
  *  limitations under the License.
  */
 
-
 package io.seata.rm.datasource;
 
 import io.seata.common.exception.NotSupportYetException;
@@ -27,6 +26,7 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManagerInbound;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManager;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import org.slf4j.Logger;
