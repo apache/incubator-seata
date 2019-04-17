@@ -18,13 +18,18 @@ package io.seata.tm.api;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.DefaultTransactionManager;
+import io.seata.tm.api.transaction.NoRollbackRule;
+import io.seata.tm.api.transaction.RollbackRule;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
-
+import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;

@@ -22,7 +22,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.DefaultTransactionManager;
 
-import com.alibaba.fescar.tm.api.transaction.TransactionInfo;
+import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;

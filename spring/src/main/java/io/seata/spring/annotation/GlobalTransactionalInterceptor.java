@@ -16,11 +16,6 @@
 
 package io.seata.spring.annotation;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.concurrent.Callable;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.GlobalLockTemplate;
@@ -28,7 +23,9 @@ import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
 import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalTemplate;
-
+import io.seata.tm.api.transaction.NoRollbackRule;
+import io.seata.tm.api.transaction.RollbackRule;
+import io.seata.tm.api.transaction.TransactionInfo;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
@@ -37,7 +34,12 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.Callable;
 
 /**
  * The type Global transactional interceptor.

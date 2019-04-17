@@ -22,7 +22,7 @@ import io.seata.tm.TMClient;
 import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalTemplate;
 
-import com.alibaba.fescar.tm.api.transaction.TransactionInfo;
+import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

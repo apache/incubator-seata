@@ -16,7 +16,7 @@
 
 package io.seata.spring.annotation;
 
-import com.alibaba.fescar.tm.api.transaction.TransactionInfo;
+import io.seata.tm.api.transaction.TransactionInfo;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;

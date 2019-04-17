@@ -16,7 +16,7 @@
 
 package io.seata.tm.api;
 
-import com.alibaba.fescar.tm.api.transaction.TransactionInfo;
+import io.seata.tm.api.transaction.TransactionInfo;
 
 /**
  * Callback for executing business logic in a global transaction.

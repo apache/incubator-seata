@@ -1,4 +1,4 @@
-package com.alibaba.fescar.tm.api.transaction;
+package io.seata.tm.api.transaction;
 /*
  *  Copyright 1999-2018 Alibaba Group Holding Ltd.
  *
@@ -14,7 +14,8 @@ package com.alibaba.fescar.tm.api.transaction;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-import com.alibaba.fescar.common.util.StringUtils;
+
+import io.seata.common.util.StringUtils;
 
 import java.io.Serializable;
 
