@@ -19,9 +19,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.alibaba.fescar</groupId>
-    <artifactId>fescar-all</artifactId>
-    <version>0.4.2</version>
+    <groupId>io.seata</groupId>
+    <artifactId>seata-parent</artifactId>
+    <version>0.5.0-SNAPSHOT</version>
     <modules>
         <module>config</module>
         <module>common</module>
@@ -40,9 +40,9 @@
     </modules>
     <packaging>pom</packaging>
 
-    <name>Alibaba fescar ${project.version}</name>
-    <url>http://fescar.io</url>
-    <description>top fescar project pom.xml file</description>
+    <name>Seata ${project.version}</name>
+    <url>http://seata.io</url>
+    <description>top seata project pom.xml file</description>
     <prerequisites>
         <maven>3.2.5</maven>
     </prerequisites>
@@ -55,26 +55,26 @@
     </licenses>
     <developers>
         <developer>
-            <id>Alibaba Fescar</id>
-            <name>Fescar</name>
-            <url>http://fescar.io</url>
+            <id>Seata</id>
+            <name>Seata</name>
+            <url>http://seata.io</url>
         </developer>
     </developers>
 
     <organization>
-        <name>Alibaba Group</name>
-        <url>https://github.com/alibaba</url>
+        <name>Seata</name>
+        <url>https://github.com/seata</url>
     </organization>
 
     <issueManagement>
         <system>github</system>
-        <url>https://github.com/alibaba/fescar/issues</url>
+        <url>https://github.com/seata/seata/issues</url>
     </issueManagement>
 
     <scm>
-        <url>git@github.com:alibaba/fescar.git</url>
-        <connection>scm:git@github.com:alibaba/fescar.git</connection>
-        <developerConnection>scm:git@github.com:alibaba/fescar.git</developerConnection>
+        <url>git@github.com:seata/seata.git</url>
+        <connection>scm:git@github.com:seata/seata.git</connection>
+        <developerConnection>scm:git@github.com:seata/seata.git</developerConnection>
     </scm>
 
     <properties>
@@ -132,122 +132,122 @@
         <dependencies>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-common</artifactId>
+                <artifactId>seata-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-config</artifactId>
+                <artifactId>seata-config</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-server</artifactId>
+                <artifactId>seata-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-core</artifactId>
+                <artifactId>seata-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-rm-datasource</artifactId>
+                <artifactId>seata-rm-datasource</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-tm</artifactId>
+                <artifactId>seata-tm</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-spring</artifactId>
+                <artifactId>seata-spring</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-dubbo</artifactId>
+                <artifactId>seata-dubbo</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery</artifactId>
+                <artifactId>seata-discovery</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery-core</artifactId>
+                <artifactId>seata-discovery-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery-all</artifactId>
+                <artifactId>seata-discovery-all</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery-consul</artifactId>
+                <artifactId>seata-discovery-consul</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery-eureka</artifactId>
+                <artifactId>seata-discovery-eureka</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery-zk</artifactId>
+                <artifactId>seata-discovery-zk</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery-redis</artifactId>
+                <artifactId>seata-discovery-redis</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery-nacos</artifactId>
+                <artifactId>seata-discovery-nacos</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-config-core</artifactId>
+                <artifactId>seata-config-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-config-apollo</artifactId>
+                <artifactId>seata-config-apollo</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-config-nacos</artifactId>
+                <artifactId>seata-config-nacos</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-config-zk</artifactId>
+                <artifactId>seata-config-zk</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-config-all</artifactId>
+                <artifactId>seata-config-all</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-tcc</artifactId>
+                <artifactId>seata-tcc</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-rm</artifactId>
+                <artifactId>seata-rm</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-test</artifactId>
+                <artifactId>seata-test</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
