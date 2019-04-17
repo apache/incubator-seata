@@ -14,4 +14,4 @@
 #  limitations under the License.
 #
 
-com.alibaba.fescar.dubbo.TransactionPropagationFilter
+io.seata.dubbo.TransactionPropagationFilter
