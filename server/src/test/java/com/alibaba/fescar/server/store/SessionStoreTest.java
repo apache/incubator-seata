@@ -16,8 +16,9 @@
 
 package com.alibaba.fescar.server.store;
 
-import java.io.File;
-
+import com.alibaba.fescar.config.Configuration;
+import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.core.constants.ConfigurationKeys;
 import com.alibaba.fescar.core.model.BranchStatus;
 import com.alibaba.fescar.core.model.BranchType;
 import com.alibaba.fescar.core.model.GlobalStatus;
@@ -27,10 +28,11 @@ import com.alibaba.fescar.server.session.BranchSession;
 import com.alibaba.fescar.server.session.GlobalSession;
 import com.alibaba.fescar.server.session.SessionHelper;
 import com.alibaba.fescar.server.session.SessionHolder;
-
 import org.junit.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.io.File;
 
 /**
  * The type Session store test.
@@ -42,6 +44,9 @@ public class SessionStoreTest {
      */
     public static final String RESOURCE_ID = "mysql:xxx";
 
+
+    private static Configuration CONFIG = ConfigurationFactory.getInstance();
+
     /**
      * Clean.
      *
@@ -49,12 +54,12 @@ public class SessionStoreTest {
      */
     @BeforeMethod
     public void clean() throws Exception {
-        File rootDataFile = new File("./" + SessionHolder.ROOT_SESSION_MANAGER_NAME);
-        File rootDataFileHis = new File("./" + SessionHolder.ROOT_SESSION_MANAGER_NAME + ".1");
+        String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
+        File rootDataFile = new File(sessionStorePath + File.separator + SessionHolder.ROOT_SESSION_MANAGER_NAME);
+        File rootDataFileHis = new File(sessionStorePath + File.separator + SessionHolder.ROOT_SESSION_MANAGER_NAME + ".1");
 
         if (rootDataFile.exists()) {
             rootDataFile.delete();
-            System.currentTimeMillis();
         }
         if (rootDataFileHis.exists()) {
             rootDataFileHis.delete();
@@ -69,14 +74,14 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFile() throws Exception {
-        SessionHolder.init(".");
+        SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.begin();
 
         BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-            "ta:1,2;tb:3", "xxx");
+                "ta:1,2;tb:3", "xxx");
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
@@ -96,7 +101,7 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "tb:3"));
 
         // Re-init SessionHolder: restore sessions from file
-        SessionHolder.init(".");
+        SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
         GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
@@ -109,6 +114,9 @@ public class SessionStoreTest {
         Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "tb:3"));
         Assert.assertTrue(lockManager.isLockable(globalSession.getTransactionId(), RESOURCE_ID, "tb:3"));
 
+        //clear
+        reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+        reloadSession.end();
     }
 
     /**
@@ -118,14 +126,14 @@ public class SessionStoreTest {
      */
     //@Test
     public void testRestoredFromFile2() throws Exception {
-        SessionHolder.init(".");
+        SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.begin();
 
         // Re-init SessionHolder: restore sessions from file
-        SessionHolder.init(".");
+        SessionHolder.init("file");
     }
 
     /**
@@ -135,14 +143,14 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFileAsyncCommitting() throws Exception {
-        SessionHolder.init(".");
+        SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.begin();
 
         BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-            "ta:1", "xxx");
+                "ta:1", "xxx");
         Assert.assertTrue(branchSession1.lock());
         globalSession.addBranch(branchSession1);
 
@@ -157,19 +165,22 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
-        SessionHolder.init(".");
+        SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
         GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
         Assert.assertEquals(reloadSession.getStatus(), GlobalStatus.AsyncCommitting);
 
         GlobalSession sessionInAsyncCommittingQueue = SessionHolder.getAsyncCommittingSessionManager()
-            .findGlobalSession(tid);
+                .findGlobalSession(tid);
         Assert.assertTrue(reloadSession == sessionInAsyncCommittingQueue);
 
         // No locking for session in AsyncCommitting status
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
+        //clear
+        reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+        reloadSession.end();
     }
 
     /**
@@ -179,14 +190,14 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFileCommitRetry() throws Exception {
-        SessionHolder.init(".");
+        SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.begin();
 
         BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-            "ta:1", "xxx");
+                "ta:1", "xxx");
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
@@ -203,14 +214,14 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
-        SessionHolder.init(".");
+        SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
         GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
         Assert.assertEquals(reloadSession.getStatus(), GlobalStatus.CommitRetrying);
 
         GlobalSession sessionInRetryCommittingQueue = SessionHolder.getRetryCommittingSessionManager()
-            .findGlobalSession(tid);
+                .findGlobalSession(tid);
         Assert.assertTrue(reloadSession == sessionInRetryCommittingQueue);
         BranchSession reloadBranchSession = reloadSession.getBranch(branchSession1.getBranchId());
         Assert.assertEquals(reloadBranchSession.getStatus(), BranchStatus.PhaseTwo_CommitFailed_Retryable);
@@ -218,6 +229,9 @@ public class SessionStoreTest {
         // Lock is held by session in CommitRetrying status
         Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
+        //clear
+        reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+        reloadSession.end();
     }
 
     /**
@@ -227,14 +241,15 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFileRollbackRetry() throws Exception {
-        SessionHolder.init(".");
+        SessionHolder.init("file");
+
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.begin();
 
         BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-            "ta:1", "xxx");
+                "ta:1", "xxx");
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
@@ -251,14 +266,14 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
-        SessionHolder.init(".");
+        SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
         GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
         Assert.assertEquals(reloadSession.getStatus(), GlobalStatus.RollbackRetrying);
 
         GlobalSession sessionInRetryRollbackingQueue = SessionHolder.getRetryRollbackingSessionManager()
-            .findGlobalSession(tid);
+                .findGlobalSession(tid);
         Assert.assertTrue(reloadSession == sessionInRetryRollbackingQueue);
         BranchSession reloadBranchSession = reloadSession.getBranch(branchSession1.getBranchId());
         Assert.assertEquals(reloadBranchSession.getStatus(), BranchStatus.PhaseTwo_RollbackFailed_Retryable);
@@ -266,6 +281,9 @@ public class SessionStoreTest {
         // Lock is held by session in RollbackRetrying status
         Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
+        //clear
+        reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
+        reloadSession.end();
     }
 
     /**
@@ -275,14 +293,15 @@ public class SessionStoreTest {
      */
     @Test
     public void testRestoredFromFileRollbackFailed() throws Exception {
-        SessionHolder.init(".");
+        SessionHolder.init("file");
+
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.begin();
 
         BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
-            "ta:1", "xxx");
+                "ta:1", "xxx");
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
@@ -302,11 +321,10 @@ public class SessionStoreTest {
         Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
-        SessionHolder.init(".");
+        SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
         GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
         Assert.assertNull(reloadSession);
-
     }
 }

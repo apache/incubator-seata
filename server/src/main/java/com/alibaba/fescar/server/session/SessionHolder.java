@@ -16,17 +16,21 @@
 
 package com.alibaba.fescar.server.session;
 
-import java.io.File;
+import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
+import com.alibaba.fescar.common.exception.StoreException;
+import com.alibaba.fescar.common.util.StringUtils;
+import com.alibaba.fescar.config.Configuration;
+import com.alibaba.fescar.config.ConfigurationFactory;
+import com.alibaba.fescar.core.constants.ConfigurationKeys;
+import com.alibaba.fescar.core.exception.TransactionException;
+import com.alibaba.fescar.core.model.GlobalStatus;
+import com.alibaba.fescar.core.store.StoreMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
-import com.alibaba.fescar.core.exception.TransactionException;
-import com.alibaba.fescar.core.model.GlobalStatus;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Session holder.
@@ -36,6 +40,11 @@ import org.slf4j.LoggerFactory;
 public class SessionHolder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SessionHolder.class);
+
+    /**
+     * The constant CONFIG.
+     */
+    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
      * The constant ROOT_SESSION_MANAGER_NAME.
@@ -62,28 +71,36 @@ public class SessionHolder {
     /**
      * Init.
      *
-     * @param sessionStorePath the session store path
+     * @param mode the store mode: file、db
      * @throws IOException the io exception
      */
-    public static void init(String sessionStorePath) throws IOException {
-        if (sessionStorePath == null) {
-            ROOT_SESSION_MANAGER = new DefaultSessionManager(ROOT_SESSION_MANAGER_NAME);
-            ASYNC_COMMITTING_SESSION_MANAGER = new DefaultSessionManager(ASYNC_COMMITTING_SESSION_MANAGER_NAME);
-            RETRY_COMMITTING_SESSION_MANAGER = new DefaultSessionManager(RETRY_COMMITTING_SESSION_MANAGER_NAME);
-            RETRY_ROLLBACKING_SESSION_MANAGER = new DefaultSessionManager(RETRY_ROLLBACKING_SESSION_MANAGER_NAME);
-        } else {
-            if (!sessionStorePath.endsWith(File.separator)) {
-                sessionStorePath = sessionStorePath + File.separator;
+    public static void init(String mode) throws IOException {
+        if (StringUtils.isBlank(mode)) {
+            //use default
+            mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
+        }
+        //the store mode
+        StoreMode storeMode = StoreMode.valueof(mode);
+        if (StoreMode.DB.equals(storeMode)) {
+            //TODO database store
+
+        } else if (StoreMode.FILE.equals(storeMode)) {
+            //file store
+            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
+            if (sessionStorePath == null) {
+                throw new StoreException("the {store.file.dir} is empty.");
             }
             ROOT_SESSION_MANAGER = new FileBasedSessionManager(ROOT_SESSION_MANAGER_NAME, sessionStorePath);
             ASYNC_COMMITTING_SESSION_MANAGER = new DefaultSessionManager(ASYNC_COMMITTING_SESSION_MANAGER_NAME);
             RETRY_COMMITTING_SESSION_MANAGER = new DefaultSessionManager(RETRY_COMMITTING_SESSION_MANAGER_NAME);
             RETRY_ROLLBACKING_SESSION_MANAGER = new DefaultSessionManager(RETRY_ROLLBACKING_SESSION_MANAGER_NAME);
-
+        } else {
+            //unknown store
+            throw new IllegalArgumentException("unknown store mode:" + mode);
         }
 
         if (ROOT_SESSION_MANAGER instanceof Reloadable) {
-            ((Reloadable)ROOT_SESSION_MANAGER).reload();
+            ((Reloadable) ROOT_SESSION_MANAGER).reload();
 
             Collection<GlobalSession> reloadedSessions = ROOT_SESSION_MANAGER.allSessions();
             if (reloadedSessions != null && !reloadedSessions.isEmpty()) {
@@ -123,7 +140,7 @@ public class SessionHolder {
                                 case CommitRetrying:
                                     try {
                                         globalSession.addSessionLifecycleListener(
-                                            getRetryCommittingSessionManager());
+                                                getRetryCommittingSessionManager());
                                         getRetryCommittingSessionManager().addGlobalSession(globalSession);
                                     } catch (TransactionException e) {
                                         throw new ShouldNeverHappenException(e);
@@ -135,7 +152,7 @@ public class SessionHolder {
                                 case TimeoutRollbackRetrying:
                                     try {
                                         globalSession.addSessionLifecycleListener(
-                                            getRetryRollbackingSessionManager());
+                                                getRetryRollbackingSessionManager());
                                         getRetryRollbackingSessionManager().addGlobalSession(globalSession);
                                     } catch (TransactionException e) {
                                         throw new ShouldNeverHappenException(e);

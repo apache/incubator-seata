@@ -16,7 +16,12 @@
 
 package com.alibaba.fescar.rm.datasource;
 
-import com.alibaba.fescar.common.XID;
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
+
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.exception.NotSupportYetException;
 import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
@@ -39,14 +44,9 @@ import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
 import com.alibaba.fescar.discovery.registry.RegistryFactory;
 import com.alibaba.fescar.rm.AbstractResourceManager;
 import com.alibaba.fescar.rm.datasource.undo.UndoLogManager;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
 
 import static com.alibaba.fescar.common.exception.FrameworkErrorCode.NoAvailableService;
 
@@ -77,7 +77,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
         throws TransactionException {
         try {
             GlobalLockQueryRequest request = new GlobalLockQueryRequest();
-            request.setTransactionId(XID.getTransactionId(xid));
+            request.setXid(xid);
             request.setLockKey(lockKeys);
             request.setResourceId(resourceId);
 

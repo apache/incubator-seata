@@ -16,8 +16,6 @@
 
 package com.alibaba.fescar.core.rpc.netty;
 
-import java.net.InetSocketAddress;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -27,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.alibaba.fescar.common.XID;
 import com.alibaba.fescar.common.exception.FrameworkErrorCode;
 import com.alibaba.fescar.common.exception.FrameworkException;
 import com.alibaba.fescar.common.thread.NamedThreadFactory;
@@ -36,7 +33,6 @@ import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.config.Configuration;
 import com.alibaba.fescar.config.ConfigurationFactory;
 import com.alibaba.fescar.core.constants.ConfigurationKeys;
-import com.alibaba.fescar.core.context.RootContext;
 import com.alibaba.fescar.core.protocol.AbstractMessage;
 import com.alibaba.fescar.core.protocol.HeartbeatMessage;
 import com.alibaba.fescar.core.protocol.RegisterTMRequest;
@@ -44,8 +40,6 @@ import com.alibaba.fescar.core.protocol.RegisterTMResponse;
 import com.alibaba.fescar.core.protocol.ResultCode;
 import com.alibaba.fescar.core.protocol.transaction.GlobalBeginResponse;
 import com.alibaba.fescar.core.rpc.netty.NettyPoolKey.TransactionRole;
-import com.alibaba.fescar.discovery.loadbalance.LoadBalanceFactory;
-import com.alibaba.fescar.discovery.registry.RegistryFactory;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -56,8 +50,6 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.alibaba.fescar.common.exception.FrameworkErrorCode.NoAvailableService;
 
 /**
  * The type Rpc client.
@@ -171,8 +163,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
 
     @Override
     public Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException {
-        String svrAddr = XID.getServerAddress(RootContext.getXID());
-        String validAddress = svrAddr != null ? svrAddr : loadBalance();
+        String validAddress = loadBalance(transactionServiceGroup);
         Channel acquireChannel = connect(validAddress);
         Object result = super.sendAsyncRequestWithResponse(validAddress, acquireChannel, msg, timeout);
         if (result instanceof GlobalBeginResponse
@@ -181,21 +172,6 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
             releaseChannel(acquireChannel, validAddress);
         }
         return result;
-    }
-
-    private String loadBalance() {
-        InetSocketAddress address = null;
-        try {
-            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(
-                transactionServiceGroup);
-            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
-        } catch (Exception ignore) {
-            LOGGER.error(ignore.getMessage());
-        }
-        if (address == null) {
-            throw new FrameworkException(NoAvailableService);
-        }
-        return NetUtil.toStringAddress(address);
     }
 
     @Override
