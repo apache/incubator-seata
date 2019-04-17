@@ -80,26 +80,26 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ## Maven dependency
 ```xml
-<fescar.version>0.4.1</fescar.version>
+<seata.version>0.5.0</seata.version>
 
 <dependency>
-    <groupId>com.alibaba.fescar</groupId>
-    <artifactId>fescar-spring</artifactId>
-    <version>${fescar.version}</version>
+    <groupId>io.seata</groupId>
+    <artifactId>seata-spring</artifactId>
+    <version>${seata.version}</version>
 </dependency>
 
 <!--dependency for Apache Dubbo-->
 <dependency>
-    <groupId>com.alibaba.fescar</groupId>
-    <artifactId>fescar-dubbo</artifactId>
-    <version>${fescar.version}</version>
+    <groupId>io.seata</groupId>
+    <artifactId>seata-dubbo</artifactId>
+    <version>${seata.version}</version>
 </dependency>
 
 <!--dependency for Alibaba Dubbo-->
 <dependency>
-    <groupId>com.alibaba.fescar</groupId>
-    <artifactId>fescar-dubbo-alibaba</artifactId>
-    <version>${fescar.version}</version>
+    <groupId>io.seata</groupId>
+    <artifactId>seata-dubbo-alibaba</artifactId>
+    <version>${seata.version}</version>
 </dependency>
 
 ```
@@ -123,7 +123,7 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 
 ## Contact
 
-* [Twitter](): TBD. Follow along for latest Fescar news on Twitter.
+* [Twitter](https://twitter.com/seataio): Follow along for latest Seata news on Twitter.
 
 * Mailing list: 
   * dev-fescar@googlegroups.com , for dev/user discussion. [subscribe](mailto:dev-fescar+subscribe@googlegroups.com), [unsubscribe](mailto:dev-fescar+unsubscribe@googlegroups.com), [archive](https://groups.google.com/forum/#!forum/dev-fescar)
@@ -135,7 +135,7 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 
 ## Seata ecosystem
 
-* [Seata Ecosystem Entry](https://github.com/fescar-group) - A GitHub group `seata-group` to gather all Seata relevant projects not appropriate in [seata](https://github.com/seata) group yet
+* [Seata Ecosystem Entry](https://github.com/seata) - A GitHub group `seata` to gather all Seata relevant projects
 * [Seata Samples](https://github.com/fescar-group/fescar-samples) - Samples for Seata
 * [Seata Docker](https://github.com/fescar-group/fescar-docker) - Seata integration with docker
 * [Seata K8s](https://github.com/fescar-group/fescar-k8s) - Seata integration with k8s

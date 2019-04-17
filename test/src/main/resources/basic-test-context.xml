@@ -40,7 +40,7 @@
 		<property name="filters" value="mergeStat" />
 	</bean>
 
-    <bean id="dataSourceProxy" class="com.alibaba.fescar.rm.datasource.DataSourceProxy">
+    <bean id="dataSourceProxy" class="io.seata.rm.datasource.DataSourceProxy">
 		<constructor-arg ref="mysqlDataSource" />
 	</bean>
 	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
@@ -50,5 +50,5 @@
 		<property name="dataSource" ref="mysqlDataSource" />
 	</bean>
 
-    <bean id="clientTest" class="com.alibaba.fescar.test.DataSourceBasicTest"/>
+    <bean id="clientTest" class="io.seata.test.DataSourceBasicTest"/>
 </beans>
