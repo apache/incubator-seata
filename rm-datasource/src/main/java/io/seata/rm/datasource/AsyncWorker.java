@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 
+
 package io.seata.rm.datasource;
 
 import io.seata.common.exception.NotSupportYetException;
@@ -26,16 +27,15 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManagerInbound;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManager;
-import io.seata.rm.datasource.undo.UndoLogManager;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ScheduledExecutorService;
@@ -97,20 +97,20 @@ public class AsyncWorker implements ResourceManagerInbound {
         BranchType branchType;
     }
 
-    private static final List<Phase2Context> ASYNC_COMMIT_BUFFER = new ArrayList<Phase2Context>();
-
     private static int ASYNC_COMMIT_BUFFER_LIMIT = ConfigurationFactory.getInstance().getInt(
         CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, 10000);
+
+    private static final BlockingQueue<Phase2Context> ASYNC_COMMIT_BUFFER = new LinkedBlockingQueue<>(ASYNC_COMMIT_BUFFER_LIMIT);
+
 
     private static ScheduledExecutorService timerExecutor;
 
     @Override
-    public synchronized BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
-        if (ASYNC_COMMIT_BUFFER.size() < ASYNC_COMMIT_BUFFER_LIMIT) {
-            ASYNC_COMMIT_BUFFER.add(new Phase2Context(branchType, xid, branchId, resourceId, applicationData));
-        } else {
+    public  BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+        if (!ASYNC_COMMIT_BUFFER.offer(new Phase2Context(branchType, xid, branchId, resourceId, applicationData))) {
             LOGGER.warn("Async commit buffer is FULL. Rejected branch [" + branchId + "/" + xid + "] will be handled by housekeeping later.");
         }
+
         return BranchStatus.PhaseTwo_Committed;
     }
 
@@ -142,20 +142,14 @@ public class AsyncWorker implements ResourceManagerInbound {
         }
 
         Map<String, List<Phase2Context>> mappedContexts = new HashMap<>(DEFAULT_RESOURCE_SIZE);
-        synchronized(this){
-            Iterator<Phase2Context> iterator = ASYNC_COMMIT_BUFFER.iterator();
-            while (iterator.hasNext()) {
-                Phase2Context commitContext = iterator.next();
-                List<Phase2Context> contextsGroupedByResourceId = mappedContexts.get(commitContext.resourceId);
-                if (contextsGroupedByResourceId == null) {
-                    contextsGroupedByResourceId = new ArrayList<>();
-                    mappedContexts.put(commitContext.resourceId, contextsGroupedByResourceId);
-                }
-                contextsGroupedByResourceId.add(commitContext);
-
-                iterator.remove();
-
+        while (!ASYNC_COMMIT_BUFFER.isEmpty()) {
+            Phase2Context commitContext = ASYNC_COMMIT_BUFFER.poll();
+            List<Phase2Context> contextsGroupedByResourceId = mappedContexts.get(commitContext.resourceId);
+            if (contextsGroupedByResourceId == null) {
+                contextsGroupedByResourceId = new ArrayList<>();
+                mappedContexts.put(commitContext.resourceId, contextsGroupedByResourceId);
             }
+            contextsGroupedByResourceId.add(commitContext);
         }
 
         for (Map.Entry<String, List<Phase2Context>> entry : mappedContexts.entrySet()) {
