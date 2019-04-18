@@ -14,11 +14,9 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.discovery.registry.sofa;
+package io.seata.discovery.registry.sofa;
 
-import com.alibaba.fescar.config.Configuration;
-import com.alibaba.fescar.config.ConfigurationFactory;
-import com.alibaba.fescar.discovery.registry.RegistryService;
+
 import com.alipay.sofa.registry.client.api.RegistryClient;
 import com.alipay.sofa.registry.client.api.RegistryClientConfig;
 import com.alipay.sofa.registry.client.api.SubscriberDataObserver;
@@ -29,6 +27,9 @@ import com.alipay.sofa.registry.client.api.registration.SubscriberRegistration;
 import com.alipay.sofa.registry.client.provider.DefaultRegistryClient;
 import com.alipay.sofa.registry.client.provider.DefaultRegistryClientConfigBuilder;
 import com.alipay.sofa.registry.core.model.ScopeEnum;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.registry.RegistryService;
 import org.apache.commons.lang.StringUtils;
 
 import java.net.InetSocketAddress;
@@ -41,8 +42,9 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static com.alibaba.fescar.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
-import static com.alibaba.fescar.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
+import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
+import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
+
 
 /**
  * The type SOFARegistry registry service.

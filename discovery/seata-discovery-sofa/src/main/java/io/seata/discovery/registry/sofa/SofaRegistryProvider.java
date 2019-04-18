@@ -14,11 +14,12 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.discovery.registry.sofa;
+package io.seata.discovery.registry.sofa;
 
-import com.alibaba.fescar.common.loader.LoadLevel;
-import com.alibaba.fescar.discovery.registry.RegistryProvider;
-import com.alibaba.fescar.discovery.registry.RegistryService;
+
+import io.seata.common.loader.LoadLevel;
+import io.seata.discovery.registry.RegistryProvider;
+import io.seata.discovery.registry.RegistryService;
 
 /**
  * @author leizhiyuan

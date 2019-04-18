@@ -48,7 +48,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>fescar-discovery-sofa</artifactId>
+            <artifactId>seata-discovery-sofa</artifactId>
         </dependency>
     </dependencies>
 </project>

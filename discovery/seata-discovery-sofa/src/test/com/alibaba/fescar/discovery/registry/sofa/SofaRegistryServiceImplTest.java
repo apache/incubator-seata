@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.discovery.registry.sofa;
+package io.seata.discovery.registry.sofa;
 
 import com.alipay.sofa.registry.server.test.TestRegistryMain;
 import org.junit.AfterClass;
@@ -26,7 +26,11 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
+/**
+ * The type SofaRegistryServiceImpl test.
+ *
+ * @author leizhiyuan
+ */
 public class SofaRegistryServiceImplTest {
 
     private static TestRegistryMain registryMain;
