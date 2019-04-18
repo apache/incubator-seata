@@ -83,9 +83,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
     private static final int ALWAYS_RETRY_BOUNDARY = 0;
 
-    private static final int MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.SERVICE_PREFIX + "max.commit.retry.timeout", ALWAYS_RETRY_BOUNDARY - 1);
+    private static final long MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getLong(ConfigurationKeys.SERVICE_PREFIX + "max.commit.retry.timeout", ALWAYS_RETRY_BOUNDARY - 1);
 
-    private static final int MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.SERVICE_PREFIX + "max.rollback.retry.timeout", ALWAYS_RETRY_BOUNDARY - 1);
+    private static final long MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getLong(ConfigurationKeys.SERVICE_PREFIX + "max.rollback.retry.timeout", ALWAYS_RETRY_BOUNDARY - 1);
 
     /**
      * Instantiates a new Default coordinator.
@@ -276,7 +276,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         /**
          * Start timing when the session begin
          */
-        if(timeout < ALWAYS_RETRY_BOUNDARY &&
+        if(timeout > ALWAYS_RETRY_BOUNDARY &&
                 now - beginTime > timeout){
             return true;
         }
