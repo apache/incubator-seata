@@ -44,9 +44,7 @@ public class MergedWarpMessageTest {
         byte[] expect = new byte[]{0, 0, 0, 12, 0, 1, 0, 1, 0, 0, 11, -72, 0, 2, 120, 120};
         MergedWarpMessage mergedWarpMessage = new MergedWarpMessage();
         final ArrayList<AbstractMessage> msgs = new ArrayList<>();
-        final GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
-        globalBeginRequest.setTransactionName("xx");
-        globalBeginRequest.setTimeout(3000);
+        final GlobalBeginRequest globalBeginRequest = buildGlobalBeginRequest();
         msgs.add(globalBeginRequest);
         mergedWarpMessage.msgs = msgs;
         byte[] result = mergedWarpMessage.encode();
@@ -55,9 +53,7 @@ public class MergedWarpMessageTest {
 
     @Test
     public void decode() {
-        final GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
-        globalBeginRequest.setTransactionName("xx");
-        globalBeginRequest.setTimeout(3000);
+        final GlobalBeginRequest globalBeginRequest = buildGlobalBeginRequest();
         byte[] result = new byte[]{0, 0, 0, 12, 0, 1, 0, 1, 0, 0, 11, -72, 0, 2, 120, 120};
         ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer();
         MergedWarpMessage decodeResult = new MergedWarpMessage();
@@ -66,10 +62,17 @@ public class MergedWarpMessageTest {
         assertThat(true).isEqualTo(expected instanceof GlobalBeginRequest);
         GlobalBeginRequest decodeGlobalBeginRequest = (GlobalBeginRequest) expected;
 
-        assertThat(decodeGlobalBeginRequest.getTransactionName()).isEqualTo(decodeGlobalBeginRequest.getTransactionName());
-        assertThat(decodeGlobalBeginRequest.getTimeout()).isEqualTo(decodeGlobalBeginRequest.getTimeout());
-        assertThat(decodeGlobalBeginRequest.getTimeout()).isEqualTo(decodeGlobalBeginRequest.getTimeout());
-        assertThat(decodeGlobalBeginRequest.getTypeCode()).isEqualTo(decodeGlobalBeginRequest.getTypeCode());
+        assertThat(globalBeginRequest.getTransactionName()).isEqualTo(decodeGlobalBeginRequest.getTransactionName());
+        assertThat(globalBeginRequest.getTimeout()).isEqualTo(decodeGlobalBeginRequest.getTimeout());
+        assertThat(globalBeginRequest.getTimeout()).isEqualTo(decodeGlobalBeginRequest.getTimeout());
+        assertThat(globalBeginRequest.getTypeCode()).isEqualTo(decodeGlobalBeginRequest.getTypeCode());
         assertThat("xx").isEqualTo(decodeGlobalBeginRequest.getTransactionName());
+    }
+
+    private GlobalBeginRequest buildGlobalBeginRequest() {
+        final GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
+        globalBeginRequest.setTransactionName("xx");
+        globalBeginRequest.setTimeout(3000);
+        return globalBeginRequest;
     }
 }
