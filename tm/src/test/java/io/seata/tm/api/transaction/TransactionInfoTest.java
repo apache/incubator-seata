@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.alibaba.fescar.tm.api.transaction;
+package io.seata.tm.api.transaction;
 
 import com.alibaba.fastjson.JSON;
 import io.seata.tm.api.transaction.NoRollbackRule;

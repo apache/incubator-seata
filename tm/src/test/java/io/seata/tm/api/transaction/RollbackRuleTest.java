@@ -13,10 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package com.alibaba.fescar.tm.api.transaction;
+package io.seata.tm.api.transaction;
 
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.tm.api.transaction.RollbackRule;
 import org.junit.Test;
 
 import java.io.IOException;
