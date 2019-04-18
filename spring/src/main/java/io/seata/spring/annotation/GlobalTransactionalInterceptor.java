@@ -119,8 +119,8 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
                 }
 
                 @Override
-                public TransactionInfo getTransactionInfo(){
-                    TransactionInfo transactionInfo=new TransactionInfo();
+                public TransactionInfo getTransactionInfo() {
+                    TransactionInfo transactionInfo = new TransactionInfo();
                     transactionInfo.setTimeOut(globalTrxAnno.timeoutMills());
                     transactionInfo.setName(name());
                     Set<RollbackRule> rollbackRules = new LinkedHashSet<>();

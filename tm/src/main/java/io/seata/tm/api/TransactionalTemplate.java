@@ -48,10 +48,10 @@ public class TransactionalTemplate {
         // 1. get or create a transaction
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
 
-        //1.1 get transactionInfo
+        // 1.1 get transactionInfo
         TransactionInfo txInfo = business.getTransactionInfo();
         if (txInfo == null) {
-            throw new ShouldNeverHappenException("transactionInfo is not exists");
+            throw new ShouldNeverHappenException("transactionInfo does not exist");
         }
         try {
 

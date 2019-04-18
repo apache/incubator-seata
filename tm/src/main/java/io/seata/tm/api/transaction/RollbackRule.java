@@ -1,4 +1,3 @@
-package io.seata.tm.api.transaction;
 /*
  *  Copyright 1999-2018 Alibaba Group Holding Ltd.
  *
@@ -14,6 +13,7 @@ package io.seata.tm.api.transaction;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package io.seata.tm.api.transaction;
 
 import io.seata.common.util.StringUtils;
 
