@@ -22,6 +22,8 @@ import io.seata.core.protocol.transaction.BranchCommitResponse;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.nio.ByteBuffer;
+
 /**
  * The type Branch commit response test.
  *
@@ -40,10 +42,37 @@ public class BranchCommitResponseTest {
         branchCommitResponse.setBranchId(2345678L);
         branchCommitResponse.setBranchStatus(BranchStatus.PhaseOne_Done);
         branchCommitResponse.setResultCode(ResultCode.Success);
-        branchCommitResponse.setMsg("");
+        branchCommitResponse.setMsg("abc");
         Assert.assertEquals(
             "xid=127.0.0.1:8091:123456,branchId=2345678,branchStatus=PhaseOne_Done,result code =Success,getMsg =",
             branchCommitResponse.toString());
+
+    }
+
+    @Test
+    public void testEncode(){
+        BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
+        branchCommitResponse.setXid("127.0.0.1:8091:123456");
+        branchCommitResponse.setBranchId(2345678L);
+        branchCommitResponse.setBranchStatus(BranchStatus.PhaseTwo_Committed);
+        branchCommitResponse.setResultCode(ResultCode.Success);
+        branchCommitResponse.setMsg("abc");
+
+        byte[] bytes = branchCommitResponse.encode();
+
+        ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
+        byteBuffer.put(bytes);
+        byteBuffer.flip();
+
+        BranchCommitResponse newBranchCommitResponse = new BranchCommitResponse();
+        newBranchCommitResponse.decode(byteBuffer);
+
+        System.out.println(newBranchCommitResponse.toString());
+
+        Assert.assertEquals(branchCommitResponse.getXid(), newBranchCommitResponse.getXid());
+        Assert.assertEquals(branchCommitResponse.getBranchId(), newBranchCommitResponse.getBranchId());
+        Assert.assertEquals(branchCommitResponse.getResultCode(), newBranchCommitResponse.getResultCode());
+        Assert.assertEquals(branchCommitResponse.getBranchStatus(), newBranchCommitResponse.getBranchStatus());
 
     }
 }
