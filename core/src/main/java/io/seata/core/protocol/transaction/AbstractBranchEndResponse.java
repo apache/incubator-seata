@@ -132,6 +132,13 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
         if (!s) {
             return s;
         }
+        short xidLen = in.readShort();
+        if (xidLen > 0) {
+            byte[] bs = new byte[xidLen];
+            in.readBytes(bs);
+            this.setXid(new String(bs, UTF8));
+        }
+        branchId = in.readLong();
         branchStatus = BranchStatus.get(in.readByte());
         return true;
     }
