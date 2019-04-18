@@ -14,12 +14,12 @@
  *  limitations under the License.
  *
  */
-package com.alibaba.fescar.core.protocol.transaction;
+package io.seata.core.protocol.transaction;
 
-import com.alibaba.fescar.core.model.BranchType;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
+import io.seata.core.model.BranchType;
 import org.junit.Assert;
 import org.junit.Test;
 
