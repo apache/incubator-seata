@@ -19,10 +19,10 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.nio.ByteBuffer;
 
 /**
  * The type Branch commit response test.
@@ -33,7 +33,6 @@ import java.nio.ByteBuffer;
 public class BranchCommitResponseTest {
     /**
      * To string test.
-     *
      */
     @Test
     public void toStringTest() {
@@ -50,29 +49,27 @@ public class BranchCommitResponseTest {
     }
 
     @Test
-    public void testEncode(){
+    public void testEncodeDecode() {
         BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
-        branchCommitResponse.setXid("127.0.0.1:8091:123456");
-        branchCommitResponse.setBranchId(2345678L);
-        branchCommitResponse.setBranchStatus(BranchStatus.PhaseTwo_Committed);
+
+        branchCommitResponse.setXid("127.0.0.1:9999:39875642");
+        branchCommitResponse.setBranchId(10241024L);
         branchCommitResponse.setResultCode(ResultCode.Success);
-        branchCommitResponse.setMsg("abc");
+        branchCommitResponse.setBranchStatus(BranchStatus.PhaseTwo_Committed);
 
-        byte[] bytes = branchCommitResponse.encode();
+        byte[] encodeResult = branchCommitResponse.encode();
 
-        ByteBuffer byteBuffer = ByteBuffer.allocate(bytes.length);
-        byteBuffer.put(bytes);
-        byteBuffer.flip();
+        ByteBuf byteBuffer = UnpooledByteBufAllocator.DEFAULT.directBuffer(encodeResult.length);
+        byteBuffer.writeBytes(encodeResult);
 
-        BranchCommitResponse newBranchCommitResponse = new BranchCommitResponse();
-        newBranchCommitResponse.decode(byteBuffer);
-
-        System.out.println(newBranchCommitResponse.toString());
-
-        Assert.assertEquals(branchCommitResponse.getXid(), newBranchCommitResponse.getXid());
-        Assert.assertEquals(branchCommitResponse.getBranchId(), newBranchCommitResponse.getBranchId());
-        Assert.assertEquals(branchCommitResponse.getResultCode(), newBranchCommitResponse.getResultCode());
-        Assert.assertEquals(branchCommitResponse.getBranchStatus(), newBranchCommitResponse.getBranchStatus());
-
+        BranchCommitResponse decodeBranchCommitResponse = new BranchCommitResponse();
+        decodeBranchCommitResponse.decode(byteBuffer);
+        Assert.assertEquals(decodeBranchCommitResponse.getXid(), branchCommitResponse.getXid());
+        Assert.assertEquals(decodeBranchCommitResponse.getBranchId(), branchCommitResponse.getBranchId());
+        Assert.assertEquals(decodeBranchCommitResponse.getResultCode(), branchCommitResponse.getResultCode());
+        Assert.assertEquals(decodeBranchCommitResponse.getBranchStatus(), branchCommitResponse.getBranchStatus());
+        Assert.assertEquals(decodeBranchCommitResponse.getTransactionExceptionCode(),
+            branchCommitResponse.getTransactionExceptionCode());
+        Assert.assertEquals(decodeBranchCommitResponse.getMsg(), branchCommitResponse.getMsg());
     }
 }

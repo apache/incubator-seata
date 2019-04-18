@@ -133,7 +133,7 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
             return s;
         }
         short xidLen = in.readShort();
-        if(xidLen > 0){
+        if (xidLen > 0) {
             byte[] bs = new byte[xidLen];
             in.readBytes(bs);
             this.setXid(new String(bs, UTF8));
