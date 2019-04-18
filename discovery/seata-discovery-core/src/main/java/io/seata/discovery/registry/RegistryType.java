@@ -48,7 +48,11 @@ public enum RegistryType {
     /**
      * Consul registry type
      */
-    Consul;
+    Consul,
+    /**
+     * Etcd3 registry type
+     */
+    Etcd3;
 
     /**
      * Gets type.
@@ -69,6 +73,8 @@ public enum RegistryType {
             return ZK;
         } else if (Consul.name().equalsIgnoreCase(name)) {
             return Consul;
+        } else if (Etcd3.name().equalsIgnoreCase(name)) {
+            return Etcd3;
         } else {
             throw new NotSupportYetException("unsupported type:" + name);
         }

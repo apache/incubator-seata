@@ -14,40 +14,37 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   -->
-
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.seata</groupId>
-        <artifactId>seata-parent</artifactId>
+        <artifactId>seata-discovery</artifactId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <packaging>pom</packaging>
-    <artifactId>seata-discovery</artifactId>
-    <name>seata-discovery ${project.version}</name>
-    <modules>
-        <module>seata-discovery-consul</module>
-        <module>seata-discovery-core</module>
-        <module>seata-discovery-all</module>
-        <module>seata-discovery-eureka</module>
-        <module>seata-discovery-zk</module>
-        <module>seata-discovery-redis</module>
-        <module>seata-discovery-nacos</module>
-        <module>seata-discovery-etcd3</module>
-    </modules>
+    <artifactId>seata-discovery-etcd3</artifactId>
+    <name>seata-discovery-etcd3 ${project.version}</name>
 
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-discovery-core</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <scope>test</scope>
+            <groupId>io.etcd</groupId>
+            <artifactId>jetcd-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>27.0.1-jre</version>
         </dependency>
     </dependencies>
 </project>
