@@ -19,11 +19,11 @@ package io.seata.core.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * The type MergedWarpMessageTest test.
@@ -35,7 +35,7 @@ public class MergedWarpMessageTest {
     @Test
     public void getTypeCode() {
         MergedWarpMessage mergedWarpMessage = new MergedWarpMessage();
-        Assert.assertEquals(AbstractMessage.TYPE_SEATA_MERGE, mergedWarpMessage.getTypeCode());
+        assertThat(mergedWarpMessage.getTypeCode()).isEqualTo(AbstractMessage.TYPE_SEATA_MERGE);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class MergedWarpMessageTest {
         msgs.add(globalBeginRequest);
         mergedWarpMessage.msgs = msgs;
         byte[] result = mergedWarpMessage.encode();
-        Assert.assertEquals(Arrays.toString(expect), Arrays.toString(result));
+        assertThat(expect).isEqualTo(result);
     }
 
     @Test
@@ -63,11 +63,13 @@ public class MergedWarpMessageTest {
         MergedWarpMessage decodeResult = new MergedWarpMessage();
         decodeResult.decode(buffer.writeBytes(result));
         final AbstractMessage expected = decodeResult.msgs.get(0);
-        Assert.assertTrue(expected instanceof GlobalBeginRequest);
+        assertThat(true).isEqualTo(expected instanceof GlobalBeginRequest);
         GlobalBeginRequest decodeGlobalBeginRequest = (GlobalBeginRequest) expected;
-        Assert.assertEquals(globalBeginRequest.getTransactionName(), decodeGlobalBeginRequest.getTransactionName());
-        Assert.assertEquals(globalBeginRequest.getTimeout(), decodeGlobalBeginRequest.getTimeout());
-        Assert.assertEquals("xx", decodeGlobalBeginRequest.getTransactionName());
-        Assert.assertEquals(globalBeginRequest.getTypeCode(), decodeGlobalBeginRequest.getTypeCode());
+
+        assertThat(decodeGlobalBeginRequest.getTransactionName()).isEqualTo(decodeGlobalBeginRequest.getTransactionName());
+        assertThat(decodeGlobalBeginRequest.getTimeout()).isEqualTo(decodeGlobalBeginRequest.getTimeout());
+        assertThat(decodeGlobalBeginRequest.getTimeout()).isEqualTo(decodeGlobalBeginRequest.getTimeout());
+        assertThat(decodeGlobalBeginRequest.getTypeCode()).isEqualTo(decodeGlobalBeginRequest.getTypeCode());
+        assertThat("xx").isEqualTo(decodeGlobalBeginRequest.getTransactionName());
     }
 }
