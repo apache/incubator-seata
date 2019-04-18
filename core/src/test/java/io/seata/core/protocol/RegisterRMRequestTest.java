@@ -18,10 +18,10 @@ package io.seata.core.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
+import static org.assertj.core.api.Assertions.assertThat;
+
 
 /**
  * The type RegisterRMRequest test.
@@ -35,34 +35,43 @@ public class RegisterRMRequestTest {
         RegisterRMRequest registerRMRequest = new RegisterRMRequest();
         final String resourceIds = "r1,r2";
         registerRMRequest.setResourceIds(resourceIds);
-        Assert.assertEquals(resourceIds, registerRMRequest.getResourceIds());
+        assertThat(resourceIds).isEqualTo(registerRMRequest.getResourceIds());
     }
 
     @Test
     public void getTypeCode() {
         RegisterRMRequest registerRMRequest = new RegisterRMRequest();
-        Assert.assertEquals(AbstractMessage.TYPE_REG_RM, registerRMRequest.getTypeCode());
+        assertThat(AbstractMessage.TYPE_REG_RM).isEqualTo(registerRMRequest.getTypeCode());
     }
 
 
     @Test
     public void encode() {
         byte[] expect = new byte[]{0, 1, 49, 0, 3, 97, 112, 112, 0, 5, 103, 114, 111, 117, 112, 0, 5, 101, 120, 116, 114, 97, 0, 0, 0, 5, 114, 49, 44, 114, 50};
-        RegisterRMRequest registerRMRequest = new RegisterRMRequest();
-        final String resourceIds = "r1,r2";
-        registerRMRequest.setResourceIds(resourceIds);
-        registerRMRequest.setApplicationId("app");
-        registerRMRequest.setExtraData("extra");
-        registerRMRequest.setTransactionServiceGroup("group");
-        registerRMRequest.setVersion("1");
+        RegisterRMRequest registerRMRequest = buildRegisterRMRequest();
         byte[] result = registerRMRequest.encode();
-        Assert.assertEquals(Arrays.toString(expect), Arrays.toString(result));
+        assertThat(expect).isEqualTo(result);
     }
 
 
     @Test
     public void decode() {
         byte[] result = new byte[]{0, 1, 49, 0, 3, 97, 112, 112, 0, 5, 103, 114, 111, 117, 112, 0, 5, 101, 120, 116, 114, 97, 0, 0, 0, 5, 114, 49, 44, 114, 50};
+        RegisterRMRequest registerRMRequest = buildRegisterRMRequest();
+        ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer();
+        RegisterRMRequest decodeResult = new RegisterRMRequest();
+        decodeResult.decode(buffer.writeBytes(result));
+        assertThat(decodeResult.getTypeCode()).isEqualTo(registerRMRequest.getTypeCode());
+        assertThat(decodeResult.getResourceIds()).isEqualTo(registerRMRequest.getResourceIds());
+        assertThat(decodeResult.getApplicationId()).isEqualTo(registerRMRequest.getApplicationId());
+        assertThat(decodeResult.getExtraData()).isEqualTo(registerRMRequest.getExtraData());
+        assertThat(decodeResult.getTransactionServiceGroup()).isEqualTo(registerRMRequest.getTransactionServiceGroup());
+        assertThat(decodeResult.getVersion()).isEqualTo(registerRMRequest.getVersion());
+    }
+
+
+    private RegisterRMRequest buildRegisterRMRequest() {
+
         RegisterRMRequest registerRMRequest = new RegisterRMRequest();
         final String resourceIds = "r1,r2";
         registerRMRequest.setResourceIds(resourceIds);
@@ -70,17 +79,6 @@ public class RegisterRMRequestTest {
         registerRMRequest.setExtraData("extra");
         registerRMRequest.setTransactionServiceGroup("group");
         registerRMRequest.setVersion("1");
-
-        ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer();
-        RegisterRMRequest decodeResult = new RegisterRMRequest();
-        decodeResult.decode(buffer.writeBytes(result));
-
-        Assert.assertEquals(registerRMRequest.getResourceIds(), decodeResult.getResourceIds());
-        Assert.assertEquals(registerRMRequest.getTypeCode(), decodeResult.getTypeCode());
-        Assert.assertEquals(registerRMRequest.getApplicationId(), decodeResult.getApplicationId());
-        Assert.assertEquals(registerRMRequest.getExtraData(), decodeResult.getExtraData());
-        Assert.assertEquals(registerRMRequest.getTransactionServiceGroup(), decodeResult.getTransactionServiceGroup());
-        Assert.assertEquals(registerRMRequest.getVersion(), decodeResult.getVersion());
-
+        return registerRMRequest;
     }
 }
