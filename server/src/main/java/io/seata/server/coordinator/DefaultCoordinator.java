@@ -17,6 +17,7 @@
 package io.seata.server.coordinator;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -83,9 +84,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
     private static final int ALWAYS_RETRY_BOUNDARY = 0;
 
-    private static final long MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getLong(ConfigurationKeys.SERVICE_PREFIX + "max.commit.retry.timeout", ALWAYS_RETRY_BOUNDARY - 1);
+    private static final Duration MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.SERVICE_PREFIX + "max.commit.retry.timeout", Duration.ofMillis(-1), 100);
 
-    private static final long MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getLong(ConfigurationKeys.SERVICE_PREFIX + "max.rollback.retry.timeout", ALWAYS_RETRY_BOUNDARY - 1);
+    private static final Duration MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.SERVICE_PREFIX + "max.rollback.retry.timeout", Duration.ofMillis(-1), 100);
 
     /**
      * Instantiates a new Default coordinator.
@@ -235,7 +236,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         long now = System.currentTimeMillis();
         for (GlobalSession rollbackingSession : rollbackingSessions) {
             try {
-                if(isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT, rollbackingSession.getBeginTime())){
+                if(isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT.toMillis(), rollbackingSession.getBeginTime())){
                     /**
                      * Prevent thread safety issues
                      */
@@ -256,7 +257,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         long now = System.currentTimeMillis();
         for (GlobalSession committingSession : committingSessions) {
             try {
-                if(isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT, committingSession.getBeginTime())){
+                if(isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT.toMillis(), committingSession.getBeginTime())){
                     /**
                      * Prevent thread safety issues
                      */
@@ -276,7 +277,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         /**
          * Start timing when the session begin
          */
-        if(timeout > ALWAYS_RETRY_BOUNDARY &&
+        if(timeout >= ALWAYS_RETRY_BOUNDARY &&
                 now - beginTime > timeout){
             return true;
         }
