@@ -28,6 +28,13 @@ public class RollbackRule implements Serializable {
 
     private final String exceptionName;
 
+    public RollbackRule(String exceptionName) {
+        if (StringUtils.isNullOrEmpty(exceptionName)) {
+            throw new IllegalArgumentException("'exceptionName' cannot be null or empty");
+        }
+        this.exceptionName = exceptionName;
+    }
+
     public RollbackRule(Class<?> clazz) {
         if (clazz == null) {
             throw new NullPointerException("'clazz' cannot be null");
@@ -38,15 +45,6 @@ public class RollbackRule implements Serializable {
         }
         this.exceptionName = clazz.getName();
     }
-
-
-    public RollbackRule(String exceptionName) {
-        if (StringUtils.isNullOrEmpty(exceptionName)) {
-            throw new IllegalArgumentException("'exceptionName' cannot be null or empty");
-        }
-        this.exceptionName = exceptionName;
-    }
-
 
     public String getExceptionName() {
         return this.exceptionName;

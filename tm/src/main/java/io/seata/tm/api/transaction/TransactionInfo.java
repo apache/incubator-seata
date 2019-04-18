@@ -56,7 +56,7 @@ public final class TransactionInfo implements Serializable {
         this.rollbackRules=rollbackRules;
     }
 
-    public boolean rollBackOn(Throwable ex) {
+    public boolean rollbackOn(Throwable ex) {
 
         RollbackRule winner = null;
         int deepest = Integer.MAX_VALUE;
@@ -71,11 +71,6 @@ public final class TransactionInfo implements Serializable {
             }
         }
 
-        // if no match ,return true
-        if (winner == null) {
-            return true;
-        }
-
-        return !(winner instanceof NoRollbackRule);
+        return winner == null || !(winner instanceof NoRollbackRule);
     }
 }

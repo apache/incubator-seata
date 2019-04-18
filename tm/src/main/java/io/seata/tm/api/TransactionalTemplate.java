@@ -84,9 +84,9 @@ public class TransactionalTemplate {
 
     private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable ex) throws TransactionalExecutor.ExecutionException {
         //roll back
-        if (txInfo != null && txInfo.rollBackOn(ex)) {
+        if (txInfo != null && txInfo.rollbackOn(ex)) {
             try {
-                rollBackTransaction(tx, ex);
+                rollbackTransaction(tx, ex);
             } catch (TransactionException txe) {
                 // Failed to rollback
                 throw new TransactionalExecutor.ExecutionException(tx, txe,
@@ -110,7 +110,7 @@ public class TransactionalTemplate {
         }
     }
 
-    private void rollBackTransaction(GlobalTransaction tx, Throwable ex) throws TransactionException, TransactionalExecutor.ExecutionException {
+    private void rollbackTransaction(GlobalTransaction tx, Throwable ex) throws TransactionException, TransactionalExecutor.ExecutionException {
         triggerBeforeRollback();
         tx.rollback();
         triggerAfterRollback();
