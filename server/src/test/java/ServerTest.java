@@ -18,9 +18,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.alibaba.fescar.core.rpc.netty.RpcServer;
-import com.alibaba.fescar.server.UUIDGenerator;
-import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
+import io.seata.core.rpc.netty.RpcServer;
+import io.seata.server.UUIDGenerator;
+import io.seata.server.coordinator.DefaultCoordinator;
 
 /**
  * The type Server test.
