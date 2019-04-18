@@ -23,6 +23,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
  * The type MergedWarpMessageTest test.
  *
@@ -31,8 +33,15 @@ import java.util.ArrayList;
 public class MergedWarpMessageTest {
 
     @Test
-    public void encodeAndDecode() {
+    public void getTypeCode() {
+        MergedWarpMessage mergedWarpMessage = new MergedWarpMessage();
+        Assert.assertEquals(AbstractMessage.TYPE_SEATA_MERGE, mergedWarpMessage.getTypeCode());
+    }
 
+    @Test
+    public void encode() {
+        //you can run encode to get the data
+        byte[] expect = new byte[]{0, 0, 0, 12, 0, 1, 0, 1, 0, 0, 11, -72, 0, 2, 120, 120};
         MergedWarpMessage mergedWarpMessage = new MergedWarpMessage();
         final ArrayList<AbstractMessage> msgs = new ArrayList<>();
         final GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
@@ -41,8 +50,15 @@ public class MergedWarpMessageTest {
         msgs.add(globalBeginRequest);
         mergedWarpMessage.msgs = msgs;
         byte[] result = mergedWarpMessage.encode();
+        Assert.assertEquals(Arrays.toString(expect), Arrays.toString(result));
+    }
 
-
+    @Test
+    public void decode() {
+        final GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
+        globalBeginRequest.setTransactionName("xx");
+        globalBeginRequest.setTimeout(3000);
+        byte[] result = new byte[]{0, 0, 0, 12, 0, 1, 0, 1, 0, 0, 11, -72, 0, 2, 120, 120};
         ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer();
         MergedWarpMessage decodeResult = new MergedWarpMessage();
         decodeResult.decode(buffer.writeBytes(result));
@@ -53,7 +69,5 @@ public class MergedWarpMessageTest {
         Assert.assertEquals(globalBeginRequest.getTimeout(), decodeGlobalBeginRequest.getTimeout());
         Assert.assertEquals("xx", decodeGlobalBeginRequest.getTransactionName());
         Assert.assertEquals(globalBeginRequest.getTypeCode(), decodeGlobalBeginRequest.getTypeCode());
-
     }
-
 }
