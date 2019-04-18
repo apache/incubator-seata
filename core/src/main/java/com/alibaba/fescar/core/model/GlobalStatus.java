@@ -140,7 +140,7 @@ public enum GlobalStatus {
         return code;
     }
 
-    public static final Set<GlobalStatus> BEGIN_AND_DOING_SET = new HashSet<>();
+
 
     private static final Map<Integer, GlobalStatus> MAP = new HashMap<>(values().length);
 
@@ -148,13 +148,6 @@ public enum GlobalStatus {
         for (GlobalStatus status : values()) {
             MAP.put(status.code, status);
         }
-        BEGIN_AND_DOING_SET.add(GlobalStatus.Begin);
-        BEGIN_AND_DOING_SET.add(GlobalStatus.Committing);
-        BEGIN_AND_DOING_SET.add(GlobalStatus.CommitRetrying);
-        BEGIN_AND_DOING_SET.add(GlobalStatus.Rollbacking);
-        BEGIN_AND_DOING_SET.add(GlobalStatus.TimeoutRollbackRetrying);
-        BEGIN_AND_DOING_SET.add(GlobalStatus.AsyncCommitting);
-        BEGIN_AND_DOING_SET.add(GlobalStatus.TimeoutRollbacking);
     }
 
     /**

@@ -54,8 +54,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private long beginTime;
 
-    private long statusUpdateTime;
-
     private boolean active;
 
     private ArrayList<BranchSession> branchSessions = new ArrayList<>();
@@ -109,7 +107,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void begin() throws TransactionException {
         this.status = GlobalStatus.Begin;
         this.beginTime = System.currentTimeMillis();
-        this.statusUpdateTime = System.currentTimeMillis();
         this.active = true;
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onBegin(this);
@@ -119,7 +116,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     @Override
     public void changeStatus(GlobalStatus status) throws TransactionException {
         this.status = status;
-        this.statusUpdateTime = System.currentTimeMillis();
         for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
             lifecycleListener.onStatusChange(this, status);
         }
@@ -351,13 +347,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return beginTime;
     }
 
-    /**
-     * Gets status update time.
-     * @return the status update time
-     */
-    public long getStatusUpdateTime() {
-        return statusUpdateTime;
-    }
 
     /**
      * Create global session global session.
@@ -423,7 +412,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             byteBuffer.putShort((short)0);
         }
         byteBuffer.putLong(beginTime);
-        byteBuffer.putLong(statusUpdateTime);
         byteBuffer.put((byte)status.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
@@ -438,7 +426,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                 + 2 // byServiceGroupBytes.length
                 + 2 // byTxNameBytes.length
                 + 8 // beginTime
-                + 8 //statusUpdateTime
                 + 1 // statusCode
             + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
             + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
@@ -470,7 +457,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             this.transactionName = new String(byTxName);
         }
         this.beginTime = byteBuffer.getLong();
-        this.statusUpdateTime = byteBuffer.getLong();
         this.status = GlobalStatus.get(byteBuffer.get());
     }
 

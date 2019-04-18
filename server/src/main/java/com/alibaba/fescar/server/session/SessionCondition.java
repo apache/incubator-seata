@@ -27,37 +27,18 @@ import java.util.Set;
  * @date 2018 /12/13
  */
 public class SessionCondition {
-    private Set<GlobalStatus> statuses;
+
     private long overTimeAliveMills;
 
     /**
      * Instantiates a new Session condition.
      *
-     * @param statuses             the statuses
      * @param overTimeAliveMills the over time alive mills
      */
-    public SessionCondition(Set<GlobalStatus> statuses, long overTimeAliveMills) {
-        this.statuses = statuses;
+    public SessionCondition( long overTimeAliveMills) {
         this.overTimeAliveMills = overTimeAliveMills;
     }
 
-    /**
-     * Gets status.
-     *
-     * @return the status
-     */
-    public Set<GlobalStatus> getStatuses() {
-        return statuses;
-    }
-
-    /**
-     * Sets status.
-     *
-     * @param status the status
-     */
-    public void setStatuses(Set<GlobalStatus> status) {
-        this.statuses = status;
-    }
 
     /**
      * Gets over time alive mills.
