@@ -37,7 +37,7 @@ public class BranchCommitRequestTest {
      * @throws Exception the exception
      */
     @Test
-    public void toStringTest() throws Exception {
+    public void toStringTest() {
         BranchCommitRequest branchCommitRequest = new BranchCommitRequest();
 
         branchCommitRequest.setXid("127.0.0.1:9999:39875642");
@@ -68,11 +68,10 @@ public class BranchCommitRequestTest {
 
         BranchCommitRequest decodeBranchCommitRequest = new BranchCommitRequest();
         decodeBranchCommitRequest.decode(byteBuffer);
-        System.out.println(decodeBranchCommitRequest);
-        Assert.assertEquals(decodeBranchCommitRequest.getXid(), decodeBranchCommitRequest.getXid());
-        Assert.assertEquals(decodeBranchCommitRequest.getBranchId(), decodeBranchCommitRequest.getBranchId());
-        Assert.assertEquals(decodeBranchCommitRequest.getResourceId(), decodeBranchCommitRequest.getResourceId());
-        Assert.assertEquals(decodeBranchCommitRequest.getApplicationData(), decodeBranchCommitRequest.getApplicationData());
-        Assert.assertEquals(decodeBranchCommitRequest.getBranchType(), decodeBranchCommitRequest.getBranchType());
+        Assert.assertEquals(decodeBranchCommitRequest.getXid(), branchCommitRequest.getXid());
+        Assert.assertEquals(decodeBranchCommitRequest.getBranchId(), branchCommitRequest.getBranchId());
+        Assert.assertEquals(decodeBranchCommitRequest.getResourceId(), branchCommitRequest.getResourceId());
+        Assert.assertEquals(decodeBranchCommitRequest.getApplicationData(), branchCommitRequest.getApplicationData());
+        Assert.assertEquals(decodeBranchCommitRequest.getBranchType(), branchCommitRequest.getBranchType());
     }
 }
