@@ -14,18 +14,17 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.core.protocol;
+package io.seata.core.protocol;
 
-import com.alibaba.fescar.core.protocol.transaction.GlobalBeginRequest;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
+import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
-
 /**
- * The type MergedWarpMessage test.
+ * The type MergedWarpMessageTest test.
  *
  * @author leizhiyuan
  */
@@ -56,4 +55,5 @@ public class MergedWarpMessageTest {
         Assert.assertEquals(globalBeginRequest.getTypeCode(), decodeGlobalBeginRequest.getTypeCode());
 
     }
+
 }
