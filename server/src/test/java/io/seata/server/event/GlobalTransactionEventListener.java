@@ -14,15 +14,15 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.server.coordinator;
+package io.seata.server.event;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.alibaba.fescar.server.event.GlobalTransactionEvent;
-import com.alibaba.fescar.core.model.GlobalStatus;
 import com.google.common.eventbus.Subscribe;
+
+import io.seata.core.model.GlobalStatus;
 
 public class GlobalTransactionEventListener {
   private final Map<GlobalStatus, AtomicInteger> eventCounters;

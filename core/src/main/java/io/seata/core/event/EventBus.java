@@ -14,17 +14,12 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.server.event;
+package io.seata.core.event;
 
-import com.alibaba.fescar.core.event.EventBus;
-import com.alibaba.fescar.core.event.GuavaEventBus;
+public interface EventBus {
+  void register(Object object);
 
-public class EventBusManager {
-  private static class SingletonHolder {
-    private static EventBus INSTANCE = new GuavaEventBus("tc");
-  }
+  void unregister(Object object);
 
-  public static final EventBus get() {
-    return SingletonHolder.INSTANCE;
-  }
+  void post(Object event);
 }

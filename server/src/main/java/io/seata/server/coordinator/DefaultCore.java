@@ -15,12 +15,16 @@
  */
 package io.seata.server.coordinator;
 
+import io.seata.common.XID;
+import io.seata.core.event.EventBus;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.ResourceManagerInbound;
+import io.seata.server.event.EventBusManager;
+import io.seata.server.event.GlobalTransactionEvent;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.LockerFactory;
 import io.seata.server.session.BranchSession;

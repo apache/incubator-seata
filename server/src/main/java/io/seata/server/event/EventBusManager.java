@@ -14,27 +14,17 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.core.event;
+package io.seata.server.event;
 
-public class GuavaEventBus implements EventBus {
-  private final com.google.common.eventbus.EventBus eventBus;
+import io.seata.core.event.EventBus;
+import io.seata.core.event.GuavaEventBus;
 
-  public GuavaEventBus(String identifier) {
-    this.eventBus = new com.google.common.eventbus.EventBus(identifier);
+public class EventBusManager {
+  private static class SingletonHolder {
+    private static EventBus INSTANCE = new GuavaEventBus("tc");
   }
 
-  @Override
-  public void register(Object object) {
-    this.eventBus.register(object);
-  }
-
-  @Override
-  public void unregister(Object object) {
-    this.eventBus.unregister(object);
-  }
-
-  @Override
-  public void post(Object event) {
-    this.eventBus.post(event);
+  public static final EventBus get() {
+    return SingletonHolder.INSTANCE;
   }
 }

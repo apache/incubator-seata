@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.core.event;
+package io.seata.core.event;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

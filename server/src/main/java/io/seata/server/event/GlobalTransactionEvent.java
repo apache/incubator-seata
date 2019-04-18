@@ -14,9 +14,9 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.server.event;
+package io.seata.server.event;
 
-import com.alibaba.fescar.core.model.GlobalStatus;
+import io.seata.core.model.GlobalStatus;
 
 public class GlobalTransactionEvent {
   public static final String ROLE_TC = "tc";

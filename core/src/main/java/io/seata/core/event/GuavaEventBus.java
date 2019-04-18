@@ -14,12 +14,27 @@
  *  limitations under the License.
  */
 
-package com.alibaba.fescar.core.event;
+package io.seata.core.event;
 
-public interface EventBus {
-  void register(Object object);
+public class GuavaEventBus implements EventBus {
+  private final com.google.common.eventbus.EventBus eventBus;
 
-  void unregister(Object object);
+  public GuavaEventBus(String identifier) {
+    this.eventBus = new com.google.common.eventbus.EventBus(identifier);
+  }
 
-  void post(Object event);
+  @Override
+  public void register(Object object) {
+    this.eventBus.register(object);
+  }
+
+  @Override
+  public void unregister(Object object) {
+    this.eventBus.unregister(object);
+  }
+
+  @Override
+  public void post(Object event) {
+    this.eventBus.post(event);
+  }
 }
