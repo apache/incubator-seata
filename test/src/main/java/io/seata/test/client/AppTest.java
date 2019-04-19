@@ -22,6 +22,7 @@ import io.seata.tm.TMClient;
 import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalTemplate;
 
+import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,13 +40,15 @@ public class AppTest {
 
     private static final String APPLICATION_ID = "my_test_app";
     private static final String TX_SERVICE_GROUP = "my_test_tx_group";
+    private static final String TX_NAME = "my_tx_instance";
+    private static final int TX_TIME_OUT = 60000;
 
     /**
      * The entry point of application.
      *
      * @param args the input arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Throwable {
         TMClient.init(APPLICATION_ID, TX_SERVICE_GROUP);
         RMClient.init(APPLICATION_ID, TX_SERVICE_GROUP);
 
@@ -74,14 +77,13 @@ public class AppTest {
                 }
 
                 @Override
-                public int timeout() {
-                    return 60000;
+                public TransactionInfo getTransactionInfo() {
+                    TransactionInfo txInfo = new TransactionInfo();
+                    txInfo.setTimeOut(TX_TIME_OUT);
+                    txInfo.setName(TX_NAME);
+                    return txInfo;
                 }
 
-                @Override
-                public String name() {
-                    return "my_tx_instance";
-                }
             });
         } catch (TransactionalExecutor.ExecutionException e) {
             TransactionalExecutor.Code code = e.getCode();

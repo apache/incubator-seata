@@ -16,6 +16,8 @@
 
 package io.seata.tm.api;
 
+import io.seata.tm.api.transaction.TransactionInfo;
+
 /**
  * Callback for executing business logic in a global transaction.
  *
@@ -32,18 +34,11 @@ public interface TransactionalExecutor {
     Object execute() throws Throwable;
 
     /**
-     * Global transaction timeout in MILLISECONDS.
-     *
-     * @return timeout in MILLISECONDS.
+     * transaction conf or other attr
+     * @return
      */
-    int timeout();
+    TransactionInfo getTransactionInfo();
 
-    /**
-     * Given name of the global transaction instance.
-     *
-     * @return Given name.
-     */
-    String name();
 
     /**
      * The enum Code.
