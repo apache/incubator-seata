@@ -271,6 +271,12 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                 fileWriteExecutor.shutdownNow();
             }
         }
+        try {
+            currFileChannel.force(true);
+        } catch (IOException e) {
+            LOGGER.error("filechannel force error", e);
+        }
+        closeFile(currRaf);
     }
 
     @Override
