@@ -116,6 +116,10 @@ public enum TransactionExceptionCode {
     //
     FailedToAddBranch,
 
+    /**
+     * FailedWriteSession
+     */
+    FailedWriteSession,
     ;
 
     private static final Map<Integer, TransactionExceptionCode> MAP = new HashMap<>(values().length);

@@ -43,7 +43,7 @@ public class WriteStoreMultithreadTest {
     private static CountDownLatch countDownLatch = new CountDownLatch(threadNum);
     public static void main(String[] args) throws Exception {
         TransactionStoreManager transactionStoreManager = new FileTransactionStoreManager(
-                "/Users/fengjun/data",
+                "data",
                 new SessionManager() {
                     @Override
                     public void destroy() {
@@ -170,6 +170,7 @@ public class WriteStoreMultithreadTest {
         long endWriteMills = System.currentTimeMillis();
         System.out.println("thread nums:" + threadNum + ", per_thread_trx_num:" + per_thread_trx_num +" ,cost" + (endWriteMills-beginWriteMills));
     }
+
     private static void write(TransactionStoreManager transactionStoreManager, int threadNo) {
         int trx_begin = threadNo * per_thread_trx_num;
         for (int i = trx_begin; i < trx_begin + per_thread_trx_num; i++) {
