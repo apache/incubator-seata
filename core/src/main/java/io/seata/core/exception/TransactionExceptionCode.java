@@ -116,6 +116,12 @@ public enum TransactionExceptionCode {
     //
     FailedToAddBranch,
 
+    /**
+     * Failed to change global status .
+     */
+    //
+    FailedToChangeGlobalStatus,
+
     ;
 
     private static final Map<Integer, TransactionExceptionCode> MAP = new HashMap<>(values().length);

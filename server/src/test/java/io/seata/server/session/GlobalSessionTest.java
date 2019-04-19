@@ -15,11 +15,12 @@
  */
 package io.seata.server.session;
 
+import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalOperation;
 import io.seata.core.model.GlobalStatus;
-
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -61,7 +62,27 @@ public class GlobalSessionTest {
      */
     @Test(dataProvider = "globalSessionProvider")
     public void changeStatusTest(GlobalSession globalSession) throws Exception {
-        globalSession.changeStatus(GlobalOperation.COMMIT,GlobalStatus.Committing);
+        globalSession.changeStatus(GlobalOperation.COMMIT, GlobalStatus.Committing);
+    }
+
+    /**
+     * Change status exp test.
+     *
+     * @param globalSession the global session
+     * @throws Exception the exception
+     */
+    @Test(dataProvider = "globalSessionProvider")
+    public void changeStatusExpTest(GlobalSession globalSession) throws Exception {
+        boolean result = false;
+        try {
+            globalSession.changeStatus(GlobalOperation.COMMIT, GlobalStatus.Committed);
+        } catch (TransactionException e) {
+            Assert.assertEquals(TransactionExceptionCode.FailedToChangeGlobalStatus, e.getCode());
+            result = true;
+        }
+        if (!result) {
+            Assert.fail("change status exp test failed");
+        }
     }
 
     /**

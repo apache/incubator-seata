@@ -23,6 +23,7 @@ import java.util.Collections;
 import io.seata.core.domain.StateGraph;
 import io.seata.core.domain.StateGraphHelper;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalOperation;
@@ -284,7 +285,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             }
         } else {
             throw new TransactionException(
-                "status not can be changed,current status is " + this.status + " ,operation=" + operation + " , target status="
+                TransactionExceptionCode.FailedToChangeGlobalStatus,
+                "status not can be changed,current status is " + this.status + " ,operation=" + operation
+                    + " , target status="
                     + status);
         }
     }
