@@ -21,7 +21,7 @@
     <parent>
         <groupId>io.seata</groupId>
         <artifactId>seata-parent</artifactId>
-        <version>0.5.0-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-tcc</artifactId>
@@ -37,7 +37,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-rm</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
