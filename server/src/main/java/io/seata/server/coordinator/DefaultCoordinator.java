@@ -27,6 +27,7 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.GlobalOperation;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.ResourceManagerInbound;
 import io.seata.core.protocol.AbstractMessage;
@@ -208,7 +209,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             }
 
             globalSession.close();
-            globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
+            globalSession.changeStatus(GlobalOperation.TIMEOUT,GlobalStatus.TimeoutRollbacking);
             LOGGER.info(
                 "Global transaction[" + globalSession.getTransactionId() + "] is timeout and will be rolled back.");
 

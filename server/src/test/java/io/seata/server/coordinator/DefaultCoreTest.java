@@ -19,6 +19,7 @@ import io.seata.common.XID;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.model.GlobalOperation;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.ResourceManagerInbound;
 import io.seata.server.session.BranchSession;
@@ -138,6 +139,7 @@ public class DefaultCoreTest {
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseOne_Done));
+        globalSession.changeStatus(GlobalOperation.COMMIT,GlobalStatus.Committing);
         core.doGlobalCommit(globalSession, false);
         Assert.assertEquals(globalSession.getStatus(), GlobalStatus.Committed);
     }
@@ -173,6 +175,7 @@ public class DefaultCoreTest {
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseOne_Timeout, BranchStatus.PhaseOne_Done));
+        globalSession.changeStatus(GlobalOperation.COMMIT,GlobalStatus.Committing);
         core.doGlobalCommit(globalSession, false);
         Assert.assertEquals(globalSession.getStatus(), GlobalStatus.CommitRetrying);
     }
@@ -202,6 +205,7 @@ public class DefaultCoreTest {
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_Rollbacked));
+        globalSession.changeStatus(GlobalOperation.ROLLBACK,GlobalStatus.Rollbacking);
         core.doGlobalRollback(globalSession, false);
         Assert.assertEquals(globalSession.getStatus(), GlobalStatus.Rollbacked);
     }
@@ -220,6 +224,7 @@ public class DefaultCoreTest {
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_RollbackFailed_Unretryable));
+        globalSession.changeStatus(GlobalOperation.ROLLBACK,GlobalStatus.Rollbacking);
         core.doGlobalRollback(globalSession, false);
         Assert.assertEquals(globalSession.getStatus(), GlobalStatus.RollbackFailed);
     }
@@ -237,6 +242,7 @@ public class DefaultCoreTest {
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_RollbackFailed_Retryable));
+        globalSession.changeStatus(GlobalOperation.ROLLBACK,GlobalStatus.Rollbacking);
         core.doGlobalRollback(globalSession, false);
         Assert.assertEquals(globalSession.getStatus(), GlobalStatus.RollbackRetrying);
     }
