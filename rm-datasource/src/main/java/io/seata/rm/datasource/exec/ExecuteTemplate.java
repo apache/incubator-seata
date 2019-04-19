@@ -72,8 +72,8 @@ public class ExecuteTemplate {
 
         if (sqlRecognizer == null) {
             sqlRecognizer = SQLVisitorFactory.get(
-                statementProxy.getTargetSQL(),
-                statementProxy.getConnectionProxy().getDbType());
+                    statementProxy.getTargetSQL(),
+                    statementProxy.getConnectionProxy().getDbType());
         }
         Executor<T> executor = null;
         if (sqlRecognizer == null) {
@@ -103,10 +103,10 @@ public class ExecuteTemplate {
 
         } catch (Throwable ex) {
             if (ex instanceof SQLException) {
-                throw (SQLException)ex;
+                throw (SQLException) ex;
             } else {
                 // Turn everything into SQLException
-                new SQLException(ex);
+                throw new SQLException(ex);
             }
         }
         return rs;
