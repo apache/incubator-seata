@@ -80,7 +80,7 @@ public class MessageFuture {
      * @param obj the obj
      */
     public void setResultMessage(Object obj) {
-        origin.complete(obj == null ? NULL : obj);
+        origin.complete(obj);
     }
 
     /**
