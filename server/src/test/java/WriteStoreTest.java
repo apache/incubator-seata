@@ -21,18 +21,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.alibaba.fescar.core.exception.TransactionException;
-import com.alibaba.fescar.core.model.BranchStatus;
-import com.alibaba.fescar.core.model.GlobalStatus;
-import com.alibaba.fescar.server.session.BranchSession;
-import com.alibaba.fescar.server.session.GlobalSession;
-import com.alibaba.fescar.server.session.SessionCondition;
-import com.alibaba.fescar.server.session.SessionManager;
-import com.alibaba.fescar.server.store.FileTransactionStoreManager;
-import com.alibaba.fescar.server.store.SessionStorable;
-import com.alibaba.fescar.server.store.TransactionStoreManager;
-import com.alibaba.fescar.server.store.TransactionStoreManager.LogOperation;
-import com.alibaba.fescar.server.store.TransactionWriteStore;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchStatus;
+import io.seata.core.model.GlobalStatus;
+import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
+import io.seata.server.session.SessionManager;
+import io.seata.server.store.FileTransactionStoreManager;
+import io.seata.server.store.SessionStorable;
+import io.seata.server.store.TransactionStoreManager;
+import io.seata.server.store.TransactionStoreManager.LogOperation;
+import io.seata.server.store.TransactionWriteStore;
 
 /**
  * The type Write store test.
@@ -46,7 +46,7 @@ import com.alibaba.fescar.server.store.TransactionWriteStore;
 public class WriteStoreTest {
     private static String vgroup = "vgroupMock";
     private static String appname = "appnameMock";
-    private static String instname = "fescarMocK";
+    private static String instname = "seataMocK";
     private static int trx_num = 65535 * 5;
     private static int trx_begin = 0;
 
@@ -59,7 +59,7 @@ public class WriteStoreTest {
      */
     public static void main(String[] args) throws InterruptedException, IOException {
         TransactionStoreManager transactionStoreManager = new FileTransactionStoreManager(
-            "/Users/min.ji/Documents/test/data",
+        "~/Documents/test/data",
             new SessionManager() {
                 @Override
                 public void addGlobalSession(GlobalSession session) throws TransactionException {
