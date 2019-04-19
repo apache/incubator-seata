@@ -181,7 +181,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                     xids.add(commitContext.xid);
                     branchIds.add(commitContext.branchId);
                     int maxSize = xids.size() > branchIds.size() ? xids.size() : branchIds.size();
-                    if(maxSize % UNDOLOG_DELETE_LIMIT_SIZE == 0){
+                    if(maxSize == UNDOLOG_DELETE_LIMIT_SIZE){
                         try {
                             UndoLogManager.batchDeleteUndoLog(xids, branchIds, UNDOLOG_DELETE_LIMIT_SIZE, conn);
                         } catch (Exception ex) {
