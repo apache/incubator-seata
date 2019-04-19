@@ -30,7 +30,7 @@ target/
 /distribution/lib
 server/*root.*
 server/.root.*
-#*.data
+*.data
 
 # system ignore
 .DS_Store
