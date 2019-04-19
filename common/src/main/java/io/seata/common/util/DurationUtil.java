@@ -61,13 +61,4 @@ public class DurationUtil {
         }
     }
 
-    public static void main(String[] args) {
-        System.out.println(parse("1d").getSeconds());
-        System.out.println(parse("1h").getSeconds());
-        System.out.println(parse("1m").getSeconds());
-        System.out.println(parse("1s").getSeconds());
-        System.out.println(parse("1ms").getSeconds());
-        System.out.println(parse("-1ms").getSeconds());
-    }
-
 }
