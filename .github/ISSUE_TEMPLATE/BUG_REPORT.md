@@ -1,11 +1,11 @@
 ---
 name: Bug Report
-about: If you would like to report a issue to Fescar, please use this template.
+about: If you would like to report a issue to Seata, please use this template.
 
 
 ---
 
-- [ ] I have searched the [issues](https://github.com/alibaba/fescar/issues) of this repository and believe that this is not a duplicate.
+- [ ] I have searched the [issues](https://github.com/seata/seata/issues) of this repository and believe that this is not a duplicate.
 
 ### Ⅰ. Issue Description
 

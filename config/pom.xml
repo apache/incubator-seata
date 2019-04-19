@@ -18,20 +18,20 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>fescar-all</artifactId>
-        <groupId>com.alibaba.fescar</groupId>
-        <version>0.4.2</version>
+        <groupId>io.seata</groupId>
+        <artifactId>seata-parent</artifactId>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>fescar-config</artifactId>
+    <artifactId>seata-config</artifactId>
     <packaging>pom</packaging>
-    <name>fescar-config ${project.version}</name>
+    <name>seata-config ${project.version}</name>
     <modules>
-        <module>fescar-config-core</module>
-        <module>fescar-config-apollo</module>
-        <module>fescar-config-nacos</module>
-        <module>fescar-config-zk</module>
-        <module>fescar-config-all</module>
+        <module>seata-config-core</module>
+        <module>seata-config-apollo</module>
+        <module>seata-config-nacos</module>
+        <module>seata-config-zk</module>
+        <module>seata-config-all</module>
     </modules>
 
     <dependencies>

@@ -19,9 +19,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.alibaba.fescar</groupId>
-    <artifactId>fescar-all</artifactId>
-    <version>0.4.2</version>
+    <groupId>io.seata</groupId>
+    <artifactId>seata-parent</artifactId>
+    <version>${revision}</version>
     <modules>
         <module>config</module>
         <module>common</module>
@@ -40,9 +40,9 @@
     </modules>
     <packaging>pom</packaging>
 
-    <name>Alibaba fescar ${project.version}</name>
-    <url>http://fescar.io</url>
-    <description>top fescar project pom.xml file</description>
+    <name>Seata ${project.version}</name>
+    <url>http://seata.io</url>
+    <description>top seata project pom.xml file</description>
     <prerequisites>
         <maven>3.2.5</maven>
     </prerequisites>
@@ -55,35 +55,37 @@
     </licenses>
     <developers>
         <developer>
-            <id>Alibaba Fescar</id>
-            <name>Fescar</name>
-            <url>http://fescar.io</url>
+            <id>Seata</id>
+            <name>Seata</name>
+            <url>http://seata.io</url>
         </developer>
     </developers>
 
     <organization>
-        <name>Alibaba Group</name>
-        <url>https://github.com/alibaba</url>
+        <name>Seata</name>
+        <url>https://github.com/seata</url>
     </organization>
 
     <issueManagement>
         <system>github</system>
-        <url>https://github.com/alibaba/fescar/issues</url>
+        <url>https://github.com/seata/seata/issues</url>
     </issueManagement>
 
     <scm>
-        <url>git@github.com:alibaba/fescar.git</url>
-        <connection>scm:git@github.com:alibaba/fescar.git</connection>
-        <developerConnection>scm:git@github.com:alibaba/fescar.git</developerConnection>
+        <url>git@github.com:seata/seata.git</url>
+        <connection>scm:git@github.com:seata/seata.git</connection>
+        <developerConnection>scm:git@github.com:seata/seata.git</developerConnection>
     </scm>
 
     <properties>
+        <!-- seata version -->
+        <revision>0.5.0</revision>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
         <!-- Maven properties -->
         <maven.test.skip>false</maven.test.skip>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <!--<maven.javadoc.skip>true</maven.javadoc.skip>-->
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -112,6 +114,12 @@
         <nacos-client.version>0.9.1</nacos-client.version>
         <javax-inject.version>1</javax-inject.version>
         <archaius-core.version>0.7.6</archaius-core.version>
+        <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
+        <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
+        <p3c-pmd.version>1.3.6</p3c-pmd.version>
+        <maven-pmd-plugin.version>3.8</maven-pmd-plugin.version>
+        <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
+        <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
     </properties>
     <!--test-->
     <dependencies>
@@ -132,122 +140,122 @@
         <dependencies>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-common</artifactId>
+                <artifactId>seata-common</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-config</artifactId>
+                <artifactId>seata-config</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-server</artifactId>
+                <artifactId>seata-server</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-core</artifactId>
+                <artifactId>seata-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-rm-datasource</artifactId>
+                <artifactId>seata-rm-datasource</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-tm</artifactId>
+                <artifactId>seata-tm</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-spring</artifactId>
+                <artifactId>seata-spring</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-dubbo</artifactId>
+                <artifactId>seata-dubbo</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery</artifactId>
+                <artifactId>seata-discovery</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery-core</artifactId>
+                <artifactId>seata-discovery-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery-all</artifactId>
+                <artifactId>seata-discovery-all</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery-consul</artifactId>
+                <artifactId>seata-discovery-consul</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery-eureka</artifactId>
+                <artifactId>seata-discovery-eureka</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery-zk</artifactId>
+                <artifactId>seata-discovery-zk</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery-redis</artifactId>
+                <artifactId>seata-discovery-redis</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-discovery-nacos</artifactId>
+                <artifactId>seata-discovery-nacos</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-config-core</artifactId>
+                <artifactId>seata-config-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-config-apollo</artifactId>
+                <artifactId>seata-config-apollo</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-config-nacos</artifactId>
+                <artifactId>seata-config-nacos</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-config-zk</artifactId>
+                <artifactId>seata-config-zk</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-config-all</artifactId>
+                <artifactId>seata-config-all</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-tcc</artifactId>
+                <artifactId>seata-tcc</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-rm</artifactId>
+                <artifactId>seata-rm</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
-                <artifactId>fescar-test</artifactId>
+                <artifactId>seata-test</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -378,7 +386,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>2.2.1</version>
+                        <version>${maven-source-plugin.version}</version>
                         <executions>
                             <execution>
                                 <phase>package</phase>
@@ -392,9 +400,10 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.0.0</version>
+                        <version>${maven-javadoc-plugin.version}</version>
                         <configuration>
                             <charset>UTF-8</charset>
+                            <failOnError>false</failOnError>
                         </configuration>
                         <executions>
                             <execution>
@@ -407,9 +416,20 @@
                     </plugin>
                     <!-- GPG -->
                     <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.7</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>oss_seata</serverId>
+                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+                    <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.5</version>
+                        <version>1.6</version>
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
@@ -417,21 +437,26 @@
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
+                                <configuration>
+                                    <keyname>F72AF874ECA9BBA7751C2DFD553EBAF7AC17F320</keyname>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
                 </plugins>
             </build>
+
             <distributionManagement>
                 <snapshotRepository>
-                    <id>openSource</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+                    <id>oss_seata</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
                 </snapshotRepository>
                 <repository>
-                    <id>openSource</id>
+                    <id>oss_seata</id>
                     <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
                 </repository>
             </distributionManagement>
+
         </profile>
     </profiles>
 
@@ -447,7 +472,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-pmd-plugin</artifactId>
-                <version>3.8</version>
+                <version>${maven-pmd-plugin.version}</version>
                 <configuration>
                     <sourceEncoding>${project.build.sourceEncoding}</sourceEncoding>
                     <minimumPriority>2</minimumPriority>
@@ -477,14 +502,14 @@
                     <dependency>
                         <groupId>com.alibaba.p3c</groupId>
                         <artifactId>p3c-pmd</artifactId>
-                        <version>1.3.6</version>
+                        <version>${p3c-pmd.version}</version>
                     </dependency>
                 </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
+                <version>${maven-compiler-plugin.version}</version>
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
@@ -509,7 +534,31 @@
                     </execution>
                 </executions>
             </plugin>
-
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>${flatten-maven-plugin.version}</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
