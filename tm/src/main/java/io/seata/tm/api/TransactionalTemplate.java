@@ -16,14 +16,16 @@
 
 package io.seata.tm.api;
 
-import java.util.List;
 
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.exception.TransactionException;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
-
+import io.seata.tm.api.transaction.TransactionInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 /**
  * Template of executing business logic with a global transaction.
@@ -42,23 +44,20 @@ public class TransactionalTemplate {
      * @return the object
      * @throws TransactionalExecutor.ExecutionException the execution exception
      */
-    public Object execute(TransactionalExecutor business) throws TransactionalExecutor.ExecutionException {
-
+    public Object execute(TransactionalExecutor business) throws Throwable {
         // 1. get or create a transaction
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
 
+        // 1.1 get transactionInfo
+        TransactionInfo txInfo = business.getTransactionInfo();
+        if (txInfo == null) {
+            throw new ShouldNeverHappenException("transactionInfo does not exist");
+        }
         try {
 
             // 2. begin transaction
-            try {
-                triggerBeforeBegin();
-                tx.begin(business.timeout(), business.name());
-                triggerAfterBegin();
-            } catch (TransactionException txe) {
-                throw new TransactionalExecutor.ExecutionException(tx, txe,
-                    TransactionalExecutor.Code.BeginFailure);
+            beginTransaction(txInfo, tx);
 
-            }
             Object rs = null;
             try {
 
@@ -67,38 +66,67 @@ public class TransactionalTemplate {
 
             } catch (Throwable ex) {
 
-                // 3. any business exception, rollback.
-                try {
-                    triggerBeforeRollback();
-                    tx.rollback();
-                    triggerAfterRollback();
-                    // 3.1 Successfully rolled back
-                    throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
-
-                } catch (TransactionException txe) {
-                    // 3.2 Failed to rollback
-                    throw new TransactionalExecutor.ExecutionException(tx, txe,
-                        TransactionalExecutor.Code.RollbackFailure, ex);
-
-                }
-
+                // 3.the needed business exception to rollback.
+                completeTransactionAfterThrowing(txInfo,tx,ex);
+                throw ex;
             }
+
             // 4. everything is fine, commit.
-            try {
-                triggerBeforeCommit();
-                tx.commit();
-                triggerAfterCommit();
-            } catch (TransactionException txe) {
-                // 4.1 Failed to commit
-                throw new TransactionalExecutor.ExecutionException(tx, txe,
-                    TransactionalExecutor.Code.CommitFailure);
-            }
+            commitTransaction(tx);
 
             return rs;
         } finally {
             //5. clear
             triggerAfterCompletion();
             cleanUp();
+        }
+    }
+
+    private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable ex) throws TransactionalExecutor.ExecutionException {
+        //roll back
+        if (txInfo != null && txInfo.rollbackOn(ex)) {
+            try {
+                rollbackTransaction(tx, ex);
+            } catch (TransactionException txe) {
+                // Failed to rollback
+                throw new TransactionalExecutor.ExecutionException(tx, txe,
+                        TransactionalExecutor.Code.RollbackFailure, ex);
+            }
+        } else {
+            // not roll back on this exception, so commit
+            commitTransaction(tx);
+        }
+    }
+
+    private void commitTransaction(GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
+        try {
+            triggerBeforeCommit();
+            tx.commit();
+            triggerAfterCommit();
+        } catch (TransactionException txe) {
+            // 4.1 Failed to commit
+            throw new TransactionalExecutor.ExecutionException(tx, txe,
+                TransactionalExecutor.Code.CommitFailure);
+        }
+    }
+
+    private void rollbackTransaction(GlobalTransaction tx, Throwable ex) throws TransactionException, TransactionalExecutor.ExecutionException {
+        triggerBeforeRollback();
+        tx.rollback();
+        triggerAfterRollback();
+        // 3.1 Successfully rolled back
+        throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
+    }
+
+    private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
+        try {
+            triggerBeforeBegin();
+            tx.begin(txInfo.getTimeOut(), txInfo.getName());
+            triggerAfterBegin();
+        } catch (TransactionException txe) {
+            throw new TransactionalExecutor.ExecutionException(tx, txe,
+                TransactionalExecutor.Code.BeginFailure);
+
         }
     }
 
