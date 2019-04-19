@@ -102,12 +102,11 @@ public class ExecuteTemplate {
             rs = executor.execute(args);
 
         } catch (Throwable ex) {
-            if (ex instanceof SQLException) {
-                throw (SQLException) ex;
-            } else {
-                // Turn everything into SQLException
-                throw new SQLException(ex);
+            if (!(ex instanceof SQLException)) {
+                // Turn other exception into SQLException
+                ex = new SQLException(ex);
             }
+            throw (SQLException)ex;
         }
         return rs;
     }
