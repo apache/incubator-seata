@@ -30,23 +30,35 @@ public class GuavaEventBusTest {
     AtomicInteger counter = new AtomicInteger(0);
     EventBus eventBus = new GuavaEventBus("test");
 
+    class TestEvent implements Event {
+      private final int value;
+
+      public int getValue() {
+        return value;
+      }
+
+      public TestEvent(int value) {
+        this.value = value;
+      }
+    }
+
     class TestSubscriber {
       @Subscribe
-      public void process(Integer event) {
-        counter.addAndGet(event);
+      public void process(TestEvent event) {
+        counter.addAndGet(event.getValue());
       }
     }
 
     TestSubscriber subscriber = new TestSubscriber();
     eventBus.register(subscriber);
 
-    eventBus.post(1);
+    eventBus.post(new TestEvent(1));
 
     Assert.assertEquals(1, counter.get());
 
     eventBus.unregister(subscriber);
 
-    eventBus.post(1);
+    eventBus.post(new TestEvent(1));
 
     Assert.assertEquals(1, counter.get());
   }

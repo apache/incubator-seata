@@ -17,9 +17,14 @@
 package io.seata.server.event;
 
 import java.io.IOException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import com.google.common.eventbus.Subscribe;
 
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
@@ -31,19 +36,37 @@ import io.seata.server.session.SessionHolder;
 public class DefaultCoreForEventBusTest {
   @Test
   public void test() throws IOException, TransactionException, InterruptedException {
+    class GlobalTransactionEventSubscriber {
+      private final Map<GlobalStatus, AtomicInteger> eventCounters;
+
+      public Map<GlobalStatus, AtomicInteger> getEventCounters() {
+        return eventCounters;
+      }
+
+      public GlobalTransactionEventSubscriber() {
+        this.eventCounters = new ConcurrentHashMap<>();
+      }
+
+      @Subscribe
+      public void processGlobalTransactionEvent(GlobalTransactionEvent event) {
+        AtomicInteger counter = eventCounters.computeIfAbsent(event.getStatus(), status -> new AtomicInteger(0));
+        counter.addAndGet(1);
+      }
+    }
+
     SessionHolder.init(null);
     DefaultCoordinator coordinator = new DefaultCoordinator(null);
     coordinator.init();
 
     Core core = CoreFactory.get();
 
-    GlobalTransactionEventListener listener = new GlobalTransactionEventListener();
-    EventBusManager.get().register(listener);
+    GlobalTransactionEventSubscriber subscriber = new GlobalTransactionEventSubscriber();
+    EventBusManager.get().register(subscriber);
 
     //start a transaction
     String xid = core.begin("test_app_id", "default_group", "test_tran_name", 30000);
 
-    Assert.assertEquals(1, listener.getEventCounters().get(GlobalStatus.Begin).get());
+    Assert.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
 
     //commit this transaction
     core.commit(xid);
@@ -52,19 +75,19 @@ public class DefaultCoreForEventBusTest {
     Thread.sleep(50);
 
     //check
-    Assert.assertEquals(1, listener.getEventCounters().get(GlobalStatus.AsyncCommitting).get());
-    Assert.assertEquals(1, listener.getEventCounters().get(GlobalStatus.Committed).get());
+    Assert.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.AsyncCommitting).get());
+    Assert.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Committed).get());
 
     //start another new transaction
     xid = core.begin("test_app_id", "default_group", "test_tran_name2", 30000);
 
-    Assert.assertEquals(2, listener.getEventCounters().get(GlobalStatus.Begin).get());
+    Assert.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
 
     core.rollback(xid);
 
     //check
-    Assert.assertEquals(1, listener.getEventCounters().get(GlobalStatus.Rollbacking).get());
-    Assert.assertEquals(1, listener.getEventCounters().get(GlobalStatus.Rollbacked).get());
+    Assert.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacking).get());
+    Assert.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacked).get());
 
     //start more one new transaction for test timeout and let this transaction immediately timeout
     xid = core.begin("test_app_id", "default_group", "test_tran_name3", 0);
@@ -73,6 +96,6 @@ public class DefaultCoreForEventBusTest {
     Thread.sleep(100);
 
     //at lease retry once because DefaultCoordinator.timeoutCheck is 2 milliseconds
-    Assert.assertTrue(listener.getEventCounters().get(GlobalStatus.TimeoutRollbacking).get() >= 1);
+    Assert.assertTrue(subscriber.getEventCounters().get(GlobalStatus.TimeoutRollbacking).get() >= 1);
   }
 }

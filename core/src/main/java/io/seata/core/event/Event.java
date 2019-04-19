@@ -16,10 +16,5 @@
 
 package io.seata.core.event;
 
-public interface EventBus {
-  void register(Object subscriber);
-
-  void unregister(Object subscriber);
-
-  void post(Event event);
+public interface Event {
 }

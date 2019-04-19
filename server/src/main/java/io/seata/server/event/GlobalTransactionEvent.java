@@ -16,9 +16,10 @@
 
 package io.seata.server.event;
 
+import io.seata.core.event.Event;
 import io.seata.core.model.GlobalStatus;
 
-public class GlobalTransactionEvent {
+public class GlobalTransactionEvent implements Event {
   public static final String ROLE_TC = "tc";
 
   public static final String ROLE_TM = "tm";

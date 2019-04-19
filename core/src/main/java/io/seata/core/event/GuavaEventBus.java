@@ -24,17 +24,17 @@ public class GuavaEventBus implements EventBus {
   }
 
   @Override
-  public void register(Object object) {
-    this.eventBus.register(object);
+  public void register(Object subscriber) {
+    this.eventBus.register(subscriber);
   }
 
   @Override
-  public void unregister(Object object) {
-    this.eventBus.unregister(object);
+  public void unregister(Object subscriber) {
+    this.eventBus.unregister(subscriber);
   }
 
   @Override
-  public void post(Object event) {
+  public void post(Event event) {
     this.eventBus.post(event);
   }
 }
