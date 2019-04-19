@@ -15,7 +15,6 @@
  */
 package io.seata.server.store;
 
-import com.alibaba.fescar.server.store.FlushDiskMode;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 

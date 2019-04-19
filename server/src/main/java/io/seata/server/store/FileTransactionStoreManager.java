@@ -16,7 +16,6 @@
 
 package io.seata.server.store;
 
-import com.alibaba.fescar.server.store.FlushDiskMode;
 import io.seata.common.util.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
