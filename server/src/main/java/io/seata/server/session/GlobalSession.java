@@ -62,15 +62,19 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
-    protected StateGraph stateGraph = new StateGraph();
+    private static StateGraph stateGraph = new StateGraph();
 
-    private void registerStateGraph() {
-        registerBlackStateGraph();
+    static {
+        registerStateGraph();
+    }
+
+    private static void registerStateGraph() {
+        registerForbiddenStateGraph();
         registerAcceptStatusGraph();
 
     }
 
-    private void registerAcceptStatusGraph() {
+    private static void registerAcceptStatusGraph() {
         stateGraph.addAllowState(StateGraphHelper.toAcceptState(
             GlobalStatus.Begin.name(),
             GlobalOperation.COMMIT.name(), GlobalStatus.Committing.name()));
@@ -216,7 +220,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     }
 
-    private void registerBlackStateGraph() {
+    private static void registerForbiddenStateGraph() {
 
         //do not need now
     }
@@ -426,7 +430,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * Instantiates a new Global session.
      */
     public GlobalSession() {
-        registerStateGraph();
     }
 
     /**
@@ -438,7 +441,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @param timeout                 the timeout
      */
     public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout) {
-        this();
         this.transactionId = UUIDGenerator.generateUUID();
         this.status = GlobalStatus.Begin;
 
