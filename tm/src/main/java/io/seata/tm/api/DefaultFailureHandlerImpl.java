@@ -16,8 +16,15 @@
 
 package io.seata.tm.api;
 
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timeout;
+import io.netty.util.TimerTask;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.model.GlobalStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Default failure handler.
@@ -26,7 +33,17 @@ import org.slf4j.LoggerFactory;
  * @date 2019 /1/8
  */
 public class DefaultFailureHandlerImpl implements FailureHandler {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFailureHandlerImpl.class);
+
+    private static final long SCHEDULE_INTERVAL_SECONDS = 10;
+
+    private static final long TICK_DURATION = 1;
+
+    private static final int TICKS_PER_WHEEL = 8;
+
+    private HashedWheelTimer timer = new HashedWheelTimer(
+            TICK_DURATION, TimeUnit.SECONDS, TICKS_PER_WHEEL);
 
     @Override
     public void onBeginFailure(GlobalTransaction tx, Throwable cause) {
@@ -36,10 +53,48 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
     @Override
     public void onCommitFailure(GlobalTransaction tx, Throwable cause) {
         LOGGER.warn("Failed to commit transaction[" + tx.getXid() + "]", cause);
+        timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.Committed), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
 
     @Override
     public void onRollbackFailure(GlobalTransaction tx, Throwable cause) {
         LOGGER.warn("Failed to rollback transaction[" + tx.getXid() + "]", cause);
+        timer.newTimeout(new CheckTimerTask(tx, GlobalStatus.Rollbacked), SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
     }
+
+    protected class CheckTimerTask implements TimerTask{
+
+        private final GlobalTransaction tx;
+
+        private final GlobalStatus required;
+
+        private boolean isStopped = false;
+
+        protected CheckTimerTask(final GlobalTransaction tx, GlobalStatus required) {
+            this.tx = tx;
+            this.required = required;
+        }
+
+        @Override
+        public void run(Timeout timeout) throws Exception {
+            if(!isStopped){
+                isStopped = shouldStop(tx, required);
+                timer.newTimeout(this, SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
+            }
+        }
+    }
+
+    private boolean shouldStop(final GlobalTransaction tx, GlobalStatus required){
+        try {
+            GlobalStatus status = tx.getStatus();
+            LOGGER.warn("transaction[" + tx.getXid() + "] current status is [" + status + "]");
+            if(status == required || status == GlobalStatus.Finished){
+                return true;
+            }
+        } catch (TransactionException e) {
+            LOGGER.error("fetch GlobalTransaction status error", e);
+        }
+        return false;
+    }
+
 }
