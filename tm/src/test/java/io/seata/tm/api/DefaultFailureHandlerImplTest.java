@@ -62,7 +62,6 @@ public class DefaultFailureHandlerImplTest {
                     if(new Random().nextInt(2) == 1){
                         result = GlobalStatus.Committed;
                     }
-                    System.out.println("getStatus()==" + result);
                     return result;
                 }
 
@@ -73,6 +72,5 @@ public class DefaultFailureHandlerImplTest {
             }, null);
         }
         Thread.sleep(11000);
-        System.out.println("main end");
     }
 }
