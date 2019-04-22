@@ -78,12 +78,14 @@
     </scm>
 
     <properties>
+        <!-- seata version -->
+        <revision>0.5.0</revision>
+
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <revision>0.5.0-SNAPSHOT</revision>
         <!-- Maven properties -->
         <maven.test.skip>false</maven.test.skip>
-        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <!--<maven.javadoc.skip>true</maven.javadoc.skip>-->
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -401,6 +403,7 @@
                         <version>${maven-javadoc-plugin.version}</version>
                         <configuration>
                             <charset>UTF-8</charset>
+                            <failOnError>false</failOnError>
                         </configuration>
                         <executions>
                             <execution>
