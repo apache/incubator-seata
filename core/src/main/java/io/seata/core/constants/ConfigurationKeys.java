@@ -93,4 +93,10 @@ public class ConfigurationKeys {
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_PREFIX + "report.retry.count";
+
+
+    /**
+     * The constant SERIALIZE_FOR_RPC.
+     */
+    public static final String SERIALIZE_FOR_RPC = CLIENT_PREFIX + "transport.serialize";
 }
