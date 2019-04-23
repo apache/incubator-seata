@@ -36,6 +36,7 @@ import com.alipay.sofa.registry.client.api.registration.SubscriberRegistration;
 import com.alipay.sofa.registry.client.provider.DefaultRegistryClient;
 import com.alipay.sofa.registry.client.provider.DefaultRegistryClientConfigBuilder;
 import com.alipay.sofa.registry.core.model.ScopeEnum;
+import io.seata.common.util.NetUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryService;
@@ -105,7 +106,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     @Override
     public void register(InetSocketAddress address) throws Exception {
-        validAddress(address);
+        NetUtil.validAddress(address);
         String clusterName = registryProps.getProperty(PRO_CLUSTER_KEY);
         PublisherRegistration publisherRegistration = new PublisherRegistration(clusterName);
         publisherRegistration.setGroup(registryProps.getProperty(PRO_GROUP_KEY));
@@ -115,7 +116,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     @Override
     public void unregister(InetSocketAddress address) throws Exception {
-        validAddress(address);
+        NetUtil.validAddress(address);
         String clusterName = registryProps.getProperty(PRO_CLUSTER_KEY);
         getRegistryInstance().unregister(clusterName, registryProps.getProperty(PRO_GROUP_KEY), RegistryType.PUBLISHER);
     }
@@ -206,12 +207,6 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     @Override
     public void close() throws Exception {
-    }
-
-    private void validAddress(InetSocketAddress address) {
-        if (null == address.getHostName() || 0 == address.getPort()) {
-            throw new IllegalArgumentException("invalid address:" + address);
-        }
     }
 
     private static Properties getNamingProperties() {
