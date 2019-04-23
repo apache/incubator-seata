@@ -254,7 +254,10 @@ public final class UndoLogManager {
         for (String xid: xids){
             deletePST.setString(paramsIndex++, xid);
         }
-        deletePST.executeUpdate();
+        int deleteRows = deletePST.executeUpdate();
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("batch delete undo log size " + deleteRows);
+        }
     }
 
     protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize,int limitSize) {

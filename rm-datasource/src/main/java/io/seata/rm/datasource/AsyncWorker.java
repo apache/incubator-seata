@@ -185,19 +185,21 @@ public class AsyncWorker implements ResourceManagerInbound {
                         try {
                             UndoLogManager.batchDeleteUndoLog(xids, branchIds, UNDOLOG_DELETE_LIMIT_SIZE, conn);
                         } catch (Exception ex) {
-                            LOGGER.warn("Failed to batch delete undo log [" +  "/" + xids + "]", ex);
+                            LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                         }
                         xids.clear();
                         branchIds.clear();
                     }
                 }
 
-                if (CollectionUtils.isNotEmpty(xids) && CollectionUtils.isNotEmpty(branchIds)) {
-                    try {
-                        UndoLogManager.batchDeleteUndoLog(xids, branchIds, UNDOLOG_DELETE_LIMIT_SIZE, conn);
-                    }catch (Exception ex) {
-                        LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
-                    }
+                if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
+                    return;
+                }
+
+                try {
+                    UndoLogManager.batchDeleteUndoLog(xids, branchIds, UNDOLOG_DELETE_LIMIT_SIZE, conn);
+                }catch (Exception ex) {
+                    LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                 }
 
             } finally {
