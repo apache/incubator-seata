@@ -40,8 +40,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private String dbType;
 
-    private boolean managed = false;
-
     /**
      * Instantiates a new Data source proxy.
      *
@@ -70,13 +68,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         } catch (SQLException e) {
             throw new IllegalStateException(String.format("can not init dataSource :%s", e.getSQLState()));
         }
-    }
-
-    private void assertManaged() {
-        if (!managed) {
-            DefaultResourceManager.get().registerResource(this);
-            managed = true;
-        }
+        DefaultResourceManager.get().registerResource(this);
     }
 
     /**
@@ -100,14 +92,12 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     @Override
     public ConnectionProxy getConnection() throws SQLException {
-        assertManaged();
         Connection targetConnection = targetDataSource.getConnection();
         return new ConnectionProxy(this, targetConnection);
     }
 
     @Override
     public ConnectionProxy getConnection(String username, String password) throws SQLException {
-        assertManaged();
         Connection targetConnection = targetDataSource.getConnection(username, password);
         return new ConnectionProxy(this, targetConnection);
     }
