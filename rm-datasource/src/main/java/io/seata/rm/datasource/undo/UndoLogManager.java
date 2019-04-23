@@ -16,16 +16,10 @@
 
 package io.seata.rm.datasource.undo;
 
-import java.sql.Blob;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.ConnectionContext;
@@ -33,9 +27,16 @@ import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Set;
 
 import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Retriable;
 
@@ -45,6 +46,7 @@ import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFai
  * @author sharajava
  */
 public final class UndoLogManager {
+
     private enum State {
         /**
          * This state can be properly rolled back by services
@@ -74,6 +76,7 @@ public final class UndoLogManager {
     private static String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
         "\t(branch_id, xid, rollback_info, log_status, log_created, log_modified)\n" +
         "VALUES (?, ?, ?, ?, now(), now())";
+
     private static String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + "\n" +
         "\tWHERE branch_id = ? AND xid = ?";
 
@@ -226,6 +229,58 @@ public final class UndoLogManager {
                 }
             }
         }
+    }
+
+    /**
+     * batch Delete undo log.
+     *
+     * @param xids
+     * @param branchIds
+     * @param limitSize
+     * @param conn
+     */
+    public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, int limitSize, Connection conn) throws SQLException {
+        if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
+            return;
+        }
+        int xidSize = xids.size();
+        int branchIdSize = branchIds.size();
+        String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize,limitSize);
+        PreparedStatement deletePST = conn.prepareStatement(batchDeleteSql);
+        int paramsIndex = 1;
+        for (Long branchId : branchIds) {
+            deletePST.setLong(paramsIndex++,branchId);
+        }
+        for (String xid: xids){
+            deletePST.setString(paramsIndex++, xid);
+        }
+        int deleteRows = deletePST.executeUpdate();
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("batch delete undo log size " + deleteRows);
+        }
+    }
+
+    protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize,int limitSize) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("DELETE FROM ")
+                .append(UNDO_LOG_TABLE_NAME)
+                .append(" WHERE  branch_id IN ");
+        appendInParam(xidSize, sqlBuilder);
+        sqlBuilder.append(" AND xid IN ");
+        appendInParam(branchIdSize, sqlBuilder);
+        sqlBuilder.append(" LIMIT ").append(limitSize);
+        return sqlBuilder.toString();
+    }
+
+    protected static void appendInParam(int size, StringBuilder sqlBuilder) {
+        sqlBuilder.append(" (");
+        for (int i = 0;i < size;i++) {
+            sqlBuilder.append("?");
+            if (i < (size - 1)) {
+                sqlBuilder.append(",");
+            }
+        }
+        sqlBuilder.append(") ");
     }
 
     /**
