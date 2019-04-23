@@ -18,28 +18,28 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>fescar-all</artifactId>
-        <groupId>com.alibaba.fescar</groupId>
-        <version>0.4.1</version>
+        <groupId>io.seata</groupId>
+        <artifactId>seata-parent</artifactId>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>fescar-distribution</artifactId>
+    <artifactId>seata-distribution</artifactId>
     <packaging>pom</packaging>
-    <name>fescar-distribution ${project.version}</name>
+    <name>seata-distribution ${project.version}</name>
 
     <dependencies>
         <dependency>
-            <groupId>com.alibaba.fescar</groupId>
-            <artifactId>fescar-server</artifactId>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-server</artifactId>
         </dependency>
     </dependencies>
     <profiles>
         <profile>
-            <id>release-fescar</id>
+            <id>release-seata</id>
             <dependencies>
                 <dependency>
-                    <groupId>com.alibaba.fescar</groupId>
-                    <artifactId>fescar-server</artifactId>
+                    <groupId>io.seata</groupId>
+                    <artifactId>seata-server</artifactId>
                 </dependency>
             </dependencies>
             <build>
@@ -49,7 +49,7 @@
                         <version>3.0.0</version>
                         <configuration>
                             <descriptors>
-                                <descriptor>release-fescar.xml</descriptor>
+                                <descriptor>release-seata.xml</descriptor>
                             </descriptors>
                         </configuration>
                         <executions>
@@ -63,7 +63,7 @@
                         </executions>
                     </plugin>
                 </plugins>
-                <finalName>fescar</finalName>
+                <finalName>seata</finalName>
             </build>
         </profile>
     </profiles>

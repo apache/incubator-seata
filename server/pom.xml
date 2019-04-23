@@ -18,19 +18,27 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>fescar-all</artifactId>
-        <groupId>com.alibaba.fescar</groupId>
-        <version>0.4.1</version>
+        <groupId>io.seata</groupId>
+        <artifactId>seata-parent</artifactId>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>fescar-server</artifactId>
+    <artifactId>seata-server</artifactId>
     <packaging>jar</packaging>
-    <name>fescar-server ${project.version}</name>
+    <name>seata-server ${project.version}</name>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>fescar-core</artifactId>
+            <artifactId>seata-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-config-all</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-discovery-all</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
@@ -75,8 +83,8 @@
                     <assembleDirectory>../distribution</assembleDirectory>
                     <programs>
                         <program>
-                            <mainClass>com.alibaba.fescar.server.Server</mainClass>
-                            <name>fescar-server</name>
+                            <mainClass>io.seata.server.Server</mainClass>
+                            <name>seata-server</name>
                             <jvmSettings>
                                 <extraArguments>
                                     <extraArgument>-server</extraArgument>
