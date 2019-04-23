@@ -93,6 +93,7 @@ public class RegisterRMRequest extends AbstractIdentifyRequest implements Serial
         }
 
         short len = in.readShort();
+        i -= 2;
         if (len > 0) {
             if (i < len) {
                 return false;
@@ -105,6 +106,7 @@ public class RegisterRMRequest extends AbstractIdentifyRequest implements Serial
         }
 
         len = in.readShort();
+        i -= 2;
         if (len > 0) {
             if (i < len) {
                 return false;
@@ -117,6 +119,7 @@ public class RegisterRMRequest extends AbstractIdentifyRequest implements Serial
         }
 
         len = in.readShort();
+        i -= 2;
         if (len > 0) {
             if (i < len) {
                 return false;
@@ -129,6 +132,7 @@ public class RegisterRMRequest extends AbstractIdentifyRequest implements Serial
         }
 
         len = in.readShort();
+        i -= 2;
         if (len > 0) {
             if (i < len) {
                 return false;
@@ -141,6 +145,7 @@ public class RegisterRMRequest extends AbstractIdentifyRequest implements Serial
         }
 
         int iLen = in.readInt();
+        i -= 4;
         if (iLen > 0) {
             if (i < iLen) {
                 return false;
