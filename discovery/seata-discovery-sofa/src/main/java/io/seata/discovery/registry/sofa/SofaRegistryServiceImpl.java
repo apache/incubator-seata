@@ -16,6 +16,15 @@
 
 package io.seata.discovery.registry.sofa;
 
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import com.alipay.sofa.registry.client.api.RegistryClient;
 import com.alipay.sofa.registry.client.api.RegistryClientConfig;
@@ -32,19 +41,8 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryService;
 import org.apache.commons.lang.StringUtils;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
-
 
 /**
  * The type SOFARegistry registry service.
@@ -62,7 +60,6 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     private static final String PRO_CLUSTER_KEY = "cluster";
     private static final String PRO_ADDRESS_WAIT_TIME_KEY = "addressWaitTime";
 
-
     private static final String DEFAULT_LOCAL_DATACENTER = "DefaultDataCenter";
     private static final String DEFAULT_LOCAL_REGION = "DEFAULT_ZONE";
     private static final String DEFAULT_GROUP = "SEATA";
@@ -72,12 +69,12 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
 
-
     private static final String HOST_SEPERATOR = ":";
     private static final String REGISTRY_TYPE = "sofa";
     private transient volatile CountDownLatch respondRegistries = new CountDownLatch(1);
 
-    private static final ConcurrentMap<String, List<SubscriberDataObserver>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, List<SubscriberDataObserver>> LISTENER_SERVICE_MAP
+        = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static Properties registryProps;
     private static volatile RegistryClient registryClient;
@@ -108,12 +105,9 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     public void register(InetSocketAddress address) throws Exception {
         validAddress(address);
         String clusterName = registryProps.getProperty(PRO_CLUSTER_KEY);
-        PublisherRegistration publisherRegistration;
-        publisherRegistration = new PublisherRegistration(clusterName);
+        PublisherRegistration publisherRegistration = new PublisherRegistration(clusterName);
         publisherRegistration.setGroup(registryProps.getProperty(PRO_GROUP_KEY));
-
         String serviceData = address.getAddress().getHostAddress() + HOST_SEPERATOR + address.getPort();
-
         getRegistryInstance().register(publisherRegistration, serviceData);
     }
 
@@ -132,14 +126,14 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
                     final String portStr = StringUtils.substringAfter(address, HOST_SEPERATOR);
 
                     RegistryClientConfig config = DefaultRegistryClientConfigBuilder.start()
-                            .setAppName(getApplicationName())
-                            .setDataCenter(registryProps.getProperty(PRO_DATACENTER_KEY))
-                            .setZone(registryProps.getProperty(PRO_REGION_KEY))
-                            .setRegistryEndpoint(StringUtils.substringBefore(address, HOST_SEPERATOR))
-                            .setRegistryEndpointPort(Integer.parseInt(portStr)).build();
+                        .setAppName(getApplicationName())
+                        .setDataCenter(registryProps.getProperty(PRO_DATACENTER_KEY))
+                        .setZone(registryProps.getProperty(PRO_REGION_KEY))
+                        .setRegistryEndpoint(StringUtils.substringBefore(address, HOST_SEPERATOR))
+                        .setRegistryEndpointPort(Integer.parseInt(portStr)).build();
 
                     registryClient = new DefaultRegistryClient(config);
-                    ((DefaultRegistryClient) registryClient).init();
+                    ((DefaultRegistryClient)registryClient).init();
                 }
             }
         }
@@ -193,7 +187,6 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         }
         return CLUSTER_ADDRESS_MAP.get(clusterName);
     }
-
 
     private List<InetSocketAddress> flatData(Map<String, List<String>> instances) {
         List<InetSocketAddress> result = new ArrayList<InetSocketAddress>();
@@ -284,45 +277,43 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     private static String getSofaClusterFileKey() {
         return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-                + FILE_CONFIG_SPLIT_CHAR
-                + PRO_CLUSTER_KEY;
+            + FILE_CONFIG_SPLIT_CHAR
+            + PRO_CLUSTER_KEY;
     }
 
     private static String getSofaAddressWaitTimeFileKey() {
         return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-                + FILE_CONFIG_SPLIT_CHAR
-                + PRO_ADDRESS_WAIT_TIME_KEY;
+            + FILE_CONFIG_SPLIT_CHAR
+            + PRO_ADDRESS_WAIT_TIME_KEY;
     }
 
     private static String getSofaAddrFileKey() {
         return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-                + FILE_CONFIG_SPLIT_CHAR
-                + PRO_SERVER_ADDR_KEY;
+            + FILE_CONFIG_SPLIT_CHAR
+            + PRO_SERVER_ADDR_KEY;
     }
 
     private static String getSofaRegionFileKey() {
         return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-                + FILE_CONFIG_SPLIT_CHAR
-                + PRO_REGION_KEY;
+            + FILE_CONFIG_SPLIT_CHAR
+            + PRO_REGION_KEY;
     }
 
     private static String getSofaDataCenterFileKey() {
         return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-                + FILE_CONFIG_SPLIT_CHAR
-                + PRO_DATACENTER_KEY;
+            + FILE_CONFIG_SPLIT_CHAR
+            + PRO_DATACENTER_KEY;
     }
-
 
     private static String getSofaGroupFileKey() {
         return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-                + FILE_CONFIG_SPLIT_CHAR
-                + PRO_GROUP_KEY;
+            + FILE_CONFIG_SPLIT_CHAR
+            + PRO_GROUP_KEY;
     }
-
 
     private String getApplicationFileKey() {
         return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-                + PRO_APPLICATION_KEY;
+            + PRO_APPLICATION_KEY;
     }
 
     private String getApplicationName() {
