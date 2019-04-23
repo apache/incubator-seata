@@ -19,7 +19,6 @@ package io.seata.rm.datasource.undo;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
-import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.ConnectionContext;
@@ -240,9 +239,6 @@ public final class UndoLogManager {
      * @param conn
      */
     public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, int limitSize, Connection conn) throws SQLException {
-        if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
-            return;
-        }
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize,limitSize);
