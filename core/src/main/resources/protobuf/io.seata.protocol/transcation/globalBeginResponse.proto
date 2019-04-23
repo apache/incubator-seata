@@ -7,7 +7,7 @@ import "AbstractTransactionResponse.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "GlobalBeginResponse";
-option java_package = "io.seata.protocol.protobuf";
+option java_package = "io.seata.protocol.core.protobuf";
 
 message GlobalBeginResponse {
     string xid = 1;

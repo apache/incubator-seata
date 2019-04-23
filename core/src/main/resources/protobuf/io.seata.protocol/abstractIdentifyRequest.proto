@@ -6,7 +6,7 @@ import "abstractMessage.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "AbstractIdentifyRequest";
-option java_package = "io.seata.protocol.protobuf";
+option java_package = "io.seata.protocol.core.protobuf";
 
 // PublishRequest is a publish request.
 message AbstractIdentifyRequest {
