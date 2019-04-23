@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+import "AbstractIdentifyRequest.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "RegisterRMResponse";
+option java_package = "io.seata.protocol.protobuf";
+
+// PublishRequest is a publish request.
+message RegisterRMResponse {
+    AbstractIdentifyRequest abstractIdentifyRequest = 1;
+    string resourceIds = 2;
+
+
+}
