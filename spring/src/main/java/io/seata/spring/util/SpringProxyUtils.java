@@ -113,6 +113,12 @@ public class SpringProxyUtils {
         if(bean == null){
             return false;
         }
+        //check dubbo proxy ?
+        String proxyClassName = bean.getClass().getName();
+        if(proxyClassName.startsWith("com.alibaba.dubbo.common.bytecode.proxy")
+                || proxyClassName.startsWith("org.apache.dubbo.common.bytecode.proxy") ){
+            return true;
+        }
         if (Proxy.class.isAssignableFrom(bean.getClass()) || AopUtils.isAopProxy(bean)) {
             return true;
         }else{
