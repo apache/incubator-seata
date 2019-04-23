@@ -36,6 +36,11 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFailureHandlerImpl.class);
 
+    /**
+     * Retry 1 hours by default
+     */
+    private static final int RETRY_MAX_TIMES = 6 * 60;
+
     private static final long SCHEDULE_INTERVAL_SECONDS = 10;
 
     private static final long TICK_DURATION = 1;
@@ -68,6 +73,8 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
 
         private final GlobalStatus required;
 
+        private int count = 0;
+
         private boolean isStopped = false;
 
         protected CheckTimerTask(final GlobalTransaction tx, GlobalStatus required) {
@@ -78,6 +85,10 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
         @Override
         public void run(Timeout timeout) throws Exception {
             if(!isStopped){
+                if(++count > RETRY_MAX_TIMES){
+                    LOGGER.error("transaction[" + tx.getXid() + "] retry fetch status times exceed the limit [" + RETRY_MAX_TIMES + " times]");
+                    return;
+                }
                 isStopped = shouldStop(tx, required);
                 timer.newTimeout(this, SCHEDULE_INTERVAL_SECONDS, TimeUnit.SECONDS);
             }

@@ -20,6 +20,7 @@ import io.seata.core.model.GlobalStatus;
 import org.junit.Test;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author XCXCXCXCX
@@ -71,6 +72,6 @@ public class DefaultFailureHandlerImplTest {
                 }
             }, null);
         }
-        Thread.sleep(11000);
+        TimeUnit.SECONDS.sleep(11);
     }
 }
