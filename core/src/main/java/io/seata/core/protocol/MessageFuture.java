@@ -16,7 +16,10 @@
 
 package io.seata.core.protocol;
 
-import java.util.concurrent.CountDownLatch;
+import io.seata.common.exception.ShouldNeverHappenException;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -30,9 +33,8 @@ public class MessageFuture {
     private RpcMessage requestMessage;
     private long timeout;
     private long start = System.currentTimeMillis();
-    private volatile Object resultMessage;
     private static final Object NULL = new Object();
-    private final CountDownLatch latch = new CountDownLatch(1);
+    private transient CompletableFuture origin = new CompletableFuture();
 
     /**
      * Is timeout boolean.
@@ -54,18 +56,22 @@ public class MessageFuture {
      */
     public Object get(long timeout, TimeUnit unit) throws TimeoutException,
         InterruptedException {
-        boolean success = latch.await(timeout, unit);
-        if (!success) {
+        Object result = null;
+        try {
+            result = origin.get(timeout, unit);
+        } catch (ExecutionException e) {
+            throw new ShouldNeverHappenException("Should not get results in a multi-threaded environment", e);
+        } catch (TimeoutException e) {
             throw new TimeoutException("cost " + (System.currentTimeMillis() - start) + " ms");
         }
 
-        if (resultMessage instanceof RuntimeException) {
-            throw (RuntimeException)resultMessage;
-        } else if (resultMessage instanceof Throwable) {
-            throw new RuntimeException((Throwable)resultMessage);
+        if (result instanceof RuntimeException) {
+            throw (RuntimeException)result;
+        } else if (result instanceof Throwable) {
+            throw new RuntimeException((Throwable)result);
         }
 
-        return resultMessage;
+        return result;
     }
 
     /**
@@ -74,8 +80,7 @@ public class MessageFuture {
      * @param obj the obj
      */
     public void setResultMessage(Object obj) {
-        this.resultMessage = (obj == null ? NULL : obj);
-        latch.countDown();
+        origin.complete(obj);
     }
 
     /**
