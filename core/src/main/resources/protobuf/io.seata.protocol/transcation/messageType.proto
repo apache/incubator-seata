@@ -3,11 +3,11 @@ syntax = "proto3";
 package io.seata.protocol.protobuf;
 
 option java_multiple_files = true;
-option java_outer_classname = "AbstractMessage";
+option java_outer_classname = "MessageType";
 option java_package = "io.seata.protocol.core.protobuf";
 
 // PublishRequest is a publish request.
-enum MessageType {
+enum MessageTypeProto {
 
     TYPE_GLOBAL_PRESERVED = 0;
 

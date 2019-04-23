@@ -8,6 +8,6 @@ option java_multiple_files = true;
 option java_outer_classname = "GlobalRollbackRequest";
 option java_package = "io.seata.protocol.core.protobuf";
 
-message GlobalRollbackRequest {
-    AbstractGlobalEndRequest abstractGlobalEndRequest = 1;
+message GlobalRollbackRequestProto {
+    AbstractGlobalEndRequestProto abstractGlobalEndRequest = 1;
 }

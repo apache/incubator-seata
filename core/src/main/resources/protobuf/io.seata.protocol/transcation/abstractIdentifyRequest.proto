@@ -9,9 +9,9 @@ option java_outer_classname = "AbstractIdentifyRequest";
 option java_package = "io.seata.protocol.core.protobuf";
 
 // PublishRequest is a publish request.
-message AbstractIdentifyRequest {
+message AbstractIdentifyRequestProto {
 
-    AbstractMessage AbstractMessage=1;
+    AbstractMessageProto abstractMessage=1;
 
     string version = 2;
 

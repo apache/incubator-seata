@@ -10,6 +10,6 @@ option java_outer_classname = "BranchRollbackResponse";
 option java_package = "io.seata.protocol.core.protobuf";
 
 // PublishRequest is a publish request.
-message BranchRollbackResponse {
-    AbstractBranchEndResponse abstractBranchEndResponse = 1;
+message BranchRollbackResponseProto {
+    AbstractBranchEndResponseProto abstractBranchEndResponse = 1;
 }

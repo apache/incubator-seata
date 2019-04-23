@@ -5,13 +5,10 @@ package io.seata.protocol.protobuf;
 import "abstractIdentifyResponse.proto";
 
 option java_multiple_files = true;
-option java_outer_classname = "RegisterRMResponse";
+option java_outer_classname = "RegisterTMResponse";
 option java_package = "io.seata.protocol.core.protobuf";
 
 // PublishRequest is a publish request.
-message RegisterRMResponse {
-    AbstractIdentifyResponse abstractIdentifyResponse = 1;
-    string resourceIds = 2;
-
-
+message RegisterTMResponseProto {
+    AbstractIdentifyResponseProto abstractIdentifyResponse = 1;
 }

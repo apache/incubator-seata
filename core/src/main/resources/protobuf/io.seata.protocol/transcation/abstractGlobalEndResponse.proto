@@ -10,7 +10,7 @@ option java_outer_classname = "AbstractGlobalEndResponse";
 option java_package = "io.seata.protocol.core.protobuf";
 
 // PublishRequest is a publish request.
-message AbstractGlobalEndResponse {
-    AbstractTransactionResponse abstractTransactionResponse = 1;
-    GlobalStatus globalStatus = 2;
+message AbstractGlobalEndResponseProto {
+    AbstractTransactionResponseProto abstractTransactionResponse = 1;
+    GlobalStatusProto globalStatus = 2;
 }
