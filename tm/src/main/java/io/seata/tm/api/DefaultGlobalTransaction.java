@@ -22,7 +22,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.DefaultTransactionManager;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,8 +95,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         xid = transactionManager.begin(null, null, name, timeout);
         status = GlobalStatus.Begin;
         RootContext.bind(xid);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Begin a NEW global transaction [" + xid + "]");
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Begin new global transaction [" + xid + "]");
         }
 
     }
@@ -121,6 +120,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 RootContext.unbind();
             }
         }
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("[" + xid + "] commit status:" + status);
+        }
 
     }
 
@@ -143,7 +145,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 RootContext.unbind();
             }
         }
-
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("[" + xid + "] rollback status:" + status);
+        }
     }
 
     @Override
