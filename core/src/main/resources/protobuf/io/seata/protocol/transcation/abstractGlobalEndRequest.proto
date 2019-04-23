@@ -7,7 +7,7 @@ import "branchStatus.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "AbstractGlobalEndRequest";
-option java_package = "io.seata.protocol.core.protobuf";
+option java_package = "io.seata.core.protocol.protobuf";
 
 // PublishRequest is a publish request.
 message AbstractGlobalEndRequestProto {
