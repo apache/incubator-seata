@@ -38,7 +38,7 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
  *
  * @param <S> the type parameter
  */
-public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactionalExecutor<ResultSet, S> {
+public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
 
     /**
      * Instantiates a new Select for update executor.
@@ -47,17 +47,17 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public SelectForUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<ResultSet, S> statementCallback,
+    public SelectForUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
                                    SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
     @Override
-    public Object doExecute(Object... args) throws Throwable {
+    public T doExecute(Object... args) throws Throwable {
         SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
 
         Connection conn = statementProxy.getConnection();
-        ResultSet rs = null;
+        T rs = null;
         Savepoint sp = null;
         LockRetryController lockRetryController = new LockRetryController();
         boolean originalAutoCommit = conn.getAutoCommit();
@@ -83,6 +83,9 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
                 conn.setAutoCommit(false);
             }
             sp = conn.setSavepoint();
+            // #870
+            // execute return Boolean
+            // executeQuery return ResultSet
             rs = statementCallback.execute(statementProxy.getTargetStatement(), args);
 
             while (true) {
