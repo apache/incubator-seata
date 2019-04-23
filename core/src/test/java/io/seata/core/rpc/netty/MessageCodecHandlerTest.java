@@ -52,9 +52,9 @@ public class MessageCodecHandlerTest {
 
         GlobalBeginRequest decodeGlobalBeginRequest = (GlobalBeginRequest)rpcMessage.getBody();
         assertThat(decodeGlobalBeginRequest.getTransactionName()).isEqualTo(
-            decodeGlobalBeginRequest.getTransactionName());
-        assertThat(decodeGlobalBeginRequest.getTimeout()).isEqualTo(decodeGlobalBeginRequest.getTimeout());
-        assertThat(decodeGlobalBeginRequest.getTypeCode()).isEqualTo(decodeGlobalBeginRequest.getTypeCode());
+            globalBeginRequest.getTransactionName());
+        assertThat(decodeGlobalBeginRequest.getTimeout()).isEqualTo(globalBeginRequest.getTimeout());
+        assertThat(decodeGlobalBeginRequest.getTypeCode()).isEqualTo(globalBeginRequest.getTypeCode());
 
     }
 
