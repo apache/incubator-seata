@@ -276,7 +276,7 @@ public class TableMetaTest {
 
                 @Override
                 public String getURL() throws SQLException {
-                    return null;
+                    return getUrl();
                 }
 
                 @Override
