@@ -16,13 +16,6 @@
 
 package io.seata.server.session;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.LockSupport;
-
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -31,6 +24,12 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * The type Global session.
@@ -513,12 +512,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         private static final int PARK_TIMES_BASE = 10;
 
         private static final int PARK_TIMES_BASE_NANOS = 1 * 1000 * 1000;
+
         public void lock() throws TransactionException {
             boolean flag;
             int times = 0;
             long beginTime = System.currentTimeMillis();
+            long restTime = GLOBAL_SESSOION_LOCK_TIME_OUT_MILLS ;
             do {
-                long restTime = System.currentTimeMillis() - beginTime;
+                restTime -= (System.currentTimeMillis() - beginTime);
                 if (restTime <= 0){
                     throw new TransactionException(TransactionExceptionCode.FailedLockGlobalTranscation);
                 }
