@@ -120,7 +120,7 @@
         <maven-pmd-plugin.version>3.8</maven-pmd-plugin.version>
         <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
-        <protobuf.version>3.7.1</protobuf.version>
+        <protobuf.version>3.7.0</protobuf.version>
     </properties>
     <!--test-->
     <dependencies>

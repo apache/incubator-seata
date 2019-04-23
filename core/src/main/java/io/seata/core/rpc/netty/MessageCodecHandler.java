@@ -26,7 +26,6 @@ import io.netty.handler.codec.ByteToMessageCodec;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.convertor.GlobalBeginRequestConvertor;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
@@ -70,7 +69,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
     private static Configuration configuration = ConfigurationFactory.getInstance();
 
-    private static String serialize = configuration.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC);
+    private static String serialize = "protobuf";//configuration.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC);
 
     /**
      * The constant UTF8.
@@ -79,6 +78,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, RpcMessage msg, ByteBuf out) throws Exception {
+        //for dynamic test
         if ("protobuf".equals(serialize)) {
             //转换类
             Object body = msg.getBody();
@@ -129,10 +129,12 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 }
                 byte[] body = hessianSerialize(msg.getBody());
                 final String name = msg.getBody().getClass().getName();
-                byteBuffer.putShort((short)(body.length + name.length() + 4));
+                final short bodyLength = (short)(body.length + name.length() + 4);
+                byteBuffer.putShort(bodyLength);
                 byteBuffer.putLong(msg.getId());
-                byteBuffer.putInt(name.length());
-                byteBuffer.put(name.getBytes(UTF8));
+                final byte[] nameBytes = name.getBytes(UTF8);
+                byteBuffer.putInt(nameBytes.length);
+                byteBuffer.put(nameBytes);
                 byteBuffer.put(body);
 
                 byteBuffer.flip();
@@ -241,9 +243,9 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                         rpcMessage.setBody(newBody);
                     }
 
+                } else {
+                    rpcMessage.setBody(bodyObject);
                 }
-
-                rpcMessage.setBody(bodyObject);
             }
         } catch (Exception e) {
             LOGGER.error("decode error", "", e);
@@ -284,9 +286,9 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
         if (bytes == null) {
             throw new NullPointerException();
         }
-        if (clazz.equals(GlobalBeginRequest.class.getName())) {
-           return FrameSerialzer.deserializeContent(clazz,bytes);
-        }else{
+        if (clazz.equals(GlobalBeginRequestProto.class.getName())) {
+            return FrameSerialzer.deserializeContent(clazz, bytes);
+        } else {
             throw new ShouldNeverHappenException();
         }
 
