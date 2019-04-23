@@ -25,10 +25,6 @@
     <artifactId>seata-discovery-sofa</artifactId>
     <name>seata-discovery-sofa ${project.version}</name>
 
-    <properties>
-        <sofa.registry.version>5.2.0</sofa.registry.version>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>io.seata</groupId>
