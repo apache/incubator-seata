@@ -74,7 +74,6 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     private static final String HOST_SEPERATOR = ":";
     private static final String REGISTRY_TYPE = "sofa";
-    private transient volatile CountDownLatch respondRegistries = new CountDownLatch(1);
 
     private static final ConcurrentMap<String, List<SubscriberDataObserver>> LISTENER_SERVICE_MAP
         = new ConcurrentHashMap<>();
@@ -167,6 +166,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
             return null;
         }
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
+            CountDownLatch respondRegistries = new CountDownLatch(1);
             subscribe(clusterName, new SubscriberDataObserver() {
                 @Override
                 public void handleData(String dataId, UserData data) {
