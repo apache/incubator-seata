@@ -22,6 +22,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.DefaultTransactionManager;
 
+import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -33,6 +34,8 @@ import org.junit.Test;
 public class APITest {
 
     private static final String DEFAULT_XID = "1234567890";
+    private static final String TX_NAME = "test";
+    private static final int TIME_OUT = 30000;
 
     /**
      * Init.
@@ -117,7 +120,7 @@ public class APITest {
      * @throws Exception the exception
      */
     @Test
-    public void testNestedCommit() throws Exception {
+    public void testNestedCommit() throws Throwable {
         TransactionalTemplate template = new TransactionalTemplate();
         template.execute(new AbstractTransactionalExecutor() {
             @Override
@@ -149,7 +152,7 @@ public class APITest {
      * @throws Exception the exception
      */
     @Test
-    public void testNestedRollback() throws Exception {
+    public void testNestedRollback() throws Throwable {
 
         final String oexMsg = "xxx";
 
@@ -194,13 +197,11 @@ public class APITest {
     private static abstract class AbstractTransactionalExecutor implements TransactionalExecutor {
 
         @Override
-        public int timeout() {
-            return 30000;
-        }
-
-        @Override
-        public String name() {
-            return "test";
+        public TransactionInfo getTransactionInfo() {
+            TransactionInfo txInfo = new TransactionInfo();
+            txInfo.setTimeOut(TIME_OUT);
+            txInfo.setName(TX_NAME);
+            return txInfo;
         }
     }
 }
