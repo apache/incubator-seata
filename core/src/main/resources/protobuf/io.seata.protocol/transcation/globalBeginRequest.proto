@@ -2,14 +2,15 @@ syntax = "proto3";
 
 package io.seata.protocol.protobuf;
 
-import "AbstractTransactionResponse.proto";
+import "abstractTransactionRequest.proto";
 
 
 option java_multiple_files = true;
 option java_outer_classname = "GlobalBeginRequest";
 option java_package = "io.seata.protocol.core.protobuf";
 
-message GlobalBeginRequest {
-    int32 timeout = 1;
-    string transactionName = 2;
+message GlobalBeginRequestProto {
+    AbstractTransactionRequest abstractTransactionRequest=1;
+    int32 timeout = 2;
+    string transactionName = 3;
 }

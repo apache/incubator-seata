@@ -10,6 +10,6 @@ option java_outer_classname = "BranchCommitRequest";
 option java_package = "io.seata.protocol.core.protobuf";
 
 // PublishRequest is a publish request.
-message BranchCommitRequest {
-    AbstractBranchEndRequest abstractBranchEndRequest = 1;
+message BranchCommitRequestProto {
+    AbstractBranchEndRequestProto abstractBranchEndRequest = 1;
 }

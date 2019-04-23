@@ -2,8 +2,8 @@ syntax = "proto3";
 
 package io.seata.protocol.protobuf;
 
-import "BranchStatus.proto";
-import "BranchType.proto";
+import "branchStatus.proto";
+import "branchType.proto";
 import "abstractTransactionRequest.proto";
 
 
@@ -11,18 +11,18 @@ option java_multiple_files = true;
 option java_outer_classname = "BranchReportRequest";
 option java_package = "io.seata.protocol.core.protobuf";
 
-message BranchReportRequest {
+message BranchReportRequestProto {
 
-    AbstractTransactionRequest abstractTransactionRequest =1;
+    AbstractTransactionRequestProto abstractTransactionRequest =1;
     string xid = 2;
 
     int64 branchId = 3;
 
     string resourceId = 4;
 
-    BranchStatus status = 5;
+    BranchStatusProto status = 5;
 
     string applicationData = 6;
 
-    BranchType branchType = 7;
+    BranchTypeProto branchType = 7;
 }

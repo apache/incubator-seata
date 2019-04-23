@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package io.seata.protocol.protobuf;
 
-import "AbstractBranchEndRequest.proto";
+import "abstractBranchEndRequest.proto";
 
 
 option java_multiple_files = true;
@@ -10,6 +10,6 @@ option java_outer_classname = "BranchRollbackRequest";
 option java_package = "io.seata.protocol.core.protobuf";
 
 // PublishRequest is a publish request.
-message BranchRollbackRequest {
-    AbstractBranchEndRequest abstractBranchEndRequest = 1;
+message BranchRollbackRequestProto {
+    AbstractBranchEndRequestProto abstractBranchEndRequest = 1;
 }

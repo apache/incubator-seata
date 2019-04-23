@@ -8,6 +8,6 @@ option java_multiple_files = true;
 option java_outer_classname = "GlobalCommitRequest";
 option java_package = "io.seata.protocol.core.protobuf";
 
-message GlobalCommitRequest {
-    AbstractGlobalEndRequest abstractGlobalEndRequest =1;
+message GlobalCommitRequestProto {
+    AbstractGlobalEndRequestProto abstractGlobalEndRequest =1;
 }

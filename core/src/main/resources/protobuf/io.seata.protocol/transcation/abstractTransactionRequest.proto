@@ -10,6 +10,6 @@ option java_outer_classname = "AbstractTransactionRequest";
 option java_package = "io.seata.protocol.core.protobuf";
 
 // PublishRequest is a publish request.
-message AbstractTransactionRequest {
-    AbstractMessage AbstractMessage=1;
+message AbstractTransactionRequestProto {
+    AbstractMessageProto abstractMessage=1;
 }

@@ -2,11 +2,13 @@ syntax = "proto3";
 
 package io.seata.protocol.protobuf;
 
+import "messageType.proto";
+
 option java_multiple_files = true;
-option java_outer_classname = "HeartbeatMessage";
+option java_outer_classname = "AbstractMessage";
 option java_package = "io.seata.protocol.core.protobuf";
 
 // PublishRequest is a publish request.
-message HeartbeatMessage {
-    bool pingOrPong = 1;
+message AbstractMessageProto {
+    MessageTypeProto messageType = 1;
 }

@@ -3,11 +3,11 @@ syntax = "proto3";
 package io.seata.protocol.protobuf;
 
 option java_multiple_files = true;
-option java_outer_classname = "BranchType";
+option java_outer_classname = "TransactionExceptionCode";
 option java_package = "io.seata.protocol.core.protobuf";
 
 // PublishRequest is a publish request.
-enum TransactionExceptionCode {
+enum TransactionExceptionCodeProto {
 
     /**
      * Unknown transaction exception code.

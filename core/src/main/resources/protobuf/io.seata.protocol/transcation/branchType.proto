@@ -7,7 +7,7 @@ option java_outer_classname = "BranchType";
 option java_package = "io.seata.protocol.core.protobuf";
 
 // PublishRequest is a publish request.
-enum BranchType {
+enum BranchTypeProto {
 
     AT = 0;
 

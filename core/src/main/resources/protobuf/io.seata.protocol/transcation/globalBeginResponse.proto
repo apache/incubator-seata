@@ -2,14 +2,15 @@ syntax = "proto3";
 
 package io.seata.protocol.protobuf;
 
-import "AbstractTransactionResponse.proto";
+import "abstractTransactionResponse.proto";
 
 
 option java_multiple_files = true;
 option java_outer_classname = "GlobalBeginResponse";
 option java_package = "io.seata.protocol.core.protobuf";
 
-message GlobalBeginResponse {
-    string xid = 1;
-    string extraData = 2;
+message GlobalBeginResponseProto {
+    AbstractTransactionResponseProto abstractTransactionResponse =1;
+    string xid = 2;
+    string extraData = 3;
 }

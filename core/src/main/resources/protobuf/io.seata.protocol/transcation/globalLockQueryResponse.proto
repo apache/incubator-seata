@@ -2,13 +2,13 @@ syntax = "proto3";
 
 package io.seata.protocol.protobuf;
 
-import "AbstractTransactionResponse.proto";
+import "abstractTransactionResponse.proto";
 
 option java_multiple_files = true;
 option java_outer_classname = "GlobalLockQueryResponse";
 option java_package = "io.seata.protocol.core.protobuf";
 
-message GlobalLockQueryResponse {
-    AbstractTransactionResponse abstractTransactionResponse = 1;
+message GlobalLockQueryResponseProto {
+    AbstractTransactionResponseProto abstractTransactionResponse = 1;
     bool lockable = 2;
 }

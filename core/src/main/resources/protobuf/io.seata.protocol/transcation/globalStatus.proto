@@ -7,7 +7,7 @@ option java_outer_classname = "GlobalStatus";
 option java_package = "io.seata.protocol.core.protobuf";
 
 // PublishRequest is a publish request.
-enum GlobalStatus {
+enum GlobalStatusProto {
 
     /**
     * Un known global status.
