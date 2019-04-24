@@ -127,10 +127,7 @@ public class TCCBeanParserUtils {
             return true;
         }
         // sofa:reference /  dubbo:reference, AOP
-        if(remotingDesc.isReference()){
-            return true;
-        }
-        return false;
+        return remotingDesc.isReference();
     }
 
     /**

@@ -118,11 +118,7 @@ public class SpringProxyUtils {
                 || proxyClassName.startsWith("org.apache.dubbo.common.bytecode.proxy") ){
             return true;
         }
-        if (Proxy.class.isAssignableFrom(bean.getClass()) || AopUtils.isAopProxy(bean)) {
-            return true;
-        }else{
-            return false;
-        }
+        return Proxy.class.isAssignableFrom(bean.getClass()) || AopUtils.isAopProxy(bean);
     }
 
     /**

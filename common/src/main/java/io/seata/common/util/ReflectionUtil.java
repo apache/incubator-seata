@@ -176,7 +176,7 @@ public class ReflectionUtil {
      */
     public static Set<Class<?>> getInterfaces(Class<?> clazz){
         if (clazz.isInterface() ) {
-            return Collections.<Class<?>>singleton(clazz);
+            return Collections.singleton(clazz);
         }
         Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
         while (clazz != null) {

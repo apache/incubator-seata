@@ -204,6 +204,6 @@ public class ConfigFuture {
         /**
          * Remove config operation.
          */
-        REMOVE;
+        REMOVE
     }
 }
