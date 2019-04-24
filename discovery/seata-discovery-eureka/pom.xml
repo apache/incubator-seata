@@ -20,6 +20,7 @@
         <groupId>io.seata</groupId>
         <artifactId>seata-discovery</artifactId>
         <version>${revision}</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>seata-discovery-eureka</artifactId>
