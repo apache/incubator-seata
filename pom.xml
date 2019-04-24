@@ -113,6 +113,7 @@
         <consul-clients.version>1.4.2</consul-clients.version>
         <nacos-client.version>0.9.1</nacos-client.version>
         <etcd-client-v3.version>0.3.0</etcd-client-v3.version>
+        <guava.version>27.0.1-jre</guava.version>
         <javax-inject.version>1</javax-inject.version>
         <archaius-core.version>0.7.6</archaius-core.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
@@ -384,6 +385,11 @@
                 <groupId>io.etcd</groupId>
                 <artifactId>jetcd-core</artifactId>
                 <version>${etcd-client-v3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.inject</groupId>

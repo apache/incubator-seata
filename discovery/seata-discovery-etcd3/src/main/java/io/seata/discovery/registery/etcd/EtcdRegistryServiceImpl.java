@@ -130,7 +130,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      */
     private void doRegister(InetSocketAddress address) throws Exception {
         PutOption putOption = PutOption.newBuilder().withLeaseId(getLeaseId()).build();
-        getClient().getKVClient().put(buildRegestryKey(address), buildRegistryValue(address), putOption);
+        getClient().getKVClient().put(buildRegestryKey(address), buildRegistryValue(address), putOption).get();
     }
 
 
@@ -147,7 +147,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      * @throws Exception
      */
     private void doUnregister(InetSocketAddress address) throws Exception {
-        getClient().getKVClient().delete(buildRegestryKey(address));
+        getClient().getKVClient().delete(buildRegestryKey(address)).get();
     }
 
     @Override
