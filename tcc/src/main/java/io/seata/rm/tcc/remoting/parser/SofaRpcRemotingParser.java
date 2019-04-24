@@ -40,10 +40,7 @@ public class SofaRpcRemotingParser extends AbstractedRemotingParser {
     public boolean isReference(Object bean, String beanName)
             throws FrameworkException {
 		String beanClassName = bean.getClass().getName();
-        if("com.alipay.sofa.runtime.spring.factory.ReferenceFactoryBean".equals(beanClassName) ){
-            return true;
-        }
-        return false;
+        return "com.alipay.sofa.runtime.spring.factory.ReferenceFactoryBean".equals(beanClassName);
     }
 
     /**
@@ -56,10 +53,7 @@ public class SofaRpcRemotingParser extends AbstractedRemotingParser {
     @Override
     public boolean isService(Object bean, String beanName) 	throws FrameworkException {
 		String beanClassName = bean.getClass().getName();
-        if("com.alipay.sofa.runtime.spring.factory.ServiceFactoryBean".equals(beanClassName) ){
-            return true;
-        }
-        return false;
+        return "com.alipay.sofa.runtime.spring.factory.ServiceFactoryBean".equals(beanClassName);
     }
 
     @Override
