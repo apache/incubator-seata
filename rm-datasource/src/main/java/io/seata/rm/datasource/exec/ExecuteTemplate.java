@@ -72,8 +72,8 @@ public class ExecuteTemplate {
 
         if (sqlRecognizer == null) {
             sqlRecognizer = SQLVisitorFactory.get(
-                statementProxy.getTargetSQL(),
-                statementProxy.getConnectionProxy().getDbType());
+                    statementProxy.getTargetSQL(),
+                    statementProxy.getConnectionProxy().getDbType());
         }
         Executor<T> executor = null;
         if (sqlRecognizer == null) {
@@ -90,7 +90,7 @@ public class ExecuteTemplate {
                     executor = new DeleteExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
                     break;
                 case SELECT_FOR_UPDATE:
-                    executor = new SelectForUpdateExecutor(statementProxy, statementCallback, sqlRecognizer);
+                    executor = new SelectForUpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
                     break;
                 default:
                     executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
@@ -100,14 +100,12 @@ public class ExecuteTemplate {
         T rs = null;
         try {
             rs = executor.execute(args);
-
         } catch (Throwable ex) {
-            if (ex instanceof SQLException) {
-                throw (SQLException)ex;
-            } else {
-                // Turn everything into SQLException
-                new SQLException(ex);
+            if (!(ex instanceof SQLException)) {
+                // Turn other exception into SQLException
+                ex = new SQLException(ex);
             }
+            throw (SQLException)ex;
         }
         return rs;
     }
