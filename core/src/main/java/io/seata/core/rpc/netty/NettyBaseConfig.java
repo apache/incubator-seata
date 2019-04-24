@@ -15,10 +15,6 @@
  */
 package io.seata.core.rpc.netty;
 
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.EpollDomainSocketChannel;
@@ -33,6 +29,8 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.NettyRuntime;
 import io.netty.util.internal.PlatformDependent;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,7 +108,7 @@ public class NettyBaseConfig {
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
 
     static {
-        TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.valueOf(CONFIG.getConfig("transport.type"));
+        TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.valueOf(CONFIG.getConfig("transport.type",TransportProtocolType.TCP.name()));
         String workerThreadSize = CONFIG.getConfig("transport.thread-factory.worker-thread-size");
         if (StringUtils.isNotBlank(workerThreadSize) && StringUtils.isNumeric(workerThreadSize)) {
             WORKER_THREAD_SIZE = Integer.parseInt(workerThreadSize);
@@ -119,7 +117,7 @@ public class NettyBaseConfig {
         } else {
             WORKER_THREAD_SIZE = WorkThreadMode.Default.getValue();
         }
-        TRANSPORT_SERVER_TYPE = TransportServerType.valueOf(CONFIG.getConfig("transport.server"));
+        TRANSPORT_SERVER_TYPE = TransportServerType.valueOf(CONFIG.getConfig("transport.server",TransportServerType.NIO.name()));
         switch (TRANSPORT_SERVER_TYPE) {
             case NIO:
                 if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.TCP) {
@@ -232,7 +230,7 @@ public class NettyBaseConfig {
             } else if (Default.name().equalsIgnoreCase(name)) {
                 return Default;
             } else {
-                throw new ShouldNeverHappenException("incorrect workThreadMode.");
+                return null;
             }
         }
 
