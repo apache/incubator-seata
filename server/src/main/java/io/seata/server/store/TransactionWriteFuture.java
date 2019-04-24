@@ -101,7 +101,7 @@ public class TransactionWriteFuture {
             return false;
         }
 
-        return (result instanceof Boolean) ? ((Boolean)result).booleanValue() : false;
+        return (result instanceof Boolean) && ((Boolean) result).booleanValue();
     }
 
     /**
