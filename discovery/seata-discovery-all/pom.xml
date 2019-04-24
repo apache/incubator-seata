@@ -50,5 +50,9 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-discovery-etcd3</artifactId>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-discovery-sofa</artifactId>
+        </dependency>
     </dependencies>
 </project>
