@@ -26,7 +26,7 @@
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
     <artifactId>seata-discovery</artifactId>
-    <name>seata-discovery ${revision}</name>
+    <name>seata-discovery ${project.version}</name>
     <modules>
         <module>seata-discovery-consul</module>
         <module>seata-discovery-core</module>
