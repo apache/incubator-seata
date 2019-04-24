@@ -15,8 +15,6 @@
  */
 package io.seata.rm.tcc.remoting;
 
-import io.seata.common.exception.FrameworkException;
-
 /**
  * remoting protocols enum
  *
