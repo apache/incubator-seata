@@ -28,7 +28,6 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,6 +142,7 @@ public class DefaultCore implements Core {
             globalSession.changeStatus(GlobalStatus.Committing);
             if (globalSession.canBeCommittedAsync()) {
                 asyncCommit(globalSession);
+                return GlobalStatus.Committed;
             } else {
                 doGlobalCommit(globalSession, false);
             }
