@@ -4,8 +4,8 @@
 
 [![Build Status](https://travis-ci.org/seata/seata.svg?branch=develop)](https://travis-ci.org/seata/seata)
 [![codecov](https://codecov.io/gh/seata/seata/branch/develop/graph/badge.svg)](https://codecov.io/gh/seata/seata)
-![license](https://img.shields.io/github/license/seata/seata.svg)
-![maven](https://img.shields.io/maven-central/v/com.alibaba.fescar/fescar-all.svg)
+[![license](https://img.shields.io/github/license/seata/seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![maven](https://img.shields.io/maven-central/v/com.alibaba.fescar/fescar-all.svg)](https://search.maven.org/search?q=io.seata)
 
 ## What is Seata?
 
