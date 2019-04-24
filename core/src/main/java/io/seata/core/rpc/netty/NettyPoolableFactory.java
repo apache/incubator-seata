@@ -93,16 +93,12 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
             if (!(response instanceof RegisterTMResponse)) {
                 return false;
             }
-            if (((RegisterTMResponse)response).isIdentified()) {
-                return true;
-            }
+            return ((RegisterTMResponse) response).isIdentified();
         } else if (transactionRole.equals(NettyPoolKey.TransactionRole.RMROLE)) {
             if (!(response instanceof RegisterRMResponse)) {
                 return false;
             }
-            if (((RegisterRMResponse)response).isIdentified()) {
-                return true;
-            }
+            return ((RegisterRMResponse) response).isIdentified();
         }
         return false;
     }
