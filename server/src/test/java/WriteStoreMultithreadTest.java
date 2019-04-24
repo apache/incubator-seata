@@ -37,7 +37,7 @@ import java.util.concurrent.CountDownLatch;
 public class WriteStoreMultithreadTest {
     private static String vgroup = "vgroupMock";
     private static String appname = "appnameMock";
-    private static String instname = "fescarMocK";
+    private static String instname = "seataMock";
     private static int per_thread_trx_num = 65535;
     private static int threadNum = 16;
     private static CountDownLatch countDownLatch = new CountDownLatch(threadNum);
