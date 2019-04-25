@@ -41,5 +41,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-test</artifactId>
+            <version>2.9.1</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 </project>
