@@ -144,8 +144,7 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 
 ## Contributors
 
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-<a href="https://github.com/seata/seata/graphs/contributors"><img src="https://opencollective.com/seata/contributors.svg?width=890&button=false" /></a>
+This project exists thanks to all the people who contribute. [[Contributors](https://github.com/seata/seata/graphs/contributors)].
 
 ## License
 
