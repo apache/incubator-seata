@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,14 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.alibaba.fescar.core.rpc.netty.RpcServer;
-import com.alibaba.fescar.server.UUIDGenerator;
-import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
+import io.seata.core.rpc.netty.RpcServer;
+import io.seata.server.UUIDGenerator;
+import io.seata.server.coordinator.DefaultCoordinator;
 
 /**
  * The type Server test.
