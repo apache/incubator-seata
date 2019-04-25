@@ -1,0 +1,2 @@
+ignore:
+  - "core/src/main/java/io/seata/core/protocol/protobuf"  # ignore folders and all its contents
