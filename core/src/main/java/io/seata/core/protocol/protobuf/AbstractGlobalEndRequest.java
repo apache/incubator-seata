@@ -30,13 +30,13 @@ public final class AbstractGlobalEndRequest {
     java.lang.String[] descriptorData = {
       "\n\036abstractGlobalEndRequest.proto\022\032io.sea" +
       "ta.protocol.protobuf\032 abstractTransactio" +
-      "nRequest.proto\032\022branchStatus.proto\"\240\001\n\035A" +
-      "bstractGlobalEndRequestProto\022_\n\032abstract" +
-      "TransactionRequest\030\001 \001(\0132;.io.seata.prot" +
-      "ocol.protobuf.AbstractTransactionRequest" +
-      "Proto\022\013\n\003xid\030\002 \001(\t\022\021\n\textraData\030\003 \001(\tB=\n" +
-      "\037io.seata.core.protocol.protobufB\030Abstra" +
-      "ctGlobalEndRequestP\001b\006proto3"
+      "nRequest.proto\"\240\001\n\035AbstractGlobalEndRequ" +
+      "estProto\022_\n\032abstractTransactionRequest\030\001" +
+      " \001(\0132;.io.seata.protocol.protobuf.Abstra" +
+      "ctTransactionRequestProto\022\013\n\003xid\030\002 \001(\t\022\021" +
+      "\n\textraData\030\003 \001(\tB=\n\037io.seata.core.proto" +
+      "col.protobufB\030AbstractGlobalEndRequestP\001" +
+      "b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -50,7 +50,6 @@ public final class AbstractGlobalEndRequest {
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           io.seata.core.protocol.protobuf.AbstractTransactionRequest.getDescriptor(),
-          io.seata.core.protocol.protobuf.BranchStatus.getDescriptor(),
         }, assigner);
     internal_static_io_seata_protocol_protobuf_AbstractGlobalEndRequestProto_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -59,7 +58,6 @@ public final class AbstractGlobalEndRequest {
         internal_static_io_seata_protocol_protobuf_AbstractGlobalEndRequestProto_descriptor,
         new java.lang.String[] { "AbstractTransactionRequest", "Xid", "ExtraData", });
     io.seata.core.protocol.protobuf.AbstractTransactionRequest.getDescriptor();
-    io.seata.core.protocol.protobuf.BranchStatus.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

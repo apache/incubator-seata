@@ -30,13 +30,12 @@ public final class MergedResultMessage {
     java.lang.String[] descriptorData = {
       "\n\031mergedResultMessage.proto\022\032io.seata.pr" +
       "otocol.protobuf\032\025abstractMessage.proto\032\031" +
-      "google/protobuf/any.proto\"\231\001\n\030MergedResu" +
+      "google/protobuf/any.proto\"\211\001\n\030MergedResu" +
       "ltMessageProto\022I\n\017abstractMessage\030\001 \001(\0132" +
       "0.io.seata.protocol.protobuf.AbstractMes" +
       "sageProto\022\"\n\004msgs\030\002 \003(\0132\024.google.protobu" +
-      "f.Any\022\016\n\006msgIds\030\003 \003(\tB8\n\037io.seata.core.p" +
-      "rotocol.protobufB\023MergedResultMessageP\001b" +
-      "\006proto3"
+      "f.AnyB8\n\037io.seata.core.protocol.protobuf" +
+      "B\023MergedResultMessageP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -57,7 +56,7 @@ public final class MergedResultMessage {
     internal_static_io_seata_protocol_protobuf_MergedResultMessageProto_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_seata_protocol_protobuf_MergedResultMessageProto_descriptor,
-        new java.lang.String[] { "AbstractMessage", "Msgs", "MsgIds", });
+        new java.lang.String[] { "AbstractMessage", "Msgs", });
     io.seata.core.protocol.protobuf.AbstractMessage.getDescriptor();
     com.google.protobuf.AnyProto.getDescriptor();
   }

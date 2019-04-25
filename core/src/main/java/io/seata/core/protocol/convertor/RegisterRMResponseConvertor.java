@@ -5,7 +5,13 @@
 package io.seata.core.protocol.convertor;
 
 import io.seata.core.protocol.RegisterRMResponse;
+import io.seata.core.protocol.ResultCode;
+import io.seata.core.protocol.protobuf.AbstractIdentifyResponseProto;
+import io.seata.core.protocol.protobuf.AbstractMessageProto;
+import io.seata.core.protocol.protobuf.AbstractResultMessageProto;
+import io.seata.core.protocol.protobuf.MessageTypeProto;
 import io.seata.core.protocol.protobuf.RegisterRMResponseProto;
+import io.seata.core.protocol.protobuf.ResultCodeProto;
 
 /**
  * @author bystander
@@ -14,11 +20,43 @@ import io.seata.core.protocol.protobuf.RegisterRMResponseProto;
 public class RegisterRMResponseConvertor implements PbConvertor<RegisterRMResponse, RegisterRMResponseProto> {
     @Override
     public RegisterRMResponseProto convert2Proto(RegisterRMResponse registerRMResponse) {
-        return null;
+        final short typeCode = registerRMResponse.getTypeCode();
+
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
+            MessageTypeProto.forNumber(typeCode)).build();
+
+        final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
+            registerRMResponse.getMsg())
+            .setResultCode(ResultCodeProto.valueOf(registerRMResponse.getResultCode().name())).setAbstractMessage(
+                abstractMessage).build();
+
+        AbstractIdentifyResponseProto abstractIdentifyResponseProto = AbstractIdentifyResponseProto.newBuilder()
+            .setAbstractResultMessage(abstractResultMessageProto)
+            .setExtraData(registerRMResponse.getExtraData())
+            .setVersion(registerRMResponse.getVersion())
+            .setIdentified(registerRMResponse.isIdentified())
+            .build();
+
+        RegisterRMResponseProto result = RegisterRMResponseProto.newBuilder()
+            .setAbstractIdentifyResponse(abstractIdentifyResponseProto).build();
+
+        return result;
     }
 
     @Override
     public RegisterRMResponse convert2Model(RegisterRMResponseProto registerRMResponseProto) {
-        return null;
+        RegisterRMResponse registerRMRequest = new RegisterRMResponse();
+
+        AbstractIdentifyResponseProto abstractIdentifyRequestProto = registerRMResponseProto
+            .getAbstractIdentifyResponse();
+        registerRMRequest.setExtraData(abstractIdentifyRequestProto.getExtraData());
+        registerRMRequest.setVersion(abstractIdentifyRequestProto.getVersion());
+        registerRMRequest.setIdentified(abstractIdentifyRequestProto.getIdentified());
+
+        registerRMRequest.setMsg(abstractIdentifyRequestProto.getAbstractResultMessage().getMsg());
+        registerRMRequest.setResultCode(
+            ResultCode.valueOf(abstractIdentifyRequestProto.getAbstractResultMessage().getResultCode().name()));
+
+        return registerRMRequest;
     }
 }

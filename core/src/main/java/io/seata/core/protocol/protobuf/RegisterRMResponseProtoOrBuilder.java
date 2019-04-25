@@ -19,14 +19,4 @@ public interface RegisterRMResponseProtoOrBuilder extends
    * <code>.io.seata.protocol.protobuf.AbstractIdentifyResponseProto abstractIdentifyResponse = 1;</code>
    */
   io.seata.core.protocol.protobuf.AbstractIdentifyResponseProtoOrBuilder getAbstractIdentifyResponseOrBuilder();
-
-  /**
-   * <code>string resourceIds = 2;</code>
-   */
-  java.lang.String getResourceIds();
-  /**
-   * <code>string resourceIds = 2;</code>
-   */
-  com.google.protobuf.ByteString
-      getResourceIdsBytes();
 }

@@ -20,7 +20,6 @@ private static final long serialVersionUID = 0L;
     super(builder);
   }
   private RegisterRMResponseProto() {
-    resourceIds_ = "";
   }
 
   @java.lang.Override
@@ -58,12 +57,6 @@ private static final long serialVersionUID = 0L;
               abstractIdentifyResponse_ = subBuilder.buildPartial();
             }
 
-            break;
-          }
-          case 18: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            resourceIds_ = s;
             break;
           }
           default: {
@@ -119,40 +112,6 @@ private static final long serialVersionUID = 0L;
     return getAbstractIdentifyResponse();
   }
 
-  public static final int RESOURCEIDS_FIELD_NUMBER = 2;
-  private volatile java.lang.Object resourceIds_;
-  /**
-   * <code>string resourceIds = 2;</code>
-   */
-  public java.lang.String getResourceIds() {
-    java.lang.Object ref = resourceIds_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      resourceIds_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string resourceIds = 2;</code>
-   */
-  public com.google.protobuf.ByteString
-      getResourceIdsBytes() {
-    java.lang.Object ref = resourceIds_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      resourceIds_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -170,9 +129,6 @@ private static final long serialVersionUID = 0L;
     if (abstractIdentifyResponse_ != null) {
       output.writeMessage(1, getAbstractIdentifyResponse());
     }
-    if (!getResourceIdsBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 2, resourceIds_);
-    }
     unknownFields.writeTo(output);
   }
 
@@ -185,9 +141,6 @@ private static final long serialVersionUID = 0L;
     if (abstractIdentifyResponse_ != null) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(1, getAbstractIdentifyResponse());
-    }
-    if (!getResourceIdsBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, resourceIds_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -209,8 +162,6 @@ private static final long serialVersionUID = 0L;
       if (!getAbstractIdentifyResponse()
           .equals(other.getAbstractIdentifyResponse())) return false;
     }
-    if (!getResourceIds()
-        .equals(other.getResourceIds())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -226,8 +177,6 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + ABSTRACTIDENTIFYRESPONSE_FIELD_NUMBER;
       hash = (53 * hash) + getAbstractIdentifyResponse().hashCode();
     }
-    hash = (37 * hash) + RESOURCEIDS_FIELD_NUMBER;
-    hash = (53 * hash) + getResourceIds().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -371,8 +320,6 @@ private static final long serialVersionUID = 0L;
         abstractIdentifyResponse_ = null;
         abstractIdentifyResponseBuilder_ = null;
       }
-      resourceIds_ = "";
-
       return this;
     }
 
@@ -404,7 +351,6 @@ private static final long serialVersionUID = 0L;
       } else {
         result.abstractIdentifyResponse_ = abstractIdentifyResponseBuilder_.build();
       }
-      result.resourceIds_ = resourceIds_;
       onBuilt();
       return result;
     }
@@ -455,10 +401,6 @@ private static final long serialVersionUID = 0L;
       if (other == io.seata.core.protocol.protobuf.RegisterRMResponseProto.getDefaultInstance()) return this;
       if (other.hasAbstractIdentifyResponse()) {
         mergeAbstractIdentifyResponse(other.getAbstractIdentifyResponse());
-      }
-      if (!other.getResourceIds().isEmpty()) {
-        resourceIds_ = other.resourceIds_;
-        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -604,75 +546,6 @@ private static final long serialVersionUID = 0L;
         abstractIdentifyResponse_ = null;
       }
       return abstractIdentifyResponseBuilder_;
-    }
-
-    private java.lang.Object resourceIds_ = "";
-    /**
-     * <code>string resourceIds = 2;</code>
-     */
-    public java.lang.String getResourceIds() {
-      java.lang.Object ref = resourceIds_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        resourceIds_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string resourceIds = 2;</code>
-     */
-    public com.google.protobuf.ByteString
-        getResourceIdsBytes() {
-      java.lang.Object ref = resourceIds_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        resourceIds_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string resourceIds = 2;</code>
-     */
-    public Builder setResourceIds(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      resourceIds_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string resourceIds = 2;</code>
-     */
-    public Builder clearResourceIds() {
-      
-      resourceIds_ = getDefaultInstance().getResourceIds();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string resourceIds = 2;</code>
-     */
-    public Builder setResourceIdsBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      resourceIds_ = value;
-      onChanged();
-      return this;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

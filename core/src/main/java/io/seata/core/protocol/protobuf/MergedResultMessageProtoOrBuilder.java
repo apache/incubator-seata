@@ -43,23 +43,4 @@ public interface MergedResultMessageProtoOrBuilder extends
    */
   com.google.protobuf.AnyOrBuilder getMsgsOrBuilder(
       int index);
-
-  /**
-   * <code>repeated string msgIds = 3;</code>
-   */
-  java.util.List<java.lang.String>
-      getMsgIdsList();
-  /**
-   * <code>repeated string msgIds = 3;</code>
-   */
-  int getMsgIdsCount();
-  /**
-   * <code>repeated string msgIds = 3;</code>
-   */
-  java.lang.String getMsgIds(int index);
-  /**
-   * <code>repeated string msgIds = 3;</code>
-   */
-  com.google.protobuf.ByteString
-      getMsgIdsBytes(int index);
 }

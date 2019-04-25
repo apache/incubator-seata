@@ -38,9 +38,4 @@ public interface AbstractResultMessageProtoOrBuilder extends
    */
   com.google.protobuf.ByteString
       getMsgBytes();
-
-  /**
-   * <code>bool identified = 4;</code>
-   */
-  boolean getIdentified();
 }
