@@ -31,12 +31,71 @@ public interface AbstractBranchEndRequestProtoOrBuilder extends
       getXidBytes();
 
   /**
-   * <code>string extraData = 3;</code>
+   * <pre>
+   **
+   * The Branch id.
+   * </pre>
+   *
+   * <code>int64 branchId = 3;</code>
    */
-  java.lang.String getExtraData();
+  long getBranchId();
+
   /**
-   * <code>string extraData = 3;</code>
+   * <pre>
+   **
+   * The Branch type.
+   * </pre>
+   *
+   * <code>.io.seata.protocol.protobuf.BranchTypeProto branchType = 4;</code>
+   */
+  int getBranchTypeValue();
+  /**
+   * <pre>
+   **
+   * The Branch type.
+   * </pre>
+   *
+   * <code>.io.seata.protocol.protobuf.BranchTypeProto branchType = 4;</code>
+   */
+  io.seata.core.protocol.protobuf.BranchTypeProto getBranchType();
+
+  /**
+   * <pre>
+   **
+   * The Resource id.
+   * </pre>
+   *
+   * <code>string resourceId = 5;</code>
+   */
+  java.lang.String getResourceId();
+  /**
+   * <pre>
+   **
+   * The Resource id.
+   * </pre>
+   *
+   * <code>string resourceId = 5;</code>
    */
   com.google.protobuf.ByteString
-      getExtraDataBytes();
+      getResourceIdBytes();
+
+  /**
+   * <pre>
+   **
+   * The Application data.
+   * </pre>
+   *
+   * <code>string applicationData = 6;</code>
+   */
+  java.lang.String getApplicationData();
+  /**
+   * <pre>
+   **
+   * The Application data.
+   * </pre>
+   *
+   * <code>string applicationData = 6;</code>
+   */
+  com.google.protobuf.ByteString
+      getApplicationDataBytes();
 }

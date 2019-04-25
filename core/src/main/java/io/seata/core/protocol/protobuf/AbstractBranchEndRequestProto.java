@@ -21,7 +21,9 @@ private static final long serialVersionUID = 0L;
   }
   private AbstractBranchEndRequestProto() {
     xid_ = "";
-    extraData_ = "";
+    branchType_ = 0;
+    resourceId_ = "";
+    applicationData_ = "";
   }
 
   @java.lang.Override
@@ -67,10 +69,27 @@ private static final long serialVersionUID = 0L;
             xid_ = s;
             break;
           }
-          case 26: {
+          case 24: {
+
+            branchId_ = input.readInt64();
+            break;
+          }
+          case 32: {
+            int rawValue = input.readEnum();
+
+            branchType_ = rawValue;
+            break;
+          }
+          case 42: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            extraData_ = s;
+            resourceId_ = s;
+            break;
+          }
+          case 50: {
+            java.lang.String s = input.readStringRequireUtf8();
+
+            applicationData_ = s;
             break;
           }
           default: {
@@ -160,34 +179,129 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int EXTRADATA_FIELD_NUMBER = 3;
-  private volatile java.lang.Object extraData_;
+  public static final int BRANCHID_FIELD_NUMBER = 3;
+  private long branchId_;
   /**
-   * <code>string extraData = 3;</code>
+   * <pre>
+   **
+   * The Branch id.
+   * </pre>
+   *
+   * <code>int64 branchId = 3;</code>
    */
-  public java.lang.String getExtraData() {
-    java.lang.Object ref = extraData_;
+  public long getBranchId() {
+    return branchId_;
+  }
+
+  public static final int BRANCHTYPE_FIELD_NUMBER = 4;
+  private int branchType_;
+  /**
+   * <pre>
+   **
+   * The Branch type.
+   * </pre>
+   *
+   * <code>.io.seata.protocol.protobuf.BranchTypeProto branchType = 4;</code>
+   */
+  public int getBranchTypeValue() {
+    return branchType_;
+  }
+  /**
+   * <pre>
+   **
+   * The Branch type.
+   * </pre>
+   *
+   * <code>.io.seata.protocol.protobuf.BranchTypeProto branchType = 4;</code>
+   */
+  public io.seata.core.protocol.protobuf.BranchTypeProto getBranchType() {
+    @SuppressWarnings("deprecation")
+    io.seata.core.protocol.protobuf.BranchTypeProto result = io.seata.core.protocol.protobuf.BranchTypeProto.valueOf(branchType_);
+    return result == null ? io.seata.core.protocol.protobuf.BranchTypeProto.UNRECOGNIZED : result;
+  }
+
+  public static final int RESOURCEID_FIELD_NUMBER = 5;
+  private volatile java.lang.Object resourceId_;
+  /**
+   * <pre>
+   **
+   * The Resource id.
+   * </pre>
+   *
+   * <code>string resourceId = 5;</code>
+   */
+  public java.lang.String getResourceId() {
+    java.lang.Object ref = resourceId_;
     if (ref instanceof java.lang.String) {
       return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
       java.lang.String s = bs.toStringUtf8();
-      extraData_ = s;
+      resourceId_ = s;
       return s;
     }
   }
   /**
-   * <code>string extraData = 3;</code>
+   * <pre>
+   **
+   * The Resource id.
+   * </pre>
+   *
+   * <code>string resourceId = 5;</code>
    */
   public com.google.protobuf.ByteString
-      getExtraDataBytes() {
-    java.lang.Object ref = extraData_;
+      getResourceIdBytes() {
+    java.lang.Object ref = resourceId_;
     if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
-      extraData_ = b;
+      resourceId_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
+  public static final int APPLICATIONDATA_FIELD_NUMBER = 6;
+  private volatile java.lang.Object applicationData_;
+  /**
+   * <pre>
+   **
+   * The Application data.
+   * </pre>
+   *
+   * <code>string applicationData = 6;</code>
+   */
+  public java.lang.String getApplicationData() {
+    java.lang.Object ref = applicationData_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      applicationData_ = s;
+      return s;
+    }
+  }
+  /**
+   * <pre>
+   **
+   * The Application data.
+   * </pre>
+   *
+   * <code>string applicationData = 6;</code>
+   */
+  public com.google.protobuf.ByteString
+      getApplicationDataBytes() {
+    java.lang.Object ref = applicationData_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      applicationData_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
@@ -214,8 +328,17 @@ private static final long serialVersionUID = 0L;
     if (!getXidBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 2, xid_);
     }
-    if (!getExtraDataBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, extraData_);
+    if (branchId_ != 0L) {
+      output.writeInt64(3, branchId_);
+    }
+    if (branchType_ != io.seata.core.protocol.protobuf.BranchTypeProto.AT.getNumber()) {
+      output.writeEnum(4, branchType_);
+    }
+    if (!getResourceIdBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 5, resourceId_);
+    }
+    if (!getApplicationDataBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 6, applicationData_);
     }
     unknownFields.writeTo(output);
   }
@@ -233,8 +356,19 @@ private static final long serialVersionUID = 0L;
     if (!getXidBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, xid_);
     }
-    if (!getExtraDataBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, extraData_);
+    if (branchId_ != 0L) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeInt64Size(3, branchId_);
+    }
+    if (branchType_ != io.seata.core.protocol.protobuf.BranchTypeProto.AT.getNumber()) {
+      size += com.google.protobuf.CodedOutputStream
+        .computeEnumSize(4, branchType_);
+    }
+    if (!getResourceIdBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, resourceId_);
+    }
+    if (!getApplicationDataBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, applicationData_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -258,8 +392,13 @@ private static final long serialVersionUID = 0L;
     }
     if (!getXid()
         .equals(other.getXid())) return false;
-    if (!getExtraData()
-        .equals(other.getExtraData())) return false;
+    if (getBranchId()
+        != other.getBranchId()) return false;
+    if (branchType_ != other.branchType_) return false;
+    if (!getResourceId()
+        .equals(other.getResourceId())) return false;
+    if (!getApplicationData()
+        .equals(other.getApplicationData())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -277,8 +416,15 @@ private static final long serialVersionUID = 0L;
     }
     hash = (37 * hash) + XID_FIELD_NUMBER;
     hash = (53 * hash) + getXid().hashCode();
-    hash = (37 * hash) + EXTRADATA_FIELD_NUMBER;
-    hash = (53 * hash) + getExtraData().hashCode();
+    hash = (37 * hash) + BRANCHID_FIELD_NUMBER;
+    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
+        getBranchId());
+    hash = (37 * hash) + BRANCHTYPE_FIELD_NUMBER;
+    hash = (53 * hash) + branchType_;
+    hash = (37 * hash) + RESOURCEID_FIELD_NUMBER;
+    hash = (53 * hash) + getResourceId().hashCode();
+    hash = (37 * hash) + APPLICATIONDATA_FIELD_NUMBER;
+    hash = (53 * hash) + getApplicationData().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -424,7 +570,13 @@ private static final long serialVersionUID = 0L;
       }
       xid_ = "";
 
-      extraData_ = "";
+      branchId_ = 0L;
+
+      branchType_ = 0;
+
+      resourceId_ = "";
+
+      applicationData_ = "";
 
       return this;
     }
@@ -458,7 +610,10 @@ private static final long serialVersionUID = 0L;
         result.abstractTransactionRequest_ = abstractTransactionRequestBuilder_.build();
       }
       result.xid_ = xid_;
-      result.extraData_ = extraData_;
+      result.branchId_ = branchId_;
+      result.branchType_ = branchType_;
+      result.resourceId_ = resourceId_;
+      result.applicationData_ = applicationData_;
       onBuilt();
       return result;
     }
@@ -514,8 +669,18 @@ private static final long serialVersionUID = 0L;
         xid_ = other.xid_;
         onChanged();
       }
-      if (!other.getExtraData().isEmpty()) {
-        extraData_ = other.extraData_;
+      if (other.getBranchId() != 0L) {
+        setBranchId(other.getBranchId());
+      }
+      if (other.branchType_ != 0) {
+        setBranchTypeValue(other.getBranchTypeValue());
+      }
+      if (!other.getResourceId().isEmpty()) {
+        resourceId_ = other.resourceId_;
+        onChanged();
+      }
+      if (!other.getApplicationData().isEmpty()) {
+        applicationData_ = other.applicationData_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -733,71 +898,301 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private java.lang.Object extraData_ = "";
+    private long branchId_ ;
     /**
-     * <code>string extraData = 3;</code>
+     * <pre>
+     **
+     * The Branch id.
+     * </pre>
+     *
+     * <code>int64 branchId = 3;</code>
      */
-    public java.lang.String getExtraData() {
-      java.lang.Object ref = extraData_;
+    public long getBranchId() {
+      return branchId_;
+    }
+    /**
+     * <pre>
+     **
+     * The Branch id.
+     * </pre>
+     *
+     * <code>int64 branchId = 3;</code>
+     */
+    public Builder setBranchId(long value) {
+      
+      branchId_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     **
+     * The Branch id.
+     * </pre>
+     *
+     * <code>int64 branchId = 3;</code>
+     */
+    public Builder clearBranchId() {
+      
+      branchId_ = 0L;
+      onChanged();
+      return this;
+    }
+
+    private int branchType_ = 0;
+    /**
+     * <pre>
+     **
+     * The Branch type.
+     * </pre>
+     *
+     * <code>.io.seata.protocol.protobuf.BranchTypeProto branchType = 4;</code>
+     */
+    public int getBranchTypeValue() {
+      return branchType_;
+    }
+    /**
+     * <pre>
+     **
+     * The Branch type.
+     * </pre>
+     *
+     * <code>.io.seata.protocol.protobuf.BranchTypeProto branchType = 4;</code>
+     */
+    public Builder setBranchTypeValue(int value) {
+      branchType_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     **
+     * The Branch type.
+     * </pre>
+     *
+     * <code>.io.seata.protocol.protobuf.BranchTypeProto branchType = 4;</code>
+     */
+    public io.seata.core.protocol.protobuf.BranchTypeProto getBranchType() {
+      @SuppressWarnings("deprecation")
+      io.seata.core.protocol.protobuf.BranchTypeProto result = io.seata.core.protocol.protobuf.BranchTypeProto.valueOf(branchType_);
+      return result == null ? io.seata.core.protocol.protobuf.BranchTypeProto.UNRECOGNIZED : result;
+    }
+    /**
+     * <pre>
+     **
+     * The Branch type.
+     * </pre>
+     *
+     * <code>.io.seata.protocol.protobuf.BranchTypeProto branchType = 4;</code>
+     */
+    public Builder setBranchType(io.seata.core.protocol.protobuf.BranchTypeProto value) {
+      if (value == null) {
+        throw new NullPointerException();
+      }
+      
+      branchType_ = value.getNumber();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     **
+     * The Branch type.
+     * </pre>
+     *
+     * <code>.io.seata.protocol.protobuf.BranchTypeProto branchType = 4;</code>
+     */
+    public Builder clearBranchType() {
+      
+      branchType_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object resourceId_ = "";
+    /**
+     * <pre>
+     **
+     * The Resource id.
+     * </pre>
+     *
+     * <code>string resourceId = 5;</code>
+     */
+    public java.lang.String getResourceId() {
+      java.lang.Object ref = resourceId_;
       if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        extraData_ = s;
+        resourceId_ = s;
         return s;
       } else {
         return (java.lang.String) ref;
       }
     }
     /**
-     * <code>string extraData = 3;</code>
+     * <pre>
+     **
+     * The Resource id.
+     * </pre>
+     *
+     * <code>string resourceId = 5;</code>
      */
     public com.google.protobuf.ByteString
-        getExtraDataBytes() {
-      java.lang.Object ref = extraData_;
+        getResourceIdBytes() {
+      java.lang.Object ref = resourceId_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        extraData_ = b;
+        resourceId_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
     /**
-     * <code>string extraData = 3;</code>
+     * <pre>
+     **
+     * The Resource id.
+     * </pre>
+     *
+     * <code>string resourceId = 5;</code>
      */
-    public Builder setExtraData(
+    public Builder setResourceId(
         java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
   
-      extraData_ = value;
+      resourceId_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>string extraData = 3;</code>
+     * <pre>
+     **
+     * The Resource id.
+     * </pre>
+     *
+     * <code>string resourceId = 5;</code>
      */
-    public Builder clearExtraData() {
+    public Builder clearResourceId() {
       
-      extraData_ = getDefaultInstance().getExtraData();
+      resourceId_ = getDefaultInstance().getResourceId();
       onChanged();
       return this;
     }
     /**
-     * <code>string extraData = 3;</code>
+     * <pre>
+     **
+     * The Resource id.
+     * </pre>
+     *
+     * <code>string resourceId = 5;</code>
      */
-    public Builder setExtraDataBytes(
+    public Builder setResourceIdBytes(
         com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
       
-      extraData_ = value;
+      resourceId_ = value;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object applicationData_ = "";
+    /**
+     * <pre>
+     **
+     * The Application data.
+     * </pre>
+     *
+     * <code>string applicationData = 6;</code>
+     */
+    public java.lang.String getApplicationData() {
+      java.lang.Object ref = applicationData_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        applicationData_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <pre>
+     **
+     * The Application data.
+     * </pre>
+     *
+     * <code>string applicationData = 6;</code>
+     */
+    public com.google.protobuf.ByteString
+        getApplicationDataBytes() {
+      java.lang.Object ref = applicationData_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        applicationData_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <pre>
+     **
+     * The Application data.
+     * </pre>
+     *
+     * <code>string applicationData = 6;</code>
+     */
+    public Builder setApplicationData(
+        java.lang.String value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  
+      applicationData_ = value;
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     **
+     * The Application data.
+     * </pre>
+     *
+     * <code>string applicationData = 6;</code>
+     */
+    public Builder clearApplicationData() {
+      
+      applicationData_ = getDefaultInstance().getApplicationData();
+      onChanged();
+      return this;
+    }
+    /**
+     * <pre>
+     **
+     * The Application data.
+     * </pre>
+     *
+     * <code>string applicationData = 6;</code>
+     */
+    public Builder setApplicationDataBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+      
+      applicationData_ = value;
       onChanged();
       return this;
     }
