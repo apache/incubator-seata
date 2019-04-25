@@ -111,7 +111,21 @@
         <eureka-clients.version>1.9.5</eureka-clients.version>
         <javax-inject.version>1</javax-inject.version>
         <archaius-core.version>0.7.6</archaius-core.version>
+        <maven.test.skip>true</maven.test.skip>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Nexus Release Repository</name>
+            <url>http://192.168.150.59:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <url>http://192.168.150.59:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <!--test-->
     <dependencies>
         <dependency>
@@ -361,15 +375,28 @@
                     </plugin>
                 </plugins>
             </build>
+            <!--<distributionManagement>-->
+                <!--<snapshotRepository>-->
+                    <!--<id>openSource</id>-->
+                    <!--<url>https://oss.sonatype.org/content/repositories/snapshots/</url>-->
+                <!--</snapshotRepository>-->
+                <!--<repository>-->
+                    <!--<id>openSource</id>-->
+                    <!--<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
+                <!--</repository>-->
+            <!--</distributionManagement>-->
+
+
             <distributionManagement>
-                <snapshotRepository>
-                    <id>openSource</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-                </snapshotRepository>
                 <repository>
-                    <id>openSource</id>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                    <id>releases</id>
+                    <name>Nexus Release Repository</name>
+                    <url>http://192.168.150.59:8081/repository/maven-releases/</url>
                 </repository>
+                <snapshotRepository>
+                    <id>snapshots</id>
+                    <url>http://192.168.150.59:8081/repository/maven-snapshots/</url>
+                </snapshotRepository>
             </distributionManagement>
         </profile>
     </profiles>
