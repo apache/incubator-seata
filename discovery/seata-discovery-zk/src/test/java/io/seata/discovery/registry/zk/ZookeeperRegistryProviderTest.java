@@ -20,7 +20,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author Geng Zhang
  */
 public class ZookeeperRegistryProviderTest {
 
@@ -28,6 +28,7 @@ public class ZookeeperRegistryProviderTest {
     public void provide() {
         ZookeeperRegistryProvider provider = new ZookeeperRegistryProvider();
         RegistryService registryService = provider.provide();
+        Assert.assertTrue(registryService instanceof ZookeeperRegisterServiceImpl);
         Assert.assertEquals(registryService, provider.provide());
     }
 

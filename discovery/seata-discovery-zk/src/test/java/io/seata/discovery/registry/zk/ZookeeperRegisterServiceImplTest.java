@@ -16,7 +16,6 @@
 package io.seata.discovery.registry.zk;
 
 import io.seata.common.util.NetUtil;
-import io.seata.discovery.registry.RegistryService;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.curator.test.TestingServer;
@@ -25,8 +24,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,28 +31,20 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author Geng Zhang
  */
 public class ZookeeperRegisterServiceImplTest {
     protected static TestingServer server = null;
     @BeforeClass
-    public static void adBeforeClass() {
-        try {
-            server = new TestingServer(2181, true);
-            server.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    public static void adBeforeClass() throws Exception {
+        server = new TestingServer(2181, true);
+        server.start();
     }
 
     @AfterClass
-    public static void adAfterClass() {
+    public static void adAfterClass() throws Exception {
         if (server != null) {
-            try {
-                server.stop();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            server.stop();
         }
     }
 
