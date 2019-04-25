@@ -21,7 +21,6 @@ private static final long serialVersionUID = 0L;
   }
   private MergedResultMessageProto() {
     msgs_ = java.util.Collections.emptyList();
-    msgIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
   }
 
   @java.lang.Override
@@ -70,15 +69,6 @@ private static final long serialVersionUID = 0L;
                 input.readMessage(com.google.protobuf.Any.parser(), extensionRegistry));
             break;
           }
-          case 26: {
-            java.lang.String s = input.readStringRequireUtf8();
-            if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-              msgIds_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000004;
-            }
-            msgIds_.add(s);
-            break;
-          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -96,9 +86,6 @@ private static final long serialVersionUID = 0L;
     } finally {
       if (((mutable_bitField0_ & 0x00000002) != 0)) {
         msgs_ = java.util.Collections.unmodifiableList(msgs_);
-      }
-      if (((mutable_bitField0_ & 0x00000004) != 0)) {
-        msgIds_ = msgIds_.getUnmodifiableView();
       }
       this.unknownFields = unknownFields.build();
       makeExtensionsImmutable();
@@ -174,35 +161,6 @@ private static final long serialVersionUID = 0L;
     return msgs_.get(index);
   }
 
-  public static final int MSGIDS_FIELD_NUMBER = 3;
-  private com.google.protobuf.LazyStringList msgIds_;
-  /**
-   * <code>repeated string msgIds = 3;</code>
-   */
-  public com.google.protobuf.ProtocolStringList
-      getMsgIdsList() {
-    return msgIds_;
-  }
-  /**
-   * <code>repeated string msgIds = 3;</code>
-   */
-  public int getMsgIdsCount() {
-    return msgIds_.size();
-  }
-  /**
-   * <code>repeated string msgIds = 3;</code>
-   */
-  public java.lang.String getMsgIds(int index) {
-    return msgIds_.get(index);
-  }
-  /**
-   * <code>repeated string msgIds = 3;</code>
-   */
-  public com.google.protobuf.ByteString
-      getMsgIdsBytes(int index) {
-    return msgIds_.getByteString(index);
-  }
-
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -223,9 +181,6 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < msgs_.size(); i++) {
       output.writeMessage(2, msgs_.get(i));
     }
-    for (int i = 0; i < msgIds_.size(); i++) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, msgIds_.getRaw(i));
-    }
     unknownFields.writeTo(output);
   }
 
@@ -242,14 +197,6 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < msgs_.size(); i++) {
       size += com.google.protobuf.CodedOutputStream
         .computeMessageSize(2, msgs_.get(i));
-    }
-    {
-      int dataSize = 0;
-      for (int i = 0; i < msgIds_.size(); i++) {
-        dataSize += computeStringSizeNoTag(msgIds_.getRaw(i));
-      }
-      size += dataSize;
-      size += 1 * getMsgIdsList().size();
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -273,8 +220,6 @@ private static final long serialVersionUID = 0L;
     }
     if (!getMsgsList()
         .equals(other.getMsgsList())) return false;
-    if (!getMsgIdsList()
-        .equals(other.getMsgIdsList())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -293,10 +238,6 @@ private static final long serialVersionUID = 0L;
     if (getMsgsCount() > 0) {
       hash = (37 * hash) + MSGS_FIELD_NUMBER;
       hash = (53 * hash) + getMsgsList().hashCode();
-    }
-    if (getMsgIdsCount() > 0) {
-      hash = (37 * hash) + MSGIDS_FIELD_NUMBER;
-      hash = (53 * hash) + getMsgIdsList().hashCode();
     }
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
@@ -448,8 +389,6 @@ private static final long serialVersionUID = 0L;
       } else {
         msgsBuilder_.clear();
       }
-      msgIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000004);
       return this;
     }
 
@@ -492,11 +431,6 @@ private static final long serialVersionUID = 0L;
       } else {
         result.msgs_ = msgsBuilder_.build();
       }
-      if (((bitField0_ & 0x00000004) != 0)) {
-        msgIds_ = msgIds_.getUnmodifiableView();
-        bitField0_ = (bitField0_ & ~0x00000004);
-      }
-      result.msgIds_ = msgIds_;
       result.bitField0_ = to_bitField0_;
       onBuilt();
       return result;
@@ -574,16 +508,6 @@ private static final long serialVersionUID = 0L;
             msgsBuilder_.addAllMessages(other.msgs_);
           }
         }
-      }
-      if (!other.msgIds_.isEmpty()) {
-        if (msgIds_.isEmpty()) {
-          msgIds_ = other.msgIds_;
-          bitField0_ = (bitField0_ & ~0x00000004);
-        } else {
-          ensureMsgIdsIsMutable();
-          msgIds_.addAll(other.msgIds_);
-        }
-        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -970,100 +894,6 @@ private static final long serialVersionUID = 0L;
         msgs_ = null;
       }
       return msgsBuilder_;
-    }
-
-    private com.google.protobuf.LazyStringList msgIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-    private void ensureMsgIdsIsMutable() {
-      if (!((bitField0_ & 0x00000004) != 0)) {
-        msgIds_ = new com.google.protobuf.LazyStringArrayList(msgIds_);
-        bitField0_ |= 0x00000004;
-       }
-    }
-    /**
-     * <code>repeated string msgIds = 3;</code>
-     */
-    public com.google.protobuf.ProtocolStringList
-        getMsgIdsList() {
-      return msgIds_.getUnmodifiableView();
-    }
-    /**
-     * <code>repeated string msgIds = 3;</code>
-     */
-    public int getMsgIdsCount() {
-      return msgIds_.size();
-    }
-    /**
-     * <code>repeated string msgIds = 3;</code>
-     */
-    public java.lang.String getMsgIds(int index) {
-      return msgIds_.get(index);
-    }
-    /**
-     * <code>repeated string msgIds = 3;</code>
-     */
-    public com.google.protobuf.ByteString
-        getMsgIdsBytes(int index) {
-      return msgIds_.getByteString(index);
-    }
-    /**
-     * <code>repeated string msgIds = 3;</code>
-     */
-    public Builder setMsgIds(
-        int index, java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureMsgIdsIsMutable();
-      msgIds_.set(index, value);
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>repeated string msgIds = 3;</code>
-     */
-    public Builder addMsgIds(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureMsgIdsIsMutable();
-      msgIds_.add(value);
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>repeated string msgIds = 3;</code>
-     */
-    public Builder addAllMsgIds(
-        java.lang.Iterable<java.lang.String> values) {
-      ensureMsgIdsIsMutable();
-      com.google.protobuf.AbstractMessageLite.Builder.addAll(
-          values, msgIds_);
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>repeated string msgIds = 3;</code>
-     */
-    public Builder clearMsgIds() {
-      msgIds_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000004);
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>repeated string msgIds = 3;</code>
-     */
-    public Builder addMsgIdsBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      ensureMsgIdsIsMutable();
-      msgIds_.add(value);
-      onChanged();
-      return this;
     }
     @java.lang.Override
     public final Builder setUnknownFields(

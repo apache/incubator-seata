@@ -13,5 +13,4 @@ message AbstractResultMessageProto {
     AbstractMessageProto AbstractMessage=1;
     ResultCodeProto resultCode = 2;
     string msg = 3;
-    bool identified = 4;
 }

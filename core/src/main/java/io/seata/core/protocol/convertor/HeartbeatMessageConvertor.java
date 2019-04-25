@@ -14,11 +14,17 @@ import io.seata.core.protocol.protobuf.HeartbeatMessageProto;
 public class HeartbeatMessageConvertor implements PbConvertor<HeartbeatMessage, HeartbeatMessageProto> {
     @Override
     public HeartbeatMessageProto convert2Proto(HeartbeatMessage heartbeatMessage) {
-        return null;
+        HeartbeatMessageProto result = HeartbeatMessageProto.newBuilder().setPingOrPong(heartbeatMessage.isPingOrPong())
+            .build();
+        return result;
     }
 
     @Override
     public HeartbeatMessage convert2Model(HeartbeatMessageProto heartbeatMessageProto) {
-        return null;
+        if (heartbeatMessageProto.getPingOrPong()) {
+            return HeartbeatMessage.PING;
+        } else {
+            return HeartbeatMessage.PONG;
+        }
     }
 }

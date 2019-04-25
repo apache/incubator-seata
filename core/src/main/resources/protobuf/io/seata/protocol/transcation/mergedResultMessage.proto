@@ -13,5 +13,4 @@ option java_package = "io.seata.core.protocol.protobuf";
 message MergedResultMessageProto {
     AbstractMessageProto abstractMessage=1;
     repeated google.protobuf.Any msgs = 2;
-    repeated string msgIds = 3;
 }

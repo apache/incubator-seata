@@ -12,7 +12,6 @@ option java_package = "io.seata.core.protocol.protobuf";
 message AbstractIdentifyResponseProto {
 
     AbstractResultMessageProto abstractResultMessage=1;
-
     string version = 2;
     string extraData = 3;
     bool identified = 4;

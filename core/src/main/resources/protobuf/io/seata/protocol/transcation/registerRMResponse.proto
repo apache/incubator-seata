@@ -11,7 +11,4 @@ option java_package = "io.seata.core.protocol.protobuf";
 // PublishRequest is a publish request.
 message RegisterRMResponseProto {
     AbstractIdentifyResponseProto abstractIdentifyResponse = 1;
-    string resourceIds = 2;
-
-
 }

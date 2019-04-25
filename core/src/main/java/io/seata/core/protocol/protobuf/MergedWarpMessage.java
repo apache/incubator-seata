@@ -30,12 +30,13 @@ public final class MergedWarpMessage {
     java.lang.String[] descriptorData = {
       "\n\027mergedWarpMessage.proto\022\032io.seata.prot" +
       "ocol.protobuf\032\025abstractMessage.proto\032\031go" +
-      "ogle/protobuf/any.proto\"\207\001\n\026MergedWarpMe" +
+      "ogle/protobuf/any.proto\"\227\001\n\026MergedWarpMe" +
       "ssageProto\022I\n\017abstractMessage\030\001 \001(\01320.io" +
       ".seata.protocol.protobuf.AbstractMessage" +
       "Proto\022\"\n\004msgs\030\002 \003(\0132\024.google.protobuf.An" +
-      "yB6\n\037io.seata.core.protocol.protobufB\021Me" +
-      "rgedWarpMessageP\001b\006proto3"
+      "y\022\016\n\006msgIds\030\003 \003(\003B6\n\037io.seata.core.proto" +
+      "col.protobufB\021MergedWarpMessageP\001b\006proto" +
+      "3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -56,7 +57,7 @@ public final class MergedWarpMessage {
     internal_static_io_seata_protocol_protobuf_MergedWarpMessageProto_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_seata_protocol_protobuf_MergedWarpMessageProto_descriptor,
-        new java.lang.String[] { "AbstractMessage", "Msgs", });
+        new java.lang.String[] { "AbstractMessage", "Msgs", "MsgIds", });
     io.seata.core.protocol.protobuf.AbstractMessage.getDescriptor();
     com.google.protobuf.AnyProto.getDescriptor();
   }

@@ -43,4 +43,17 @@ public interface MergedWarpMessageProtoOrBuilder extends
    */
   com.google.protobuf.AnyOrBuilder getMsgsOrBuilder(
       int index);
+
+  /**
+   * <code>repeated int64 msgIds = 3;</code>
+   */
+  java.util.List<java.lang.Long> getMsgIdsList();
+  /**
+   * <code>repeated int64 msgIds = 3;</code>
+   */
+  int getMsgIdsCount();
+  /**
+   * <code>repeated int64 msgIds = 3;</code>
+   */
+  long getMsgIds(int index);
 }

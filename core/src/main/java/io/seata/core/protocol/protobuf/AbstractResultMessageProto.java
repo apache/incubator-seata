@@ -73,11 +73,6 @@ private static final long serialVersionUID = 0L;
             msg_ = s;
             break;
           }
-          case 32: {
-
-            identified_ = input.readBool();
-            break;
-          }
           default: {
             if (!parseUnknownField(
                 input, unknownFields, extensionRegistry, tag)) {
@@ -182,15 +177,6 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int IDENTIFIED_FIELD_NUMBER = 4;
-  private boolean identified_;
-  /**
-   * <code>bool identified = 4;</code>
-   */
-  public boolean getIdentified() {
-    return identified_;
-  }
-
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -214,9 +200,6 @@ private static final long serialVersionUID = 0L;
     if (!getMsgBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, msg_);
     }
-    if (identified_ != false) {
-      output.writeBool(4, identified_);
-    }
     unknownFields.writeTo(output);
   }
 
@@ -236,10 +219,6 @@ private static final long serialVersionUID = 0L;
     }
     if (!getMsgBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, msg_);
-    }
-    if (identified_ != false) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(4, identified_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -264,8 +243,6 @@ private static final long serialVersionUID = 0L;
     if (resultCode_ != other.resultCode_) return false;
     if (!getMsg()
         .equals(other.getMsg())) return false;
-    if (getIdentified()
-        != other.getIdentified()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -285,9 +262,6 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + resultCode_;
     hash = (37 * hash) + MSG_FIELD_NUMBER;
     hash = (53 * hash) + getMsg().hashCode();
-    hash = (37 * hash) + IDENTIFIED_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-        getIdentified());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -435,8 +409,6 @@ private static final long serialVersionUID = 0L;
 
       msg_ = "";
 
-      identified_ = false;
-
       return this;
     }
 
@@ -470,7 +442,6 @@ private static final long serialVersionUID = 0L;
       }
       result.resultCode_ = resultCode_;
       result.msg_ = msg_;
-      result.identified_ = identified_;
       onBuilt();
       return result;
     }
@@ -528,9 +499,6 @@ private static final long serialVersionUID = 0L;
       if (!other.getMsg().isEmpty()) {
         msg_ = other.msg_;
         onChanged();
-      }
-      if (other.getIdentified() != false) {
-        setIdentified(other.getIdentified());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -788,32 +756,6 @@ private static final long serialVersionUID = 0L;
   checkByteStringIsUtf8(value);
       
       msg_ = value;
-      onChanged();
-      return this;
-    }
-
-    private boolean identified_ ;
-    /**
-     * <code>bool identified = 4;</code>
-     */
-    public boolean getIdentified() {
-      return identified_;
-    }
-    /**
-     * <code>bool identified = 4;</code>
-     */
-    public Builder setIdentified(boolean value) {
-      
-      identified_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>bool identified = 4;</code>
-     */
-    public Builder clearIdentified() {
-      
-      identified_ = false;
       onChanged();
       return this;
     }

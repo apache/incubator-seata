@@ -8,10 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.InvalidProtocolBufferException;
-import io.seata.core.protocol.convertor.GlobalBeginRequestConvertor;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergedWarpMessage;
+import io.seata.core.protocol.convertor.MergedWarpMessageConvertor;
 import io.seata.core.protocol.convertor.PbConvertor;
 import io.seata.core.protocol.serialize.FrameSerialzer;
 import io.seata.core.protocol.serialize.ProtobufConvertManager;
@@ -19,7 +18,6 @@ import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.junit.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 /**
  * @author bystander
@@ -38,7 +36,8 @@ public class MergeMessageTest {
         final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetcConvertor(
             globalBeginRequest.getClass().getName());
 
-        GlobalBeginRequestProto globalBeginRequestProto = (GlobalBeginRequestProto)pbConvertor.convert2Proto(globalBeginRequest);
+        GlobalBeginRequestProto globalBeginRequestProto = (GlobalBeginRequestProto)pbConvertor.convert2Proto(
+            globalBeginRequest);
 
         final short typeCode = mergedWarpMessage.getTypeCode();
 
@@ -57,25 +56,16 @@ public class MergeMessageTest {
 
         assertThat(anys.size()).isEqualTo(1);
 
-        for (Any any : anys) {
-            if (any.is(GlobalBeginRequestProto.class)) {
-                try {
-                    Object ob = any.unpack(GlobalBeginRequestProto.class);
-                    assertThat(ob instanceof GlobalBeginRequestProto).isEqualTo(true);
+        MergedWarpMessageConvertor convertor = new MergedWarpMessageConvertor();
+        MergedWarpMessage model = convertor.convert2Model(result);
 
-                    GlobalBeginRequestProto decodeGlobalBeginRequest = (GlobalBeginRequestProto)ob;
-                    assertThat(decodeGlobalBeginRequest.getTransactionName()).isEqualTo(
-                        globalBeginRequest.getTransactionName());
-                    assertThat(decodeGlobalBeginRequest.getTimeout()).isEqualTo(globalBeginRequest.getTimeout());
-                    assertThat(
-                        decodeGlobalBeginRequest.getAbstractTransactionRequest().getAbstractMessage().getMessageType()
-                            .getNumber()).isEqualTo(globalBeginRequest.getTypeCode());
+        GlobalBeginRequest decodeModel = (GlobalBeginRequest)model.msgs.get(0);
+        assertThat(decodeModel.getTransactionName()).isEqualTo(
+            globalBeginRequest.getTransactionName());
+        assertThat(decodeModel.getTimeout()).isEqualTo(globalBeginRequest.getTimeout());
+        assertThat(
+            decodeModel.getTypeCode()).isEqualTo(globalBeginRequest.getTypeCode());
 
-                } catch (InvalidProtocolBufferException e) {
-                    fail(e.getMessage());
-                }
-            }
-        }
     }
 
     private GlobalBeginRequest buildGlobalBeginRequest() {

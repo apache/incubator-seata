@@ -30,12 +30,11 @@ public final class RegisterRMResponse {
     java.lang.String[] descriptorData = {
       "\n\030registerRMResponse.proto\022\032io.seata.pro" +
       "tocol.protobuf\032\036abstractIdentifyResponse" +
-      ".proto\"\213\001\n\027RegisterRMResponseProto\022[\n\030ab" +
-      "stractIdentifyResponse\030\001 \001(\01329.io.seata." +
-      "protocol.protobuf.AbstractIdentifyRespon" +
-      "seProto\022\023\n\013resourceIds\030\002 \001(\tB7\n\037io.seata" +
-      ".core.protocol.protobufB\022RegisterRMRespo" +
-      "nseP\001b\006proto3"
+      ".proto\"v\n\027RegisterRMResponseProto\022[\n\030abs" +
+      "tractIdentifyResponse\030\001 \001(\01329.io.seata.p" +
+      "rotocol.protobuf.AbstractIdentifyRespons" +
+      "eProtoB7\n\037io.seata.core.protocol.protobu" +
+      "fB\022RegisterRMResponseP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -55,7 +54,7 @@ public final class RegisterRMResponse {
     internal_static_io_seata_protocol_protobuf_RegisterRMResponseProto_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_seata_protocol_protobuf_RegisterRMResponseProto_descriptor,
-        new java.lang.String[] { "AbstractIdentifyResponse", "ResourceIds", });
+        new java.lang.String[] { "AbstractIdentifyResponse", });
     io.seata.core.protocol.protobuf.AbstractIdentifyResponse.getDescriptor();
   }
 
