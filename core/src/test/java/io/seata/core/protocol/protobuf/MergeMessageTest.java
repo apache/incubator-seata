@@ -23,7 +23,7 @@ import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.convertor.MergedWarpMessageConvertor;
 import io.seata.core.protocol.convertor.PbConvertor;
-import io.seata.core.protocol.serialize.FrameSerialzer;
+import io.seata.core.protocol.serialize.ProtobufSerialzer;
 import io.seata.core.protocol.serialize.ProtobufConvertManager;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.junit.Test;
@@ -58,9 +58,9 @@ public class MergeMessageTest {
         MergedWarpMessageProto mergedWarpMessageProto = MergedWarpMessageProto.newBuilder().setAbstractMessage(
             abstractMessage).addMsgs(Any.pack(globalBeginRequestProto)).build();
 
-        byte[] bytes = FrameSerialzer.serializeContent(mergedWarpMessageProto);
+        byte[] bytes = ProtobufSerialzer.serializeContent(mergedWarpMessageProto);
 
-        MergedWarpMessageProto result = FrameSerialzer.deserializeContent(MergedWarpMessageProto.class.getName(),
+        MergedWarpMessageProto result = ProtobufSerialzer.deserializeContent(MergedWarpMessageProto.class.getName(),
             bytes);
 
         List<Any> anys = result.getMsgsList();

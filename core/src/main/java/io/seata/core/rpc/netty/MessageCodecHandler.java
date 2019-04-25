@@ -30,7 +30,7 @@ import io.seata.core.protocol.MessageCodec;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.convertor.PbConvertor;
 import io.seata.core.protocol.protobuf.HeartbeatMessageProto;
-import io.seata.core.protocol.serialize.FrameSerialzer;
+import io.seata.core.protocol.serialize.ProtobufSerialzer;
 import io.seata.core.protocol.serialize.ProtobufConvertManager;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.slf4j.Logger;
@@ -268,7 +268,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
             throw new NullPointerException();
         }
 
-        return FrameSerialzer.serializeContent(object);
+        return ProtobufSerialzer.serializeContent(object);
 
     }
 
@@ -283,7 +283,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
         if (bytes == null) {
             throw new NullPointerException();
         }
-        return FrameSerialzer.deserializeContent(clazz, bytes);
+        return ProtobufSerialzer.deserializeContent(clazz, bytes);
 
     }
 
