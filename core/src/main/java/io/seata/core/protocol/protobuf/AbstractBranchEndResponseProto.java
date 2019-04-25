@@ -22,8 +22,6 @@ private static final long serialVersionUID = 0L;
   private AbstractBranchEndResponseProto() {
     xid_ = "";
     branchStatus_ = 0;
-    resourceId_ = "";
-    applicationData_ = "";
   }
 
   @java.lang.Override
@@ -78,18 +76,6 @@ private static final long serialVersionUID = 0L;
             int rawValue = input.readEnum();
 
             branchStatus_ = rawValue;
-            break;
-          }
-          case 42: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            resourceId_ = s;
-            break;
-          }
-          case 50: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            applicationData_ = s;
             break;
           }
           default: {
@@ -205,74 +191,6 @@ private static final long serialVersionUID = 0L;
     return result == null ? io.seata.core.protocol.protobuf.BranchStatusProto.UNRECOGNIZED : result;
   }
 
-  public static final int RESOURCEID_FIELD_NUMBER = 5;
-  private volatile java.lang.Object resourceId_;
-  /**
-   * <code>string resourceId = 5;</code>
-   */
-  public java.lang.String getResourceId() {
-    java.lang.Object ref = resourceId_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      resourceId_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string resourceId = 5;</code>
-   */
-  public com.google.protobuf.ByteString
-      getResourceIdBytes() {
-    java.lang.Object ref = resourceId_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      resourceId_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int APPLICATIONDATA_FIELD_NUMBER = 6;
-  private volatile java.lang.Object applicationData_;
-  /**
-   * <code>string applicationData = 6;</code>
-   */
-  public java.lang.String getApplicationData() {
-    java.lang.Object ref = applicationData_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      applicationData_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string applicationData = 6;</code>
-   */
-  public com.google.protobuf.ByteString
-      getApplicationDataBytes() {
-    java.lang.Object ref = applicationData_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      applicationData_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -299,12 +217,6 @@ private static final long serialVersionUID = 0L;
     if (branchStatus_ != io.seata.core.protocol.protobuf.BranchStatusProto.BUnknown.getNumber()) {
       output.writeEnum(4, branchStatus_);
     }
-    if (!getResourceIdBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 5, resourceId_);
-    }
-    if (!getApplicationDataBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 6, applicationData_);
-    }
     unknownFields.writeTo(output);
   }
 
@@ -328,12 +240,6 @@ private static final long serialVersionUID = 0L;
     if (branchStatus_ != io.seata.core.protocol.protobuf.BranchStatusProto.BUnknown.getNumber()) {
       size += com.google.protobuf.CodedOutputStream
         .computeEnumSize(4, branchStatus_);
-    }
-    if (!getResourceIdBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, resourceId_);
-    }
-    if (!getApplicationDataBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, applicationData_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -360,10 +266,6 @@ private static final long serialVersionUID = 0L;
     if (getBranchId()
         != other.getBranchId()) return false;
     if (branchStatus_ != other.branchStatus_) return false;
-    if (!getResourceId()
-        .equals(other.getResourceId())) return false;
-    if (!getApplicationData()
-        .equals(other.getApplicationData())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -386,10 +288,6 @@ private static final long serialVersionUID = 0L;
         getBranchId());
     hash = (37 * hash) + BRANCHSTATUS_FIELD_NUMBER;
     hash = (53 * hash) + branchStatus_;
-    hash = (37 * hash) + RESOURCEID_FIELD_NUMBER;
-    hash = (53 * hash) + getResourceId().hashCode();
-    hash = (37 * hash) + APPLICATIONDATA_FIELD_NUMBER;
-    hash = (53 * hash) + getApplicationData().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -539,10 +437,6 @@ private static final long serialVersionUID = 0L;
 
       branchStatus_ = 0;
 
-      resourceId_ = "";
-
-      applicationData_ = "";
-
       return this;
     }
 
@@ -577,8 +471,6 @@ private static final long serialVersionUID = 0L;
       result.xid_ = xid_;
       result.branchId_ = branchId_;
       result.branchStatus_ = branchStatus_;
-      result.resourceId_ = resourceId_;
-      result.applicationData_ = applicationData_;
       onBuilt();
       return result;
     }
@@ -639,14 +531,6 @@ private static final long serialVersionUID = 0L;
       }
       if (other.branchStatus_ != 0) {
         setBranchStatusValue(other.getBranchStatusValue());
-      }
-      if (!other.getResourceId().isEmpty()) {
-        resourceId_ = other.resourceId_;
-        onChanged();
-      }
-      if (!other.getApplicationData().isEmpty()) {
-        applicationData_ = other.applicationData_;
-        onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -930,144 +814,6 @@ private static final long serialVersionUID = 0L;
     public Builder clearBranchStatus() {
       
       branchStatus_ = 0;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object resourceId_ = "";
-    /**
-     * <code>string resourceId = 5;</code>
-     */
-    public java.lang.String getResourceId() {
-      java.lang.Object ref = resourceId_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        resourceId_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string resourceId = 5;</code>
-     */
-    public com.google.protobuf.ByteString
-        getResourceIdBytes() {
-      java.lang.Object ref = resourceId_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        resourceId_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string resourceId = 5;</code>
-     */
-    public Builder setResourceId(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      resourceId_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string resourceId = 5;</code>
-     */
-    public Builder clearResourceId() {
-      
-      resourceId_ = getDefaultInstance().getResourceId();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string resourceId = 5;</code>
-     */
-    public Builder setResourceIdBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      resourceId_ = value;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object applicationData_ = "";
-    /**
-     * <code>string applicationData = 6;</code>
-     */
-    public java.lang.String getApplicationData() {
-      java.lang.Object ref = applicationData_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        applicationData_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string applicationData = 6;</code>
-     */
-    public com.google.protobuf.ByteString
-        getApplicationDataBytes() {
-      java.lang.Object ref = applicationData_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        applicationData_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string applicationData = 6;</code>
-     */
-    public Builder setApplicationData(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      applicationData_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string applicationData = 6;</code>
-     */
-    public Builder clearApplicationData() {
-      
-      applicationData_ = getDefaultInstance().getApplicationData();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string applicationData = 6;</code>
-     */
-    public Builder setApplicationDataBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      applicationData_ = value;
       onChanged();
       return this;
     }

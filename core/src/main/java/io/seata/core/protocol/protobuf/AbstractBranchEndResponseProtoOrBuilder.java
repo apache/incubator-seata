@@ -43,24 +43,4 @@ public interface AbstractBranchEndResponseProtoOrBuilder extends
    * <code>.io.seata.protocol.protobuf.BranchStatusProto branchStatus = 4;</code>
    */
   io.seata.core.protocol.protobuf.BranchStatusProto getBranchStatus();
-
-  /**
-   * <code>string resourceId = 5;</code>
-   */
-  java.lang.String getResourceId();
-  /**
-   * <code>string resourceId = 5;</code>
-   */
-  com.google.protobuf.ByteString
-      getResourceIdBytes();
-
-  /**
-   * <code>string applicationData = 6;</code>
-   */
-  java.lang.String getApplicationData();
-  /**
-   * <code>string applicationData = 6;</code>
-   */
-  com.google.protobuf.ByteString
-      getApplicationDataBytes();
 }

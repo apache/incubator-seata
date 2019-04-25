@@ -16,6 +16,4 @@ message AbstractBranchEndResponseProto {
     string xid = 2;
     int64 branchId = 3;
     BranchStatusProto branchStatus = 4;
-    string resourceId = 5;
-    string applicationData = 6;
 }
