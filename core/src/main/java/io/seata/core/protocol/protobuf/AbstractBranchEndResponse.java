@@ -30,16 +30,15 @@ public final class AbstractBranchEndResponse {
     java.lang.String[] descriptorData = {
       "\n\037abstractBranchEndResponse.proto\022\032io.se" +
       "ata.protocol.protobuf\032!abstractTransacti" +
-      "onResponse.proto\032\022branchStatus.proto\"\224\002\n" +
+      "onResponse.proto\032\022branchStatus.proto\"\347\001\n" +
       "\036AbstractBranchEndResponseProto\022a\n\033abstr" +
       "actTransactionResponse\030\001 \001(\0132<.io.seata." +
       "protocol.protobuf.AbstractTransactionRes" +
       "ponseProto\022\013\n\003xid\030\002 \001(\t\022\020\n\010branchId\030\003 \001(" +
       "\003\022C\n\014branchStatus\030\004 \001(\0162-.io.seata.proto" +
-      "col.protobuf.BranchStatusProto\022\022\n\nresour" +
-      "ceId\030\005 \001(\t\022\027\n\017applicationData\030\006 \001(\tB>\n\037i" +
-      "o.seata.core.protocol.protobufB\031Abstract" +
-      "BranchEndResponseP\001b\006proto3"
+      "col.protobuf.BranchStatusProtoB>\n\037io.sea" +
+      "ta.core.protocol.protobufB\031AbstractBranc" +
+      "hEndResponseP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -60,7 +59,7 @@ public final class AbstractBranchEndResponse {
     internal_static_io_seata_protocol_protobuf_AbstractBranchEndResponseProto_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_seata_protocol_protobuf_AbstractBranchEndResponseProto_descriptor,
-        new java.lang.String[] { "AbstractTransactionResponse", "Xid", "BranchId", "BranchStatus", "ResourceId", "ApplicationData", });
+        new java.lang.String[] { "AbstractTransactionResponse", "Xid", "BranchId", "BranchStatus", });
     io.seata.core.protocol.protobuf.AbstractTransactionResponse.getDescriptor();
     io.seata.core.protocol.protobuf.BranchStatus.getDescriptor();
   }
