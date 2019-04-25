@@ -29,17 +29,14 @@ public final class AbstractGlobalEndRequest {
   static {
     java.lang.String[] descriptorData = {
       "\n\036abstractGlobalEndRequest.proto\022\032io.sea" +
-      "ta.protocol.protobuf\032!abstractTransactio" +
-      "nResponse.proto\032\022branchStatus.proto\"\223\002\n\035" +
-      "AbstractGlobalEndRequestProto\022a\n\033abstrac" +
-      "tTransactionResponse\030\001 \001(\0132<.io.seata.pr" +
-      "otocol.protobuf.AbstractTransactionRespo" +
-      "nseProto\022\013\n\003xid\030\002 \001(\t\022\020\n\010branchId\030\003 \001(\003\022" +
-      "C\n\014branchStatus\030\004 \001(\0162-.io.seata.protoco" +
-      "l.protobuf.BranchStatusProto\022\022\n\nresource" +
-      "Id\030\005 \001(\t\022\027\n\017applicationData\030\006 \001(\tB=\n\037io." +
-      "seata.core.protocol.protobufB\030AbstractGl" +
-      "obalEndRequestP\001b\006proto3"
+      "ta.protocol.protobuf\032 abstractTransactio" +
+      "nRequest.proto\032\022branchStatus.proto\"\240\001\n\035A" +
+      "bstractGlobalEndRequestProto\022_\n\032abstract" +
+      "TransactionRequest\030\001 \001(\0132;.io.seata.prot" +
+      "ocol.protobuf.AbstractTransactionRequest" +
+      "Proto\022\013\n\003xid\030\002 \001(\t\022\021\n\textraData\030\003 \001(\tB=\n" +
+      "\037io.seata.core.protocol.protobufB\030Abstra" +
+      "ctGlobalEndRequestP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -52,7 +49,7 @@ public final class AbstractGlobalEndRequest {
     com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          io.seata.core.protocol.protobuf.AbstractTransactionResponse.getDescriptor(),
+          io.seata.core.protocol.protobuf.AbstractTransactionRequest.getDescriptor(),
           io.seata.core.protocol.protobuf.BranchStatus.getDescriptor(),
         }, assigner);
     internal_static_io_seata_protocol_protobuf_AbstractGlobalEndRequestProto_descriptor =
@@ -60,8 +57,8 @@ public final class AbstractGlobalEndRequest {
     internal_static_io_seata_protocol_protobuf_AbstractGlobalEndRequestProto_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_seata_protocol_protobuf_AbstractGlobalEndRequestProto_descriptor,
-        new java.lang.String[] { "AbstractTransactionResponse", "Xid", "BranchId", "BranchStatus", "ResourceId", "ApplicationData", });
-    io.seata.core.protocol.protobuf.AbstractTransactionResponse.getDescriptor();
+        new java.lang.String[] { "AbstractTransactionRequest", "Xid", "ExtraData", });
+    io.seata.core.protocol.protobuf.AbstractTransactionRequest.getDescriptor();
     io.seata.core.protocol.protobuf.BranchStatus.getDescriptor();
   }
 

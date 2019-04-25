@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package io.seata.protocol.protobuf;
 
-import "abstractTransactionResponse.proto";
+import "abstractTransactionRequest.proto";
 import "branchStatus.proto";
 
 option java_multiple_files = true;
@@ -12,10 +12,7 @@ option java_package = "io.seata.core.protocol.protobuf";
 // PublishRequest is a publish request.
 message AbstractGlobalEndRequestProto {
 
-    AbstractTransactionResponseProto abstractTransactionResponse =1;
+    AbstractTransactionRequestProto abstractTransactionRequest =1;
     string xid = 2;
-    int64 branchId = 3;
-    BranchStatusProto branchStatus = 4;
-    string resourceId = 5;
-    string applicationData = 6;
+    string extraData = 3;
 }

@@ -4,7 +4,11 @@
  */
 package io.seata.core.protocol.convertor;
 
+import io.seata.core.protocol.protobuf.AbstractGlobalEndRequestProto;
+import io.seata.core.protocol.protobuf.AbstractMessageProto;
+import io.seata.core.protocol.protobuf.AbstractTransactionRequestProto;
 import io.seata.core.protocol.protobuf.GlobalCommitRequestProto;
+import io.seata.core.protocol.protobuf.MessageTypeProto;
 import io.seata.core.protocol.transaction.GlobalCommitRequest;
 
 /**
@@ -14,11 +18,33 @@ import io.seata.core.protocol.transaction.GlobalCommitRequest;
 public class GlobalCommitRequestConvertor implements PbConvertor<GlobalCommitRequest, GlobalCommitRequestProto> {
     @Override
     public GlobalCommitRequestProto convert2Proto(GlobalCommitRequest globalCommitRequest) {
-        return null;
+        final short typeCode = globalCommitRequest.getTypeCode();
+
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
+            MessageTypeProto.forNumber(typeCode)).build();
+
+        final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
+            .newBuilder().setAbstractMessage(
+                abstractMessage).build();
+
+        AbstractGlobalEndRequestProto abstractGlobalEndRequestProto = AbstractGlobalEndRequestProto.newBuilder()
+            .setAbstractTransactionRequest(abstractTransactionRequestProto)
+            .setXid(globalCommitRequest.getXid())
+            .setExtraData(globalCommitRequest.getExtraData())
+            .build();
+
+        GlobalCommitRequestProto result = GlobalCommitRequestProto.newBuilder().setAbstractGlobalEndRequest(
+            abstractGlobalEndRequestProto).build();
+
+        return result;
+
     }
 
     @Override
     public GlobalCommitRequest convert2Model(GlobalCommitRequestProto globalCommitRequestProto) {
-        return null;
+        GlobalCommitRequest branchCommitRequest = new GlobalCommitRequest();
+        branchCommitRequest.setExtraData(globalCommitRequestProto.getAbstractGlobalEndRequest().getExtraData());
+        branchCommitRequest.setXid(globalCommitRequestProto.getAbstractGlobalEndRequest().getXid());
+        return branchCommitRequest;
     }
 }

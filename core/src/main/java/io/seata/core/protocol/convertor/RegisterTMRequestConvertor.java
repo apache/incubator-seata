@@ -5,6 +5,9 @@
 package io.seata.core.protocol.convertor;
 
 import io.seata.core.protocol.RegisterTMRequest;
+import io.seata.core.protocol.protobuf.AbstractIdentifyRequestProto;
+import io.seata.core.protocol.protobuf.AbstractMessageProto;
+import io.seata.core.protocol.protobuf.MessageTypeProto;
 import io.seata.core.protocol.protobuf.RegisterTMRequestProto;
 
 /**
@@ -14,11 +17,35 @@ import io.seata.core.protocol.protobuf.RegisterTMRequestProto;
 public class RegisterTMRequestConvertor implements PbConvertor<RegisterTMRequest, RegisterTMRequestProto> {
     @Override
     public RegisterTMRequestProto convert2Proto(RegisterTMRequest registerTMRequest) {
-        return null;
+        final short typeCode = registerTMRequest.getTypeCode();
+
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
+            MessageTypeProto.forNumber(typeCode)).build();
+
+        AbstractIdentifyRequestProto abstractIdentifyRequestProto = AbstractIdentifyRequestProto.newBuilder()
+            .setAbstractMessage(abstractMessage)
+            .setApplicationId(registerTMRequest.getApplicationId())
+            .setExtraData(registerTMRequest.getExtraData())
+            .setTransactionServiceGroup(registerTMRequest.getTransactionServiceGroup())
+            .setVersion(registerTMRequest.getVersion())
+            .build();
+
+        RegisterTMRequestProto result = RegisterTMRequestProto.newBuilder().setAbstractIdentifyRequest(
+            abstractIdentifyRequestProto).build();
+
+        return result;
     }
 
     @Override
     public RegisterTMRequest convert2Model(RegisterTMRequestProto registerTMRequestProto) {
-        return null;
+        RegisterTMRequest registerRMRequest = new RegisterTMRequest();
+
+        AbstractIdentifyRequestProto abstractIdentifyRequest = registerTMRequestProto.getAbstractIdentifyRequest();
+        registerRMRequest.setApplicationId(abstractIdentifyRequest.getApplicationId());
+        registerRMRequest.setExtraData(abstractIdentifyRequest.getExtraData());
+        registerRMRequest.setTransactionServiceGroup(abstractIdentifyRequest.getTransactionServiceGroup());
+        registerRMRequest.setVersion(abstractIdentifyRequest.getVersion());
+
+        return registerRMRequest;
     }
 }

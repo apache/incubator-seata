@@ -8,17 +8,17 @@ public interface AbstractGlobalEndRequestProtoOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+   * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
    */
-  boolean hasAbstractTransactionResponse();
+  boolean hasAbstractTransactionRequest();
   /**
-   * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+   * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
    */
-  io.seata.core.protocol.protobuf.AbstractTransactionResponseProto getAbstractTransactionResponse();
+  io.seata.core.protocol.protobuf.AbstractTransactionRequestProto getAbstractTransactionRequest();
   /**
-   * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+   * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
    */
-  io.seata.core.protocol.protobuf.AbstractTransactionResponseProtoOrBuilder getAbstractTransactionResponseOrBuilder();
+  io.seata.core.protocol.protobuf.AbstractTransactionRequestProtoOrBuilder getAbstractTransactionRequestOrBuilder();
 
   /**
    * <code>string xid = 2;</code>
@@ -31,36 +31,12 @@ public interface AbstractGlobalEndRequestProtoOrBuilder extends
       getXidBytes();
 
   /**
-   * <code>int64 branchId = 3;</code>
+   * <code>string extraData = 3;</code>
    */
-  long getBranchId();
-
+  java.lang.String getExtraData();
   /**
-   * <code>.io.seata.protocol.protobuf.BranchStatusProto branchStatus = 4;</code>
-   */
-  int getBranchStatusValue();
-  /**
-   * <code>.io.seata.protocol.protobuf.BranchStatusProto branchStatus = 4;</code>
-   */
-  io.seata.core.protocol.protobuf.BranchStatusProto getBranchStatus();
-
-  /**
-   * <code>string resourceId = 5;</code>
-   */
-  java.lang.String getResourceId();
-  /**
-   * <code>string resourceId = 5;</code>
+   * <code>string extraData = 3;</code>
    */
   com.google.protobuf.ByteString
-      getResourceIdBytes();
-
-  /**
-   * <code>string applicationData = 6;</code>
-   */
-  java.lang.String getApplicationData();
-  /**
-   * <code>string applicationData = 6;</code>
-   */
-  com.google.protobuf.ByteString
-      getApplicationDataBytes();
+      getExtraDataBytes();
 }

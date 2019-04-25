@@ -4,7 +4,11 @@
  */
 package io.seata.core.protocol.convertor;
 
+import io.seata.core.protocol.protobuf.AbstractGlobalEndRequestProto;
+import io.seata.core.protocol.protobuf.AbstractMessageProto;
+import io.seata.core.protocol.protobuf.AbstractTransactionRequestProto;
 import io.seata.core.protocol.protobuf.GlobalRollbackRequestProto;
+import io.seata.core.protocol.protobuf.MessageTypeProto;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 
 /**
@@ -14,11 +18,32 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 public class GlobalRollbackRequestConvertor implements PbConvertor<GlobalRollbackRequest, GlobalRollbackRequestProto> {
     @Override
     public GlobalRollbackRequestProto convert2Proto(GlobalRollbackRequest globalRollbackRequest) {
-        return null;
+        final short typeCode = globalRollbackRequest.getTypeCode();
+
+        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
+            MessageTypeProto.forNumber(typeCode)).build();
+
+        final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
+            .newBuilder().setAbstractMessage(
+                abstractMessage).build();
+
+        AbstractGlobalEndRequestProto abstractGlobalEndRequestProto = AbstractGlobalEndRequestProto.newBuilder()
+            .setAbstractTransactionRequest(abstractTransactionRequestProto)
+            .setXid(globalRollbackRequest.getXid())
+            .setExtraData(globalRollbackRequest.getExtraData())
+            .build();
+
+        GlobalRollbackRequestProto result = GlobalRollbackRequestProto.newBuilder().setAbstractGlobalEndRequest(
+            abstractGlobalEndRequestProto).build();
+
+        return result;
     }
 
     @Override
     public GlobalRollbackRequest convert2Model(GlobalRollbackRequestProto globalRollbackRequestProto) {
-        return null;
+        GlobalRollbackRequest branchCommitRequest = new GlobalRollbackRequest();
+        branchCommitRequest.setExtraData(globalRollbackRequestProto.getAbstractGlobalEndRequest().getExtraData());
+        branchCommitRequest.setXid(globalRollbackRequestProto.getAbstractGlobalEndRequest().getXid());
+        return branchCommitRequest;
     }
 }
