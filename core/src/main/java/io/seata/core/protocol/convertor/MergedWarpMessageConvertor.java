@@ -44,7 +44,7 @@ public class MergedWarpMessageConvertor implements PbConvertor<MergedWarpMessage
 
         List<Any> lists = new ArrayList<>();
         for (AbstractMessage msg : mergedWarpMessage.msgs) {
-            final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetcConvertor(
+            final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(
                 msg.getClass().getName());
             lists.add(Any.pack((Message)pbConvertor.convert2Proto(msg)));
         }
@@ -64,12 +64,12 @@ public class MergedWarpMessageConvertor implements PbConvertor<MergedWarpMessage
         MergedWarpMessage result = new MergedWarpMessage();
         List<Any> anys = mergedWarpMessageProto.getMsgsList();
         for (Any any : anys) {
-            final Class clazz = ProtobufConvertManager.getInstance().fetchClass(
+            final Class clazz = ProtobufConvertManager.getInstance().fetchProtoClass(
                 getTypeNameFromTypeUrl(any.getTypeUrl()));
             if (any.is(clazz)) {
                 try {
                     Object ob = any.unpack(clazz);
-                    final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetcReversedConvertor(
+                    final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(
                         clazz.getName());
                     Object model = pbConvertor.convert2Model(ob);
                     result.msgs.add((AbstractMessage)model);

@@ -97,7 +97,6 @@ import io.seata.core.protocol.transaction.GlobalStatusResponse;
 
 /**
  * @author leizhiyuan
-
  */
 public class ProtobufConvertManager {
 
@@ -105,7 +104,7 @@ public class ProtobufConvertManager {
 
     private Map<String, PbConvertor> reverseConvertorMap = new ConcurrentHashMap<>();
 
-    private Map<String, Class> clazzMap = new ConcurrentHashMap<>();
+    private Map<String, Class> protoClazzMap = new ConcurrentHashMap<>();
 
     private static class SingletonHolder {
         private static final ProtobufConvertManager INSTANCE;
@@ -163,51 +162,57 @@ public class ProtobufConvertManager {
             protobufConvertManager.convertorMap.put(RegisterTMResponse.class.getName(),
                 new RegisterTMResponseConvertor());
 
-            protobufConvertManager.clazzMap.put(GlobalBeginRequestProto.getDescriptor().getFullName(), GlobalBeginRequestProto.class);
-            protobufConvertManager.clazzMap.put(BranchCommitRequestProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(GlobalBeginRequestProto.getDescriptor().getFullName(),
+                GlobalBeginRequestProto.class);
+            protobufConvertManager.protoClazzMap.put(BranchCommitRequestProto.getDescriptor().getFullName(),
                 BranchCommitRequestProto.class);
-            protobufConvertManager.clazzMap.put(BranchCommitResponseProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(BranchCommitResponseProto.getDescriptor().getFullName(),
                 BranchCommitResponseProto.class);
-            protobufConvertManager.clazzMap.put(BranchRegisterRequestProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(BranchRegisterRequestProto.getDescriptor().getFullName(),
                 BranchRegisterRequestProto.class);
-            protobufConvertManager.clazzMap.put(BranchRegisterResponseProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(BranchRegisterResponseProto.getDescriptor().getFullName(),
                 BranchRegisterResponseProto.class);
-            protobufConvertManager.clazzMap.put(BranchReportRequestProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(BranchReportRequestProto.getDescriptor().getFullName(),
                 BranchReportRequestProto.class);
-            protobufConvertManager.clazzMap.put(BranchReportResponseProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(BranchReportResponseProto.getDescriptor().getFullName(),
                 BranchReportResponseProto.class);
-            protobufConvertManager.clazzMap.put(BranchRollbackRequestProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(BranchRollbackRequestProto.getDescriptor().getFullName(),
                 BranchRollbackRequestProto.class);
-            protobufConvertManager.clazzMap.put(BranchRollbackResponseProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(BranchRollbackResponseProto.getDescriptor().getFullName(),
                 BranchRollbackResponseProto.class);
-            protobufConvertManager.clazzMap.put(GlobalBeginResponseProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(GlobalBeginResponseProto.getDescriptor().getFullName(),
                 GlobalBeginResponseProto.class);
-            protobufConvertManager.clazzMap.put(GlobalCommitRequestProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(GlobalCommitRequestProto.getDescriptor().getFullName(),
                 GlobalCommitRequestProto.class);
-            protobufConvertManager.clazzMap.put(GlobalCommitResponseProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(GlobalCommitResponseProto.getDescriptor().getFullName(),
                 GlobalCommitResponseProto.class);
-            protobufConvertManager.clazzMap.put(GlobalLockQueryRequestProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(GlobalLockQueryRequestProto.getDescriptor().getFullName(),
                 GlobalLockQueryRequestProto.class);
-            protobufConvertManager.clazzMap.put(GlobalLockQueryResponseProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(GlobalLockQueryResponseProto.getDescriptor().getFullName(),
                 GlobalLockQueryResponseProto.class);
-            protobufConvertManager.clazzMap.put(GlobalRollbackRequestProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(GlobalRollbackRequestProto.getDescriptor().getFullName(),
                 GlobalRollbackRequestProto.class);
-            protobufConvertManager.clazzMap.put(GlobalRollbackResponseProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(GlobalRollbackResponseProto.getDescriptor().getFullName(),
                 GlobalRollbackResponseProto.class);
-            protobufConvertManager.clazzMap.put(GlobalStatusRequestProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(GlobalStatusRequestProto.getDescriptor().getFullName(),
                 GlobalStatusRequestProto.class);
-            protobufConvertManager.clazzMap.put(GlobalStatusResponseProto.getDescriptor().getFullName(),
+            protobufConvertManager.protoClazzMap.put(GlobalStatusResponseProto.getDescriptor().getFullName(),
                 GlobalStatusResponseProto.class);
 
-            protobufConvertManager.clazzMap.put(MergedWarpMessageProto.getDescriptor().getFullName(), MergedWarpMessageProto.class);
-            protobufConvertManager.clazzMap.put(HeartbeatMessageProto.getDescriptor().getFullName(), HeartbeatMessageProto.class);
-            protobufConvertManager.clazzMap.put(MergedResultMessageProto.getDescriptor().getFullName(), MergedResultMessageProto.class);
-            protobufConvertManager.clazzMap.put(RegisterRMRequestProto.getDescriptor().getFullName(), RegisterRMRequestProto.class);
-            protobufConvertManager.clazzMap.put(RegisterRMResponseProto.getDescriptor().getFullName(), RegisterRMResponseProto.class);
-            protobufConvertManager.clazzMap.put(RegisterTMRequestProto.getDescriptor().getFullName(), RegisterTMRequestProto.class);
-            protobufConvertManager.clazzMap.put(RegisterTMResponseProto.getDescriptor().getFullName(), RegisterTMResponseProto.class);
-
-
+            protobufConvertManager.protoClazzMap.put(MergedWarpMessageProto.getDescriptor().getFullName(),
+                MergedWarpMessageProto.class);
+            protobufConvertManager.protoClazzMap.put(HeartbeatMessageProto.getDescriptor().getFullName(),
+                HeartbeatMessageProto.class);
+            protobufConvertManager.protoClazzMap.put(MergedResultMessageProto.getDescriptor().getFullName(),
+                MergedResultMessageProto.class);
+            protobufConvertManager.protoClazzMap.put(RegisterRMRequestProto.getDescriptor().getFullName(),
+                RegisterRMRequestProto.class);
+            protobufConvertManager.protoClazzMap.put(RegisterRMResponseProto.getDescriptor().getFullName(),
+                RegisterRMResponseProto.class);
+            protobufConvertManager.protoClazzMap.put(RegisterTMRequestProto.getDescriptor().getFullName(),
+                RegisterTMRequestProto.class);
+            protobufConvertManager.protoClazzMap.put(RegisterTMResponseProto.getDescriptor().getFullName(),
+                RegisterTMResponseProto.class);
 
             protobufConvertManager.reverseConvertorMap.put(GlobalBeginRequestProto.class.getName(),
                 new GlobalBeginRequestConvertor());
@@ -248,7 +253,8 @@ public class ProtobufConvertManager {
 
             protobufConvertManager.reverseConvertorMap.put(MergedWarpMessageProto.class.getName(),
                 new MergedWarpMessageConvertor());
-            protobufConvertManager.reverseConvertorMap.put(HeartbeatMessageProto.class.getName(), new HeartbeatMessageConvertor());
+            protobufConvertManager.reverseConvertorMap.put(HeartbeatMessageProto.class.getName(),
+                new HeartbeatMessageConvertor());
             protobufConvertManager.reverseConvertorMap.put(MergedResultMessageProto.class.getName(),
                 new MergeResultMessageConvertor());
             protobufConvertManager.reverseConvertorMap.put(RegisterRMRequestProto.class.getName(),
@@ -274,16 +280,16 @@ public class ProtobufConvertManager {
         return SingletonHolder.INSTANCE;
     }
 
-    public PbConvertor fetcConvertor(String clazz) {
+    public PbConvertor fetchConvertor(String clazz) {
         return convertorMap.get(clazz);
     }
 
-    public PbConvertor fetcReversedConvertor(String clazz) {
+    public PbConvertor fetchReversedConvertor(String clazz) {
         return reverseConvertorMap.get(clazz);
     }
 
-    public Class fetchClass(String clazz) {
-        return clazzMap.get(clazz);
+    public Class fetchProtoClass(String clazz) {
+        return protoClazzMap.get(clazz);
     }
 
 }
