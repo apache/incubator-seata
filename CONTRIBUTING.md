@@ -1,9 +1,9 @@
-# Fescar
+# Seata
 
-## Fescar Code Style
-Fescar code style Comply with Alibaba Java Coding Guidelines.
+## Seata Code Style
+Seata code style Comply with Alibaba Java Coding Guidelines.
 
-Fescar 的编码规范遵从于《阿里巴巴JAVA开发规约》。
+Seata 的编码规范遵从于《阿里巴巴JAVA开发规约》。
 
 
 ### Guidelines
