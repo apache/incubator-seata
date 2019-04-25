@@ -27,9 +27,7 @@ public class ZookeeperRegistryProviderTest {
     @Test
     public void provide() {
         ZookeeperRegistryProvider provider = new ZookeeperRegistryProvider();
-        RegistryService registryService = provider.provide();
-        Assert.assertTrue(registryService instanceof ZookeeperRegisterServiceImpl);
-        Assert.assertEquals(registryService, provider.provide());
+        Assert.assertTrue(provider.provide() instanceof ZookeeperRegisterServiceImpl);
     }
 
 }
