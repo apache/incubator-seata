@@ -18,6 +18,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.alibaba.fescar.common.XID;
+import com.alibaba.fescar.common.util.NetUtil;
 import com.alibaba.fescar.core.rpc.netty.RpcServer;
 import com.alibaba.fescar.server.UUIDGenerator;
 import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
@@ -43,8 +45,9 @@ public class ServerTest {
         RpcServer rpcServer = new RpcServer(workingThreads);
         rpcServer.setHandler(new DefaultCoordinator(rpcServer));
         UUIDGenerator.init(1);
+        XID.setIpAddress(NetUtil.getLocalIp());
+        XID.setPort(rpcServer.getListenPort());
         rpcServer.init();
-
         System.exit(0);
     }
 
