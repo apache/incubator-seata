@@ -59,7 +59,7 @@ public class DefaultCore implements Core {
     @Override
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
-        GlobalSession globalSession = assertGlobalSessionNull(XID.getTransactionId(xid));
+        GlobalSession globalSession = assertGlobalSessionNotNull(XID.getTransactionId(xid));
         return globalSession.lockAndExcute(() -> {
             if (!globalSession.isActive()) {
                 throw new TransactionException(GlobalTransactionNotActive, "Current Status: " + globalSession.getStatus());
@@ -82,7 +82,7 @@ public class DefaultCore implements Core {
         });
     }
 
-    private GlobalSession assertGlobalSessionNull(long transactionId) throws TransactionException {
+    private GlobalSession assertGlobalSessionNotNull(long transactionId) throws TransactionException {
         GlobalSession globalSession = SessionHolder.findGlobalSession(transactionId);
         if (globalSession == null) {
             throw new TransactionException(TransactionExceptionCode.GlobalTransactionNotExist, "" + transactionId + "");
@@ -94,7 +94,7 @@ public class DefaultCore implements Core {
     @Override
     public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status,
                              String applicationData) throws TransactionException {
-        GlobalSession globalSession = assertGlobalSessionNull(XID.getTransactionId(xid));
+        GlobalSession globalSession = assertGlobalSessionNotNull(XID.getTransactionId(xid));
         BranchSession branchSession = globalSession.getBranch(branchId);
         if (branchSession == null) {
             throw new TransactionException(BranchTransactionNotExist);
