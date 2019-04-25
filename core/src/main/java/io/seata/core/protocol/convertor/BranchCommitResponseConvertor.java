@@ -74,6 +74,6 @@ public class BranchCommitResponseConvertor implements PbConvertor<BranchCommitRe
         branchCommitResponse.setTransactionExceptionCode(TransactionExceptionCode.valueOf(
             branchCommitResponseProto.getAbstractBranchEndResponse().getAbstractTransactionResponse()
                 .getTransactionExceptionCode().name()));
-        return null;
+        return branchCommitResponse;
     }
 }

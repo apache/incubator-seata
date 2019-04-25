@@ -21,9 +21,7 @@ private static final long serialVersionUID = 0L;
   }
   private AbstractGlobalEndRequestProto() {
     xid_ = "";
-    branchStatus_ = 0;
-    resourceId_ = "";
-    applicationData_ = "";
+    extraData_ = "";
   }
 
   @java.lang.Override
@@ -51,14 +49,14 @@ private static final long serialVersionUID = 0L;
             done = true;
             break;
           case 10: {
-            io.seata.core.protocol.protobuf.AbstractTransactionResponseProto.Builder subBuilder = null;
-            if (abstractTransactionResponse_ != null) {
-              subBuilder = abstractTransactionResponse_.toBuilder();
+            io.seata.core.protocol.protobuf.AbstractTransactionRequestProto.Builder subBuilder = null;
+            if (abstractTransactionRequest_ != null) {
+              subBuilder = abstractTransactionRequest_.toBuilder();
             }
-            abstractTransactionResponse_ = input.readMessage(io.seata.core.protocol.protobuf.AbstractTransactionResponseProto.parser(), extensionRegistry);
+            abstractTransactionRequest_ = input.readMessage(io.seata.core.protocol.protobuf.AbstractTransactionRequestProto.parser(), extensionRegistry);
             if (subBuilder != null) {
-              subBuilder.mergeFrom(abstractTransactionResponse_);
-              abstractTransactionResponse_ = subBuilder.buildPartial();
+              subBuilder.mergeFrom(abstractTransactionRequest_);
+              abstractTransactionRequest_ = subBuilder.buildPartial();
             }
 
             break;
@@ -69,27 +67,10 @@ private static final long serialVersionUID = 0L;
             xid_ = s;
             break;
           }
-          case 24: {
-
-            branchId_ = input.readInt64();
-            break;
-          }
-          case 32: {
-            int rawValue = input.readEnum();
-
-            branchStatus_ = rawValue;
-            break;
-          }
-          case 42: {
+          case 26: {
             java.lang.String s = input.readStringRequireUtf8();
 
-            resourceId_ = s;
-            break;
-          }
-          case 50: {
-            java.lang.String s = input.readStringRequireUtf8();
-
-            applicationData_ = s;
+            extraData_ = s;
             break;
           }
           default: {
@@ -124,25 +105,25 @@ private static final long serialVersionUID = 0L;
             io.seata.core.protocol.protobuf.AbstractGlobalEndRequestProto.class, io.seata.core.protocol.protobuf.AbstractGlobalEndRequestProto.Builder.class);
   }
 
-  public static final int ABSTRACTTRANSACTIONRESPONSE_FIELD_NUMBER = 1;
-  private io.seata.core.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse_;
+  public static final int ABSTRACTTRANSACTIONREQUEST_FIELD_NUMBER = 1;
+  private io.seata.core.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest_;
   /**
-   * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+   * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
    */
-  public boolean hasAbstractTransactionResponse() {
-    return abstractTransactionResponse_ != null;
+  public boolean hasAbstractTransactionRequest() {
+    return abstractTransactionRequest_ != null;
   }
   /**
-   * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+   * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
    */
-  public io.seata.core.protocol.protobuf.AbstractTransactionResponseProto getAbstractTransactionResponse() {
-    return abstractTransactionResponse_ == null ? io.seata.core.protocol.protobuf.AbstractTransactionResponseProto.getDefaultInstance() : abstractTransactionResponse_;
+  public io.seata.core.protocol.protobuf.AbstractTransactionRequestProto getAbstractTransactionRequest() {
+    return abstractTransactionRequest_ == null ? io.seata.core.protocol.protobuf.AbstractTransactionRequestProto.getDefaultInstance() : abstractTransactionRequest_;
   }
   /**
-   * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+   * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
    */
-  public io.seata.core.protocol.protobuf.AbstractTransactionResponseProtoOrBuilder getAbstractTransactionResponseOrBuilder() {
-    return getAbstractTransactionResponse();
+  public io.seata.core.protocol.protobuf.AbstractTransactionRequestProtoOrBuilder getAbstractTransactionRequestOrBuilder() {
+    return getAbstractTransactionRequest();
   }
 
   public static final int XID_FIELD_NUMBER = 2;
@@ -179,94 +160,34 @@ private static final long serialVersionUID = 0L;
     }
   }
 
-  public static final int BRANCHID_FIELD_NUMBER = 3;
-  private long branchId_;
+  public static final int EXTRADATA_FIELD_NUMBER = 3;
+  private volatile java.lang.Object extraData_;
   /**
-   * <code>int64 branchId = 3;</code>
+   * <code>string extraData = 3;</code>
    */
-  public long getBranchId() {
-    return branchId_;
-  }
-
-  public static final int BRANCHSTATUS_FIELD_NUMBER = 4;
-  private int branchStatus_;
-  /**
-   * <code>.io.seata.protocol.protobuf.BranchStatusProto branchStatus = 4;</code>
-   */
-  public int getBranchStatusValue() {
-    return branchStatus_;
-  }
-  /**
-   * <code>.io.seata.protocol.protobuf.BranchStatusProto branchStatus = 4;</code>
-   */
-  public io.seata.core.protocol.protobuf.BranchStatusProto getBranchStatus() {
-    @SuppressWarnings("deprecation")
-    io.seata.core.protocol.protobuf.BranchStatusProto result = io.seata.core.protocol.protobuf.BranchStatusProto.valueOf(branchStatus_);
-    return result == null ? io.seata.core.protocol.protobuf.BranchStatusProto.UNRECOGNIZED : result;
-  }
-
-  public static final int RESOURCEID_FIELD_NUMBER = 5;
-  private volatile java.lang.Object resourceId_;
-  /**
-   * <code>string resourceId = 5;</code>
-   */
-  public java.lang.String getResourceId() {
-    java.lang.Object ref = resourceId_;
+  public java.lang.String getExtraData() {
+    java.lang.Object ref = extraData_;
     if (ref instanceof java.lang.String) {
       return (java.lang.String) ref;
     } else {
       com.google.protobuf.ByteString bs = 
           (com.google.protobuf.ByteString) ref;
       java.lang.String s = bs.toStringUtf8();
-      resourceId_ = s;
+      extraData_ = s;
       return s;
     }
   }
   /**
-   * <code>string resourceId = 5;</code>
+   * <code>string extraData = 3;</code>
    */
   public com.google.protobuf.ByteString
-      getResourceIdBytes() {
-    java.lang.Object ref = resourceId_;
+      getExtraDataBytes() {
+    java.lang.Object ref = extraData_;
     if (ref instanceof java.lang.String) {
       com.google.protobuf.ByteString b = 
           com.google.protobuf.ByteString.copyFromUtf8(
               (java.lang.String) ref);
-      resourceId_ = b;
-      return b;
-    } else {
-      return (com.google.protobuf.ByteString) ref;
-    }
-  }
-
-  public static final int APPLICATIONDATA_FIELD_NUMBER = 6;
-  private volatile java.lang.Object applicationData_;
-  /**
-   * <code>string applicationData = 6;</code>
-   */
-  public java.lang.String getApplicationData() {
-    java.lang.Object ref = applicationData_;
-    if (ref instanceof java.lang.String) {
-      return (java.lang.String) ref;
-    } else {
-      com.google.protobuf.ByteString bs = 
-          (com.google.protobuf.ByteString) ref;
-      java.lang.String s = bs.toStringUtf8();
-      applicationData_ = s;
-      return s;
-    }
-  }
-  /**
-   * <code>string applicationData = 6;</code>
-   */
-  public com.google.protobuf.ByteString
-      getApplicationDataBytes() {
-    java.lang.Object ref = applicationData_;
-    if (ref instanceof java.lang.String) {
-      com.google.protobuf.ByteString b = 
-          com.google.protobuf.ByteString.copyFromUtf8(
-              (java.lang.String) ref);
-      applicationData_ = b;
+      extraData_ = b;
       return b;
     } else {
       return (com.google.protobuf.ByteString) ref;
@@ -287,23 +208,14 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (abstractTransactionResponse_ != null) {
-      output.writeMessage(1, getAbstractTransactionResponse());
+    if (abstractTransactionRequest_ != null) {
+      output.writeMessage(1, getAbstractTransactionRequest());
     }
     if (!getXidBytes().isEmpty()) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 2, xid_);
     }
-    if (branchId_ != 0L) {
-      output.writeInt64(3, branchId_);
-    }
-    if (branchStatus_ != io.seata.core.protocol.protobuf.BranchStatusProto.BUnknown.getNumber()) {
-      output.writeEnum(4, branchStatus_);
-    }
-    if (!getResourceIdBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 5, resourceId_);
-    }
-    if (!getApplicationDataBytes().isEmpty()) {
-      com.google.protobuf.GeneratedMessageV3.writeString(output, 6, applicationData_);
+    if (!getExtraDataBytes().isEmpty()) {
+      com.google.protobuf.GeneratedMessageV3.writeString(output, 3, extraData_);
     }
     unknownFields.writeTo(output);
   }
@@ -314,26 +226,15 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (abstractTransactionResponse_ != null) {
+    if (abstractTransactionRequest_ != null) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(1, getAbstractTransactionResponse());
+        .computeMessageSize(1, getAbstractTransactionRequest());
     }
     if (!getXidBytes().isEmpty()) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, xid_);
     }
-    if (branchId_ != 0L) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeInt64Size(3, branchId_);
-    }
-    if (branchStatus_ != io.seata.core.protocol.protobuf.BranchStatusProto.BUnknown.getNumber()) {
-      size += com.google.protobuf.CodedOutputStream
-        .computeEnumSize(4, branchStatus_);
-    }
-    if (!getResourceIdBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, resourceId_);
-    }
-    if (!getApplicationDataBytes().isEmpty()) {
-      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, applicationData_);
+    if (!getExtraDataBytes().isEmpty()) {
+      size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, extraData_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -350,20 +251,15 @@ private static final long serialVersionUID = 0L;
     }
     io.seata.core.protocol.protobuf.AbstractGlobalEndRequestProto other = (io.seata.core.protocol.protobuf.AbstractGlobalEndRequestProto) obj;
 
-    if (hasAbstractTransactionResponse() != other.hasAbstractTransactionResponse()) return false;
-    if (hasAbstractTransactionResponse()) {
-      if (!getAbstractTransactionResponse()
-          .equals(other.getAbstractTransactionResponse())) return false;
+    if (hasAbstractTransactionRequest() != other.hasAbstractTransactionRequest()) return false;
+    if (hasAbstractTransactionRequest()) {
+      if (!getAbstractTransactionRequest()
+          .equals(other.getAbstractTransactionRequest())) return false;
     }
     if (!getXid()
         .equals(other.getXid())) return false;
-    if (getBranchId()
-        != other.getBranchId()) return false;
-    if (branchStatus_ != other.branchStatus_) return false;
-    if (!getResourceId()
-        .equals(other.getResourceId())) return false;
-    if (!getApplicationData()
-        .equals(other.getApplicationData())) return false;
+    if (!getExtraData()
+        .equals(other.getExtraData())) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -375,21 +271,14 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    if (hasAbstractTransactionResponse()) {
-      hash = (37 * hash) + ABSTRACTTRANSACTIONRESPONSE_FIELD_NUMBER;
-      hash = (53 * hash) + getAbstractTransactionResponse().hashCode();
+    if (hasAbstractTransactionRequest()) {
+      hash = (37 * hash) + ABSTRACTTRANSACTIONREQUEST_FIELD_NUMBER;
+      hash = (53 * hash) + getAbstractTransactionRequest().hashCode();
     }
     hash = (37 * hash) + XID_FIELD_NUMBER;
     hash = (53 * hash) + getXid().hashCode();
-    hash = (37 * hash) + BRANCHID_FIELD_NUMBER;
-    hash = (53 * hash) + com.google.protobuf.Internal.hashLong(
-        getBranchId());
-    hash = (37 * hash) + BRANCHSTATUS_FIELD_NUMBER;
-    hash = (53 * hash) + branchStatus_;
-    hash = (37 * hash) + RESOURCEID_FIELD_NUMBER;
-    hash = (53 * hash) + getResourceId().hashCode();
-    hash = (37 * hash) + APPLICATIONDATA_FIELD_NUMBER;
-    hash = (53 * hash) + getApplicationData().hashCode();
+    hash = (37 * hash) + EXTRADATA_FIELD_NUMBER;
+    hash = (53 * hash) + getExtraData().hashCode();
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -527,21 +416,15 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      if (abstractTransactionResponseBuilder_ == null) {
-        abstractTransactionResponse_ = null;
+      if (abstractTransactionRequestBuilder_ == null) {
+        abstractTransactionRequest_ = null;
       } else {
-        abstractTransactionResponse_ = null;
-        abstractTransactionResponseBuilder_ = null;
+        abstractTransactionRequest_ = null;
+        abstractTransactionRequestBuilder_ = null;
       }
       xid_ = "";
 
-      branchId_ = 0L;
-
-      branchStatus_ = 0;
-
-      resourceId_ = "";
-
-      applicationData_ = "";
+      extraData_ = "";
 
       return this;
     }
@@ -569,16 +452,13 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public io.seata.core.protocol.protobuf.AbstractGlobalEndRequestProto buildPartial() {
       io.seata.core.protocol.protobuf.AbstractGlobalEndRequestProto result = new io.seata.core.protocol.protobuf.AbstractGlobalEndRequestProto(this);
-      if (abstractTransactionResponseBuilder_ == null) {
-        result.abstractTransactionResponse_ = abstractTransactionResponse_;
+      if (abstractTransactionRequestBuilder_ == null) {
+        result.abstractTransactionRequest_ = abstractTransactionRequest_;
       } else {
-        result.abstractTransactionResponse_ = abstractTransactionResponseBuilder_.build();
+        result.abstractTransactionRequest_ = abstractTransactionRequestBuilder_.build();
       }
       result.xid_ = xid_;
-      result.branchId_ = branchId_;
-      result.branchStatus_ = branchStatus_;
-      result.resourceId_ = resourceId_;
-      result.applicationData_ = applicationData_;
+      result.extraData_ = extraData_;
       onBuilt();
       return result;
     }
@@ -627,25 +507,15 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(io.seata.core.protocol.protobuf.AbstractGlobalEndRequestProto other) {
       if (other == io.seata.core.protocol.protobuf.AbstractGlobalEndRequestProto.getDefaultInstance()) return this;
-      if (other.hasAbstractTransactionResponse()) {
-        mergeAbstractTransactionResponse(other.getAbstractTransactionResponse());
+      if (other.hasAbstractTransactionRequest()) {
+        mergeAbstractTransactionRequest(other.getAbstractTransactionRequest());
       }
       if (!other.getXid().isEmpty()) {
         xid_ = other.xid_;
         onChanged();
       }
-      if (other.getBranchId() != 0L) {
-        setBranchId(other.getBranchId());
-      }
-      if (other.branchStatus_ != 0) {
-        setBranchStatusValue(other.getBranchStatusValue());
-      }
-      if (!other.getResourceId().isEmpty()) {
-        resourceId_ = other.resourceId_;
-        onChanged();
-      }
-      if (!other.getApplicationData().isEmpty()) {
-        applicationData_ = other.applicationData_;
+      if (!other.getExtraData().isEmpty()) {
+        extraData_ = other.extraData_;
         onChanged();
       }
       this.mergeUnknownFields(other.unknownFields);
@@ -677,121 +547,121 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private io.seata.core.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse_;
+    private io.seata.core.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest_;
     private com.google.protobuf.SingleFieldBuilderV3<
-        io.seata.core.protocol.protobuf.AbstractTransactionResponseProto, io.seata.core.protocol.protobuf.AbstractTransactionResponseProto.Builder, io.seata.core.protocol.protobuf.AbstractTransactionResponseProtoOrBuilder> abstractTransactionResponseBuilder_;
+        io.seata.core.protocol.protobuf.AbstractTransactionRequestProto, io.seata.core.protocol.protobuf.AbstractTransactionRequestProto.Builder, io.seata.core.protocol.protobuf.AbstractTransactionRequestProtoOrBuilder> abstractTransactionRequestBuilder_;
     /**
-     * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+     * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
      */
-    public boolean hasAbstractTransactionResponse() {
-      return abstractTransactionResponseBuilder_ != null || abstractTransactionResponse_ != null;
+    public boolean hasAbstractTransactionRequest() {
+      return abstractTransactionRequestBuilder_ != null || abstractTransactionRequest_ != null;
     }
     /**
-     * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+     * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
      */
-    public io.seata.core.protocol.protobuf.AbstractTransactionResponseProto getAbstractTransactionResponse() {
-      if (abstractTransactionResponseBuilder_ == null) {
-        return abstractTransactionResponse_ == null ? io.seata.core.protocol.protobuf.AbstractTransactionResponseProto.getDefaultInstance() : abstractTransactionResponse_;
+    public io.seata.core.protocol.protobuf.AbstractTransactionRequestProto getAbstractTransactionRequest() {
+      if (abstractTransactionRequestBuilder_ == null) {
+        return abstractTransactionRequest_ == null ? io.seata.core.protocol.protobuf.AbstractTransactionRequestProto.getDefaultInstance() : abstractTransactionRequest_;
       } else {
-        return abstractTransactionResponseBuilder_.getMessage();
+        return abstractTransactionRequestBuilder_.getMessage();
       }
     }
     /**
-     * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+     * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
      */
-    public Builder setAbstractTransactionResponse(io.seata.core.protocol.protobuf.AbstractTransactionResponseProto value) {
-      if (abstractTransactionResponseBuilder_ == null) {
+    public Builder setAbstractTransactionRequest(io.seata.core.protocol.protobuf.AbstractTransactionRequestProto value) {
+      if (abstractTransactionRequestBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
         }
-        abstractTransactionResponse_ = value;
+        abstractTransactionRequest_ = value;
         onChanged();
       } else {
-        abstractTransactionResponseBuilder_.setMessage(value);
+        abstractTransactionRequestBuilder_.setMessage(value);
       }
 
       return this;
     }
     /**
-     * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+     * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
      */
-    public Builder setAbstractTransactionResponse(
-        io.seata.core.protocol.protobuf.AbstractTransactionResponseProto.Builder builderForValue) {
-      if (abstractTransactionResponseBuilder_ == null) {
-        abstractTransactionResponse_ = builderForValue.build();
+    public Builder setAbstractTransactionRequest(
+        io.seata.core.protocol.protobuf.AbstractTransactionRequestProto.Builder builderForValue) {
+      if (abstractTransactionRequestBuilder_ == null) {
+        abstractTransactionRequest_ = builderForValue.build();
         onChanged();
       } else {
-        abstractTransactionResponseBuilder_.setMessage(builderForValue.build());
+        abstractTransactionRequestBuilder_.setMessage(builderForValue.build());
       }
 
       return this;
     }
     /**
-     * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+     * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
      */
-    public Builder mergeAbstractTransactionResponse(io.seata.core.protocol.protobuf.AbstractTransactionResponseProto value) {
-      if (abstractTransactionResponseBuilder_ == null) {
-        if (abstractTransactionResponse_ != null) {
-          abstractTransactionResponse_ =
-            io.seata.core.protocol.protobuf.AbstractTransactionResponseProto.newBuilder(abstractTransactionResponse_).mergeFrom(value).buildPartial();
+    public Builder mergeAbstractTransactionRequest(io.seata.core.protocol.protobuf.AbstractTransactionRequestProto value) {
+      if (abstractTransactionRequestBuilder_ == null) {
+        if (abstractTransactionRequest_ != null) {
+          abstractTransactionRequest_ =
+            io.seata.core.protocol.protobuf.AbstractTransactionRequestProto.newBuilder(abstractTransactionRequest_).mergeFrom(value).buildPartial();
         } else {
-          abstractTransactionResponse_ = value;
+          abstractTransactionRequest_ = value;
         }
         onChanged();
       } else {
-        abstractTransactionResponseBuilder_.mergeFrom(value);
+        abstractTransactionRequestBuilder_.mergeFrom(value);
       }
 
       return this;
     }
     /**
-     * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+     * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
      */
-    public Builder clearAbstractTransactionResponse() {
-      if (abstractTransactionResponseBuilder_ == null) {
-        abstractTransactionResponse_ = null;
+    public Builder clearAbstractTransactionRequest() {
+      if (abstractTransactionRequestBuilder_ == null) {
+        abstractTransactionRequest_ = null;
         onChanged();
       } else {
-        abstractTransactionResponse_ = null;
-        abstractTransactionResponseBuilder_ = null;
+        abstractTransactionRequest_ = null;
+        abstractTransactionRequestBuilder_ = null;
       }
 
       return this;
     }
     /**
-     * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+     * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
      */
-    public io.seata.core.protocol.protobuf.AbstractTransactionResponseProto.Builder getAbstractTransactionResponseBuilder() {
+    public io.seata.core.protocol.protobuf.AbstractTransactionRequestProto.Builder getAbstractTransactionRequestBuilder() {
       
       onChanged();
-      return getAbstractTransactionResponseFieldBuilder().getBuilder();
+      return getAbstractTransactionRequestFieldBuilder().getBuilder();
     }
     /**
-     * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+     * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
      */
-    public io.seata.core.protocol.protobuf.AbstractTransactionResponseProtoOrBuilder getAbstractTransactionResponseOrBuilder() {
-      if (abstractTransactionResponseBuilder_ != null) {
-        return abstractTransactionResponseBuilder_.getMessageOrBuilder();
+    public io.seata.core.protocol.protobuf.AbstractTransactionRequestProtoOrBuilder getAbstractTransactionRequestOrBuilder() {
+      if (abstractTransactionRequestBuilder_ != null) {
+        return abstractTransactionRequestBuilder_.getMessageOrBuilder();
       } else {
-        return abstractTransactionResponse_ == null ?
-            io.seata.core.protocol.protobuf.AbstractTransactionResponseProto.getDefaultInstance() : abstractTransactionResponse_;
+        return abstractTransactionRequest_ == null ?
+            io.seata.core.protocol.protobuf.AbstractTransactionRequestProto.getDefaultInstance() : abstractTransactionRequest_;
       }
     }
     /**
-     * <code>.io.seata.protocol.protobuf.AbstractTransactionResponseProto abstractTransactionResponse = 1;</code>
+     * <code>.io.seata.protocol.protobuf.AbstractTransactionRequestProto abstractTransactionRequest = 1;</code>
      */
     private com.google.protobuf.SingleFieldBuilderV3<
-        io.seata.core.protocol.protobuf.AbstractTransactionResponseProto, io.seata.core.protocol.protobuf.AbstractTransactionResponseProto.Builder, io.seata.core.protocol.protobuf.AbstractTransactionResponseProtoOrBuilder> 
-        getAbstractTransactionResponseFieldBuilder() {
-      if (abstractTransactionResponseBuilder_ == null) {
-        abstractTransactionResponseBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
-            io.seata.core.protocol.protobuf.AbstractTransactionResponseProto, io.seata.core.protocol.protobuf.AbstractTransactionResponseProto.Builder, io.seata.core.protocol.protobuf.AbstractTransactionResponseProtoOrBuilder>(
-                getAbstractTransactionResponse(),
+        io.seata.core.protocol.protobuf.AbstractTransactionRequestProto, io.seata.core.protocol.protobuf.AbstractTransactionRequestProto.Builder, io.seata.core.protocol.protobuf.AbstractTransactionRequestProtoOrBuilder> 
+        getAbstractTransactionRequestFieldBuilder() {
+      if (abstractTransactionRequestBuilder_ == null) {
+        abstractTransactionRequestBuilder_ = new com.google.protobuf.SingleFieldBuilderV3<
+            io.seata.core.protocol.protobuf.AbstractTransactionRequestProto, io.seata.core.protocol.protobuf.AbstractTransactionRequestProto.Builder, io.seata.core.protocol.protobuf.AbstractTransactionRequestProtoOrBuilder>(
+                getAbstractTransactionRequest(),
                 getParentForChildren(),
                 isClean());
-        abstractTransactionResponse_ = null;
+        abstractTransactionRequest_ = null;
       }
-      return abstractTransactionResponseBuilder_;
+      return abstractTransactionRequestBuilder_;
     }
 
     private java.lang.Object xid_ = "";
@@ -863,211 +733,71 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private long branchId_ ;
+    private java.lang.Object extraData_ = "";
     /**
-     * <code>int64 branchId = 3;</code>
+     * <code>string extraData = 3;</code>
      */
-    public long getBranchId() {
-      return branchId_;
-    }
-    /**
-     * <code>int64 branchId = 3;</code>
-     */
-    public Builder setBranchId(long value) {
-      
-      branchId_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>int64 branchId = 3;</code>
-     */
-    public Builder clearBranchId() {
-      
-      branchId_ = 0L;
-      onChanged();
-      return this;
-    }
-
-    private int branchStatus_ = 0;
-    /**
-     * <code>.io.seata.protocol.protobuf.BranchStatusProto branchStatus = 4;</code>
-     */
-    public int getBranchStatusValue() {
-      return branchStatus_;
-    }
-    /**
-     * <code>.io.seata.protocol.protobuf.BranchStatusProto branchStatus = 4;</code>
-     */
-    public Builder setBranchStatusValue(int value) {
-      branchStatus_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>.io.seata.protocol.protobuf.BranchStatusProto branchStatus = 4;</code>
-     */
-    public io.seata.core.protocol.protobuf.BranchStatusProto getBranchStatus() {
-      @SuppressWarnings("deprecation")
-      io.seata.core.protocol.protobuf.BranchStatusProto result = io.seata.core.protocol.protobuf.BranchStatusProto.valueOf(branchStatus_);
-      return result == null ? io.seata.core.protocol.protobuf.BranchStatusProto.UNRECOGNIZED : result;
-    }
-    /**
-     * <code>.io.seata.protocol.protobuf.BranchStatusProto branchStatus = 4;</code>
-     */
-    public Builder setBranchStatus(io.seata.core.protocol.protobuf.BranchStatusProto value) {
-      if (value == null) {
-        throw new NullPointerException();
-      }
-      
-      branchStatus_ = value.getNumber();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>.io.seata.protocol.protobuf.BranchStatusProto branchStatus = 4;</code>
-     */
-    public Builder clearBranchStatus() {
-      
-      branchStatus_ = 0;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object resourceId_ = "";
-    /**
-     * <code>string resourceId = 5;</code>
-     */
-    public java.lang.String getResourceId() {
-      java.lang.Object ref = resourceId_;
+    public java.lang.String getExtraData() {
+      java.lang.Object ref = extraData_;
       if (!(ref instanceof java.lang.String)) {
         com.google.protobuf.ByteString bs =
             (com.google.protobuf.ByteString) ref;
         java.lang.String s = bs.toStringUtf8();
-        resourceId_ = s;
+        extraData_ = s;
         return s;
       } else {
         return (java.lang.String) ref;
       }
     }
     /**
-     * <code>string resourceId = 5;</code>
+     * <code>string extraData = 3;</code>
      */
     public com.google.protobuf.ByteString
-        getResourceIdBytes() {
-      java.lang.Object ref = resourceId_;
+        getExtraDataBytes() {
+      java.lang.Object ref = extraData_;
       if (ref instanceof String) {
         com.google.protobuf.ByteString b = 
             com.google.protobuf.ByteString.copyFromUtf8(
                 (java.lang.String) ref);
-        resourceId_ = b;
+        extraData_ = b;
         return b;
       } else {
         return (com.google.protobuf.ByteString) ref;
       }
     }
     /**
-     * <code>string resourceId = 5;</code>
+     * <code>string extraData = 3;</code>
      */
-    public Builder setResourceId(
+    public Builder setExtraData(
         java.lang.String value) {
       if (value == null) {
     throw new NullPointerException();
   }
   
-      resourceId_ = value;
+      extraData_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>string resourceId = 5;</code>
+     * <code>string extraData = 3;</code>
      */
-    public Builder clearResourceId() {
+    public Builder clearExtraData() {
       
-      resourceId_ = getDefaultInstance().getResourceId();
+      extraData_ = getDefaultInstance().getExtraData();
       onChanged();
       return this;
     }
     /**
-     * <code>string resourceId = 5;</code>
+     * <code>string extraData = 3;</code>
      */
-    public Builder setResourceIdBytes(
+    public Builder setExtraDataBytes(
         com.google.protobuf.ByteString value) {
       if (value == null) {
     throw new NullPointerException();
   }
   checkByteStringIsUtf8(value);
       
-      resourceId_ = value;
-      onChanged();
-      return this;
-    }
-
-    private java.lang.Object applicationData_ = "";
-    /**
-     * <code>string applicationData = 6;</code>
-     */
-    public java.lang.String getApplicationData() {
-      java.lang.Object ref = applicationData_;
-      if (!(ref instanceof java.lang.String)) {
-        com.google.protobuf.ByteString bs =
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        applicationData_ = s;
-        return s;
-      } else {
-        return (java.lang.String) ref;
-      }
-    }
-    /**
-     * <code>string applicationData = 6;</code>
-     */
-    public com.google.protobuf.ByteString
-        getApplicationDataBytes() {
-      java.lang.Object ref = applicationData_;
-      if (ref instanceof String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        applicationData_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-    /**
-     * <code>string applicationData = 6;</code>
-     */
-    public Builder setApplicationData(
-        java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
-      applicationData_ = value;
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string applicationData = 6;</code>
-     */
-    public Builder clearApplicationData() {
-      
-      applicationData_ = getDefaultInstance().getApplicationData();
-      onChanged();
-      return this;
-    }
-    /**
-     * <code>string applicationData = 6;</code>
-     */
-    public Builder setApplicationDataBytes(
-        com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
-      applicationData_ = value;
+      extraData_ = value;
       onChanged();
       return this;
     }
