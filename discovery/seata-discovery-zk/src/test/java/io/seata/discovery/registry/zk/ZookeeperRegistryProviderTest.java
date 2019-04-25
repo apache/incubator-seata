@@ -15,7 +15,6 @@
  */
 package io.seata.discovery.registry.zk;
 
-import io.seata.discovery.registry.RegistryService;
 import org.junit.Assert;
 import org.junit.Test;
 
