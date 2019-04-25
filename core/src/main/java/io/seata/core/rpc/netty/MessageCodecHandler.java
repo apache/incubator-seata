@@ -31,8 +31,8 @@ import io.seata.core.protocol.MessageCodec;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.convertor.PbConvertor;
 import io.seata.core.protocol.protobuf.HeartbeatMessageProto;
-import io.seata.core.protocol.serialize.ProtobufSerialzer;
 import io.seata.core.protocol.serialize.ProtobufConvertManager;
+import io.seata.core.protocol.serialize.ProtobufSerialzer;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,6 +70,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
     private static Configuration configuration = ConfigurationFactory.getInstance();
 
     private static String serialize = "protobuf";//configuration.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC);
+    private final static String PROTOBUF = "protobuf";
 
     /**
      * The constant UTF8.
@@ -79,11 +80,11 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
     @Override
     protected void encode(ChannelHandlerContext ctx, RpcMessage msg, ByteBuf out) throws Exception {
         //for dynamic test
-        if ("protobuf".equals(serialize)) {
+        if (PROTOBUF.equals(serialize)) {
             //转换类
             Object body = msg.getBody();
             if (body instanceof GlobalBeginRequest) {
-                final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetcConvertor(
+                final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(
                     body.getClass().getName());
                 Object newBody = pbConvertor.convert2Proto(body);
                 msg.setBody(newBody);
@@ -236,8 +237,8 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 final String clazz = new String(clazzName, UTF8);
                 Object bodyObject = protobufDeserialize(clazz, body);
 
-                if ("protobuf".equals(serialize)) {
-                    final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetcConvertor(
+                if (PROTOBUF.equals(serialize)) {
+                    final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(
                         body.getClass().getName());
                     Object newBody = pbConvertor.convert2Model(bodyObject);
                     rpcMessage.setBody(newBody);

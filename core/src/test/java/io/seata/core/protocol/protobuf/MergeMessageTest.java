@@ -44,7 +44,7 @@ public class MergeMessageTest {
         msgs.add(globalBeginRequest);
         mergedWarpMessage.msgs = msgs;
 
-        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetcConvertor(
+        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(
             globalBeginRequest.getClass().getName());
 
         GlobalBeginRequestProto globalBeginRequestProto = (GlobalBeginRequestProto)pbConvertor.convert2Proto(
