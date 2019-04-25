@@ -79,7 +79,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>0.5.0</revision>
+        <revision>0.6.0-SNAPSHOT</revision>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -121,8 +121,8 @@
         <maven-pmd-plugin.version>3.8</maven-pmd-plugin.version>
         <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
+        <license-maven-plugin.version>3.0</license-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
-
     </properties>
     <!--test-->
     <dependencies>
@@ -575,7 +575,7 @@
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>
-                <version>3.0</version>
+                <version>${license-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
