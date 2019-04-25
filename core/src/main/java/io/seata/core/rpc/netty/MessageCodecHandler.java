@@ -23,7 +23,6 @@ import java.util.List;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.protocol.AbstractMessage;
@@ -31,7 +30,7 @@ import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MessageCodec;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.convertor.PbConvertor;
-import io.seata.core.protocol.protobuf.GlobalBeginRequestProto;
+import io.seata.core.protocol.protobuf.HeartbeatMessageProto;
 import io.seata.core.protocol.serialize.FrameSerialzer;
 import io.seata.core.protocol.serialize.ProtobufConvertManager;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
@@ -105,7 +104,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
         byteBuffer.putShort((short)flag);
 
-        if (msg.getBody() instanceof HeartbeatMessage) {
+        if (msg.getBody() instanceof HeartbeatMessage || msg.getBody() instanceof HeartbeatMessageProto) {
             byteBuffer.putShort((short)0);
             byteBuffer.putLong(msg.getId());
             byteBuffer.flip();
@@ -129,7 +128,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("msg:" + msg.getBody().toString());
                 }
-                byte[] body = hessianSerialize(msg.getBody());
+                byte[] body = protobufSerialize(msg.getBody());
                 final String name = msg.getBody().getClass().getName();
                 final short bodyLength = (short)(body.length + name.length() + 4);
                 byteBuffer.putShort(bodyLength);
@@ -235,18 +234,13 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 byte[] body = new byte[bodyLength - clazzNameLength - 4];
                 in.readBytes(body);
                 final String clazz = new String(clazzName, UTF8);
-                Object bodyObject = hessianDeserialize(clazz, body);
+                Object bodyObject = protobufDeserialize(clazz, body);
 
                 if ("protobuf".equals(serialize)) {
-                    //转换类
-                    if (bodyObject instanceof GlobalBeginRequestProto) {
-
-                        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetcConvertor(
-                            body.getClass().getName());
-                        Object newBody = pbConvertor.convert2Model(bodyObject);
-                        rpcMessage.setBody(newBody);
-                    }
-
+                    final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetcConvertor(
+                        body.getClass().getName());
+                    Object newBody = pbConvertor.convert2Model(bodyObject);
+                    rpcMessage.setBody(newBody);
                 } else {
                     rpcMessage.setBody(bodyObject);
                 }
@@ -270,7 +264,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
      * @return the byte [ ]
      * @throws Exception the exception
      */
-    private static byte[] hessianSerialize(Object object) throws Exception {
+    private static byte[] protobufSerialize(Object object) throws Exception {
         if (object == null) {
             throw new NullPointerException();
         }
@@ -286,15 +280,11 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
      * @return the object
      * @throws Exception the exception
      */
-    private static Object hessianDeserialize(String clazz, byte[] bytes) throws Exception {
+    private static Object protobufDeserialize(String clazz, byte[] bytes) throws Exception {
         if (bytes == null) {
             throw new NullPointerException();
         }
-        if (clazz.equals(GlobalBeginRequestProto.class.getName())) {
-            return FrameSerialzer.deserializeContent(clazz, bytes);
-        } else {
-            throw new ShouldNeverHappenException();
-        }
+        return FrameSerialzer.deserializeContent(clazz, bytes);
 
     }
 

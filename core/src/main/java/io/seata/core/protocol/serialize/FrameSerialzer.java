@@ -28,8 +28,8 @@ import java.lang.reflect.Modifier;
 import io.seata.common.exception.ShouldNeverHappenException;
 
 /**
- * @author bystander
- * @version : FrameSerialzer.java, v 0.1 2019年04月08日 09:47 bystander Exp $
+ * @author leizhiyuan
+
  */
 public class FrameSerialzer {
 
