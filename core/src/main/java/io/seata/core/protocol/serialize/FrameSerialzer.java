@@ -26,7 +26,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import io.seata.common.exception.ShouldNeverHappenException;
-import org.apache.commons.lang.ClassUtils;
 
 /**
  * @author bystander
@@ -34,7 +33,7 @@ import org.apache.commons.lang.ClassUtils;
  */
 public class FrameSerialzer {
 
-    private static final FramebufHelper protobufHelper = new FramebufHelper();
+    private static final FramebufHelper PROTOBUF_HELPER = new FramebufHelper();
 
     /**
      * Encode method name
@@ -48,12 +47,12 @@ public class FrameSerialzer {
     public static byte[] serializeContent(Object request) {
 
         Class clazz = request.getClass();
-        Method method = protobufHelper.toByteArrayMethodMap.get(clazz);
+        Method method = PROTOBUF_HELPER.toByteArrayMethodMap.get(clazz);
         if (method == null) {
             try {
                 method = clazz.getMethod(METHOD_TOBYTEARRAY);
                 method.setAccessible(true);
-                protobufHelper.toByteArrayMethodMap.put(clazz, method);
+                PROTOBUF_HELPER.toByteArrayMethodMap.put(clazz, method);
             } catch (Exception e) {
                 throw new ShouldNeverHappenException("Cannot found method " + clazz.getName()
                     + ".toByteArray(), please check the generated code.", e);
@@ -82,7 +81,7 @@ public class FrameSerialzer {
             e.printStackTrace();
         }
 
-        Method method = protobufHelper.parseFromMethodMap.get(clazz);
+        Method method = PROTOBUF_HELPER.parseFromMethodMap.get(clazz);
         if (method == null) {
             try {
                 method = clazz.getMethod(METHOD_PARSEFROM, byte[].class);
@@ -91,7 +90,7 @@ public class FrameSerialzer {
                         + ".parseFrom(byte[]), please check the generated code");
                 }
                 method.setAccessible(true);
-                protobufHelper.parseFromMethodMap.put(clazz, method);
+                PROTOBUF_HELPER.parseFromMethodMap.put(clazz, method);
             } catch (NoSuchMethodException e) {
                 throw new ShouldNeverHappenException("Cannot found method " + clazz.getName()
                     + ".parseFrom(byte[]), please check the generated code", e);

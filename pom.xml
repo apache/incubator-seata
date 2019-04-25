@@ -536,6 +536,9 @@
                         <ruleset>rulesets/java/ali-other.xml</ruleset>
                         <ruleset>rulesets/java/ali-set.xml</ruleset>
                     </rulesets>
+                    <excludes>
+                        <exclude>**/protobuf/*.java</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>

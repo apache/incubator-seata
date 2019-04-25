@@ -9,10 +9,12 @@ import java.util.List;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
-import io.seata.core.convertor.GlobalBeginRequestConvertor;
+import io.seata.core.protocol.convertor.GlobalBeginRequestConvertor;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergedWarpMessage;
+import io.seata.core.protocol.convertor.PbConvertor;
 import io.seata.core.protocol.serialize.FrameSerialzer;
+import io.seata.core.protocol.serialize.ProtobufConvertManager;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.junit.Test;
 
@@ -33,7 +35,10 @@ public class MergeMessageTest {
         msgs.add(globalBeginRequest);
         mergedWarpMessage.msgs = msgs;
 
-        GlobalBeginRequestProto globalBeginRequestProto = GlobalBeginRequestConvertor.convert2Proto(globalBeginRequest);
+        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetcConvertor(
+            globalBeginRequest.getClass().getName());
+
+        GlobalBeginRequestProto globalBeginRequestProto = (GlobalBeginRequestProto)pbConvertor.convert2Proto(globalBeginRequest);
 
         final short typeCode = mergedWarpMessage.getTypeCode();
 

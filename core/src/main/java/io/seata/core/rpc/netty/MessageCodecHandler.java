@@ -25,13 +25,14 @@ import io.netty.handler.codec.ByteToMessageCodec;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.convertor.GlobalBeginRequestConvertor;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MessageCodec;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.protocol.convertor.PbConvertor;
 import io.seata.core.protocol.protobuf.GlobalBeginRequestProto;
 import io.seata.core.protocol.serialize.FrameSerialzer;
+import io.seata.core.protocol.serialize.ProtobufConvertManager;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,8 +83,9 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
             //转换类
             Object body = msg.getBody();
             if (body instanceof GlobalBeginRequest) {
-                GlobalBeginRequestProto newBody = GlobalBeginRequestConvertor
-                    .convert2Proto((GlobalBeginRequest)body);
+                final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetcConvertor(
+                    body.getClass().getName());
+                Object newBody = pbConvertor.convert2Proto(body);
                 msg.setBody(newBody);
             }
 
@@ -237,8 +239,10 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 if ("protobuf".equals(serialize)) {
                     //转换类
                     if (bodyObject instanceof GlobalBeginRequestProto) {
-                        GlobalBeginRequest newBody = GlobalBeginRequestConvertor
-                            .convert2Model((GlobalBeginRequestProto)bodyObject);
+
+                        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetcConvertor(
+                            body.getClass().getName());
+                        Object newBody = pbConvertor.convert2Model(bodyObject);
                         rpcMessage.setBody(newBody);
                     }
 
