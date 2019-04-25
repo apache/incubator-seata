@@ -31,9 +31,9 @@ import io.seata.common.exception.ShouldNeverHappenException;
  * @author leizhiyuan
 
  */
-public class FrameSerialzer {
+public class ProtobufSerialzer {
 
-    private static final FramebufHelper PROTOBUF_HELPER = new FramebufHelper();
+    private static final ProtobufHelper PROTOBUF_HELPER = new ProtobufHelper();
 
     /**
      * Encode method name

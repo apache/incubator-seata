@@ -29,9 +29,9 @@ import com.google.protobuf.MessageLite;
 import io.seata.common.exception.ShouldNeverHappenException;
 
 /**
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author leizhiyuan
  */
-public class FramebufHelper {
+public class ProtobufHelper {
 
     /**
      * Cache of parseFrom method
@@ -44,15 +44,14 @@ public class FramebufHelper {
     ConcurrentMap<Class, Method> toByteArrayMethodMap = new ConcurrentHashMap<Class, Method>();
 
     /**
-     * 请求参数类型缓存 {service+method:class}
+     *  {className:class}
      */
     private ConcurrentMap<String, Class> requestClassCache = new ConcurrentHashMap<String, Class>();
 
     /**
-     * 从缓存中获取请求值类
      *
-     * @param service    接口名
-     * @return 请求参数类
+     * @param service
+     * @return
      */
     public Class getPbClass(String service) {
         Class reqClass = requestClassCache.get(service);
@@ -70,10 +69,9 @@ public class FramebufHelper {
     }
 
     /**
-     * 加载protobuf接口里方法的参数和返回值类型到缓存，不需要传递
      *
-     * @param key        缓存的key
-     * @param clazz      接口名
+     * @param key
+     * @param clazz
      */
     private void loadProtoClassToCache(String key, Class clazz) {
         if (clazz == void.class || !isProtoBufMessageClass(clazz)) {
