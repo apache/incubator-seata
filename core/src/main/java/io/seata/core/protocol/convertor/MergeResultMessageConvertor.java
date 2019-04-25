@@ -58,7 +58,10 @@ public class MergeResultMessageConvertor implements PbConvertor<MergeResultMessa
             if (any.is(clazz)) {
                 try {
                     Object ob = any.unpack(clazz);
-                    temp.add((AbstractResultMessage)ob);
+                    final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetcReversedConvertor(
+                        clazz.getName());
+                    Object model = pbConvertor.convert2Model(ob);
+                    temp.add((AbstractResultMessage)model);
                 } catch (InvalidProtocolBufferException e) {
                     throw new ShouldNeverHappenException(e);
                 }

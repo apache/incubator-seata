@@ -59,7 +59,9 @@ public class MergedWarpMessageConvertor implements PbConvertor<MergedWarpMessage
             if (any.is(clazz)) {
                 try {
                     Object ob = any.unpack(clazz);
-                    result.msgs.add((AbstractMessage)ob);
+                    final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetcReversedConvertor(clazz.getName());
+                    Object model = pbConvertor.convert2Model(ob);
+                    result.msgs.add((AbstractMessage)model);
                 } catch (InvalidProtocolBufferException e) {
                     throw new ShouldNeverHappenException(e);
                 }
