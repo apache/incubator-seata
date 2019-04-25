@@ -140,7 +140,6 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             }
         }
         List<Field> pkRows = beforeImage.pkRows();
-       //TODO this select  for update  do without 
         selectSQLAppender.append(
             " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(pkRows));
         String selectSQL = selectSQLAppender.toString();
