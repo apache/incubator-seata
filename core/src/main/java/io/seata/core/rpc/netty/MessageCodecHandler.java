@@ -238,8 +238,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 Object bodyObject = protobufDeserialize(clazz, body);
 
                 if (PROTOBUF.equals(serialize)) {
-                    final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(
-                        body.getClass().getName());
+                    final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(clazz);
                     Object newBody = pbConvertor.convert2Model(bodyObject);
                     rpcMessage.setBody(newBody);
                 } else {
