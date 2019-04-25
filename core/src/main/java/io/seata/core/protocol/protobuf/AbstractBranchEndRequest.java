@@ -30,13 +30,16 @@ public final class AbstractBranchEndRequest {
     java.lang.String[] descriptorData = {
       "\n\036abstractBranchEndRequest.proto\022\032io.sea" +
       "ta.protocol.protobuf\032 abstractTransactio" +
-      "nRequest.proto\"\240\001\n\035AbstractBranchEndRequ" +
-      "estProto\022_\n\032abstractTransactionRequest\030\001" +
-      " \001(\0132;.io.seata.protocol.protobuf.Abstra" +
-      "ctTransactionRequestProto\022\013\n\003xid\030\002 \001(\t\022\021" +
-      "\n\textraData\030\003 \001(\tB=\n\037io.seata.core.proto" +
-      "col.protobufB\030AbstractBranchEndRequestP\001" +
-      "b\006proto3"
+      "nRequest.proto\032\020branchType.proto\"\215\002\n\035Abs" +
+      "tractBranchEndRequestProto\022_\n\032abstractTr" +
+      "ansactionRequest\030\001 \001(\0132;.io.seata.protoc" +
+      "ol.protobuf.AbstractTransactionRequestPr" +
+      "oto\022\013\n\003xid\030\002 \001(\t\022\020\n\010branchId\030\003 \001(\003\022?\n\nbr" +
+      "anchType\030\004 \001(\0162+.io.seata.protocol.proto" +
+      "buf.BranchTypeProto\022\022\n\nresourceId\030\005 \001(\t\022" +
+      "\027\n\017applicationData\030\006 \001(\tB=\n\037io.seata.cor" +
+      "e.protocol.protobufB\030AbstractBranchEndRe" +
+      "questP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -50,14 +53,16 @@ public final class AbstractBranchEndRequest {
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           io.seata.core.protocol.protobuf.AbstractTransactionRequest.getDescriptor(),
+          io.seata.core.protocol.protobuf.BranchType.getDescriptor(),
         }, assigner);
     internal_static_io_seata_protocol_protobuf_AbstractBranchEndRequestProto_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_io_seata_protocol_protobuf_AbstractBranchEndRequestProto_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_seata_protocol_protobuf_AbstractBranchEndRequestProto_descriptor,
-        new java.lang.String[] { "AbstractTransactionRequest", "Xid", "ExtraData", });
+        new java.lang.String[] { "AbstractTransactionRequest", "Xid", "BranchId", "BranchType", "ResourceId", "ApplicationData", });
     io.seata.core.protocol.protobuf.AbstractTransactionRequest.getDescriptor();
+    io.seata.core.protocol.protobuf.BranchType.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)
