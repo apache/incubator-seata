@@ -13,18 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.protocol.protobuf;
+package io.seata.core.protocol.convertor;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import com.google.protobuf.Any;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergedWarpMessage;
-import io.seata.core.protocol.convertor.MergedWarpMessageConvertor;
-import io.seata.core.protocol.convertor.PbConvertor;
-import io.seata.core.protocol.serialize.ProtobufSerialzer;
-import io.seata.core.protocol.serialize.ProtobufConvertManager;
+import io.seata.core.protocol.protobuf.MergedWarpMessageProto;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.junit.Test;
 
@@ -32,9 +27,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author leizhiyuan
-
  */
-public class MergeMessageTest {
+public class MergeMessageConvertorTest {
 
     @Test
     public void test() {
@@ -44,31 +38,11 @@ public class MergeMessageTest {
         msgs.add(globalBeginRequest);
         mergedWarpMessage.msgs = msgs;
 
-        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(
-            globalBeginRequest.getClass().getName());
+        MergedWarpMessageConvertor pbConvertor = new MergedWarpMessageConvertor();
+        MergedWarpMessageProto globalBeginRequestProto = pbConvertor.convert2Proto(
+            mergedWarpMessage);
 
-        GlobalBeginRequestProto globalBeginRequestProto = (GlobalBeginRequestProto)pbConvertor.convert2Proto(
-            globalBeginRequest);
-
-        final short typeCode = mergedWarpMessage.getTypeCode();
-
-        final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
-            MessageTypeProto.forNumber(typeCode)).build();
-
-        MergedWarpMessageProto mergedWarpMessageProto = MergedWarpMessageProto.newBuilder().setAbstractMessage(
-            abstractMessage).addMsgs(Any.pack(globalBeginRequestProto)).build();
-
-        byte[] bytes = ProtobufSerialzer.serializeContent(mergedWarpMessageProto);
-
-        MergedWarpMessageProto result = ProtobufSerialzer.deserializeContent(MergedWarpMessageProto.class.getName(),
-            bytes);
-
-        List<Any> anys = result.getMsgsList();
-
-        assertThat(anys.size()).isEqualTo(1);
-
-        MergedWarpMessageConvertor convertor = new MergedWarpMessageConvertor();
-        MergedWarpMessage model = convertor.convert2Model(result);
+        MergedWarpMessage model = pbConvertor.convert2Model(globalBeginRequestProto);
 
         GlobalBeginRequest decodeModel = (GlobalBeginRequest)model.msgs.get(0);
         assertThat(decodeModel.getTransactionName()).isEqualTo(
