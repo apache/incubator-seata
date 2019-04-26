@@ -22,6 +22,8 @@ import io.seata.common.util.NetUtil;
 import io.seata.core.rpc.netty.RpcServer;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
+import org.junit.Test;
+
 /**
  * The type Server test.
  *
@@ -35,10 +37,10 @@ public class ServerTest {
 
     /**
      * The entry point of application.
-     *
-     * @param args the input arguments
+     * Basic server function test
      */
-    public static void main(String[] args) {
+    @Test
+    public void Test() {
 
         RpcServer rpcServer = new RpcServer(workingThreads);
         rpcServer.setHandler(new DefaultCoordinator(rpcServer));
