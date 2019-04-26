@@ -21,7 +21,9 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
+import io.seata.rm.datasource.undo.oracle.OracleUndoDeleteExecutor;
 import io.seata.rm.datasource.undo.oracle.OracleUndoInsertExecutor;
+import io.seata.rm.datasource.undo.oracle.OracleUndoUpdateExecutor;
 
 /**
  * The type Undo executor factory.
@@ -46,9 +48,9 @@ public class UndoExecutorFactory {
                 case INSERT:
                     return new OracleUndoInsertExecutor(sqlUndoLog);
                 case UPDATE:
-                    return new OracleUndoInsertExecutor(sqlUndoLog);
+                    return new OracleUndoUpdateExecutor(sqlUndoLog);
                 case DELETE:
-                    return new OracleUndoInsertExecutor(sqlUndoLog);
+                    return new OracleUndoDeleteExecutor(sqlUndoLog);
                 default:
                     throw new ShouldNeverHappenException();
             }
