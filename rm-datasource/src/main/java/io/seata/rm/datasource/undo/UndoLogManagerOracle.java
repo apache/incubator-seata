@@ -64,7 +64,7 @@ public final class UndoLogManagerOracle {
             return value;
         }
     }
-    private static final Logger LOGGER = LoggerFactory.getLogger(UndoLogManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UndoLogManagerOracle.class);
 
     private static String UNDO_LOG_TABLE_NAME = "undo_log";
     private static String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
