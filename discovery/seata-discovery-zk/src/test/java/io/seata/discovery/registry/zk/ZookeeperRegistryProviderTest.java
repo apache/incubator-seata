@@ -13,38 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.tcc.remoting;
+package io.seata.discovery.registry.zk;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
- * remoting protocols enum
- *
- * @author zhangsen
+ * @author Geng Zhang
  */
-public class Protocols {
+public class ZookeeperRegistryProviderTest {
 
-	/**
-	 * sofa-rpc service
-	 */
-	public static short SOFA_RPC = 2;
-
-	/**
-	 * dubbo service
-	 */
-	public static short DUBBO = 3;
-
-	/**
-	 * restful service
-	 */
-	public static short RESTFUL = 4;
-
-	/**
-	 * local bean
-	 */
-	public static short IN_JVM = 5;
-
-	/**
-	 * hsf service
-	 */
-	public static short HSF = 8;
+    @Test
+    public void provide() {
+        ZookeeperRegistryProvider provider = new ZookeeperRegistryProvider();
+        Assert.assertTrue(provider.provide() instanceof ZookeeperRegisterServiceImpl);
+    }
 
 }
