@@ -221,7 +221,8 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                     LOGGER.info("RmRpcClient channel" + ctx.channel() + " idle.");
                 }
                 try {
-                    nettyClientKeyPool.invalidateObject(poolKeyMap.get(ctx.channel().remoteAddress()), ctx.channel());
+                    String serverAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
+                    nettyClientKeyPool.invalidateObject(poolKeyMap.get(serverAddress), ctx.channel());
                 } catch (Exception exx) {
                     LOGGER.error(exx.getMessage());
                 } finally {
