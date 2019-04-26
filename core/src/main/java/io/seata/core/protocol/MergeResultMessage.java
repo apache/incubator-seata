@@ -116,7 +116,11 @@ public class MergeResultMessage extends AbstractMessage implements MergeMessage 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("MergeResultMessage ");
-        for (AbstractMessage msg : msgs) { sb.append(msg.toString()).append("\n"); }
+        if (msgs != null) {
+            for (AbstractMessage msg : msgs) {
+                sb.append(msg.toString()).append("\n");
+            }
+        }
         return sb.toString();
     }
 }
