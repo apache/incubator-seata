@@ -124,6 +124,7 @@
         <license-maven-plugin.version>3.0</license-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
         <protobuf.version>3.7.0</protobuf.version>
+
     </properties>
     <!--test-->
     <dependencies>
