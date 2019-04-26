@@ -124,7 +124,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
         }
         in.markReaderIndex();
         short protocol = in.readShort();
-        if (protocol == MAGIC) {
+        if (protocol != MAGIC) {
             String emsg = "decode error,Unknown protocol: " + protocol + ",will close channel:" + ctx.channel();
             LOGGER.error(emsg);
             ctx.channel().close();
