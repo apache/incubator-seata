@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.server.coordinator;
 
 import io.seata.common.XID;
@@ -30,7 +29,6 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -145,6 +143,7 @@ public class DefaultCore implements Core {
             globalSession.changeStatus(GlobalOperation.COMMIT,GlobalStatus.Committing);
             if (globalSession.canBeCommittedAsync()) {
                 asyncCommit(globalSession);
+                return GlobalStatus.Committed;
             } else {
                 doGlobalCommit(globalSession, false);
             }
