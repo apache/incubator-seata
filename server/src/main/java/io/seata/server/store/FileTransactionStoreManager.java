@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -361,7 +362,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                 List<GlobalSession> globalSessionsOverMaxTimeout = sessionManager.findGlobalSessions(
                     new SessionCondition(
                         GlobalStatus.Begin, MAX_TRX_TIMEOUT_MILLS));
-                if (null != globalSessionsOverMaxTimeout) {
+                if (CollectionUtils.isNotEmpty(globalSessionsOverMaxTimeout)) {
                     for (GlobalSession globalSession : globalSessionsOverMaxTimeout) {
                         TransactionWriteStore globalWriteStore = new TransactionWriteStore(globalSession,
                             LogOperation.GLOBAL_ADD);
