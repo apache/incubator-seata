@@ -1,6 +1,5 @@
-
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -14,10 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+package io.seata.rm.datasource.undo.oracle.keyword;
 
-package com.alibaba.fescar.rm.datasource.undo.oracle.keyword;
-
-import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
+import io.seata.rm.datasource.undo.KeywordChecker;
 
 import java.util.Arrays;
 import java.util.Set;

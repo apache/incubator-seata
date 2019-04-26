@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,8 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
-package com.alibaba.fescar.rm.datasource.sql.struct;
+package io.seata.rm.datasource.sql.struct;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -27,13 +26,15 @@ import java.util.concurrent.TimeUnit;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.StringUtils;
-import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
-import com.alibaba.fescar.core.context.RootContext;
-import com.alibaba.fescar.rm.datasource.AbstractConnectionProxy;
-import com.alibaba.fescar.rm.datasource.DataSourceProxy;
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.AbstractConnectionProxy;
+import io.seata.rm.datasource.DataSourceProxy;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+
+import javax.sql.DataSource;
 
 /**
  * The type Table meta cache.
@@ -50,27 +51,16 @@ public class TableMetaCacheOracle {
     /**
      * Gets table meta.
      *
-     * @param dataSourceProxy the data source proxy
+     * @param dataSourceProxy the druid data source
      * @param tableName       the table name
      * @return the table meta
      */
-    public static TableMeta getTableMeta(DataSourceProxy dataSourceProxy, String tableName) {
-        return getTableMeta(dataSourceProxy.getTargetDataSource(), tableName);
-    }
-
-    /**
-     * Gets table meta.
-     *
-     * @param druidDataSource the druid data source
-     * @param tableName       the table name
-     * @return the table meta
-     */
-    public static TableMeta getTableMeta(final DruidDataSource druidDataSource, final String tableName) {
+    public static TableMeta getTableMeta(final DataSourceProxy dataSourceProxy, final String tableName) {
         if (StringUtils.isEmpty(tableName)) {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
-        String dataSourceKey = druidDataSource.getUrl();
+        String dataSourceKey =  dataSourceProxy.getResourceId();
 
         TableMeta tmeta = null;
         final String key = dataSourceKey + "." + tableName;
@@ -78,7 +68,7 @@ public class TableMetaCacheOracle {
             tmeta = TABLE_META_CACHE.get(key, new Callable<TableMeta>() {
                 @Override
                 public TableMeta call() throws Exception {
-                    return fetchSchema(druidDataSource, tableName);
+                    return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
                 }
             });
         } catch (ExecutionException e) {
@@ -86,7 +76,7 @@ public class TableMetaCacheOracle {
 
         if (tmeta == null) {
             try {
-                tmeta = fetchSchema(druidDataSource, tableName);
+                tmeta = fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
             }
         }
@@ -97,17 +87,17 @@ public class TableMetaCacheOracle {
         return tmeta;
     }
 
-    private static TableMeta fetchSchema(DruidDataSource druidDataSource, String tableName) throws SQLException {
-        return fetchSchemeInDefaultWay(druidDataSource, tableName);
+    private static TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
+        return fetchSchemeInDefaultWay(dataSource, tableName);
     }
 
-    private static TableMeta fetchSchemeInDefaultWay(DruidDataSource druidDataSource, String tableName)
+    private static TableMeta fetchSchemeInDefaultWay(DataSource dataSource, String tableName)
         throws SQLException {
         Connection conn = null;
         java.sql.Statement stmt = null;
         java.sql.ResultSet rs = null;
         try {
-            conn = druidDataSource.getConnection();
+            conn = dataSource.getConnection();
             stmt = conn.createStatement();
             StringBuffer sb = new StringBuffer("SELECT * FROM " + tableName );
             rs = stmt.executeQuery(sb.toString());
@@ -236,7 +226,7 @@ public class TableMetaCacheOracle {
         String indexName = "";
         while (rs2.next()) {
             indexName = rs2.getString("INDEX_NAME");
-            if( org.apache.commons.lang3.StringUtils.isEmpty(indexName) ){
+            if( StringUtils.isEmpty(indexName) ){
                 continue;
             }
             String colName = rs2.getString("COLUMN_NAME").toUpperCase();

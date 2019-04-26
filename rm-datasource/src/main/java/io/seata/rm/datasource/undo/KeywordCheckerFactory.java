@@ -18,6 +18,7 @@ package io.seata.rm.datasource.undo;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
+import io.seata.rm.datasource.undo.oracle.keyword.OracleKeywordChecker;
 
 /**
  * The type Keyword checker factory.

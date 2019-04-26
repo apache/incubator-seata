@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -45,6 +46,7 @@ import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManager;
 
 import io.seata.rm.datasource.undo.UndoLogManager;
+import io.seata.rm.datasource.undo.UndoLogManagerOracle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

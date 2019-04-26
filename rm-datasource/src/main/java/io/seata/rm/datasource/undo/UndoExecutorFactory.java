@@ -21,6 +21,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
+import io.seata.rm.datasource.undo.oracle.OracleUndoInsertExecutor;
 
 /**
  * The type Undo executor factory.

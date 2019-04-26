@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
@@ -23,8 +24,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
-import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.rm.datasource.undo.UndoLogManager;
+import io.seata.rm.datasource.undo.*;
 import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoLogManager;
@@ -54,10 +54,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      *
      * @param dataSourceProxy  the data source proxy
      * @param targetConnection the target connection
-     * @param dbType           the db type
      */
-    public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection, String dbType) {
-        super(dataSourceProxy, targetConnection, dbType);
+    public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
+        super(dataSourceProxy, targetConnection);
     }
 
     /**

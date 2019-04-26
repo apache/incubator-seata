@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,19 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
-package com.alibaba.fescar.rm.datasource.undo.oracle;
+package io.seata.rm.datasource.undo.oracle;
 
 import com.alibaba.druid.util.JdbcConstants;
-import com.alibaba.fescar.common.exception.ShouldNeverHappenException;
-import com.alibaba.fescar.rm.datasource.sql.struct.Field;
-import com.alibaba.fescar.rm.datasource.sql.struct.KeyType;
-import com.alibaba.fescar.rm.datasource.sql.struct.Row;
-import com.alibaba.fescar.rm.datasource.sql.struct.TableRecords;
-import com.alibaba.fescar.rm.datasource.undo.AbstractUndoExecutor;
-import com.alibaba.fescar.rm.datasource.undo.KeywordChecker;
-import com.alibaba.fescar.rm.datasource.undo.KeywordCheckerFactory;
-import com.alibaba.fescar.rm.datasource.undo.SQLUndoLog;
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.sql.struct.Field;
+import io.seata.rm.datasource.sql.struct.KeyType;
+import io.seata.rm.datasource.sql.struct.Row;
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.undo.AbstractUndoExecutor;
+import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.rm.datasource.undo.KeywordCheckerFactory;
+import io.seata.rm.datasource.undo.SQLUndoLog;
 
 import java.sql.PreparedStatement;
 import java.sql.SQLException;

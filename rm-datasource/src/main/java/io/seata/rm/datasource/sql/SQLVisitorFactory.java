@@ -32,6 +32,10 @@ import io.seata.rm.datasource.sql.druid.MySQLDeleteRecognizer;
 import io.seata.rm.datasource.sql.druid.MySQLInsertRecognizer;
 import io.seata.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
 import io.seata.rm.datasource.sql.druid.MySQLUpdateRecognizer;
+import io.seata.rm.datasource.sql.druid.oracle.OracleDeleteRecognizer;
+import io.seata.rm.datasource.sql.druid.oracle.OracleInsertRecognizer;
+import io.seata.rm.datasource.sql.druid.oracle.OracleSelectForUpdateRecognizer;
+import io.seata.rm.datasource.sql.druid.oracle.OracleUpdateRecognizer;
 
 /**
  * The type Sql visitor factory.

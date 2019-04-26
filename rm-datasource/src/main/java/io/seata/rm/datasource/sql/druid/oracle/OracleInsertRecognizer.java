@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,8 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
-package com.alibaba.fescar.rm.datasource.sql.druid.oracle;
+package io.seata.rm.datasource.sql.druid.oracle;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -27,10 +26,10 @@ import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleDeleteStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
-import com.alibaba.fescar.rm.datasource.sql.SQLInsertRecognizer;
-import com.alibaba.fescar.rm.datasource.sql.SQLParsingException;
-import com.alibaba.fescar.rm.datasource.sql.SQLType;
-import com.alibaba.fescar.rm.datasource.sql.druid.BaseRecognizer;
+import io.seata.rm.datasource.sql.SQLInsertRecognizer;
+import io.seata.rm.datasource.sql.SQLParsingException;
+import io.seata.rm.datasource.sql.SQLType;
+import io.seata.rm.datasource.sql.druid.BaseRecognizer;
 
 import java.util.ArrayList;
 import java.util.List;
