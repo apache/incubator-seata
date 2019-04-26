@@ -629,6 +629,9 @@
                         <include>**/src/main/java/**</include>
                         <include>**/src/test/java/**</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/core/protocol/protobuf/**</exclude>
+                    </excludes>
                     <strictCheck>true</strictCheck>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
@@ -649,6 +652,7 @@
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>false</failsOnError>
                             <failOnViolation>false</failOnViolation>
+                            <excludes>**/core/protocol/protobuf/**</excludes>
                         </configuration>
                         <goals>
                             <goal>check</goal>
