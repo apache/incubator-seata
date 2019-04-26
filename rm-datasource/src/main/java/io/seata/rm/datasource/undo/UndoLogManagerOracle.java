@@ -257,7 +257,7 @@ public final class UndoLogManagerOracle {
         appendInParam(xidSize, sqlBuilder);
         sqlBuilder.append(" AND xid IN ");
         appendInParam(branchIdSize, sqlBuilder);
-        sqlBuilder.append(" LIMIT ").append(limitSize);
+//        sqlBuilder.append(" LIMIT ").append(limitSize);
         return sqlBuilder.toString();
     }
 
