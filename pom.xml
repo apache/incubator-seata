@@ -114,7 +114,6 @@
         <nacos-client.version>0.9.1</nacos-client.version>
         <javax-inject.version>1</javax-inject.version>
         <archaius-core.version>0.7.6</archaius-core.version>
-        <maven.test.skip>true</maven.test.skip>
         <sofa.registry.version>5.2.0</sofa.registry.version>
         <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
         <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
