@@ -252,8 +252,8 @@ public final class UndoLogManager {
                 deletePST.setString(paramsIndex++, xid);
             }
             int deleteRows = deletePST.executeUpdate();
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("batch delete undo log size " + deleteRows);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("batch delete undo log size " + deleteRows);
             }
         }catch (Exception e){
             if (!(e instanceof SQLException)) {
