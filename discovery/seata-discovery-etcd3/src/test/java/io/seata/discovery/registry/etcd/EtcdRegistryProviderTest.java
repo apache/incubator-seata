@@ -14,20 +14,25 @@
  *  limitations under the License.
  */
 
-package io.seata.discovery.registery.etcd;
+package io.seata.discovery.registry.etcd;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.discovery.registry.RegistryProvider;
-import io.seata.discovery.registry.RegistryService;
+import io.seata.discovery.registery.etcd.EtcdRegistryProvider;
+import io.seata.discovery.registery.etcd.EtcdRegistryServiceImpl;
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/04/18
+ * @date 2019/04/26
+ * the type etcd registry provider test
  */
-@LoadLevel(name = "Etcd3", order = 1)
-public class EtcdRegistryProvider implements RegistryProvider {
-    @Override
-    public RegistryService provide() {
-        return EtcdRegistryServiceImpl.getInstance();
+public class EtcdRegistryProviderTest {
+    /**
+     * test provide
+     */
+    @Test
+    public void testProvide() {
+        assertThat(new EtcdRegistryProvider().provide()).isInstanceOf(EtcdRegistryServiceImpl.class);
     }
 }

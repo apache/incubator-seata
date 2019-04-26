@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import io.etcd.jetcd.watch.WatchResponse;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
+import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryService;
@@ -92,6 +93,10 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     private static long leaseId = 0;
     private EtcdLifeKeeper lifeKeeper = null;
     private Future<Boolean> lifeKeeperFuture = null;
+    /**
+     * a endpoint for unit testing
+     */
+    public static final String TEST_ENDPONT = "etcd-test-lancher-endpoint";
 
 
     private EtcdRegistryServiceImpl() {
@@ -252,7 +257,12 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         if (null == client) {
             synchronized (EtcdRegistryServiceImpl.class) {
                 if (null == client) {
-                    client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY)).build();
+                    String testEndpoint = System.getProperty(TEST_ENDPONT);
+                    if (StringUtils.isNotBlank(testEndpoint)) {
+                        client = Client.builder().endpoints(testEndpoint).build();
+                    } else {
+                        client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY)).build();
+                    }
                 }
             }
         }
