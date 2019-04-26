@@ -133,9 +133,8 @@ public class DefaultCore implements Core {
         }
         // just lock changeStatus
         boolean shouldCommit = globalSession.lockAndExcute(() -> {
-            GlobalStatus status = globalSession.getStatus();
             globalSession.closeAndClean(); // Highlight: Firstly, close the session, then no more branch can be registered.
-            if (status == GlobalStatus.Begin) {
+            if (globalSession.getStatus() == GlobalStatus.Begin) {
                 globalSession.changeStatus(GlobalStatus.Committing);
                 return true;
             }
@@ -244,11 +243,10 @@ public class DefaultCore implements Core {
         if (globalSession == null) {
             return GlobalStatus.Finished;
         }
-        GlobalStatus status = globalSession.getStatus();
         // just lock changeStatus
         boolean shouldRollBack = globalSession.lockAndExcute(() -> {
             globalSession.close(); // Highlight: Firstly, close the session, then no more branch can be registered.
-            if (status == GlobalStatus.Begin) {
+            if (globalSession.getStatus() == GlobalStatus.Begin) {
                 globalSession.changeStatus(GlobalStatus.Rollbacking);
                 return true;
             }
