@@ -17,16 +17,23 @@
 package io.seata.core.rpc.netty;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.List;
-
-import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.HeartbeatMessage;
-import io.seata.core.protocol.MessageCodec;
-import io.seata.core.protocol.RpcMessage;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.HeartbeatMessage;
+import io.seata.core.protocol.MessageCodec;
+import io.seata.core.protocol.RpcMessage;
+import io.seata.core.protocol.convertor.PbConvertor;
+import io.seata.core.protocol.protobuf.HeartbeatMessageProto;
+import io.seata.core.protocol.serialize.ProtobufConvertManager;
+import io.seata.core.protocol.serialize.ProtobufSerialzer;
+import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,8 +67,31 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
     private static final int MAGIC_HALF = -38;
     private static final int NOT_FOUND_INDEX = -1;
 
+    private static Configuration configuration = ConfigurationFactory.getInstance();
+
+    private static String serialize = "protobuf";//configuration.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC);
+    private final static String PROTOBUF = "protobuf";
+
+    /**
+     * The constant UTF8.
+     */
+    protected static final Charset UTF8 = Charset.forName("utf-8");
+
     @Override
     protected void encode(ChannelHandlerContext ctx, RpcMessage msg, ByteBuf out) throws Exception {
+        //for dynamic test
+        if (PROTOBUF.equals(serialize)) {
+            //转换类
+            Object body = msg.getBody();
+            if (body instanceof GlobalBeginRequest) {
+                final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(
+                    body.getClass().getName());
+                Object newBody = pbConvertor.convert2Proto(body);
+                msg.setBody(newBody);
+            }
+
+        }
+
         MessageCodec msgCodec = null;
         ByteBuffer byteBuffer = ByteBuffer.allocate(128);
         if (msg.getBody() instanceof MessageCodec) {
@@ -75,7 +105,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
         byteBuffer.putShort((short)flag);
 
-        if (msg.getBody() instanceof HeartbeatMessage) {
+        if (msg.getBody() instanceof HeartbeatMessage || msg.getBody() instanceof HeartbeatMessageProto) {
             byteBuffer.putShort((short)0);
             byteBuffer.putLong(msg.getId());
             byteBuffer.flip();
@@ -99,9 +129,14 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("msg:" + msg.getBody().toString());
                 }
-                byte[] body = hessianSerialize(msg.getBody());
-                byteBuffer.putShort((short)body.length);
+                byte[] body = protobufSerialize(msg.getBody());
+                final String name = msg.getBody().getClass().getName();
+                final short bodyLength = (short)(body.length + name.length() + 4);
+                byteBuffer.putShort(bodyLength);
                 byteBuffer.putLong(msg.getId());
+                final byte[] nameBytes = name.getBytes(UTF8);
+                byteBuffer.putInt(nameBytes.length);
+                byteBuffer.put(nameBytes);
                 byteBuffer.put(body);
 
                 byteBuffer.flip();
@@ -193,10 +228,22 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 }
                 rpcMessage.setBody(msgCodec);
             } else {
-                byte[] body = new byte[bodyLength];
+
+                int clazzNameLength = in.readInt();
+                byte[] clazzName = new byte[clazzNameLength];
+                in.readBytes(clazzName);
+                byte[] body = new byte[bodyLength - clazzNameLength - 4];
                 in.readBytes(body);
-                Object bodyObject = hessianDeserialize(body);
-                rpcMessage.setBody(bodyObject);
+                final String clazz = new String(clazzName, UTF8);
+                Object bodyObject = protobufDeserialize(clazz, body);
+
+                if (PROTOBUF.equals(serialize)) {
+                    final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(clazz);
+                    Object newBody = pbConvertor.convert2Model(bodyObject);
+                    rpcMessage.setBody(newBody);
+                } else {
+                    rpcMessage.setBody(bodyObject);
+                }
             }
         } catch (Exception e) {
             LOGGER.error("decode error", "", e);
@@ -217,12 +264,12 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
      * @return the byte [ ]
      * @throws Exception the exception
      */
-    private static byte[] hessianSerialize(Object object) throws Exception {
+    private static byte[] protobufSerialize(Object object) throws Exception {
         if (object == null) {
             throw new NullPointerException();
         }
-        //todo user defined exx
-        throw new RuntimeException("hessianSerialize not support");
+
+        return ProtobufSerialzer.serializeContent(object);
 
     }
 
@@ -233,12 +280,11 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
      * @return the object
      * @throws Exception the exception
      */
-    private static Object hessianDeserialize(byte[] bytes) throws Exception {
+    private static Object protobufDeserialize(String clazz, byte[] bytes) throws Exception {
         if (bytes == null) {
             throw new NullPointerException();
         }
-        //todo user defined exx
-        throw new RuntimeException("hessianDeserialize not support");
+        return ProtobufSerialzer.deserializeContent(clazz, bytes);
 
     }
 

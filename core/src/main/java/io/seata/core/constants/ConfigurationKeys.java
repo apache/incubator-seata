@@ -72,6 +72,11 @@ public class ConfigurationKeys {
     public static final String CLIENT_PREFIX = "client.";
 
     /**
+     * The constant TRANSPORT_PREFIX.
+     */
+    public static final String TRANSPORT_PREFIX = "transport.";
+
+    /**
      * The constant CLIENT_ASYNC_COMMIT_BUFFER_LIMIT.
      */
     public static final String CLIENT_ASYNC_COMMIT_BUFFER_LIMIT = CLIENT_PREFIX + "async.commit.buffer.limit";
@@ -93,4 +98,10 @@ public class ConfigurationKeys {
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_PREFIX + "report.retry.count";
+
+
+    /**
+     * The constant SERIALIZE_FOR_RPC.
+     */
+    public static final String SERIALIZE_FOR_RPC = TRANSPORT_PREFIX + "serialize";
 }

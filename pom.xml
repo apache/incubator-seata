@@ -121,6 +121,7 @@
         <maven-pmd-plugin.version>3.8</maven-pmd-plugin.version>
         <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
+        <protobuf.version>3.7.0</protobuf.version>
     </properties>
     <!--test-->
     <dependencies>
@@ -384,6 +385,11 @@
                 <artifactId>archaius-core</artifactId>
                 <version>${archaius-core.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.google.protobuf</groupId>
+                <artifactId>protobuf-java</artifactId>
+                <version>${protobuf.version}</version>
+            </dependency>
         </dependencies>
 
     </dependencyManagement>
@@ -500,6 +506,9 @@
                         <ruleset>rulesets/java/ali-other.xml</ruleset>
                         <ruleset>rulesets/java/ali-set.xml</ruleset>
                     </rulesets>
+                    <excludes>
+                        <exclude>**/protobuf/*.java</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
