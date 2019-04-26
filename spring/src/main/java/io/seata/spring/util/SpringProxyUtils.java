@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.spring.util;
 
 import org.springframework.aop.TargetSource;
@@ -113,11 +112,13 @@ public class SpringProxyUtils {
         if(bean == null){
             return false;
         }
-        if (Proxy.class.isAssignableFrom(bean.getClass()) || AopUtils.isAopProxy(bean)) {
+        //check dubbo proxy ?
+        String proxyClassName = bean.getClass().getName();
+        if(proxyClassName.startsWith("com.alibaba.dubbo.common.bytecode.proxy")
+                || proxyClassName.startsWith("org.apache.dubbo.common.bytecode.proxy") ){
             return true;
-        }else{
-            return false;
         }
+        return Proxy.class.isAssignableFrom(bean.getClass()) || AopUtils.isAopProxy(bean);
     }
 
     /**
