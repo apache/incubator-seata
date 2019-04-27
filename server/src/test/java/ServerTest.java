@@ -13,16 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import io.seata.common.XID;
 import io.seata.common.util.NetUtil;
 import io.seata.core.rpc.netty.RpcServer;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
-import org.junit.Test;
+
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Server test.
@@ -35,12 +34,13 @@ public class ServerTest {
     private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
             new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
+
     /**
      * The entry point of application.
-     * Basic server function test
+     *
+     * @param args the input arguments
      */
-    @Test
-    public void Test() {
+    public static void main(String[] args) {
 
         RpcServer rpcServer = new RpcServer(workingThreads);
         rpcServer.setHandler(new DefaultCoordinator(rpcServer));
