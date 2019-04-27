@@ -15,8 +15,6 @@
  */
 package io.seata.rm.datasource.sql;
 
-import java.util.List;
-
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
@@ -28,10 +26,8 @@ import io.seata.rm.datasource.sql.druid.MySQLDeleteRecognizer;
 import io.seata.rm.datasource.sql.druid.MySQLInsertRecognizer;
 import io.seata.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
 import io.seata.rm.datasource.sql.druid.MySQLUpdateRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLDeleteRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLInsertRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLUpdateRecognizer;
+
+import java.util.List;
 
 /**
  * The type Sql visitor factory.
@@ -62,7 +58,7 @@ public class SQLVisitorFactory {
             } else if (ast instanceof SQLDeleteStatement) {
                 recognizer = new MySQLDeleteRecognizer(sql, ast);
             } else if (ast instanceof SQLSelectStatement) {
-                if (((SQLSelectStatement)ast).getSelect().getQueryBlock().isForUpdate()) {
+                if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
                     recognizer = new MySQLSelectForUpdateRecognizer(sql, ast);
                 }
             }
