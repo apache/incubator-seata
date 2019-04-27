@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.core.rpc.netty;
 
 import java.util.Map;
@@ -222,7 +221,8 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                     LOGGER.info("RmRpcClient channel" + ctx.channel() + " idle.");
                 }
                 try {
-                    nettyClientKeyPool.invalidateObject(poolKeyMap.get(ctx.channel().remoteAddress()), ctx.channel());
+                    String serverAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
+                    nettyClientKeyPool.invalidateObject(poolKeyMap.get(serverAddress), ctx.channel());
                 } catch (Exception exx) {
                     LOGGER.error(exx.getMessage());
                 } finally {

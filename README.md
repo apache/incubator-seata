@@ -1,11 +1,11 @@
-<img src="https://github.com/fescar-group/fescar-samples/blob/master/doc/img/seata.png"  height="100" width="426">
+<img src="https://github.com/seata/seata-samples/blob/master/doc/img/seata.png"  height="100" width="426">
 
 # Seata: Simple Extensible Autonomous Transaction Architecture
 
 [![Build Status](https://travis-ci.org/seata/seata.svg?branch=develop)](https://travis-ci.org/seata/seata)
 [![codecov](https://codecov.io/gh/seata/seata/branch/develop/graph/badge.svg)](https://codecov.io/gh/seata/seata)
-![license](https://img.shields.io/github/license/seata/seata.svg)
-![maven](https://img.shields.io/maven-central/v/com.alibaba.fescar/fescar-all.svg)
+[![license](https://img.shields.io/github/license/seata/seata.svg)](https://www.apache.org/licenses/LICENSE-2.0.html)
+[![maven](https://img.shields.io/maven-central/v/io.seata/seata-parent.svg)](https://search.maven.org/search?q=io.seata)
 
 ## What is Seata?
 
@@ -136,16 +136,15 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 ## Seata ecosystem
 
 * [Seata Ecosystem Entry](https://github.com/seata) - A GitHub group `seata` to gather all Seata relevant projects
-* [Seata Samples](https://github.com/fescar-group/fescar-samples) - Samples for Seata
-* [Seata Docker](https://github.com/fescar-group/fescar-docker) - Seata integration with docker
-* [Seata K8s](https://github.com/fescar-group/fescar-k8s) - Seata integration with k8s
-* [Awesome Seata](https://github.com/fescar-group/awesome-fescar) - Description of Seata related projects 
-* [Seata Website](https://github.com/fescar-group/fescar.io) - Seata official website （***In the process of design***）
+* [Seata Samples](https://github.com/seata/seata-samples) - Samples for Seata
+* [Seata Docker](https://github.com/seata/seata-docker) - Seata integration with docker
+* [Seata K8s](https://github.com/seata/seata-k8s) - Seata integration with k8s
+* [Awesome Seata](https://github.com/seata/awesome-seata) - Description of Seata related projects 
+* [Seata Website](https://github.com/seata/seata.github.io) - Seata official website （***In the process of design***）
 
 ## Contributors
 
-This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
-<a href="https://github.com/seata/seata/graphs/contributors"><img src="https://opencollective.com/fescar/contributors.svg?width=890&button=false" /></a>
+This project exists thanks to all the people who contribute. [[Contributors](https://github.com/seata/seata/graphs/contributors)].
 
 ## License
 

@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.server.coordinator;
 
 import java.io.IOException;
@@ -202,13 +201,17 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 LOGGER.debug(globalSession.getTransactionId() + " " + globalSession.getStatus() + " " +
                     globalSession.getBeginTime() + " " + globalSession.getTimeout());
             }
-
-            if (globalSession.getStatus() != GlobalStatus.Begin || !globalSession.isTimeout()) {
+            boolean shouldTimeout = globalSession.lockAndExcute(() -> {
+                if (globalSession.getStatus() != GlobalStatus.Begin || !globalSession.isTimeout()) {
+                    return false;
+                }
+                globalSession.close();
+                globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
+                return true;
+            });
+            if (!shouldTimeout) {
                 continue;
             }
-
-            globalSession.close();
-            globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
             LOGGER.info(
                 "Global transaction[" + globalSession.getTransactionId() + "] is timeout and will be rolled back.");
 
