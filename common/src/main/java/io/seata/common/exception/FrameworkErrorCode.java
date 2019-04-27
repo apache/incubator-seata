@@ -94,26 +94,37 @@ public enum FrameworkErrorCode {
     /**
      * 未定义错误
      */
-    UnknownAppError("10000", "unknown error", "内部错误"),
-    ;
+    UnknownAppError("10000", "unknown error", "内部错误"),;
 
     /**
      * The Err code.
      */
-    public String errCode;
+    private String errCode;
     /**
      * The Err message.
      */
-    public String errMessage;
+    private String errMessage;
     /**
      * The Err dispose.
      */
-    public String errDispose;
+    private String errDispose;
 
     FrameworkErrorCode(String errCode, String errMessage, String errDispose) {
         this.errCode = errCode;
         this.errMessage = errMessage;
         this.errDispose = errDispose;
+    }
+
+    public String getErrCode() {
+        return errCode;
+    }
+
+    public String getErrMessage() {
+        return errMessage;
+    }
+
+    public String getErrDispose() {
+        return errDispose;
     }
 
     @Override
