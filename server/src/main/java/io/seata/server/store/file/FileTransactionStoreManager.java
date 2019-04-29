@@ -24,7 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -36,17 +36,16 @@ import io.seata.common.exception.StoreException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
-import io.seata.core.model.GlobalStatus;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.store.AbstractTransactionStoreManager;
+import io.seata.server.store.FlushDiskMode;
 import io.seata.server.store.ReloadableStore;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.store.TransactionWriteFuture;
 import io.seata.server.store.TransactionWriteStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,8 +132,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
      */
     public FileTransactionStoreManager(String fullFileName, SessionManager sessionManager) throws IOException {
         initFile(fullFileName);
-        fileWriteExecutor =
-                new ThreadPoolExecutor(MAX_THREAD_WRITE, MAX_THREAD_WRITE, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
+        fileWriteExecutor = new ThreadPoolExecutor(MAX_THREAD_WRITE, MAX_THREAD_WRITE, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
                         new LinkedBlockingQueue<Runnable>(),
                         new NamedThreadFactory("fileTransactionStore", MAX_THREAD_WRITE, true));
         writeDataFileRunnable = new WriteDataFileRunnable();
@@ -259,16 +257,6 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             return true;
         }
         return false;
-    }
-
-    /**
-     * Read session global session.
-     *
-     * @param transactionId the transaction id
-     * @return the global session
-     */
-    public GlobalSession readSession(Long transactionId){
-        throw new StoreException("unsupport for read from file, transactionId:" + transactionId);
     }
 
     @Override

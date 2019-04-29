@@ -82,10 +82,8 @@ public class DefaultSessionManager extends AbstractSessionManager {
     public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
         List<GlobalSession> found = new ArrayList<>();
         for (GlobalSession globalSession : sessionMap.values()) {
-            if (globalSession.getStatus() == condition.getStatus()) {
-                if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
-                    found.add(globalSession);
-                }
+            if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
+                found.add(globalSession);
             }
         }
         return found;

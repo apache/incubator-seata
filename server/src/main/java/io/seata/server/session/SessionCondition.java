@@ -34,11 +34,8 @@ public class SessionCondition {
 
     /**
      * Instantiates a new Session condition.
-     *
-     * @param transactionId the transaction id
      */
-    public SessionCondition(Long transactionId) {
-        this.transactionId = transactionId;
+    public SessionCondition() {
     }
 
     /**
@@ -106,65 +103,35 @@ public class SessionCondition {
     }
 
     /**
-     * Get statuses global status [ ].
-     *
-     * @return the global status [ ]
-     */
-    public GlobalStatus[] getStatuses() {
-        return statuses;
-    }
-
-    /**
-     * Sets statuses.
-     *
-     * @param statuses the statuses
-     */
-    public void setStatuses(GlobalStatus[] statuses) {
-        this.statuses = statuses;
-    }
-
-    /**
-     * Gets transaction id.
-     *
-     * @return the transaction id
-     */
-    public Long getTransactionId() {
-        return transactionId;
-    }
-
-    /**
-     * Sets transaction id.
-     *
-     * @param transactionId the transaction id
-     */
-    public void setTransactionId(Long transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    /**
-     * Gets xid.
-     *
-     * @return the xid
-     */
-    public String getXid() {
-        return xid;
-    }
-
-    /**
-     * Sets xid.
-     *
-     * @param xid the xid
-     */
-    public void setXid(String xid) {
-        this.xid = xid;
-    }
-
-    /**
      * Sets over time alive mills.
      *
      * @param overTimeAliveMills the over time alive mills
      */
     public void setOverTimeAliveMills(long overTimeAliveMills) {
         this.overTimeAliveMills = overTimeAliveMills;
+    }
+
+    public Long getTransactionId() {
+        return transactionId;
+    }
+
+    public void setTransactionId(Long transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public String getXid() {
+        return xid;
+    }
+
+    public void setXid(String xid) {
+        this.xid = xid;
+    }
+
+    public GlobalStatus[] getStatuses() {
+        return statuses;
+    }
+
+    public void setStatuses(GlobalStatus[] statuses) {
+        this.statuses = statuses;
     }
 }

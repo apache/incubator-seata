@@ -15,12 +15,6 @@
  */
 package io.seata.server.session;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -74,12 +68,6 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         writeSession(LogOperation.GLOBAL_ADD, session);
     }
 
-
-    @Override
-    public GlobalSession findGlobalSession(Long transactionId) throws TransactionException {
-        return sessionMap.get(transactionId);
-    }
-
     @Override
     public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status) throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
@@ -120,23 +108,6 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.GLOBAL_ADD);
         }
         writeSession(LogOperation.BRANCH_REMOVE, branchSession);
-
-    }
-
-    @Override
-    public Collection<GlobalSession> allSessions() {
-        return sessionMap.values();
-    }
-
-    @Override
-    public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
-        List<GlobalSession> found = new ArrayList<>();
-        for (GlobalSession globalSession : sessionMap.values()) {
-                if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
-                    found.add(globalSession);
-                }
-        }
-        return found;
     }
 
     @Override
@@ -175,10 +146,16 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         removeGlobalSession(globalSession);
     }
 
-    private void writeSession(LogOperation logOperation, SessionStorable sessionStorable) throws TransactionException{
+    private void writeSession(LogOperation logOperation, SessionStorable sessionStorable) throws TransactionException {
         if (!transactionStoreManager.writeSession(logOperation, sessionStorable)) {
             throw new TransactionException(TransactionExceptionCode.FailedWriteSession);
         }
+    }
+
+    @Override
+    public void destroy() {
+    }
+
     /**
      * Sets transaction store manager.
      *
