@@ -25,11 +25,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigFuture.ConfigOperation;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import org.apache.commons.lang.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,18 +185,22 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
                     setFailResult(configFuture);
                     return;
                 }
-                if (configFuture.getOperation() == ConfigOperation.GET) {
-                    String result = CONFIG.getString(configFuture.getDataId());
-                    configFuture.setResult(result == null ? configFuture.getContent() : result);
-                } else if (configFuture.getOperation() == ConfigOperation.PUT) {
-                    //todo
-                    configFuture.setResult(Boolean.TRUE);
-                } else if (configFuture.getOperation() == ConfigOperation.PUTIFABSENT) {
-                    //todo
-                    configFuture.setResult(Boolean.TRUE);
-                } else if (configFuture.getOperation() == ConfigOperation.REMOVE) {
-                    //todo
-                    configFuture.setResult(Boolean.TRUE);
+                try {
+                    if (configFuture.getOperation() == ConfigOperation.GET) {
+                        String result = CONFIG.getString(configFuture.getDataId());
+                        configFuture.setResult(result);
+                    } else if (configFuture.getOperation() == ConfigOperation.PUT) {
+                        //todo
+                        configFuture.setResult(Boolean.TRUE);
+                    } else if (configFuture.getOperation() == ConfigOperation.PUTIFABSENT) {
+                        //todo
+                        configFuture.setResult(Boolean.TRUE);
+                    } else if (configFuture.getOperation() == ConfigOperation.REMOVE) {
+                        //todo
+                        configFuture.setResult(Boolean.TRUE);
+                    }
+                } catch (Exception e){
+                    setFailResult(configFuture);
                 }
             }
         }
