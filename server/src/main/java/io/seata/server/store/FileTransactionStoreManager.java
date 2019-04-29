@@ -513,9 +513,9 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
      */
     class WriteDataFileRunnable implements Runnable {
 
-        private volatile List<StoreRequest> requestsWrite = new LinkedList<>();
+        private volatile List<StoreRequest> requestsWrite = new ArrayList<>();
 
-        private volatile List<StoreRequest> requestsRead = new LinkedList<>();
+        private volatile List<StoreRequest> requestsRead = new ArrayList<>();
 
         private volatile AtomicBoolean hasNotified = new AtomicBoolean(false);
 
