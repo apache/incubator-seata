@@ -542,7 +542,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
          * handle the rest requests when stopping is true
          */
         private void handleRestRequest() {
-            int remainNums = storeRequests.remainingCapacity();
+            int remainNums = storeRequests.size();
             for (int i = 0; i < remainNums; i++) {
                 handleStoreRequest(storeRequests.poll());
             }
