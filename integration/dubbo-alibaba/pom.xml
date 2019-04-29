@@ -22,6 +22,7 @@
         <groupId>io.seata</groupId>
         <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -39,5 +40,4 @@
             <version>2.6.5</version>
         </dependency>
     </dependencies>
-
 </project>

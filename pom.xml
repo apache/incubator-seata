@@ -23,24 +23,24 @@
     <artifactId>seata-parent</artifactId>
     <version>${revision}</version>
     <modules>
-        <module>config</module>
         <module>common</module>
-        <module>server</module>
-        <module>distribution</module>
+        <module>config</module>
         <module>core</module>
-        <module>rm-datasource</module>
-        <module>tm</module>
-        <module>spring</module>
-        <module>dubbo</module>
         <module>discovery</module>
-        <module>test</module>
-        <module>dubbo-alibaba</module>
-        <module>tcc</module>
+        <module>distribution</module>
+        <module>integration/dubbo</module>
+        <module>integration/dubbo-alibaba</module>
         <module>rm</module>
+        <module>rm-datasource</module>
+        <module>server</module>
+        <module>spring</module>
+        <module>tcc</module>
+        <module>test</module>
+        <module>tm</module>
     </modules>
     <packaging>pom</packaging>
 
-    <name>Seata ${project.version}</name>
+    <name>Seata Parent POM ${project.version}</name>
     <url>http://seata.io</url>
     <description>top seata project pom.xml file</description>
     <prerequisites>
