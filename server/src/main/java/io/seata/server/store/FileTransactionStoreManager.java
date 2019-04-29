@@ -509,18 +509,8 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
 
         private LinkedBlockingQueue<StoreRequest> storeRequests = new LinkedBlockingQueue<>();
 
-        private volatile AtomicBoolean hasNotified = new AtomicBoolean(false);
 
-        private final Semaphore waitPoint = new Semaphore(1);
-
-
-        /**
-         * two synchornized
-         * the second synchornized for reading
-         *
-         * @param request
-         */
-        public synchronized void putRequest(final StoreRequest request) {
+        public void putRequest(final StoreRequest request) {
             storeRequests.add(request);
         }
 
