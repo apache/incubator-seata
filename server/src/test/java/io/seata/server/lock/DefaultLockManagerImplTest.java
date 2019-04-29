@@ -15,13 +15,17 @@
  */
 package io.seata.server.lock;
 
+import io.seata.common.XID;
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
+import io.seata.server.lock.memory.MemoryLockManagerImpl;
 import io.seata.server.session.BranchSession;
 
 import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import javax.transaction.xa.Xid;
 
 /**
  * The type Default lock manager impl test.
@@ -31,7 +35,7 @@ import org.testng.annotations.Test;
  */
 public class DefaultLockManagerImplTest {
 
-    private LockManager lockManager = new DefaultLockManagerImpl();
+    private LockManager lockManager = new MemoryLockManagerImpl();
 
     private static final long transactionId = UUIDGenerator.generateUUID();
 
@@ -59,7 +63,7 @@ public class DefaultLockManagerImplTest {
      */
     @Test
     public void isLockableTest() throws Exception {
-        boolean resultOne = lockManager.isLockable(transactionId, resourceId, lockKey);
+        boolean resultOne = lockManager.isLockable(XID.generateXID(transactionId), resourceId, lockKey);
         Assert.assertTrue(resultOne);
     }
 
@@ -71,6 +75,7 @@ public class DefaultLockManagerImplTest {
     @DataProvider
     public static Object[][] branchSessionProvider() {
         BranchSession branchSession = new BranchSession();
+        branchSession.setXid(XID.generateXID(transactionId));
         branchSession.setBranchId(1L);
         branchSession.setTransactionId(transactionId);
         branchSession.setClientId("c1");

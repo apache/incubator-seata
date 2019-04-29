@@ -15,13 +15,6 @@
  */
 package io.seata.server.coordinator;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -57,9 +50,14 @@ import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchCommitRequest;
 import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchRollbackRequest;
@@ -152,7 +150,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             request.setApplicationData(applicationData);
             request.setBranchType(branchType);
 
-            GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+            GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
             BranchSession branchSession = globalSession.getBranch(branchId);
 
             BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
@@ -178,7 +176,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             request.setApplicationData(applicationData);
             request.setBranchType(branchType);
 
-            GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+            GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
             BranchSession branchSession = globalSession.getBranch(branchId);
 
             BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSyncRequest(resourceId,
@@ -191,14 +189,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         }
     }
 
-    private void timeoutCheck() throws TransactionException {
+    protected void timeoutCheck() throws TransactionException {
         Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
         if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
             LOGGER.debug("Transaction Timeout Check Begin: " + allSessions.size());
         }
         for (GlobalSession globalSession : allSessions) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(globalSession.getTransactionId() + " " + globalSession.getStatus() + " " +
+                LOGGER.debug(globalSession.getXid() + " " + globalSession.getStatus() + " " +
                     globalSession.getBeginTime() + " " + globalSession.getTimeout());
             }
             boolean shouldTimeout = globalSession.lockAndExcute(() -> {
@@ -213,7 +211,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 continue;
             }
             LOGGER.info(
-                "Global transaction[" + globalSession.getTransactionId() + "] is timeout and will be rolled back.");
+                "Global transaction[" + globalSession.getXid() + "] is timeout and will be rolled back.");
 
             globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
             SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
@@ -225,31 +223,31 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
     }
 
-    private void handleRetryRollbacking() {
+    protected void handleRetryRollbacking() {
         Collection<GlobalSession> rollbackingSessions = SessionHolder.getRetryRollbackingSessionManager().allSessions();
         for (GlobalSession rollbackingSession : rollbackingSessions) {
             try {
                 core.doGlobalRollback(rollbackingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.info("Failed to retry rollbacking [{}] {} {}",
-                    rollbackingSession.getTransactionId(), ex.getCode(), ex.getMessage());
+                    rollbackingSession.getXid(), ex.getCode(), ex.getMessage());
             }
         }
     }
 
-    private void handleRetryCommitting() {
+    protected void handleRetryCommitting() {
         Collection<GlobalSession> committingSessions = SessionHolder.getRetryCommittingSessionManager().allSessions();
         for (GlobalSession committingSession : committingSessions) {
             try {
                 core.doGlobalCommit(committingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.info("Failed to retry committing [{}] {} {}",
-                    committingSession.getTransactionId(), ex.getCode(), ex.getMessage());
+                    committingSession.getXid(), ex.getCode(), ex.getMessage());
             }
         }
     }
 
-    private void handleAsyncCommitting() {
+    protected void handleAsyncCommitting() {
         Collection<GlobalSession> asyncCommittingSessions = SessionHolder.getAsyncCommittingSessionManager()
             .allSessions();
         for (GlobalSession asyncCommittingSession : asyncCommittingSessions) {
@@ -257,7 +255,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 core.doGlobalCommit(asyncCommittingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.info("Failed to async committing [{}] {} {}",
-                    asyncCommittingSession.getTransactionId(), ex.getCode(), ex.getMessage());
+                    asyncCommittingSession.getXid(), ex.getCode(), ex.getMessage());
             }
         }
     }

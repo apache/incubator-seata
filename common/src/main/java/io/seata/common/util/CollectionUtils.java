@@ -43,4 +43,24 @@ public class CollectionUtils {
     public static boolean isNotEmpty(Collection col){
         return col != null && col.size() > 0;
     }
+
+    /**
+     * Is empty boolean.
+     *
+     * @param array the array
+     * @return the boolean
+     */
+    public static boolean isEmpty(Object[] array){
+        return !isNotEmpty(array);
+    }
+
+    /**
+     * Is not empty boolean.
+     *
+     * @param array the array
+     * @return the boolean
+     */
+    public static boolean isNotEmpty(Object[] array){
+        return array != null && array.length > 0;
+    }
 }

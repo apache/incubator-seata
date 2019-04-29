@@ -17,6 +17,7 @@ package io.seata.server.lock;
 
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
+import io.seata.server.lock.memory.MemoryLockManagerImpl;
 import io.seata.server.session.BranchSession;
 
 import org.junit.Assert;
@@ -39,7 +40,7 @@ public class LockManagerTest {
      */
     @Test(dataProvider = "branchSessionProvider")
     public void acquireLock_success(BranchSession branchSession) throws Exception {
-        LockManager lockManager = LockManagerFactory.get();
+        LockManager lockManager = new MemoryLockManagerImpl();
         Assert.assertTrue(lockManager.acquireLock(branchSession));
     }
 
@@ -52,7 +53,7 @@ public class LockManagerTest {
      */
     @Test(dataProvider = "branchSessionsProvider")
     public void acquireLock_failed(BranchSession branchSession1, BranchSession branchSession2) throws Exception {
-        LockManager lockManager = LockManagerFactory.get();
+        LockManager lockManager = new MemoryLockManagerImpl();
         Assert.assertTrue(lockManager.acquireLock(branchSession1));
         Assert.assertFalse(lockManager.acquireLock(branchSession2));
     }
@@ -66,13 +67,13 @@ public class LockManagerTest {
     @Test(dataProvider = "branchSessionProvider")
     public void isLockableTest(BranchSession branchSession) throws Exception {
         branchSession.setLockKey("t:4");
-        LockManager lockManager = LockManagerFactory.get();
+        LockManager lockManager = new MemoryLockManagerImpl();
         Assert.assertTrue(lockManager
-            .isLockable(branchSession.getTransactionId(), branchSession.getResourceId(), branchSession.getLockKey()));
+            .isLockable(branchSession.getXid(), branchSession.getResourceId(), branchSession.getLockKey()));
         lockManager.acquireLock(branchSession);
         branchSession.setTransactionId(UUIDGenerator.generateUUID());
         Assert.assertFalse(lockManager
-            .isLockable(branchSession.getTransactionId(), branchSession.getResourceId(), branchSession.getLockKey()));
+            .isLockable(branchSession.getXid(), branchSession.getResourceId(), branchSession.getLockKey()));
     }
 
     /**

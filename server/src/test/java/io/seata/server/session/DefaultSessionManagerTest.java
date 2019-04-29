@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import io.seata.common.XID;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
@@ -58,7 +59,7 @@ public class DefaultSessionManagerTest {
     @Test(dataProvider = "globalSessionProvider")
     public void findGlobalSessionTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
-        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getTransactionId());
+        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
         Assert.assertNotNull(expected);
         Assert.assertEquals(expected.getTransactionId(), globalSession.getTransactionId());
         Assert.assertEquals(expected.getApplicationId(), globalSession.getApplicationId());
@@ -80,7 +81,7 @@ public class DefaultSessionManagerTest {
         sessionManager.addGlobalSession(globalSession);
         globalSession.setStatus(GlobalStatus.Finished);
         sessionManager.updateGlobalSessionStatus(globalSession, GlobalStatus.Finished);
-        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getTransactionId());
+        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
         Assert.assertNotNull(expected);
         Assert.assertEquals(GlobalStatus.Finished, expected.getStatus());
         sessionManager.removeGlobalSession(globalSession);
@@ -96,7 +97,7 @@ public class DefaultSessionManagerTest {
     public void removeGlobalSessionTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
         sessionManager.removeGlobalSession(globalSession);
-        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getTransactionId());
+        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
         Assert.assertNull(expected);
 
     }
@@ -285,6 +286,10 @@ public class DefaultSessionManagerTest {
     @DataProvider
     public static Object[][] globalSessionProvider() {
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+
+        String xid = XID.generateXID(globalSession.getTransactionId());
+        globalSession.setXid(xid);
+
         return new Object[][] {{globalSession}};
     }
 

@@ -46,6 +46,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
             MAX_BRANCH_SESSION_SIZE));
 
+    private String xid;
+
     private long transactionId;
 
     private long branchId;
@@ -189,7 +191,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      *
      * @param status the status
      */
-    void setStatus(BranchStatus status) {
+    public void setStatus(BranchStatus status) {
         this.status = status;
     }
 
@@ -229,6 +231,24 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         this.branchId = branchId;
     }
 
+    /**
+     * Gets xid.
+     *
+     * @return the xid
+     */
+    public String getXid() {
+        return xid;
+    }
+
+    /**
+     * Sets xid.
+     *
+     * @param xid the xid
+     */
+    public void setXid(String xid) {
+        this.xid = xid;
+    }
+
     @Override
     public String toString() {
         return "BR:" + branchId + "/" + transactionId;
@@ -255,28 +275,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public boolean unlock() throws TransactionException {
-        if (lockHolder.size() == 0) {
-            return true;
-        }
-        Iterator<Map.Entry<Map<String, Long>, Set<String>>> it = lockHolder.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<Map<String, Long>, Set<String>> entry = it.next();
-            Map<String, Long> bucket = entry.getKey();
-            Set<String> keys = entry.getValue();
-            synchronized (bucket) {
-                for (String key : keys) {
-                    Long v = bucket.get(key);
-                    if (v == null) {
-                        continue;
-                    }
-                    if (v.longValue() == getTransactionId()) {
-                        bucket.remove(key);
-                    }
-                }
-            }
-        }
-        lockHolder.clear();
-        return true;
+        return LockManagerFactory.get().unLock(this);
     }
 
     @Override
@@ -290,7 +289,9 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         byte[] applicationDataBytes = applicationData != null ? applicationData.getBytes() : null;
 
-        int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes);
+        byte[] xidBytes = xid != null ? xid.getBytes() : null;
+
+        int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes, xidBytes);
 
 
         if (size > MAX_BRANCH_SESSION_SIZE){
@@ -348,6 +349,13 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             byteBuffer.putInt(0);
         }
 
+        if(xidBytes != null){
+            byteBuffer.putInt(xidBytes.length);
+            byteBuffer.put(xidBytes);
+        }else {
+            byteBuffer.putInt(0);
+        }
+
         byteBuffer.put((byte)status.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
@@ -356,7 +364,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     }
 
     private int calBranchSessionSize(byte[] resourceIdBytes, byte[] lockKeyBytes, byte[] clientIdBytes,
-                                     byte[] applicationDataBytes) {
+                                     byte[] applicationDataBytes, byte[] xidBytes) {
         final int size = 8 // trascationId
                 + 8 // branchId
                 + 4 // resourceIdBytes.length
@@ -367,7 +375,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
                 + (resourceIdBytes == null ? 0 : resourceIdBytes.length)
                 + (lockKeyBytes == null ? 0 : lockKeyBytes.length)
                 + (clientIdBytes == null ? 0 : clientIdBytes.length)
-                + (applicationDataBytes == null ? 0 : applicationDataBytes.length);
+                + (applicationDataBytes == null ? 0 : applicationDataBytes.length)
+                + (xidBytes == null ? 0 : xidBytes.length);
         return size;
     }
 
@@ -408,6 +417,12 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             byte[] byApplicationData = new byte[applicationDataLen];
             byteBuffer.get(byApplicationData);
             this.applicationData = new String(byApplicationData);
+        }
+        int xidLen = byteBuffer.getInt();
+        if (xidLen > 0) {
+            byte[] xidBytes = new byte[xidLen];
+            byteBuffer.get(xidBytes);
+            this.xid = new String(xidBytes);
         }
         this.status = BranchStatus.get(byteBuffer.get());
 

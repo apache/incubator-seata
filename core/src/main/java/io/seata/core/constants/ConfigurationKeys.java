@@ -92,4 +92,81 @@ public class ConfigurationKeys {
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_PREFIX + "report.retry.count";
+
+    /**
+     * The constant STORE_DB_GLOBAL_TABLE.
+     */
+    public static final String STORE_DB_GLOBAL_TABLE  = "store.db.global.table";
+
+    /**
+     * The constant STORE_DB_BRANCH_TABLE.
+     */
+    public static final String STORE_DB_BRANCH_TABLE  = "store.db.branch.table";
+
+    /**
+     * The constant STORE_DB_GLOBAL_DEFAULT_TABLE.
+     */
+    public static final String STORE_DB_GLOBAL_DEFAULT_TABLE  = "global_table";
+
+    /**
+     * The constant STORE_DB_BRANCH_DEFAULT_TABLE.
+     */
+    public static final String STORE_DB_BRANCH_DEFAULT_TABLE  = "branch_table";
+
+    /**
+     * The constant STORE_DB_DATASOURCE_TYPE.
+     */
+    public static final String STORE_DB_DATASOURCE_TYPE  = "store.db.datasource-type";
+
+
+    /**
+     * The constant STORE_DB_TYPE.
+     */
+    public static final String STORE_DB_TYPE  = "store.db.db-type";
+
+    /**
+     * The constant STORE_DB_URL.
+     */
+    public static final String STORE_DB_URL  = "store.db.url";
+
+    /**
+     * The constant STORE_DB_USER.
+     */
+    public static final String STORE_DB_USER  = "store.db.user";
+
+    /**
+     * The constant STORE_DB_PASSWORD.
+     */
+    public static final String STORE_DB_PASSWORD  = "store.db.password";
+
+    /**
+     * The constant STORE_DB_MIN_CONN.
+     */
+    public static final String STORE_DB_MIN_CONN = "store.db.min-conn";
+
+    /**
+     * The constant STORE_DB_MAX_CONN.
+     */
+    public static final String STORE_DB_MAX_CONN  = "store.db.max-conn";
+
+    /**
+     * The constant STORE_DB_LOG_QUERY_LIMIT.
+     */
+    public static final String STORE_DB_LOG_QUERY_LIMIT  = "store.db.query-limit";
+
+    /**
+     * The constant LOCK_MODE.
+     */
+    public static final String LOCK_MODE =  "lock.mode";
+
+    /**
+     * The constant LOCK_DB_TABLE.
+     */
+    public static final String LOCK_DB_TABLE  = "lock.db.lock-table";
+
+    /**
+     * The constant LOCK_DB_DEFAULT_TABLE.
+     */
+    public static final String LOCK_DB_DEFAULT_TABLE  = "lock_table";
+
 }

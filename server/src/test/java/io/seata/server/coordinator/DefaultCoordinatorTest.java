@@ -73,7 +73,7 @@ public class DefaultCoordinatorTest {
         SessionHolder.init(null);
         serverMessageSender = new MockServerMessageSender();
         defaultCoordinator = new DefaultCoordinator(serverMessageSender);
-        defaultCoordinator.init();
+//        defaultCoordinator.init();
     }
 
     @Test(dataProvider = "xidAndBranchIdProviderForCommit")
@@ -99,6 +99,23 @@ public class DefaultCoordinatorTest {
         }
 
         Assert.assertEquals(result, BranchStatus.PhaseTwo_Rollbacked);
+
+    }
+
+
+    @Test
+    public void test_handleRetryRollbacking() throws TransactionException, InterruptedException {
+
+        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
+        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
+
+        Thread.sleep(100);
+
+        defaultCoordinator.timeoutCheck();
+        defaultCoordinator.handleRetryRollbacking();
+
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        Assert.assertNull(globalSession);
 
     }
 

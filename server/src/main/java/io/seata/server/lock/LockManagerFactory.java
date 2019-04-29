@@ -15,6 +15,16 @@
  */
 package io.seata.server.lock;
 
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.LockMode;
+import io.seata.core.store.StoreMode;
+import io.seata.core.store.db.DataSourceGenerator;
+
+import javax.sql.DataSource;
+
 /**
  * The type Lock manager factory.
  *
@@ -22,25 +32,37 @@ package io.seata.server.lock;
  */
 public class LockManagerFactory {
 
-    private static class SingletonHolder {
-        private static LockManager INSTANCE = new DefaultLockManagerImpl();
-    }
+    /**
+     * The constant CONFIG.
+     */
+    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
+    /**
+     * The constant lockManager.
+     */
+    protected static LockManager lockManager = null;
 
     /**
      * Get lock manager.
      *
      * @return the lock manager
      */
-    public static final LockManager get() {
-        return SingletonHolder.INSTANCE;
+    public static synchronized final LockManager get() {
+        if(lockManager != null){
+            return lockManager;
+        }
+        String lockMode = CONFIG.getConfig(ConfigurationKeys.LOCK_MODE);
+        if(LockMode.DB.name().equalsIgnoreCase(lockMode)){
+            //init dataSource
+            String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+            DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, datasourceType);
+            DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
+            lockManager = EnhancedServiceLoader.load(LockManager.class, lockMode, new Object[]{logStoreDataSource});
+        }else {
+            lockManager = EnhancedServiceLoader.load(LockManager.class, lockMode);
+        }
+        return lockManager;
     }
 
-    /**
-     * Just for test mocking
-     *
-     * @param lockManager the lock manager
-     */
-    public static void set(LockManager lockManager) {
-        SingletonHolder.INSTANCE = lockManager;
-    }
+
 }

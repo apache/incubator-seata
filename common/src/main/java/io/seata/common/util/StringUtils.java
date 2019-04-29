@@ -36,7 +36,6 @@ import javax.sql.rowset.serial.SerialBlob;
 public class StringUtils {
 
     private StringUtils() {
-
     }
 
     /**
@@ -53,7 +52,7 @@ public class StringUtils {
      * Is blank string ?
      *
      * @param str the str
-     * @return boolean
+     * @return boolean boolean
      */
     public static boolean isBlank(String str) {
         int length;
@@ -73,7 +72,7 @@ public class StringUtils {
      * Is Not blank string ?
      *
      * @param str the str
-     * @return boolean
+     * @return boolean boolean
      */
     public static boolean isNotBlank(String str) {
         int length;
@@ -88,6 +87,34 @@ public class StringUtils {
             }
         }
         return false;
+    }
+
+    /**
+     * Equals boolean.
+     *
+     * @param str1 the str 1
+     * @param str2 the str 2
+     * @return the boolean
+     */
+    public static boolean equals(String str1, String str2){
+        if(isBlank(str1)){
+            return isBlank(str2);
+        }
+        return str1.equals(str2);
+    }
+
+    /**
+     * Equals ignore case boolean.
+     *
+     * @param str1 the str 1
+     * @param str2 the str 2
+     * @return the boolean
+     */
+    public static boolean equalsIgnoreCase(String str1, String str2){
+        if(isBlank(str1)){
+            return isBlank(str2);
+        }
+        return str1.equalsIgnoreCase(str2);
     }
 
     /**
@@ -139,7 +166,7 @@ public class StringUtils {
      * Object.toString()
      *
      * @param obj the obj
-     * @return string
+     * @return string string
      */
     public static String toString(Object obj){
         if (obj == null){

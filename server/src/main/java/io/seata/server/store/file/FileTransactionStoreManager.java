@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.store;
+package io.seata.server.store.file;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +31,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import io.seata.common.exception.StoreException;
+import io.seata.common.loader.LoadLevel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.model.GlobalStatus;
@@ -38,7 +40,13 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
-
+import io.seata.server.store.AbstractTransactionStoreManager;
+import io.seata.server.store.ReloadableStore;
+import io.seata.server.store.SessionStorable;
+import io.seata.server.store.StoreConfig;
+import io.seata.server.store.TransactionStoreManager;
+import io.seata.server.store.TransactionWriteFuture;
+import io.seata.server.store.TransactionWriteStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +55,8 @@ import org.slf4j.LoggerFactory;
  *
  * @author jimin.jm @alibaba-inc.com
  */
-public class FileTransactionStoreManager implements TransactionStoreManager {
+@LoadLevel(name = "file")
+public class FileTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager, ReloadableStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileTransactionStoreManager.class);
     private BlockingQueue<TransactionWriteFuture> transactionWriteFutureQueue
         = new LinkedBlockingQueue<TransactionWriteFuture>();
@@ -133,6 +142,26 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
         return false;
     }
 
+    /**
+     * Read session global session.
+     *
+     * @param transactionId the transaction id
+     * @return the global session
+     */
+    public GlobalSession readSession(Long transactionId){
+        throw new StoreException("unsupport for read from file, transactionId:" + transactionId);
+    }
+
+    @Override
+    public GlobalSession readSession(String xid) {
+        throw new StoreException("unsupport for read from file, xid:" + xid);
+    }
+
+    @Override
+    public List<GlobalSession> readSession(SessionCondition sessionCondition) {
+        throw new StoreException("unsupport for read from file");
+    }
+
     @Override
     public void shutdown() {
         if (null != fileWriteExecutor) {
@@ -152,7 +181,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
     }
 
     @Override
-    public List<TransactionWriteStore> readWriteStoreFromFile(int readSize, boolean isHistory) {
+    public List<TransactionWriteStore> readWriteStore(int readSize, boolean isHistory) {
         File file = null;
         long currentOffset = 0;
         if (isHistory) {
@@ -266,7 +295,9 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
      */
     class WriteDataFileRunnable implements Runnable {
 
-
+        /**
+         * The Wirete buffer.
+         */
         ByteBuffer wireteBuffer =  ByteBuffer.allocateDirect(MAX_WRITE_BUFFER_SIZE);
 
         @Override
@@ -360,18 +391,18 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
         private void saveHistory() throws IOException {
             try {
                 List<GlobalSession> globalSessionsOverMaxTimeout = sessionManager.findGlobalSessions(
-                    new SessionCondition(
-                        GlobalStatus.Begin, MAX_TRX_TIMEOUT_MILLS));
+                        new SessionCondition(
+                                GlobalStatus.Begin, MAX_TRX_TIMEOUT_MILLS));
                 if (CollectionUtils.isNotEmpty(globalSessionsOverMaxTimeout)) {
                     for (GlobalSession globalSession : globalSessionsOverMaxTimeout) {
                         TransactionWriteStore globalWriteStore = new TransactionWriteStore(globalSession,
-                            LogOperation.GLOBAL_ADD);
+                                LogOperation.GLOBAL_ADD);
                         writeDataFile(globalWriteStore.encode());
                         List<BranchSession> branchSessIonsOverMaXTimeout = globalSession.getSortedBranches();
                         if (null != branchSessIonsOverMaXTimeout) {
                             for (BranchSession branchSession : branchSessIonsOverMaXTimeout) {
                                 TransactionWriteStore branchWriteStore = new TransactionWriteStore(branchSession,
-                                    LogOperation.BRANCH_ADD);
+                                        LogOperation.BRANCH_ADD);
                                 writeDataFile(branchWriteStore.encode());
                             }
                         }
@@ -380,13 +411,12 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                 currFileChannel.force(true);
                 closeFile(currRaf);
                 Files.move(currDataFile.toPath(), new File(hisFullFileName).toPath(),
-                    StandardCopyOption.REPLACE_EXISTING);
+                        StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException exx) {
                 LOGGER.error("save history data file error," + exx.getMessage());
             } finally {
                 initFile(currFullFileName);
             }
-
         }
     }
 }

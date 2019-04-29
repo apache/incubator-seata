@@ -19,10 +19,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import io.seata.common.XID;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 
+import io.seata.server.session.file.FileBasedSessionManager;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
@@ -69,7 +71,7 @@ public class FileBasedSessionManagerTest {
     @Test(dataProvider = "globalSessionProvider")
     public void findGlobalSessionTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
-        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getTransactionId());
+        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
         Assert.assertNotNull(expected);
         Assert.assertEquals(expected.getTransactionId(), globalSession.getTransactionId());
         Assert.assertEquals(expected.getApplicationId(), globalSession.getApplicationId());
@@ -91,7 +93,7 @@ public class FileBasedSessionManagerTest {
         sessionManager.addGlobalSession(globalSession);
         globalSession.setStatus(GlobalStatus.Finished);
         sessionManager.updateGlobalSessionStatus(globalSession, GlobalStatus.Finished);
-        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getTransactionId());
+        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
         Assert.assertNotNull(expected);
         Assert.assertEquals(GlobalStatus.Finished, expected.getStatus());
         sessionManager.removeGlobalSession(globalSession);
@@ -107,9 +109,8 @@ public class FileBasedSessionManagerTest {
     public void removeGlobalSessionTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
         sessionManager.removeGlobalSession(globalSession);
-        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getTransactionId());
+        GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
         Assert.assertNull(expected);
-
     }
 
     /**
@@ -296,6 +297,10 @@ public class FileBasedSessionManagerTest {
     @DataProvider
     public static Object[][] globalSessionProvider() {
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+
+        String xid = XID.generateXID(globalSession.getTransactionId());
+        globalSession.setXid(xid);
+
         return new Object[][] {{globalSession}};
     }
 
@@ -319,6 +324,7 @@ public class FileBasedSessionManagerTest {
     @DataProvider
     public static Object[][] branchSessionProvider() {
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+        globalSession.setXid(XID.generateXID(globalSession.getTransactionId()));
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(1L);
@@ -327,6 +333,7 @@ public class FileBasedSessionManagerTest {
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
+
         return new Object[][] {{globalSession, branchSession}};
     }
 }

@@ -1,0 +1,2 @@
+io.seata.server.lock.db.DataBaseLockManagerImpl
+io.seata.server.lock.memory.MemoryLockManagerImpl
