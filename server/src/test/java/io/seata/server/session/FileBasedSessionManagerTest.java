@@ -189,7 +189,7 @@ public class FileBasedSessionManagerTest {
         for (GlobalSession globalSession : globalSessions) {
             sessionManager.addGlobalSession(globalSession);
         }
-        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin, 30 * 24 * 3600);
+        SessionCondition sessionCondition = new SessionCondition( 30 * 24 * 3600);
         Collection<GlobalSession> expectedGlobalSessions = sessionManager.findGlobalSessions(sessionCondition);
         Assert.assertNotNull(expectedGlobalSessions);
         Assert.assertEquals(2, expectedGlobalSessions.size());

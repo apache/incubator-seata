@@ -25,26 +25,26 @@ public class Protocols {
 	/**
 	 * sofa-rpc service
 	 */
-	public static short SOFA_RPC = 2;
+	public static final short SOFA_RPC = 2;
 
 	/**
 	 * dubbo service
 	 */
-	public static short DUBBO = 3;
+	public static final short DUBBO = 3;
 
 	/**
 	 * restful service
 	 */
-	public static short RESTFUL = 4;
+	public static final short RESTFUL = 4;
 
 	/**
 	 * local bean
 	 */
-	public static short IN_JVM = 5;
+	public static final short IN_JVM = 5;
 
 	/**
 	 * hsf service
 	 */
-	public static short HSF = 8;
+	public static final short HSF = 8;
 
 }
