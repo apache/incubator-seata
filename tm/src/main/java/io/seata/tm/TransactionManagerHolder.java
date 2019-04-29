@@ -15,6 +15,7 @@
  */
 package io.seata.tm;
 
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -56,6 +57,9 @@ public class TransactionManagerHolder {
      * @return the transaction manager
      */
     public static TransactionManager get() {
+        if (SingletonHolder.INSTANCE == null) {
+            throw new ShouldNeverHappenException("TransactionManager is NOT ready!");
+        }
         return SingletonHolder.INSTANCE;
     }
 
