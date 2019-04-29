@@ -348,7 +348,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             try {
                 connect(serverAddress);
             } catch (Exception e) {
-                LOGGER.error(FrameworkErrorCode.NetConnect.errCode,
+                LOGGER.error(FrameworkErrorCode.NetConnect.getErrCode(),
                     "can not connect to " + serverAddress + " cause:" + e.getMessage(), e);
             }
         }
