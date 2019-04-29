@@ -199,4 +199,9 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
 
     private void restore(TransactionWriteStore store) {
     }
+
+    @Override
+    public void destroy() {
+        transactionStoreManager.shutdown();
+    }
 }

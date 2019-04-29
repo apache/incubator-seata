@@ -16,7 +16,9 @@
 package io.seata.core.model;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Status of global transaction.
@@ -127,6 +129,7 @@ public enum GlobalStatus {
         this.code = code;
     }
 
+
     /**
      * Gets code.
      *
@@ -135,6 +138,8 @@ public enum GlobalStatus {
     public int getCode() {
         return code;
     }
+
+
 
     private static final Map<Integer, GlobalStatus> MAP = new HashMap<>(values().length);
 

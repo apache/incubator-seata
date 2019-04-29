@@ -118,6 +118,11 @@ public enum TransactionExceptionCode {
      *  Failed to lock global transaction exception code.
      */
     FailedLockGlobalTranscation,
+
+    /**
+     * FailedWriteSession
+     */
+    FailedWriteSession,
     ;
 
     private static final Map<Integer, TransactionExceptionCode> MAP = new HashMap<>(values().length);

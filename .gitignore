@@ -37,3 +37,4 @@ server/.root.*
 Thumbs.db
 *.orig
 *.class
+data*

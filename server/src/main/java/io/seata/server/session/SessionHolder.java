@@ -234,4 +234,11 @@ public class SessionHolder {
     public static GlobalSession findGlobalSession(Long transactionId) throws TransactionException {
         return getRootSessionManager().findGlobalSession(transactionId);
     }
+
+    public static void destory() {
+        ROOT_SESSION_MANAGER.destroy();
+        ASYNC_COMMITTING_SESSION_MANAGER.destroy();
+        RETRY_COMMITTING_SESSION_MANAGER.destroy();
+        RETRY_ROLLBACKING_SESSION_MANAGER.destroy();
+    }
 }
