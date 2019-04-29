@@ -34,7 +34,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -185,7 +184,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
             writeDataFileRunnable.putRequest(syncFlushRequest);
             syncFlushRequest.waitForFlush(MAX_WAIT_FOR_FLUSH_TIME_MILLS);
         } else {
-            writeDataFileRunnable.putRequest(new AsyncRequest(curFileNum, currFileChannel));
+            writeDataFileRunnable.putRequest(new AsyncFlushRequest(curFileNum, currFileChannel));
         }
     }
 
@@ -426,18 +425,29 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
     interface StoreRequest {
 
     }
-
-    class SyncFlushRequest implements StoreRequest {
-
+    abstract class AbstractFlushRequest implements StoreRequest{
         private final long curFileTrxNum;
 
         private final FileChannel curFileChannel;
 
+        protected AbstractFlushRequest(long curFileTrxNum, FileChannel curFileChannel) {
+            this.curFileTrxNum = curFileTrxNum;
+            this.curFileChannel = curFileChannel;
+        }
+        public long getCurFileTrxNum() {
+            return curFileTrxNum;
+        }
+
+        public FileChannel getCurFileChannel() {
+            return curFileChannel;
+        }
+    }
+    class SyncFlushRequest extends AbstractFlushRequest {
+
         private final CountDownLatch countDownLatch = new CountDownLatch(1);
 
         public SyncFlushRequest(long curFileTrxNum, FileChannel curFileChannel) {
-            this.curFileTrxNum = curFileTrxNum;
-            this.curFileChannel = curFileChannel;
+            super(curFileTrxNum, curFileChannel);
         }
 
 
@@ -452,34 +462,14 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                 LOGGER.error("Interrupted", e);
             }
         }
-
-        public long getCurFileTrxNum() {
-            return curFileTrxNum;
-        }
-
-        public FileChannel getCurFileChannel() {
-            return curFileChannel;
-        }
     }
 
-    class AsyncRequest implements StoreRequest {
+    class AsyncFlushRequest extends AbstractFlushRequest {
 
-        private final long curFileTrxNum;
-
-        private final FileChannel curFileChannel;
-
-        public AsyncRequest(long curFileTrxNum, FileChannel curFileChannel) {
-            this.curFileTrxNum = curFileTrxNum;
-            this.curFileChannel = curFileChannel;
+        public AsyncFlushRequest(long curFileTrxNum, FileChannel curFileChannel) {
+            super(curFileTrxNum, curFileChannel);
         }
 
-        public long getCurFileTrxNum() {
-            return curFileTrxNum;
-        }
-
-        public FileChannel getCurFileChannel() {
-            return curFileChannel;
-        }
     }
 
     class CloseFileRequest implements StoreRequest {
@@ -544,8 +534,8 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
             }
             if (storeRequest instanceof SyncFlushRequest) {
                 syncFlush((SyncFlushRequest) storeRequest);
-            } else if (storeRequest instanceof AsyncRequest) {
-                async((AsyncRequest) storeRequest);
+            } else if (storeRequest instanceof AsyncFlushRequest) {
+                async((AsyncFlushRequest) storeRequest);
             } else if (storeRequest instanceof CloseFileRequest) {
                 closeAndFlush((CloseFileRequest) storeRequest);
             }
@@ -558,7 +548,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
             closeFile(currRaf);
         }
 
-        private void async(AsyncRequest req) {
+        private void async(AsyncFlushRequest req) {
             if (req.getCurFileTrxNum() < FILE_FLUSH_NUM.get()) {
                 flushOnCondition(req.getCurFileChannel());
             }
