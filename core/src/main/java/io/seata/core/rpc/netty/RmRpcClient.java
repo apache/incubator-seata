@@ -313,7 +313,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
             }
             channelFromPool = nettyClientKeyPool.borrowObject(poolKeyMap.get(serverAddress));
         } catch (Exception exx) {
-            LOGGER.error(FrameworkErrorCode.RegistRM.errCode, "register RM failed.", exx);
+            LOGGER.error(FrameworkErrorCode.RegistRM.getErrCode(), "register RM failed.", exx);
             throw new FrameworkException("can not register RM,err:" + exx.getMessage());
         }
         return channelFromPool;
@@ -346,7 +346,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOGGER.error(FrameworkErrorCode.ExceptionCaught.errCode,
+        LOGGER.error(FrameworkErrorCode.ExceptionCaught.getErrCode(),
             NetUtil.toStringAddress(ctx.channel().remoteAddress()) + "connect exception. " + cause.getMessage(),
             cause);
         releaseChannel(ctx.channel(), getAddressFromChannel(ctx.channel()));

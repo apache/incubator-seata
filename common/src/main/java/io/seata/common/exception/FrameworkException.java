@@ -46,7 +46,7 @@ public class FrameworkException extends RuntimeException {
      * @param err the err
      */
     public FrameworkException(FrameworkErrorCode err) {
-        this(err.errMessage, err);
+        this(err.getErrMessage(), err);
     }
 
     /**

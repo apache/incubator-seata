@@ -363,12 +363,12 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                             try {
                                 dispatch(rpcMessage.getId(), ctx, rpcMessage.getBody());
                             } catch (Throwable th) {
-                                LOGGER.error(FrameworkErrorCode.NetDispatch.errCode, th.getMessage(), th);
+                                LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                             }
                         }
                     });
                 } catch (RejectedExecutionException e) {
-                    LOGGER.error(FrameworkErrorCode.ThreadPoolFull.errCode,
+                    LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
                         "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
                     if (allowDumpStack) {
                         String name = ManagementFactory.getRuntimeMXBean().getName();
@@ -399,12 +399,12 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                                 try {
                                     dispatch(rpcMessage.getId(), ctx, rpcMessage.getBody());
                                 } catch (Throwable th) {
-                                    LOGGER.error(FrameworkErrorCode.NetDispatch.errCode, th.getMessage(), th);
+                                    LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                                 }
                             }
                         });
                     } catch (RejectedExecutionException e) {
-                        LOGGER.error(FrameworkErrorCode.ThreadPoolFull.errCode,
+                        LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
                             "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
                     }
                 }
@@ -414,7 +414,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOGGER.error(FrameworkErrorCode.ExceptionCaught.errCode,
+        LOGGER.error(FrameworkErrorCode.ExceptionCaught.getErrCode(),
             ctx.channel() + " connect exception. " + cause.getMessage(),
             cause);
         try {

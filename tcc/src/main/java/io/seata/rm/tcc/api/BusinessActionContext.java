@@ -68,7 +68,7 @@ public class BusinessActionContext implements Serializable {
      * @return the branch id
      */
     public long getBranchId() {
-        return branchId!=null?Long.valueOf(branchId):-1;
+        return branchId != null ? Long.parseLong(branchId) : -1;
     }
 
     /**

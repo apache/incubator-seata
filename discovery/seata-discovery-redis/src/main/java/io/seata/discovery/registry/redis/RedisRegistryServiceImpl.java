@@ -74,7 +74,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         String serverAddr = seataConfig.getConfig(getRedisAddrFileKey());
         String[] serverArr = serverAddr.split(":");
         String host = serverArr[0];
-        int port = Integer.valueOf(serverArr[1]);
+        int port = Integer.parseInt(serverArr[1]);
         int db = seataConfig.getInt(getRedisDbFileKey());
         GenericObjectPoolConfig redisConfig = new GenericObjectPoolConfig();
         redisConfig.setTestOnBorrow(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.borrow", true));
