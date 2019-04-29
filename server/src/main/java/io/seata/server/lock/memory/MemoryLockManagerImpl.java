@@ -15,8 +15,8 @@
  */
 package io.seata.server.lock.memory;
 
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -26,8 +26,10 @@ import io.seata.common.XID;
 import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.store.LockDO;
 import io.seata.server.lock.AbstractLockManager;
 import io.seata.server.session.BranchSession;
 import org.slf4j.Logger;
@@ -45,8 +47,7 @@ public class MemoryLockManagerImpl extends AbstractLockManager {
 
     private static final int BUCKET_PER_TABLE = 128;
 
-    private static final ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<Integer, Map<String,
-        Long>>>>
+    private static final ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<Integer, Map<String, Long>>>>
         LOCK_MAP
         = new ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<Integer, Map<String, Long>>>>();
 
@@ -116,34 +117,6 @@ public class MemoryLockManagerImpl extends AbstractLockManager {
             }
         }
         return true;
-
-    }
-
-    @Override
-    public boolean unLock(BranchSession branchSession) throws TransactionException {
-        ConcurrentHashMap<Map<String, Long>, Set<String>> lockHolder = branchSession.getLockHolder();
-        if (lockHolder.size() == 0) {
-            return true;
-        }
-        Iterator<Map.Entry<Map<String, Long>, Set<String>>> it = lockHolder.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<Map<String, Long>, Set<String>> entry = it.next();
-            Map<String, Long> bucket = entry.getKey();
-            Set<String> keys = entry.getValue();
-            synchronized (bucket) {
-                for (String key : keys) {
-                    Long v = bucket.get(key);
-                    if (v == null) {
-                        continue;
-                    }
-                    if (v.longValue() == branchSession.getTransactionId()) {
-                        bucket.remove(key);
-                    }
-                }
-            }
-        }
-        lockHolder.clear();
-        return true;
     }
 
     @Override
@@ -186,17 +159,12 @@ public class MemoryLockManagerImpl extends AbstractLockManager {
     }
 
     @Override
-    public void cleanAllLocks() throws TransactionException {
-        LOCK_MAP.clear();
-    }
-
-    @Override
-    public boolean releaseLock(BranchSession branchSession) throws TransactionException {
+    public boolean unLock(BranchSession branchSession) throws TransactionException {
         ConcurrentHashMap<Map<String, Long>, Set<String>> lockHolder = branchSession.getLockHolder();
         if (lockHolder.size() == 0) {
             return true;
         }
-        Iterator<Entry<Map<String, Long>, Set<String>>> it = lockHolder.entrySet().iterator();
+        Iterator<Map.Entry<Map<String, Long>, Set<String>>> it = lockHolder.entrySet().iterator();
         while (it.hasNext()) {
             Map.Entry<Map<String, Long>, Set<String>> entry = it.next();
             Map<String, Long> bucket = entry.getKey();
@@ -216,4 +184,10 @@ public class MemoryLockManagerImpl extends AbstractLockManager {
         lockHolder.clear();
         return true;
     }
+
+    @Override
+    public void cleanAllLocks() throws TransactionException {
+        LOCK_MAP.clear();
+    }
+
 }

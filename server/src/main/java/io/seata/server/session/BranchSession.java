@@ -15,12 +15,6 @@
  */
 package io.seata.server.session;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.seata.common.util.CompressUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -30,6 +24,12 @@ import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The type Branch session.
@@ -317,7 +317,6 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         ByteBuffer byteBuffer = byteBufferThreadLocal.get();
         //recycle
         byteBuffer.clear();
-
 
         byteBuffer.putLong(transactionId);
         byteBuffer.putLong(branchId);
