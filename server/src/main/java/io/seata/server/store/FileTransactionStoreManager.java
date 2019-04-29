@@ -32,14 +32,8 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
@@ -513,9 +507,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
      */
     class WriteDataFileRunnable implements Runnable {
 
-        private volatile List<StoreRequest> requestsWrite = new ArrayList<>();
-
-        private volatile List<StoreRequest> requestsRead = new ArrayList<>();
+        private LinkedBlockingQueue<StoreRequest> storeRequests = new LinkedBlockingQueue<>();
 
         private volatile AtomicBoolean hasNotified = new AtomicBoolean(false);
 
@@ -529,51 +521,43 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
          * @param request
          */
         public synchronized void putRequest(final StoreRequest request) {
-            synchronized (this.requestsWrite) {
-                this.requestsWrite.add(request);
-            }
-            if (hasNotified.compareAndSet(false, true)) {
-                waitPoint.release(); // notify
-            }
+            storeRequests.add(request);
         }
 
-        private void swapRequests() {
-            List<StoreRequest> tmp = this.requestsWrite;
-            this.requestsWrite = this.requestsRead;
-            this.requestsRead = tmp;
-        }
 
         @Override
         public void run() {
             while (!stopping) {
                 try {
-                    this.waitForRunning(MAX_WAIT_TIME_MILLS);
-                    this.doCommit();
+                    StoreRequest storeRequest = storeRequests.poll(MAX_WAIT_TIME_MILLS, TimeUnit.MILLISECONDS);
+                    handleStoreRequest(storeRequest);
                 } catch (Exception exx) {
-                    LOGGER.error(exx.getMessage());
+                    LOGGER.error("write file error", exx.getMessage());
                 }
             }
-            // lastSwap clear the rest of request
-            this.swapRequests();
-            this.doCommit();
+            handleRestRequest();
         }
 
-        private void doCommit() {
-            synchronized (this.requestsRead) {
-                if (!this.requestsRead.isEmpty()) {
-                    for (StoreRequest req : this.requestsRead) {
-                        if (req instanceof SyncFlushRequest) {
-                            syncFlush((SyncFlushRequest) req);
-                        } else if (req instanceof AsyncRequest) {
-                            async((AsyncRequest) req);
-                        } else if (req instanceof CloseFileRequest) {
-                            closeAndFlush((CloseFileRequest) req);
-                        }
-                    }
-                    this.requestsRead.clear();
-                } else {
-                    flushOnCondition(currFileChannel);
-                }
+        /**
+         * handle the rest requests when stopping is true
+         */
+        private void handleRestRequest() {
+            int remainNums = storeRequests.remainingCapacity();
+            for (int i = 0; i < remainNums; i++) {
+                handleStoreRequest(storeRequests.poll());
+            }
+        }
+
+        private void handleStoreRequest(StoreRequest storeRequest) {
+            if (storeRequest == null){
+                flushOnCondition(currFileChannel);
+            }
+            if (storeRequest instanceof SyncFlushRequest) {
+                syncFlush((SyncFlushRequest) storeRequest);
+            } else if (storeRequest instanceof AsyncRequest) {
+                async((AsyncRequest) storeRequest);
+            } else if (storeRequest instanceof CloseFileRequest) {
+                closeAndFlush((CloseFileRequest) storeRequest);
             }
         }
 
@@ -599,22 +583,6 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
             // notify
             req.wakeupCustomer();
         }
-
-        private void waitForRunning(int maxWaitTime) throws InterruptedException {
-            if (hasNotified.compareAndSet(true, false)) {
-                this.swapRequests();
-                return;
-            }
-            try {
-                waitPoint.tryAcquire(maxWaitTime, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e) {
-                LOGGER.error("Interrupted", e);
-            } finally {
-                hasNotified.set(false);
-                this.swapRequests();
-            }
-        }
-
 
         private void flushOnCondition(FileChannel fileChannel) {
             if (FLUSH_DISK_MODE == FlushDiskMode.SYNC_MODEL) {
