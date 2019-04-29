@@ -32,6 +32,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -512,9 +513,9 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
      */
     class WriteDataFileRunnable implements Runnable {
 
-        private volatile List<StoreRequest> requestsWrite = new ArrayList<StoreRequest>();
+        private volatile List<StoreRequest> requestsWrite = new LinkedList<>();
 
-        private volatile List<StoreRequest> requestsRead = new ArrayList<StoreRequest>();
+        private volatile List<StoreRequest> requestsRead = new LinkedList<>();
 
         private volatile AtomicBoolean hasNotified = new AtomicBoolean(false);
 
