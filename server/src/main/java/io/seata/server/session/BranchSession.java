@@ -17,7 +17,6 @@ package io.seata.server.session;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,10 +40,10 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BranchSession.class);
 
-    private static final int MAX_BRANCH_SESSION_SIZE =  StoreConfig.getMaxBranchSessionSize();
+    private static final int MAX_BRANCH_SESSION_SIZE = StoreConfig.getMaxBranchSessionSize();
 
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
-            MAX_BRANCH_SESSION_SIZE));
+        MAX_BRANCH_SESSION_SIZE));
 
     private String xid;
 
@@ -293,23 +292,25 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes, xidBytes);
 
-
-        if (size > MAX_BRANCH_SESSION_SIZE){
-            if (lockKeyBytes == null){
-                throw new RuntimeException("branch session size exceeded, size : " + size + " maxBranchSessionSize : " + MAX_BRANCH_SESSION_SIZE);
+        if (size > MAX_BRANCH_SESSION_SIZE) {
+            if (lockKeyBytes == null) {
+                throw new RuntimeException("branch session size exceeded, size : " + size + " maxBranchSessionSize : "
+                    + MAX_BRANCH_SESSION_SIZE);
             }
             // try compress lockkey
             try {
                 size -= lockKeyBytes.length;
                 lockKeyBytes = CompressUtil.compress(lockKeyBytes);
-            }catch (IOException e){
+            } catch (IOException e) {
                 LOGGER.error("compress lockKey error", e);
-            }finally {
+            } finally {
                 size += lockKeyBytes.length;
             }
 
-            if (size > MAX_BRANCH_SESSION_SIZE){
-                throw new RuntimeException("compress branch session size exceeded, compressSize : " + size + " maxBranchSessionSize : " + MAX_BRANCH_SESSION_SIZE);
+            if (size > MAX_BRANCH_SESSION_SIZE) {
+                throw new RuntimeException(
+                    "compress branch session size exceeded, compressSize : " + size + " maxBranchSessionSize : "
+                        + MAX_BRANCH_SESSION_SIZE);
             }
         }
 
@@ -395,13 +396,13 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         if (lockKeyLen > 0) {
             byte[] byLockKey = new byte[lockKeyLen];
             byteBuffer.get(byLockKey);
-            if (CompressUtil.isCompressData(byLockKey)){
+            if (CompressUtil.isCompressData(byLockKey)) {
                 try {
                     this.lockKey = new String(CompressUtil.uncompress(byLockKey));
-                }catch (IOException e){
+                } catch (IOException e) {
                     throw new RuntimeException("uncompress lockKey error", e);
                 }
-            }else {
+            } else {
                 this.lockKey = new String(byLockKey);
             }
 
