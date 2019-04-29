@@ -13,20 +13,32 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.registery.etcd;
-
-import io.seata.common.loader.LoadLevel;
-import io.seata.discovery.registry.RegistryProvider;
-import io.seata.discovery.registry.RegistryService;
+package io.seata.server.store;
 
 /**
- * @author xingfudeshi@gmail.com
- * @date 2019/04/18
+ *
+ * @author lizhao
  */
-@LoadLevel(name = "Etcd3", order = 1)
-public class EtcdRegistryProvider implements RegistryProvider {
-    @Override
-    public RegistryService provide() {
-        return EtcdRegistryServiceImpl.getInstance();
+public enum  FlushDiskMode {
+    /**
+     * sync flush disk
+     */
+    SYNC_MODEL("sync"),
+    /**
+     * async flush disk
+     */
+    ASYNC_MODEL("async");
+
+    private String modeStr;
+
+    FlushDiskMode(String modeStr) {
+        this.modeStr = modeStr;
+    }
+
+    public static FlushDiskMode findDiskMode(String modeStr) {
+        if (SYNC_MODEL.modeStr.equals(modeStr)){
+            return SYNC_MODEL;
+        }
+        return ASYNC_MODEL;
     }
 }
