@@ -25,6 +25,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.typesafe.config.ConfigException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigFuture.ConfigOperation;
 
@@ -186,8 +187,13 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
                     return;
                 }
                 if (configFuture.getOperation() == ConfigOperation.GET) {
-                    String result = CONFIG.getString(configFuture.getDataId());
-                    configFuture.setResult(result == null ? configFuture.getContent() : result);
+                    String result;
+                    try {
+                        result = CONFIG.getString(configFuture.getDataId());
+                    } catch (ConfigException.Missing missing){
+                        result = configFuture.getContent();
+                    }
+                    configFuture.setResult(result);
                 } else if (configFuture.getOperation() == ConfigOperation.PUT) {
                     //todo
                     configFuture.setResult(Boolean.TRUE);
