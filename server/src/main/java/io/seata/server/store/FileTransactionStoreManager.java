@@ -520,7 +520,6 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
 
         private final Semaphore waitPoint = new Semaphore(1);
 
-        private long time = 0;
 
         /**
          * two synchornized
