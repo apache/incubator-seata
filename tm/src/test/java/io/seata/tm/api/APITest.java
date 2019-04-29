@@ -21,6 +21,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.DefaultTransactionManager;
 
+import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.After;
 import org.junit.Assert;
@@ -41,7 +42,7 @@ public class APITest {
      */
     @BeforeClass
     public static void init() {
-        DefaultTransactionManager.set(new TransactionManager() {
+        TransactionManagerHolder.set(new TransactionManager() {
             @Override
             public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
                 throws TransactionException {
