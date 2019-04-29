@@ -51,7 +51,7 @@ public class DefaultSessionManager extends AbstractSessionManager {
         transactionStoreManager = new AbstractTransactionStoreManager() {
             @Override
             public boolean writeSession(LogOperation logOperation, SessionStorable session) {
-                return false;
+                return true;
             }
         };
     }
@@ -91,4 +91,8 @@ public class DefaultSessionManager extends AbstractSessionManager {
         return found;
     }
 
+    @Override
+    public void destroy() {
+        transactionStoreManager.shutdown();
+    }
 }

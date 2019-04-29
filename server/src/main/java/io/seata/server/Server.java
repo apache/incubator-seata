@@ -24,6 +24,7 @@ import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.core.rpc.netty.RpcServer;
+import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.session.SessionHolder;
 
@@ -75,6 +76,8 @@ public class Server {
         DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
         coordinator.init();
         rpcServer.setHandler(coordinator);
+        // register ShutdownHook
+        ShutdownHook.getInstance().addDisposable(coordinator);
 
         UUIDGenerator.init(1);
 

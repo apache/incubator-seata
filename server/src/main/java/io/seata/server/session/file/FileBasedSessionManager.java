@@ -223,4 +223,9 @@ public class FileBasedSessionManager extends DefaultSessionManager implements Re
 
     private void restore(TransactionWriteStore store) {
     }
+
+    @Override
+    public void destroy() {
+        transactionStoreManager.shutdown();
+    }
 }

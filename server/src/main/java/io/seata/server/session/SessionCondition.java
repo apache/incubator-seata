@@ -17,6 +17,8 @@ package io.seata.server.session;
 
 import io.seata.core.model.GlobalStatus;
 
+import java.util.Set;
+
 /**
  * The type Session condition.
  *
@@ -70,11 +72,9 @@ public class SessionCondition {
     /**
      * Instantiates a new Session condition.
      *
-     * @param status             the status
      * @param overTimeAliveMills the over time alive mills
      */
-    public SessionCondition(GlobalStatus status, long overTimeAliveMills) {
-        this.status = status;
+    public SessionCondition( long overTimeAliveMills) {
         this.overTimeAliveMills = overTimeAliveMills;
     }
 

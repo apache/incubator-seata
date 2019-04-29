@@ -21,6 +21,7 @@ store.file.dir=file_store/data
 store.file.max-branch-session-size=16384
 store.file.max-global-session-size=512
 store.file.file-write-buffer-cache-size=16384
+store.file.flush-disk-mode=async
 store.file.session.reload.read_size=100
 store.db.db-type=mysql
 store.db.url=jdbc:mysql://localhost:3306/fescar_demo

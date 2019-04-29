@@ -15,9 +15,17 @@
  */
 package io.seata.server.session;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager.LogOperation;
 import org.slf4j.Logger;
@@ -63,7 +71,13 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_ADD);
         }
-        transactionStoreManager.writeSession(LogOperation.GLOBAL_ADD, session);
+        writeSession(LogOperation.GLOBAL_ADD, session);
+    }
+
+
+    @Override
+    public GlobalSession findGlobalSession(Long transactionId) throws TransactionException {
+        return sessionMap.get(transactionId);
     }
 
     @Override
@@ -71,7 +85,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_UPDATE);
         }
-        transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
+        writeSession(LogOperation.GLOBAL_UPDATE, session);
     }
 
     @Override
@@ -79,7 +93,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_REMOVE);
         }
-        transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, session);
+        writeSession(LogOperation.GLOBAL_REMOVE, session);
     }
 
     @Override
@@ -87,7 +101,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_ADD);
         }
-        transactionStoreManager.writeSession(LogOperation.BRANCH_ADD, branchSession);
+        writeSession(LogOperation.BRANCH_ADD, branchSession);
     }
 
     @Override
@@ -96,7 +110,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.GLOBAL_ADD);
         }
-        transactionStoreManager.writeSession(LogOperation.BRANCH_UPDATE, branchSession);
+        writeSession(LogOperation.BRANCH_UPDATE, branchSession);
     }
 
     @Override
@@ -105,8 +119,24 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.GLOBAL_ADD);
         }
-        transactionStoreManager.writeSession(LogOperation.BRANCH_REMOVE, branchSession);
+        writeSession(LogOperation.BRANCH_REMOVE, branchSession);
 
+    }
+
+    @Override
+    public Collection<GlobalSession> allSessions() {
+        return sessionMap.values();
+    }
+
+    @Override
+    public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
+        List<GlobalSession> found = new ArrayList<>();
+        for (GlobalSession globalSession : sessionMap.values()) {
+                if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
+                    found.add(globalSession);
+                }
+        }
+        return found;
     }
 
     @Override
@@ -145,6 +175,10 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
         removeGlobalSession(globalSession);
     }
 
+    private void writeSession(LogOperation logOperation, SessionStorable sessionStorable) throws TransactionException{
+        if (!transactionStoreManager.writeSession(logOperation, sessionStorable)) {
+            throw new TransactionException(TransactionExceptionCode.FailedWriteSession);
+        }
     /**
      * Sets transaction store manager.
      *
