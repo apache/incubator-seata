@@ -18,7 +18,6 @@ package io.seata.rm.datasource.undo;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
-import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.ConnectionContext;
@@ -239,24 +238,34 @@ public final class UndoLogManager {
      * @param conn
      */
     public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, int limitSize, Connection conn) throws SQLException {
-        if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
-            return;
-        }
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize,limitSize);
-        PreparedStatement deletePST = conn.prepareStatement(batchDeleteSql);
-        int paramsIndex = 1;
-        for (Long branchId : branchIds) {
-            deletePST.setLong(paramsIndex++,branchId);
+        PreparedStatement deletePST = null;
+        try {
+            deletePST = conn.prepareStatement(batchDeleteSql);
+            int paramsIndex = 1;
+            for (Long branchId : branchIds) {
+                deletePST.setLong(paramsIndex++,branchId);
+            }
+            for (String xid: xids){
+                deletePST.setString(paramsIndex++, xid);
+            }
+            int deleteRows = deletePST.executeUpdate();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("batch delete undo log size " + deleteRows);
+            }
+        }catch (Exception e){
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
+            }
+            throw (SQLException) e;
+        } finally {
+            if (deletePST != null) {
+                deletePST.close();
+            }
         }
-        for (String xid: xids){
-            deletePST.setString(paramsIndex++, xid);
-        }
-        int deleteRows = deletePST.executeUpdate();
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("batch delete undo log size " + deleteRows);
-        }
+
     }
 
     protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize,int limitSize) {
@@ -291,10 +300,22 @@ public final class UndoLogManager {
      * @throws SQLException the sql exception
      */
     public static void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
-        PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
-        deletePST.setLong(1, branchId);
-        deletePST.setString(2, xid);
-        deletePST.executeUpdate();
+        PreparedStatement deletePST = null;
+        try {
+            deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
+            deletePST.setLong(1, branchId);
+            deletePST.setString(2, xid);
+            deletePST.executeUpdate();
+        }catch (Exception e){
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
+            }
+            throw (SQLException) e;
+        } finally {
+            if (deletePST != null) {
+                deletePST.close();
+            }
+        }
     }
 
     private static void insertUndoLogWithNormal(String xid, long branchID,
@@ -318,11 +339,10 @@ public final class UndoLogManager {
             pst.setInt(4, state.getValue());
             pst.executeUpdate();
         } catch (Exception e) {
-            if (e instanceof SQLException) {
-                throw (SQLException)e;
-            } else {
-                throw new SQLException(e);
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
             }
+            throw (SQLException) e;
         } finally {
             if (pst != null) {
                 pst.close();
