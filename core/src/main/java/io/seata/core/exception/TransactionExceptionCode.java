@@ -114,6 +114,10 @@ public enum TransactionExceptionCode {
      */
     //
     FailedToAddBranch,
+    /**
+     *  Failed to lock global transaction exception code.
+     */
+    FailedLockGlobalTranscation,
 
     /**
      * FailedWriteSession

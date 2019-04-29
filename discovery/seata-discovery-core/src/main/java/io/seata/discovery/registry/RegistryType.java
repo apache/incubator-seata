@@ -49,10 +49,13 @@ public enum RegistryType {
      */
     Consul,
     /**
+     * Etcd3 registry type
+     */
+    Etcd3,
+    /**
      * Sofa registry type
      */
     Sofa;
-
 
     /**
      * Gets type.
@@ -73,6 +76,8 @@ public enum RegistryType {
             return ZK;
         } else if (Consul.name().equalsIgnoreCase(name)) {
             return Consul;
+        } else if (Etcd3.name().equalsIgnoreCase(name)) {
+            return Etcd3;
         } else if (Sofa.name().equalsIgnoreCase(name)) {
             return Sofa;
         } else {
