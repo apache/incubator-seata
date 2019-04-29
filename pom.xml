@@ -112,6 +112,9 @@
         <eureka-clients.version>1.9.5</eureka-clients.version>
         <consul-clients.version>1.4.2</consul-clients.version>
         <nacos-client.version>0.9.1</nacos-client.version>
+        <etcd-client-v3.version>0.3.0</etcd-client-v3.version>
+        <testcontainers.version>1.11.2</testcontainers.version>
+        <guava.version>27.0.1-jre</guava.version>
         <javax-inject.version>1</javax-inject.version>
         <archaius-core.version>0.7.6</archaius-core.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
@@ -224,6 +227,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>seata-discovery-nacos</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>seata-discovery-etcd3</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -375,6 +383,26 @@
                 <groupId>com.ecwid.consul</groupId>
                 <artifactId>consul-api</artifactId>
                 <version>${consul-clients.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.etcd</groupId>
+                <artifactId>jetcd-core</artifactId>
+                <version>${etcd-client-v3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.etcd</groupId>
+                <artifactId>jetcd-launcher</artifactId>
+                <version>${etcd-client-v3.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers</artifactId>
+                <version>${testcontainers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
             <dependency>
                 <groupId>javax.inject</groupId>

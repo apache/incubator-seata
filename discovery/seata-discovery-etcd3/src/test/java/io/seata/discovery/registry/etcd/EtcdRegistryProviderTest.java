@@ -13,38 +13,26 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.tcc.remoting;
+
+package io.seata.discovery.registry.etcd;
+
+import io.seata.discovery.registery.etcd.EtcdRegistryProvider;
+import io.seata.discovery.registery.etcd.EtcdRegistryServiceImpl;
+import org.junit.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * remoting protocols enum
- *
- * @author zhangsen
+ * @author xingfudeshi@gmail.com
+ * @date 2019/04/26
+ * the type etcd registry provider test
  */
-public class Protocols {
-
-	/**
-	 * sofa-rpc service
-	 */
-	public static final short SOFA_RPC = 2;
-
-	/**
-	 * dubbo service
-	 */
-	public static final short DUBBO = 3;
-
-	/**
-	 * restful service
-	 */
-	public static final short RESTFUL = 4;
-
-	/**
-	 * local bean
-	 */
-	public static final short IN_JVM = 5;
-
-	/**
-	 * hsf service
-	 */
-	public static final short HSF = 8;
-
+public class EtcdRegistryProviderTest {
+    /**
+     * test provide
+     */
+    @Test
+    public void testProvide() {
+        assertThat(new EtcdRegistryProvider().provide()).isInstanceOf(EtcdRegistryServiceImpl.class);
+    }
 }
