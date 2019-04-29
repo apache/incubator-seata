@@ -122,9 +122,6 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
      * Init.
      */
     public void init() {
-        //register shutdownHook
-        ShutdownHook.getInstance().addDisposable(this);
-
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
