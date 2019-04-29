@@ -426,9 +426,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
                 + 2 // byTxNameBytes.length
                 + 8 // beginTime
                 + 1 // statusCode
-            + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
-            + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
-            + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
+                + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
+                + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
+                + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
         return size;
     }
 
