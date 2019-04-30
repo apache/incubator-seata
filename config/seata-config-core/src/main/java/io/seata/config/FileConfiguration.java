@@ -201,6 +201,7 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
                     }
                 } catch (Exception e){
                     setFailResult(configFuture);
+                    LOGGER.warn("Could not found property {}, try to use default value instead.", configFuture.getDataId());
                 }
             }
         }
