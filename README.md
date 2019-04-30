@@ -118,7 +118,7 @@ Please follow the [template](https://github.com/seata/seata/blob/develop/.github
 
 ## Contributing
 
-Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING](./CONTRIBUTING.md) about how to contribute to this project.
+Contributors are welcomed to join the SEATA project. Please check [CONTRIBUTING](./CONTRIBUTING.md) about how to contribute to this project.
 
 
 ## Contact
