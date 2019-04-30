@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package io.seata.server.session;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 
 import io.seata.core.model.BranchStatus;
@@ -178,7 +179,7 @@ public class DefaultSessionManagerTest {
         for (GlobalSession globalSession : globalSessions) {
             sessionManager.addGlobalSession(globalSession);
         }
-        SessionCondition sessionCondition = new SessionCondition(GlobalStatus.Begin, 30 * 24 * 3600);
+        SessionCondition sessionCondition = new SessionCondition( 30 * 24 * 3600);
         Collection<GlobalSession> expectedGlobalSessions = sessionManager.findGlobalSessions(sessionCondition);
         Assert.assertNotNull(expectedGlobalSessions);
         Assert.assertEquals(2, expectedGlobalSessions.size());

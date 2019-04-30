@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.core.rpc.netty;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -194,7 +193,8 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
                     LOGGER.info("channel" + ctx.channel() + " read idle.");
                 }
                 try {
-                    nettyClientKeyPool.invalidateObject(poolKeyMap.get(ctx.channel().remoteAddress()), ctx.channel());
+                    String serverAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
+                    nettyClientKeyPool.invalidateObject(poolKeyMap.get(serverAddress), ctx.channel());
                 } catch (Exception exx) {
                     LOGGER.error(exx.getMessage());
                 } finally {
@@ -370,7 +370,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOGGER.error(FrameworkErrorCode.ExceptionCaught.errCode,
+        LOGGER.error(FrameworkErrorCode.ExceptionCaught.getErrCode(),
             NetUtil.toStringAddress(ctx.channel().remoteAddress()) + "connect exception. " + cause.getMessage(), cause);
         releaseChannel(ctx.channel(), getAddressFromChannel(ctx.channel()));
         if (LOGGER.isInfoEnabled()) {

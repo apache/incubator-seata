@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.rm.datasource.exec;
 
 import java.sql.PreparedStatement;
@@ -142,7 +141,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         List<Field> pkRows = beforeImage.pkRows();
         selectSQLAppender.append(
-            " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(pkRows) + " FOR UPDATE");
+            " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(pkRows));
         String selectSQL = selectSQLAppender.toString();
 
         TableRecords afterImage = null;

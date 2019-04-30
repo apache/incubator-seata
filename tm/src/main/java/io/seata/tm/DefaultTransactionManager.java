@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.tm;
 
 import java.util.concurrent.TimeoutException;
@@ -40,32 +39,6 @@ import io.seata.core.rpc.netty.TmRpcClient;
  * @author sharajava
  */
 public class DefaultTransactionManager implements TransactionManager {
-
-    private static class SingletonHolder {
-        private static TransactionManager INSTANCE = new DefaultTransactionManager();
-    }
-
-    /**
-     * Get transaction manager.
-     *
-     * @return the transaction manager
-     */
-    public static TransactionManager get() {
-        return SingletonHolder.INSTANCE;
-    }
-
-    /**
-     * Set a TM instance.
-     *
-     * @param mock commonly used for test mocking
-     */
-    public static void set(TransactionManager mock) {
-        SingletonHolder.INSTANCE = mock;
-    }
-
-    private DefaultTransactionManager() {
-
-    }
 
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)

@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,12 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.server.session;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,10 +40,10 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BranchSession.class);
 
-    private static final int MAX_BRANCH_SESSION_SIZE =  StoreConfig.getMaxBranchSessionSize();
+    private static final int MAX_BRANCH_SESSION_SIZE = StoreConfig.getMaxBranchSessionSize();
 
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
-            MAX_BRANCH_SESSION_SIZE));
+        MAX_BRANCH_SESSION_SIZE));
 
     private long transactionId;
 
@@ -256,28 +254,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public boolean unlock() throws TransactionException {
-        if (lockHolder.size() == 0) {
-            return true;
-        }
-        Iterator<Map.Entry<Map<String, Long>, Set<String>>> it = lockHolder.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<Map<String, Long>, Set<String>> entry = it.next();
-            Map<String, Long> bucket = entry.getKey();
-            Set<String> keys = entry.getValue();
-            synchronized (bucket) {
-                for (String key : keys) {
-                    Long v = bucket.get(key);
-                    if (v == null) {
-                        continue;
-                    }
-                    if (v.longValue() == getTransactionId()) {
-                        bucket.remove(key);
-                    }
-                }
-            }
-        }
-        lockHolder.clear();
-        return true;
+        return LockManagerFactory.get().releaseLock(this);
     }
 
     @Override
@@ -293,30 +270,31 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes);
 
-
-        if (size > MAX_BRANCH_SESSION_SIZE){
-            if (lockKeyBytes == null){
-                throw new RuntimeException("branch session size exceeded, size : " + size + " maxBranchSessionSize : " + MAX_BRANCH_SESSION_SIZE);
+        if (size > MAX_BRANCH_SESSION_SIZE) {
+            if (lockKeyBytes == null) {
+                throw new RuntimeException("branch session size exceeded, size : " + size + " maxBranchSessionSize : "
+                    + MAX_BRANCH_SESSION_SIZE);
             }
             // try compress lockkey
             try {
                 size -= lockKeyBytes.length;
                 lockKeyBytes = CompressUtil.compress(lockKeyBytes);
-            }catch (IOException e){
+            } catch (IOException e) {
                 LOGGER.error("compress lockKey error", e);
-            }finally {
+            } finally {
                 size += lockKeyBytes.length;
             }
 
-            if (size > MAX_BRANCH_SESSION_SIZE){
-                throw new RuntimeException("compress branch session size exceeded, compressSize : " + size + " maxBranchSessionSize : " + MAX_BRANCH_SESSION_SIZE);
+            if (size > MAX_BRANCH_SESSION_SIZE) {
+                throw new RuntimeException(
+                    "compress branch session size exceeded, compressSize : " + size + " maxBranchSessionSize : "
+                        + MAX_BRANCH_SESSION_SIZE);
             }
         }
 
         ByteBuffer byteBuffer = byteBufferThreadLocal.get();
         //recycle
         byteBuffer.clear();
-
 
         byteBuffer.putLong(transactionId);
         byteBuffer.putLong(branchId);
@@ -359,16 +337,16 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     private int calBranchSessionSize(byte[] resourceIdBytes, byte[] lockKeyBytes, byte[] clientIdBytes,
                                      byte[] applicationDataBytes) {
         final int size = 8 // trascationId
-                + 8 // branchId
-                + 4 // resourceIdBytes.length
-                + 4 // lockKeyBytes.length
-                + 2 // clientIdBytes.length
-                + 4 // applicationDataBytes.length
-                + 1 // statusCode
-                + (resourceIdBytes == null ? 0 : resourceIdBytes.length)
-                + (lockKeyBytes == null ? 0 : lockKeyBytes.length)
-                + (clientIdBytes == null ? 0 : clientIdBytes.length)
-                + (applicationDataBytes == null ? 0 : applicationDataBytes.length);
+            + 8 // branchId
+            + 4 // resourceIdBytes.length
+            + 4 // lockKeyBytes.length
+            + 2 // clientIdBytes.length
+            + 4 // applicationDataBytes.length
+            + 1 // statusCode
+            + (resourceIdBytes == null ? 0 : resourceIdBytes.length)
+            + (lockKeyBytes == null ? 0 : lockKeyBytes.length)
+            + (clientIdBytes == null ? 0 : clientIdBytes.length)
+            + (applicationDataBytes == null ? 0 : applicationDataBytes.length);
         return size;
     }
 
@@ -387,13 +365,13 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
         if (lockKeyLen > 0) {
             byte[] byLockKey = new byte[lockKeyLen];
             byteBuffer.get(byLockKey);
-            if (CompressUtil.isCompressData(byLockKey)){
+            if (CompressUtil.isCompressData(byLockKey)) {
                 try {
                     this.lockKey = new String(CompressUtil.uncompress(byLockKey));
-                }catch (IOException e){
+                } catch (IOException e) {
                     throw new RuntimeException("uncompress lockKey error", e);
                 }
-            }else {
+            } else {
                 this.lockKey = new String(byLockKey);
             }
 

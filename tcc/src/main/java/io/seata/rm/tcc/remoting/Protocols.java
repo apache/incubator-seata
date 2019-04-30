@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,10 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.rm.tcc.remoting;
-
-import io.seata.common.exception.FrameworkException;
 
 /**
  * remoting protocols enum
@@ -28,26 +25,26 @@ public class Protocols {
 	/**
 	 * sofa-rpc service
 	 */
-	public static short SOFA_RPC = 2;
+	public static final short SOFA_RPC = 2;
 
 	/**
 	 * dubbo service
 	 */
-	public static short DUBBO = 3;
+	public static final short DUBBO = 3;
 
 	/**
 	 * restful service
 	 */
-	public static short RESTFUL = 4;
+	public static final short RESTFUL = 4;
 
 	/**
 	 * local bean
 	 */
-	public static short IN_JVM = 5;
+	public static final short IN_JVM = 5;
 
 	/**
 	 * hsf service
 	 */
-	public static short HSF = 8;
+	public static final short HSF = 8;
 
 }

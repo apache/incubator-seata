@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,14 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.core.protocol.transaction;
 
 import java.nio.ByteBuffer;
 
-import io.seata.core.model.BranchType;
-
 import io.netty.buffer.ByteBuf;
+import io.seata.core.model.BranchType;
 
 /**
  * The type Abstract branch end request.
@@ -202,6 +200,7 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
         int leftLen = in.readableBytes();
         int read = 0;
         int xidLen = in.readShort();
+        leftLen -= 2;
         if (xidLen > 0) {
             if (leftLen < xidLen) {
                 return false;
@@ -217,6 +216,7 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
         leftLen--;
 
         int resourceIdLen = in.readShort();
+        leftLen -= 2;
         if (resourceIdLen > 0) {
             if (leftLen < resourceIdLen) {
                 return false;
@@ -228,6 +228,7 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
         }
 
         int applicationDataLen = in.readInt();
+        leftLen -= 4;
         if (applicationDataLen > 0) {
             if (leftLen < applicationDataLen) {
                 return false;

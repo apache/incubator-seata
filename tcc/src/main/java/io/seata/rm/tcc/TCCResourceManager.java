@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.rm.tcc;
 
 import com.alibaba.fastjson.JSON;
@@ -94,10 +93,12 @@ public class TCCResourceManager extends AbstractResourceManager {
 			BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId, applicationData);
 			Object ret = commitMethod.invoke(targetTCCBean, businessActionContext);
 			LOGGER.info("TCC resource commit result :" + ret + ", xid:" + xid + ", branchId:" + branchId + ", resourceId:" + resourceId);
-			if(ret != null && ret instanceof TwoPhaseResult){
-				result = ((TwoPhaseResult)ret).isSuccess();
-			}else {
-				result = (boolean) ret;
+			if (ret != null) {
+				if (ret instanceof TwoPhaseResult) {
+					result = ((TwoPhaseResult) ret).isSuccess();
+				} else {
+					result = (boolean) ret;
+				}
 			}
 			return result ? BranchStatus.PhaseTwo_Committed:BranchStatus.PhaseTwo_CommitFailed_Retryable;
 		}catch (Throwable t){
@@ -134,11 +135,13 @@ public class TCCResourceManager extends AbstractResourceManager {
 			BusinessActionContext businessActionContext = getBusinessActionContext(xid, branchId, resourceId, applicationData);
 			Object ret = rollbackMethod.invoke(targetTCCBean, businessActionContext);
 			LOGGER.info("TCC resource rollback result :" + ret + ", xid:" + xid + ", branchId:" + branchId + ", resourceId:" + resourceId);
-			if (ret != null && ret instanceof TwoPhaseResult) {
-				result = ((TwoPhaseResult) ret).isSuccess();
-			} else {
-				result = (boolean) ret;
-			}
+            if (ret != null) {
+                if (ret instanceof TwoPhaseResult) {
+                    result = ((TwoPhaseResult) ret).isSuccess();
+                } else {
+                    result = (boolean) ret;
+                }
+            }
 			return result ? BranchStatus.PhaseTwo_Rollbacked : BranchStatus.PhaseTwo_RollbackFailed_Retryable;
 		} catch (Throwable t) {
 			String msg = String.format("rollback TCC resource error, resourceId: %s, xid: %s.", resourceId, xid);

@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,10 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.rm.datasource.sql;
-
-import java.util.List;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -29,10 +26,8 @@ import io.seata.rm.datasource.sql.druid.MySQLDeleteRecognizer;
 import io.seata.rm.datasource.sql.druid.MySQLInsertRecognizer;
 import io.seata.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
 import io.seata.rm.datasource.sql.druid.MySQLUpdateRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLDeleteRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLInsertRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLUpdateRecognizer;
+
+import java.util.List;
 
 /**
  * The type Sql visitor factory.
@@ -63,7 +58,7 @@ public class SQLVisitorFactory {
             } else if (ast instanceof SQLDeleteStatement) {
                 recognizer = new MySQLDeleteRecognizer(sql, ast);
             } else if (ast instanceof SQLSelectStatement) {
-                if (((SQLSelectStatement)ast).getSelect().getQueryBlock().isForUpdate()) {
+                if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
                     recognizer = new MySQLSelectForUpdateRecognizer(sql, ast);
                 }
             }

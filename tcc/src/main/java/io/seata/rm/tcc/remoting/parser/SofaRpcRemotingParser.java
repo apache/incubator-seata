@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.rm.tcc.remoting.parser;
 
 import io.seata.common.exception.FrameworkException;
@@ -41,10 +40,7 @@ public class SofaRpcRemotingParser extends AbstractedRemotingParser {
     public boolean isReference(Object bean, String beanName)
             throws FrameworkException {
 		String beanClassName = bean.getClass().getName();
-        if("com.alipay.sofa.runtime.spring.factory.ReferenceFactoryBean".equals(beanClassName) ){
-            return true;
-        }
-        return false;
+        return "com.alipay.sofa.runtime.spring.factory.ReferenceFactoryBean".equals(beanClassName);
     }
 
     /**
@@ -57,10 +53,7 @@ public class SofaRpcRemotingParser extends AbstractedRemotingParser {
     @Override
     public boolean isService(Object bean, String beanName) 	throws FrameworkException {
 		String beanClassName = bean.getClass().getName();
-        if("com.alipay.sofa.runtime.spring.factory.ServiceFactoryBean".equals(beanClassName) ){
-            return true;
-        }
-        return false;
+        return "com.alipay.sofa.runtime.spring.factory.ServiceFactoryBean".equals(beanClassName);
     }
 
     @Override

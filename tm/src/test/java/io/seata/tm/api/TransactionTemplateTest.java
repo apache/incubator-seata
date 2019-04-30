@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package io.seata.tm.api;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.DefaultTransactionManager;
+import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.transaction.NoRollbackRule;
 import io.seata.tm.api.transaction.RollbackRule;
 import io.seata.tm.api.transaction.TransactionHook;
@@ -56,7 +57,7 @@ public class TransactionTemplateTest {
         when(transactionManager.commit(DEFAULT_XID)).thenReturn(GlobalStatus.Committed);
         when(transactionManager.rollback(DEFAULT_XID)).thenReturn(GlobalStatus.Rollbacked);
         when(transactionManager.getStatus(DEFAULT_XID)).thenReturn(GlobalStatus.Begin);
-        DefaultTransactionManager.set(transactionManager);
+        TransactionManagerHolder.set(transactionManager);
 
         //mock transactionalExecutor
         transactionalExecutor = Mockito.mock(TransactionalExecutor.class);

@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.rm.tcc.api;
 
 import java.io.Serializable;
@@ -69,7 +68,7 @@ public class BusinessActionContext implements Serializable {
      * @return the branch id
      */
     public long getBranchId() {
-        return branchId!=null?Long.valueOf(branchId):-1;
+        return branchId != null ? Long.parseLong(branchId) : -1;
     }
 
     /**
