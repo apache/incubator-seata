@@ -79,7 +79,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>0.6.0-SNAPSHOT</revision>
+        <revision>0.5.1-SNAPSHOT</revision>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

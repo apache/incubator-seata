@@ -18,9 +18,8 @@ package io.seata.core.protocol;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.seata.common.util.NetUtil;
-
 import io.netty.channel.Channel;
+import io.seata.common.util.NetUtil;
 
 /**
  * The type Version.
@@ -32,7 +31,7 @@ public class Version {
     /**
      * The constant CURRENT.
      */
-    public static final String CURRENT = "0.5.0";
+    public static final String CURRENT = "0.5.1";
 
     /**
      * The constant VERSION_MAP.
