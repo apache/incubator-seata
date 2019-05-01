@@ -512,7 +512,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         private static final int PARK_TIMES_BASE = 10;
 
-        private static final int PARK_TIMES_BASE_MILLS = 1 * 1000;
+        private static final int PARK_TIMES_BASE_MILLS = 1;
 
         public void lock() throws TransactionException {
             boolean flag;
