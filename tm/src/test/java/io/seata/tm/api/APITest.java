@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.tm.api;
 
 import io.seata.core.context.RootContext;
@@ -22,6 +21,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.DefaultTransactionManager;
 
+import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.After;
 import org.junit.Assert;
@@ -42,7 +42,7 @@ public class APITest {
      */
     @BeforeClass
     public static void init() {
-        DefaultTransactionManager.set(new TransactionManager() {
+        TransactionManagerHolder.set(new TransactionManager() {
             @Override
             public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
                 throws TransactionException {

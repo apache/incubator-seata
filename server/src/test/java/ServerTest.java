@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,14 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+import io.seata.common.XID;
+import io.seata.common.util.NetUtil;
+import io.seata.core.rpc.netty.RpcServer;
+import io.seata.server.UUIDGenerator;
+import io.seata.server.coordinator.DefaultCoordinator;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import io.seata.core.rpc.netty.RpcServer;
-import io.seata.server.UUIDGenerator;
-import io.seata.server.coordinator.DefaultCoordinator;
 
 /**
  * The type Server test.
@@ -33,6 +34,7 @@ public class ServerTest {
     private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
             new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
+
     /**
      * The entry point of application.
      *
@@ -43,8 +45,9 @@ public class ServerTest {
         RpcServer rpcServer = new RpcServer(workingThreads);
         rpcServer.setHandler(new DefaultCoordinator(rpcServer));
         UUIDGenerator.init(1);
+        XID.setIpAddress(NetUtil.getLocalIp());
+        XID.setPort(rpcServer.getListenPort());
         rpcServer.init();
-
         System.exit(0);
     }
 
