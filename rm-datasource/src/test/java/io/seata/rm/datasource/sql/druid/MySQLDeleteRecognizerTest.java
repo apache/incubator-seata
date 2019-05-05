@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.sql.druid;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -70,13 +71,75 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
             public ArrayList<Object>[] getParameters() {
                 ArrayList<Object> idParam = new ArrayList<>();
                 idParam.add("id1");
-                ArrayList<Object> nameParam = new ArrayList<>();
-                nameParam.add("name1");
-                return new ArrayList[] {idParam, nameParam};
+                return new ArrayList[] {idParam};
             }
         }, paramAppender);
 
         Assert.assertEquals(Collections.singletonList("id1"), paramAppender);
         Assert.assertEquals("id = ?", whereCondition);
+    }
+
+    /**
+     * Delete recognizer test 2.
+     */
+    @Test
+    public void deleteRecognizerTest_2() {
+
+        String sql = "DELETE FROM t1 WHERE id IN (?, ?)";
+
+        SQLStatement statement = getSQLStatement(sql);
+
+        MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
+
+        Assert.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
+        Assert.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
+
+        // test overflow parameters
+        ArrayList<Object> paramAppender = new ArrayList<>();
+        String whereCondition = mySQLDeleteRecognizer.getWhereCondition(new ParametersHolder() {
+            @Override
+            public ArrayList<Object>[] getParameters() {
+                ArrayList<Object> idParam = new ArrayList<>();
+                idParam.add("id1");
+                ArrayList<Object> id2Param = new ArrayList<>();
+                id2Param.add("id2");
+                return new ArrayList[] {idParam, id2Param};
+            }
+        }, paramAppender);
+
+        Assert.assertEquals(Arrays.asList("id1", "id2"), paramAppender);
+        Assert.assertEquals("id IN (?, ?)", whereCondition);
+    }
+
+    /**
+     * Delete recognizer test 3.
+     */
+    @Test
+    public void deleteRecognizerTest_3() {
+
+        String sql = "DELETE FROM t1 WHERE id between ? AND ?";
+
+        SQLStatement statement = getSQLStatement(sql);
+
+        MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
+
+        Assert.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
+        Assert.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
+
+        // test overflow parameters
+        ArrayList<Object> paramAppender = new ArrayList<>();
+        String whereCondition = mySQLDeleteRecognizer.getWhereCondition(new ParametersHolder() {
+            @Override
+            public ArrayList<Object>[] getParameters() {
+                ArrayList<Object> idParam = new ArrayList<>();
+                idParam.add("id1");
+                ArrayList<Object> id2Param = new ArrayList<>();
+                id2Param.add("id2");
+                return new ArrayList[] {idParam, id2Param};
+            }
+        }, paramAppender);
+
+        Assert.assertEquals(Arrays.asList("id1", "id2"), paramAppender);
+        Assert.assertEquals("id BETWEEN ? AND ?", whereCondition);
     }
 }
