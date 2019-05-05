@@ -34,7 +34,6 @@ import io.seata.core.protocol.protobuf.HeartbeatMessageProto;
 import io.seata.core.protocol.serialize.ProtobufConvertManager;
 import io.seata.core.protocol.serialize.ProtobufSerialzer;
 import io.seata.core.protocol.serialize.SerializeType;
-import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -80,15 +79,12 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
     @Override
     protected void encode(ChannelHandlerContext ctx, RpcMessage msg, ByteBuf out) throws Exception {
         if (SerializeType.PROTOBUF.getCode().equals(serialize)) {
-            //转换类
+            //translate
             Object body = msg.getBody();
-            if (body instanceof GlobalBeginRequest) {
-                final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(
-                    body.getClass().getName());
-                Object newBody = pbConvertor.convert2Proto(body);
-                msg.setBody(newBody);
-            }
-
+            final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(
+                body.getClass().getName());
+            Object newBody = pbConvertor.convert2Proto(body);
+            msg.setBody(newBody);
         }
 
         MessageCodec msgCodec = null;
