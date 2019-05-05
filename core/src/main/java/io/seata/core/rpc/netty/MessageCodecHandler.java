@@ -24,6 +24,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MessageCodec;
@@ -32,6 +33,7 @@ import io.seata.core.protocol.convertor.PbConvertor;
 import io.seata.core.protocol.protobuf.HeartbeatMessageProto;
 import io.seata.core.protocol.serialize.ProtobufConvertManager;
 import io.seata.core.protocol.serialize.ProtobufSerialzer;
+import io.seata.core.protocol.serialize.SerializeType;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,8 +70,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
     private static Configuration configuration = ConfigurationFactory.getInstance();
 
-    private static String serialize = "protobuf";//configuration.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC);
-    private final static String PROTOBUF = "protobuf";
+    private static String serialize = configuration.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC);
 
     /**
      * The constant UTF8.
@@ -78,8 +79,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, RpcMessage msg, ByteBuf out) throws Exception {
-        //for dynamic test
-        if (PROTOBUF.equals(serialize)) {
+        if (SerializeType.PROTOBUF.getCode().equals(serialize)) {
             //转换类
             Object body = msg.getBody();
             if (body instanceof GlobalBeginRequest) {
@@ -227,7 +227,6 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 }
                 rpcMessage.setBody(msgCodec);
             } else {
-
                 int clazzNameLength = in.readInt();
                 byte[] clazzName = new byte[clazzNameLength];
                 in.readBytes(clazzName);
@@ -236,7 +235,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 final String clazz = new String(clazzName, UTF8);
                 Object bodyObject = protobufDeserialize(clazz, body);
 
-                if (PROTOBUF.equals(serialize)) {
+                if (SerializeType.PROTOBUF.getCode().equals(serialize)) {
                     final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(clazz);
                     Object newBody = pbConvertor.convert2Model(bodyObject);
                     rpcMessage.setBody(newBody);

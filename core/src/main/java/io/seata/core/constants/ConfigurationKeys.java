@@ -102,5 +102,5 @@ public class ConfigurationKeys {
     /**
      * The constant SERIALIZE_FOR_RPC.
      */
-    public static final String SERIALIZE_FOR_RPC = TRANSPORT_PREFIX + "serialize";
+    public static final String SERIALIZE_FOR_RPC = TRANSPORT_PREFIX + "serialization";
 }
