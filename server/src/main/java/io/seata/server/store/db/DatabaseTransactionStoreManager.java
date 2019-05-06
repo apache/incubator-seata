@@ -272,7 +272,6 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
         branchTransactionDO.setClientId(branchSession.getClientId());
         branchTransactionDO.setLockKey(branchSession.getLockKey());
         branchTransactionDO.setResourceGroupId(branchSession.getResourceGroupId());
-        branchTransactionDO.setXid(branchSession.getXid());
         branchTransactionDO.setTransactionId(branchSession.getTransactionId());
         branchTransactionDO.setApplicationData(branchSession.getApplicationData());
         branchTransactionDO.setResourceId(branchSession.getResourceId());

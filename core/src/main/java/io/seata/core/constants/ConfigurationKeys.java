@@ -116,7 +116,7 @@ public class ConfigurationKeys {
     /**
      * The constant STORE_DB_DATASOURCE_TYPE.
      */
-    public static final String STORE_DB_DATASOURCE_TYPE  = "store.db.datasource-type";
+    public static final String STORE_DB_DATASOURCE_TYPE  = "store.db.datasource";
 
 
     /**
