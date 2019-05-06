@@ -516,7 +516,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         public void lock() throws TransactionException {
             boolean flag;
-            int times = 0;
+            int times = 1;
             long beginTime = System.currentTimeMillis();
             do {
                 long restTime = GLOBAL_SESSOION_LOCK_TIME_OUT_MILLS - (System.currentTimeMillis() - beginTime);
