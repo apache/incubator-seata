@@ -80,12 +80,8 @@
     <properties>
         <!-- seata version -->
         <revision>0.6.0-SNAPSHOT</revision>
-
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <!-- Maven properties -->
-        <maven.test.skip>false</maven.test.skip>
-        <!--<maven.javadoc.skip>true</maven.javadoc.skip>-->
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -112,7 +108,7 @@
         <redis-clients.version>2.9.0</redis-clients.version>
         <eureka-clients.version>1.9.5</eureka-clients.version>
         <consul-clients.version>1.4.2</consul-clients.version>
-        <nacos-client.version>0.9.1</nacos-client.version>
+        <nacos-client.version>1.0.0</nacos-client.version>
         <etcd-client-v3.version>0.3.0</etcd-client-v3.version>
         <testcontainers.version>1.11.2</testcontainers.version>
         <guava.version>27.0.1-jre</guava.version>
@@ -130,6 +126,10 @@
         <junit-jupiter.version>5.4.2</junit-jupiter.version>
         <mockito-core.version>2.23.4</mockito-core.version>
         <assertj-core.version>3.12.2</assertj-core.version>
+        <httpclient.version>4.5.8</httpclient.version>
+        <httpcore.version>4.4.11</httpcore.version>
+        <druid.version>1.1.12</druid.version>
+        <caffeine.version>2.7.0</caffeine.version>
     </properties>
     <!--test-->
     <dependencies>
@@ -428,6 +428,29 @@
                 <groupId>com.netflix.archaius</groupId>
                 <artifactId>archaius-core</artifactId>
                 <version>${archaius-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient.version}</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpcore</artifactId>
+                <version>${httpcore.version}</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>druid</artifactId>
+                <version>${druid.version}</version>
+                <optional>true</optional>
+            </dependency>
+            <dependency>
+                <groupId>com.github.ben-manes.caffeine</groupId>
+                <artifactId>caffeine</artifactId>
+                <version>${caffeine.version}</version>
             </dependency>
         </dependencies>
 
