@@ -50,5 +50,5 @@
 		<property name="dataSource" ref="mysqlDataSource" />
 	</bean>
 
-    <bean id="clientTest" class="io.seata.test.DataSourceBasicTest"/>
+    <bean id="clientTest" class="DataSourceBasicTest"/>
 </beans>

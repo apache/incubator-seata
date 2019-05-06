@@ -22,8 +22,8 @@ import java.util.Collections;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.rm.datasource.ParametersHolder;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type My sql delete recognizer test.
@@ -44,9 +44,9 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
 
-        Assert.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
-        Assert.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
-        Assert.assertEquals("id = 'id1'", mySQLDeleteRecognizer.getWhereCondition());
+        Assertions.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
+        Assertions.assertEquals("id = 'id1'", mySQLDeleteRecognizer.getWhereCondition());
     }
 
     /**
@@ -61,8 +61,8 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
 
-        Assert.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
-        Assert.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
+        Assertions.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
 
         // test overflow parameters
         ArrayList<Object> paramAppender = new ArrayList<>();
@@ -75,8 +75,8 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
             }
         }, paramAppender);
 
-        Assert.assertEquals(Collections.singletonList("id1"), paramAppender);
-        Assert.assertEquals("id = ?", whereCondition);
+        Assertions.assertEquals(Collections.singletonList("id1"), paramAppender);
+        Assertions.assertEquals("id = ?", whereCondition);
     }
 
     /**
@@ -91,8 +91,8 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
 
-        Assert.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
-        Assert.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
+        Assertions.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
 
         // test overflow parameters
         ArrayList<Object> paramAppender = new ArrayList<>();
@@ -107,8 +107,8 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
             }
         }, paramAppender);
 
-        Assert.assertEquals(Arrays.asList("id1", "id2"), paramAppender);
-        Assert.assertEquals("id IN (?, ?)", whereCondition);
+        Assertions.assertEquals(Arrays.asList("id1", "id2"), paramAppender);
+        Assertions.assertEquals("id IN (?, ?)", whereCondition);
     }
 
     /**
@@ -123,8 +123,8 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLDeleteRecognizer mySQLDeleteRecognizer = new MySQLDeleteRecognizer(sql, statement);
 
-        Assert.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
-        Assert.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
+        Assertions.assertEquals(sql, mySQLDeleteRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mySQLDeleteRecognizer.getTableName());
 
         // test overflow parameters
         ArrayList<Object> paramAppender = new ArrayList<>();
@@ -139,7 +139,7 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
             }
         }, paramAppender);
 
-        Assert.assertEquals(Arrays.asList("id1", "id2"), paramAppender);
-        Assert.assertEquals("id BETWEEN ? AND ?", whereCondition);
+        Assertions.assertEquals(Arrays.asList("id1", "id2"), paramAppender);
+        Assertions.assertEquals("id BETWEEN ? AND ?", whereCondition);
     }
 }

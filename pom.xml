@@ -44,7 +44,7 @@
     <url>http://seata.io</url>
     <description>top seata project pom.xml file</description>
     <prerequisites>
-        <maven>3.2.5</maven>
+        <maven>3.6.0</maven>
     </prerequisites>
     <licenses>
         <license>
@@ -90,9 +90,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
-        <netty4.version>4.1.24.Final</netty4.version>
+        <netty4.version>4.1.30.Final</netty4.version>
         <org.springframework.spring.version>2.5.6.SEC03</org.springframework.spring.version>
-        <junit.version>4.12</junit.version>
         <dubbo.version>2.7.0</dubbo.version>
         <fastjson.version>1.2.48</fastjson.version>
         <config.version>1.2.1</config.version>
@@ -103,10 +102,12 @@
         <commons-pool.version>1.6</commons-pool.version>
         <cglib.version>3.1</cglib.version>
         <aopalliance.version>1.0</aopalliance.version>
-        <zkclient.version>0.10</zkclient.version>
+        <zkclient.version>0.11</zkclient.version>
+        <spring.version>4.3.23.RELEASE</spring.version>
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <testng.version>6.4</testng.version>
         <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
+        <maven-surefire-plugin.version>2.22.1</maven-surefire-plugin.version>
         <apollo-client.version>1.1.0</apollo-client.version>
         <redis-clients.version>2.9.0</redis-clients.version>
         <eureka-clients.version>1.9.5</eureka-clients.version>
@@ -126,24 +127,46 @@
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <license-maven-plugin.version>3.0</license-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
+        <junit-jupiter.version>5.4.2</junit-jupiter.version>
+        <mockito-core.version>2.23.4</mockito-core.version>
+        <assertj-core.version>3.12.2</assertj-core.version>
     </properties>
     <!--test-->
     <dependencies>
         <dependency>
-            <groupId>org.assertj</groupId>
-            <artifactId>assertj-core</artifactId>
-            <version>2.6.0</version>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+            <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>2.23.4</version>
+            <version>${mockito-core.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <version>${assertj-core.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-framework-bom</artifactId>
+                <version>${spring.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>seata-common</artifactId>
@@ -160,7 +183,7 @@
                 <version>${project.version}</version>
             </dependency>
             <dependency>
-                <groupId>${project.groupId}</groupId>
+                <groupId>io.seata</groupId>
                 <artifactId>seata-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -285,11 +308,6 @@
                 <version>${fastjson.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring</artifactId>
-                <version>${org.springframework.spring.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>com.typesafe</groupId>
                 <artifactId>config</artifactId>
                 <version>${config.version}</version>
@@ -319,16 +337,7 @@
                 <artifactId>commons-pool</artifactId>
                 <version>${commons-pool.version}</version>
             </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.testng</groupId>
-                <artifactId>testng</artifactId>
-                <version>${testng.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>org.apache.dubbo</groupId>
                 <artifactId>dubbo</artifactId>
@@ -348,6 +357,12 @@
                 <groupId>com.101tec</groupId>
                 <artifactId>zkclient</artifactId>
                 <version>${zkclient.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>io.netty</artifactId>
+                        <groupId>netty</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
@@ -574,6 +589,11 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin.version}</version>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
