@@ -122,7 +122,7 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
-        throw new NotSupportYetException("not support putConfigIfAbsent");
+        throw new NotSupportYetException("not support atomic operation putConfigIfAbsent");
     }
 
     @Override

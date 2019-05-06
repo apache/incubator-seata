@@ -82,7 +82,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
-        throw new NotSupportYetException("not support putConfigIfAbsent");
+        throw new NotSupportYetException("not support atomic operation putConfigIfAbsent");
     }
 
     @Override
@@ -112,7 +112,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
 
     @Override
     public List<Listener> getConfigListeners(String dataId) {
-        throw new NotSupportYetException("not support putConfigIfAbsent");
+        throw new NotSupportYetException("not support getConfigListeners");
     }
 
     private static Properties getConfigProperties() {
