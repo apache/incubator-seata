@@ -33,7 +33,7 @@ import io.seata.core.protocol.convertor.PbConvertor;
 import io.seata.core.protocol.protobuf.HeartbeatMessageProto;
 import io.seata.core.protocol.serialize.ProtobufConvertManager;
 import io.seata.core.protocol.serialize.ProtobufSerialzer;
-import io.seata.core.protocol.serialize.SerializeType;
+import io.seata.core.codec.CodecType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +78,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
     @Override
     protected void encode(ChannelHandlerContext ctx, RpcMessage msg, ByteBuf out) throws Exception {
-        if (SerializeType.PROTOBUF.getCode().equals(serialize)) {
+        if (CodecType.PROTOBUF.name().equalsIgnoreCase(serialize)) {
             //translate
             Object body = msg.getBody();
             final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(
@@ -231,7 +231,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 final String clazz = new String(clazzName, UTF8);
                 Object bodyObject = protobufDeserialize(clazz, body);
 
-                if (SerializeType.PROTOBUF.getCode().equals(serialize)) {
+                if (CodecType.PROTOBUF.name().equalsIgnoreCase(serialize)) {
                     final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(clazz);
                     Object newBody = pbConvertor.convert2Model(bodyObject);
                     rpcMessage.setBody(newBody);

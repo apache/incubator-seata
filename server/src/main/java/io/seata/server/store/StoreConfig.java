@@ -19,7 +19,6 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 
 import static io.seata.core.constants.ConfigurationKeys.STORE_FILE_PREFIX;
-import static io.seata.core.constants.ConfigurationKeys.STORE_PREFIX;
 
 
 /**
@@ -49,10 +48,6 @@ public class StoreConfig {
 
     public static int getFileWriteBufferCacheSize() {
         return CONFIGURATION.getInt(STORE_FILE_PREFIX + "file-write-buffer-cache-size", DEFAULT_WRITE_BUFFER_SIZE);
-    }
-
-    public static FlushDiskMode getFlushDiskMode() {
-        return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_PREFIX + "flush-disk-mode"));
     }
 
     public static FlushDiskMode getFlushDiskMode() {

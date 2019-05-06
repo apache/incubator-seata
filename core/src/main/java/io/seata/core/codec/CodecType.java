@@ -13,44 +13,56 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.protocol.serialize;
+package io.seata.core.codec;
 
 /**
  * The enum serialize type.
  *
  * @author leizhiyuan
  */
-public enum SerializeType {
+public enum CodecType {
 
     /**
      * The seata.
+     * <p>
+     * Math.pow(2, 0)
      */
-    // AT Branch
-    SEATA("seata"),
+    SEATA((byte)1),
 
     /**
      * The protobuf.
+     * <p>
+     * Math.pow(2, 1)
      */
-    PROTOBUF("protobuf");
+    PROTOBUF((byte)2);
 
-    private final String code;
+    private final byte code;
 
-    private SerializeType(final String code) {
+    CodecType(final byte code) {
         this.code = code;
     }
 
-    public static SerializeType getResultCode(String code) {
-        if (code != null) {
-            for (SerializeType b : SerializeType.values()) {
-                if (code.equalsIgnoreCase(b.code)) {
-                    return b;
-                }
+    /**
+     * Gets result code.
+     *
+     * @param code the code
+     * @return the result code
+     */
+    public static CodecType getResultCode(byte code) {
+        for (CodecType b : CodecType.values()) {
+            if (code == b.code) {
+                return b;
             }
         }
-        return null;
+        throw new IllegalArgumentException("unknown codec:" + code);
     }
 
-    public String getCode() {
+    /**
+     * Gets code.
+     *
+     * @return the code
+     */
+    public byte getCode() {
         return code;
     }
 }
