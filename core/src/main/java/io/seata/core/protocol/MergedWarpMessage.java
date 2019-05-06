@@ -74,14 +74,12 @@ public class MergedWarpMessage extends AbstractMessage implements Serializable, 
 
     @Override
     public boolean decode(ByteBuf in) {
-        int i = in.readableBytes();
-        if (i < 4) {
+        if (in.readableBytes() < 4) {
             return false;
         }
 
-        i -= 4;
         int length = in.readInt();
-        if (i < length) {
+        if (in.readableBytes() < length) {
             return false;
         }
 
