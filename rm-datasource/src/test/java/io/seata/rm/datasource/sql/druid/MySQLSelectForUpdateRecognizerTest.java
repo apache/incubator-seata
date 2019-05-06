@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.sql.druid;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -81,7 +82,37 @@ public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerT
     @Test
     public void selectForUpdateRecognizerTest_3() {
 
-        String sql = "SELECT name1, name2 FROM t1 WHERE id1 = ? FOR UPDATE";
+        String sql = "SELECT name1, name2 FROM t1 WHERE id = ? FOR UPDATE";
+
+        SQLStatement statement = getSQLStatement(sql);
+
+        MySQLSelectForUpdateRecognizer mySQLUpdateRecognizer = new MySQLSelectForUpdateRecognizer(sql, statement);
+
+        Assert.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
+        Assert.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
+
+        // test overflow parameters
+        ArrayList<Object> paramAppender = new ArrayList<>();
+        String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
+            @Override
+            public ArrayList<Object>[] getParameters() {
+                ArrayList<Object> id1Param = new ArrayList<>();
+                id1Param.add("id1");
+                return new ArrayList[] {id1Param};
+            }
+        }, paramAppender);
+
+        Assert.assertEquals(Collections.singletonList("id1"), paramAppender);
+        Assert.assertEquals("id = ?", whereCondition);
+    }
+
+    /**
+     * Select for update recognizer test 4.
+     */
+    @Test
+    public void selectForUpdateRecognizerTest_4() {
+
+        String sql = "SELECT name1, name2 FROM t1 WHERE id IN (?,?) FOR UPDATE";
 
         SQLStatement statement = getSQLStatement(sql);
 
@@ -103,7 +134,39 @@ public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerT
             }
         }, paramAppender);
 
-        Assert.assertEquals(Collections.singletonList("id1"), paramAppender);
-        Assert.assertEquals("id1 = ?", whereCondition);
+        Assert.assertEquals(Arrays.asList("id1", "id2"), paramAppender);
+        Assert.assertEquals("id IN (?, ?)", whereCondition);
+    }
+
+    /**
+     * Select for update recognizer test 5.
+     */
+    @Test
+    public void selectForUpdateRecognizerTest_5() {
+
+        String sql = "SELECT name1, name2 FROM t1 WHERE id between ? and ? FOR UPDATE";
+
+        SQLStatement statement = getSQLStatement(sql);
+
+        MySQLSelectForUpdateRecognizer mySQLUpdateRecognizer = new MySQLSelectForUpdateRecognizer(sql, statement);
+
+        Assert.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
+        Assert.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
+
+        // test overflow parameters
+        ArrayList<Object> paramAppender = new ArrayList<>();
+        String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
+            @Override
+            public ArrayList<Object>[] getParameters() {
+                ArrayList<Object> id1Param = new ArrayList<>();
+                id1Param.add("id1");
+                ArrayList<Object> id2Param = new ArrayList<>();
+                id2Param.add("id2");
+                return new ArrayList[] {id1Param, id2Param};
+            }
+        }, paramAppender);
+
+        Assert.assertEquals(Arrays.asList("id1", "id2"), paramAppender);
+        Assert.assertEquals("id BETWEEN ? AND ?", whereCondition);
     }
 }

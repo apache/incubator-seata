@@ -31,6 +31,13 @@ import io.seata.server.UUIDGenerator;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.LockSupport;
+
 /**
  * The type Global session.
  *
@@ -45,7 +52,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private long transactionId;
 
-    private GlobalStatus status;
+    private volatile GlobalStatus status;
 
     private String applicationId;
 
@@ -223,6 +230,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         //do not need now
     }
+
+    private GlobalSessionSpinLock globalSessionSpinLock = new GlobalSessionSpinLock();
 
     /**
      * Add boolean.
@@ -428,8 +437,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     /**
      * Instantiates a new Global session.
      */
-    public GlobalSession() {
-    }
+    public GlobalSession() {}
 
     /**
      * Instantiates a new Global session.
@@ -521,6 +529,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return beginTime;
     }
 
+
     /**
      * Create global session global session.
      *
@@ -531,7 +540,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the global session
      */
     public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
-        int timeout) {
+                                                    int timeout) {
         GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout);
         return session;
     }
@@ -594,15 +603,15 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private int calGlobalSessionSize(byte[] byApplicationIdBytes, byte[] byServiceGroupBytes, byte[] byTxNameBytes) {
         final int size = 8 // trascationId
-            + 4 // timeout
-            + 2 // byApplicationIdBytes.length
-            + 2 // byServiceGroupBytes.length
-            + 2 // byTxNameBytes.length
-            + 8 // beginTime
-            + 1 // statusCode
-            + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
-            + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
-            + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
+                + 4 // timeout
+                + 2 // byApplicationIdBytes.length
+                + 2 // byServiceGroupBytes.length
+                + 2 // byTxNameBytes.length
+                + 8 // beginTime
+                + 1 // statusCode
+                + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
+                + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
+                + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
         return size;
     }
 
@@ -640,6 +649,86 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public boolean hasBranch() {
         return branchSessions.size() > 0;
+    }
+
+    public void lock() throws TransactionException {
+        globalSessionSpinLock.lock();
+    }
+
+    public void unlock(){
+        globalSessionSpinLock.unlock();
+    }
+
+    public void lockAndExcute(LockRunnable excuteRunnable) throws TransactionException{
+        this.lock();
+        try {
+            excuteRunnable.run();
+        }finally {
+            this.unlock();
+        }
+    }
+
+    public <T> T lockAndExcute(LockCallable<T> lockCallable) throws TransactionException{
+        this.lock();
+        try {
+            return lockCallable.call();
+        }finally {
+            this.unlock();
+        }
+    }
+    /**
+     * globalsession is low race conditions, so use spinlock
+     */
+    private class GlobalSessionSpinLock{
+        /**
+         * true: Can lock, false : in lock.
+         */
+        private AtomicBoolean globalSessionSpinLock = new AtomicBoolean(true);
+
+        private static final int GLOBAL_SESSOION_LOCK_TIME_OUT_MILLS = 2 * 1000;
+
+        private static final int PARK_TIMES_BASE = 10;
+
+        private static final int PARK_TIMES_BASE_MILLS = 1;
+
+        public void lock() throws TransactionException {
+            boolean flag;
+            int times = 1;
+            long beginTime = System.currentTimeMillis();
+            do {
+                long restTime = GLOBAL_SESSOION_LOCK_TIME_OUT_MILLS - (System.currentTimeMillis() - beginTime);
+                if (restTime <= 0){
+                    throw new TransactionException(TransactionExceptionCode.FailedLockGlobalTranscation);
+                }
+                // Pause every PARK_TIMES_BASE times,yield the CPU
+                if (times % PARK_TIMES_BASE == 0){
+                    // Exponential Backoff
+                    long backOffTime =  PARK_TIMES_BASE_MILLS << (times/PARK_TIMES_BASE);
+                    long parkTime = backOffTime < restTime ? backOffTime : restTime;
+                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(parkTime));
+                }
+                flag = this.globalSessionSpinLock.compareAndSet(true, false);
+                times++;
+            }
+            while (!flag);
+        }
+
+
+        public void unlock() {
+            this.globalSessionSpinLock.compareAndSet(false, true);
+        }
+
+    }
+
+    @FunctionalInterface
+    public interface LockRunnable {
+
+        void run() throws TransactionException;
+    }
+    @FunctionalInterface
+    public interface LockCallable<V> {
+
+        V call() throws TransactionException;
     }
 
     private boolean isLegalOperation(GlobalOperation operate, GlobalStatus targetStatus) {

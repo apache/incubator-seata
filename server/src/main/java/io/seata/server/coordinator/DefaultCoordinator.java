@@ -51,9 +51,11 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
+import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.ServerMessageSender;
 import io.seata.core.rpc.TransactionMessageHandler;
+import io.seata.core.rpc.netty.RpcServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -71,9 +73,11 @@ import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranc
  * @author sharajava
  */
 public class DefaultCoordinator extends AbstractTCInboundHandler
-    implements TransactionMessageHandler, ResourceManagerInbound {
+    implements TransactionMessageHandler, ResourceManagerInbound, Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCoordinator.class);
+
+    private static final int TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS = 5000;
 
     private ServerMessageSender messageSender;
 
@@ -202,13 +206,17 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 LOGGER.debug(globalSession.getTransactionId() + " " + globalSession.getStatus() + " " +
                     globalSession.getBeginTime() + " " + globalSession.getTimeout());
             }
-
-            if (globalSession.getStatus() != GlobalStatus.Begin || !globalSession.isTimeout()) {
+            boolean shouldTimeout = globalSession.lockAndExcute(() -> {
+                if (globalSession.getStatus() != GlobalStatus.Begin || !globalSession.isTimeout()) {
+                    return false;
+                }
+                globalSession.close();
+                globalSession.changeStatus(GlobalOperation.TIMEOUT,GlobalStatus.TimeoutRollbacking);
+                return true;
+            });
+            if (!shouldTimeout) {
                 continue;
             }
-
-            globalSession.close();
-            globalSession.changeStatus(GlobalOperation.TIMEOUT,GlobalStatus.TimeoutRollbacking);
             LOGGER.info(
                 "Global transaction[" + globalSession.getTransactionId() + "] is timeout and will be rolled back.");
 
@@ -323,7 +331,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
             }
         }, 0, 2, TimeUnit.MILLISECONDS);
-
     }
 
     @Override
@@ -343,5 +350,28 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             throw new IllegalArgumentException();
         }
 
+    }
+
+    @Override
+    public void destroy() {
+        // 1. first shutdown timed task
+        retryRollbacking.shutdown();
+        retryCommitting.shutdown();
+        asyncCommitting.shutdown();
+        timeoutCheck.shutdown();
+        try {
+            retryRollbacking.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+            timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ingore) {
+
+        }
+        // 2. sencond close netty flow
+        if (messageSender instanceof RpcServer){
+            ((RpcServer) messageSender).destroy();
+        }
+        // 3. last destory SessionHolder
+        SessionHolder.destory();
     }
 }
