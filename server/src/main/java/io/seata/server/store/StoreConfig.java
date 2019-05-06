@@ -54,4 +54,8 @@ public class StoreConfig {
     public static FlushDiskMode getFlushDiskMode() {
         return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_PREFIX + "flush-disk-mode"));
     }
+
+    public static FlushDiskMode getFlushDiskMode() {
+        return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_FILE_PREFIX + "flush-disk-mode"));
+    }
 }
