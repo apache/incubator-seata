@@ -19,7 +19,6 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 
 import static io.seata.core.constants.ConfigurationKeys.STORE_FILE_PREFIX;
-import static io.seata.core.constants.ConfigurationKeys.STORE_PREFIX;
 
 
 /**
@@ -52,6 +51,6 @@ public class StoreConfig {
     }
 
     public static FlushDiskMode getFlushDiskMode() {
-        return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_PREFIX + "flush-disk-mode"));
+        return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_FILE_PREFIX + "flush-disk-mode"));
     }
 }
