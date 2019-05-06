@@ -24,6 +24,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.codec.CodecFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
@@ -31,9 +32,8 @@ import io.seata.core.protocol.MessageCodec;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.convertor.PbConvertor;
 import io.seata.core.protocol.protobuf.HeartbeatMessageProto;
-import io.seata.core.protocol.serialize.ProtobufConvertManager;
-import io.seata.core.protocol.serialize.ProtobufSerialzer;
 import io.seata.core.codec.CodecType;
+import io.seata.core.protocol.serialize.ProtobufConvertManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,7 +124,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("msg:" + msg.getBody().toString());
                 }
-                byte[] body = protobufSerialize(msg.getBody());
+                byte[] body = CodecFactory.encode(CodecType.PROTOBUF.getCode(),msg.getBody());
                 final String name = msg.getBody().getClass().getName();
                 final short bodyLength = (short)(body.length + name.length() + 4);
                 byteBuffer.putShort(bodyLength);
@@ -214,7 +214,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 byte[] body = new byte[bodyLength - clazzNameLength - 4];
                 in.readBytes(body);
                 final String clazz = new String(clazzName, UTF8);
-                Object bodyObject = protobufDeserialize(clazz, body);
+                Object bodyObject = CodecFactory.decode(CodecType.PROTOBUF.getCode(),clazz, body);
 
                 if (CodecType.PROTOBUF.name().equalsIgnoreCase(serialize)) {
                     final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(clazz);
@@ -233,37 +233,6 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
             LOGGER.debug("Receive:" + rpcMessage.getBody() + ",messageId:"
                 + msgId);
         }
-
-    }
-
-    /**
-     * Hessian serialize byte [ ].
-     *
-     * @param object the object
-     * @return the byte [ ]
-     * @throws Exception the exception
-     */
-    private static byte[] protobufSerialize(Object object) throws Exception {
-        if (object == null) {
-            throw new NullPointerException();
-        }
-
-        return ProtobufSerialzer.serializeContent(object);
-
-    }
-
-    /**
-     * Hessian deserialize object.
-     *
-     * @param bytes the bytes
-     * @return the object
-     * @throws Exception the exception
-     */
-    private static Object protobufDeserialize(String clazz, byte[] bytes) throws Exception {
-        if (bytes == null) {
-            throw new NullPointerException();
-        }
-        return ProtobufSerialzer.deserializeContent(clazz, bytes);
 
     }
 }
