@@ -150,60 +150,46 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        int begin = in.readerIndex();
-        int magicIndex = getMagicIndex(in);
-        if (magicIndex == NOT_FOUND_INDEX) {
-            LOGGER.error("codec decode not found magic offset");
-            in.skipBytes(in.readableBytes());
-            return;
-        }
-        if (magicIndex != 0 && LOGGER.isInfoEnabled()) {
-            LOGGER.info("please notice magicIndex is not zero offset!!!");
-        }
-        in.skipBytes(magicIndex - in.readerIndex());
+
         if (in.readableBytes() < HEAD_LENGTH) {
-            LOGGER.error("decode less than header length");
             return;
         }
-        byte[] buffer = new byte[HEAD_LENGTH];
-        in.readBytes(buffer);
-        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
-        short magic = byteBuffer.getShort();
-        if (magic != MAGIC) {
-            LOGGER.error("decode error,will close channel:" + ctx.channel());
+        in.markReaderIndex();
+        short protocol = in.readShort();
+        if (protocol != MAGIC) {
+            String emsg = "decode error,Unknown protocol: " + protocol + ",will close channel:" + ctx.channel();
+            LOGGER.error(emsg);
             ctx.channel().close();
             return;
         }
 
-        int flag = byteBuffer.getShort();
+        int flag = (int)in.readShort();
+
         boolean isHeartbeat = (FLAG_HEARTBEAT & flag) > 0;
         boolean isRequest = (FLAG_REQUEST & flag) > 0;
         boolean isSeataCodec = (FLAG_SEATA_CODEC & flag) > 0;
 
         short bodyLength = 0;
         short typeCode = 0;
-        if (!isSeataCodec) { bodyLength = byteBuffer.getShort(); } else { typeCode = byteBuffer.getShort(); }
-        long msgId = byteBuffer.getLong();
-
+        if (!isSeataCodec) { bodyLength = in.readShort(); } else { typeCode = in.readShort(); }
+        long msgId = in.readLong();
         if (isHeartbeat) {
             RpcMessage rpcMessage = new RpcMessage();
             rpcMessage.setId(msgId);
             rpcMessage.setAsync(true);
             rpcMessage.setHeartbeat(isHeartbeat);
             rpcMessage.setRequest(isRequest);
-
             if (isRequest) {
                 rpcMessage.setBody(HeartbeatMessage.PING);
             } else {
                 rpcMessage.setBody(HeartbeatMessage.PONG);
             }
-
             out.add(rpcMessage);
             return;
         }
 
         if (bodyLength > 0 && in.readableBytes() < bodyLength) {
-            in.readerIndex(begin);
+            in.resetReaderIndex();
             return;
         }
 
@@ -217,8 +203,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
             if (isSeataCodec) {
                 MessageCodec msgCodec = AbstractMessage.getMsgInstanceByCode(typeCode);
                 if (!msgCodec.decode(in)) {
-                    LOGGER.error(msgCodec + " decode error.");
-                    in.readerIndex(begin);
+                    in.resetReaderIndex();
                     return;
                 }
                 rpcMessage.setBody(msgCodec);
@@ -280,20 +265,5 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
         }
         return ProtobufSerialzer.deserializeContent(clazz, bytes);
 
-    }
-
-    private static int getMagicIndex(ByteBuf in) {
-        boolean found = false;
-        int readIndex = in.readerIndex();
-        int begin = 0;
-        while (readIndex < in.writerIndex()) {
-            if (in.getByte(readIndex) == MAGIC_HALF && in.getByte(readIndex + 1) == MAGIC_HALF) {
-                begin = readIndex;
-                found = true;
-                break;
-            }
-            ++readIndex;
-        }
-        return found ? begin : NOT_FOUND_INDEX;
     }
 }
