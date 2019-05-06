@@ -16,48 +16,66 @@
 package io.seata.discovery.loadbalance;
 
 import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-import org.testng.collections.Lists;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 /**
  * Created by guoyao on 2019/2/14.
  */
+@RunWith(Parameterized.class)
 public class LoadBalanceTest {
 
     /**
-     * Test random load balance select.
+     * Address provider object [ ] [ ].
      *
-     * @param addresses the addresses
+     * @return the object [ ] [ ]
      */
-    @Test(dataProvider = "addressProvider")
-    public void testRandomLoadBalance_select(List<InetSocketAddress> addresses) {
+    @Parameterized.Parameters
+    public static Collection addressProvider() {
+        List<InetSocketAddress> addresses = new ArrayList<>();
+        addresses.add(new InetSocketAddress("127.0.0.1", 8091));
+        addresses.add(new InetSocketAddress("127.0.0.1", 8092));
+        addresses.add(new InetSocketAddress("127.0.0.1", 8093));
+        addresses.add(new InetSocketAddress("127.0.0.1", 8094));
+        addresses.add(new InetSocketAddress("127.0.0.1", 8095));
+        return Arrays.asList(addresses);
+    }
+
+    private List<InetSocketAddress> addresses;
+
+    public LoadBalanceTest(List<InetSocketAddress> addresses) {
+        this.addresses = addresses;
+    }
+
+    /**
+     * Test random load balance select.
+     */
+    @Test
+    public void testRandomLoadBalance_select() {
         int runs = 10000;
         Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new RandomLoadBalance());
         for (InetSocketAddress address : counter.keySet()) {
             Long count = counter.get(address).get();
-            Assert.assertTrue(count > 0, "selecte one time at last");
+            Assert.assertTrue("selecte one time at last", count > 0);
         }
     }
 
     /**
      * Test round robin load balance select.
-     *
-     * @param addresses the addresses
      */
-    @Test(dataProvider = "addressProvider")
-    public void testRoundRobinLoadBalance_select(List<InetSocketAddress> addresses) {
+    @Test
+    public void testRoundRobinLoadBalance_select() {
         int runs = 10000;
         Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new RoundRobinLoadBalance());
         for (InetSocketAddress address : counter.keySet()) {
             Long count = counter.get(address).get();
-            Assert.assertTrue(Math.abs(count - runs / (0f + addresses.size())) < 1f, "abs diff shoud < 1");
+            Assert.assertTrue("abs diff shoud < 1", Math.abs(count - runs / (0f + addresses.size())) < 1f);
         }
     }
 
@@ -87,20 +105,5 @@ public class LoadBalanceTest {
         return counter;
     }
 
-    /**
-     * Address provider object [ ] [ ].
-     *
-     * @return the object [ ] [ ]
-     */
-    @DataProvider
-    public static Object[][] addressProvider() {
-        List<InetSocketAddress> addresses = Lists.newArrayList();
-        addresses.add(new InetSocketAddress("127.0.0.1", 8091));
-        addresses.add(new InetSocketAddress("127.0.0.1", 8092));
-        addresses.add(new InetSocketAddress("127.0.0.1", 8093));
-        addresses.add(new InetSocketAddress("127.0.0.1", 8094));
-        addresses.add(new InetSocketAddress("127.0.0.1", 8095));
-        return new Object[][] {{addresses}};
-    }
 
 }

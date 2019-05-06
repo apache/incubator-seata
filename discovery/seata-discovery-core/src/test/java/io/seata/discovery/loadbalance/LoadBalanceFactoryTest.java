@@ -17,6 +17,8 @@ package io.seata.discovery.loadbalance;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -25,8 +27,9 @@ import io.seata.discovery.registry.RegistryService;
 
 import org.junit.Assert;
 import org.junit.Ignore;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 /**
  * The type Load balance factory test.
@@ -34,17 +37,23 @@ import org.testng.annotations.Test;
  * @author jimin.jm @alibaba-inc.com
  * @date 2019 /02/12
  */
+@RunWith(Parameterized.class)
 public class LoadBalanceFactoryTest {
+
+    private LoadBalance loadBalance;
+
+    public LoadBalanceFactoryTest(LoadBalance loadBalance) {
+        this.loadBalance = loadBalance;
+    }
 
     /**
      * Test get registry.
      *
-     * @param loadBalance the load balance
      * @throws Exception the exception
      */
-    @Test(dataProvider = "instanceProvider")
+    @Test
     @Ignore
-    public void testGetRegistry(LoadBalance loadBalance) throws Exception {
+    public void testGetRegistry() throws Exception {
         Assert.assertNotNull(loadBalance);
         RegistryService registryService = RegistryFactory.getInstance();
         InetSocketAddress address1 = new InetSocketAddress("127.0.0.1", 8091);
@@ -59,7 +68,6 @@ public class LoadBalanceFactoryTest {
     /**
      * Test get address.
      *
-     * @param loadBalance the load balance
      * @throws Exception the exception
      */
     @Test
@@ -73,12 +81,11 @@ public class LoadBalanceFactoryTest {
     /**
      * Test subscribe.
      *
-     * @param loadBalance the load balance
      * @throws Exception the exception
      */
-    @Test(dataProvider = "instanceProvider")
+    @Test
     @Ignore
-    public void testSubscribe(LoadBalance loadBalance) throws Exception {
+    public void testSubscribe() throws Exception {
         Assert.assertNotNull(loadBalance);
         RegistryService registryService = RegistryFactory.getInstance();
         InetSocketAddress address1 = new InetSocketAddress("127.0.0.1", 8091);
@@ -96,11 +103,10 @@ public class LoadBalanceFactoryTest {
     /**
      * Test get address.
      *
-     * @param loadBalance the load balance
      * @throws Exception the exception
      */
-    @Test(dataProvider = "instanceProvider")
-    public void testGetAddress(LoadBalance loadBalance) throws Exception {
+    @Test
+    public void testGetAddress() throws Exception {
         Assert.assertNotNull(loadBalance);
         InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
         List<InetSocketAddress> addressList = new ArrayList<>();
@@ -114,10 +120,10 @@ public class LoadBalanceFactoryTest {
      *
      * @return the object [ ] [ ]
      */
-    @DataProvider
-    public static Object[][] instanceProvider() {
+    @Parameterized.Parameters
+    public static Collection instanceProvider() {
         LoadBalance loadBalance = LoadBalanceFactory.getInstance();
-        return new Object[][] {{loadBalance}};
+        return Arrays.asList(loadBalance);
     }
 
 }
