@@ -18,9 +18,12 @@ package io.seata.server.session;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.LockSupport;
 
-import io.seata.core.domain.StateGraph;
-import io.seata.core.domain.StateGraphHelper;
+import io.seata.core.domain.GlobalSessionStatusStateMachine;
+import io.seata.core.domain.StateMachineHelper;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -30,13 +33,6 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
-
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.locks.LockSupport;
 
 /**
  * The type Global session.
@@ -68,168 +64,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
-    private static StateGraph stateGraph = new StateGraph();
-
-    static {
-        registerStateGraph();
-    }
-
-    private static void registerStateGraph() {
-        registerForbiddenStateGraph();
-        registerAcceptStatusGraph();
-
-    }
-
-    private static void registerAcceptStatusGraph() {
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Begin.name(),
-            GlobalOperation.COMMIT.name(), GlobalStatus.Committing.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Begin.name(),
-            GlobalOperation.TIMEOUT.name(), GlobalStatus.TimeoutRollbacking.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Begin.name(),
-            GlobalOperation.ROLLBACK.name(), GlobalStatus.Rollbacking.name()));
-
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Committing.name(),
-            GlobalOperation.ASYNC_COMMIT.name(), GlobalStatus.AsyncCommitting.name()));
-
-        //commit
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.AsyncCommitting.name(),
-            GlobalOperation.RETRY_COMMIT.name(), GlobalStatus.CommitRetrying.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.AsyncCommitting.name(),
-            GlobalOperation.END_COMMIT_FAIL.name(), GlobalStatus.CommitFailed.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.AsyncCommitting.name(),
-            GlobalOperation.END_COMMIT_SUCCESS.name(), GlobalStatus.Committed.name()));
-
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Committing.name(),
-            GlobalOperation.RETRY_COMMIT.name(), GlobalStatus.CommitRetrying.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Committing.name(),
-            GlobalOperation.END_COMMIT_FAIL.name(), GlobalStatus.CommitFailed.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Committing.name(),
-            GlobalOperation.END_COMMIT_SUCCESS.name(), GlobalStatus.Committed.name()));
-
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.CommitRetrying.name(),
-            GlobalOperation.RETRY_COMMIT.name(), GlobalStatus.CommitRetrying.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.CommitRetrying.name(),
-            GlobalOperation.END_COMMIT_FAIL.name(), GlobalStatus.CommitFailed.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.CommitRetrying.name(),
-            GlobalOperation.END_COMMIT_SUCCESS.name(), GlobalStatus.Committed.name()));
-
-        //rollback
-
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Rollbacking.name(),
-            GlobalOperation.RETRY_ROLLBACK.name(), GlobalStatus.TimeoutRollbackRetrying.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Rollbacking.name(),
-            GlobalOperation.RETRY_ROLLBACK.name(), GlobalStatus.RollbackRetrying.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Rollbacking.name(),
-            GlobalOperation.END_ROLLBACK_SUCCESS.name(), GlobalStatus.TimeoutRollbacked.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Rollbacking.name(),
-            GlobalOperation.END_ROLLBACK_SUCCESS.name(), GlobalStatus.Rollbacked.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Rollbacking.name(),
-            GlobalOperation.END_ROLLBACK_FAIL.name(), GlobalStatus.RollbackFailed.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Rollbacking.name(),
-            GlobalOperation.END_ROLLBACK_FAIL.name(), GlobalStatus.TimeoutRollbackFailed.name()));
-
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.RollbackRetrying.name(),
-            GlobalOperation.RETRY_ROLLBACK.name(), GlobalStatus.TimeoutRollbackRetrying.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.RollbackRetrying.name(),
-            GlobalOperation.RETRY_ROLLBACK.name(), GlobalStatus.RollbackRetrying.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.RollbackRetrying.name(),
-            GlobalOperation.END_ROLLBACK_SUCCESS.name(), GlobalStatus.TimeoutRollbacked.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.RollbackRetrying.name(),
-            GlobalOperation.END_ROLLBACK_SUCCESS.name(), GlobalStatus.Rollbacked.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.RollbackRetrying.name(),
-            GlobalOperation.END_ROLLBACK_FAIL.name(), GlobalStatus.RollbackFailed.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.RollbackRetrying.name(),
-            GlobalOperation.END_ROLLBACK_FAIL.name(), GlobalStatus.TimeoutRollbackFailed.name()));
-
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.TimeoutRollbacking.name(),
-            GlobalOperation.RETRY_ROLLBACK.name(), GlobalStatus.TimeoutRollbackRetrying.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.TimeoutRollbacking.name(),
-            GlobalOperation.RETRY_ROLLBACK.name(), GlobalStatus.RollbackRetrying.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.TimeoutRollbacking.name(),
-            GlobalOperation.END_ROLLBACK_SUCCESS.name(), GlobalStatus.TimeoutRollbacked.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.TimeoutRollbacking.name(),
-            GlobalOperation.END_ROLLBACK_SUCCESS.name(), GlobalStatus.Rollbacked.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.TimeoutRollbacking.name(),
-            GlobalOperation.END_ROLLBACK_FAIL.name(), GlobalStatus.RollbackFailed.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.TimeoutRollbacking.name(),
-            GlobalOperation.END_ROLLBACK_FAIL.name(), GlobalStatus.TimeoutRollbackFailed.name()));
-
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.TimeoutRollbackRetrying.name(),
-            GlobalOperation.RETRY_ROLLBACK.name(), GlobalStatus.TimeoutRollbackRetrying.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.TimeoutRollbackRetrying.name(),
-            GlobalOperation.RETRY_ROLLBACK.name(), GlobalStatus.RollbackRetrying.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.TimeoutRollbackRetrying.name(),
-            GlobalOperation.END_ROLLBACK_SUCCESS.name(), GlobalStatus.TimeoutRollbacked.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.TimeoutRollbackRetrying.name(),
-            GlobalOperation.END_ROLLBACK_SUCCESS.name(), GlobalStatus.Rollbacked.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.TimeoutRollbackRetrying.name(),
-            GlobalOperation.END_ROLLBACK_FAIL.name(), GlobalStatus.RollbackFailed.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.TimeoutRollbackRetrying.name(),
-            GlobalOperation.END_ROLLBACK_FAIL.name(), GlobalStatus.TimeoutRollbackFailed.name()));
-
-        //FIN
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Committed.name(),
-            GlobalOperation.FINISH.name(), GlobalStatus.Finished.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.CommitFailed.name(),
-            GlobalOperation.FINISH.name(), GlobalStatus.Finished.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.TimeoutRollbacked.name(),
-            GlobalOperation.FINISH.name(), GlobalStatus.Finished.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.Rollbacked.name(),
-            GlobalOperation.FINISH.name(), GlobalStatus.Finished.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.TimeoutRollbackFailed.name(),
-            GlobalOperation.FINISH.name(), GlobalStatus.Finished.name()));
-        stateGraph.addAllowState(StateGraphHelper.toAcceptState(
-            GlobalStatus.RollbackFailed.name(),
-            GlobalOperation.FINISH.name(), GlobalStatus.Finished.name()));
-
-    }
-
-    private static void registerForbiddenStateGraph() {
-
-        //do not need now
-    }
+    private GlobalSessionStatusStateMachine sessionStatusStateMachine = StateMachineHelper.buildGlobalStatusMachine();
 
     private GlobalSessionSpinLock globalSessionSpinLock = new GlobalSessionSpinLock();
 
@@ -290,17 +125,18 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void changeStatus(GlobalOperation operation, GlobalStatus status) throws TransactionException {
-        if (isLegalOperation(operation, status)) {
-            this.status = status;
-            for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
-                lifecycleListener.onStatusChange(this, status);
-            }
+        if (sessionStatusStateMachine.canAccept(operation)) {
+            sessionStatusStateMachine.fire(operation);
         } else {
             throw new TransactionException(
                 TransactionExceptionCode.FailedToChangeGlobalStatus,
                 "status not can be changed,current status is " + this.status + " ,operation=" + operation
                     + " , target status="
                     + status);
+        }
+        this.status = status;
+        for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
+            lifecycleListener.onStatusChange(this, status);
         }
     }
 
@@ -529,7 +365,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return beginTime;
     }
 
-
     /**
      * Create global session global session.
      *
@@ -540,7 +375,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the global session
      */
     public static GlobalSession createGlobalSession(String applicationId, String txServiceGroup, String txName,
-                                                    int timeout) {
+        int timeout) {
         GlobalSession session = new GlobalSession(applicationId, txServiceGroup, txName, timeout);
         return session;
     }
@@ -603,15 +438,15 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private int calGlobalSessionSize(byte[] byApplicationIdBytes, byte[] byServiceGroupBytes, byte[] byTxNameBytes) {
         final int size = 8 // trascationId
-                + 4 // timeout
-                + 2 // byApplicationIdBytes.length
-                + 2 // byServiceGroupBytes.length
-                + 2 // byTxNameBytes.length
-                + 8 // beginTime
-                + 1 // statusCode
-                + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
-                + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
-                + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
+            + 4 // timeout
+            + 2 // byApplicationIdBytes.length
+            + 2 // byServiceGroupBytes.length
+            + 2 // byTxNameBytes.length
+            + 8 // beginTime
+            + 1 // statusCode
+            + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
+            + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
+            + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
         return size;
     }
 
@@ -655,31 +490,32 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         globalSessionSpinLock.lock();
     }
 
-    public void unlock(){
+    public void unlock() {
         globalSessionSpinLock.unlock();
     }
 
-    public void lockAndExcute(LockRunnable excuteRunnable) throws TransactionException{
+    public void lockAndExcute(LockRunnable excuteRunnable) throws TransactionException {
         this.lock();
         try {
             excuteRunnable.run();
-        }finally {
+        } finally {
             this.unlock();
         }
     }
 
-    public <T> T lockAndExcute(LockCallable<T> lockCallable) throws TransactionException{
+    public <T> T lockAndExcute(LockCallable<T> lockCallable) throws TransactionException {
         this.lock();
         try {
             return lockCallable.call();
-        }finally {
+        } finally {
             this.unlock();
         }
     }
+
     /**
      * globalsession is low race conditions, so use spinlock
      */
-    private class GlobalSessionSpinLock{
+    private class GlobalSessionSpinLock {
         /**
          * true: Can lock, false : in lock.
          */
@@ -697,13 +533,13 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             long beginTime = System.currentTimeMillis();
             do {
                 long restTime = GLOBAL_SESSOION_LOCK_TIME_OUT_MILLS - (System.currentTimeMillis() - beginTime);
-                if (restTime <= 0){
+                if (restTime <= 0) {
                     throw new TransactionException(TransactionExceptionCode.FailedLockGlobalTranscation);
                 }
                 // Pause every PARK_TIMES_BASE times,yield the CPU
-                if (times % PARK_TIMES_BASE == 0){
+                if (times % PARK_TIMES_BASE == 0) {
                     // Exponential Backoff
-                    long backOffTime =  PARK_TIMES_BASE_MILLS << (times/PARK_TIMES_BASE);
+                    long backOffTime = PARK_TIMES_BASE_MILLS << (times / PARK_TIMES_BASE);
                     long parkTime = backOffTime < restTime ? backOffTime : restTime;
                     LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(parkTime));
                 }
@@ -712,7 +548,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             }
             while (!flag);
         }
-
 
         public void unlock() {
             this.globalSessionSpinLock.compareAndSet(false, true);
@@ -725,15 +560,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         void run() throws TransactionException;
     }
+
     @FunctionalInterface
     public interface LockCallable<V> {
 
         V call() throws TransactionException;
     }
 
-    private boolean isLegalOperation(GlobalOperation operate, GlobalStatus targetStatus) {
-        return stateGraph.analyse(StateGraphHelper.toAcceptState(this.status.name(),
-            operate.name(), targetStatus.name()));
+    public GlobalSessionStatusStateMachine getSessionStatusStateMachine() {
+        return sessionStatusStateMachine;
     }
-
 }

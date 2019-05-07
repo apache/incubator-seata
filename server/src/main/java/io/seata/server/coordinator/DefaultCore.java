@@ -231,9 +231,9 @@ public class DefaultCore implements Core {
         SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
         GlobalStatus currentStatus = globalSession.getStatus();
         if (SessionHelper.isTimeoutGlobalStatus(currentStatus)) {
-            globalSession.changeStatus(GlobalOperation.RETRY_ROLLBACK,GlobalStatus.TimeoutRollbackRetrying);
+            globalSession.changeStatus(GlobalOperation.RETRY_ROLLBACK_TIMEOUT,GlobalStatus.TimeoutRollbackRetrying);
         } else {
-            globalSession.changeStatus(GlobalOperation.RETRY_ROLLBACK,GlobalStatus.RollbackRetrying);
+            globalSession.changeStatus(GlobalOperation.RETRY_ROLLBACK_NORMAL,GlobalStatus.RollbackRetrying);
         }
     }
 

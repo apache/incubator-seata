@@ -15,6 +15,7 @@
  */
 package io.seata.server.session;
 
+import io.seata.core.domain.GlobalSessionStatusStateMachine;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -213,5 +214,16 @@ public class GlobalSessionTest {
         branchSession.setApplicationData("{\"data\":\"test\"}");
         globalSession.add(branchSession);
         return new Object[][] {{globalSession}};
+    }
+
+
+    @Test
+    public void testMachine(){
+        GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+        final GlobalSessionStatusStateMachine sessionStatusStateMachine = globalSession.getSessionStatusStateMachine();
+        sessionStatusStateMachine.fire(GlobalOperation.BEGIN);
+        sessionStatusStateMachine.fire(GlobalOperation.ROLLBACK);
+        sessionStatusStateMachine.fire(GlobalOperation.BEGIN);
+        Assert.assertTrue(sessionStatusStateMachine.canAccept(GlobalOperation.RETRY_ROLLBACK_NORMAL));
     }
 }

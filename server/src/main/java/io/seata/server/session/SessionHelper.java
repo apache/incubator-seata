@@ -90,9 +90,9 @@ public class SessionHelper {
     public static void endRollbacked(GlobalSession globalSession) throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
         if (isTimeoutGlobalStatus(currentStatus)) {
-            globalSession.changeStatus(GlobalOperation.END_ROLLBACK_SUCCESS,GlobalStatus.TimeoutRollbacked);
+            globalSession.changeStatus(GlobalOperation.END_ROLLBACK_SUCCESS_TIMEOUT,GlobalStatus.TimeoutRollbacked);
         } else {
-            globalSession.changeStatus(GlobalOperation.END_ROLLBACK_SUCCESS,GlobalStatus.Rollbacked);
+            globalSession.changeStatus(GlobalOperation.END_ROLLBACK_SUCCESS_NORMAL,GlobalStatus.Rollbacked);
         }
         globalSession.end();
     }
@@ -106,9 +106,9 @@ public class SessionHelper {
     public static void endRollbackFailed(GlobalSession globalSession) throws TransactionException {
         GlobalStatus currentStatus = globalSession.getStatus();
         if (isTimeoutGlobalStatus(currentStatus)) {
-            globalSession.changeStatus(GlobalOperation.END_ROLLBACK_FAIL,GlobalStatus.TimeoutRollbackFailed);
+            globalSession.changeStatus(GlobalOperation.END_ROLLBACK_FAIL_TIMEOUT,GlobalStatus.TimeoutRollbackFailed);
         } else {
-            globalSession.changeStatus(GlobalOperation.END_ROLLBACK_FAIL,GlobalStatus.RollbackFailed);
+            globalSession.changeStatus(GlobalOperation.END_ROLLBACK_FAIL_NORMAL,GlobalStatus.RollbackFailed);
         }
         globalSession.end();
     }

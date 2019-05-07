@@ -126,6 +126,7 @@
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <license-maven-plugin.version>3.0</license-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
+        <squirrel-foundation.version>0.3.8</squirrel-foundation.version>
     </properties>
     <!--test-->
     <dependencies>
@@ -413,6 +414,11 @@
                 <groupId>com.netflix.archaius</groupId>
                 <artifactId>archaius-core</artifactId>
                 <version>${archaius-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.squirrelframework</groupId>
+                <artifactId>squirrel-foundation</artifactId>
+                <version>${squirrel-foundation.version}</version>
             </dependency>
         </dependencies>
 
