@@ -15,16 +15,15 @@
  */
 package io.seata.server.session;
 
-import io.seata.core.domain.GlobalSessionStatusStateMachine;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalOperation;
 import io.seata.core.model.GlobalStatus;
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 /**
  * The type Global session test.
@@ -39,9 +38,10 @@ public class GlobalSessionTest {
      *
      * @param globalSession the global session
      */
-    @Test(dataProvider = "branchSessionTCCProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionTCCProvider")
     public void canBeCommittedAsyncTest(GlobalSession globalSession) {
-        Assert.assertFalse(globalSession.canBeCommittedAsync());
+        Assertions.assertFalse(globalSession.canBeCommittedAsync());
     }
 
     /**
@@ -50,7 +50,8 @@ public class GlobalSessionTest {
      * @param globalSession the global session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "globalSessionProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionProvider")
     public void beginTest(GlobalSession globalSession) throws Exception {
         globalSession.begin();
     }
@@ -61,29 +62,10 @@ public class GlobalSessionTest {
      * @param globalSession the global session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "globalSessionProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionProvider")
     public void changeStatusTest(GlobalSession globalSession) throws Exception {
-        globalSession.changeStatus(GlobalOperation.COMMIT, GlobalStatus.Committing);
-    }
-
-    /**
-     * Change status exp test.
-     *
-     * @param globalSession the global session
-     * @throws Exception the exception
-     */
-    @Test(dataProvider = "globalSessionProvider")
-    public void changeStatusExpTest(GlobalSession globalSession) throws Exception {
-        boolean result = false;
-        try {
-            globalSession.changeStatus(GlobalOperation.COMMIT, GlobalStatus.Committed);
-        } catch (TransactionException e) {
-            Assert.assertEquals(TransactionExceptionCode.FailedToChangeGlobalStatus, e.getCode());
-            result = true;
-        }
-        if (!result) {
-            Assert.fail("change status exp test failed");
-        }
+        globalSession.changeStatus(GlobalStatus.Committed);
     }
 
     /**
@@ -93,7 +75,8 @@ public class GlobalSessionTest {
      * @param branchSession the branch session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "branchSessionProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
     public void changeBranchStatusTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseTwo_Committed);
     }
@@ -104,7 +87,8 @@ public class GlobalSessionTest {
      * @param globalSession the global session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "globalSessionProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionProvider")
     public void closeTest(GlobalSession globalSession) throws Exception {
         globalSession.close();
     }
@@ -115,7 +99,8 @@ public class GlobalSessionTest {
      * @param globalSession the global session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "globalSessionProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionProvider")
     public void endTest(GlobalSession globalSession) throws Exception {
         globalSession.end();
     }
@@ -127,7 +112,8 @@ public class GlobalSessionTest {
      * @param branchSession the branch session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "branchSessionProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
     public void addBranchTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         globalSession.addBranch(branchSession);
     }
@@ -139,7 +125,8 @@ public class GlobalSessionTest {
      * @param branchSession the branch session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "branchSessionProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
     public void removeBranchTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         globalSession.addBranch(branchSession);
         globalSession.removeBranch(branchSession);
@@ -150,17 +137,18 @@ public class GlobalSessionTest {
      *
      * @param globalSession the global session
      */
-    @Test(dataProvider = "globalSessionProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionProvider")
     public void codecTest(GlobalSession globalSession) {
         byte[] result = globalSession.encode();
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
         GlobalSession expected = new GlobalSession();
         expected.decode(result);
-        Assert.assertEquals(expected.getTransactionId(), globalSession.getTransactionId());
-        Assert.assertEquals(expected.getTimeout(), globalSession.getTimeout());
-        Assert.assertEquals(expected.getApplicationId(), globalSession.getApplicationId());
-        Assert.assertEquals(expected.getTransactionServiceGroup(), globalSession.getTransactionServiceGroup());
-        Assert.assertEquals(expected.getTransactionName(), globalSession.getTransactionName());
+        Assertions.assertEquals(expected.getTransactionId(), globalSession.getTransactionId());
+        Assertions.assertEquals(expected.getTimeout(), globalSession.getTimeout());
+        Assertions.assertEquals(expected.getApplicationId(), globalSession.getApplicationId());
+        Assertions.assertEquals(expected.getTransactionServiceGroup(), globalSession.getTransactionServiceGroup());
+        Assertions.assertEquals(expected.getTransactionName(), globalSession.getTransactionName());
     }
 
     /**
@@ -168,12 +156,14 @@ public class GlobalSessionTest {
      *
      * @return the object [ ] [ ]
      */
-    @DataProvider
-    public static Object[][] globalSessionProvider() {
+    static Stream<Arguments> globalSessionProvider() {
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
         globalSession.setActive(true);
         globalSession.addSessionLifecycleListener(new DefaultSessionManager("default"));
-        return new Object[][] {{globalSession}};
+        return Stream.of(
+                Arguments.of(
+                        globalSession)
+        );
     }
 
     /**
@@ -181,8 +171,7 @@ public class GlobalSessionTest {
      *
      * @return the object [ ] [ ]
      */
-    @DataProvider
-    public static Object[][] branchSessionProvider() {
+    static Stream<Arguments> branchSessionProvider() {
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(globalSession.getTransactionId());
@@ -193,7 +182,10 @@ public class GlobalSessionTest {
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
         globalSession.add(branchSession);
-        return new Object[][] {{globalSession, branchSession}};
+        return Stream.of(
+                Arguments.of(
+                        globalSession, branchSession)
+        );
     }
 
     /**
@@ -201,8 +193,8 @@ public class GlobalSessionTest {
      *
      * @return the object [ ] [ ]
      */
-    @DataProvider
-    public static Object[][] branchSessionTCCProvider() {
+
+    static Stream<Arguments> branchSessionTCCProvider() {
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(globalSession.getTransactionId());
@@ -213,17 +205,8 @@ public class GlobalSessionTest {
         branchSession.setBranchType(BranchType.TCC);
         branchSession.setApplicationData("{\"data\":\"test\"}");
         globalSession.add(branchSession);
-        return new Object[][] {{globalSession}};
-    }
-
-
-    @Test
-    public void testMachine(){
-        GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
-        final GlobalSessionStatusStateMachine sessionStatusStateMachine = globalSession.getSessionStatusStateMachine();
-        sessionStatusStateMachine.fire(GlobalOperation.BEGIN);
-        sessionStatusStateMachine.fire(GlobalOperation.ROLLBACK);
-        sessionStatusStateMachine.fire(GlobalOperation.BEGIN);
-        Assert.assertTrue(sessionStatusStateMachine.canAccept(GlobalOperation.RETRY_ROLLBACK));
+        return Stream.of(
+                Arguments.of(globalSession)
+        );
     }
 }

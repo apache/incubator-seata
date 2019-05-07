@@ -21,8 +21,8 @@ import java.sql.SQLException;
 
 import javax.sql.rowset.serial.SerialBlob;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -60,7 +60,7 @@ public class BlobUtilsTest {
      * Test input stream 2 string.
      */
     @Test
-    @Ignore
+    @Disabled
     public void testInputStream2String() {
         InputStream inputStream = BlobUtilsTest.class.getClassLoader().getResourceAsStream("test.txt");
         assertThat(BlobUtils.inputStream2String(inputStream)).isEqualTo("abc\n"
