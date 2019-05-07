@@ -17,9 +17,9 @@ package io.seata.discovery.registry.sofa;
 
 import com.alipay.sofa.registry.server.test.TestRegistryMain;
 import org.junit.AfterClass;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -42,7 +42,7 @@ public class SofaRegistryServiceImplTest {
         try {
             registryMain.startRegistry();
         } catch (Exception e) {
-            Assert.fail("start sofaregistry fail");
+            Assertions.fail("start sofaregistry fail");
         }
     }
 
@@ -54,7 +54,7 @@ public class SofaRegistryServiceImplTest {
         try {
             instance.register(address);
         } catch (Exception e) {
-            Assert.fail(e.getMessage());
+            Assertions.fail(e.getMessage());
         }
 
         //need sofa registry to sync data
@@ -67,17 +67,17 @@ public class SofaRegistryServiceImplTest {
         try {
             result = instance.lookup("my_test_tx_group");
         } catch (Exception e) {
-            Assert.fail(e.getMessage());
+            Assertions.fail(e.getMessage());
         }
 
-        Assert.assertTrue(result.size() > 0);
-        Assert.assertEquals(address, result.get(0));
+        Assertions.assertTrue(result.size() > 0);
+        Assertions.assertEquals(address, result.get(0));
 
 
         try {
             instance.unregister(address);
         } catch (Exception e) {
-            Assert.fail(e.getMessage());
+            Assertions.fail(e.getMessage());
         }
 
         try {
@@ -88,10 +88,10 @@ public class SofaRegistryServiceImplTest {
         try {
             result = instance.lookup("my_test_tx_group");
         } catch (Exception e) {
-            Assert.fail(e.getMessage());
+            Assertions.fail(e.getMessage());
         }
 
-        Assert.assertEquals(0, result.size());
+        Assertions.assertEquals(0, result.size());
 
     }
 

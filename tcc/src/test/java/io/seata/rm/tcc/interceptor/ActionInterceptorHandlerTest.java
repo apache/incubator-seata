@@ -18,8 +18,8 @@ package io.seata.rm.tcc.interceptor;
 import io.seata.rm.tcc.TccAction;
 import io.seata.rm.tcc.TccParam;
 import io.seata.rm.tcc.api.BusinessActionContext;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -55,9 +55,9 @@ public class ActionInterceptorHandlerTest {
                 new Object[]{null, 10, list, tccParam});
         System.out.println(paramContext);
 
-        Assert.assertEquals(10, paramContext.get("a"));
-        Assert.assertEquals("b", paramContext.get("b"));
-        Assert.assertEquals("abc@ali.com", paramContext.get("email"));
+        Assertions.assertEquals(10, paramContext.get("a"));
+        Assertions.assertEquals("b", paramContext.get("b"));
+        Assertions.assertEquals("abc@ali.com", paramContext.get("email"));
     }
 
 }

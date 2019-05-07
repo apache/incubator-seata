@@ -19,10 +19,10 @@ import io.seata.common.util.NetUtil;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.curator.test.TestingServer;
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -35,41 +35,42 @@ import java.util.concurrent.TimeUnit;
  */
 public class ZookeeperRegisterServiceImplTest {
     protected static TestingServer server = null;
-    @BeforeClass
+
+    @BeforeAll
     public static void adBeforeClass() throws Exception {
         server = new TestingServer(2181, true);
         server.start();
     }
 
-    @AfterClass
+    @AfterAll
     public static void adAfterClass() throws Exception {
         if (server != null) {
             server.stop();
         }
     }
 
-    ZookeeperRegisterServiceImpl service  = (ZookeeperRegisterServiceImpl) new ZookeeperRegistryProvider().provide();
-    
+    ZookeeperRegisterServiceImpl service = (ZookeeperRegisterServiceImpl) new ZookeeperRegistryProvider().provide();
+
     @Test
     public void getInstance() {
         ZookeeperRegisterServiceImpl service1 = ZookeeperRegisterServiceImpl.getInstance();
-        Assert.assertEquals(service1, service);
+        Assertions.assertEquals(service1, service);
     }
-    
+
     @Test
     public void buildZkTest() {
         ZkClient client = service.buildZkClient("127.0.0.1:2181", 5000, 5000);
-        Assert.assertTrue(client.exists("/zookeeper"));
+        Assertions.assertTrue(client.exists("/zookeeper"));
     }
 
     @Test
     public void testAll() throws Exception {
         service.register(new InetSocketAddress(NetUtil.getLocalAddress(), 33333));
 
-        Assert.assertNull(service.lookup("xxx"));
+        Assertions.assertNull(service.lookup("xxx"));
         List<InetSocketAddress> lookup2 = service.doLookup("default");
-        Assert.assertTrue(lookup2.size() == 1);
-        
+        Assertions.assertTrue(lookup2.size() == 1);
+
         final List<String> data = new ArrayList<>();
         final CountDownLatch latch = new CountDownLatch(1);
         IZkChildListener listener = (s, list) -> {
@@ -86,11 +87,11 @@ public class ZookeeperRegisterServiceImplTest {
             latch2.countDown();
         };
         service.subscribe("default", listener2);
-        
+
         service.unregister(new InetSocketAddress(NetUtil.getLocalAddress(), 33333));
         latch2.await(1000, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(data2.size() == 0);
-        
+        Assertions.assertTrue(data2.size() == 0);
+
         service.unsubscribe("default", listener);
         service.unsubscribe("default", listener2);
     }

@@ -20,8 +20,8 @@ import java.nio.ByteBuffer;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Branch register request test.
@@ -37,7 +37,7 @@ public class BranchRegisterRequestTest {
         branchRegisterRequest.setBranchType(BranchType.AT);
         branchRegisterRequest.setResourceId("resource1");
         branchRegisterRequest.setLockKey("lock_key_1");
-        Assert.assertEquals("xid=127.0.0.1:8091:1249853,branchType=AT,resourceId=resource1,lockKey=lock_key_1",
+        Assertions.assertEquals("xid=127.0.0.1:8091:1249853,branchType=AT,resourceId=resource1,lockKey=lock_key_1",
             branchRegisterRequest.toString());
 
     }
@@ -59,10 +59,10 @@ public class BranchRegisterRequestTest {
         byteBuffer.flip();
         BranchRegisterRequest decodeBranchRegisterRequest = new BranchRegisterRequest();
         decodeBranchRegisterRequest.decode(byteBuffer);
-        Assert.assertEquals(branchRegisterRequest.getXid(), decodeBranchRegisterRequest.getXid());
-        Assert.assertEquals(branchRegisterRequest.getLockKey(), decodeBranchRegisterRequest.getLockKey());
-        Assert.assertEquals(branchRegisterRequest.getResourceId(), decodeBranchRegisterRequest.getResourceId());
-        Assert.assertEquals(branchRegisterRequest.getApplicationData(),
+        Assertions.assertEquals(branchRegisterRequest.getXid(), decodeBranchRegisterRequest.getXid());
+        Assertions.assertEquals(branchRegisterRequest.getLockKey(), decodeBranchRegisterRequest.getLockKey());
+        Assertions.assertEquals(branchRegisterRequest.getResourceId(), decodeBranchRegisterRequest.getResourceId());
+        Assertions.assertEquals(branchRegisterRequest.getApplicationData(),
             decodeBranchRegisterRequest.getApplicationData());
     }
 }
