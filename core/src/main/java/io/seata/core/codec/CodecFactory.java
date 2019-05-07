@@ -1,9 +1,24 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.core.codec;
-
-import io.seata.common.loader.EnhancedServiceLoader;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.seata.common.loader.EnhancedServiceLoader;
 
 /**
  * The type Codec factory.
@@ -24,9 +39,9 @@ public class CodecFactory {
      * @param code the code
      * @return the codec
      */
-    public static synchronized Codec getCodec(byte code){
+    public static synchronized Codec getCodec(byte code) {
         CodecType codecType = CodecType.getResultCode(code);
-        if(CODEC_MAP.get(codecType) != null){
+        if (CODEC_MAP.get(codecType) != null) {
             return CODEC_MAP.get(codecType);
         }
         Codec codec = EnhancedServiceLoader.load(Codec.class, codecType.name());
@@ -42,7 +57,7 @@ public class CodecFactory {
      * @param t    the t
      * @return the byte [ ]
      */
-    public static <T> byte[] encode(byte code, T t){
+    public static <T> byte[] encode(byte code, T t) {
         return getCodec(code).encode(t);
     }
 
@@ -54,9 +69,8 @@ public class CodecFactory {
      * @param bytes the bytes
      * @return the t
      */
-    public static <T> T decode(byte code, byte[] bytes){
-        return getCodec(code).decode(bytes);
+    public static <T> T decode(byte code, String clazz, byte[] bytes) {
+        return getCodec(code).decode(clazz,bytes);
     }
-
 
 }

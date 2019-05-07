@@ -102,25 +102,22 @@ public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
 
     @Override
     public boolean decode(ByteBuf in) {
-        int i = in.readableBytes();
-        if (i < 3) {
+        if (in.readableBytes() < 3) {
             return false;
         }
-        i -= 3;
         this.identified = (in.readByte() == 1);
-
         short len = in.readShort();
-        if (len > 0) {
-            if (i < len) {
-                return false;
-            }
-
-            byte[] bs = new byte[len];
-            in.readBytes(bs);
-            this.setVersion(new String(bs, UTF8));
+        if (len <= 0) {
+            return false;
         }
-
+        if (in.readableBytes() < len) {
+            return false;
+        }
+        byte[] bs = new byte[len];
+        in.readBytes(bs);
+        this.setVersion(new String(bs, UTF8));
         return true;
+
     }
 
     @Override

@@ -13,28 +13,35 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.codec.seata;
+package io.seata.codec.protobuf;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.codec.Codec;
 
 /**
- * The type Seata codec.
+ * The type Protobuf codec.
  *
- * @author zhangsen
+ * @author leizhiyuan
  * @data 2019 /5/6
  */
-@LoadLevel(name="seata", order = 0)
-public class SeataCodec implements Codec {
+@LoadLevel(name = "protobuf", order = 0)
+public class ProtobufCodec implements Codec {
 
     @Override
     public <T> byte[] encode(T t) {
-        return new byte[0];
+        if (t == null) {
+            throw new NullPointerException();
+        }
+
+        return ProtobufSerialzer.serializeContent(t);
     }
 
     @Override
-    public <T> T decode(String clazz,byte[] bytes) {
-        return null;
+    public <T> T decode(String clazz, byte[] bytes) {
+        if (bytes == null) {
+            throw new NullPointerException();
+        }
+        return ProtobufSerialzer.deserializeContent(clazz, bytes);
     }
 
 }

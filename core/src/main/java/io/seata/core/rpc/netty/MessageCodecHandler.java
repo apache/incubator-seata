@@ -24,6 +24,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.codec.CodecFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
@@ -31,9 +32,8 @@ import io.seata.core.protocol.MessageCodec;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.convertor.PbConvertor;
 import io.seata.core.protocol.protobuf.HeartbeatMessageProto;
-import io.seata.core.protocol.serialize.ProtobufConvertManager;
-import io.seata.core.protocol.serialize.ProtobufSerialzer;
 import io.seata.core.codec.CodecType;
+import io.seata.core.protocol.serialize.ProtobufConvertManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -124,7 +124,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("msg:" + msg.getBody().toString());
                 }
-                byte[] body = protobufSerialize(msg.getBody());
+                byte[] body = CodecFactory.encode(CodecType.PROTOBUF.getCode(),msg.getBody());
                 final String name = msg.getBody().getClass().getName();
                 final short bodyLength = (short)(body.length + name.length() + 4);
                 byteBuffer.putShort(bodyLength);
@@ -150,60 +150,46 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-        int begin = in.readerIndex();
-        int magicIndex = getMagicIndex(in);
-        if (magicIndex == NOT_FOUND_INDEX) {
-            LOGGER.error("codec decode not found magic offset");
-            in.skipBytes(in.readableBytes());
-            return;
-        }
-        if (magicIndex != 0 && LOGGER.isInfoEnabled()) {
-            LOGGER.info("please notice magicIndex is not zero offset!!!");
-        }
-        in.skipBytes(magicIndex - in.readerIndex());
+
         if (in.readableBytes() < HEAD_LENGTH) {
-            LOGGER.error("decode less than header length");
             return;
         }
-        byte[] buffer = new byte[HEAD_LENGTH];
-        in.readBytes(buffer);
-        ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
-        short magic = byteBuffer.getShort();
-        if (magic != MAGIC) {
-            LOGGER.error("decode error,will close channel:" + ctx.channel());
+        in.markReaderIndex();
+        short protocol = in.readShort();
+        if (protocol != MAGIC) {
+            String emsg = "decode error,Unknown protocol: " + protocol + ",will close channel:" + ctx.channel();
+            LOGGER.error(emsg);
             ctx.channel().close();
             return;
         }
 
-        int flag = byteBuffer.getShort();
+        int flag = (int)in.readShort();
+
         boolean isHeartbeat = (FLAG_HEARTBEAT & flag) > 0;
         boolean isRequest = (FLAG_REQUEST & flag) > 0;
         boolean isSeataCodec = (FLAG_SEATA_CODEC & flag) > 0;
 
         short bodyLength = 0;
         short typeCode = 0;
-        if (!isSeataCodec) { bodyLength = byteBuffer.getShort(); } else { typeCode = byteBuffer.getShort(); }
-        long msgId = byteBuffer.getLong();
-
+        if (!isSeataCodec) { bodyLength = in.readShort(); } else { typeCode = in.readShort(); }
+        long msgId = in.readLong();
         if (isHeartbeat) {
             RpcMessage rpcMessage = new RpcMessage();
             rpcMessage.setId(msgId);
             rpcMessage.setAsync(true);
             rpcMessage.setHeartbeat(isHeartbeat);
             rpcMessage.setRequest(isRequest);
-
             if (isRequest) {
                 rpcMessage.setBody(HeartbeatMessage.PING);
             } else {
                 rpcMessage.setBody(HeartbeatMessage.PONG);
             }
-
             out.add(rpcMessage);
             return;
         }
 
         if (bodyLength > 0 && in.readableBytes() < bodyLength) {
-            in.readerIndex(begin);
+            in.resetReaderIndex();
             return;
         }
 
@@ -217,8 +203,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
             if (isSeataCodec) {
                 MessageCodec msgCodec = AbstractMessage.getMsgInstanceByCode(typeCode);
                 if (!msgCodec.decode(in)) {
-                    LOGGER.error(msgCodec + " decode error.");
-                    in.readerIndex(begin);
+                    in.resetReaderIndex();
                     return;
                 }
                 rpcMessage.setBody(msgCodec);
@@ -229,7 +214,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 byte[] body = new byte[bodyLength - clazzNameLength - 4];
                 in.readBytes(body);
                 final String clazz = new String(clazzName, UTF8);
-                Object bodyObject = protobufDeserialize(clazz, body);
+                Object bodyObject = CodecFactory.decode(CodecType.PROTOBUF.getCode(),clazz, body);
 
                 if (CodecType.PROTOBUF.name().equalsIgnoreCase(serialize)) {
                     final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(clazz);
@@ -249,51 +234,5 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 + msgId);
         }
 
-    }
-
-    /**
-     * Hessian serialize byte [ ].
-     *
-     * @param object the object
-     * @return the byte [ ]
-     * @throws Exception the exception
-     */
-    private static byte[] protobufSerialize(Object object) throws Exception {
-        if (object == null) {
-            throw new NullPointerException();
-        }
-
-        return ProtobufSerialzer.serializeContent(object);
-
-    }
-
-    /**
-     * Hessian deserialize object.
-     *
-     * @param bytes the bytes
-     * @return the object
-     * @throws Exception the exception
-     */
-    private static Object protobufDeserialize(String clazz, byte[] bytes) throws Exception {
-        if (bytes == null) {
-            throw new NullPointerException();
-        }
-        return ProtobufSerialzer.deserializeContent(clazz, bytes);
-
-    }
-
-    private static int getMagicIndex(ByteBuf in) {
-        boolean found = false;
-        int readIndex = in.readerIndex();
-        int begin = 0;
-        while (readIndex < in.writerIndex()) {
-            if (in.getByte(readIndex) == MAGIC_HALF && in.getByte(readIndex + 1) == MAGIC_HALF) {
-                begin = readIndex;
-                found = true;
-                break;
-            }
-            ++readIndex;
-        }
-        return found ? begin : NOT_FOUND_INDEX;
     }
 }
