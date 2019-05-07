@@ -155,6 +155,12 @@
             <version>${assertj-core.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testcontainers.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
     <dependencyManagement>
         <dependencies>
@@ -275,11 +281,6 @@
                 <groupId>io.etcd</groupId>
                 <artifactId>jetcd-launcher</artifactId>
                 <version>${etcd-client-v3.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers</artifactId>
-                <version>${testcontainers.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
