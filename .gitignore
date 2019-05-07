@@ -38,3 +38,4 @@ Thumbs.db
 *.orig
 *.class
 data*
+/.metadata/
