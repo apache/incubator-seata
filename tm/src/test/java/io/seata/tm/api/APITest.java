@@ -119,18 +119,15 @@ public class APITest {
      */
     @Test
     public void testNestedCommit() throws Throwable {
-        TransactionalTemplate template = new TransactionalTemplate();
-        template.execute(new AbstractTransactionalExecutor() {
+        TransactionalTemplate.execute(new AbstractTransactionalExecutor() {
             @Override
             public Object execute() throws Throwable {
 
-                TransactionalTemplate template = new TransactionalTemplate();
-                template.execute(new AbstractTransactionalExecutor() {
+                TransactionalTemplate.execute(new AbstractTransactionalExecutor() {
                     @Override
                     public Object execute() throws Throwable {
 
-                        TransactionalTemplate template = new TransactionalTemplate();
-                        template.execute(new AbstractTransactionalExecutor() {
+                        TransactionalTemplate.execute(new AbstractTransactionalExecutor() {
                             @Override
                             public Object execute() throws Throwable {
                                 return null;
@@ -154,21 +151,18 @@ public class APITest {
 
         final String oexMsg = "xxx";
 
-        TransactionalTemplate template = new TransactionalTemplate();
         try {
-            template.execute(new AbstractTransactionalExecutor() {
+            TransactionalTemplate.execute(new AbstractTransactionalExecutor() {
                 @Override
                 public Object execute() throws Throwable {
 
-                    TransactionalTemplate template = new TransactionalTemplate();
                     try {
-                        template.execute(new AbstractTransactionalExecutor() {
+                        TransactionalTemplate.execute(new AbstractTransactionalExecutor() {
                             @Override
                             public Object execute() throws Throwable {
 
-                                TransactionalTemplate template = new TransactionalTemplate();
                                 try {
-                                    template.execute(new AbstractTransactionalExecutor() {
+                                    TransactionalTemplate.execute(new AbstractTransactionalExecutor() {
                                         @Override
                                         public Object execute() throws Throwable {
                                             throw new RuntimeException(oexMsg);

@@ -76,8 +76,7 @@ public class TransactionTemplateTest {
         TransactionHook transactionHook = Mockito.mock(TransactionHook.class);
 
         TransactionHookManager.registerHook(transactionHook);
-        TransactionalTemplate template = new TransactionalTemplate();
-        template.execute(transactionalExecutor);
+        TransactionalTemplate.execute(transactionalExecutor);
         verifyCommit(transactionHook);
     }
 
@@ -86,9 +85,8 @@ public class TransactionTemplateTest {
         TransactionHook transactionHook = Mockito.mock(TransactionHook.class);
         when(transactionalExecutor.execute()).thenThrow(new RuntimeException());
         TransactionHookManager.registerHook(transactionHook);
-        TransactionalTemplate template = new TransactionalTemplate();
         try {
-            template.execute(transactionalExecutor);
+            TransactionalTemplate.execute(transactionalExecutor);
         } catch (Exception e) {
             //catch rollback exception
         }
@@ -131,9 +129,8 @@ public class TransactionTemplateTest {
 
         when(transactionalExecutor.execute()).thenThrow(throwable);
         TransactionHookManager.registerHook(transactionHook);
-        TransactionalTemplate template = new TransactionalTemplate();
         try {
-            template.execute(transactionalExecutor);
+            TransactionalTemplate.execute(transactionalExecutor);
         } catch (Exception e) {
             //catch rollback exception
         }

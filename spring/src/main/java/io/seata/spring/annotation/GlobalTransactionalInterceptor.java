@@ -49,9 +49,6 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionalInterceptor.class);
     private static final FailureHandler DEFAULT_FAIL_HANDLER = new DefaultFailureHandlerImpl();
-
-    private final TransactionalTemplate transactionalTemplate = new TransactionalTemplate();
-    private final GlobalLockTemplate<Object> globalLockTemplate = new GlobalLockTemplate<>();
     private final FailureHandler failureHandler;
 
     /**
@@ -84,7 +81,7 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
     }
 
     private Object handleGlobalLock(final MethodInvocation methodInvocation) throws Exception {
-        return globalLockTemplate.execute(new Callable<Object>() {
+        return GlobalLockTemplate.execute(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
                 try {
@@ -103,7 +100,7 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
     private Object handleGlobalTransaction(final MethodInvocation methodInvocation,
                                            final GlobalTransactional globalTrxAnno) throws Throwable {
         try {
-            return transactionalTemplate.execute(new TransactionalExecutor() {
+            return TransactionalTemplate.execute(new TransactionalExecutor() {
                 @Override
                 public Object execute() throws Throwable {
                     return methodInvocation.proceed();

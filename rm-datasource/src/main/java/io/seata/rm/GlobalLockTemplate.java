@@ -26,7 +26,7 @@ import io.seata.core.context.RootContext;
  * @author deyou
  * @date 2019.03.07
  */
-public class GlobalLockTemplate<T> {
+public class GlobalLockTemplate {
 
     /**
      * Execute object.
@@ -35,7 +35,7 @@ public class GlobalLockTemplate<T> {
      * @return the object
      * @throws Exception
      */
-    public Object execute(Callable<T> business) throws Exception {
+    public static  <T> Object execute(Callable<T> business) throws Exception {
 
         Object rs = null;
         try {
