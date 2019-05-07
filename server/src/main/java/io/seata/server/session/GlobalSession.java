@@ -285,8 +285,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public GlobalSession(String applicationId, String transactionServiceGroup, String transactionName, int timeout) {
         this.transactionId = UUIDGenerator.generateUUID();
+        this.sessionStatusStateMachine.fire(GlobalOperation.BEGIN);
         this.status = GlobalStatus.Begin;
-
         this.applicationId = applicationId;
         this.transactionServiceGroup = transactionServiceGroup;
         this.transactionName = transactionName;
