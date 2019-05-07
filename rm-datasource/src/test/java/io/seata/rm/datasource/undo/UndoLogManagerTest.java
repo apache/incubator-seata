@@ -15,7 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

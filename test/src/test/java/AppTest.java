@@ -13,16 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.test.client;
-
+import io.seata.common.ApplicationKeeper;
 import io.seata.rm.RMClient;
-import io.seata.test.common.ApplicationKeeper;
 import io.seata.tm.TMClient;
 import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalTemplate;
-
 import io.seata.tm.api.transaction.TransactionInfo;
-import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -52,10 +49,10 @@ public class AppTest {
         RMClient.init(APPLICATION_ID, TX_SERVICE_GROUP);
 
         ClassPathXmlApplicationContext context = new ClassPathXmlApplicationContext(
-            "basic-test-context.xml");
+                "basic-test-context.xml");
 
-        final JdbcTemplate jdbcTemplate = (JdbcTemplate)context
-            .getBean("jdbcTemplate");
+        final JdbcTemplate jdbcTemplate = (JdbcTemplate) context
+                .getBean("jdbcTemplate");
 
         jdbcTemplate.update("delete from undo_log");
         jdbcTemplate.update("delete from user0");
@@ -70,7 +67,7 @@ public class AppTest {
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("Exception Rollback Business Begin ...");
                     }
-                    jdbcTemplate.update("update user0 set name = 'xxx' where id = ?", new Object[] {1});
+                    jdbcTemplate.update("update user0 set name = 'xxx' where id = ?", new Object[]{1});
                     jdbcTemplate.update("insert into user1 (id, name, gmt) values (1, 'user1', '2019-01-01')");
                     throw bizException;
                 }
@@ -89,11 +86,11 @@ public class AppTest {
             if (code == TransactionalExecutor.Code.RollbackDone) {
                 Throwable businessEx = e.getOriginalException();
                 if (businessEx instanceof MyBusinessException) {
-                    Assert.assertEquals(((MyBusinessException)businessEx).getBusinessErrorCode(),
-                        bizException.businessErrorCode);
+                    Assertions.assertEquals(((MyBusinessException) businessEx).getBusinessErrorCode(),
+                            bizException.businessErrorCode);
                 }
             } else {
-                Assert.assertFalse("Not expected," + e.getMessage(), false);
+                Assertions.assertFalse(false, "Not expected," + e.getMessage());
 
             }
         }

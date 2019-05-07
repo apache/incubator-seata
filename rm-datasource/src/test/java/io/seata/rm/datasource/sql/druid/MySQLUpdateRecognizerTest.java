@@ -22,8 +22,8 @@ import java.util.Collections;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.rm.datasource.ParametersHolder;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type My sql update recognizer test.
@@ -42,12 +42,12 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
 
-        Assert.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
-        Assert.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
-        Assert.assertEquals(1, mySQLUpdateRecognizer.getUpdateColumns().size());
-        Assert.assertEquals("name", mySQLUpdateRecognizer.getUpdateColumns().get(0));
-        Assert.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
-        Assert.assertEquals("id = 'id1'", mySQLUpdateRecognizer.getWhereCondition());
+        Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
+        Assertions.assertEquals(1, mySQLUpdateRecognizer.getUpdateColumns().size());
+        Assertions.assertEquals("name", mySQLUpdateRecognizer.getUpdateColumns().get(0));
+        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
+        Assertions.assertEquals("id = 'id1'", mySQLUpdateRecognizer.getWhereCondition());
     }
 
     /**
@@ -62,14 +62,14 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
 
-        Assert.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
-        Assert.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
-        Assert.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
-        Assert.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
-        Assert.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
-        Assert.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
-        Assert.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
-        Assert.assertEquals("id = 'id1'", mySQLUpdateRecognizer.getWhereCondition());
+        Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
+        Assertions.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
+        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
+        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
+        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
+        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
+        Assertions.assertEquals("id = 'id1'", mySQLUpdateRecognizer.getWhereCondition());
     }
 
     /**
@@ -84,13 +84,13 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
 
-        Assert.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
-        Assert.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
-        Assert.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
-        Assert.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
-        Assert.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
-        Assert.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
-        Assert.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
+        Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
+        Assertions.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
+        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
+        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
+        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
+        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
 
         ArrayList<Object> paramAppender = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
@@ -102,9 +102,9 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
             }
         }, paramAppender);
 
-        Assert.assertEquals(Collections.singletonList("id1"), paramAppender);
+        Assertions.assertEquals(Collections.singletonList("id1"), paramAppender);
 
-        Assert.assertEquals("id = ?", whereCondition);
+        Assertions.assertEquals("id = ?", whereCondition);
     }
 
     /**
@@ -119,13 +119,13 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
 
-        Assert.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
-        Assert.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
-        Assert.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
-        Assert.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
-        Assert.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
-        Assert.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
-        Assert.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
+        Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
+        Assertions.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
+        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
+        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
+        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
+        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
 
         ArrayList<Object> paramAppender = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
@@ -139,9 +139,9 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
             }
         }, paramAppender);
 
-        Assert.assertEquals(Arrays.asList("id1", "id2"), paramAppender);
+        Assertions.assertEquals(Arrays.asList("id1", "id2"), paramAppender);
 
-        Assert.assertEquals("id IN (?, ?)", whereCondition);
+        Assertions.assertEquals("id IN (?, ?)", whereCondition);
     }
 
     /**
@@ -156,13 +156,13 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
 
-        Assert.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
-        Assert.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
-        Assert.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
-        Assert.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
-        Assert.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
-        Assert.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
-        Assert.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
+        Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
+        Assertions.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
+        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
+        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
+        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
+        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
 
         ArrayList<Object> paramAppender = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
@@ -178,9 +178,9 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
             }
         }, paramAppender);
 
-        Assert.assertEquals(Arrays.asList("id1", "id2", "name"), paramAppender);
+        Assertions.assertEquals(Arrays.asList("id1", "id2", "name"), paramAppender);
 
-        Assert.assertEquals("id IN (?, ?)\nAND name1 = ?", whereCondition);
+        Assertions.assertEquals("id IN (?, ?)\nAND name1 = ?", whereCondition);
     }
 
     /**
@@ -195,13 +195,13 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLUpdateRecognizer mySQLUpdateRecognizer = new MySQLUpdateRecognizer(sql, statement);
 
-        Assert.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
-        Assert.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
-        Assert.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
-        Assert.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
-        Assert.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
-        Assert.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
-        Assert.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
+        Assertions.assertEquals(sql, mySQLUpdateRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mySQLUpdateRecognizer.getTableName());
+        Assertions.assertEquals(2, mySQLUpdateRecognizer.getUpdateColumns().size());
+        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateColumns().get(0));
+        Assertions.assertEquals("name1", mySQLUpdateRecognizer.getUpdateValues().get(0));
+        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
+        Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
 
         ArrayList<Object> paramAppender = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
@@ -215,7 +215,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
             }
         }, paramAppender);
 
-        Assert.assertEquals(Arrays.asList("id1", "id2"), paramAppender);
-        Assert.assertEquals("id BETWEEN ? AND ?", whereCondition);
+        Assertions.assertEquals(Arrays.asList("id1", "id2"), paramAppender);
+        Assertions.assertEquals("id BETWEEN ? AND ?", whereCondition);
     }
 }

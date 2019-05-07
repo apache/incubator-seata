@@ -25,10 +25,11 @@ import io.etcd.jetcd.watch.WatchResponse;
 import io.seata.discovery.registery.etcd.EtcdRegistryProvider;
 import io.seata.discovery.registery.etcd.EtcdRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryService;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -41,23 +42,24 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author xingfudeshi@gmail.com
  * @date 2019/04/26
  */
+@Disabled
 public class EtcdRegistryServiceImplTest {
     private static final String REGISTRY_KEY_PREFIX = "registry-seata-";
     private static final String CLUSTER_NAME = "default";
     @Rule
-    private final EtcdClusterResource etcd = new EtcdClusterResource(CLUSTER_NAME, 1);
+    private final static EtcdClusterResource etcd = new EtcdClusterResource(CLUSTER_NAME, 1);
 
     private final Client client = Client.builder().endpoints(etcd.cluster().getClientEndpoints()).build();
     private final static String HOST = "127.0.0.1";
     private final static int PORT = 8091;
 
-    @BeforeClass
-    public void beforeClass() throws Exception {
+    @BeforeAll
+    public static void beforeClass() throws Exception {
         System.setProperty(EtcdRegistryServiceImpl.TEST_ENDPONT, etcd.cluster().getClientEndpoints().get(0).toString());
     }
 
-    @AfterClass
-    public void afterClass() throws Exception {
+    @AfterAll
+    public static void afterClass() throws Exception {
         System.setProperty(EtcdRegistryServiceImpl.TEST_ENDPONT, "");
     }
 

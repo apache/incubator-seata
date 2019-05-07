@@ -15,6 +15,7 @@
  */
 package io.seata.server.coordinator;
 
+import io.netty.channel.Channel;
 import io.seata.common.XID;
 import io.seata.common.util.NetUtil;
 import io.seata.core.exception.TransactionException;
@@ -27,16 +28,18 @@ import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.ServerMessageSender;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
-import io.netty.channel.Channel;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
 import java.util.Collection;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
 /**
  * The type DefaultCoordinator test.
@@ -67,7 +70,7 @@ public class DefaultCoordinatorTest {
 
     private static Core core = new DefaultCore();
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() throws Exception {
         XID.setIpAddress(NetUtil.getLocalIp());
         SessionHolder.init(null);
@@ -76,33 +79,33 @@ public class DefaultCoordinatorTest {
         defaultCoordinator.init();
     }
 
-    @Test(dataProvider = "xidAndBranchIdProviderForCommit")
+    @ParameterizedTest
+    @MethodSource("xidAndBranchIdProviderForCommit")
     public void branchCommit(String xid, Long branchId) {
         BranchStatus result = null;
 
         try {
             result = defaultCoordinator.branchCommit(BranchType.AT, xid, branchId, resourceId, applicationData);
         } catch (TransactionException e) {
-            Assert.fail(e.getMessage());
+            Assertions.fail(e.getMessage());
         }
-        Assert.assertEquals(result, BranchStatus.PhaseTwo_Committed);
+        Assertions.assertEquals(result, BranchStatus.PhaseTwo_Committed);
 
     }
-
-    @Test(dataProvider = "xidAndBranchIdProviderForRollback")
+    @Disabled
+    @ParameterizedTest
+    @MethodSource("xidAndBranchIdProviderForRollback")
     public void branchRollback(String xid, Long branchId) {
         BranchStatus result = null;
         try {
             result = defaultCoordinator.branchRollback(BranchType.AT, xid, branchId, resourceId, applicationData);
         } catch (TransactionException e) {
-            Assert.fail(e.getMessage());
+            Assertions.fail(e.getMessage());
         }
-
-        Assert.assertEquals(result, BranchStatus.PhaseTwo_Rollbacked);
-
+        Assertions.assertEquals(result, BranchStatus.PhaseTwo_Rollbacked);
     }
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() throws Exception {
 
         Collection<GlobalSession> globalSessions = SessionHolder.getRootSessionManager().allSessions();
@@ -115,19 +118,20 @@ public class DefaultCoordinatorTest {
         }
     }
 
-
-    @DataProvider
-    public static Object[][] xidAndBranchIdProviderForCommit() throws Exception {
+    static Stream<Arguments> xidAndBranchIdProviderForCommit() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
         Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
-        return new Object[][]{{xid, branchId}};
+        return Stream.of(
+                Arguments.of(xid, branchId)
+        );
     }
 
-    @DataProvider
-    public static Object[][] xidAndBranchIdProviderForRollback() throws Exception {
+    static Stream<Arguments> xidAndBranchIdProviderForRollback() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
         Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_2);
-        return new Object[][]{{xid, branchId}};
+        return Stream.of(
+                Arguments.of(xid, branchId)
+        );
     }
 
 

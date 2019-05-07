@@ -20,8 +20,8 @@ import java.nio.ByteBuffer;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Codec test.
@@ -47,7 +47,7 @@ public class CodecTest {
         BranchRegisterResponse rs = new BranchRegisterResponse();
         rs.decode(byteBuffer);
 
-        Assert.assertEquals(response.getBranchId(), rs.getBranchId());
-        Assert.assertEquals(response.getResultCode(), rs.getResultCode());
+        Assertions.assertEquals(response.getBranchId(), rs.getBranchId());
+        Assertions.assertEquals(response.getResultCode(), rs.getResultCode());
     }
 }

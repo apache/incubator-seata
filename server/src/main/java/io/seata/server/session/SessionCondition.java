@@ -15,10 +15,6 @@
  */
 package io.seata.server.session;
 
-import io.seata.core.model.GlobalStatus;
-
-import java.util.Set;
-
 /**
  * The type Session condition.
  *

@@ -16,11 +16,9 @@
 package io.seata.core.rpc.netty;
 
 import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
-
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author: jimin.jm@alibaba-inc.com
@@ -36,47 +34,47 @@ public class NettyPoolKeyTest {
     private static final RegisterRMRequest MSG1 = new RegisterRMRequest("applicationId1", "transactionServiceGroup1");
     private static final RegisterRMRequest MSG2 = new RegisterRMRequest("applicationId2", "transactionServiceGroup2");
 
-    @Before
+    @BeforeEach
     public void init() {
         nettyPoolKey = new NettyPoolKey(RM_ROLE, ADDRESS1, MSG1);
     }
 
     @Test
     public void getTransactionRole() {
-        Assert.assertEquals(nettyPoolKey.getTransactionRole(), RM_ROLE);
+        Assertions.assertEquals(nettyPoolKey.getTransactionRole(), RM_ROLE);
     }
 
     @Test
     public void setTransactionRole() {
         nettyPoolKey.setTransactionRole(TM_ROLE);
-        Assert.assertEquals(nettyPoolKey.getTransactionRole(), TM_ROLE);
+        Assertions.assertEquals(nettyPoolKey.getTransactionRole(), TM_ROLE);
     }
 
     @Test
     public void getAddress() {
-        Assert.assertEquals(nettyPoolKey.getAddress(), ADDRESS1);
+        Assertions.assertEquals(nettyPoolKey.getAddress(), ADDRESS1);
     }
 
     @Test
     public void setAddress() {
         nettyPoolKey.setAddress(ADDRESS2);
-        Assert.assertEquals(nettyPoolKey.getAddress(), ADDRESS2);
+        Assertions.assertEquals(nettyPoolKey.getAddress(), ADDRESS2);
     }
 
     @Test
     public void getMessage() {
-        Assert.assertEquals(nettyPoolKey.getMessage(), MSG1);
+        Assertions.assertEquals(nettyPoolKey.getMessage(), MSG1);
     }
 
     @Test
     public void setMessage() {
         nettyPoolKey.setMessage(MSG2);
-        Assert.assertEquals(nettyPoolKey.getMessage(), MSG2);
+        Assertions.assertEquals(nettyPoolKey.getMessage(), MSG2);
     }
 
     @Test
     public void testToString() {
         String expectStr = "transactionRole:RMROLE,address:127.0.0.1:8091,msg:< " + MSG1.toString() + " >";
-        Assert.assertEquals(nettyPoolKey.toString(), expectStr);
+        Assertions.assertEquals(nettyPoolKey.toString(), expectStr);
     }
 }

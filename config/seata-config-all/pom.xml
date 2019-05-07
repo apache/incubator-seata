@@ -29,14 +29,17 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-config-apollo</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-config-zk</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-config-nacos</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

@@ -27,8 +27,8 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Tm rpc client test.
@@ -55,12 +55,12 @@ public class TmRpcClientTest {
 
         NettyClientConfig defaultNettyClientConfig = new NettyClientConfig();
         GenericKeyedObjectPool.Config config = tmRpcClient.getNettyPoolConfig();
-        Assert.assertEquals(defaultNettyClientConfig.getMaxPoolActive(), config.maxActive);
-        Assert.assertEquals(defaultNettyClientConfig.getMinPoolIdle(), config.minIdle);
-        Assert.assertEquals(defaultNettyClientConfig.getMaxAcquireConnMills(), config.maxWait);
-        Assert.assertEquals(defaultNettyClientConfig.isPoolTestBorrow(), config.testOnBorrow);
-        Assert.assertEquals(defaultNettyClientConfig.isPoolTestReturn(), config.testOnReturn);
-        Assert.assertEquals(defaultNettyClientConfig.isPoolLifo(), config.lifo);
+        Assertions.assertEquals(defaultNettyClientConfig.getMaxPoolActive(), config.maxActive);
+        Assertions.assertEquals(defaultNettyClientConfig.getMinPoolIdle(), config.minIdle);
+        Assertions.assertEquals(defaultNettyClientConfig.getMaxAcquireConnMills(), config.maxWait);
+        Assertions.assertEquals(defaultNettyClientConfig.isPoolTestBorrow(), config.testOnBorrow);
+        Assertions.assertEquals(defaultNettyClientConfig.isPoolTestReturn(), config.testOnReturn);
+        Assertions.assertEquals(defaultNettyClientConfig.isPoolLifo(), config.lifo);
     }
 
     /**
@@ -81,22 +81,22 @@ public class TmRpcClientTest {
         bootstrapField.setAccessible(true);
         Bootstrap bootstrap = (Bootstrap)bootstrapField.get(tmRpcClient);
 
-        Assert.assertNotNull(bootstrap);
+        Assertions.assertNotNull(bootstrap);
         Field optionsField = getDeclaredField(bootstrap, "options");
         optionsField.setAccessible(true);
         Map<ChannelOption<?>, Object> options = (Map<ChannelOption<?>, Object>)optionsField.get(bootstrap);
-        Assert.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.TCP_NODELAY)));
-        Assert.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.SO_KEEPALIVE)));
-        Assert.assertEquals(10000, options.get(ChannelOption.CONNECT_TIMEOUT_MILLIS));
-        Assert.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.SO_KEEPALIVE)));
-        Assert.assertEquals(153600, options.get(ChannelOption.SO_RCVBUF));
+        Assertions.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.TCP_NODELAY)));
+        Assertions.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.SO_KEEPALIVE)));
+        Assertions.assertEquals(10000, options.get(ChannelOption.CONNECT_TIMEOUT_MILLIS));
+        Assertions.assertTrue(Boolean.TRUE.equals(options.get(ChannelOption.SO_KEEPALIVE)));
+        Assertions.assertEquals(153600, options.get(ChannelOption.SO_RCVBUF));
 
         Field channelFactoryField = getDeclaredField(bootstrap, "channelFactory");
         channelFactoryField.setAccessible(true);
         ChannelFactory<? extends Channel>
             channelFactory = (ChannelFactory<? extends Channel>)channelFactoryField.get(bootstrap);
-        Assert.assertNotNull(channelFactory);
-        Assert.assertTrue(channelFactory.newChannel() instanceof NioSocketChannel);
+        Assertions.assertNotNull(channelFactory);
+        Assertions.assertTrue(channelFactory.newChannel() instanceof NioSocketChannel);
 
     }
 

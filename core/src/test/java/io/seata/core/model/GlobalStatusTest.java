@@ -15,11 +15,12 @@
  */
 package io.seata.core.model;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * A unit test for {@link GlobalStatus}
+ *
  * @author Lay
  * @date 2019/3/6
  */
@@ -30,24 +31,24 @@ public class GlobalStatusTest {
     @Test
     public void testGetCode() {
         int code = GlobalStatus.Begin.getCode();
-        Assert.assertEquals(code, BEGIN_CODE);
+        Assertions.assertEquals(code, BEGIN_CODE);
     }
 
     @Test
     public void testGetWithByte() {
-        GlobalStatus branchStatus = GlobalStatus.get((byte)BEGIN_CODE);
-        Assert.assertEquals(branchStatus, GlobalStatus.Begin);
+        GlobalStatus branchStatus = GlobalStatus.get((byte) BEGIN_CODE);
+        Assertions.assertEquals(branchStatus, GlobalStatus.Begin);
     }
 
     @Test
     public void testGetWithInt() {
         GlobalStatus branchStatus = GlobalStatus.get(BEGIN_CODE);
-        Assert.assertEquals(branchStatus, GlobalStatus.Begin);
+        Assertions.assertEquals(branchStatus, GlobalStatus.Begin);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGetException() {
-        GlobalStatus.get(NONE);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> GlobalStatus.get(NONE));
     }
 
 }

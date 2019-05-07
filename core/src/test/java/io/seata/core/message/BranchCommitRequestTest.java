@@ -20,8 +20,8 @@ import io.seata.core.protocol.transaction.BranchCommitRequest;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Branch commit request test.
@@ -46,7 +46,7 @@ public class BranchCommitRequestTest {
         branchCommitRequest.setResourceId("resource1");
         branchCommitRequest.setApplicationData("app1");
 
-        Assert.assertEquals("xid=127.0.0.1:9999:39875642,branchId=1,branchType=AT,"
+        Assertions.assertEquals("xid=127.0.0.1:9999:39875642,branchId=1,branchType=AT,"
             + "resourceId=resource1,applicationData=app1", branchCommitRequest.toString());
 
     }
@@ -68,10 +68,10 @@ public class BranchCommitRequestTest {
 
         BranchCommitRequest decodeBranchCommitRequest = new BranchCommitRequest();
         decodeBranchCommitRequest.decode(byteBuffer);
-        Assert.assertEquals(decodeBranchCommitRequest.getXid(), branchCommitRequest.getXid());
-        Assert.assertEquals(decodeBranchCommitRequest.getBranchId(), branchCommitRequest.getBranchId());
-        Assert.assertEquals(decodeBranchCommitRequest.getResourceId(), branchCommitRequest.getResourceId());
-        Assert.assertEquals(decodeBranchCommitRequest.getApplicationData(), branchCommitRequest.getApplicationData());
-        Assert.assertEquals(decodeBranchCommitRequest.getBranchType(), branchCommitRequest.getBranchType());
+        Assertions.assertEquals(decodeBranchCommitRequest.getXid(), branchCommitRequest.getXid());
+        Assertions.assertEquals(decodeBranchCommitRequest.getBranchId(), branchCommitRequest.getBranchId());
+        Assertions.assertEquals(decodeBranchCommitRequest.getResourceId(), branchCommitRequest.getResourceId());
+        Assertions.assertEquals(decodeBranchCommitRequest.getApplicationData(), branchCommitRequest.getApplicationData());
+        Assertions.assertEquals(decodeBranchCommitRequest.getBranchType(), branchCommitRequest.getBranchType());
     }
 }

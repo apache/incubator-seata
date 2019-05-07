@@ -15,12 +15,9 @@
  */
 package io.seata.rm;
 
-import java.util.concurrent.Callable;
-
 import io.seata.core.context.RootContext;
-
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * check GlobalLockLocalTransactionlTemplate
@@ -39,16 +36,11 @@ public class GlobalLockLocalTransactionlTemplateTest {
 
         GlobalLockTemplate<Object> template = new GlobalLockTemplate<Object>();
 
-        template.execute(new Callable<Object>() {
-
-            @Override
-            public Object call() throws Exception {
-                Assert.assertTrue("lock flag not set!", RootContext.requireGlobalLock());
-                return null;
-            }
+        template.execute(() -> {
+            Assertions.assertTrue(RootContext.requireGlobalLock(), "lock flag not set!");
+            return null;
         });
 
-        Assert.assertTrue("lock flag not clean!", !RootContext.requireGlobalLock());
-
+        Assertions.assertTrue(!RootContext.requireGlobalLock(), "lock flag not clean!");
     }
 }

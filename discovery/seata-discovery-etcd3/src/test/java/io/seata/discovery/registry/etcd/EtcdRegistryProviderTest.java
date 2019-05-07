@@ -17,7 +17,7 @@ package io.seata.discovery.registry.etcd;
 
 import io.seata.discovery.registery.etcd.EtcdRegistryProvider;
 import io.seata.discovery.registery.etcd.EtcdRegistryServiceImpl;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

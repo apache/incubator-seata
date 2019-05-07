@@ -19,9 +19,13 @@ import io.seata.spring.tcc.LocalTccAction;
 import io.seata.spring.tcc.LocalTccActionImpl;
 import io.seata.spring.tcc.TccAction;
 import io.seata.spring.tcc.TccActionImpl;
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+
+import java.util.stream.Stream;
 
 /**
  * GlobalTransactionScanner Unit Test
@@ -35,40 +39,43 @@ public class GlobalTransactionScannerTest {
     /**
      * Test wrap normal bean.
      *
-     * @param bean the bean
+     * @param bean     the bean
      * @param beanName the bean name
      * @param cacheKey the cache key
      */
-    @Test(dataProvider = "normalBeanProvider")
+    @ParameterizedTest
+    @MethodSource("normalBeanProvider")
     public void testWrapNormalBean(Object bean, String beanName, Object cacheKey) {
         Object result = globalTransactionScanner.wrapIfNecessary(bean, beanName, cacheKey);
-        Assert.assertNotSame(result, bean);
+        Assertions.assertNotSame(result, bean);
     }
 
     /**
      * wrap nothing
      *
-     * @param bean the bean
+     * @param bean     the bean
      * @param beanName the bean name
      * @param cacheKey the cache key
      */
-    @Test(dataProvider = "normalTccBeanProvider")
-    public void testWrapNormalTccBean(Object bean, String beanName, Object cacheKey){
+    @ParameterizedTest
+    @MethodSource("normalTccBeanProvider")
+    public void testWrapNormalTccBean(Object bean, String beanName, Object cacheKey) {
         Object result = globalTransactionScanner.wrapIfNecessary(bean, beanName, cacheKey);
-        Assert.assertSame(result, bean);
+        Assertions.assertSame(result, bean);
     }
 
     /**
      * wrapped
      *
-     * @param bean the bean
+     * @param bean     the bean
      * @param beanName the bean name
      * @param cacheKey the cache key
      */
-    @Test(dataProvider = "localTccBeanProvider")
-    public void testWrapLocalTccBean(Object bean, String beanName, Object cacheKey){
+    @ParameterizedTest
+    @MethodSource("localTccBeanProvider")
+    public void testWrapLocalTccBean(Object bean, String beanName, Object cacheKey) {
         TccAction result = (LocalTccAction) globalTransactionScanner.wrapIfNecessary(bean, beanName, cacheKey);
-        Assert.assertNotSame(result, bean);
+        Assertions.assertNotSame(result, bean);
     }
 
     /**
@@ -84,12 +91,13 @@ public class GlobalTransactionScannerTest {
      *
      * @return the object [ ] [ ]
      */
-    @DataProvider
-    public static Object[][] normalBeanProvider() {
+    static Stream<Arguments> normalBeanProvider() {
         Business business = new BusinessImpl();
         String beanName = "business";
         String cacheKey = "business-key";
-        return new Object[][]{{business, beanName, cacheKey}};
+        return Stream.of(
+                Arguments.of(business, beanName, cacheKey)
+        );
     }
 
     /**
@@ -97,12 +105,13 @@ public class GlobalTransactionScannerTest {
      *
      * @return the object [ ] [ ]
      */
-    @DataProvider
-    public static Object[][] normalTccBeanProvider() {
+    static Stream<Arguments> normalTccBeanProvider() {
         TccAction tccAction = new TccActionImpl();
         String beanName = "tccBean";
         String cacheKey = "tccBean-key";
-        return new Object[][]{{tccAction, beanName, cacheKey}};
+        return Stream.of(
+                Arguments.of(tccAction, beanName, cacheKey)
+        );
     }
 
     /**
@@ -110,11 +119,12 @@ public class GlobalTransactionScannerTest {
      *
      * @return the object [ ] [ ]
      */
-    @DataProvider
-    public static Object[][] localTccBeanProvider() {
+    static Stream<Arguments> localTccBeanProvider() {
         LocalTccAction localTccAction = new LocalTccActionImpl();
         String beanName = "lcoalTccBean";
         String cacheKey = "lcoalTccBean-key";
-        return new Object[][]{{localTccAction, beanName, cacheKey}};
+        return Stream.of(
+                Arguments.of(localTccAction, beanName, cacheKey)
+        );
     }
 }

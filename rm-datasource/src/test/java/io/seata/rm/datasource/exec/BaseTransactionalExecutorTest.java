@@ -15,20 +15,19 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.Callable;
-
 import io.seata.rm.GlobalLockTemplate;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Assert;
-import org.junit.Test;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -46,28 +45,24 @@ public class BaseTransactionalExecutorTest {
         StatementProxy statementProxy = new StatementProxy<>(connectionProxy, null);
 
         BaseTransactionalExecutor<Object, Statement> baseTransactionalExecutor
-            = new BaseTransactionalExecutor<Object, Statement>(statementProxy, null, null) {
+                = new BaseTransactionalExecutor<Object, Statement>(statementProxy, null, null) {
             @Override
-            protected Object doExecute(Object... args) throws Throwable {
+            protected Object doExecute(Object... args) {
                 return null;
             }
         };
         GlobalLockTemplate<Object> globalLockLocalTransactionalTemplate = new GlobalLockTemplate<>();
 
         // not in global lock context
-        new Callable<Object>() {
-
-            @Override
-            public Object call() throws Exception {
-                try {
-                    baseTransactionalExecutor.execute(new Object());
-                    Assert.assertTrue("conectionContext set!", !connectionProxy.isGlobalLockRequire());
-                } catch (Throwable e) {
-                    throw new RuntimeException(e);
-                }
-                return null;
+        ((Callable<Object>) () -> {
+            try {
+                baseTransactionalExecutor.execute(new Object());
+                Assertions.assertTrue(!connectionProxy.isGlobalLockRequire(), "conectionContext set!");
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
             }
-        }.call();
+            return null;
+        }).call();
 
         //in global lock context
         globalLockLocalTransactionalTemplate.execute(new Callable<Object>() {
@@ -76,7 +71,7 @@ public class BaseTransactionalExecutorTest {
             public Object call() throws Exception {
                 try {
                     baseTransactionalExecutor.execute(new Object());
-                    Assert.assertTrue("conectionContext not set!", connectionProxy.isGlobalLockRequire());
+                    Assertions.assertTrue(connectionProxy.isGlobalLockRequire(), "conectionContext not set!");
                 } catch (Throwable e) {
                     throw new RuntimeException(e);
                 }
