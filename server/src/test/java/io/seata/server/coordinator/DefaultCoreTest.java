@@ -146,6 +146,7 @@ public class DefaultCoreTest {
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseOne_Done));
+        globalSession.changeStatus(GlobalOperation.COMMIT, GlobalStatus.Committing);
         core.doGlobalCommit(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Committed);
     }
