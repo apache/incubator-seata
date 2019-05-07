@@ -118,7 +118,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void begin() throws TransactionException {
         this.beginTime = System.currentTimeMillis();
         this.active = true;
-        changeStatus(GlobalOperation.BEGIN, GlobalStatus.Begin);
+        sessionStatusStateMachine.fire(GlobalOperation.BEGIN);
+        this.status = GlobalStatus.Begin;
+        for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
+            lifecycleListener.onBegin(this);
+        }
     }
 
     @Override
