@@ -31,14 +31,17 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-config-all</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-discovery-all</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>

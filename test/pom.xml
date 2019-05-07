@@ -48,14 +48,17 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-tm</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-server</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-rm-datasource</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.dubbo</groupId>
