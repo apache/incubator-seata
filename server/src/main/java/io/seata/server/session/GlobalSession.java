@@ -64,7 +64,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
-    private GlobalSessionStatusStateMachine sessionStatusStateMachine = StateMachineHelper.buildGlobalStatusMachine();
+    private GlobalSessionStatusStateMachine sessionStatusStateMachine = StateMachineHelper.buildGlobalStatusMachine(
+        GlobalStatus.UnKnown);
 
     private GlobalSessionSpinLock globalSessionSpinLock = new GlobalSessionSpinLock();
 
@@ -115,19 +116,15 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     @Override
     public void begin() throws TransactionException {
-        this.status = GlobalStatus.Begin;
         this.beginTime = System.currentTimeMillis();
         this.active = true;
-        for (SessionLifecycleListener lifecycleListener : lifecycleListeners) {
-            lifecycleListener.onBegin(this);
-        }
+        changeStatus(GlobalOperation.BEGIN, GlobalStatus.Begin);
     }
 
     @Override
     public void changeStatus(GlobalOperation operation, GlobalStatus status) throws TransactionException {
-        if (sessionStatusStateMachine.canAccept(operation)) {
-            sessionStatusStateMachine.fire(operation);
-        } else {
+        sessionStatusStateMachine.fire(operation);
+        if (sessionStatusStateMachine.getCurrentState() != status) {
             throw new TransactionException(
                 TransactionExceptionCode.FailedToChangeGlobalStatus,
                 "status not can be changed,current status is " + this.status + " ,operation=" + operation
@@ -475,6 +472,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
         this.beginTime = byteBuffer.getLong();
         this.status = GlobalStatus.get(byteBuffer.get());
+
+        this.sessionStatusStateMachine = StateMachineHelper.buildGlobalStatusMachine(this.status);
     }
 
     /**

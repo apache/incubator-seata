@@ -261,7 +261,7 @@ public class SessionStoreTest {
 
         globalSession.changeStatus(GlobalOperation.ROLLBACK,GlobalStatus.Rollbacking);
         globalSession.changeBranchStatus(branchSession1, BranchStatus.PhaseTwo_RollbackFailed_Retryable);
-        globalSession.changeStatus(GlobalOperation.RETRY_ROLLBACK_NORMAL,GlobalStatus.RollbackRetrying);
+        globalSession.changeStatus(GlobalOperation.RETRY_ROLLBACK,GlobalStatus.RollbackRetrying);
 
         lockManager.cleanAllLocks();
 

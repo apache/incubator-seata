@@ -27,12 +27,12 @@ import org.squirrelframework.foundation.fsm.UntypedStateMachineBuilder;
  */
 public class StateMachineHelper {
 
-    public static GlobalSessionStatusStateMachine buildGlobalStatusMachine() {
+    public static GlobalSessionStatusStateMachine buildGlobalStatusMachine(GlobalStatus globalStatus) {
         final UntypedStateMachineBuilder builder = StateMachineBuilderFactory.create(
             GlobalSessionStatusStateMachine.class);
 
         builder.transitions().from(GlobalStatus.UnKnown).toAmong(GlobalStatus.Begin).onEach(GlobalOperation.BEGIN);
-
+        builder.transitions().from(GlobalStatus.Begin).toAmong(GlobalStatus.Begin).onEach(GlobalOperation.BEGIN);
         builder.transitions().from(GlobalStatus.Begin).toAmong(GlobalStatus.Committing).onEach(GlobalOperation.COMMIT);
         builder.transitions().from(GlobalStatus.Begin).toAmong(GlobalStatus.TimeoutRollbacking).onEach(
             GlobalOperation.TIMEOUT);
@@ -63,46 +63,46 @@ public class StateMachineHelper {
             GlobalOperation.END_COMMIT_SUCCESS);
 
         builder.transitions().from(GlobalStatus.Rollbacking).toAmong(
-            GlobalStatus.RollbackRetrying).onEach(GlobalOperation.RETRY_ROLLBACK_NORMAL);
+            GlobalStatus.RollbackRetrying).onEach(GlobalOperation.RETRY_ROLLBACK);
         builder.transitions().from(GlobalStatus.Rollbacking).toAmong(
-            GlobalStatus.Rollbacked).onEach(GlobalOperation.END_ROLLBACK_SUCCESS_NORMAL);
+            GlobalStatus.Rollbacked).onEach(GlobalOperation.END_ROLLBACK_SUCCESS);
         builder.transitions().from(GlobalStatus.Rollbacking).toAmong(
-            GlobalStatus.RollbackFailed).onEach(GlobalOperation.END_ROLLBACK_FAIL_NORMAL);
+            GlobalStatus.RollbackFailed).onEach(GlobalOperation.END_ROLLBACK_FAIL);
 
         builder.transitions().from(GlobalStatus.RollbackRetrying).toAmong(
-            GlobalStatus.RollbackRetrying).onEach(GlobalOperation.RETRY_ROLLBACK_NORMAL);
+            GlobalStatus.RollbackRetrying).onEach(GlobalOperation.RETRY_ROLLBACK);
         builder.transitions().from(GlobalStatus.RollbackRetrying).toAmong(
-            GlobalStatus.Rollbacked).onEach(GlobalOperation.END_ROLLBACK_SUCCESS_NORMAL);
+            GlobalStatus.Rollbacked).onEach(GlobalOperation.END_ROLLBACK_SUCCESS);
         builder.transitions().from(GlobalStatus.RollbackRetrying).toAmong(
-            GlobalStatus.RollbackFailed).onEach(GlobalOperation.END_ROLLBACK_FAIL_NORMAL);
+            GlobalStatus.RollbackFailed).onEach(GlobalOperation.END_ROLLBACK_FAIL);
 
         builder.transitions().from(GlobalStatus.TimeoutRollbacking).toAmong(
-            GlobalStatus.RollbackRetrying).onEach(GlobalOperation.RETRY_ROLLBACK_TIMEOUT);
+            GlobalStatus.RollbackRetrying).onEach(GlobalOperation.RETRY_ROLLBACK);
         builder.transitions().from(GlobalStatus.TimeoutRollbacking).toAmong(
-            GlobalStatus.Rollbacked).onEach(GlobalOperation.END_ROLLBACK_SUCCESS_TIMEOUT);
+            GlobalStatus.Rollbacked).onEach(GlobalOperation.END_ROLLBACK_SUCCESS);
         builder.transitions().from(GlobalStatus.TimeoutRollbacking).toAmong(
-            GlobalStatus.RollbackFailed).onEach(GlobalOperation.END_ROLLBACK_FAIL_TIMEOUT);
+            GlobalStatus.RollbackFailed).onEach(GlobalOperation.END_ROLLBACK_FAIL);
 
         builder.transitions().from(GlobalStatus.TimeoutRollbackRetrying).toAmong(
-            GlobalStatus.TimeoutRollbackRetrying).onEach(GlobalOperation.RETRY_ROLLBACK_TIMEOUT);
+            GlobalStatus.TimeoutRollbackRetrying).onEach(GlobalOperation.RETRY_ROLLBACK);
         builder.transitions().from(GlobalStatus.TimeoutRollbackRetrying).toAmong(GlobalStatus.TimeoutRollbacked)
-            .onEach(GlobalOperation.END_ROLLBACK_SUCCESS_TIMEOUT);
+            .onEach(GlobalOperation.END_ROLLBACK_SUCCESS);
         builder.transitions().from(GlobalStatus.TimeoutRollbackRetrying).toAmong(GlobalStatus.TimeoutRollbackFailed)
-            .onEach(GlobalOperation.END_ROLLBACK_FAIL_TIMEOUT);
+            .onEach(GlobalOperation.END_ROLLBACK_FAIL);
 
         builder.transitions().from(GlobalStatus.TimeoutRollbacked).toAmong(
-            GlobalStatus.TimeoutRollbackRetrying).onEach(GlobalOperation.RETRY_ROLLBACK_TIMEOUT);
+            GlobalStatus.TimeoutRollbackRetrying).onEach(GlobalOperation.RETRY_ROLLBACK);
         builder.transitions().from(GlobalStatus.TimeoutRollbacked).toAmong(
-            GlobalStatus.TimeoutRollbacked).onEach(GlobalOperation.END_ROLLBACK_SUCCESS_TIMEOUT);
+            GlobalStatus.TimeoutRollbacked).onEach(GlobalOperation.END_ROLLBACK_SUCCESS);
         builder.transitions().from(GlobalStatus.TimeoutRollbacked).toAmong(GlobalStatus.TimeoutRollbackFailed).onEach(
-            GlobalOperation.END_ROLLBACK_FAIL_TIMEOUT);
+            GlobalOperation.END_ROLLBACK_FAIL);
 
         builder.transitions().from(GlobalStatus.TimeoutRollbackFailed).toAmong(
-            GlobalStatus.TimeoutRollbackRetrying).onEach(GlobalOperation.RETRY_ROLLBACK_TIMEOUT);
+            GlobalStatus.TimeoutRollbackRetrying).onEach(GlobalOperation.RETRY_ROLLBACK);
         builder.transitions().from(GlobalStatus.TimeoutRollbackFailed).toAmong(GlobalStatus.TimeoutRollbacked).onEach(
-            GlobalOperation.END_ROLLBACK_SUCCESS_TIMEOUT);
+            GlobalOperation.END_ROLLBACK_SUCCESS);
         builder.transitions().from(GlobalStatus.TimeoutRollbackFailed).toAmong(GlobalStatus.TimeoutRollbackFailed)
-            .onEach(GlobalOperation.END_ROLLBACK_FAIL_TIMEOUT);
+            .onEach(GlobalOperation.END_ROLLBACK_FAIL);
 
         builder.transitions().from(GlobalStatus.Committed).toAmong(
             GlobalStatus.Finished).onEach(GlobalOperation.FINISH);
@@ -116,7 +116,7 @@ public class StateMachineHelper {
             GlobalStatus.Finished).onEach(GlobalOperation.FINISH);
         builder.transitions().from(GlobalStatus.RollbackFailed).toAmong(
             GlobalStatus.Finished).onEach(GlobalOperation.FINISH);
-        GlobalSessionStatusStateMachine machine = builder.newAnyStateMachine(GlobalStatus.UnKnown);
+        GlobalSessionStatusStateMachine machine = builder.newAnyStateMachine(globalStatus);
         machine.start();
         return machine;
     }

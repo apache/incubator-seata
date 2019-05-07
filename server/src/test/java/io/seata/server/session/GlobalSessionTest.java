@@ -224,6 +224,6 @@ public class GlobalSessionTest {
         sessionStatusStateMachine.fire(GlobalOperation.BEGIN);
         sessionStatusStateMachine.fire(GlobalOperation.ROLLBACK);
         sessionStatusStateMachine.fire(GlobalOperation.BEGIN);
-        Assert.assertTrue(sessionStatusStateMachine.canAccept(GlobalOperation.RETRY_ROLLBACK_NORMAL));
+        Assert.assertTrue(sessionStatusStateMachine.canAccept(GlobalOperation.RETRY_ROLLBACK));
     }
 }

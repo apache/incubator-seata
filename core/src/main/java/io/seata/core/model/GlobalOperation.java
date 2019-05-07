@@ -63,44 +63,30 @@ public enum GlobalOperation {
     ROLLBACK(6),
 
     /**
-     * RETRY_ROLLBACK_NORMAL
+     * RETRY_ROLLBACK
      */
-    RETRY_ROLLBACK_NORMAL(7),
+    RETRY_ROLLBACK(7),
 
     /**
-     * END_ROLLBACK_SUCCESS_NORMAL
+     * END_ROLLBACK_SUCCESS
      */
-    END_ROLLBACK_SUCCESS_NORMAL(8),
+    END_ROLLBACK_SUCCESS(8),
 
     /**
-     * END_ROLLBACK_FAIL_NORMAL
+     * END_ROLLBACK_FAIL
      */
-    END_ROLLBACK_FAIL_NORMAL(9),
+    END_ROLLBACK_FAIL(9),
 
-    /**
-     * END_ROLLBACK_SUCCESS_NORMAL
-     */
-    END_ROLLBACK_SUCCESS_TIMEOUT(10),
-
-    /**
-     * END_ROLLBACK_SUCCESS_NORMAL
-     */
-    END_ROLLBACK_FAIL_TIMEOUT(11),
-
-    /**
-     * RETRY_ROLLBACK_NORMAL
-     */
-    RETRY_ROLLBACK_TIMEOUT(12),
 
     /**
      * The TIMEOUT CHECK
      */
-    TIMEOUT(13),
+    TIMEOUT(10),
 
     /**
      * The FINSH
      */
-    FINISH(14),
+    FINISH(11),
 
     ;
 
