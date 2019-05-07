@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.rm.datasource.sql.druid;
 
 import java.util.Arrays;
@@ -21,8 +20,8 @@ import java.util.Collections;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type My sql insert recognizer test.
@@ -43,11 +42,11 @@ public class MySQLInsertRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLInsertRecognizer mySQLInsertRecognizer = new MySQLInsertRecognizer(sql, statement);
 
-        Assert.assertEquals(sql, mySQLInsertRecognizer.getOriginalSQL());
-        Assert.assertEquals("t1", mySQLInsertRecognizer.getTableName());
-        Assert.assertEquals(Collections.singletonList("name"), mySQLInsertRecognizer.getInsertColumns());
-        Assert.assertEquals(1, mySQLInsertRecognizer.getInsertRows().size());
-        Assert.assertEquals(Collections.singletonList("name1"), mySQLInsertRecognizer.getInsertRows().get(0));
+        Assertions.assertEquals(sql, mySQLInsertRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mySQLInsertRecognizer.getTableName());
+        Assertions.assertEquals(Collections.singletonList("name"), mySQLInsertRecognizer.getInsertColumns());
+        Assertions.assertEquals(1, mySQLInsertRecognizer.getInsertRows().size());
+        Assertions.assertEquals(Collections.singletonList("name1"), mySQLInsertRecognizer.getInsertRows().get(0));
     }
 
     /**
@@ -62,11 +61,11 @@ public class MySQLInsertRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLInsertRecognizer mySQLInsertRecognizer = new MySQLInsertRecognizer(sql, statement);
 
-        Assert.assertEquals(sql, mySQLInsertRecognizer.getOriginalSQL());
-        Assert.assertEquals("t1", mySQLInsertRecognizer.getTableName());
-        Assert.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertColumns());
-        Assert.assertEquals(1, mySQLInsertRecognizer.getInsertRows().size());
-        Assert.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertRows().get(0));
+        Assertions.assertEquals(sql, mySQLInsertRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mySQLInsertRecognizer.getTableName());
+        Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertColumns());
+        Assertions.assertEquals(1, mySQLInsertRecognizer.getInsertRows().size());
+        Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertRows().get(0));
     }
 
     /**
@@ -81,13 +80,13 @@ public class MySQLInsertRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLInsertRecognizer mySQLInsertRecognizer = new MySQLInsertRecognizer(sql, statement);
 
-        Assert.assertEquals(sql, mySQLInsertRecognizer.getOriginalSQL());
-        Assert.assertEquals("t1", mySQLInsertRecognizer.getTableName());
-        Assert.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertColumns());
-        Assert.assertEquals(3, mySQLInsertRecognizer.getInsertRows().size());
-        Assert.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertRows().get(0));
-        Assert.assertEquals(Arrays.asList("name3", "name4"), mySQLInsertRecognizer.getInsertRows().get(1));
-        Assert.assertEquals(Arrays.asList("name5", "name6"), mySQLInsertRecognizer.getInsertRows().get(2));
+        Assertions.assertEquals(sql, mySQLInsertRecognizer.getOriginalSQL());
+        Assertions.assertEquals("t1", mySQLInsertRecognizer.getTableName());
+        Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertColumns());
+        Assertions.assertEquals(3, mySQLInsertRecognizer.getInsertRows().size());
+        Assertions.assertEquals(Arrays.asList("name1", "name2"), mySQLInsertRecognizer.getInsertRows().get(0));
+        Assertions.assertEquals(Arrays.asList("name3", "name4"), mySQLInsertRecognizer.getInsertRows().get(1));
+        Assertions.assertEquals(Arrays.asList("name5", "name6"), mySQLInsertRecognizer.getInsertRows().get(2));
     }
 
 }

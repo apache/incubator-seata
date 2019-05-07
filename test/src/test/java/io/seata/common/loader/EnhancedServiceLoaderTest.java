@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,11 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.common.loader;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
@@ -31,13 +30,13 @@ public class EnhancedServiceLoaderTest {
     public void testLoadBeanByOrder(){
         LoaderTestSPI loader  = EnhancedServiceLoader.load(LoaderTestSPI.class, EnhancedServiceLoaderTest.class.getClassLoader());
         System.out.println(loader.echo());
-        Assert.assertEquals("impl_2", loader.echo());
+        Assertions.assertEquals("impl_2", loader.echo());
     }
 
     @Test
     public void testLoadAll(){
         List<LoaderTestSPI> list = EnhancedServiceLoader.loadAll(LoaderTestSPI.class);
-        Assert.assertEquals(2, list.size());
+        Assertions.assertEquals(2, list.size());
     }
 
 

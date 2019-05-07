@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.config.nacos;
 
 import java.util.List;
@@ -83,7 +82,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
-        throw new NotSupportYetException("not support putConfigIfAbsent");
+        throw new NotSupportYetException("not support atomic operation putConfigIfAbsent");
     }
 
     @Override
@@ -113,7 +112,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
 
     @Override
     public List<Listener> getConfigListeners(String dataId) {
-        throw new NotSupportYetException("not support putConfigIfAbsent");
+        throw new NotSupportYetException("not support getConfigListeners");
     }
 
     private static Properties getConfigProperties() {

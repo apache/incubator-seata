@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.core.rpc.netty;
 
 import java.net.InetSocketAddress;
@@ -349,7 +348,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             try {
                 connect(serverAddress);
             } catch (Exception e) {
-                LOGGER.error(FrameworkErrorCode.NetConnect.errCode,
+                LOGGER.error(FrameworkErrorCode.NetConnect.getErrCode(),
                     "can not connect to " + serverAddress + " cause:" + e.getMessage(), e);
             }
         }

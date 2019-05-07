@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,15 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.rm.tcc.interceptor;
 
 import io.seata.rm.tcc.TccAction;
 import io.seata.rm.tcc.TccParam;
 import io.seata.rm.tcc.api.BusinessActionContext;
-import io.seata.rm.tcc.TccParam;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -48,7 +46,7 @@ public class ActionInterceptorHandlerTest {
     @Test
     public void testBusinessActionContext() throws NoSuchMethodException {
         Method prepareMethod = TccAction.class.getDeclaredMethod("prepare",
-                new Class[]{BusinessActionContext.class, int.class, List.class, TccParam.class});
+                BusinessActionContext.class, int.class, List.class, TccParam.class);
         List list = new ArrayList();
         list.add("b");
         TccParam tccParam = new TccParam (1, "abc@ali.com");
@@ -57,9 +55,9 @@ public class ActionInterceptorHandlerTest {
                 new Object[]{null, 10, list, tccParam});
         System.out.println(paramContext);
 
-        Assert.assertEquals(10, paramContext.get("a"));
-        Assert.assertEquals("b", paramContext.get("b"));
-        Assert.assertEquals("abc@ali.com", paramContext.get("email"));
+        Assertions.assertEquals(10, paramContext.get("a"));
+        Assertions.assertEquals("b", paramContext.get("b"));
+        Assertions.assertEquals("abc@ali.com", paramContext.get("email"));
     }
 
 }

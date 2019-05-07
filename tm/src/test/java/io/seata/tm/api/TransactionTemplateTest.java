@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,15 +17,15 @@ package io.seata.tm.api;
 
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
-import io.seata.tm.DefaultTransactionManager;
+import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.transaction.NoRollbackRule;
 import io.seata.tm.api.transaction.RollbackRule;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.LinkedHashSet;
@@ -48,7 +48,7 @@ public class TransactionTemplateTest {
 
     private TransactionalExecutor transactionalExecutor;
 
-    @Before
+    @BeforeEach
     public void init() throws Exception {
         // mock transactionManager
         TransactionManager transactionManager = mock(TransactionManager.class);
@@ -56,7 +56,7 @@ public class TransactionTemplateTest {
         when(transactionManager.commit(DEFAULT_XID)).thenReturn(GlobalStatus.Committed);
         when(transactionManager.rollback(DEFAULT_XID)).thenReturn(GlobalStatus.Rollbacked);
         when(transactionManager.getStatus(DEFAULT_XID)).thenReturn(GlobalStatus.Begin);
-        DefaultTransactionManager.set(transactionManager);
+        TransactionManagerHolder.set(transactionManager);
 
         //mock transactionalExecutor
         transactionalExecutor = Mockito.mock(TransactionalExecutor.class);
@@ -66,7 +66,7 @@ public class TransactionTemplateTest {
         when(transactionalExecutor.getTransactionInfo()).thenReturn(txInfo);
     }
 
-    @After
+    @AfterEach
     public void assertHooks() {
         assertThat(TransactionHookManager.getHooks()).isEmpty();
     }
@@ -99,7 +99,7 @@ public class TransactionTemplateTest {
     public void testTransactionRollbackHook_WithRollBackRule() throws Throwable {
         Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
         rollbackRules.add(new RollbackRule(NullPointerException.class));
-        TransactionHook transactionHook = testRollBackRules(rollbackRules,new NullPointerException());
+        TransactionHook transactionHook = testRollBackRules(rollbackRules, new NullPointerException());
         verifyRollBack(transactionHook);
     }
 
@@ -107,7 +107,7 @@ public class TransactionTemplateTest {
     public void testTransactionRollbackHook_WithNoRollBackRule() throws Throwable {
         Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
         rollbackRules.add(new NoRollbackRule(NullPointerException.class));
-        TransactionHook transactionHook = testRollBackRules(rollbackRules,new NullPointerException());
+        TransactionHook transactionHook = testRollBackRules(rollbackRules, new NullPointerException());
         verifyCommit(transactionHook);
     }
 
@@ -116,11 +116,11 @@ public class TransactionTemplateTest {
         Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
         rollbackRules.add(new RollbackRule(NullPointerException.class));
         rollbackRules.add(new NoRollbackRule(NullPointerException.class));
-        TransactionHook transactionHook = testRollBackRules(rollbackRules,new NullPointerException());
+        TransactionHook transactionHook = testRollBackRules(rollbackRules, new NullPointerException());
         verifyRollBack(transactionHook);
     }
 
-    private TransactionHook testRollBackRules(Set<RollbackRule> rollbackRules,Throwable throwable) throws Throwable {
+    private TransactionHook testRollBackRules(Set<RollbackRule> rollbackRules, Throwable throwable) throws Throwable {
         TransactionHook transactionHook = Mockito.mock(TransactionHook.class);
         // mock  txInfo
         TransactionInfo txInfo = new TransactionInfo();

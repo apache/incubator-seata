@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.server.session;
 
 import java.io.IOException;
@@ -234,5 +233,12 @@ public class SessionHolder {
      */
     public static GlobalSession findGlobalSession(Long transactionId) throws TransactionException {
         return getRootSessionManager().findGlobalSession(transactionId);
+    }
+
+    public static void destory() {
+        ROOT_SESSION_MANAGER.destroy();
+        ASYNC_COMMITTING_SESSION_MANAGER.destroy();
+        RETRY_COMMITTING_SESSION_MANAGER.destroy();
+        RETRY_ROLLBACKING_SESSION_MANAGER.destroy();
     }
 }

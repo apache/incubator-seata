@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.discovery.registry.redis;
 
 import java.lang.management.ManagementFactory;
@@ -75,7 +74,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         String serverAddr = seataConfig.getConfig(getRedisAddrFileKey());
         String[] serverArr = serverAddr.split(":");
         String host = serverArr[0];
-        int port = Integer.valueOf(serverArr[1]);
+        int port = Integer.parseInt(serverArr[1]);
         int db = seataConfig.getInt(getRedisDbFileKey());
         GenericObjectPoolConfig redisConfig = new GenericObjectPoolConfig();
         redisConfig.setTestOnBorrow(seataConfig.getBoolean(REDIS_FILEKEY_PREFIX + "test.on.borrow", true));

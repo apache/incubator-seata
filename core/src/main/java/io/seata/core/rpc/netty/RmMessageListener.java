@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.core.rpc.netty;
 
 import io.seata.common.exception.FrameworkErrorCode;
@@ -95,7 +94,10 @@ public class RmMessageListener implements ClientMessageListener {
             resultMessage = (BranchCommitResponse)handler.onRequest(branchCommitRequest, null);
             sender.sendResponse(msgId, serverAddress, resultMessage);
         } catch (Exception e) {
-            LOGGER.error(FrameworkErrorCode.NetOnMessage.errCode, e.getMessage(), e);
+            LOGGER.error(FrameworkErrorCode.NetOnMessage.getErrCode(), e.getMessage(), e);
+            if(resultMessage == null){
+                resultMessage = new BranchCommitResponse();
+            }
             resultMessage.setResultCode(ResultCode.Failed);
             resultMessage.setMsg(e.getMessage());
             sender.sendResponse(msgId, serverAddress, resultMessage);

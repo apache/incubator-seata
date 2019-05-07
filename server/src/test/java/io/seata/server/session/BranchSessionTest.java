@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -17,10 +17,12 @@ package io.seata.server.session;
 
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import java.util.stream.Stream;
 
 /**
  * The type Branch session test.
@@ -35,18 +37,19 @@ public class BranchSessionTest {
      *
      * @param branchSession the branch session
      */
-    @Test(dataProvider = "branchSessionProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
     public void codecTest(BranchSession branchSession) {
         byte[] result = branchSession.encode();
-        Assert.assertNotNull(result);
+        Assertions.assertNotNull(result);
         BranchSession expected = new BranchSession();
         expected.decode(result);
-        Assert.assertEquals(branchSession.getTransactionId(), expected.getTransactionId());
-        Assert.assertEquals(branchSession.getBranchId(), expected.getBranchId());
-        Assert.assertEquals(branchSession.getResourceId(), expected.getResourceId());
-        Assert.assertEquals(branchSession.getLockKey(), expected.getLockKey());
-        Assert.assertEquals(branchSession.getClientId(), expected.getClientId());
-        Assert.assertEquals(branchSession.getApplicationData(), expected.getApplicationData());
+        Assertions.assertEquals(branchSession.getTransactionId(), expected.getTransactionId());
+        Assertions.assertEquals(branchSession.getBranchId(), expected.getBranchId());
+        Assertions.assertEquals(branchSession.getResourceId(), expected.getResourceId());
+        Assertions.assertEquals(branchSession.getLockKey(), expected.getLockKey());
+        Assertions.assertEquals(branchSession.getClientId(), expected.getClientId());
+        Assertions.assertEquals(branchSession.getApplicationData(), expected.getApplicationData());
 
     }
 
@@ -55,8 +58,7 @@ public class BranchSessionTest {
      *
      * @return the object [ ] [ ]
      */
-    @DataProvider
-    public static Object[][] branchSessionProvider() {
+    static Stream<Arguments> branchSessionProvider() {
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(UUIDGenerator.generateUUID());
         branchSession.setBranchId(1L);
@@ -67,6 +69,8 @@ public class BranchSessionTest {
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.AT);
-        return new Object[][] {{branchSession}};
+        return Stream.of(
+                Arguments.of(branchSession)
+        );
     }
 }

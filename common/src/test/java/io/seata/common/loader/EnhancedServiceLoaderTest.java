@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,13 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.common.loader;
 
-import java.util.List;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Assert;
-import org.junit.Test;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -37,15 +36,17 @@ public class EnhancedServiceLoaderTest {
     @Test
     public void testLoadByClassAndClassLoader() {
         Hello load = EnhancedServiceLoader.load(Hello.class, Hello.class.getClassLoader());
-        Assert.assertEquals(load.say(), "Bonjour");
+        Assertions.assertEquals(load.say(), "Bonjour");
     }
 
     /**
      * Test load exception.
      */
-    @Test(expected = EnhancedServiceNotFoundException.class)
+    @Test
     public void testLoadException() {
-        EnhancedServiceLoaderTest load = EnhancedServiceLoader.load(EnhancedServiceLoaderTest.class);
+        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> {
+            EnhancedServiceLoaderTest load = EnhancedServiceLoader.load(EnhancedServiceLoaderTest.class);
+        });
     }
 
     /**
@@ -72,7 +73,7 @@ public class EnhancedServiceLoaderTest {
     @Test
     public void testLoadByClassAndClassLoaderAndActivateName() {
         Hello englishHello = EnhancedServiceLoader
-            .load(Hello.class, "EnglishHello", EnhancedServiceLoaderTest.class.getClassLoader());
+                .load(Hello.class, "EnglishHello", EnhancedServiceLoaderTest.class.getClassLoader());
         assertThat(englishHello.say()).isEqualTo("hello!");
     }
 
@@ -94,7 +95,7 @@ public class EnhancedServiceLoaderTest {
     @Test
     public void getAllExtensionClass1() {
         List<Class> allExtensionClass = EnhancedServiceLoader
-            .getAllExtensionClass(Hello.class, ClassLoader.getSystemClassLoader());
+                .getAllExtensionClass(Hello.class, ClassLoader.getSystemClassLoader());
         assertThat(allExtensionClass).isNotEmpty();
     }
 
