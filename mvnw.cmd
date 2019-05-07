@@ -1,5 +1,5 @@
 @REM ----------------------------------------------------------------------------
-@REM Copyright 1999-2018 Alibaba Group Holding Ltd.
+@REM Copyright 1999-2019 Seata.io Group.
 @REM
 @REM Licensed under the Apache License, Version 2.0 (the "License");
 @REM you may not use this file except in compliance with the License.
