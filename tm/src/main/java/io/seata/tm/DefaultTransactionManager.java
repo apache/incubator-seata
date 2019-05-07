@@ -40,32 +40,6 @@ import io.seata.core.rpc.netty.TmRpcClient;
  */
 public class DefaultTransactionManager implements TransactionManager {
 
-    private static class SingletonHolder {
-        private static TransactionManager INSTANCE = new DefaultTransactionManager();
-    }
-
-    /**
-     * Get transaction manager.
-     *
-     * @return the transaction manager
-     */
-    public static TransactionManager get() {
-        return SingletonHolder.INSTANCE;
-    }
-
-    /**
-     * Set a TM instance.
-     *
-     * @param mock commonly used for test mocking
-     */
-    public static void set(TransactionManager mock) {
-        SingletonHolder.INSTANCE = mock;
-    }
-
-    private DefaultTransactionManager() {
-
-    }
-
     @Override
     public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
         throws TransactionException {

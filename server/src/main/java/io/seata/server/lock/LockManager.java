@@ -51,4 +51,13 @@ public interface LockManager {
      * @throws TransactionException the transaction exception
      */
     void cleanAllLocks() throws TransactionException;
+
+    /**
+     * Release lock boolean.
+     *
+     * @param branchSession the branch session
+     * @return the boolean
+     * @throws TransactionException the transaction exception
+     */
+    boolean releaseLock(BranchSession branchSession) throws TransactionException;
 }

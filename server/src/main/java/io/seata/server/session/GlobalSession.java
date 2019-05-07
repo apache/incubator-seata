@@ -27,6 +27,7 @@ import io.seata.server.store.StoreConfig;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.LockSupport;
 
@@ -351,6 +352,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return beginTime;
     }
 
+
     /**
      * Create global session global session.
      *
@@ -424,15 +426,15 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private int calGlobalSessionSize(byte[] byApplicationIdBytes, byte[] byServiceGroupBytes, byte[] byTxNameBytes) {
         final int size = 8 // trascationId
-            + 4 // timeout
-            + 2 // byApplicationIdBytes.length
-            + 2 // byServiceGroupBytes.length
-            + 2 // byTxNameBytes.length
-            + 8 // beginTime
-            + 1 // statusCode
-            + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
-            + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
-            + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
+                + 4 // timeout
+                + 2 // byApplicationIdBytes.length
+                + 2 // byServiceGroupBytes.length
+                + 2 // byTxNameBytes.length
+                + 8 // beginTime
+                + 1 // statusCode
+                + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
+                + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
+                + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
         return size;
     }
 
@@ -510,24 +512,23 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         private static final int PARK_TIMES_BASE = 10;
 
-        private static final int PARK_TIMES_BASE_NANOS = 1 * 1000 * 1000;
+        private static final int PARK_TIMES_BASE_MILLS = 1;
 
         public void lock() throws TransactionException {
             boolean flag;
-            int times = 0;
+            int times = 1;
             long beginTime = System.currentTimeMillis();
-            long restTime = GLOBAL_SESSOION_LOCK_TIME_OUT_MILLS ;
             do {
-                restTime -= (System.currentTimeMillis() - beginTime);
+                long restTime = GLOBAL_SESSOION_LOCK_TIME_OUT_MILLS - (System.currentTimeMillis() - beginTime);
                 if (restTime <= 0){
                     throw new TransactionException(TransactionExceptionCode.FailedLockGlobalTranscation);
                 }
                 // Pause every PARK_TIMES_BASE times,yield the CPU
                 if (times % PARK_TIMES_BASE == 0){
                     // Exponential Backoff
-                    long backOffTime =  PARK_TIMES_BASE_NANOS << (times/PARK_TIMES_BASE);
+                    long backOffTime =  PARK_TIMES_BASE_MILLS << (times/PARK_TIMES_BASE);
                     long parkTime = backOffTime < restTime ? backOffTime : restTime;
-                    LockSupport.parkNanos(parkTime);
+                    LockSupport.parkNanos(TimeUnit.MILLISECONDS.toNanos(parkTime));
                 }
                 flag = this.globalSessionSpinLock.compareAndSet(true, false);
                 times++;

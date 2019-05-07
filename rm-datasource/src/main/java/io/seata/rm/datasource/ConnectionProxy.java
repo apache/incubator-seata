@@ -24,8 +24,6 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
-import io.seata.rm.datasource.undo.*;
-import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoLogManager;
 import org.slf4j.Logger;

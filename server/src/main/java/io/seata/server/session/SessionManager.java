@@ -21,13 +21,14 @@ import java.util.List;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.rpc.Disposable;
 
 /**
  * The interface Session manager.
  *
  * @author sharajava
  */
-public interface SessionManager extends SessionLifecycleListener {
+public interface SessionManager extends SessionLifecycleListener, Disposable {
 
     /**
      * Add global session.

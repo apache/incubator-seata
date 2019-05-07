@@ -15,12 +15,6 @@
  */
 package io.seata.rm.datasource;
 
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
-
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
@@ -44,11 +38,14 @@ import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManager;
-
-import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogManagerOracle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
 
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
@@ -76,7 +73,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
 
     @Override
     public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
-        throws TransactionException {
+            throws TransactionException {
         try {
             GlobalLockQueryRequest request = new GlobalLockQueryRequest();
             request.setXid(xid);
@@ -85,17 +82,17 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
 
             GlobalLockQueryResponse response = null;
             if (RootContext.inGlobalTransaction()) {
-                response = (GlobalLockQueryResponse)RmRpcClient.getInstance().sendMsgWithResponse(request);
+                response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
             } else if (RootContext.requireGlobalLock()) {
-                response = (GlobalLockQueryResponse)RmRpcClient.getInstance().sendMsgWithResponse(loadBalance(),
-                    request, NettyClientConfig.getRpcRequestTimeout());
+                response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(loadBalance(),
+                        request, NettyClientConfig.getRpcRequestTimeout());
             } else {
                 throw new RuntimeException("unknow situation!");
             }
 
             if (response.getResultCode() == ResultCode.Failed) {
                 throw new TransactionException(response.getTransactionExceptionCode(),
-                    "Response[" + response.getMsg() + "]");
+                        "Response[" + response.getMsg() + "]");
             }
             return response.isLockable();
         } catch (TimeoutException toe) {
@@ -111,7 +108,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
         InetSocketAddress address = null;
         try {
             List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(
-                TmRpcClient.getInstance().getTransactionServiceGroup());
+                    TmRpcClient.getInstance().getTransactionServiceGroup());
             address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
         } catch (Exception ignore) {
             LOGGER.error(ignore.getMessage());
@@ -138,7 +135,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     }
 
     @Override
-    public void init(){
+    public void init() {
         AsyncWorker asyncWorker = new AsyncWorker();
         asyncWorker.init();
         initAsyncWorker(asyncWorker);
@@ -163,7 +160,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
      * @return the data source proxy
      */
     public DataSourceProxy get(String resourceId) {
-        return (DataSourceProxy)dataSourceCache.get(resourceId);
+        return (DataSourceProxy) dataSourceCache.get(resourceId);
     }
 
     @Override
@@ -200,7 +197,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     }
 
     @Override
-    public BranchType getBranchType(){
+    public BranchType getBranchType() {
         return BranchType.AT;
     }
 
