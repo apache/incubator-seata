@@ -73,7 +73,7 @@ public class ApplicationKeeper {
                 LOGGER.info("Application is keep running ... ");
                 LOCK.wait();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOGGER.error("interrupted error", e);
             }
         }
     }
