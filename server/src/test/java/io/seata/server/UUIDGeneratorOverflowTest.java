@@ -15,7 +15,7 @@
  */
 package io.seata.server;
 
-import org.testng.annotations.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Uuid generator overflow test.
