@@ -19,7 +19,6 @@ import java.nio.ByteBuffer;
 
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.rpc.RpcContext;
-import io.seata.core.rpc.RpcContext;
 
 /**
  * The type Abstract transaction request.
