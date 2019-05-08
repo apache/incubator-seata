@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,14 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.rm.tcc.remoting.parser;
 
 import io.seata.rm.tcc.TccAction;
 import io.seata.rm.tcc.TccActionImpl;
 import io.seata.rm.tcc.remoting.RemotingDesc;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 
 /**
@@ -43,7 +42,7 @@ public class LocalTCCRemotingParserTest {
         TccActionImpl tccAction = new TccActionImpl();
 
         boolean result = localTCCRemotingParser.isService(tccAction, "a");
-        Assert.assertTrue(result);
+        Assertions.assertTrue(result);
     }
 
     /**
@@ -54,7 +53,7 @@ public class LocalTCCRemotingParserTest {
         TccActionImpl tccAction = new TccActionImpl();
 
         boolean result = localTCCRemotingParser.isReference(tccAction, "b");
-        Assert.assertTrue(result);
+        Assertions.assertTrue(result);
     }
 
     /**
@@ -65,11 +64,11 @@ public class LocalTCCRemotingParserTest {
         TccActionImpl tccAction = new TccActionImpl();
 
         RemotingDesc remotingDesc = localTCCRemotingParser.getServiceDesc(tccAction, "c");
-        Assert.assertNotNull(remotingDesc);
+        Assertions.assertNotNull(remotingDesc);
 
-        Assert.assertEquals(remotingDesc.getInterfaceClassName(), "io.seata.rm.tcc.TccAction");
-        Assert.assertEquals(remotingDesc.getInterfaceClass(), TccAction.class);
-        Assert.assertEquals(remotingDesc.getTargetBean(), tccAction);
+        Assertions.assertEquals(remotingDesc.getInterfaceClassName(), "io.seata.rm.tcc.TccAction");
+        Assertions.assertEquals(remotingDesc.getInterfaceClass(), TccAction.class);
+        Assertions.assertEquals(remotingDesc.getTargetBean(), tccAction);
     }
 
 }

@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,20 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.server.lock;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.server.session.BranchSession;
-
-import io.netty.util.internal.ConcurrentSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -153,5 +153,32 @@ public class DefaultLockManagerImpl implements LockManager {
     @Override
     public void cleanAllLocks() throws TransactionException {
         LOCK_MAP.clear();
+    }
+
+    @Override
+    public boolean releaseLock(BranchSession branchSession) throws TransactionException {
+        ConcurrentHashMap<Map<String, Long>, Set<String>> lockHolder = branchSession.getLockHolder();
+        if (lockHolder.size() == 0) {
+            return true;
+        }
+        Iterator<Entry<Map<String, Long>, Set<String>>> it = lockHolder.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Map<String, Long>, Set<String>> entry = it.next();
+            Map<String, Long> bucket = entry.getKey();
+            Set<String> keys = entry.getValue();
+            synchronized (bucket) {
+                for (String key : keys) {
+                    Long v = bucket.get(key);
+                    if (v == null) {
+                        continue;
+                    }
+                    if (v.longValue() == branchSession.getTransactionId()) {
+                        bucket.remove(key);
+                    }
+                }
+            }
+        }
+        lockHolder.clear();
+        return true;
     }
 }

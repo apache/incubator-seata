@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.server.session;
 
 import java.util.List;
@@ -39,7 +38,7 @@ public class DefaultSessionManager extends AbstractSessionManager {
         transactionStoreManager = new TransactionStoreManager() {
             @Override
             public boolean writeSession(LogOperation logOperation, SessionStorable session) {
-                return false;
+                return true;
             }
 
             @Override
@@ -57,5 +56,10 @@ public class DefaultSessionManager extends AbstractSessionManager {
                 return false;
             }
         };
+    }
+
+    @Override
+    public void destroy() {
+        transactionStoreManager.shutdown();
     }
 }

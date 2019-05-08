@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,19 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.tm.api;
 
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
-import io.seata.tm.DefaultTransactionManager;
-
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import io.seata.tm.TransactionManagerHolder;
+import io.seata.tm.api.transaction.TransactionInfo;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Api test.
@@ -33,16 +32,18 @@ import org.junit.Test;
 public class APITest {
 
     private static final String DEFAULT_XID = "1234567890";
+    private static final String TX_NAME = "test";
+    private static final int TIME_OUT = 30000;
 
     /**
      * Init.
      */
-    @BeforeClass
+    @BeforeAll
     public static void init() {
-        DefaultTransactionManager.set(new TransactionManager() {
+        TransactionManagerHolder.set(new TransactionManager() {
             @Override
             public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
-                throws TransactionException {
+                    throws TransactionException {
                 return DEFAULT_XID;
             }
 
@@ -66,7 +67,7 @@ public class APITest {
     /**
      * Clean root context.
      */
-    @After
+    @AfterEach
     public void cleanRootContext() {
         RootContext.unbind();
     }
@@ -80,8 +81,8 @@ public class APITest {
     public void testCurrent() throws Exception {
         RootContext.bind(DEFAULT_XID);
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
-        Assert.assertEquals(tx.getXid(), DEFAULT_XID);
-        Assert.assertEquals(tx.getStatus(), GlobalStatus.Begin);
+        Assertions.assertEquals(tx.getXid(), DEFAULT_XID);
+        Assertions.assertEquals(tx.getStatus(), GlobalStatus.Begin);
 
     }
 
@@ -93,8 +94,8 @@ public class APITest {
     @Test
     public void testNewTx() throws Exception {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
-        Assert.assertEquals(tx.getStatus(), GlobalStatus.UnKnown);
-        Assert.assertNull(tx.getXid());
+        Assertions.assertEquals(tx.getStatus(), GlobalStatus.UnKnown);
+        Assertions.assertNull(tx.getXid());
     }
 
     /**
@@ -106,8 +107,8 @@ public class APITest {
     public void testBegin() throws Exception {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         tx.begin();
-        Assert.assertEquals(tx.getStatus(), GlobalStatus.Begin);
-        Assert.assertNotNull(tx.getXid());
+        Assertions.assertEquals(tx.getStatus(), GlobalStatus.Begin);
+        Assertions.assertNotNull(tx.getXid());
 
     }
 
@@ -117,7 +118,7 @@ public class APITest {
      * @throws Exception the exception
      */
     @Test
-    public void testNestedCommit() throws Exception {
+    public void testNestedCommit() throws Throwable {
         TransactionalTemplate template = new TransactionalTemplate();
         template.execute(new AbstractTransactionalExecutor() {
             @Override
@@ -149,7 +150,7 @@ public class APITest {
      * @throws Exception the exception
      */
     @Test
-    public void testNestedRollback() throws Exception {
+    public void testNestedRollback() throws Throwable {
 
         final String oexMsg = "xxx";
 
@@ -187,20 +188,18 @@ public class APITest {
             });
         } catch (TransactionalExecutor.ExecutionException ex) {
             Throwable oex = ex.getOriginalException();
-            Assert.assertEquals(oex.getMessage(), oexMsg);
+            Assertions.assertEquals(oex.getMessage(), oexMsg);
         }
     }
 
     private static abstract class AbstractTransactionalExecutor implements TransactionalExecutor {
 
         @Override
-        public int timeout() {
-            return 30000;
-        }
-
-        @Override
-        public String name() {
-            return "test";
+        public TransactionInfo getTransactionInfo() {
+            TransactionInfo txInfo = new TransactionInfo();
+            txInfo.setTimeOut(TIME_OUT);
+            txInfo.setName(TX_NAME);
+            return txInfo;
         }
     }
 }

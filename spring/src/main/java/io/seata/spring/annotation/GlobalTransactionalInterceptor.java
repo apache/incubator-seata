@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,13 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.spring.annotation;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.concurrent.Callable;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
@@ -28,7 +22,9 @@ import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
 import io.seata.tm.api.TransactionalExecutor;
 import io.seata.tm.api.TransactionalTemplate;
-
+import io.seata.tm.api.transaction.NoRollbackRule;
+import io.seata.tm.api.transaction.RollbackRule;
+import io.seata.tm.api.transaction.TransactionInfo;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
@@ -36,6 +32,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.concurrent.Callable;
 
 /**
  * The type Global transactional interceptor.
@@ -106,18 +109,34 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
                     return methodInvocation.proceed();
                 }
 
-                @Override
-                public int timeout() {
-                    return globalTrxAnno.timeoutMills();
-                }
-
-                @Override
                 public String name() {
                     String name = globalTrxAnno.name();
                     if (!StringUtils.isNullOrEmpty(name)) {
                         return name;
                     }
                     return formatMethod(methodInvocation.getMethod());
+                }
+
+                @Override
+                public TransactionInfo getTransactionInfo() {
+                    TransactionInfo transactionInfo = new TransactionInfo();
+                    transactionInfo.setTimeOut(globalTrxAnno.timeoutMills());
+                    transactionInfo.setName(name());
+                    Set<RollbackRule> rollbackRules = new LinkedHashSet<>();
+                    for (Class<?> rbRule : globalTrxAnno.rollbackFor()) {
+                        rollbackRules.add(new RollbackRule(rbRule));
+                    }
+                    for (String rbRule : globalTrxAnno.rollbackForClassName()) {
+                        rollbackRules.add(new RollbackRule(rbRule));
+                    }
+                    for (Class<?> rbRule : globalTrxAnno.noRollbackFor()) {
+                        rollbackRules.add(new NoRollbackRule(rbRule));
+                    }
+                    for (String rbRule : globalTrxAnno.noRollbackForClassName()) {
+                        rollbackRules.add(new NoRollbackRule(rbRule));
+                    }
+                    transactionInfo.setRollbackRules(rollbackRules);
+                    return transactionInfo;
                 }
             });
         } catch (TransactionalExecutor.ExecutionException e) {

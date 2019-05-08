@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,8 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.spring.annotation;
+
+import io.seata.tm.api.transaction.TransactionInfo;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -35,7 +36,7 @@ public @interface GlobalTransactional {
      *
      * @return timeoutMills in MILLISECONDS.
      */
-    int timeoutMills() default 60000;
+    int timeoutMills() default TransactionInfo.DEFAULT_TIME_OUT;
 
     /**
      * Given name of the global transaction instance.
@@ -43,5 +44,30 @@ public @interface GlobalTransactional {
      * @return Given name.
      */
     String name() default "";
+
+    /**
+     * roll back for the Class
+     * @return
+     */
+    Class<? extends Throwable>[] rollbackFor() default {};
+
+    /**
+     *  roll back for the class name
+     * @return
+     */
+    String[] rollbackForClassName() default {};
+
+    /**
+     * not roll back for the Class
+     * @return
+     */
+    Class<? extends Throwable>[] noRollbackFor() default {};
+
+    /**
+     * not roll back for the class name
+     * @return
+     */
+    String[] noRollbackForClassName() default {};
+
 
 }

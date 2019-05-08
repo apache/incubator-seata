@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -33,10 +33,10 @@ public class StoreConfig {
     private static final int DEFAULT_MAX_BRANCH_SESSION_SIZE = 1024 * 16;
 
     // default 512b
-    public static final int DEFAULT_MAX_GLOBAL_SESSION_SIZE = 512;
+    private static final int DEFAULT_MAX_GLOBAL_SESSION_SIZE = 512;
 
     // default 16kb
-    public static final int DEFAULT_WRITE_BUFFER_SIZE = 1024 * 16;
+    private static final int DEFAULT_WRITE_BUFFER_SIZE = 1024 * 16;
 
     public static int getMaxBranchSessionSize() {
         return CONFIGURATION.getInt(STORE_FILE_PREFIX + "max-branch-session-size", DEFAULT_MAX_BRANCH_SESSION_SIZE);
@@ -48,5 +48,9 @@ public class StoreConfig {
 
     public static int getFileWriteBufferCacheSize() {
         return CONFIGURATION.getInt(STORE_FILE_PREFIX + "file-write-buffer-cache-size", DEFAULT_WRITE_BUFFER_SIZE);
+    }
+
+    public static FlushDiskMode getFlushDiskMode() {
+        return FlushDiskMode.findDiskMode(CONFIGURATION.getConfig(STORE_FILE_PREFIX + "flush-disk-mode"));
     }
 }

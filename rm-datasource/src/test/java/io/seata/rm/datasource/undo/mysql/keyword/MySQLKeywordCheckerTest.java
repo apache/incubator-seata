@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.rm.datasource.undo.mysql.keyword;
 
 import java.sql.Types;
@@ -33,8 +32,8 @@ import io.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
 
 import io.seata.rm.datasource.undo.UndoExecutorTest;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type My sql keyword checker test.
@@ -50,7 +49,7 @@ public class MySQLKeywordCheckerTest {
     @Test
     public void testCheck() {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-        Assert.assertTrue(keywordChecker.check("desc"));
+        Assertions.assertTrue(keywordChecker.check("desc"));
 
     }
 
@@ -60,7 +59,7 @@ public class MySQLKeywordCheckerTest {
     @Test
     public void testCheckAndReplace() {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-        Assert.assertEquals("`desc`", keywordChecker.checkAndReplace("desc"));
+        Assertions.assertEquals("`desc`", keywordChecker.checkAndReplace("desc"));
 
     }
 
@@ -134,7 +133,7 @@ public class MySQLKeywordCheckerTest {
 
         MySQLUndoUpdateExecutorExtension mySQLUndoUpdateExecutor = new MySQLUndoUpdateExecutorExtension(sqlUndoLog);
 
-        Assert.assertEquals("UPDATE `lock` SET `desc` = ?, `order` = ?, since = ? WHERE id = ?",
+        Assertions.assertEquals("UPDATE `lock` SET `desc` = ?, `order` = ?, since = ? WHERE id = ?",
             mySQLUndoUpdateExecutor.getSql());
 
     }
@@ -222,7 +221,7 @@ public class MySQLKeywordCheckerTest {
 
         MySQLUndoInsertExecutorExtension mySQLUndoInsertExecutor = new MySQLUndoInsertExecutorExtension(sqlUndoLog);
 
-        Assert.assertEquals("DELETE FROM `lock` WHERE id = ?", mySQLUndoInsertExecutor.getSql());
+        Assertions.assertEquals("DELETE FROM `lock` WHERE id = ?", mySQLUndoInsertExecutor.getSql());
 
     }
 
@@ -309,7 +308,7 @@ public class MySQLKeywordCheckerTest {
 
         MySQLUndoDeleteExecutorExtension mySQLUndoDeleteExecutor = new MySQLUndoDeleteExecutorExtension(sqlUndoLog);
 
-        Assert.assertEquals("INSERT INTO `lock`(`desc`, `order`, id) VALUES (?, ?, ?)",
+        Assertions.assertEquals("INSERT INTO `lock`(`desc`, `order`, id) VALUES (?, ?, ?)",
             mySQLUndoDeleteExecutor.getSql());
 
     }

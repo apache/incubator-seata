@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -16,8 +16,8 @@
 package io.seata.core.protocol.transaction;
 
 import io.seata.core.protocol.ResultCode;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
@@ -38,20 +38,20 @@ public class GlobalBeginResponseTest {
     public void testGetSetXid() {
         GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
         globalBeginResponse.setXid(XID);
-        Assert.assertEquals(XID, globalBeginResponse.getXid());
+        Assertions.assertEquals(XID, globalBeginResponse.getXid());
     }
 
     @Test
     public void testGetSetExtraData() {
         GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
         globalBeginResponse.setExtraData(EXTRA_DATA);
-        Assert.assertEquals(EXTRA_DATA, globalBeginResponse.getExtraData());
+        Assertions.assertEquals(EXTRA_DATA, globalBeginResponse.getExtraData());
     }
 
     @Test
     public void testGetTypeCode() {
         GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
-        Assert.assertEquals(GlobalBeginResponse.TYPE_GLOBAL_BEGIN_RESULT, globalBeginResponse.getTypeCode());
+        Assertions.assertEquals(GlobalBeginResponse.TYPE_GLOBAL_BEGIN_RESULT, globalBeginResponse.getTypeCode());
     }
 
     @Test

@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.server.lock;
 
 import io.seata.core.exception.TransactionException;
@@ -52,4 +51,13 @@ public interface LockManager {
      * @throws TransactionException the transaction exception
      */
     void cleanAllLocks() throws TransactionException;
+
+    /**
+     * Release lock boolean.
+     *
+     * @param branchSession the branch session
+     * @return the boolean
+     * @throws TransactionException the transaction exception
+     */
+    boolean releaseLock(BranchSession branchSession) throws TransactionException;
 }

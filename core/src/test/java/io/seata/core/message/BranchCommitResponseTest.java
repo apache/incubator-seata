@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,8 +21,8 @@ import io.seata.core.protocol.transaction.BranchCommitResponse;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Branch commit response test.
@@ -42,7 +42,7 @@ public class BranchCommitResponseTest {
         branchCommitResponse.setBranchStatus(BranchStatus.PhaseOne_Done);
         branchCommitResponse.setResultCode(ResultCode.Success);
         branchCommitResponse.setMsg("");
-        Assert.assertEquals(
+        Assertions.assertEquals(
             "xid=127.0.0.1:8091:123456,branchId=2345678,branchStatus=PhaseOne_Done,result code =Success,getMsg =",
             branchCommitResponse.toString());
 
@@ -64,12 +64,12 @@ public class BranchCommitResponseTest {
 
         BranchCommitResponse decodeBranchCommitResponse = new BranchCommitResponse();
         decodeBranchCommitResponse.decode(byteBuffer);
-        Assert.assertEquals(decodeBranchCommitResponse.getXid(), branchCommitResponse.getXid());
-        Assert.assertEquals(decodeBranchCommitResponse.getBranchId(), branchCommitResponse.getBranchId());
-        Assert.assertEquals(decodeBranchCommitResponse.getResultCode(), branchCommitResponse.getResultCode());
-        Assert.assertEquals(decodeBranchCommitResponse.getBranchStatus(), branchCommitResponse.getBranchStatus());
-        Assert.assertEquals(decodeBranchCommitResponse.getTransactionExceptionCode(),
+        Assertions.assertEquals(decodeBranchCommitResponse.getXid(), branchCommitResponse.getXid());
+        Assertions.assertEquals(decodeBranchCommitResponse.getBranchId(), branchCommitResponse.getBranchId());
+        Assertions.assertEquals(decodeBranchCommitResponse.getResultCode(), branchCommitResponse.getResultCode());
+        Assertions.assertEquals(decodeBranchCommitResponse.getBranchStatus(), branchCommitResponse.getBranchStatus());
+        Assertions.assertEquals(decodeBranchCommitResponse.getTransactionExceptionCode(),
             branchCommitResponse.getTransactionExceptionCode());
-        Assert.assertEquals(decodeBranchCommitResponse.getMsg(), branchCommitResponse.getMsg());
+        Assertions.assertEquals(decodeBranchCommitResponse.getMsg(), branchCommitResponse.getMsg());
     }
 }

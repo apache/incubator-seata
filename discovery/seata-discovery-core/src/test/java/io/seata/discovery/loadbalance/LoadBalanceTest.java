@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,19 +13,19 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.discovery.loadbalance;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+
 import java.net.InetSocketAddress;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
-import org.testng.collections.Lists;
+import java.util.stream.Stream;
 
 /**
  * Created by guoyao on 2019/2/14.
@@ -37,13 +37,14 @@ public class LoadBalanceTest {
      *
      * @param addresses the addresses
      */
-    @Test(dataProvider = "addressProvider")
+    @ParameterizedTest
+    @MethodSource("addressProvider")
     public void testRandomLoadBalance_select(List<InetSocketAddress> addresses) {
         int runs = 10000;
         Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new RandomLoadBalance());
         for (InetSocketAddress address : counter.keySet()) {
             Long count = counter.get(address).get();
-            Assert.assertTrue(count > 0, "selecte one time at last");
+            Assertions.assertTrue(count > 0, "selecte one time at last");
         }
     }
 
@@ -52,13 +53,14 @@ public class LoadBalanceTest {
      *
      * @param addresses the addresses
      */
-    @Test(dataProvider = "addressProvider")
+    @ParameterizedTest
+    @MethodSource("addressProvider")
     public void testRoundRobinLoadBalance_select(List<InetSocketAddress> addresses) {
         int runs = 10000;
         Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new RoundRobinLoadBalance());
         for (InetSocketAddress address : counter.keySet()) {
             Long count = counter.get(address).get();
-            Assert.assertTrue(Math.abs(count - runs / (0f + addresses.size())) < 1f, "abs diff shoud < 1");
+            Assertions.assertTrue(Math.abs(count - runs / (0f + addresses.size())) < 1f, "abs diff shoud < 1");
         }
     }
 
@@ -72,7 +74,7 @@ public class LoadBalanceTest {
      */
     public Map<InetSocketAddress, AtomicLong> getSelectedCounter(int runs, List<InetSocketAddress> addresses,
                                                                  LoadBalance loadBalance) {
-        Assert.assertNotNull(loadBalance);
+        Assertions.assertNotNull(loadBalance);
         Map<InetSocketAddress, AtomicLong> counter = new ConcurrentHashMap<>();
         for (InetSocketAddress address : addresses) {
             counter.put(address, new AtomicLong(0));
@@ -91,17 +93,15 @@ public class LoadBalanceTest {
     /**
      * Address provider object [ ] [ ].
      *
-     * @return the object [ ] [ ]
+     * @return Stream<List < InetSocketAddress>>
      */
-    @DataProvider
-    public static Object[][] addressProvider() {
-        List<InetSocketAddress> addresses = Lists.newArrayList();
-        addresses.add(new InetSocketAddress("127.0.0.1", 8091));
-        addresses.add(new InetSocketAddress("127.0.0.1", 8092));
-        addresses.add(new InetSocketAddress("127.0.0.1", 8093));
-        addresses.add(new InetSocketAddress("127.0.0.1", 8094));
-        addresses.add(new InetSocketAddress("127.0.0.1", 8095));
-        return new Object[][] {{addresses}};
+    static Stream<List<InetSocketAddress>> addressProvider() {
+        return Stream.of(
+                Arrays.asList(new InetSocketAddress("127.0.0.1", 8091),
+                        new InetSocketAddress("127.0.0.1", 8092),
+                        new InetSocketAddress("127.0.0.1", 8093),
+                        new InetSocketAddress("127.0.0.1", 8094),
+                        new InetSocketAddress("127.0.0.1", 8095))
+        );
     }
-
 }
