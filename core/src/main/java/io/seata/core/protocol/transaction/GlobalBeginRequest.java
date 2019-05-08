@@ -19,7 +19,6 @@ import java.nio.ByteBuffer;
 
 import io.seata.core.protocol.MergedMessage;
 import io.seata.core.rpc.RpcContext;
-import io.seata.core.rpc.RpcContext;
 
 /**
  * The type Global begin request.

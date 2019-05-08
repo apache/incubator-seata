@@ -20,7 +20,6 @@ import java.nio.ByteBuffer;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.MergedMessage;
 import io.seata.core.rpc.RpcContext;
-import io.seata.core.rpc.RpcContext;
 
 /**
  * The type Branch register request.
