@@ -17,7 +17,6 @@ package io.seata.core.protocol.transaction;
 
 import io.seata.core.protocol.MergedMessage;
 import io.seata.core.rpc.RpcContext;
-import io.seata.core.rpc.RpcContext;
 
 /**
  * The type Global lock query request.
