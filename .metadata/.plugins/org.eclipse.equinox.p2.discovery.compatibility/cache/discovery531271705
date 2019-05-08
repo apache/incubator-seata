@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<directory xmlns="http://www.eclipse.org/mylyn/discovery/directory/">
+    <entry url="http://repo1.maven.org/maven2/.m2e/discovery-catalog/org.eclipse.m2e.discovery.oss-catalog-1.6.jar" permitCategories="true"/>
+</directory>

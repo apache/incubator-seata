@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><testrun name="BranchStatusTest" project="core" tests="4" started="4" failures="0" errors="0" ignored="0">
+  <testsuite name="io.seata.core.model.BranchStatusTest" time="0.033" displayname="BranchStatusTest" uniqueid="[engine:junit-jupiter]/[class:io.seata.core.model.BranchStatusTest]">
+    <testcase name="testGetException" classname="io.seata.core.model.BranchStatusTest" time="0.014" displayname="testGetException()" uniqueid="[engine:junit-jupiter]/[class:io.seata.core.model.BranchStatusTest]/[method:testGetException()]"/>
+    <testcase name="testGetCode" classname="io.seata.core.model.BranchStatusTest" time="0.004" displayname="testGetCode()" uniqueid="[engine:junit-jupiter]/[class:io.seata.core.model.BranchStatusTest]/[method:testGetCode()]"/>
+    <testcase name="testGetWithByte" classname="io.seata.core.model.BranchStatusTest" time="0.004" displayname="testGetWithByte()" uniqueid="[engine:junit-jupiter]/[class:io.seata.core.model.BranchStatusTest]/[method:testGetWithByte()]"/>
+    <testcase name="testGetWithInt" classname="io.seata.core.model.BranchStatusTest" time="0.011" displayname="testGetWithInt()" uniqueid="[engine:junit-jupiter]/[class:io.seata.core.model.BranchStatusTest]/[method:testGetWithInt()]"/>
+  </testsuite>
+</testrun>

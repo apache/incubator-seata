@@ -1,0 +1,14 @@
+package io.seata.core.rpc;
+
+import static org.junit.Assert.*;
+
+import org.junit.Test;
+
+public class RpcContextTest {
+
+	@Test
+	public void test() {
+		fail("Not yet implemented");
+	}
+
+}
