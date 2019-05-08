@@ -30,11 +30,14 @@ import java.util.Objects;
  */
 public final class ConfigurationFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
-    private static final String REGISTRY_CONF = "registry.conf";
+    private static final String REGISTRY_CONF_PREFIX = "registry";
+    private static final String REGISTRY_CONF_SUFFIX = ".conf";
     /**
      * The constant FILE_INSTANCE.
      */
-    public static final Configuration FILE_INSTANCE = new FileConfiguration(REGISTRY_CONF);
+    private static final String ENV_VALUE = System.getProperty("env");
+    private static final Configuration DEFAULT_FILE_INSTANCE = new FileConfiguration(REGISTRY_CONF_PREFIX + REGISTRY_CONF_SUFFIX);
+    public static final Configuration CURRENT_FILE_INSTANCE = ENV_VALUE == null || "default".equals(ENV_VALUE) ? DEFAULT_FILE_INSTANCE : new FileConfiguration(REGISTRY_CONF_PREFIX + "-" + ENV_VALUE + REGISTRY_CONF_SUFFIX);
     private static final String NAME_KEY = "name";
     private static final String FILE_TYPE = "file";
 
@@ -43,11 +46,11 @@ public final class ConfigurationFactory {
      *
      * @return the instance
      */
-    public static Configuration getInstance() {
+    public static synchronized Configuration getInstance() {
         ConfigType configType = null;
         String configTypeName = null;
         try {
-            configTypeName = FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+            configTypeName = CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + ConfigurationKeys.FILE_ROOT_TYPE);
             configType = ConfigType.getType(configTypeName);
         } catch (Exception exx) {
@@ -57,7 +60,7 @@ public final class ConfigurationFactory {
             String pathDataId = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + FILE_TYPE + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + NAME_KEY;
-            String name = FILE_INSTANCE.getConfig(pathDataId);
+            String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             return new FileConfiguration(name);
         } else {
             return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
