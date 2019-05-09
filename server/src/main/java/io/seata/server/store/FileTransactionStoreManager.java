@@ -407,9 +407,9 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
     }
 
     private boolean writeDataFileByBuffer(ByteBuffer byteBuffer) {
+        byteBuffer.flip();
         for (int retry = 0; retry < MAX_WRITE_RETRY; retry++) {
             try {
-                byteBuffer.flip();
                 while (byteBuffer.hasRemaining()) {
                     currFileChannel.write(byteBuffer);
                 }
