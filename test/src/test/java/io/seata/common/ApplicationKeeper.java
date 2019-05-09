@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.test.common;
+package io.seata.common;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
@@ -73,7 +73,7 @@ public class ApplicationKeeper {
                 LOGGER.info("Application is keep running ... ");
                 LOCK.wait();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                LOGGER.error("interrupted error", e);
             }
         }
     }
