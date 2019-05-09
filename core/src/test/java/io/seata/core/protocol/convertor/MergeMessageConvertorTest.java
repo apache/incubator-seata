@@ -21,7 +21,7 @@ import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.protobuf.MergedWarpMessageProto;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

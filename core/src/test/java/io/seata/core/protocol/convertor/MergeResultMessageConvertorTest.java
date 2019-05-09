@@ -22,7 +22,7 @@ import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.protobuf.MergedResultMessageProto;
 import io.seata.core.protocol.transaction.GlobalCommitResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

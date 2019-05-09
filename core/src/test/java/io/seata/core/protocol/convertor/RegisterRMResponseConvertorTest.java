@@ -18,7 +18,7 @@ package io.seata.core.protocol.convertor;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.protobuf.RegisterRMResponseProto;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

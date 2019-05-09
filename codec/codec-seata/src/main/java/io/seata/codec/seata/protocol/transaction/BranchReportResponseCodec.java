@@ -13,36 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.protocol;
+package io.seata.codec.seata.protocol.transaction;
 
-import io.netty.buffer.ByteBuf;
+import io.seata.core.protocol.transaction.BranchReportResponse;
 
 /**
- * The interface Message codec.
+ * The type Branch report response codec.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/14
+ * @author zhangsen
  */
-public interface MessageCodec {
-    /**
-     * Gets type code.
-     *
-     * @return the type code
-     */
-    short getTypeCode();
+public class BranchReportResponseCodec extends AbstractTransactionResponseCodec {
 
-    /**
-     * Encode byte [ ].
-     *
-     * @return the byte [ ]
-     */
-    byte[] encode();
+    @Override
+    public Class<?> getMessageClassType() {
+        return BranchReportResponse.class;
+    }
 
-    /**
-     * Decode boolean.
-     *
-     * @param in the in
-     * @return the boolean
-     */
-    boolean decode(ByteBuf in);
 }

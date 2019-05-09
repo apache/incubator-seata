@@ -20,7 +20,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.protobuf.GlobalStatusResponseProto;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

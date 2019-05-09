@@ -15,6 +15,8 @@
  */
 package io.seata.core.protocol.transaction;
 
+import io.seata.core.protocol.MessageType;
+
 /**
  * The type Global commit response.
  *
@@ -24,6 +26,6 @@ public class GlobalCommitResponse extends AbstractGlobalEndResponse {
 
     @Override
     public short getTypeCode() {
-        return TYPE_GLOBAL_COMMIT_RESULT;
+        return MessageType.TYPE_GLOBAL_COMMIT_RESULT;
     }
 }

@@ -19,7 +19,7 @@ import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.protobuf.BranchRegisterResponseProto;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

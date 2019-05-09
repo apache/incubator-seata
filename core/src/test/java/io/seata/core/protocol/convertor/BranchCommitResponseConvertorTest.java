@@ -20,7 +20,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.protobuf.BranchCommitResponseProto;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

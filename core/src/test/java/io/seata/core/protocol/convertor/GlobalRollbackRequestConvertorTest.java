@@ -17,7 +17,7 @@ package io.seata.core.protocol.convertor;
 
 import io.seata.core.protocol.protobuf.GlobalRollbackRequestProto;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

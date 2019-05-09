@@ -29,7 +29,7 @@
     <dependencies>
 
         <dependency>
-            <groupId>io.seata</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>seata-core</artifactId>
             <version>${project.version}</version>
         </dependency>

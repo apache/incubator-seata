@@ -36,7 +36,7 @@ public class CodecFactory {
     /**
      * Get codec codec.
      *
-     * @param code the code
+     * @param codec the code
      * @return the codec
      */
     public static synchronized Codec getCodec(byte codec) {
@@ -46,31 +46,32 @@ public class CodecFactory {
         }
         Codec codecImpl = EnhancedServiceLoader.load(Codec.class, codecType.name());
         CODEC_MAP.put(codecType, codecImpl);
-        return codec;
+        return codecImpl;
     }
 
     /**
      * Encode byte [ ].
      *
      * @param <T>  the type parameter
-     * @param code the code
+     * @param codec the codec
      * @param t    the t
      * @return the byte [ ]
      */
     public static <T> byte[] encode(byte codec, T t) {
-        return getCodec(code).encode(t);
+        return getCodec(codec).encode(t);
     }
 
     /**
      * Decode t.
      *
      * @param <T>   the type parameter
-     * @param code  the code
+     * @param codec  the code
      * @param bytes the bytes
      * @return the t
      */
     public static <T> T decode(byte codec, byte[] bytes){
-        return getCodec(code).decode(bytes);
+        return getCodec(codec).decode(bytes);
     }
+
 
 }

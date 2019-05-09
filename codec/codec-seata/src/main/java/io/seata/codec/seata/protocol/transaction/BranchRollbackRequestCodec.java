@@ -13,21 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.protocol;
+package io.seata.codec.seata.protocol.transaction;
 
-import java.nio.ByteBuffer;
+
+import io.seata.core.protocol.transaction.BranchRollbackRequest;
 
 /**
- * The interface Merged message.
+ * The type Branch rollback request codec.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/17
+ * @author zhangsen
  */
-public interface MergedMessage {
-    /**
-     * Decode.
-     *
-     * @param byteBuffer the byte buffer
-     */
-    void decode(ByteBuffer byteBuffer);
+public class BranchRollbackRequestCodec extends AbstractBranchEndRequestCodec {
+
+    @Override
+    public Class<?> getMessageClassType() {
+        return BranchRollbackRequest.class;
+    }
 }
