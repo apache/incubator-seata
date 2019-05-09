@@ -15,9 +15,10 @@
  */
 package io.seata.core.protocol.transaction;
 
+import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.ResultCode;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
@@ -38,33 +39,20 @@ public class GlobalBeginResponseTest {
     public void testGetSetXid() {
         GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
         globalBeginResponse.setXid(XID);
-        Assert.assertEquals(XID, globalBeginResponse.getXid());
+        Assertions.assertEquals(XID, globalBeginResponse.getXid());
     }
 
     @Test
     public void testGetSetExtraData() {
         GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
         globalBeginResponse.setExtraData(EXTRA_DATA);
-        Assert.assertEquals(EXTRA_DATA, globalBeginResponse.getExtraData());
+        Assertions.assertEquals(EXTRA_DATA, globalBeginResponse.getExtraData());
     }
 
     @Test
     public void testGetTypeCode() {
         GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
-        Assert.assertEquals(GlobalBeginResponse.TYPE_GLOBAL_BEGIN_RESULT, globalBeginResponse.getTypeCode());
+        Assertions.assertEquals(MessageType.TYPE_GLOBAL_BEGIN_RESULT, globalBeginResponse.getTypeCode());
     }
 
-    @Test
-    public void testDoEncodeAndDecode() {
-        GlobalBeginResponse globalBeginResponseOne = new GlobalBeginResponse();
-        globalBeginResponseOne.setXid(XID);
-        globalBeginResponseOne.setExtraData(EXTRA_DATA);
-        globalBeginResponseOne.setResultCode(RESULT_CODE);
-        byte[] encode = globalBeginResponseOne.encode();
-        GlobalBeginResponse globalBeginResponseTwo = new GlobalBeginResponse();
-        globalBeginResponseTwo.decode(ByteBuffer.wrap(encode));
-        assertThat(globalBeginResponseOne.getXid()).isEqualTo(globalBeginResponseTwo.getXid());
-        assertThat(globalBeginResponseOne.getExtraData()).isEqualTo(globalBeginResponseTwo.getExtraData());
-        assertThat(globalBeginResponseOne.getResultCode()).isEqualTo(globalBeginResponseTwo.getResultCode());
-    }
 }

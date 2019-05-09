@@ -15,7 +15,7 @@
  */
 package io.seata.core.protocol.transaction;
 
-import io.seata.core.rpc.RpcContext;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.RpcContext;
 
 /**
@@ -26,7 +26,7 @@ import io.seata.core.rpc.RpcContext;
 public class GlobalRollbackRequest extends AbstractGlobalEndRequest {
     @Override
     public short getTypeCode() {
-        return TYPE_GLOBAL_ROLLBACK;
+        return MessageType.TYPE_GLOBAL_ROLLBACK;
     }
 
     @Override

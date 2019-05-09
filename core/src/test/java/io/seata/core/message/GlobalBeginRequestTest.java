@@ -20,8 +20,8 @@ import java.util.Arrays;
 
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Global begin request test.
@@ -42,45 +42,7 @@ public class GlobalBeginRequestTest {
         globalBeginRequest.setTransactionName("tran 1");
         System.out.println(globalBeginRequest.toString());
 
-        Assert.assertEquals("timeout=60000,transactionName=tran 1", globalBeginRequest.toString());
+        Assertions.assertEquals("timeout=60000,transactionName=tran 1", globalBeginRequest.toString());
     }
 
-    /**
-     * Test encode.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testEncode() throws Exception {
-        GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
-        globalBeginRequest.setTransactionName("tran 1");
-
-        byte[] encodeResult = globalBeginRequest.encode();
-        String encodeResultStr = Arrays.toString(encodeResult);
-
-        Assert.assertEquals("[0, 0, -22, 96, 0, 6, 116, 114, 97, 110, 32, 49]", encodeResultStr);
-    }
-
-    /**
-     * Test decode.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testDecode() throws Exception {
-        GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
-        globalBeginRequest.setTransactionName("tran 1");
-
-        byte[] encodeResult = globalBeginRequest.encode();
-
-        ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
-        byteBuffer.put(encodeResult);
-        byteBuffer.flip();
-
-        GlobalBeginRequest decodeGlobalBeginRequest = new GlobalBeginRequest();
-        decodeGlobalBeginRequest.decode(byteBuffer);
-        System.out.println(decodeGlobalBeginRequest);
-        Assert.assertEquals(globalBeginRequest.getTimeout(), decodeGlobalBeginRequest.getTimeout());
-        Assert.assertEquals(globalBeginRequest.getTransactionName(), decodeGlobalBeginRequest.getTransactionName());
-    }
 }

@@ -17,24 +17,71 @@ package io.seata.codec.seata;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.codec.Codec;
+import io.seata.core.protocol.AbstractMessage;
+
+import java.nio.ByteBuffer;
 
 /**
- * The type Seata codec.
+ * The Seata codec.
  *
  * @author zhangsen
  * @data 2019 /5/6
  */
-@LoadLevel(name="seata", order = 0)
+@LoadLevel(name="SEATA")
 public class SeataCodec implements Codec {
 
     @Override
     public <T> byte[] encode(T t) {
-        return new byte[0];
+        if(t == null || !(t instanceof AbstractMessage)){
+            throw new IllegalArgumentException("AbstractMessage isn't available.");
+        }
+        AbstractMessage abstractMessage = (AbstractMessage) t;
+        //typecode
+        short typecode = abstractMessage.getTypeCode();
+        //msg codec
+        MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode);
+        //get empty ByteBuffer
+        ByteBuffer out = MessageCodecFactory.getByteBuffer(abstractMessage);
+        //msg encode
+        messageCodec.encode(t, out);
+        out.flip();
+        byte[] body = new byte[out.limit()];
+        out.get(body);
+
+        //typecode + body
+        ByteBuffer byteBuffer = ByteBuffer.allocate(4+ body.length);
+        byteBuffer.putShort(typecode);
+        byteBuffer.put(body);
+
+        byteBuffer.flip();
+        byte[] content = new byte[byteBuffer.limit()];
+        byteBuffer.get(content);
+        return content;
     }
 
     @Override
-    public <T> T decode(String clazz,byte[] bytes) {
-        return null;
+    public <T> T decode(byte[] bytes) {
+        if(bytes == null || bytes.length == 0){
+            throw new IllegalArgumentException("Nothing to decode.");
+        }
+        if(bytes.length < 2){
+            throw new IllegalArgumentException("The byte[] isn't available for decode.");
+        }
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        //typecode
+        short typecode = byteBuffer.getShort();
+        //msg body
+        byte[] body = new byte[byteBuffer.remaining()];
+        byteBuffer.get(body);
+        ByteBuffer in = ByteBuffer.wrap(body);
+        //new Messgae
+        AbstractMessage abstractMessage = MessageCodecFactory.getMessage(typecode);
+        //get messageCodec
+        MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode);
+        //decode
+        messageCodec.decode(abstractMessage, in);
+        return (T) abstractMessage;
     }
+
 
 }

@@ -15,10 +15,8 @@
  */
 package io.seata.core.protocol.transaction;
 
-import java.nio.ByteBuffer;
 
 import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.RpcContext;
 
 /**
@@ -27,11 +25,6 @@ import io.seata.core.rpc.RpcContext;
  * @author sharajava
  */
 public abstract class AbstractTransactionRequest extends AbstractMessage {
-
-    /**
-     * The Byte buffer.
-     */
-    protected ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
 
     /**
      * Handle abstract transaction response.

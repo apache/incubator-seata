@@ -18,7 +18,7 @@ package io.seata.core.protocol;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
 import io.seata.core.protocol.transaction.GlobalBeginResponse;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -42,36 +42,7 @@ public class MergeResultMessageTest {
     @Test
     public void getTypeCode() {
         MergeResultMessage mergeResultMessage = new MergeResultMessage();
-        assertThat(AbstractMessage.TYPE_SEATA_MERGE_RESULT).isEqualTo(mergeResultMessage.getTypeCode());
-    }
-
-    @Test
-    public void encode() {
-        byte[] expect = new byte[]{0, 0, 0, 17, 0, 1, 0, 2, 1, 0, 0, 3, 120, 105, 100, 0, 4, 100, 97, 116, 97};
-        MergeResultMessage mergeResultMessage = new MergeResultMessage();
-        final AbstractResultMessage[] msgs = new AbstractResultMessage[1];
-        final GlobalBeginResponse globalBeginResponse = buildGlobalBeginResponse();
-        msgs[0] = globalBeginResponse;
-        mergeResultMessage.setMsgs(msgs);
-        byte[] result = mergeResultMessage.encode();
-        assertThat(expect).isEqualTo(result);
-    }
-
-    @Test
-    public void decode() {
-
-        byte[] result = new byte[]{0, 0, 0, 17, 0, 1, 0, 2, 1, 0, 0, 3, 120, 105, 100, 0, 4, 100, 97, 116, 97};
-        final GlobalBeginResponse globalBeginResponse = buildGlobalBeginResponse();
-        ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer();
-        MergeResultMessage decodeResult = new MergeResultMessage();
-        decodeResult.decode(buffer.writeBytes(result));
-        GlobalBeginResponse decodeGlobalBeginResponse = (GlobalBeginResponse) decodeResult.getMsgs()[0];
-
-        assertThat(globalBeginResponse.getExtraData()).isEqualTo(decodeGlobalBeginResponse.getExtraData());
-        assertThat(globalBeginResponse.getXid()).isEqualTo(decodeGlobalBeginResponse.getXid());
-        assertThat(globalBeginResponse.getResultCode()).isEqualTo(decodeGlobalBeginResponse.getResultCode());
-        //msg won't be coded
-        assertThat(decodeGlobalBeginResponse.getMsg()).isNull();
+        assertThat(MessageType.TYPE_SEATA_MERGE_RESULT).isEqualTo(mergeResultMessage.getTypeCode());
     }
 
     private GlobalBeginResponse buildGlobalBeginResponse() {

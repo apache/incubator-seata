@@ -39,5 +39,5 @@ public interface Codec {
      * @param bytes the bytes
      * @return the t
      */
-    <T> T decode(String clazz ,byte[] bytes);
+    <T> T decode(byte[] bytes);
 }

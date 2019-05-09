@@ -18,7 +18,7 @@ package io.seata.core.protocol.convertor;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.protobuf.BranchCommitRequestProto;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

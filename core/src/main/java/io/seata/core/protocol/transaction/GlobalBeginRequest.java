@@ -15,20 +15,16 @@
  */
 package io.seata.core.protocol.transaction;
 
+import io.seata.core.protocol.MessageType;
+import io.seata.core.rpc.RpcContext;
 import java.nio.ByteBuffer;
-
-import io.seata.core.protocol.MergedMessage;
-import io.seata.core.rpc.RpcContext;
-import io.seata.core.rpc.RpcContext;
 
 /**
  * The type Global begin request.
  *
  * @author jimin.jm @alibaba-inc.com
  */
-public class GlobalBeginRequest extends AbstractTransactionRequestToTC implements MergedMessage {
-
-    private static final long serialVersionUID = 7236162274218388376L;
+public class GlobalBeginRequest extends AbstractTransactionRequestToTC {
 
     private int timeout = 60000;
 
@@ -72,41 +68,9 @@ public class GlobalBeginRequest extends AbstractTransactionRequestToTC implement
 
     @Override
     public short getTypeCode() {
-        return TYPE_GLOBAL_BEGIN;
+        return MessageType.TYPE_GLOBAL_BEGIN;
     }
 
-    @Override
-    public byte[] encode() {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(256);
-        byteBuffer.putInt(timeout);
-
-        if (this.transactionName != null) {
-            byte[] bs = transactionName.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
-            if (bs.length > 0) {
-                byteBuffer.put(bs);
-            }
-        } else {
-            byteBuffer.putShort((short)0);
-        }
-
-        byteBuffer.flip();
-        byte[] content = new byte[byteBuffer.limit()];
-        byteBuffer.get(content);
-        return content;
-    }
-
-    @Override
-    public void decode(ByteBuffer byteBuffer) {
-        this.timeout = byteBuffer.getInt();
-
-        short len = byteBuffer.getShort();
-        if (len > 0) {
-            byte[] bs = new byte[len];
-            byteBuffer.get(bs);
-            this.setTransactionName(new String(bs, UTF8));
-        }
-    }
 
     @Override
     public AbstractTransactionResponse handle(RpcContext rpcContext) {

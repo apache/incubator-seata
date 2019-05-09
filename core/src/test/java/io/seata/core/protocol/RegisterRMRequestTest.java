@@ -17,7 +17,7 @@ package io.seata.core.protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufAllocator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,34 +40,8 @@ public class RegisterRMRequestTest {
     @Test
     public void getTypeCode() {
         RegisterRMRequest registerRMRequest = new RegisterRMRequest();
-        assertThat(AbstractMessage.TYPE_REG_RM).isEqualTo(registerRMRequest.getTypeCode());
+        assertThat(MessageType.TYPE_REG_RM).isEqualTo(registerRMRequest.getTypeCode());
     }
-
-
-    @Test
-    public void encode() {
-        byte[] expect = new byte[]{0, 1, 49, 0, 3, 97, 112, 112, 0, 5, 103, 114, 111, 117, 112, 0, 5, 101, 120, 116, 114, 97, 0, 0, 0, 5, 114, 49, 44, 114, 50};
-        RegisterRMRequest registerRMRequest = buildRegisterRMRequest();
-        byte[] result = registerRMRequest.encode();
-        assertThat(expect).isEqualTo(result);
-    }
-
-
-    @Test
-    public void decode() {
-        byte[] result = new byte[]{0, 1, 49, 0, 3, 97, 112, 112, 0, 5, 103, 114, 111, 117, 112, 0, 5, 101, 120, 116, 114, 97, 0, 0, 0, 5, 114, 49, 44, 114, 50};
-        RegisterRMRequest registerRMRequest = buildRegisterRMRequest();
-        ByteBuf buffer = ByteBufAllocator.DEFAULT.buffer();
-        RegisterRMRequest decodeResult = new RegisterRMRequest();
-        decodeResult.decode(buffer.writeBytes(result));
-        assertThat(decodeResult.getTypeCode()).isEqualTo(registerRMRequest.getTypeCode());
-        assertThat(decodeResult.getResourceIds()).isEqualTo(registerRMRequest.getResourceIds());
-        assertThat(decodeResult.getApplicationId()).isEqualTo(registerRMRequest.getApplicationId());
-        assertThat(decodeResult.getExtraData()).isEqualTo(registerRMRequest.getExtraData());
-        assertThat(decodeResult.getTransactionServiceGroup()).isEqualTo(registerRMRequest.getTransactionServiceGroup());
-        assertThat(decodeResult.getVersion()).isEqualTo(registerRMRequest.getVersion());
-    }
-
 
     private RegisterRMRequest buildRegisterRMRequest() {
 

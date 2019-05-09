@@ -17,7 +17,7 @@ package io.seata.core.protocol.convertor;
 
 import io.seata.core.protocol.protobuf.GlobalStatusRequestProto;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

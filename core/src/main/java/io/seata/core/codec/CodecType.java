@@ -27,14 +27,14 @@ public enum CodecType {
      * <p>
      * Math.pow(2, 0)
      */
-    SEATA((byte)1),
+    SEATA((byte)0x1),
 
     /**
      * The protobuf.
      * <p>
      * Math.pow(2, 1)
      */
-    PROTOBUF((byte)2);
+    PROTOBUF((byte)0x2);
 
     private final byte code;
 
@@ -48,9 +48,24 @@ public enum CodecType {
      * @param code the code
      * @return the result code
      */
-    public static CodecType getResultCode(byte code) {
+    public static CodecType getResultCode(int code) {
         for (CodecType b : CodecType.values()) {
             if (code == b.code) {
+                return b;
+            }
+        }
+        throw new IllegalArgumentException("unknown codec:" + code);
+    }
+
+    /**
+     * Gets result code.
+     *
+     * @param code the code
+     * @return the result code
+     */
+    public static CodecType getResultCode(String code) {
+        for (CodecType b : CodecType.values()) {
+            if (b.name().equalsIgnoreCase(code)) {
                 return b;
             }
         }

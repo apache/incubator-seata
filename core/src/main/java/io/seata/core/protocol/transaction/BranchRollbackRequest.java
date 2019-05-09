@@ -15,7 +15,7 @@
  */
 package io.seata.core.protocol.transaction;
 
-import io.seata.core.rpc.RpcContext;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.RpcContext;
 
 /**
@@ -27,7 +27,7 @@ public class BranchRollbackRequest extends AbstractBranchEndRequest {
 
     @Override
     public short getTypeCode() {
-        return TYPE_BRANCH_ROLLBACK;
+        return MessageType.TYPE_BRANCH_ROLLBACK;
     }
 
     @Override

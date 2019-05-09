@@ -19,8 +19,8 @@ import java.nio.ByteBuffer;
 
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Global rollback request test.
@@ -35,24 +35,7 @@ public class GlobalRollbackRequestTest {
         GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
         globalRollbackRequest.setXid("127.0.0.1:8091:1249853");
         globalRollbackRequest.setExtraData("test_extra_data");
-        Assert.assertEquals("xid=127.0.0.1:8091:1249853,extraData=test_extra_data", globalRollbackRequest.toString());
+        Assertions.assertEquals("xid=127.0.0.1:8091:1249853,extraData=test_extra_data", globalRollbackRequest.toString());
     }
 
-    /**
-     * Test decode.
-     */
-    @Test
-    public void testDecode() {
-        GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
-        globalRollbackRequest.setXid("127.0.0.1:8091:1249853");
-        globalRollbackRequest.setExtraData("test_extra_data");
-        byte[] encodeResult = globalRollbackRequest.encode();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
-        byteBuffer.put(encodeResult);
-        byteBuffer.flip();
-        GlobalRollbackRequest decodeGlobalRollbackRequest = new GlobalRollbackRequest();
-        decodeGlobalRollbackRequest.decode(byteBuffer);
-        Assert.assertEquals(globalRollbackRequest.getXid(), decodeGlobalRollbackRequest.getXid());
-        Assert.assertEquals(globalRollbackRequest.getExtraData(), decodeGlobalRollbackRequest.getExtraData());
-    }
 }

@@ -15,7 +15,7 @@
  */
 package io.seata.core.protocol.transaction;
 
-import io.seata.core.rpc.RpcContext;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.RpcContext;
 
 /**
@@ -27,7 +27,7 @@ public class GlobalStatusRequest extends AbstractGlobalEndRequest {
 
     @Override
     public short getTypeCode() {
-        return TYPE_GLOBAL_STATUS;
+        return MessageType.TYPE_GLOBAL_STATUS;
     }
 
     @Override

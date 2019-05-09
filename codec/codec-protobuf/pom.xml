@@ -28,14 +28,14 @@
     <name>codec-protobuf ${project.version}</name>
     <dependencies>
         <dependency>
-            <groupId>io.seata</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>seata-common</artifactId>
             <version>${revision}</version>
         </dependency>
         <dependency>
-            <groupId>io.seata</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>seata-core</artifactId>
-            <version>${revision}</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 </project>

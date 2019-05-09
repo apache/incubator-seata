@@ -24,7 +24,6 @@ import java.io.Serializable;
  * @date 2018 /10/10
  */
 public class RegisterRMResponse extends AbstractIdentifyResponse implements Serializable {
-    private static final long serialVersionUID = 6391375605848221420L;
 
     /**
      * Instantiates a new Register rm response.
@@ -45,6 +44,6 @@ public class RegisterRMResponse extends AbstractIdentifyResponse implements Seri
 
     @Override
     public short getTypeCode() {
-        return TYPE_REG_RM_RESULT;
+        return MessageType.TYPE_REG_RM_RESULT;
     }
 }

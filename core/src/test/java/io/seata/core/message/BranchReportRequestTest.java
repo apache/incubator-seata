@@ -21,8 +21,8 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Branch report request test.
@@ -40,40 +40,11 @@ public class BranchReportRequestTest {
         branchReportRequest.setResourceId("resource003");
         branchReportRequest.setStatus(BranchStatus.PhaseOne_Timeout);
         branchReportRequest.setApplicationData("test app data");
-        Assert.assertEquals(
+        Assertions.assertEquals(
             "xid=127.0.0.1:8091:1249853,branchId=3,resourceId=resource003,status=PhaseOne_Timeout,"
                 + "applicationData=test app"
                 + " data",
             branchReportRequest.toString());
     }
 
-    /**
-     * Test decode.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testDecode() {
-        BranchReportRequest branchReportRequest = new BranchReportRequest();
-        branchReportRequest.setXid("127.0.0.1:8091:1249853");
-        branchReportRequest.setBranchId(3);
-        branchReportRequest.setResourceId("resource003");
-        branchReportRequest.setStatus(BranchStatus.PhaseOne_Timeout);
-        branchReportRequest.setApplicationData("test app data");
-        branchReportRequest.setBranchType(BranchType.AT);
-
-        byte[] encodeResult = branchReportRequest.encode();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
-        byteBuffer.put(encodeResult);
-        byteBuffer.flip();
-
-        BranchReportRequest decodeBranchReportRequest = new BranchReportRequest();
-        decodeBranchReportRequest.decode(byteBuffer);
-        Assert.assertEquals(branchReportRequest.getXid(), decodeBranchReportRequest.getXid());
-        Assert.assertEquals(branchReportRequest.getBranchId(), decodeBranchReportRequest.getBranchId());
-        Assert.assertEquals(branchReportRequest.getResourceId(), decodeBranchReportRequest.getResourceId());
-        Assert.assertEquals(branchReportRequest.getStatus(), decodeBranchReportRequest.getStatus());
-        Assert.assertEquals(branchReportRequest.getApplicationData(), decodeBranchReportRequest.getApplicationData());
-        Assert.assertEquals(branchReportRequest.getBranchType(), decodeBranchReportRequest.getBranchType());
-    }
 }

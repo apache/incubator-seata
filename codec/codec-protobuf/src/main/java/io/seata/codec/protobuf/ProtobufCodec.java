@@ -32,16 +32,18 @@ public class ProtobufCodec implements Codec {
         if (t == null) {
             throw new NullPointerException();
         }
-
+        //TODO
         return ProtobufSerialzer.serializeContent(t);
     }
 
     @Override
-    public <T> T decode(String clazz, byte[] bytes) {
+    public <T> T decode(byte[] bytes){
+//    public <T> T decode(String clazz, byte[] bytes) {
         if (bytes == null) {
             throw new NullPointerException();
         }
-        return ProtobufSerialzer.deserializeContent(clazz, bytes);
+        //TODO
+        return ProtobufSerialzer.deserializeContent(null, bytes);
     }
 
 }
