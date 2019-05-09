@@ -37,7 +37,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
-import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
+import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -49,8 +49,8 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
 
     private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
     private static final String SERVER_ADDR_KEY = "serverAddr";
-    private static final String REGISTRY_TYPE = "consul";
-    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
+    private static final String CONFIG_TYPE = "consul";
+    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static ExecutorService consulConfigExecutor = null;
@@ -160,7 +160,7 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
 
     @Override
     public String getTypeName() {
-        return REGISTRY_TYPE;
+        return CONFIG_TYPE;
     }
 
 
