@@ -1,4 +1,5 @@
 /*
+ /*
  *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +18,13 @@ package io.seata.core.rpc;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+
 import java.util.HashSet;
+
 
 /**
  * RpcContext Test
@@ -29,14 +36,20 @@ import java.util.HashSet;
  *
  */
 
+
 public class RpcContextTest {
+	
+	private static RpcContext rc;
+	
 
 	/**
 	 *  RpcContext Constructor 
 	*/
-	RpcContext rc = new RpcContext();
-	
-	
+
+	@BeforeAll
+	public static void setup( ) {
+		rc = new RpcContext();
+	}
 	/**
 	 * Test set ApplicationId to value = "1"
 	 * Test get ApplicationId
@@ -125,6 +138,7 @@ public class RpcContextTest {
 	 */
 	@Test
 	public void testAddResourceValue() throws Exception {
+		
 		Assertions.assertThrows(Exception.class, () -> {
 			String resource = "a";
 			HashSet<String> resourceSet = new HashSet<String>();
