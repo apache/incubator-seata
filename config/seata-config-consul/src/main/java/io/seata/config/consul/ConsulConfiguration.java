@@ -60,6 +60,7 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
      * default watch timeout in second
      */
     private static final int DEFAULT_WATCH_TIMEOUT = 60;
+    private static final long CAS = 0L;
 
 
     private ConsulConfiguration() {
@@ -110,7 +111,7 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
         consulConfigExecutor.execute(() -> {
             PutParams putParams = new PutParams();
             //Setting CAS to 0 means that this is an atomic operation, created when key does not exist.
-            putParams.setCas(0L);
+            putParams.setCas(CAS);
             complete(getConsulClient().setKVValue(dataId, content, putParams), configFuture);
         });
         return (Boolean) configFuture.get();
