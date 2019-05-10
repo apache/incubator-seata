@@ -19,6 +19,7 @@ package io.seata.tm.api;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timeout;
 import io.netty.util.TimerTask;
+import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import org.slf4j.Logger;
@@ -48,6 +49,7 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
     private static final int TICKS_PER_WHEEL = 8;
 
     private HashedWheelTimer timer = new HashedWheelTimer(
+            new NamedThreadFactory("failedTransactionRetry",1),
             TICK_DURATION, TimeUnit.SECONDS, TICKS_PER_WHEEL);
 
     @Override
@@ -98,7 +100,7 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
     private boolean shouldStop(final GlobalTransaction tx, GlobalStatus required){
         try {
             GlobalStatus status = tx.getStatus();
-            LOGGER.warn("transaction[" + tx.getXid() + "] current status is [" + status + "]");
+            LOGGER.info("transaction[" + tx.getXid() + "] current status is [" + status + "]");
             if(status == required || status == GlobalStatus.Finished){
                 return true;
             }
