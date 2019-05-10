@@ -46,7 +46,7 @@ public class ProtobufCodec implements Codec {
         Object newBody = pbConvertor.convert2Proto(t);
 
         byte[] body = ProtobufSerializer.serializeContent(newBody);
-        final String name = t.getClass().getName();
+        final String name = newBody.getClass().getName();
         final byte[] nameBytes = name.getBytes(UTF8);
         ByteBuffer byteBuffer = ByteBuffer.allocate(4 + nameBytes.length + body.length);
         byteBuffer.putInt(nameBytes.length);
