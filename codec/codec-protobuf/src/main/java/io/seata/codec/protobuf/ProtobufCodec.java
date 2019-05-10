@@ -20,8 +20,8 @@ import java.nio.charset.Charset;
 
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.codec.Codec;
-import io.seata.core.protocol.convertor.PbConvertor;
-import io.seata.core.protocol.serialize.ProtobufConvertManager;
+import io.seata.codec.protobuf.convertor.PbConvertor;
+import io.seata.codec.protobuf.manager.ProtobufConvertManager;
 
 /**
  * The type Protobuf codec.
@@ -45,7 +45,7 @@ public class ProtobufCodec implements Codec {
             t.getClass().getName());
         Object newBody = pbConvertor.convert2Proto(t);
 
-        byte[] body = ProtobufSerialzer.serializeContent(newBody);
+        byte[] body = ProtobufSerializer.serializeContent(newBody);
         final String name = t.getClass().getName();
         final byte[] nameBytes = name.getBytes(UTF8);
         ByteBuffer byteBuffer = ByteBuffer.allocate(4 + nameBytes.length + body.length);
@@ -70,7 +70,7 @@ public class ProtobufCodec implements Codec {
         byte[] body = new byte[bytes.length - clazzNameLength - 4];
         byteBuffer.get(body);
         final String clazz = new String(clazzName, UTF8);
-        Object protobufObject = ProtobufSerialzer.deserializeContent(clazz, bytes);
+        Object protobufObject = ProtobufSerializer.deserializeContent(clazz, bytes);
         final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(clazz);
         Object newBody = pbConvertor.convert2Model(protobufObject);
         return (T)newBody;
