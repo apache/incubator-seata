@@ -68,7 +68,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static ExecutorService etcdConfigExecutor = null;
-    private static ExecutorService consulConfigExecutor = null;
+    private static ExecutorService etcdNotifierExecutor = null;
     private static ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = null;
     private static ConcurrentHashMap<String, List<ConfigChangeNotifier>> configChangeNotifiersMap = null;
 
@@ -88,7 +88,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
                 if (null == instance) {
                     etcdConfigExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
                         Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("etcd-config-executor", THREAD_POOL_NUM));
-                    consulConfigExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
+                    etcdNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
                         Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("etcd-config-notifier-executor", THREAD_POOL_NUM));
                     configListenersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
                     configChangeNotifiersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
@@ -156,7 +156,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         if (null != listener.getExecutor()) {
             listener.getExecutor().submit(configChangeNotifier);
         } else {
-            consulConfigExecutor.submit(configChangeNotifier);
+            etcdNotifierExecutor.submit(configChangeNotifier);
         }
     }
 
