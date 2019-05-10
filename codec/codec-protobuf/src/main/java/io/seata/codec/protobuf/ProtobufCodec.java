@@ -18,10 +18,11 @@ package io.seata.codec.protobuf;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.core.codec.Codec;
+import com.google.protobuf.GeneratedMessageV3;
 import io.seata.codec.protobuf.convertor.PbConvertor;
 import io.seata.codec.protobuf.manager.ProtobufConvertManager;
+import io.seata.common.loader.LoadLevel;
+import io.seata.core.codec.Codec;
 
 /**
  * The type Protobuf codec.
@@ -43,10 +44,10 @@ public class ProtobufCodec implements Codec {
         //translate to pb
         final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(
             t.getClass().getName());
-        Object newBody = pbConvertor.convert2Proto(t);
-
+        //for cross language,write FullName to data,which defines in proto file
+        GeneratedMessageV3 newBody = (GeneratedMessageV3)pbConvertor.convert2Proto(t);
         byte[] body = ProtobufSerializer.serializeContent(newBody);
-        final String name = newBody.getClass().getName();
+        final String name = newBody.getDescriptorForType().getFullName();
         final byte[] nameBytes = name.getBytes(UTF8);
         ByteBuffer byteBuffer = ByteBuffer.allocate(4 + nameBytes.length + body.length);
         byteBuffer.putInt(nameBytes.length);
@@ -70,7 +71,8 @@ public class ProtobufCodec implements Codec {
         byte[] body = new byte[bytes.length - clazzNameLength - 4];
         byteBuffer.get(body);
         final String clazz = new String(clazzName, UTF8);
-        Object protobufObject = ProtobufSerializer.deserializeContent(clazz, bytes);
+        Class protobufClazz = ProtobufConvertManager.getInstance().fetchProtoClass(clazz);
+        Object protobufObject = ProtobufSerializer.deserializeContent(protobufClazz.getName(), bytes);
         //translate back to core model
         final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(clazz);
         Object newBody = pbConvertor.convert2Model(protobufObject);
