@@ -99,4 +99,15 @@ enum TransactionExceptionCodeProto {
     //
     FailedToAddBranch = 14;
 
+    /**
+  *  Failed to lock global transaction exception code.
+  */
+    FailedLockGlobalTranscation = 15;
+
+    /**
+     * FailedWriteSession
+     */
+    FailedWriteSession = 16;
+
+
 }

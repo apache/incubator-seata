@@ -24,7 +24,7 @@ public final class TransactionExceptionCode {
   static {
     java.lang.String[] descriptorData = {
       "\n\036transactionExceptionCode.proto\022\032io.sea" +
-      "ta.protocol.protobuf*\303\003\n\035TransactionExce" +
+      "ta.protocol.protobuf*\374\003\n\035TransactionExce" +
       "ptionCodeProto\022\013\n\007Unknown\020\000\022\023\n\017LockKeyCo" +
       "nflict\020\001\022\006\n\002IO\020\002\022\"\n\036BranchRollbackFailed" +
       "_Retriable\020\003\022$\n BranchRollbackFailed_Unr" +
@@ -35,9 +35,11 @@ public final class TransactionExceptionCode {
       "nsactionNotActive\020\n\022\"\n\036GlobalTransaction" +
       "StatusInvalid\020\013\022#\n\037FailedToSendBranchCom" +
       "mitRequest\020\014\022%\n!FailedToSendBranchRollba" +
-      "ckRequest\020\r\022\025\n\021FailedToAddBranch\020\016B?\n!io" +
-      ".seata.codec.protobuf.generatedB\030Transac" +
-      "tionExceptionCodeP\001b\006proto3"
+      "ckRequest\020\r\022\025\n\021FailedToAddBranch\020\016\022\037\n\033Fa" +
+      "iledLockGlobalTranscation\020\017\022\026\n\022FailedWri" +
+      "teSession\020\020B?\n!io.seata.codec.protobuf.g" +
+      "eneratedB\030TransactionExceptionCodeP\001b\006pr" +
+      "oto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

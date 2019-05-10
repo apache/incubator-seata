@@ -117,6 +117,24 @@ public enum TransactionExceptionCodeProto
    * <code>FailedToAddBranch = 14;</code>
    */
   FailedToAddBranch(14),
+  /**
+   * <pre>
+   **
+   *  Failed to lock global transaction exception code.
+   * </pre>
+   *
+   * <code>FailedLockGlobalTranscation = 15;</code>
+   */
+  FailedLockGlobalTranscation(15),
+  /**
+   * <pre>
+   **
+   * FailedWriteSession
+   * </pre>
+   *
+   * <code>FailedWriteSession = 16;</code>
+   */
+  FailedWriteSession(16),
   UNRECOGNIZED(-1),
   ;
 
@@ -225,6 +243,24 @@ public enum TransactionExceptionCodeProto
    * <code>FailedToAddBranch = 14;</code>
    */
   public static final int FailedToAddBranch_VALUE = 14;
+  /**
+   * <pre>
+   **
+   *  Failed to lock global transaction exception code.
+   * </pre>
+   *
+   * <code>FailedLockGlobalTranscation = 15;</code>
+   */
+  public static final int FailedLockGlobalTranscation_VALUE = 15;
+  /**
+   * <pre>
+   **
+   * FailedWriteSession
+   * </pre>
+   *
+   * <code>FailedWriteSession = 16;</code>
+   */
+  public static final int FailedWriteSession_VALUE = 16;
 
 
   public final int getNumber() {
@@ -260,6 +296,8 @@ public enum TransactionExceptionCodeProto
       case 12: return FailedToSendBranchCommitRequest;
       case 13: return FailedToSendBranchRollbackRequest;
       case 14: return FailedToAddBranch;
+      case 15: return FailedLockGlobalTranscation;
+      case 16: return FailedWriteSession;
       default: return null;
     }
   }
