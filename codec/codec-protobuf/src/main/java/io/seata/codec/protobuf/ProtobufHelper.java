@@ -44,22 +44,23 @@ public class ProtobufHelper {
 
     /**
      *
-     * @param service
+     * @param clazzName
      * @return
      */
-    public Class getPbClass(String service) {
-        Class reqClass = requestClassCache.get(service);
+    public Class getPbClass(String clazzName) {
+        Class reqClass = requestClassCache.get(clazzName);
         if (reqClass == null) {
             // 读取接口里的方法参数和返回值
             Class clazz = null;
             try {
-                clazz = Class.forName(service);
+                clazz = Class.forName(clazzName);
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                throw new ShouldNeverHappenException("get class occurs exception", e);
+
             }
-            loadProtoClassToCache(service, clazz);
+            loadProtoClassToCache(clazzName, clazz);
         }
-        return requestClassCache.get(service);
+        return requestClassCache.get(clazzName);
     }
 
     /**

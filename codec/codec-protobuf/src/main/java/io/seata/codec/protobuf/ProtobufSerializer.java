@@ -15,7 +15,6 @@
  */
 package io.seata.codec.protobuf;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -23,7 +22,6 @@ import io.seata.common.exception.ShouldNeverHappenException;
 
 /**
  * @author leizhiyuan
-
  */
 public class ProtobufSerializer {
 
@@ -55,10 +53,8 @@ public class ProtobufSerializer {
         byte[] bytes = new byte[0];
         try {
             bytes = (byte[])method.invoke(request);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            throw new ShouldNeverHappenException("serialize occurs exception", e);
         }
 
         return bytes;
@@ -68,12 +64,7 @@ public class ProtobufSerializer {
         if (content == null || content.length == 0) {
             return null;
         }
-        Class clazz = null;
-        try {
-            clazz = Class.forName(responseClazz);
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+        Class clazz = PROTOBUF_HELPER.getPbClass(responseClazz);
 
         Method method = PROTOBUF_HELPER.parseFromMethodMap.get(clazz);
         if (method == null) {
