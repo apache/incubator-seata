@@ -28,6 +28,7 @@ import io.etcd.jetcd.op.CmpTarget;
 import io.etcd.jetcd.op.Op;
 import io.etcd.jetcd.options.PutOption;
 import io.etcd.jetcd.watch.WatchResponse;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.AbstractConfiguration;
@@ -238,7 +239,8 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
                 }
             } else if (response instanceof DeleteResponse) {
                 configFuture.setResult(Boolean.TRUE);
-
+            } else {
+                throw new ShouldNeverHappenException("unsupported response type");
             }
         } catch (Exception e) {
             LOGGER.error("error occurred while completing the future{}", e.getMessage());
@@ -253,7 +255,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         private final ConfigChangeListener listener;
         private Watch.Watcher watcher;
 
-        public ConfigChangeNotifier(String dataId, ConfigChangeListener listener) {
+        ConfigChangeNotifier(String dataId, ConfigChangeListener listener) {
             this.dataId = dataId;
             this.listener = listener;
         }
@@ -261,9 +263,9 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         /**
          * get the listener
          *
-         * @return
+         * @return ConfigChangeListener
          */
-        public ConfigChangeListener getListener() {
+        ConfigChangeListener getListener() {
             return this.listener;
         }
 
