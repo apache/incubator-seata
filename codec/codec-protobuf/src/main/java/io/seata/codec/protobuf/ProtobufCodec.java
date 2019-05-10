@@ -27,9 +27,9 @@ import io.seata.codec.protobuf.manager.ProtobufConvertManager;
  * The type Protobuf codec.
  *
  * @author leizhiyuan
- * @data 2019 /5/6
+ * @date 2019 /5/6
  */
-@LoadLevel(name = "protobuf", order = 0)
+@LoadLevel(name = "PROTOBUF", order = 0)
 public class ProtobufCodec implements Codec {
 
     protected static final Charset UTF8 = Charset.forName("utf-8");
@@ -71,6 +71,7 @@ public class ProtobufCodec implements Codec {
         byteBuffer.get(body);
         final String clazz = new String(clazzName, UTF8);
         Object protobufObject = ProtobufSerializer.deserializeContent(clazz, bytes);
+        //translate back to core model
         final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(clazz);
         Object newBody = pbConvertor.convert2Model(protobufObject);
         return (T)newBody;
