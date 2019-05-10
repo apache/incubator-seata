@@ -56,6 +56,6 @@ public class RegisterTMResponseCodecTest {
 
 //        Assert.assertEquals(registerTMResponse2.getExtraData(), registerTMResponse.getExtraData());
 //        Assert.assertEquals(registerTMResponse2.getMsg(), registerTMResponse.getMsg());
-//        Assert.assertEquals(registerTMResponse2.getResultCode(), registerTMResponse.getResultCode());
+//        Assert.assertEquals(registerTMResponse2.getByCode(), registerTMResponse.getByCode());
     }
 }

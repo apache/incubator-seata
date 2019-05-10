@@ -48,7 +48,7 @@ public enum CodecType {
      * @param code the code
      * @return the result code
      */
-    public static CodecType getResultCode(int code) {
+    public static CodecType getByCode(int code) {
         for (CodecType b : CodecType.values()) {
             if (code == b.code) {
                 return b;
@@ -63,7 +63,7 @@ public enum CodecType {
      * @param code the code
      * @return the result code
      */
-    public static CodecType getResultCode(String code) {
+    public static CodecType getByCode(String code) {
         for (CodecType b : CodecType.values()) {
             if (b.name().equalsIgnoreCase(code)) {
                 return b;

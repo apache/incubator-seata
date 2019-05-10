@@ -40,7 +40,7 @@ public class CodecFactory {
      * @return the codec
      */
     public static synchronized Codec getCodec(byte codec) {
-        CodecType codecType = CodecType.getResultCode(codec);
+        CodecType codecType = CodecType.getByCode(codec);
         if (CODEC_MAP.get(codecType) != null) {
             return CODEC_MAP.get(codecType);
         }

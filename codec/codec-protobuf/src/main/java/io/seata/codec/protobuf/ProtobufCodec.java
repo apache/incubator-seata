@@ -15,6 +15,12 @@
  */
 package io.seata.codec.protobuf;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+
+import com.google.protobuf.GeneratedMessageV3;
+import io.seata.codec.protobuf.convertor.PbConvertor;
+import io.seata.codec.protobuf.manager.ProtobufConvertManager;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.codec.Codec;
 
@@ -22,28 +28,55 @@ import io.seata.core.codec.Codec;
  * The type Protobuf codec.
  *
  * @author leizhiyuan
- * @data 2019 /5/6
+ * @date 2019 /5/6
  */
-@LoadLevel(name = "protobuf", order = 0)
+@LoadLevel(name = "PROTOBUF", order = 0)
 public class ProtobufCodec implements Codec {
+
+    protected static final Charset UTF8 = Charset.forName("utf-8");
 
     @Override
     public <T> byte[] encode(T t) {
         if (t == null) {
             throw new NullPointerException();
         }
-        //TODO
-        return ProtobufSerialzer.serializeContent(t);
+
+        //translate to pb
+        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchConvertor(
+            t.getClass().getName());
+        //for cross language,write FullName to data,which defines in proto file
+        GeneratedMessageV3 newBody = (GeneratedMessageV3)pbConvertor.convert2Proto(t);
+        byte[] body = ProtobufSerializer.serializeContent(newBody);
+        final String name = newBody.getDescriptorForType().getFullName();
+        final byte[] nameBytes = name.getBytes(UTF8);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(4 + nameBytes.length + body.length);
+        byteBuffer.putInt(nameBytes.length);
+        byteBuffer.put(nameBytes);
+        byteBuffer.put(body);
+        byteBuffer.flip();
+        byte[] content = new byte[byteBuffer.limit()];
+        byteBuffer.get(content);
+        return content;
     }
 
     @Override
-    public <T> T decode(byte[] bytes){
-//    public <T> T decode(String clazz, byte[] bytes) {
+    public <T> T decode(byte[] bytes) {
         if (bytes == null) {
             throw new NullPointerException();
         }
-        //TODO
-        return ProtobufSerialzer.deserializeContent(null, bytes);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+        int clazzNameLength = byteBuffer.getInt();
+        byte[] clazzName = new byte[clazzNameLength];
+        byteBuffer.get(clazzName);
+        byte[] body = new byte[bytes.length - clazzNameLength - 4];
+        byteBuffer.get(body);
+        final String descriptorName = new String(clazzName, UTF8);
+        Class protobufClazz = ProtobufConvertManager.getInstance().fetchProtoClass(descriptorName);
+        Object protobufObject = ProtobufSerializer.deserializeContent(protobufClazz.getName(), body);
+        //translate back to core model
+        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(protobufClazz.getName());
+        Object newBody = pbConvertor.convert2Model(protobufObject);
+        return (T)newBody;
     }
 
 }

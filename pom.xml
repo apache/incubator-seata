@@ -442,7 +442,7 @@
                         <ruleset>rulesets/java/ali-set.xml</ruleset>
                     </rulesets>
                     <excludes>
-                        <exclude>**/protobuf/*.java</exclude>
+                        <exclude>**/generated/*.java</exclude>
                     </excludes>
                 </configuration>
                 <executions>
@@ -540,7 +540,7 @@
                         <include>**/src/test/java/**</include>
                     </includes>
                     <excludes>
-                        <exclude>**/core/protocol/protobuf/**</exclude>
+                        <exclude>**/generated/**</exclude>
                     </excludes>
                     <strictCheck>true</strictCheck>
                     <mapping>
@@ -562,7 +562,7 @@
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>false</failsOnError>
                             <failOnViolation>false</failOnViolation>
-                            <excludes>**/core/protocol/protobuf/**</excludes>
+                            <excludes>**/generated/**</excludes>
                         </configuration>
                         <goals>
                             <goal>check</goal>

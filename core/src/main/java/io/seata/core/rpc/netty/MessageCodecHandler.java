@@ -95,7 +95,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
             return;
         }
         //codec
-        CodecType codecType = CodecType.getResultCode(serialize);
+        CodecType codecType = CodecType.getByCode(this.getSerializer());
         byte codecCode = codecType.getCode();
 
         //header, the flag: 0000 0000 flags(4) codec(4)
@@ -163,7 +163,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
         boolean isHeartbeat = (FLAG_HEARTBEAT & flag) > 0;
         boolean isRequest = (FLAG_REQUEST & flag) > 0;
         boolean isSeataCodec = (FLAG_SEATA_CODEC & flag) > 0;
-        CodecType codecType = CodecType.getResultCode(flag & 0x0F);
+        CodecType codecType = CodecType.getByCode(flag & 0x0F);
 
         //msgId
         long msgId = in.readLong();
@@ -216,5 +216,9 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 + msgId);
         }
 
+    }
+
+    protected String getSerializer() {
+        return serialize;
     }
 }
