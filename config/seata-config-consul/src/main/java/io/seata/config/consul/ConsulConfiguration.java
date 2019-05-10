@@ -56,6 +56,7 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
     private static ExecutorService consulConfigExecutor = null;
     private static ExecutorService consulNotifierExecutor = null;
     private static ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = null;
+    private static ConcurrentMap<String, List<ConfigChangeNotifier>> configChangeNotifiersMap = null;
 
     /**
      * default watch timeout in second
@@ -81,6 +82,7 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
                     consulNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
                         Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("consul-notifier-executor", THREAD_POOL_NUM));
                     configListenersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+                    configChangeNotifiersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
                     instance = new ConsulConfiguration();
                 }
             }
@@ -132,7 +134,9 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
     @Override
     public void addConfigListener(String dataId, ConfigChangeListener listener) {
         configListenersMap.putIfAbsent(dataId, new ArrayList<>());
+        configChangeNotifiersMap.putIfAbsent(dataId, new ArrayList<>());
         ConfigChangeNotifier configChangeNotifier = new ConfigChangeNotifier(dataId, listener);
+        configChangeNotifiersMap.get(dataId).add(configChangeNotifier);
         if (null != listener.getExecutor()) {
             listener.getExecutor().submit(configChangeNotifier);
         } else {
@@ -156,6 +160,17 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
         if (null != listener.getExecutor()) {
             listener.getExecutor().shutdownNow();
         }
+        //remove and stop the configChangeNotifier
+        List<ConfigChangeNotifier> configChangeNotifiers = configChangeNotifiersMap.get(dataId);
+        List<ConfigChangeNotifier> newConfigChangeNotifiers = new ArrayList<>();
+        for (ConfigChangeNotifier configChangeNotifier : configChangeNotifiers) {
+            if (!listener.equals(configChangeNotifier.getListener())) {
+                newConfigChangeNotifiers.add(configChangeNotifier);
+            } else {
+                configChangeNotifier.stop();
+            }
+        }
+        configChangeNotifiersMap.put(dataId, newConfigChangeNotifiers);
     }
 
     @Override
@@ -209,15 +224,35 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
         private final String dataId;
         private final ConfigChangeListener listener;
         private long consulIndex;
+        private boolean running;
 
         public ConfigChangeNotifier(String dataId, ConfigChangeListener listener) {
             this.dataId = dataId;
             this.listener = listener;
             this.consulIndex = getConsulClient().getKVValue(this.dataId).getConsulIndex();
+            this.running = true;
+        }
+
+        /**
+         * get the listener
+         *
+         * @return
+         */
+        public ConfigChangeListener getListener() {
+            return this.listener;
         }
 
         @Override
         public void run() {
+            if (running) {
+                process();
+            }
+        }
+
+        /**
+         * process
+         */
+        private void process() {
             for (; ; ) {
                 QueryParams queryParams = new QueryParams(DEFAULT_WATCH_TIMEOUT, consulIndex);
                 Response<GetValue> response = getConsulClient().getKVValue(this.dataId, queryParams);
@@ -230,6 +265,13 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
                     }
                 }
             }
+        }
+
+        /**
+         * stop the notifier
+         */
+        public void stop() {
+            this.running = false;
         }
     }
 }
