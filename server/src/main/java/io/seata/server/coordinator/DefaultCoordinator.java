@@ -24,6 +24,7 @@ import java.util.concurrent.TimeoutException;
 
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.DurationUtil;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
@@ -87,9 +88,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
     private static final int ALWAYS_RETRY_BOUNDARY = 0;
 
-    private static final Duration MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.SERVICE_PREFIX + "max.commit.retry.timeout", Duration.ofMillis(-1), 100);
+    private static final Duration MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.SERVICE_PREFIX + "max.commit.retry.timeout", DurationUtil.DEFAULT_DURATION, 100);
 
-    private static final Duration MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.SERVICE_PREFIX + "max.rollback.retry.timeout", Duration.ofMillis(-1), 100);
+    private static final Duration MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.SERVICE_PREFIX + "max.rollback.retry.timeout", DurationUtil.DEFAULT_DURATION, 100);
 
     /**
      * Instantiates a new Default coordinator.
