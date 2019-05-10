@@ -57,6 +57,6 @@ public class RegisterRMResponseCodecTest {
 
 //        Assert.assertEquals(registerRMRespons2.getExtraData(), registerRMResponse.getExtraData());
 //        Assert.assertEquals(registerRMRespons2.getMsg(), registerRMResponse.getMsg());
-//        Assert.assertEquals(registerRMRespons2.getResultCode(), registerRMResponse.getResultCode());
+//        Assert.assertEquals(registerRMRespons2.getByCode(), registerRMResponse.getByCode());
     }
 }

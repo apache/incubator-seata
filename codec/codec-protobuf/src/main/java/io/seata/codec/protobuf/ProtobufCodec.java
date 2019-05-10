@@ -70,11 +70,11 @@ public class ProtobufCodec implements Codec {
         byteBuffer.get(clazzName);
         byte[] body = new byte[bytes.length - clazzNameLength - 4];
         byteBuffer.get(body);
-        final String clazz = new String(clazzName, UTF8);
-        Class protobufClazz = ProtobufConvertManager.getInstance().fetchProtoClass(clazz);
-        Object protobufObject = ProtobufSerializer.deserializeContent(protobufClazz.getName(), bytes);
+        final String descriptorName = new String(clazzName, UTF8);
+        Class protobufClazz = ProtobufConvertManager.getInstance().fetchProtoClass(descriptorName);
+        Object protobufObject = ProtobufSerializer.deserializeContent(protobufClazz.getName(), body);
         //translate back to core model
-        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(clazz);
+        final PbConvertor pbConvertor = ProtobufConvertManager.getInstance().fetchReversedConvertor(protobufClazz.getName());
         Object newBody = pbConvertor.convert2Model(protobufObject);
         return (T)newBody;
     }
