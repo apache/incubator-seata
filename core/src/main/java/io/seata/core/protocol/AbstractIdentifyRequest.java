@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.core.protocol;
 
 import java.nio.ByteBuffer;
@@ -215,37 +214,55 @@ public abstract class AbstractIdentifyRequest extends AbstractMessage {
 
     @Override
     public boolean decode(ByteBuf in) {
-        try {
-            short len = in.readShort();
-            if (len > 0) {
-                byte[] bs = new byte[len];
-                in.readBytes(bs);
-                this.setVersion(new String(bs, UTF8));
-            }
-            len = in.readShort();
-            if (len > 0) {
-                byte[] bs = new byte[len];
-                in.readBytes(bs);
-                this.setApplicationId(new String(bs, UTF8));
-            }
-            len = in.readShort();
-            if (len > 0) {
-                byte[] bs = new byte[len];
-                in.readBytes(bs);
-                this.setTransactionServiceGroup(new String(bs, UTF8));
-            }
-            len = in.readShort();
-            if (len > 0) {
-                byte[] bs = new byte[len];
-                in.readBytes(bs);
-                this.setExtraData(new String(bs, UTF8));
-            }
-        } catch (Exception exx) {
-            LOGGER.error(exx.getMessage() + this);
+
+        short len;
+        if (in.readableBytes() < 2) {
             return false;
         }
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(in.writerIndex() == in.readerIndex() ? "true" : "false" + this);
+        len = in.readShort();
+
+        if (in.readableBytes() < len) {
+            return false;
+        }
+        byte[] bs = new byte[len];
+        in.readBytes(bs);
+        this.setVersion(new String(bs, UTF8));
+
+        if (in.readableBytes() < 2) {
+            return false;
+        }
+        len = in.readShort();
+
+        if (in.readableBytes() < len) {
+            return false;
+        }
+        bs = new byte[len];
+        in.readBytes(bs);
+        this.setApplicationId(new String(bs, UTF8));
+
+        if (in.readableBytes() < 2) {
+            return false;
+        }
+        len = in.readShort();
+
+        if (in.readableBytes() < len) {
+            return false;
+        }
+        bs = new byte[len];
+        in.readBytes(bs);
+        this.setTransactionServiceGroup(new String(bs, UTF8));
+
+        if (in.readableBytes() < 2) {
+            return false;
+        }
+        len = in.readShort();
+
+        if (in.readableBytes() >= len) {
+            bs = new byte[len];
+            in.readBytes(bs);
+            this.setExtraData(new String(bs, UTF8));
+        } else {
+            //maybe null
         }
 
         return true;

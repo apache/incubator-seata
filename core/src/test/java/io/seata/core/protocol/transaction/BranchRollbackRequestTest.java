@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -12,7 +12,6 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- *
  */
 package io.seata.core.protocol.transaction;
 
@@ -20,8 +19,8 @@ package io.seata.core.protocol.transaction;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.seata.core.model.BranchType;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author: jimin.jm@alibaba-inc.com
@@ -38,7 +37,7 @@ public class BranchRollbackRequestTest {
         branchRollbackRequest.setResourceId("resource1");
         branchRollbackRequest.setApplicationData("app1");
 
-        Assert.assertEquals("xid=127.0.0.1:9999:39875642,branchId=1,branchType=AT,"
+        Assertions.assertEquals("xid=127.0.0.1:9999:39875642,branchId=1,branchType=AT,"
             + "resourceId=resource1,applicationData=app1", branchRollbackRequest.toString());
 
     }
@@ -60,12 +59,12 @@ public class BranchRollbackRequestTest {
 
         BranchRollbackRequest decodeBranchRollbackRequest = new BranchRollbackRequest();
         decodeBranchRollbackRequest.decode(byteBuffer);
-        Assert.assertEquals(decodeBranchRollbackRequest.getXid(), branchRollbackRequest.getXid());
-        Assert.assertEquals(decodeBranchRollbackRequest.getBranchId(), branchRollbackRequest.getBranchId());
-        Assert.assertEquals(decodeBranchRollbackRequest.getResourceId(), branchRollbackRequest.getResourceId());
-        Assert.assertEquals(decodeBranchRollbackRequest.getApplicationData(),
+        Assertions.assertEquals(decodeBranchRollbackRequest.getXid(), branchRollbackRequest.getXid());
+        Assertions.assertEquals(decodeBranchRollbackRequest.getBranchId(), branchRollbackRequest.getBranchId());
+        Assertions.assertEquals(decodeBranchRollbackRequest.getResourceId(), branchRollbackRequest.getResourceId());
+        Assertions.assertEquals(decodeBranchRollbackRequest.getApplicationData(),
             decodeBranchRollbackRequest.getApplicationData());
-        Assert.assertEquals(decodeBranchRollbackRequest.getBranchType(), branchRollbackRequest.getBranchType());
+        Assertions.assertEquals(decodeBranchRollbackRequest.getBranchType(), branchRollbackRequest.getBranchType());
     }
 
 }

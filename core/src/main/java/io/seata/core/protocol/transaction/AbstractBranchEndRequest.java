@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.core.protocol.transaction;
 
 import java.nio.ByteBuffer;
@@ -198,48 +197,62 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
 
     @Override
     public boolean decode(ByteBuf in) {
-        int leftLen = in.readableBytes();
-        int read = 0;
-        int xidLen = in.readShort();
-        leftLen -= 2;
-        if (xidLen > 0) {
-            if (leftLen < xidLen) {
-                return false;
-            }
-            byte[] bs = new byte[xidLen];
-            in.readBytes(bs);
-            setXid(new String(bs, UTF8));
-            leftLen -= xidLen;
+        int xidLen = 0;
+        if (in.readableBytes() >= 2) {
+            xidLen = in.readShort();
+        }
+        if (xidLen <= 0) {
+            return false;
+        }
+        if (in.readableBytes() < xidLen) {
+            return false;
+        }
+        byte[] bs = new byte[xidLen];
+        in.readBytes(bs);
+        setXid(new String(bs, UTF8));
+
+        if (in.readableBytes() < 8) {
+            return false;
         }
         this.branchId = in.readLong();
-        leftLen -= 8;
-        this.branchType = BranchType.get(in.readByte());
-        leftLen--;
 
-        int resourceIdLen = in.readShort();
-        leftLen -= 2;
-        if (resourceIdLen > 0) {
-            if (leftLen < resourceIdLen) {
-                return false;
-            }
-            byte[] bs = new byte[resourceIdLen];
-            in.readBytes(bs);
-            setResourceId(new String(bs, UTF8));
-            leftLen -= resourceIdLen;
+        if (in.readableBytes() < 1) {
+            return false;
         }
+        this.branchType = BranchType.get(in.readByte());
 
-        int applicationDataLen = in.readInt();
-        leftLen -= 4;
+        int resourceIdLen = 0;
+        if (in.readableBytes() < 2) {
+            return false;
+        }
+        resourceIdLen = in.readShort();
+
+        if (resourceIdLen <= 0) {
+            return false;
+        }
+        if (in.readableBytes() < resourceIdLen) {
+            return false;
+        }
+        bs = new byte[resourceIdLen];
+        in.readBytes(bs);
+        setResourceId(new String(bs, UTF8));
+
+        int applicationDataLen = 0;
+        if (in.readableBytes() < 4) {
+            return false;
+        }
+        applicationDataLen = in.readInt();
+
         if (applicationDataLen > 0) {
-            if (leftLen < applicationDataLen) {
+            if (in.readableBytes() < applicationDataLen) {
                 return false;
             }
-            byte[] bs = new byte[applicationDataLen];
+           bs = new byte[applicationDataLen];
             in.readBytes(bs);
             setApplicationData(new String(bs, UTF8));
-            leftLen -= applicationDataLen;
+        }else{
+            //application data may be null
         }
-
         return true;
     }
 

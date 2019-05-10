@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.core.protocol;
 
 import java.io.Serializable;
@@ -75,14 +74,12 @@ public class MergedWarpMessage extends AbstractMessage implements Serializable, 
 
     @Override
     public boolean decode(ByteBuf in) {
-        int i = in.readableBytes();
-        if (i < 4) {
+        if (in.readableBytes() < 4) {
             return false;
         }
 
-        i -= 4;
         int length = in.readInt();
-        if (i < length) {
+        if (in.readableBytes() < length) {
             return false;
         }
 

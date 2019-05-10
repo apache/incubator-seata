@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.common.exception;
 
 /**
@@ -101,20 +100,32 @@ public enum FrameworkErrorCode {
     /**
      * The Err code.
      */
-    public String errCode;
+    private String errCode;
     /**
      * The Err message.
      */
-    public String errMessage;
+    private String errMessage;
     /**
      * The Err dispose.
      */
-    public String errDispose;
+    private String errDispose;
 
     FrameworkErrorCode(String errCode, String errMessage, String errDispose) {
         this.errCode = errCode;
         this.errMessage = errMessage;
         this.errDispose = errDispose;
+    }
+
+    public String getErrCode() {
+        return errCode;
+    }
+
+    public String getErrMessage() {
+        return errMessage;
+    }
+
+    public String getErrDispose() {
+        return errDispose;
     }
 
     @Override

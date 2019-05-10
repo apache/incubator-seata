@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -19,10 +19,14 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
-import io.seata.rm.datasource.sql.struct.*;
-import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import io.seata.rm.datasource.sql.struct.Null;
+import io.seata.rm.datasource.sql.struct.Row;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.sql.PreparedStatement;
@@ -33,12 +37,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author guoyao
@@ -61,12 +64,12 @@ public class InsertExecutorTest {
 
     private InsertExecutor insertExecutor;
 
-    @Before
+    @BeforeEach
     public void init() {
         statementProxy = mock(PreparedStatementProxy.class);
         statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
-        tableMeta =  mock(TableMeta.class);
+        tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
     }
 
@@ -74,17 +77,16 @@ public class InsertExecutorTest {
     public void testBeforeImage() throws SQLException {
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         TableRecords tableRecords = insertExecutor.beforeImage();
-        Assertions.assertThat(tableRecords.getRows()).isEmpty();
-        Assertions.assertThat(tableRecords.size()).isEqualTo(0);
+        Assertions.assertEquals(tableRecords.size(), 0);
         try {
             tableRecords.add(new Row());
         } catch (Exception e) {
-            Assertions.assertThat(e instanceof UnsupportedOperationException).isTrue();
+            Assertions.assertTrue(e instanceof UnsupportedOperationException);
         }
         try {
             tableRecords.getTableMeta();
         } catch (Exception e) {
-            Assertions.assertThat(e instanceof UnsupportedOperationException).isTrue();
+            Assertions.assertTrue(e instanceof UnsupportedOperationException);
         }
     }
 
@@ -97,7 +99,7 @@ public class InsertExecutorTest {
         TableRecords tableRecords = new TableRecords();
         doReturn(tableRecords).when(insertExecutor).getTableRecords(pkValues);
         TableRecords resultTableRecords = insertExecutor.afterImage(new TableRecords());
-        Assertions.assertThat(resultTableRecords).isEqualTo(tableRecords);
+        Assertions.assertEquals(resultTableRecords, tableRecords);
     }
 
     @Test
@@ -109,17 +111,19 @@ public class InsertExecutorTest {
         TableRecords tableRecords = new TableRecords();
         doReturn(tableRecords).when(insertExecutor).getTableRecords(pkValues);
         TableRecords resultTableRecords = insertExecutor.afterImage(new TableRecords());
-        Assertions.assertThat(resultTableRecords).isEqualTo(tableRecords);
+        Assertions.assertEquals(resultTableRecords, tableRecords);
     }
 
-    @Test(expected = SQLException.class)
-    public void testAfterImage_Exception() throws SQLException {
-        doReturn(false).when(insertExecutor).containsPK();
-        List<Object> pkValues = new ArrayList<>();
-        pkValues.add(PK_VALUE);
-        doReturn(pkValues).when(insertExecutor).getPkValuesByAuto();
-        doReturn(null).when(insertExecutor).getTableRecords(pkValues);
-        insertExecutor.afterImage(new TableRecords());
+    @Test
+    public void testAfterImage_Exception() {
+        Assertions.assertThrows(SQLException.class, () -> {
+            doReturn(false).when(insertExecutor).containsPK();
+            List<Object> pkValues = new ArrayList<>();
+            pkValues.add(PK_VALUE);
+            doReturn(pkValues).when(insertExecutor).getPkValuesByAuto();
+            doReturn(null).when(insertExecutor).getTableRecords(pkValues);
+            insertExecutor.afterImage(new TableRecords());
+        });
     }
 
     @Test
@@ -127,9 +131,9 @@ public class InsertExecutorTest {
         List<String> insertColumns = mockInsertColumns();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.containsPK(insertColumns)).thenReturn(true);
-        Assertions.assertThat(insertExecutor.containsPK()).isTrue();
+        Assertions.assertTrue(insertExecutor.containsPK());
         when(tableMeta.containsPK(insertColumns)).thenReturn(false);
-        Assertions.assertThat(insertExecutor.containsPK()).isFalse();
+        Assertions.assertFalse(insertExecutor.containsPK());
     }
 
     @Test
@@ -140,17 +144,19 @@ public class InsertExecutorTest {
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
         when(statementProxy.getParamsByIndex(0)).thenReturn(pkValues);
-        List pkValuesByColumn=insertExecutor.getPkValuesByColumn();
-        Assertions.assertThat(pkValuesByColumn).isEqualTo(pkValues);
+        List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
+        Assertions.assertEquals(pkValuesByColumn, pkValues);
     }
 
-    @Test(expected = ShouldNeverHappenException.class)
-    public void testGetPkValuesByColumn_Exception() throws SQLException {
-        mockInsertColumns();
-        doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
-        when(statementProxy.getParamsByIndex(0)).thenReturn(null);
-        insertExecutor.getPkValuesByColumn();
+    @Test
+    public void testGetPkValuesByColumn_Exception() {
+        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
+            mockInsertColumns();
+            doReturn(tableMeta).when(insertExecutor).getTableMeta();
+            when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+            when(statementProxy.getParamsByIndex(0)).thenReturn(null);
+            insertExecutor.getPkValuesByColumn();
+        });
     }
 
     @Test
@@ -168,42 +174,48 @@ public class InsertExecutorTest {
         List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         //pk value = Null so getPkValuesByAuto
         verify(insertExecutor).getPkValuesByAuto();
-        Assertions.assertThat(pkValuesByColumn).isEqualTo(pkValuesAuto);
+        Assertions.assertEquals(pkValuesByColumn, pkValuesAuto);
     }
 
-    @Test(expected = NotSupportYetException.class)
-    public void testGetPkValuesByAuto_NotSupportYetException() throws SQLException {
-        doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
-        columnMetaMap.put(ID_COLUMN, new ColumnMeta());
-        columnMetaMap.put(USER_ID_COLUMN, new ColumnMeta());
-        when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
-        insertExecutor.getPkValuesByAuto();
+    @Test
+    public void testGetPkValuesByAuto_NotSupportYetException() {
+        Assertions.assertThrows(NotSupportYetException.class, () -> {
+            doReturn(tableMeta).when(insertExecutor).getTableMeta();
+            Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
+            columnMetaMap.put(ID_COLUMN, new ColumnMeta());
+            columnMetaMap.put(USER_ID_COLUMN, new ColumnMeta());
+            when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
+            insertExecutor.getPkValuesByAuto();
+        });
     }
 
-    @Test(expected = ShouldNeverHappenException.class)
-    public void testGetPkValuesByAuto_ShouldNeverHappenException() throws SQLException {
-        doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
-        ColumnMeta columnMeta = mock(ColumnMeta.class);
-        columnMetaMap.put(ID_COLUMN, columnMeta);
-        when(columnMeta.isAutoincrement()).thenReturn(false);
-        when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
-        insertExecutor.getPkValuesByAuto();
+    @Test
+    public void testGetPkValuesByAuto_ShouldNeverHappenException() {
+        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
+            doReturn(tableMeta).when(insertExecutor).getTableMeta();
+            Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
+            ColumnMeta columnMeta = mock(ColumnMeta.class);
+            columnMetaMap.put(ID_COLUMN, columnMeta);
+            when(columnMeta.isAutoincrement()).thenReturn(false);
+            when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
+            insertExecutor.getPkValuesByAuto();
+        });
     }
 
-    @Test(expected = SQLException.class)
-    public void testGetPkValuesByAuto_SQLException() throws SQLException {
-        doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        ColumnMeta columnMeta = mock(ColumnMeta.class);
-        Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
-        columnMetaMap.put(ID_COLUMN, columnMeta);
-        when(columnMeta.isAutoincrement()).thenReturn(true);
-        when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
-        PreparedStatement preparedStatement = mock(PreparedStatement.class);
-        when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
-        when(preparedStatement.getGeneratedKeys()).thenThrow(new SQLException());
-        insertExecutor.getPkValuesByAuto();
+    @Test
+    public void testGetPkValuesByAuto_SQLException() {
+        Assertions.assertThrows(SQLException.class, () -> {
+            doReturn(tableMeta).when(insertExecutor).getTableMeta();
+            ColumnMeta columnMeta = mock(ColumnMeta.class);
+            Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
+            columnMetaMap.put(ID_COLUMN, columnMeta);
+            when(columnMeta.isAutoincrement()).thenReturn(true);
+            when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
+            PreparedStatement preparedStatement = mock(PreparedStatement.class);
+            when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
+            when(preparedStatement.getGeneratedKeys()).thenThrow(new SQLException());
+            insertExecutor.getPkValuesByAuto();
+        });
     }
 
     @Test
@@ -221,7 +233,7 @@ public class InsertExecutorTest {
         when(resultSet.next()).thenReturn(false);
         when(resultSet.getObject(1)).thenReturn(PK_VALUE);
         List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
-        Assertions.assertThat(pkValuesByAuto).isEmpty();
+        Assertions.assertEquals(pkValuesByAuto.size(),0);
     }
 
     @Test
@@ -241,7 +253,7 @@ public class InsertExecutorTest {
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
         List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
-        Assertions.assertThat(pkValuesByAuto).isEqualTo(pkValues);
+        Assertions.assertEquals(pkValuesByAuto, pkValues);
     }
 
     @Test
@@ -262,7 +274,7 @@ public class InsertExecutorTest {
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
         List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
-        Assertions.assertThat(pkValuesByAuto).isEqualTo(pkValues);
+        Assertions.assertEquals(pkValuesByAuto, pkValues);
     }
 
     private List<String> mockInsertColumns() {

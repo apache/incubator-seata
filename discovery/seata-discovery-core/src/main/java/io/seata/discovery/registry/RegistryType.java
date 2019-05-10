@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.discovery.registry;
 
 import io.seata.common.exception.NotSupportYetException;
@@ -50,10 +49,13 @@ public enum RegistryType {
      */
     Consul,
     /**
+     * Etcd3 registry type
+     */
+    Etcd3,
+    /**
      * Sofa registry type
      */
     Sofa;
-
 
     /**
      * Gets type.
@@ -74,6 +76,8 @@ public enum RegistryType {
             return ZK;
         } else if (Consul.name().equalsIgnoreCase(name)) {
             return Consul;
+        } else if (Etcd3.name().equalsIgnoreCase(name)) {
+            return Etcd3;
         } else if (Sofa.name().equalsIgnoreCase(name)) {
             return Sofa;
         } else {

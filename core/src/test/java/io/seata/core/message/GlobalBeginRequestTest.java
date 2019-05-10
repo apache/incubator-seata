@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ import java.util.Arrays;
 
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Global begin request test.
@@ -42,7 +42,7 @@ public class GlobalBeginRequestTest {
         globalBeginRequest.setTransactionName("tran 1");
         System.out.println(globalBeginRequest.toString());
 
-        Assert.assertEquals("timeout=60000,transactionName=tran 1", globalBeginRequest.toString());
+        Assertions.assertEquals("timeout=60000,transactionName=tran 1", globalBeginRequest.toString());
     }
 
     /**
@@ -58,7 +58,7 @@ public class GlobalBeginRequestTest {
         byte[] encodeResult = globalBeginRequest.encode();
         String encodeResultStr = Arrays.toString(encodeResult);
 
-        Assert.assertEquals("[0, 0, -22, 96, 0, 6, 116, 114, 97, 110, 32, 49]", encodeResultStr);
+        Assertions.assertEquals("[0, 0, -22, 96, 0, 6, 116, 114, 97, 110, 32, 49]", encodeResultStr);
     }
 
     /**
@@ -80,7 +80,7 @@ public class GlobalBeginRequestTest {
         GlobalBeginRequest decodeGlobalBeginRequest = new GlobalBeginRequest();
         decodeGlobalBeginRequest.decode(byteBuffer);
         System.out.println(decodeGlobalBeginRequest);
-        Assert.assertEquals(globalBeginRequest.getTimeout(), decodeGlobalBeginRequest.getTimeout());
-        Assert.assertEquals(globalBeginRequest.getTransactionName(), decodeGlobalBeginRequest.getTransactionName());
+        Assertions.assertEquals(globalBeginRequest.getTimeout(), decodeGlobalBeginRequest.getTimeout());
+        Assertions.assertEquals(globalBeginRequest.getTransactionName(), decodeGlobalBeginRequest.getTransactionName());
     }
 }

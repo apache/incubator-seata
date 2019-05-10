@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.server;
 
 import java.io.IOException;
@@ -25,6 +24,7 @@ import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.core.rpc.netty.RpcServer;
+import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.session.SessionHolder;
 
@@ -39,6 +39,7 @@ public class Server {
     private static final int MAX_SERVER_POOL_SIZE = 500;
     private static final int MAX_TASK_QUEUE_SIZE = 20000;
     private static final int KEEP_ALIVE_TIME = 500;
+    private static final int SERVER_DEFAULT_PORT = 8091;
     private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(MIN_SERVER_POOL_SIZE,
         MAX_SERVER_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
         new LinkedBlockingQueue(MAX_TASK_QUEUE_SIZE),
@@ -53,10 +54,7 @@ public class Server {
     public static void main(String[] args) throws IOException {
         RpcServer rpcServer = new RpcServer(WORKING_THREADS);
 
-        int port = 8091;
-        if (args.length == 0) {
-            rpcServer.setListenPort(port);
-        }
+        int port = SERVER_DEFAULT_PORT;
         //server port
         if (args.length > 0) {
             try {
@@ -65,8 +63,8 @@ public class Server {
                 System.err.println("Usage: sh services-server.sh $LISTEN_PORT $PATH_FOR_PERSISTENT_DATA");
                 System.exit(0);
             }
-            rpcServer.setListenPort(port);
         }
+        rpcServer.setListenPort(port);
 
         //log store mode : file、db
         String storeMode = null;
@@ -77,7 +75,9 @@ public class Server {
 
         DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
         coordinator.init();
-        rpcServer.setHandler(new DefaultCoordinator(rpcServer));
+        rpcServer.setHandler(coordinator);
+        // register ShutdownHook
+        ShutdownHook.getInstance().addDisposable(coordinator);
 
         UUIDGenerator.init(1);
 

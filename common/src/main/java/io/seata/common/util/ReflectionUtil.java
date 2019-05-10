@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.common.util;
 
 import java.lang.reflect.Field;
@@ -33,7 +32,7 @@ public class ReflectionUtil {
     /**
      * The constant MAX_NEST_DEPTH.
      */
-    public static int MAX_NEST_DEPTH = 20;
+    public static final int MAX_NEST_DEPTH = 20;
 
     /**
      * Gets class by name.
@@ -177,7 +176,7 @@ public class ReflectionUtil {
      */
     public static Set<Class<?>> getInterfaces(Class<?> clazz){
         if (clazz.isInterface() ) {
-            return Collections.<Class<?>>singleton(clazz);
+            return Collections.singleton(clazz);
         }
         Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
         while (clazz != null) {

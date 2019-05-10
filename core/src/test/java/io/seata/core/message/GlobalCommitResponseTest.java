@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.GlobalCommitResponse;
 
 import org.apache.commons.lang.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Global commit response test.
@@ -49,7 +49,7 @@ public class GlobalCommitResponseTest {
 
         System.out.println(globalCommitResponse.toString());
 
-        Assert.assertEquals("globalStatus=Committed,ResultCode=Success,Msg=OK", globalCommitResponse.toString());
+        Assertions.assertEquals("globalStatus=Committed,ResultCode=Success,Msg=OK", globalCommitResponse.toString());
     }
 
     /**
@@ -72,7 +72,7 @@ public class GlobalCommitResponseTest {
         String encodeResultStr = Arrays.toString(encodeResult);
         System.out.println(encodeResultStr);
 
-        Assert.assertEquals("[1, 0, 9]", encodeResultStr);
+        Assertions.assertEquals("[1, 0, 9]", encodeResultStr);
     }
 
     /**
@@ -100,10 +100,10 @@ public class GlobalCommitResponseTest {
 
         System.out.println(decodeGlobalCommitResponse.toString());
 
-        Assert.assertEquals(globalCommitResponse.getGlobalStatus(), decodeGlobalCommitResponse.getGlobalStatus());
-        Assert.assertEquals(globalCommitResponse.getResultCode(), decodeGlobalCommitResponse.getResultCode());
+        Assertions.assertEquals(globalCommitResponse.getGlobalStatus(), decodeGlobalCommitResponse.getGlobalStatus());
+        Assertions.assertEquals(globalCommitResponse.getResultCode(), decodeGlobalCommitResponse.getResultCode());
         //success response do not have msg
-        Assert.assertTrue(StringUtils.isBlank(decodeGlobalCommitResponse.getMsg()));
+        Assertions.assertTrue(StringUtils.isBlank(decodeGlobalCommitResponse.getMsg()));
     }
 
     /**
@@ -131,8 +131,8 @@ public class GlobalCommitResponseTest {
 
         System.out.println(decodeGlobalCommitResponse.toString());
 
-        Assert.assertEquals(globalCommitResponse.getGlobalStatus(), decodeGlobalCommitResponse.getGlobalStatus());
-        Assert.assertEquals(globalCommitResponse.getResultCode(), decodeGlobalCommitResponse.getResultCode());
-        Assert.assertEquals(globalCommitResponse.getMsg(), decodeGlobalCommitResponse.getMsg());
+        Assertions.assertEquals(globalCommitResponse.getGlobalStatus(), decodeGlobalCommitResponse.getGlobalStatus());
+        Assertions.assertEquals(globalCommitResponse.getResultCode(), decodeGlobalCommitResponse.getResultCode());
+        Assertions.assertEquals(globalCommitResponse.getMsg(), decodeGlobalCommitResponse.getMsg());
     }
 }
