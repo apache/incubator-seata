@@ -54,6 +54,7 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static ExecutorService consulConfigExecutor = null;
+    private static ExecutorService consulNotifierExecutor = null;
     private static ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = null;
 
     /**
@@ -77,6 +78,8 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
                 if (null == instance) {
                     consulConfigExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
                         Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("consul-config-executor", THREAD_POOL_NUM));
+                    consulNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
+                        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("consul-notifier-executor", THREAD_POOL_NUM));
                     configListenersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
                     instance = new ConsulConfiguration();
                 }
@@ -129,9 +132,11 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
     @Override
     public void addConfigListener(String dataId, ConfigChangeListener listener) {
         configListenersMap.putIfAbsent(dataId, new ArrayList<>());
+        ConfigChangeNotifier configChangeNotifier = new ConfigChangeNotifier(dataId, listener);
         if (null != listener.getExecutor()) {
-            ConfigChangeNotifier configChangeNotifier = new ConfigChangeNotifier(dataId, listener);
             listener.getExecutor().submit(configChangeNotifier);
+        } else {
+            consulConfigExecutor.submit(configChangeNotifier);
         }
     }
 
