@@ -244,7 +244,7 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
 
         @Override
         public void run() {
-            if (running) {
+            while (running) {
                 process();
             }
         }
@@ -253,18 +253,17 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
          * process
          */
         private void process() {
-            for (; ; ) {
-                QueryParams queryParams = new QueryParams(DEFAULT_WATCH_TIMEOUT, consulIndex);
-                Response<GetValue> response = getConsulClient().getKVValue(this.dataId, queryParams);
-                Long currentIndex = response.getConsulIndex();
-                if (currentIndex != null && currentIndex > consulIndex) {
-                    GetValue getValue = response.getValue();
-                    consulIndex = currentIndex;
-                    for (ConfigChangeListener listener : configListenersMap.get(this.dataId)) {
-                        listener.receiveConfigInfo(getValue.getDecodedValue());
-                    }
+            QueryParams queryParams = new QueryParams(DEFAULT_WATCH_TIMEOUT, consulIndex);
+            Response<GetValue> response = getConsulClient().getKVValue(this.dataId, queryParams);
+            Long currentIndex = response.getConsulIndex();
+            if (currentIndex != null && currentIndex > consulIndex) {
+                GetValue getValue = response.getValue();
+                consulIndex = currentIndex;
+                for (ConfigChangeListener listener : configListenersMap.get(this.dataId)) {
+                    listener.receiveConfigInfo(getValue.getDecodedValue());
                 }
             }
+
         }
 
         /**
