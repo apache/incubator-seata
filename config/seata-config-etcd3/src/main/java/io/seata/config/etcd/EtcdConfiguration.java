@@ -63,7 +63,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
 
     private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
     private static final String SERVER_ADDR_KEY = "serverAddr";
-    private static final String CONFIG_TYPE = "etcd";
+    private static final String CONFIG_TYPE = "etcd3";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
@@ -72,7 +72,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
     private static ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = null;
     private static ConcurrentHashMap<String, List<ConfigChangeNotifier>> configChangeNotifiersMap = null;
 
-    private static final long VISION_NOT_EXIST = 0;
+    private static final long VERSION_NOT_EXIST = 0;
 
     private EtcdConfiguration() {
     }
@@ -130,7 +130,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
             //use etcd transaction to ensure the atomic operation
             complete(client.getKVClient().txn()
                 //whether the key exists
-                .If(new Cmp(ByteSequence.from(dataId, UTF_8), Cmp.Op.EQUAL, CmpTarget.version(VISION_NOT_EXIST)))
+                .If(new Cmp(ByteSequence.from(dataId, UTF_8), Cmp.Op.EQUAL, CmpTarget.version(VERSION_NOT_EXIST)))
                 //not exist,then will create
                 .Then(Op.put(ByteSequence.from(dataId, UTF_8), ByteSequence.from(content, UTF_8), PutOption.DEFAULT))
                 .commit(), configFuture);
