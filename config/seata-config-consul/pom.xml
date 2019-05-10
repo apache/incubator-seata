@@ -22,29 +22,18 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-config-all</artifactId>
-    <name>seata-config-all ${project.version}</name>
+    <artifactId>seata-config-consul</artifactId>
+    <name>seata-config-consul ${project.version}</name>
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-apollo</artifactId>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-config-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-zk</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-nacos</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-consul</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.ecwid.consul</groupId>
+            <artifactId>consul-api</artifactId>
         </dependency>
     </dependencies>
 

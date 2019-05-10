@@ -37,7 +37,11 @@ public enum ConfigType {
     /**
      * Apollo config type.
      */
-    Apollo;
+    Apollo,
+    /**
+     * Consul config type
+     */
+    Consul;
 
     /**
      * Gets type.
