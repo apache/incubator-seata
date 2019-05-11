@@ -12,7 +12,7 @@ target/
 .settings/
 .project
 .classpath
-.metadata/
+/.metadata
 
 # idea ignore
 .idea/
