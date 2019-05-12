@@ -41,6 +41,16 @@ import io.seata.rm.datasource.undo.KeywordCheckerFactory;
  */
 public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
 
+    /**
+     * DELETE FROM a WHERE pk = ?
+     */
+    private static final String DELETE_SQL_TEMPLATE = "DELETE FROM %s WHERE %s = ?";
+
+    /**
+     * Undo Inset.
+     *
+     * @return sql
+     */
     @Override
     protected String buildUndoSQL() {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
@@ -50,17 +60,8 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = afterImageRows.get(0);
-        StringBuffer mainSQL = new StringBuffer(
-            "DELETE FROM " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()));
-        StringBuffer where = new StringBuffer(" WHERE ");
-        boolean first = true;
-        for (Field field : row.getFields()) {
-            if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
-            }
-
-        }
-        return mainSQL.append(where).toString();
+        Field pkField = row.primaryKeys().get(0);
+        return String.format(DELETE_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()), pkField.getName());
     }
 
     @Override

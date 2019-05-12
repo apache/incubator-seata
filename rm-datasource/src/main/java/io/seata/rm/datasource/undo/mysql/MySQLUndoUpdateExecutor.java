@@ -27,6 +27,7 @@ import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The type My sql undo update executor.
@@ -35,6 +36,16 @@ import java.util.List;
  */
 public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
 
+    /**
+     * UPDATE a SET x = ?, y = ?, z = ? WHERE pk = ?
+     */
+    private static final String UPDATE_SQL_TEMPLATE = "UPDATE %s SET %s WHERE %s = ?";
+
+    /**
+     * Undo Update.
+     *
+     * @return sql
+     */
     @Override
     protected String buildUndoSQL() {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
@@ -44,24 +55,14 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
             throw new ShouldNeverHappenException("Invalid UNDO LOG"); // TODO
         }
         Row row = beforeImageRows.get(0);
-        StringBuffer mainSQL = new StringBuffer(
-            "UPDATE " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()) + " SET ");
-        StringBuffer where = new StringBuffer(" WHERE ");
-        boolean first = true;
-        for (Field field : row.getFields()) {
-            if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
-            } else {
-                if (first) {
-                    first = false;
-                } else {
-                    mainSQL.append(", ");
-                }
-                mainSQL.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
-            }
-
-        }
-        return mainSQL.append(where).toString();
+        Field pkField = row.primaryKeys().get(0);
+        List<Field> nonPkFields = row.nonPrimaryKeys();
+        List<String> updateColumns = nonPkFields.stream()
+            .map(field -> keywordChecker.checkAndReplace(field.getName()) + " = ?")
+            .collect(Collectors.toList());
+        String updateColumnsStr = String.join(", ", updateColumns);
+        return String.format(UPDATE_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
+                             updateColumnsStr, keywordChecker.checkAndReplace(pkField.getName()));
     }
 
     /**

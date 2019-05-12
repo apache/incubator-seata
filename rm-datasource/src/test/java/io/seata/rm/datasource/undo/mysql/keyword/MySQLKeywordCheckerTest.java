@@ -308,7 +308,7 @@ public class MySQLKeywordCheckerTest {
 
         MySQLUndoDeleteExecutorExtension mySQLUndoDeleteExecutor = new MySQLUndoDeleteExecutorExtension(sqlUndoLog);
 
-        Assertions.assertEquals("INSERT INTO `lock`(`desc`, `order`, id) VALUES (?, ?, ?)",
+        Assertions.assertEquals("INSERT INTO `lock` (`desc`, `order`, id) VALUES (?, ?, ?)",
             mySQLUndoDeleteExecutor.getSql());
 
     }
