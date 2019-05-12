@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,14 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.core.model;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * A unit test for {@link BranchType}
+ *
  * @author Lay
  * @date 2019/3/6
  */
@@ -32,30 +32,30 @@ public class BranchTypeTest {
     @Test
     public void testOrdinal() {
         int ordinal = BranchType.AT.ordinal();
-        Assert.assertEquals(AT_ORDINAL, ordinal);
+        Assertions.assertEquals(AT_ORDINAL, ordinal);
     }
 
     @Test
     public void testGetWithOrdinal() {
-        BranchType type  = BranchType.get(BranchType.AT.ordinal());
-        Assert.assertEquals(type, BranchType.AT);
+        BranchType type = BranchType.get(BranchType.AT.ordinal());
+        Assertions.assertEquals(type, BranchType.AT);
     }
 
     @Test
     public void testGetWithByte() {
-        BranchType branchStatus = BranchType.get((byte)AT_ORDINAL);
-        Assert.assertEquals(branchStatus, BranchType.AT);
+        BranchType branchStatus = BranchType.get((byte) AT_ORDINAL);
+        Assertions.assertEquals(branchStatus, BranchType.AT);
     }
 
     @Test
     public void testGetWithInt() {
         BranchType branchStatus = BranchType.get(AT_ORDINAL);
-        Assert.assertEquals(branchStatus, BranchType.AT);
+        Assertions.assertEquals(branchStatus, BranchType.AT);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testGetException() {
-        BranchType.get(NONE);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> BranchType.get(NONE));
     }
 
 

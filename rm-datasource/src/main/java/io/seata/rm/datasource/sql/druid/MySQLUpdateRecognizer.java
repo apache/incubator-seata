@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.rm.datasource.sql.druid;
 
 import java.util.ArrayList;
@@ -118,7 +117,15 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
                 return super.visit(x);
             }
         };
-        visitor.visit((SQLBinaryOpExpr)where);
+        if (where instanceof SQLBinaryOpExpr) {
+            visitor.visit((SQLBinaryOpExpr)where);
+        } else if (where instanceof SQLInListExpr) {
+            visitor.visit((SQLInListExpr) where);
+        } else if (where instanceof SQLBetweenExpr) {
+            visitor.visit((SQLBetweenExpr) where);
+        } else {
+            throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
+        }
         return sb.toString();
     }
 

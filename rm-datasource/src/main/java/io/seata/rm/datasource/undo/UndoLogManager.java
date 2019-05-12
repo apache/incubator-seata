@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,15 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.rm.datasource.undo;
-
-import java.sql.Blob;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
 
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
@@ -33,9 +25,16 @@ import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Set;
 
 import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Retriable;
 
@@ -45,6 +44,7 @@ import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFai
  * @author sharajava
  */
 public final class UndoLogManager {
+
     private enum State {
         /**
          * This state can be properly rolled back by services
@@ -74,6 +74,7 @@ public final class UndoLogManager {
     private static String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
         "\t(branch_id, xid, rollback_info, log_status, log_created, log_modified)\n" +
         "VALUES (?, ?, ?, ?, now(), now())";
+
     private static String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + "\n" +
         "\tWHERE branch_id = ? AND xid = ?";
 
@@ -229,6 +230,68 @@ public final class UndoLogManager {
     }
 
     /**
+     * batch Delete undo log.
+     *
+     * @param xids
+     * @param branchIds
+     * @param limitSize
+     * @param conn
+     */
+    public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, int limitSize, Connection conn) throws SQLException {
+        int xidSize = xids.size();
+        int branchIdSize = branchIds.size();
+        String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize,limitSize);
+        PreparedStatement deletePST = null;
+        try {
+            deletePST = conn.prepareStatement(batchDeleteSql);
+            int paramsIndex = 1;
+            for (Long branchId : branchIds) {
+                deletePST.setLong(paramsIndex++,branchId);
+            }
+            for (String xid: xids){
+                deletePST.setString(paramsIndex++, xid);
+            }
+            int deleteRows = deletePST.executeUpdate();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("batch delete undo log size " + deleteRows);
+            }
+        }catch (Exception e){
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
+            }
+            throw (SQLException) e;
+        } finally {
+            if (deletePST != null) {
+                deletePST.close();
+            }
+        }
+
+    }
+
+    protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize,int limitSize) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("DELETE FROM ")
+                .append(UNDO_LOG_TABLE_NAME)
+                .append(" WHERE  branch_id IN ");
+        appendInParam(xidSize, sqlBuilder);
+        sqlBuilder.append(" AND xid IN ");
+        appendInParam(branchIdSize, sqlBuilder);
+        sqlBuilder.append(" LIMIT ").append(limitSize);
+        return sqlBuilder.toString();
+    }
+
+    protected static void appendInParam(int size, StringBuilder sqlBuilder) {
+        sqlBuilder.append(" (");
+        for (int i = 0;i < size;i++) {
+            sqlBuilder.append("?");
+            if (i < (size - 1)) {
+                sqlBuilder.append(",");
+            }
+        }
+        sqlBuilder.append(") ");
+    }
+
+    /**
      * Delete undo log.
      *
      * @param xid the xid
@@ -237,10 +300,22 @@ public final class UndoLogManager {
      * @throws SQLException the sql exception
      */
     public static void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
-        PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
-        deletePST.setLong(1, branchId);
-        deletePST.setString(2, xid);
-        deletePST.executeUpdate();
+        PreparedStatement deletePST = null;
+        try {
+            deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
+            deletePST.setLong(1, branchId);
+            deletePST.setString(2, xid);
+            deletePST.executeUpdate();
+        }catch (Exception e){
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
+            }
+            throw (SQLException) e;
+        } finally {
+            if (deletePST != null) {
+                deletePST.close();
+            }
+        }
     }
 
     private static void insertUndoLogWithNormal(String xid, long branchID,
@@ -264,11 +339,10 @@ public final class UndoLogManager {
             pst.setInt(4, state.getValue());
             pst.executeUpdate();
         } catch (Exception e) {
-            if (e instanceof SQLException) {
-                throw (SQLException)e;
-            } else {
-                throw new SQLException(e);
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
             }
+            throw (SQLException) e;
         } finally {
             if (pst != null) {
                 pst.close();

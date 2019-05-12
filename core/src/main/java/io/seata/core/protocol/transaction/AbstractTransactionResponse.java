@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,16 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.core.protocol.transaction;
 
 import java.nio.ByteBuffer;
 
-import io.seata.core.exception.TransactionExceptionCode;
-import io.seata.core.protocol.AbstractResultMessage;
-
 import io.netty.buffer.ByteBuf;
 import io.seata.core.exception.TransactionExceptionCode;
+import io.seata.core.protocol.AbstractResultMessage;
 
 /**
  * The type Abstract transaction response.

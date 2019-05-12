@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,8 +18,8 @@ package io.seata.core.message;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Branch register response test.
@@ -37,7 +37,7 @@ public class BranchRegisterResponseTest {
         branchRegisterResponse.setBranchId(123457L);
         branchRegisterResponse.setResultCode(ResultCode.Success);
         branchRegisterResponse.setMsg("");
-        Assert.assertEquals(
+        Assertions.assertEquals(
             "BranchRegisterResponse: branchId=123457,result code =Success,getMsg =",
             branchRegisterResponse.toString());
 

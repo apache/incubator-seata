@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.common.util;
 
 import java.io.IOException;
@@ -22,8 +21,8 @@ import java.sql.SQLException;
 
 import javax.sql.rowset.serial.SerialBlob;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -79,7 +78,7 @@ public class StringUtilsTest {
      * Test input stream 2 string.
      */
     @Test
-    @Ignore
+    @Disabled
     public void testInputStream2String() throws IOException {
         InputStream inputStream = StringUtilsTest.class.getClassLoader().getResourceAsStream("test.txt");
         assertThat(StringUtils.inputStream2String(inputStream))

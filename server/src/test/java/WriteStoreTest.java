@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -61,6 +60,11 @@ public class WriteStoreTest {
         TransactionStoreManager transactionStoreManager = new FileTransactionStoreManager(
         "~/Documents/test/data",
             new SessionManager() {
+                @Override
+                public void destroy() {
+
+                }
+
                 @Override
                 public void addGlobalSession(GlobalSession session) throws TransactionException {
 

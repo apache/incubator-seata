@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,14 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.core.protocol.transaction;
 
 import java.nio.ByteBuffer;
 
-import io.seata.core.model.BranchStatus;
-
 import io.netty.buffer.ByteBuf;
+import io.seata.core.model.BranchStatus;
 
 /**
  * The type Abstract branch end response.
@@ -132,13 +130,24 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
         if (!s) {
             return s;
         }
-        short xidLen = in.readShort();
-        if (xidLen > 0) {
-            byte[] bs = new byte[xidLen];
-            in.readBytes(bs);
-            this.setXid(new String(bs, UTF8));
+        short xidLen;
+        if (in.readableBytes() < 2) {
+            return false;
+        }
+        xidLen = in.readShort();
+        if (in.readableBytes() < xidLen) {
+            return false;
+        }
+        byte[] bs = new byte[xidLen];
+        in.readBytes(bs);
+        this.setXid(new String(bs, UTF8));
+        if (in.readableBytes() < 8) {
+            return false;
         }
         branchId = in.readLong();
+        if (in.readableBytes() < 1) {
+            return false;
+        }
         branchStatus = BranchStatus.get(in.readByte());
         return true;
     }

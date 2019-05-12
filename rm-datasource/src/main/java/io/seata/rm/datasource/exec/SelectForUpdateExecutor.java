@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.rm.datasource.exec;
 
 import java.sql.Connection;
@@ -38,7 +37,7 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
  *
  * @param <S> the type parameter
  */
-public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactionalExecutor<ResultSet, S> {
+public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
 
     /**
      * Instantiates a new Select for update executor.
@@ -47,17 +46,17 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public SelectForUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<ResultSet, S> statementCallback,
+    public SelectForUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
                                    SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
     @Override
-    public Object doExecute(Object... args) throws Throwable {
+    public T doExecute(Object... args) throws Throwable {
         SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
 
         Connection conn = statementProxy.getConnection();
-        ResultSet rs = null;
+        T rs = null;
         Savepoint sp = null;
         LockRetryController lockRetryController = new LockRetryController();
         boolean originalAutoCommit = conn.getAutoCommit();
@@ -83,6 +82,9 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
                 conn.setAutoCommit(false);
             }
             sp = conn.setSavepoint();
+            // #870
+            // execute return Boolean
+            // executeQuery return ResultSet
             rs = statementCallback.execute(statementProxy.getTargetStatement(), args);
 
             while (true) {
@@ -104,6 +106,9 @@ public class SelectForUpdateExecutor<S extends Statement> extends BaseTransactio
 
                     TableRecords selectPKRows = TableRecords.buildRecords(getTableMeta(), rsPK);
                     String lockKeys = buildLockKey(selectPKRows);
+                    if (StringUtils.isNullOrEmpty(lockKeys)) {
+                        break;
+                    }
 
                     if (RootContext.inGlobalTransaction()) {
                         //do as usual

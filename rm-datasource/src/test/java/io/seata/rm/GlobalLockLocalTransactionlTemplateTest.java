@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,15 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.rm;
 
-import java.util.concurrent.Callable;
-
 import io.seata.core.context.RootContext;
-
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * check GlobalLockLocalTransactionlTemplate
@@ -40,16 +36,11 @@ public class GlobalLockLocalTransactionlTemplateTest {
 
         GlobalLockTemplate<Object> template = new GlobalLockTemplate<Object>();
 
-        template.execute(new Callable<Object>() {
-
-            @Override
-            public Object call() throws Exception {
-                Assert.assertTrue("lock flag not set!", RootContext.requireGlobalLock());
-                return null;
-            }
+        template.execute(() -> {
+            Assertions.assertTrue(RootContext.requireGlobalLock(), "lock flag not set!");
+            return null;
         });
 
-        Assert.assertTrue("lock flag not clean!", !RootContext.requireGlobalLock());
-
+        Assertions.assertTrue(!RootContext.requireGlobalLock(), "lock flag not clean!");
     }
 }
