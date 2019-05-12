@@ -74,13 +74,14 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
         // PK is at last one.
         fields.add(pkField);
 
-        List<String> insertColumns = fields.stream().map(field -> keywordChecker.checkAndReplace(field.getName())).collect(Collectors.toList());
-        String insertColumnStr = String.join(", ", insertColumns);
-        List<String> insertValues = fields.stream().map(field -> "?").collect(Collectors.toList());
-        String insertValuesStr = String.join(", ", insertValues);
+        String insertColumns = fields.stream()
+            .map(field -> keywordChecker.checkAndReplace(field.getName()))
+            .collect(Collectors.joining(", "));
+        String insertValues = fields.stream().map(field -> "?")
+            .collect(Collectors.joining(", "));
 
         return String.format(INSERT_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
-                             insertColumnStr, insertValuesStr);
+                             insertColumns, insertValues);
     }
 
     @Override

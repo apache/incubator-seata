@@ -57,12 +57,11 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
         Row row = beforeImageRows.get(0);
         Field pkField = row.primaryKeys().get(0);
         List<Field> nonPkFields = row.nonPrimaryKeys();
-        List<String> updateColumns = nonPkFields.stream()
+        String updateColumns = nonPkFields.stream()
             .map(field -> keywordChecker.checkAndReplace(field.getName()) + " = ?")
-            .collect(Collectors.toList());
-        String updateColumnsStr = String.join(", ", updateColumns);
+            .collect(Collectors.joining(", "));
         return String.format(UPDATE_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
-                             updateColumnsStr, keywordChecker.checkAndReplace(pkField.getName()));
+                             updateColumns, keywordChecker.checkAndReplace(pkField.getName()));
     }
 
     /**
