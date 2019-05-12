@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.undo.mysql;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
