@@ -31,8 +31,10 @@ import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 
@@ -45,8 +47,10 @@ public class TableMetaCacheOracle {
 
     private static final long EXPIRE_TIME = 900 * 1000;
 
-    private static final Cache<String, TableMeta> TABLE_META_CACHE = CacheBuilder.newBuilder().maximumSize(CACHE_SIZE)
+    private static final Cache<String, TableMeta> TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
         .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
+
+    private static Logger logger = LoggerFactory.getLogger(TableMetaCacheOracle.class);
 
     /**
      * Gets table meta.
@@ -64,16 +68,14 @@ public class TableMetaCacheOracle {
 
         TableMeta tmeta = null;
         final String key = dataSourceKey + "." + tableName;
-        try {
-            tmeta = TABLE_META_CACHE.get(key, new Callable<TableMeta>() {
-                @Override
-                public TableMeta call() throws Exception {
-                    return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
-                }
-            });
-        } catch (ExecutionException e) {
-        }
-
+        tmeta = TABLE_META_CACHE.get(key, mappingFunction -> {
+            try {
+                return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
+            } catch (SQLException e) {
+                logger.error("get cache error !", e);
+                return null;
+            }
+        });
         if (tmeta == null) {
             try {
                 tmeta = fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
@@ -135,7 +137,7 @@ public class TableMetaCacheOracle {
             col.setTableName(tableName);
             col.setColumnName(rs2.getString("COLUMN_NAME"));
             String datatype = rs2.getString("DATA_TYPE");
-            if (StringUtils.equalsIgnoreCase(datatype, "NUMBER")) {
+            if (com.alibaba.druid.util.StringUtils.equalsIgnoreCase(datatype, "NUMBER")) {
                 col.setDataType(java.sql.Types.BIGINT);
             } else if (StringUtils.equalsIgnoreCase(datatype, "VARCHAR2")) {
                 col.setDataType(java.sql.Types.VARCHAR);
