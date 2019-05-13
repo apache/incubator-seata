@@ -78,7 +78,7 @@ public class MySQLKeywordCheckerTest {
 
         Field pkField = new Field();
         pkField.setKeyType(KeyType.PrimaryKey);
-        pkField.setName("id");
+        pkField.setName("key");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
         beforeRow.add(pkField);
@@ -109,7 +109,7 @@ public class MySQLKeywordCheckerTest {
 
         Field pkField1 = new Field();
         pkField1.setKeyType(KeyType.PrimaryKey);
-        pkField1.setName("id");
+        pkField1.setName("key");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(213);
         afterRow.add(pkField1);
@@ -133,7 +133,7 @@ public class MySQLKeywordCheckerTest {
 
         MySQLUndoUpdateExecutorExtension mySQLUndoUpdateExecutor = new MySQLUndoUpdateExecutorExtension(sqlUndoLog);
 
-        Assertions.assertEquals("UPDATE `lock` SET `desc` = ?, `order` = ?, since = ? WHERE id = ?",
+        Assertions.assertEquals("UPDATE `lock` SET `desc` = ?, `order` = ?, since = ? WHERE `key` = ?",
             mySQLUndoUpdateExecutor.getSql());
 
     }
@@ -175,7 +175,7 @@ public class MySQLKeywordCheckerTest {
 
         Field pkField = new Field();
         pkField.setKeyType(KeyType.PrimaryKey);
-        pkField.setName("id");
+        pkField.setName("key");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
         afterRow1.add(pkField);
@@ -196,7 +196,7 @@ public class MySQLKeywordCheckerTest {
 
         Field pkField1 = new Field();
         pkField1.setKeyType(KeyType.PrimaryKey);
-        pkField1.setName("id");
+        pkField1.setName("key");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);
         afterRow.add(pkField1);
@@ -221,7 +221,7 @@ public class MySQLKeywordCheckerTest {
 
         MySQLUndoInsertExecutorExtension mySQLUndoInsertExecutor = new MySQLUndoInsertExecutorExtension(sqlUndoLog);
 
-        Assertions.assertEquals("DELETE FROM `lock` WHERE id = ?", mySQLUndoInsertExecutor.getSql());
+        Assertions.assertEquals("DELETE FROM `lock` WHERE `key` = ?", mySQLUndoInsertExecutor.getSql());
 
     }
 
@@ -262,7 +262,7 @@ public class MySQLKeywordCheckerTest {
 
         Field pkField = new Field();
         pkField.setKeyType(KeyType.PrimaryKey);
-        pkField.setName("id");
+        pkField.setName("key");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
         afterRow1.add(pkField);
@@ -283,7 +283,7 @@ public class MySQLKeywordCheckerTest {
 
         Field pkField1 = new Field();
         pkField1.setKeyType(KeyType.PrimaryKey);
-        pkField1.setName("id");
+        pkField1.setName("key");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);
         afterRow.add(pkField1);
@@ -308,7 +308,7 @@ public class MySQLKeywordCheckerTest {
 
         MySQLUndoDeleteExecutorExtension mySQLUndoDeleteExecutor = new MySQLUndoDeleteExecutorExtension(sqlUndoLog);
 
-        Assertions.assertEquals("INSERT INTO `lock` (`desc`, `order`, id) VALUES (?, ?, ?)",
+        Assertions.assertEquals("INSERT INTO `lock` (`desc`, `order`, `key`) VALUES (?, ?, ?)",
             mySQLUndoDeleteExecutor.getSql());
 
     }
