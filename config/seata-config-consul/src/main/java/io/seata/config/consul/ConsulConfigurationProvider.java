@@ -13,26 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.protocol.transaction;
+package io.seata.config.consul;
 
-import io.seata.core.protocol.MergedMessage;
-import io.seata.core.rpc.RpcContext;
+import io.seata.common.loader.LoadLevel;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationProvider;
 
 /**
- * The type Global lock query request.
- *
- * @author jimin.jm @alibaba-inc.com
+ * @author xingfudeshi@gmail.com
+ * @date 2019/05/05
  */
-public class GlobalLockQueryRequest extends BranchRegisterRequest implements MergedMessage {
-
+@LoadLevel(name = "Consul", order = 1)
+public class ConsulConfigurationProvider implements ConfigurationProvider {
     @Override
-    public short getTypeCode() {
-        return TYPE_GLOBAL_LOCK_QUERY;
+    public Configuration provide() {
+        return ConsulConfiguration.getInstance();
     }
-
-    @Override
-    public AbstractTransactionResponse handle(RpcContext rpcContext) {
-        return handler.handle(this, rpcContext);
-    }
-
 }

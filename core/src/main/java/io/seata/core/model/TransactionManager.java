@@ -16,7 +16,6 @@
 package io.seata.core.model;
 
 import io.seata.core.exception.TransactionException;
-import io.seata.core.exception.TransactionException;
 
 /**
  * Transaction Manager.

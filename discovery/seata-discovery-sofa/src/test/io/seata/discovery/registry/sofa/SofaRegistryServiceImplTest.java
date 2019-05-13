@@ -16,9 +16,9 @@
 package io.seata.discovery.registry.sofa;
 
 import com.alipay.sofa.registry.server.test.TestRegistryMain;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
-import org.junit.BeforeClass;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.net.InetSocketAddress;
@@ -34,7 +34,7 @@ public class SofaRegistryServiceImplTest {
 
     private static TestRegistryMain registryMain;
 
-    @BeforeClass
+    @BeforeAll
     public static void beforeClass() {
         System.setProperty("serverAddr", "127.0.0.1:9603");
         System.setProperty("addressWaitTime", "10000");
@@ -96,7 +96,7 @@ public class SofaRegistryServiceImplTest {
     }
 
 
-    @AfterClass
+    @AfterAll
     public static void afterClass() {
         System.setProperty("serverAddr", "");
         System.setProperty("addressWaitTime", "0");
