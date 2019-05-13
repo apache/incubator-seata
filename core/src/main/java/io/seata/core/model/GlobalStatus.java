@@ -127,6 +127,7 @@ public enum GlobalStatus {
         this.code = code;
     }
 
+
     /**
      * Gets code.
      *
@@ -135,6 +136,8 @@ public enum GlobalStatus {
     public int getCode() {
         return code;
     }
+
+
 
     private static final Map<Integer, GlobalStatus> MAP = new HashMap<>(values().length);
 

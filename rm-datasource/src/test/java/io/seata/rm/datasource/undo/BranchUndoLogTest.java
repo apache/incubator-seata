@@ -24,8 +24,8 @@ import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Branch undo log test.
@@ -72,7 +72,7 @@ public class BranchUndoLogTest {
         System.out.println(encodeString);
 
         BranchUndoLog decodeObj = UndoLogParserFactory.getInstance().decode(encodeString);
-        Assert.assertEquals(decodeObj.getBranchId(), branchUndoLog.getBranchId());
+        Assertions.assertEquals(decodeObj.getBranchId(), branchUndoLog.getBranchId());
 
     }
 }

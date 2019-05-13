@@ -107,29 +107,12 @@ public interface TransactionStoreManager {
          * @return the log operation by code
          */
         public static LogOperation getLogOperationByCode(byte code) {
-            LogOperation logOperation = null;
-            switch (code) {
-                case 1:
-                    logOperation = LogOperation.GLOBAL_ADD;
-                    break;
-                case 2:
-                    logOperation = LogOperation.GLOBAL_UPDATE;
-                    break;
-                case 3:
-                    logOperation = LogOperation.GLOBAL_REMOVE;
-                    break;
-                case 4:
-                    logOperation = LogOperation.BRANCH_ADD;
-                    break;
-                case 5:
-                    logOperation = LogOperation.BRANCH_UPDATE;
-                    break;
-                case 6:
-                    logOperation = LogOperation.BRANCH_REMOVE;
-                    break;
-                default:
+            for (LogOperation temp : values()) {
+                if (temp.getCode() == code) {
+                    return temp;
+                }
             }
-            return logOperation;
+            throw new IllegalArgumentException("Unknown LogOperation[" + code + "]");
         }
     }
 }

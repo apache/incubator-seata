@@ -15,17 +15,23 @@
  */
 package io.seata.server.session;
 
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * The type Global session.
@@ -34,14 +40,16 @@ import io.seata.server.store.StoreConfig;
  */
 public class GlobalSession implements SessionLifecycle, SessionStorable {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalSession.class);
+
     private static final int MAX_GLOBAL_SESSION_SIZE = StoreConfig.getMaxGlobalSessionSize();
 
     private static ThreadLocal<ByteBuffer> byteBufferThreadLocal = ThreadLocal.withInitial(() -> ByteBuffer.allocate(
-        MAX_GLOBAL_SESSION_SIZE));
+            MAX_GLOBAL_SESSION_SIZE));
 
     private long transactionId;
 
-    private GlobalStatus status;
+    private volatile GlobalStatus status;
 
     private String applicationId;
 
@@ -56,6 +64,8 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     private boolean active;
 
     private ArrayList<BranchSession> branchSessions = new ArrayList<>();
+
+    private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
 
     /**
      * Add boolean.
@@ -346,6 +356,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return beginTime;
     }
 
+
     /**
      * Create global session global session.
      *
@@ -419,15 +430,15 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private int calGlobalSessionSize(byte[] byApplicationIdBytes, byte[] byServiceGroupBytes, byte[] byTxNameBytes) {
         final int size = 8 // trascationId
-            + 4 // timeout
-            + 2 // byApplicationIdBytes.length
-            + 2 // byServiceGroupBytes.length
-            + 2 // byTxNameBytes.length
-            + 8 // beginTime
-            + 1 // statusCode
-            + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
-            + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
-            + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
+                + 4 // timeout
+                + 2 // byApplicationIdBytes.length
+                + 2 // byServiceGroupBytes.length
+                + 2 // byTxNameBytes.length
+                + 8 // beginTime
+                + 1 // statusCode
+                + (byApplicationIdBytes == null ? 0 : byApplicationIdBytes.length)
+                + (byServiceGroupBytes == null ? 0 : byServiceGroupBytes.length)
+                + (byTxNameBytes == null ? 0 : byTxNameBytes.length);
         return size;
     }
 
@@ -465,5 +476,66 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public boolean hasBranch() {
         return branchSessions.size() > 0;
+    }
+
+    public void lock() throws TransactionException {
+        globalSessionLock.lock();
+    }
+
+    public void unlock(){
+        globalSessionLock.unlock();
+    }
+
+    public void lockAndExcute(LockRunnable excuteRunnable) throws TransactionException{
+        this.lock();
+        try {
+            excuteRunnable.run();
+        }finally {
+            this.unlock();
+        }
+    }
+
+    public <T> T lockAndExcute(LockCallable<T> lockCallable) throws TransactionException{
+        this.lock();
+        try {
+            return lockCallable.call();
+        }finally {
+            this.unlock();
+        }
+    }
+
+    private class GlobalSessionLock {
+
+        private Lock globalSessionLock = new ReentrantLock();
+
+        private static final int GLOBAL_SESSOION_LOCK_TIME_OUT_MILLS = 2 * 1000;
+
+        public void lock() throws TransactionException {
+             try {
+                if (globalSessionLock.tryLock(GLOBAL_SESSOION_LOCK_TIME_OUT_MILLS, TimeUnit.MILLISECONDS)){
+                    return;
+                }
+            } catch (InterruptedException e) {
+                 LOGGER.error("Interrupted error", e);
+            }
+            throw new TransactionException(TransactionExceptionCode.FailedLockGlobalTranscation);
+        }
+
+
+        public void unlock() {
+            globalSessionLock.unlock();
+        }
+
+    }
+
+    @FunctionalInterface
+    public interface LockRunnable {
+
+        void run() throws TransactionException;
+    }
+    @FunctionalInterface
+    public interface LockCallable<V> {
+
+        V call() throws TransactionException;
     }
 }

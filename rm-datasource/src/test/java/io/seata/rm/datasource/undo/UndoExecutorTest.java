@@ -58,7 +58,7 @@ import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * The type Undo executor test.

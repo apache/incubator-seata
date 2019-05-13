@@ -84,12 +84,10 @@ public class MergeResultMessage extends AbstractMessage implements MergeMessage 
 
     @Override
     public boolean decode(ByteBuf in) {
-        int i = in.readableBytes();
-        if (i < 4) { return false; }
+        if (in.readableBytes() < 4) { return false; }
 
-        i -= 4;
         int length = in.readInt();
-        if (i < length) { return false; }
+        if (in.readableBytes() < length) { return false; }
         byte[] buffer = new byte[length];
         in.readBytes(buffer);
         ByteBuffer byteBuffer = ByteBuffer.wrap(buffer);
@@ -116,6 +114,9 @@ public class MergeResultMessage extends AbstractMessage implements MergeMessage 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("MergeResultMessage ");
+        if (msgs == null) {
+            return sb.toString();
+        }
         for (AbstractMessage msg : msgs) { sb.append(msg.toString()).append("\n"); }
         return sb.toString();
     }
