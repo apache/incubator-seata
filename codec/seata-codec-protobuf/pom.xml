@@ -23,9 +23,9 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>codec-protobuf</artifactId>
+    <artifactId>seata-codec-protobuf</artifactId>
     <packaging>jar</packaging>
-    <name>codec-protobuf ${project.version}</name>
+    <name>seata-codec-protobuf ${project.version}</name>
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>

@@ -112,6 +112,7 @@
         <httpclient.version>4.5.8</httpclient.version>
         <httpcore.version>4.4.11</httpcore.version>
         <caffeine.version>2.7.0</caffeine.version>
+        <protobuf.version>3.7.1</protobuf.version>
     </properties>
 
     <dependencies>
@@ -226,6 +227,16 @@
             <artifactId>seata-tm</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-codec-seata</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-codec-protobuf</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- spring  -->
         <dependency>
@@ -295,6 +306,11 @@
             <groupId>commons-pool</groupId>
             <artifactId>commons-pool</artifactId>
             <version>${commons-pool.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.dubbo</groupId>
@@ -504,6 +520,8 @@
                                     <include>io.seata:seata-spring</include>
                                     <include>io.seata:seata-tcc</include>
                                     <include>io.seata:seata-tm</include>
+                                    <include>io.seata:seata-codec-seata</include>
+                                    <include>io.seata:seata-codec-protobuf</include>
                                 </includes>
                             </artifactSet>
                             <transformers>

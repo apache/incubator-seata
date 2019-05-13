@@ -28,8 +28,8 @@
     <name>seata-codec ${project.version}</name>
 
     <modules>
-        <module>codec-protobuf</module>
-        <module>codec-seata</module>
+        <module>seata-codec-protobuf</module>
+        <module>seata-codec-seata</module>
     </modules>
 
 </project>
