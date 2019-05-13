@@ -19,8 +19,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.UnpooledByteBufAllocator;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.protocol.ResultCode;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author: jimin.jm@alibaba-inc.com
@@ -35,7 +35,7 @@ public class BranchRollbackResponseTest {
         branchRollbackResponse.setBranchStatus(BranchStatus.PhaseOne_Done);
         branchRollbackResponse.setResultCode(ResultCode.Success);
         branchRollbackResponse.setMsg("");
-        Assert.assertEquals(
+        Assertions.assertEquals(
             "xid=127.0.0.1:8091:123456,branchId=2345678,branchStatus=PhaseOne_Done,result code =Success,getMsg =",
             branchRollbackResponse.toString());
 
@@ -57,13 +57,13 @@ public class BranchRollbackResponseTest {
 
         BranchRollbackResponse decodeBranchRollbackResponse = new BranchRollbackResponse();
         decodeBranchRollbackResponse.decode(byteBuffer);
-        Assert.assertEquals(decodeBranchRollbackResponse.getXid(), branchRollbackResponse.getXid());
-        Assert.assertEquals(decodeBranchRollbackResponse.getBranchId(), branchRollbackResponse.getBranchId());
-        Assert.assertEquals(decodeBranchRollbackResponse.getResultCode(), branchRollbackResponse.getResultCode());
-        Assert.assertEquals(decodeBranchRollbackResponse.getBranchStatus(), branchRollbackResponse.getBranchStatus());
-        Assert.assertEquals(decodeBranchRollbackResponse.getTransactionExceptionCode(),
+        Assertions.assertEquals(decodeBranchRollbackResponse.getXid(), branchRollbackResponse.getXid());
+        Assertions.assertEquals(decodeBranchRollbackResponse.getBranchId(), branchRollbackResponse.getBranchId());
+        Assertions.assertEquals(decodeBranchRollbackResponse.getResultCode(), branchRollbackResponse.getResultCode());
+        Assertions.assertEquals(decodeBranchRollbackResponse.getBranchStatus(), branchRollbackResponse.getBranchStatus());
+        Assertions.assertEquals(decodeBranchRollbackResponse.getTransactionExceptionCode(),
             branchRollbackResponse.getTransactionExceptionCode());
-        Assert.assertEquals(decodeBranchRollbackResponse.getMsg(), branchRollbackResponse.getMsg());
+        Assertions.assertEquals(decodeBranchRollbackResponse.getMsg(), branchRollbackResponse.getMsg());
     }
 
 }

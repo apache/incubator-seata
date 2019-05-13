@@ -34,8 +34,8 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
 import io.seata.rm.datasource.DataSourceProxy;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * The table meta fetch test.
@@ -92,56 +92,56 @@ public class TableMetaTest {
 
         TableMeta tableMeta = TableMetaCache.getTableMeta(proxy, "t1");
 
-        Assert.assertEquals("t1", tableMeta.getTableName());
-        Assert.assertEquals("id", tableMeta.getPkName());
+        Assertions.assertEquals("t1", tableMeta.getTableName());
+        Assertions.assertEquals("id", tableMeta.getPkName());
 
-        Assert.assertEquals("id", tableMeta.getColumnMeta("id").getColumnName());
-        Assert.assertEquals("id", tableMeta.getAutoIncreaseColumn().getColumnName());
-        Assert.assertEquals(1, tableMeta.getPrimaryKeyMap().size());
-        Assert.assertEquals(Collections.singletonList("id"), tableMeta.getPrimaryKeyOnlyName());
+        Assertions.assertEquals("id", tableMeta.getColumnMeta("id").getColumnName());
+        Assertions.assertEquals("id", tableMeta.getAutoIncreaseColumn().getColumnName());
+        Assertions.assertEquals(1, tableMeta.getPrimaryKeyMap().size());
+        Assertions.assertEquals(Collections.singletonList("id"), tableMeta.getPrimaryKeyOnlyName());
 
-        Assert.assertEquals(4, tableMeta.getAllColumns().size());
+        Assertions.assertEquals(4, tableMeta.getAllColumns().size());
 
         assertColumnMetaEquals(columnMetas[0], tableMeta.getAllColumns().get("id"));
         assertColumnMetaEquals(columnMetas[1], tableMeta.getAllColumns().get("name1"));
         assertColumnMetaEquals(columnMetas[2], tableMeta.getAllColumns().get("name2"));
         assertColumnMetaEquals(columnMetas[3], tableMeta.getAllColumns().get("name3"));
 
-        Assert.assertEquals(2, tableMeta.getAllIndexes().size());
+        Assertions.assertEquals(2, tableMeta.getAllIndexes().size());
 
         assertIndexMetaEquals(indexMetas[0], tableMeta.getAllIndexes().get("PRIMARY"));
-        Assert.assertEquals(IndexType.PRIMARY, tableMeta.getAllIndexes().get("PRIMARY").getIndextype());
+        Assertions.assertEquals(IndexType.PRIMARY, tableMeta.getAllIndexes().get("PRIMARY").getIndextype());
         assertIndexMetaEquals(indexMetas[1], tableMeta.getAllIndexes().get("name1"));
-        Assert.assertEquals(IndexType.Unique, tableMeta.getAllIndexes().get("name1").getIndextype());
+        Assertions.assertEquals(IndexType.Unique, tableMeta.getAllIndexes().get("name1").getIndextype());
 
     }
 
     private void assertColumnMetaEquals(Object[] expected, ColumnMeta actual) {
-        Assert.assertEquals(expected[0], actual.getTableCat());
-        Assert.assertEquals(expected[3], actual.getColumnName());
-        Assert.assertEquals(expected[4], actual.getDataType());
-        Assert.assertEquals(expected[5], actual.getDataTypeName());
-        Assert.assertEquals(expected[6], actual.getColumnSize());
-        Assert.assertEquals(expected[7], actual.getDecimalDigits());
-        Assert.assertEquals(expected[8], actual.getNumPrecRadix());
-        Assert.assertEquals(expected[9], actual.getNullAble());
-        Assert.assertEquals(expected[10], actual.getRemarks());
-        Assert.assertEquals(expected[11], actual.getColumnDef());
-        Assert.assertEquals(expected[12], actual.getSqlDataType());
-        Assert.assertEquals(expected[13], actual.getSqlDatetimeSub());
-        Assert.assertEquals(expected[14], actual.getCharOctetLength());
-        Assert.assertEquals(expected[15], actual.getOrdinalPosition());
-        Assert.assertEquals(expected[16], actual.getIsNullAble());
-        Assert.assertEquals(expected[17], actual.getIsAutoincrement());
+        Assertions.assertEquals(expected[0], actual.getTableCat());
+        Assertions.assertEquals(expected[3], actual.getColumnName());
+        Assertions.assertEquals(expected[4], actual.getDataType());
+        Assertions.assertEquals(expected[5], actual.getDataTypeName());
+        Assertions.assertEquals(expected[6], actual.getColumnSize());
+        Assertions.assertEquals(expected[7], actual.getDecimalDigits());
+        Assertions.assertEquals(expected[8], actual.getNumPrecRadix());
+        Assertions.assertEquals(expected[9], actual.getNullAble());
+        Assertions.assertEquals(expected[10], actual.getRemarks());
+        Assertions.assertEquals(expected[11], actual.getColumnDef());
+        Assertions.assertEquals(expected[12], actual.getSqlDataType());
+        Assertions.assertEquals(expected[13], actual.getSqlDatetimeSub());
+        Assertions.assertEquals(expected[14], actual.getCharOctetLength());
+        Assertions.assertEquals(expected[15], actual.getOrdinalPosition());
+        Assertions.assertEquals(expected[16], actual.getIsNullAble());
+        Assertions.assertEquals(expected[17], actual.getIsAutoincrement());
     }
 
     private void assertIndexMetaEquals(Object[] expected, IndexMeta actual) {
-        Assert.assertEquals(expected[0], actual.getIndexName());
-        Assert.assertEquals(expected[3], actual.getIndexQualifier());
-        Assert.assertEquals(expected[4], (int)actual.getType());
-        Assert.assertEquals(expected[5], actual.getOrdinalPosition());
-        Assert.assertEquals(expected[6], actual.getAscOrDesc());
-        Assert.assertEquals(expected[7], actual.getCardinality());
+        Assertions.assertEquals(expected[0], actual.getIndexName());
+        Assertions.assertEquals(expected[3], actual.getIndexQualifier());
+        Assertions.assertEquals(expected[4], (int)actual.getType());
+        Assertions.assertEquals(expected[5], actual.getOrdinalPosition());
+        Assertions.assertEquals(expected[6], actual.getAscOrDesc());
+        Assertions.assertEquals(expected[7], actual.getCardinality());
     }
 
     private class MockDriver extends com.alibaba.druid.mock.MockDriver {
