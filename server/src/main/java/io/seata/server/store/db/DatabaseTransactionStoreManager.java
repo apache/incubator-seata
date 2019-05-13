@@ -96,7 +96,7 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
         //init dataSource
         DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, datasourceType);
         DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
-        logStore = EnhancedServiceLoader.load(LogStore.class, StoreMode.DB.name(), new Object[]{logStoreDataSource});
+        logStore = EnhancedServiceLoader.load(LogStore.class, StoreMode.DB.name(), new Class[]{DataSource.class}, new Object[]{logStoreDataSource});
         inited.set(true);
     }
 
