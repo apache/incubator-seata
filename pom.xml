@@ -107,13 +107,6 @@
         <assertj-core.version>3.12.2</assertj-core.version>
         <junit-platform-launcher.version>1.4.2</junit-platform-launcher.version>
 
-        <httpclient.version>4.5.8</httpclient.version>
-        <httpcore.version>4.4.11</httpcore.version>
-        <druid.version>1.1.12</druid.version>
-        <caffeine.version>2.7.0</caffeine.version>
-
-        <oracle.client.version>10.2.0.3.0</oracle.client.version>
-        <mysql.client.version>5.1.30</mysql.client.version>
     </properties>
 
     <!--test-->
