@@ -86,6 +86,9 @@ public class DefaultCoreTest {
         long transactionId = XID.getTransactionId(xid);
         GlobalSession globalSession = SessionHolder.findGlobalSession(transactionId);
         Assertions.assertEquals(globalSession.getSortedBranches().size(), 1);
+
+        //clear
+        globalSession.end();
     }
 
     /**
@@ -103,6 +106,9 @@ public class DefaultCoreTest {
         GlobalSession globalSession = SessionHolder.findGlobalSession(transactionId);
         BranchSession branchSession = globalSession.getBranch(branchId);
         Assertions.assertEquals(branchSession.getStatus(), BranchStatus.PhaseOne_Done);
+
+        //clear
+        globalSession.end();
     }
 
     /**
@@ -147,6 +153,9 @@ public class DefaultCoreTest {
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Committed);
+
+        //clear
+        globalSession.end();
     }
 
 
@@ -166,6 +175,9 @@ public class DefaultCoreTest {
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_CommitFailed_Unretryable, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Begin);
+
+        //clear
+        globalSession.end();
     }
 
     /**
@@ -184,6 +196,9 @@ public class DefaultCoreTest {
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseOne_Timeout, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.CommitRetrying);
+
+        //clear
+        globalSession.end();
     }
 
     /**
@@ -215,6 +230,9 @@ public class DefaultCoreTest {
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_Rollbacked));
         core.doGlobalRollback(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Rollbacked);
+
+        //clear
+        globalSession.end();
     }
 
 
@@ -234,6 +252,9 @@ public class DefaultCoreTest {
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_RollbackFailed_Unretryable));
         core.doGlobalRollback(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.RollbackFailed);
+
+        //clear
+        globalSession.end();
     }
 
     /**
@@ -252,6 +273,8 @@ public class DefaultCoreTest {
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_RollbackFailed_Retryable));
         core.doGlobalRollback(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.RollbackRetrying);
+
+        globalSession.end();
     }
 
     /**

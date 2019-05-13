@@ -27,6 +27,13 @@
     <packaging>jar</packaging>
     <name>seata-test ${project.version}</name>
 
+    <properties>
+        <mysql-connector-java.version>5.1.35</mysql-connector-java.version>
+        <zookeeper.version>3.4.8</zookeeper.version>
+        <jedis.version>2.9.0</jedis.version>
+        <redisson.version>3.9.0</redisson.version>
+    </properties>
+
     <build>
         <plugins>
             <plugin>
@@ -100,13 +107,8 @@
             <artifactId>redisson</artifactId>
             <version>${redisson.version}</version>
         </dependency>
+
     </dependencies>
-    <properties>
-        <mysql-connector-java.version>5.1.35</mysql-connector-java.version>
-        <zookeeper.version>3.4.8</zookeeper.version>
-        <jedis.version>2.9.0</jedis.version>
-        <redisson.version>3.9.0</redisson.version>
-    </properties>
 
 
 </project>
