@@ -18,26 +18,23 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.seata</groupId>
-        <artifactId>seata-discovery</artifactId>
+        <artifactId>seata-config</artifactId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-discovery-sofa</artifactId>
-    <name>seata-discovery-sofa ${project.version}</name>
+    <artifactId>seata-config-consul</artifactId>
+    <name>seata-config-consul ${project.version}</name>
 
     <dependencies>
         <dependency>
             <groupId>io.seata</groupId>
-            <artifactId>seata-discovery-core</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-         <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>registry-client-all</artifactId>
+            <artifactId>seata-config-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>registry-test</artifactId>
+            <groupId>com.ecwid.consul</groupId>
+            <artifactId>consul-api</artifactId>
         </dependency>
     </dependencies>
+
 </project>
