@@ -41,10 +41,12 @@ public class DefaultLockManagerImpl implements LockManager {
 
     private static final int BUCKET_PER_TABLE = 128;
 
-    private static final ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<Integer, Map<String,
-        Long>>>>
-        LOCK_MAP
-        = new ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<Integer, Map<String, Long>>>>();
+    private static final
+    ConcurrentHashMap<String/* resourceId */,
+        ConcurrentHashMap<String/* tableName */,
+            ConcurrentHashMap<Integer/* bucketId */,
+                Map<String/* pk */, Long/* transactionId */>>>>
+        LOCK_MAP = new ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<Integer, Map<String, Long>>>>();
 
     @Override
     public boolean acquireLock(BranchSession branchSession) throws TransactionException {
