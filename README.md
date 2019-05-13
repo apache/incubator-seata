@@ -139,6 +139,7 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 * [Seata Samples](https://github.com/seata/seata-samples) - Samples for Seata
 * [Seata Docker](https://github.com/seata/seata-docker) - Seata integration with docker
 * [Seata K8s](https://github.com/seata/seata-k8s) - Seata integration with k8s
+* [Seata taas](https://github.com/seata/taas) - Seata compatible high availability server
 * [Awesome Seata](https://github.com/seata/awesome-seata) - Description of Seata related projects 
 * [Seata Website](https://github.com/seata/seata.github.io) - Seata official website （***In the process of design***）
 
