@@ -114,6 +114,7 @@
         <nacos-client.version>0.9.1</nacos-client.version>
         <javax-inject.version>1</javax-inject.version>
         <archaius-core.version>0.7.6</archaius-core.version>
+        <maven.test.skip>true</maven.test.skip>
         <sofa.registry.version>5.2.0</sofa.registry.version>
         <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
         <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
@@ -124,6 +125,19 @@
         <license-maven-plugin.version>3.0</license-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
     </properties>
+
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Nexus Release Repository</name>
+            <url>http://192.168.150.59:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <url>http://192.168.150.59:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <!--test-->
     <dependencies>
         <dependency>
@@ -459,14 +473,15 @@
                 </plugins>
             </build>
             <distributionManagement>
-                <snapshotRepository>
-                    <id>oss_seata</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-                </snapshotRepository>
                 <repository>
-                    <id>oss_seata</id>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                    <id>releases</id>
+                    <name>Nexus Release Repository</name>
+                    <url>http://192.168.150.59:8081/repository/maven-releases/</url>
                 </repository>
+                <snapshotRepository>
+                    <id>snapshots</id>
+                    <url>http://192.168.150.59:8081/repository/maven-snapshots/</url>
+                </snapshotRepository>
             </distributionManagement>
         </profile>
     </profiles>
