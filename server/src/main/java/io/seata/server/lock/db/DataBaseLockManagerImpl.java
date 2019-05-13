@@ -15,7 +15,6 @@
  */
 package io.seata.server.lock.db;
 
-import io.seata.common.executor.Initialize;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
@@ -25,7 +24,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
 import io.seata.server.lock.AbstractLockManager;
-import io.seata.server.lock.LockManager;
 import io.seata.server.session.BranchSession;
 
 import javax.sql.DataSource;
@@ -76,7 +74,12 @@ public class DataBaseLockManagerImpl extends AbstractLockManager {
             //no lock
             return true;
         }
-        return lockStore.acquireLock(locks);
+        try{
+            return lockStore.acquireLock(locks);
+        }catch(Exception t){
+            LOGGER.error("AcquireLock error, branchSession:" + branchSession, t);
+            return false;
+        }
     }
 
     /**
@@ -93,7 +96,12 @@ public class DataBaseLockManagerImpl extends AbstractLockManager {
             //no lock
             return true;
         }
-        return lockStore.unLock(locks);
+        try{
+            return lockStore.unLock(locks);
+        }catch(Exception t){
+            LOGGER.error("unLock error, branchSession:" + branchSession, t);
+            return false;
+        }
     }
 
     /**
@@ -107,7 +115,12 @@ public class DataBaseLockManagerImpl extends AbstractLockManager {
     @Override
     public boolean isLockable(String xid, String resourceId, String lockKey) throws TransactionException {
         List<LockDO> locks = collectRowLocks(lockKey, resourceId, xid);
-        return lockStore.isLockable(locks);
+        try{
+            return lockStore.isLockable(locks);
+        }catch(Exception t){
+            LOGGER.error("isLockable error, xid:" + xid + ", resourceId:"+resourceId + ", lockKey:"+lockKey, t);
+            return false;
+        }
     }
 
     /**

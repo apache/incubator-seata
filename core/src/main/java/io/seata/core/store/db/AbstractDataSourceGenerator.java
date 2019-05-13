@@ -77,9 +77,6 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      */
     protected String getPassword(){
         String password = CONFIG.getConfig(ConfigurationKeys.STORE_DB_PASSWORD);
-        if(StringUtils.isBlank(password)){
-            throw new StoreException("the {store.db.password} can't empty.");
-        }
         return password;
     }
 

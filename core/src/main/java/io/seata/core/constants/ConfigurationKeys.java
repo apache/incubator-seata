@@ -169,4 +169,24 @@ public class ConfigurationKeys {
      */
     public static final String LOCK_DB_DEFAULT_TABLE  = "lock_table";
 
+    /**
+     * The constant COMMITING_RETRY_DELAY.
+     */
+    public static final String  COMMITING_RETRY_DELAY = "recovery.committing-retry-delay";
+
+    /**
+     * The constant ASYN_COMMITING_RETRY_DELAY.
+     */
+    public static final String  ASYN_COMMITING_RETRY_DELAY = "recovery.asyn-committing-retry-delay";
+
+    /**
+     * The constant ROLLBACKING_RETRY_DELAY.
+     */
+    public static final String  ROLLBACKING_RETRY_DELAY = "recovery.rollbacking-retry-delay";
+
+    /**
+     * The constant TIMEOUT_RETRY_DELAY.
+     */
+    public static final String  TIMEOUT_RETRY_DELAY = "recovery.timeout-retry-delay";
+
 }

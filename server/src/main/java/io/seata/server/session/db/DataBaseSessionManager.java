@@ -82,12 +82,16 @@ public class DataBaseSessionManager extends AbstractSessionManager implements Se
 
     @Override
     public void addGlobalSession(GlobalSession session) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
-            return;
-        }
-        boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_ADD, session);
-        if (!ret) {
-            throw new StoreException("addGlobalSession failed.");
+        if (StringUtils.isBlank(taskName)) {
+            boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_ADD, session);
+            if (!ret) {
+                throw new StoreException("addGlobalSession failed.");
+            }
+        }else {
+            boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
+            if (!ret) {
+                throw new StoreException("addGlobalSession failed.");
+            }
         }
     }
 
@@ -160,7 +164,8 @@ public class DataBaseSessionManager extends AbstractSessionManager implements Se
         } else if (SessionHolder.RETRY_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
             return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.CommitRetrying}));
         } else if (SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.RollbackRetrying}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.RollbackRetrying,
+                    GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
         } else {
             //all data
             return findGlobalSessions(new SessionCondition(new GlobalStatus[]{

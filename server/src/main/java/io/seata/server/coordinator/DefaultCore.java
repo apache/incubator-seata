@@ -67,6 +67,7 @@ public class DefaultCore implements Core {
                 throw new TransactionException(GlobalTransactionStatusInvalid,
                         globalSession.getStatus() + " while expecting " + GlobalStatus.Begin);
             }
+            globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
                     applicationData, lockKeys, clientId);
             if (!branchSession.lock()) {
@@ -98,6 +99,7 @@ public class DefaultCore implements Core {
         if (branchSession == null) {
             throw new TransactionException(BranchTransactionNotExist);
         }
+        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.changeBranchStatus(branchSession, status);
     }
 
@@ -130,6 +132,7 @@ public class DefaultCore implements Core {
         if (globalSession == null) {
             return GlobalStatus.Finished;
         }
+        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         // just lock changeStatus
         boolean shouldCommit = globalSession.lockAndExcute(() -> {
             //the lock should release after branch commit
@@ -243,6 +246,7 @@ public class DefaultCore implements Core {
         if (globalSession == null) {
             return GlobalStatus.Finished;
         }
+        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         // just lock changeStatus
         boolean shouldRollBack = globalSession.lockAndExcute(() -> {
             globalSession.close(); // Highlight: Firstly, close the session, then no more branch can be registered.

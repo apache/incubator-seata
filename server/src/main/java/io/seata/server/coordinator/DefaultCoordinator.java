@@ -16,6 +16,8 @@
 package io.seata.server.coordinator;
 
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -75,6 +77,26 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCoordinator.class);
 
     private static final int TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS = 5000;
+
+    /**
+     * The Committing retry delay.
+     */
+    protected int committingRetryDelay = CONFIG.getInt(ConfigurationKeys.COMMITING_RETRY_DELAY, 1000);
+
+    /**
+     * The Asyn committing retry delay.
+     */
+    protected int asynCommittingRetryDelay = CONFIG.getInt(ConfigurationKeys.ASYN_COMMITING_RETRY_DELAY, 1000);
+
+    /**
+     * The Rollbacking retry delay.
+     */
+    protected int rollbackingRetryDelay = CONFIG.getInt(ConfigurationKeys.ROLLBACKING_RETRY_DELAY, 1000);
+
+    /**
+     * The Timeout retry delay.
+     */
+    protected int timeoutRetryDelay = CONFIG.getInt(ConfigurationKeys.TIMEOUT_RETRY_DELAY, 1000);
 
     private ServerMessageSender messageSender;
 
@@ -193,8 +215,16 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         }
     }
 
+    /**
+     * Timeout check.
+     *
+     * @throws TransactionException the transaction exception
+     */
     protected void timeoutCheck() throws TransactionException {
         Collection<GlobalSession> allSessions = SessionHolder.getRootSessionManager().allSessions();
+        if(CollectionUtils.isEmpty(allSessions)){
+            return;
+        }
         if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
             LOGGER.debug("Transaction Timeout Check Begin: " + allSessions.size());
         }
@@ -207,6 +237,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 if (globalSession.getStatus() != GlobalStatus.Begin || !globalSession.isTimeout()) {
                     return false;
                 }
+                globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 globalSession.close();
                 globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
                 return true;
@@ -227,10 +258,17 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
     }
 
+    /**
+     * Handle retry rollbacking.
+     */
     protected void handleRetryRollbacking() {
         Collection<GlobalSession> rollbackingSessions = SessionHolder.getRetryRollbackingSessionManager().allSessions();
+        if(CollectionUtils.isEmpty(rollbackingSessions)){
+            return;
+        }
         for (GlobalSession rollbackingSession : rollbackingSessions) {
             try {
+                rollbackingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalRollback(rollbackingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.info("Failed to retry rollbacking [{}] {} {}",
@@ -239,10 +277,17 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         }
     }
 
+    /**
+     * Handle retry committing.
+     */
     protected void handleRetryCommitting() {
         Collection<GlobalSession> committingSessions = SessionHolder.getRetryCommittingSessionManager().allSessions();
+        if(CollectionUtils.isEmpty(committingSessions)){
+           return;
+        }
         for (GlobalSession committingSession : committingSessions) {
             try {
+                committingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(committingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.info("Failed to retry committing [{}] {} {}",
@@ -251,11 +296,18 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         }
     }
 
+    /**
+     * Handle async committing.
+     */
     protected void handleAsyncCommitting() {
         Collection<GlobalSession> asyncCommittingSessions = SessionHolder.getAsyncCommittingSessionManager()
             .allSessions();
+        if(CollectionUtils.isEmpty(asyncCommittingSessions)){
+            return;
+        }
         for (GlobalSession asyncCommittingSession : asyncCommittingSessions) {
             try {
+                asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(asyncCommittingSession, true);
             } catch (TransactionException ex) {
                 LOGGER.info("Failed to async committing [{}] {} {}",
@@ -291,7 +343,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 }
 
             }
-        }, 0, 5, TimeUnit.MILLISECONDS);
+        }, 0, rollbackingRetryDelay, TimeUnit.MILLISECONDS);
 
         retryCommitting.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -303,7 +355,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 }
 
             }
-        }, 0, 5, TimeUnit.MILLISECONDS);
+        }, 0, committingRetryDelay, TimeUnit.MILLISECONDS);
 
         asyncCommitting.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -315,7 +367,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 }
 
             }
-        }, 0, 10, TimeUnit.MILLISECONDS);
+        }, 0, asynCommittingRetryDelay, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(new Runnable() {
             @Override
@@ -327,7 +379,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 }
 
             }
-        }, 0, 2, TimeUnit.MILLISECONDS);
+        }, 0, timeoutRetryDelay, TimeUnit.MILLISECONDS);
     }
 
     @Override

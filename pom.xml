@@ -131,6 +131,9 @@
         <httpcore.version>4.4.11</httpcore.version>
         <druid.version>1.1.12</druid.version>
         <caffeine.version>2.7.0</caffeine.version>
+
+        <oracle.client.version>10.2.0.4.0</oracle.client.version>
+        <mysql.client.version>5.1.30</mysql.client.version>
     </properties>
     <!--test-->
     <dependencies>
@@ -144,6 +147,12 @@
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
             <version>${junit-jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-launcher</artifactId>
+            <version>1.4.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -336,6 +345,16 @@
                 <groupId>com.github.ben-manes.caffeine</groupId>
                 <artifactId>caffeine</artifactId>
                 <version>${caffeine.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.oracle</groupId>
+                <artifactId>ojdbc14</artifactId>
+                <version>${oracle.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>mysql</groupId>
+                <artifactId>mysql-connector-java</artifactId>
+                <version>${mysql.client.version}</version>
             </dependency>
         </dependencies>
 

@@ -19,6 +19,8 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.store.LockDO;
 import io.seata.server.session.BranchSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +32,9 @@ import java.util.List;
  * @data 2019 /4/25
  */
 public abstract class AbstractLockManager implements LockManager {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockManager.class);
+
 
     /**
      * The constant LOCK_SPLIT.
