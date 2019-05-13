@@ -47,9 +47,12 @@ public class MemoryLockManagerImpl extends AbstractLockManager {
 
     private static final int BUCKET_PER_TABLE = 128;
 
-    private static final ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<Integer, Map<String, Long>>>>
-        LOCK_MAP
-        = new ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<Integer, Map<String, Long>>>>();
+    private static final
+    ConcurrentHashMap<String/* resourceId */,
+            ConcurrentHashMap<String/* tableName */,
+                    ConcurrentHashMap<Integer/* bucketId */,
+                            Map<String/* pk */, Long/* transactionId */>>>>
+            LOCK_MAP = new ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<Integer, Map<String, Long>>>>();
 
     /**
      * Instantiates a new Memory lock manager.

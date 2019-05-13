@@ -242,7 +242,7 @@ public class SessionHolder {
     }
 
     /**
-     * Find global session global session.
+     * Find global session.
      *
      * @param xid the xid
      * @return the global session
