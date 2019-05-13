@@ -54,6 +54,7 @@ import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -177,6 +178,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             request.setBranchType(branchType);
 
             GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+            if(globalSession == null){
+                return BranchStatus.PhaseTwo_Committed;
+            }
             BranchSession branchSession = globalSession.getBranch(branchId);
 
             BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
@@ -203,6 +207,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             request.setBranchType(branchType);
 
             GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+            if(globalSession == null){
+                return BranchStatus.PhaseTwo_Rollbacked;
+            }
             BranchSession branchSession = globalSession.getBranch(branchId);
 
             BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSyncRequest(resourceId,
