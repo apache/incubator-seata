@@ -20,10 +20,12 @@ import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.lock.memory.MemoryLockManagerImpl;
 import io.seata.server.session.BranchSession;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import org.testng.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import java.util.stream.Stream;
 
 import javax.transaction.xa.Xid;
 
@@ -49,10 +51,11 @@ public class DefaultLockManagerImplTest {
      * @param branchSession the branch session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "branchSessionProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
     public void acquireLockTest(BranchSession branchSession) throws Exception {
         boolean result = lockManager.acquireLock(branchSession);
-        Assert.assertTrue(result);
+        Assertions.assertTrue(result);
         branchSession.unlock();
     }
 
@@ -64,16 +67,16 @@ public class DefaultLockManagerImplTest {
     @Test
     public void isLockableTest() throws Exception {
         boolean resultOne = lockManager.isLockable(XID.generateXID(transactionId), resourceId, lockKey);
-        Assert.assertTrue(resultOne);
+
+        Assertions.assertTrue(resultOne);
     }
 
     /**
      * Branch session provider object [ ] [ ].
      *
-     * @return the object [ ] [ ]
+     * @return Stream<BranchSession>
      */
-    @DataProvider
-    public static Object[][] branchSessionProvider() {
+    static Stream<BranchSession> branchSessionProvider() {
         BranchSession branchSession = new BranchSession();
         branchSession.setXid(XID.generateXID(transactionId));
         branchSession.setBranchId(1L);
@@ -85,7 +88,7 @@ public class DefaultLockManagerImplTest {
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.AT);
-        return new Object[][] {{branchSession}};
+        return Stream.of(branchSession);
     }
 
 }

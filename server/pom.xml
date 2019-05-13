@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~  Copyright 1999-2018 Alibaba Group Holding Ltd.
+  ~  Copyright 1999-2019 Seata.io Group.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~  you may not use this file except in compliance with the License.
@@ -31,14 +31,17 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-config-all</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-discovery-all</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
@@ -70,7 +73,6 @@
             <artifactId>testng</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>

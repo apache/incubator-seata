@@ -15,8 +15,8 @@
  */
 package io.seata.discovery.registry.zk;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author Geng Zhang
@@ -26,7 +26,7 @@ public class ZookeeperRegistryProviderTest {
     @Test
     public void provide() {
         ZookeeperRegistryProvider provider = new ZookeeperRegistryProvider();
-        Assert.assertTrue(provider.provide() instanceof ZookeeperRegisterServiceImpl);
+        Assertions.assertTrue(provider.provide() instanceof ZookeeperRegisterServiceImpl);
     }
 
 }

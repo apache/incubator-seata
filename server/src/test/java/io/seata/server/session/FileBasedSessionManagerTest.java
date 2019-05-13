@@ -23,12 +23,21 @@ import io.seata.common.XID;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import io.seata.server.session.file.FileBasedSessionManager;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * The type File based session manager test.
@@ -38,14 +47,14 @@ import org.testng.annotations.Test;
  */
 public class FileBasedSessionManagerTest {
 
-    private SessionManager sessionManager = null;
+    private static SessionManager sessionManager = null;
 
     /**
      * Sets up.
      *
      * @throws Exception the exception
      */
-    @BeforeClass
+    @BeforeEach
     public void setUp() throws Exception {
         sessionManager = new FileBasedSessionManager("root.data", ".");
     }
@@ -56,7 +65,8 @@ public class FileBasedSessionManagerTest {
      * @param globalSession the global session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "globalSessionProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionProvider")
     public void addGlobalSessionTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
         sessionManager.removeGlobalSession(globalSession);
@@ -68,17 +78,18 @@ public class FileBasedSessionManagerTest {
      * @param globalSession the global session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "globalSessionProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionProvider")
     public void findGlobalSessionTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
         GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
-        Assert.assertNotNull(expected);
-        Assert.assertEquals(expected.getTransactionId(), globalSession.getTransactionId());
-        Assert.assertEquals(expected.getApplicationId(), globalSession.getApplicationId());
-        Assert.assertEquals(expected.getTransactionServiceGroup(), globalSession.getTransactionServiceGroup());
-        Assert.assertEquals(expected.getTransactionName(), globalSession.getTransactionName());
-        Assert.assertEquals(expected.getTransactionId(), globalSession.getTransactionId());
-        Assert.assertEquals(expected.getStatus(), globalSession.getStatus());
+        Assertions.assertNotNull(expected);
+        Assertions.assertEquals(expected.getTransactionId(), globalSession.getTransactionId());
+        Assertions.assertEquals(expected.getApplicationId(), globalSession.getApplicationId());
+        Assertions.assertEquals(expected.getTransactionServiceGroup(), globalSession.getTransactionServiceGroup());
+        Assertions.assertEquals(expected.getTransactionName(), globalSession.getTransactionName());
+        Assertions.assertEquals(expected.getTransactionId(), globalSession.getTransactionId());
+        Assertions.assertEquals(expected.getStatus(), globalSession.getStatus());
         sessionManager.removeGlobalSession(globalSession);
     }
 
@@ -88,14 +99,15 @@ public class FileBasedSessionManagerTest {
      * @param globalSession the global session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "globalSessionProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionProvider")
     public void updateGlobalSessionStatusTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
         globalSession.setStatus(GlobalStatus.Finished);
         sessionManager.updateGlobalSessionStatus(globalSession, GlobalStatus.Finished);
         GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
-        Assert.assertNotNull(expected);
-        Assert.assertEquals(GlobalStatus.Finished, expected.getStatus());
+        Assertions.assertNotNull(expected);
+        Assertions.assertEquals(GlobalStatus.Finished, expected.getStatus());
         sessionManager.removeGlobalSession(globalSession);
     }
 
@@ -105,12 +117,14 @@ public class FileBasedSessionManagerTest {
      * @param globalSession the global session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "globalSessionProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionProvider")
     public void removeGlobalSessionTest(GlobalSession globalSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
         sessionManager.removeGlobalSession(globalSession);
         GlobalSession expected = sessionManager.findGlobalSession(globalSession.getXid());
-        Assert.assertNull(expected);
+        Assertions.assertNull(expected);
+
     }
 
     /**
@@ -120,7 +134,8 @@ public class FileBasedSessionManagerTest {
      * @param branchSession the branch session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "branchSessionProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
     public void addBranchSessionTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
         sessionManager.addBranchSession(globalSession, branchSession);
@@ -135,9 +150,10 @@ public class FileBasedSessionManagerTest {
      * @param branchSession the branch session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "branchSessionProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
     public void updateBranchSessionStatusTest(GlobalSession globalSession, BranchSession branchSession)
-        throws Exception {
+            throws Exception {
         sessionManager.addGlobalSession(globalSession);
         sessionManager.addBranchSession(globalSession, branchSession);
         sessionManager.updateBranchSessionStatus(branchSession, BranchStatus.PhaseTwo_Committed);
@@ -152,7 +168,8 @@ public class FileBasedSessionManagerTest {
      * @param branchSession the branch session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "branchSessionProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
     public void removeBranchSessionTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.addGlobalSession(globalSession);
         sessionManager.addBranchSession(globalSession, branchSession);
@@ -166,14 +183,15 @@ public class FileBasedSessionManagerTest {
      * @param globalSessions the global sessions
      * @throws Exception the exception
      */
-    @Test(dataProvider = "globalSessionsProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionsProvider")
     public void allSessionsTest(List<GlobalSession> globalSessions) throws Exception {
         for (GlobalSession globalSession : globalSessions) {
             sessionManager.addGlobalSession(globalSession);
         }
         Collection<GlobalSession> expectedGlobalSessions = sessionManager.allSessions();
-        Assert.assertNotNull(expectedGlobalSessions);
-        Assert.assertEquals(2, expectedGlobalSessions.size());
+        Assertions.assertNotNull(expectedGlobalSessions);
+        Assertions.assertEquals(2, expectedGlobalSessions.size());
         for (GlobalSession globalSession : globalSessions) {
             sessionManager.removeGlobalSession(globalSession);
         }
@@ -185,15 +203,16 @@ public class FileBasedSessionManagerTest {
      * @param globalSessions the global sessions
      * @throws Exception the exception
      */
-    @Test(dataProvider = "globalSessionsProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionsProvider")
     public void findGlobalSessionsTest(List<GlobalSession> globalSessions) throws Exception {
         for (GlobalSession globalSession : globalSessions) {
             sessionManager.addGlobalSession(globalSession);
         }
-        SessionCondition sessionCondition = new SessionCondition( 30 * 24 * 3600);
+        SessionCondition sessionCondition = new SessionCondition(30 * 24 * 3600);
         Collection<GlobalSession> expectedGlobalSessions = sessionManager.findGlobalSessions(sessionCondition);
-        Assert.assertNotNull(expectedGlobalSessions);
-        Assert.assertEquals(2, expectedGlobalSessions.size());
+        Assertions.assertNotNull(expectedGlobalSessions);
+        Assertions.assertEquals(2, expectedGlobalSessions.size());
         for (GlobalSession globalSession : globalSessions) {
             sessionManager.removeGlobalSession(globalSession);
         }
@@ -205,7 +224,8 @@ public class FileBasedSessionManagerTest {
      * @param globalSession the global session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "globalSessionProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionProvider")
     public void onBeginTest(GlobalSession globalSession) throws Exception {
         sessionManager.onBegin(globalSession);
         sessionManager.onEnd(globalSession);
@@ -217,7 +237,8 @@ public class FileBasedSessionManagerTest {
      * @param globalSession the global session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "globalSessionProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionProvider")
     public void onStatusChangeTest(GlobalSession globalSession) throws Exception {
         sessionManager.onBegin(globalSession);
         sessionManager.onStatusChange(globalSession, GlobalStatus.Finished);
@@ -231,7 +252,8 @@ public class FileBasedSessionManagerTest {
      * @param branchSession the branch session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "branchSessionProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
     public void onBranchStatusChangeTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.onBegin(globalSession);
         sessionManager.onAddBranch(globalSession, branchSession);
@@ -245,7 +267,8 @@ public class FileBasedSessionManagerTest {
      * @param branchSession the branch session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "branchSessionProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
     public void onAddBranchTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.onBegin(globalSession);
         sessionManager.onAddBranch(globalSession, branchSession);
@@ -258,7 +281,8 @@ public class FileBasedSessionManagerTest {
      * @param branchSession the branch session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "branchSessionProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
     public void onRemoveBranchTest(GlobalSession globalSession, BranchSession branchSession) throws Exception {
         sessionManager.onBegin(globalSession);
         sessionManager.onAddBranch(globalSession, branchSession);
@@ -271,7 +295,8 @@ public class FileBasedSessionManagerTest {
      * @param globalSession the global session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "globalSessionProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionProvider")
     public void onCloseTest(GlobalSession globalSession) throws Exception {
         sessionManager.onBegin(globalSession);
         sessionManager.onClose(globalSession);
@@ -283,7 +308,8 @@ public class FileBasedSessionManagerTest {
      * @param globalSession the global session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "globalSessionProvider")
+    @ParameterizedTest
+    @MethodSource("globalSessionProvider")
     public void onEndTest(GlobalSession globalSession) throws Exception {
         sessionManager.onBegin(globalSession);
         sessionManager.onEnd(globalSession);
@@ -294,14 +320,15 @@ public class FileBasedSessionManagerTest {
      *
      * @return the object [ ] [ ]
      */
-    @DataProvider
-    public static Object[][] globalSessionProvider() {
+    static Stream<Arguments> globalSessionProvider() {
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
         String xid = XID.generateXID(globalSession.getTransactionId());
         globalSession.setXid(xid);
 
-        return new Object[][] {{globalSession}};
+        return Stream.of(
+                Arguments.of(globalSession)
+        );
     }
 
     /**
@@ -309,11 +336,12 @@ public class FileBasedSessionManagerTest {
      *
      * @return the object [ ] [ ]
      */
-    @DataProvider
-    public static Object[][] globalSessionsProvider() {
+    static Stream<Arguments> globalSessionsProvider() {
         GlobalSession globalSession1 = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
         GlobalSession globalSession2 = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
-        return new Object[][] {{Arrays.asList(globalSession1, globalSession2)}};
+        return Stream.of(
+                Arguments.of(Arrays.asList(globalSession1, globalSession2))
+        );
     }
 
     /**
@@ -321,8 +349,7 @@ public class FileBasedSessionManagerTest {
      *
      * @return the object [ ] [ ]
      */
-    @DataProvider
-    public static Object[][] branchSessionProvider() {
+    static Stream<Arguments> branchSessionProvider() {
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
         globalSession.setXid(XID.generateXID(globalSession.getTransactionId()));
         BranchSession branchSession = new BranchSession();
@@ -333,7 +360,8 @@ public class FileBasedSessionManagerTest {
         branchSession.setLockKey("t_1");
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
-
-        return new Object[][] {{globalSession, branchSession}};
+        return Stream.of(
+                Arguments.of(globalSession, branchSession)
+        );
     }
 }
