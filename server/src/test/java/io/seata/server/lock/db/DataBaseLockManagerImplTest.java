@@ -20,16 +20,16 @@ import io.seata.core.store.db.LockStoreDataBaseDAO;
 import io.seata.server.lock.LockManager;
 import io.seata.server.session.BranchSession;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import static org.junit.Assert.*;
+
 
 /**
  * @author zhangsen
@@ -43,7 +43,7 @@ public class DataBaseLockManagerImplTest {
 
     static LockStoreDataBaseDAO dataBaseLockStoreDAO  = null;
 
-    @BeforeClass
+    @BeforeAll
     public static void start(){
         dataSource =  new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
@@ -95,7 +95,7 @@ public class DataBaseLockManagerImplTest {
         branchSession.setResourceId("abcss");
         branchSession.setLockKey("t1:13,14;t2:11,12");
 
-        Assert.assertTrue(lockManager.acquireLock(branchSession));
+        Assertions.assertTrue(lockManager.acquireLock(branchSession));
 
         String sql = "select * from lock_table where xid = 'abc-123:786756'"  ;
         String sql2 = "select count(*) from lock_table where xid = 'abc-123:786756' " +
@@ -107,18 +107,18 @@ public class DataBaseLockManagerImplTest {
 
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(true);
+                Assertions.assertTrue(true);
             }else {
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }
             rs.close();
 
             rs = conn.createStatement().executeQuery(sql2);
             if(rs.next()){
-                Assert.assertTrue(true);
-                Assert.assertEquals(4, rs.getInt(1));
+                Assertions.assertTrue(true);
+                Assertions.assertEquals(4, rs.getInt(1));
             }else {
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }
             rs.close();
 
@@ -142,7 +142,7 @@ public class DataBaseLockManagerImplTest {
         branchSession.setResourceId("abcss");
         branchSession.setLockKey("t1:53,54;t2:21,32");
 
-        Assert.assertTrue(lockManager.acquireLock(branchSession));
+        Assertions.assertTrue(lockManager.acquireLock(branchSession));
 
         BranchSession branchSession2 = new BranchSession();
         branchSession2.setXid("abc-123:65867978");
@@ -151,7 +151,7 @@ public class DataBaseLockManagerImplTest {
         branchSession2.setResourceId("abcss");
         branchSession2.setLockKey("t1:13,14;t2:21,45");
 
-        Assert.assertTrue(lockManager.acquireLock(branchSession2));
+        Assertions.assertTrue(lockManager.acquireLock(branchSession2));
 
         BranchSession branchSession3 = new BranchSession();
         branchSession3.setXid("abc-123:5678789");
@@ -160,7 +160,7 @@ public class DataBaseLockManagerImplTest {
         branchSession3.setResourceId("abcss");
         branchSession3.setLockKey("t1:53,14;t2:21,45");
 
-        Assert.assertTrue(!lockManager.acquireLock(branchSession3));
+        Assertions.assertTrue(!lockManager.acquireLock(branchSession3));
 
         String delSql = "delete from lock_table where xid in( 'abc-123:65867978' , 'abc-123:65867978' , 'abc-123:5678789'  )"  ;
         Connection conn =  null;
@@ -187,7 +187,7 @@ public class DataBaseLockManagerImplTest {
         branchSession.setResourceId("abcss");
         branchSession.setLockKey("t1:3,4;t2:4,5");
 
-        Assert.assertTrue(lockManager.acquireLock(branchSession));
+        Assertions.assertTrue(lockManager.acquireLock(branchSession));
 
         String sql = "select * from lock_table where xid = 'abc-123:56867'"  ;
         String sql2 = "select count(*) from lock_table where xid = 'abc-123:56867' " +
@@ -198,29 +198,29 @@ public class DataBaseLockManagerImplTest {
 
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(true);
+                Assertions.assertTrue(true);
             }else {
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }
             rs.close();
 
             rs = conn.createStatement().executeQuery(sql2);
             if(rs.next()){
-                Assert.assertTrue(true);
-                Assert.assertEquals(4, rs.getInt(1));
+                Assertions.assertTrue(true);
+                Assertions.assertEquals(4, rs.getInt(1));
             }else {
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }
             rs.close();
 
             //un lock
-            Assert.assertTrue(lockManager.unLock(branchSession));
+            Assertions.assertTrue(lockManager.unLock(branchSession));
 
             rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }else {
-                Assert.assertTrue(true);
+                Assertions.assertTrue(true);
             }
             rs.close();
 
@@ -246,7 +246,7 @@ public class DataBaseLockManagerImplTest {
         branchSession.setResourceId("abcss");
         branchSession.setLockKey("t1:8,7;t2:1,2");
 
-        Assert.assertTrue(lockManager.acquireLock(branchSession));
+        Assertions.assertTrue(lockManager.acquireLock(branchSession));
 
         BranchSession branchSession2 = new BranchSession();
         branchSession2.setXid("abc-123:56877898");
@@ -255,7 +255,7 @@ public class DataBaseLockManagerImplTest {
         branchSession2.setResourceId("abcss");
         branchSession2.setLockKey("t1:8");
 
-        Assert.assertTrue(lockManager.isLockable(branchSession2.getXid(), branchSession2.getResourceId(), branchSession2.getLockKey()));
+        Assertions.assertTrue(lockManager.isLockable(branchSession2.getXid(), branchSession2.getResourceId(), branchSession2.getLockKey()));
 
         BranchSession branchSession3 = new BranchSession();
         branchSession3.setXid("abc-123:4575614354");
@@ -264,7 +264,7 @@ public class DataBaseLockManagerImplTest {
         branchSession3.setResourceId("abcss");
         branchSession3.setLockKey("t2:1,12");
 
-        Assert.assertTrue(!lockManager.isLockable(branchSession3.getXid(), branchSession3.getResourceId(), branchSession3.getLockKey()));
+        Assertions.assertTrue(!lockManager.isLockable(branchSession3.getXid(), branchSession3.getResourceId(), branchSession3.getLockKey()));
 
         String delSql = "delete from lock_table where xid in( 'abc-123:56877898' , 'abc-123:56877898' , 'abc-123:4575614354'  )"  ;
         Connection conn =  null;

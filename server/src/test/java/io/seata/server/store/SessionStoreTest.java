@@ -35,7 +35,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.File;
 
 /**
  * The type Session store test.
@@ -221,7 +220,7 @@ public class SessionStoreTest {
 
         String otherXID = XID.generateXID(0L);
 
-        Assert.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
+        Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
         globalSession.changeStatus(GlobalStatus.Committing);
         globalSession.changeBranchStatus(branchSession1, BranchStatus.PhaseTwo_CommitFailed_Retryable);

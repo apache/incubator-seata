@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-import javax.transaction.xa.Xid;
 
 /**
  * The type Default lock manager impl test.

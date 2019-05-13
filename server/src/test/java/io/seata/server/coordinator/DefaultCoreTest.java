@@ -85,7 +85,7 @@ public class DefaultCoreTest {
     public void branchRegisterTest(String xid) throws Exception {
         core.branchRegister(BranchType.AT, resourceId, clientId, xid, "abc", lockKeys_1);
         long transactionId = XID.getTransactionId(xid);
-        GlobalSession globalSession = SessionHolder.findGlobalSession(transactionId);
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertEquals(globalSession.getSortedBranches().size(), 1);
 
         //clear

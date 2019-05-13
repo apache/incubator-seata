@@ -17,9 +17,10 @@ package io.seata.core.store.db;
 
 import io.seata.core.store.LockDO;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -38,7 +39,7 @@ public class DataBaseLockStoreDAOTest {
 
     static BasicDataSource dataSource = null;
 
-    @BeforeClass
+    @BeforeAll
     public static void start(){
         dataSource =  new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
@@ -94,7 +95,7 @@ public class DataBaseLockStoreDAOTest {
         }
 
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
-        Assert.assertTrue(ret);
+        Assertions.assertTrue(ret);
 
         String sql = "select * from lock_table where xid = 'abc-123:123' and table_name  = 't' and row_key in ('abc-0','abc-1','abc-2')"  ;
         Connection conn =  null;
@@ -102,9 +103,9 @@ public class DataBaseLockStoreDAOTest {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(true);
+                Assertions.assertTrue(true);
             }else {
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }
         } finally {
             if(conn != null){
@@ -115,7 +116,7 @@ public class DataBaseLockStoreDAOTest {
             }
         }
 
-        Assert.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
+        Assertions.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
 
     }
 
@@ -136,7 +137,7 @@ public class DataBaseLockStoreDAOTest {
         }
 
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
-        Assert.assertTrue(ret);
+        Assertions.assertTrue(ret);
 
         String sql = "select * from lock_table where xid = 'abc-123:123' and table_name  = 't' and row_key in ('abc-0','abc-1','abc-2')"  ;
         Connection conn =  null;
@@ -144,9 +145,9 @@ public class DataBaseLockStoreDAOTest {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(true);
+                Assertions.assertTrue(true);
             }else {
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }
         } finally {
             if(conn != null){
@@ -158,9 +159,9 @@ public class DataBaseLockStoreDAOTest {
         }
 
         //lock again
-        Assert.assertTrue(dataBaseLockStoreDAO.acquireLock(lockDOs));
+        Assertions.assertTrue(dataBaseLockStoreDAO.acquireLock(lockDOs));
 
-        Assert.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
+        Assertions.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
 
     }
 
@@ -180,7 +181,7 @@ public class DataBaseLockStoreDAOTest {
         }
 
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
-        Assert.assertTrue(ret);
+        Assertions.assertTrue(ret);
 
         String sql = "select * from lock_table where xid = 'abc-456:123' and table_name  = 't' and row_key in ('abc-0','abc-1','abc-2')"  ;
         Connection conn =  null;
@@ -188,20 +189,20 @@ public class DataBaseLockStoreDAOTest {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(true);
+                Assertions.assertTrue(true);
             }else {
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }
             rs.close();
 
             //unlock
-            Assert.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
+            Assertions.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
 
             rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }else {
-                Assert.assertTrue(true);
+                Assertions.assertTrue(true);
             }
 
         } finally {
@@ -233,10 +234,10 @@ public class DataBaseLockStoreDAOTest {
         }
 
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
-        Assert.assertTrue(ret);
+        Assertions.assertTrue(ret);
 
         //unlock
-        Assert.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
+        Assertions.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
     }
 
     @Test
@@ -255,7 +256,7 @@ public class DataBaseLockStoreDAOTest {
         }
 
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
-        Assert.assertTrue(ret);
+        Assertions.assertTrue(ret);
 
         String sql = "select * from lock_table where xid = 'abc-123:222' and table_name  = 't' and row_key in ('abc-0','abc-1','abc-2')"  ;
         Connection conn =  null;
@@ -263,9 +264,9 @@ public class DataBaseLockStoreDAOTest {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(true);
+                Assertions.assertTrue(true);
             }else {
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }
         } finally {
             if(conn != null){
@@ -290,7 +291,7 @@ public class DataBaseLockStoreDAOTest {
         }
 
         boolean ret2 = dataBaseLockStoreDAO.acquireLock(lockDOs_2);
-        Assert.assertTrue(!ret2);
+        Assertions.assertTrue(!ret2);
 
     }
 

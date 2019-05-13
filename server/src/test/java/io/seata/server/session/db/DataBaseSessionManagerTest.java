@@ -28,9 +28,9 @@ import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.store.db.DatabaseTransactionStoreManager;
 import org.apache.commons.dbcp.BasicDataSource;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -53,7 +53,7 @@ public class DataBaseSessionManagerTest {
 
     static BasicDataSource dataSource = null;
 
-    @BeforeClass
+    @BeforeAll
     public static void start() throws Exception {
         DataBaseSessionManager tempSessionManager = new DataBaseSessionManager();
         DatabaseTransactionStoreManager transactionStoreManager = new DatabaseTransactionStoreManager();
@@ -131,9 +131,9 @@ public class DataBaseSessionManagerTest {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(true);
+                Assertions.assertTrue(true);
             }else{
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }
 
             conn.createStatement().execute(delSql);
@@ -168,10 +168,10 @@ public class DataBaseSessionManagerTest {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(true);
-                Assert.assertEquals(rs.getInt("status"), GlobalStatus.Committing.getCode());
+                Assertions.assertTrue(true);
+                Assertions.assertEquals(rs.getInt("status"), GlobalStatus.Committing.getCode());
             }else{
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }
 
             conn.createStatement().execute(delSql);
@@ -202,9 +202,9 @@ public class DataBaseSessionManagerTest {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(true);
+                Assertions.assertTrue(true);
             }else{
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }
             rs.close();
 
@@ -213,9 +213,9 @@ public class DataBaseSessionManagerTest {
 
             rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }else{
-                Assert.assertTrue(true);
+                Assertions.assertTrue(true);
             }
             rs.close();
 
@@ -241,17 +241,17 @@ public class DataBaseSessionManagerTest {
         sessionManager.addGlobalSession(session);
 
         GlobalSession globalSession_db = sessionManager.findGlobalSession(session.getXid());
-        Assert.assertNotNull(globalSession_db);
+        Assertions.assertNotNull(globalSession_db);
 
-        Assert.assertEquals(globalSession_db.getTransactionId(), session.getTransactionId());
-        Assert.assertEquals(globalSession_db.getXid(), session.getXid());
-        Assert.assertEquals(globalSession_db.getApplicationData(), session.getApplicationData());
-        Assert.assertEquals(globalSession_db.getApplicationId(), session.getApplicationId());
-        Assert.assertEquals(globalSession_db.getTransactionName(), session.getTransactionName());
-        Assert.assertEquals(globalSession_db.getTransactionServiceGroup(), session.getTransactionServiceGroup());
-        Assert.assertEquals(globalSession_db.getBeginTime(), session.getBeginTime());
-        Assert.assertEquals(globalSession_db.getTimeout(), session.getTimeout());
-        Assert.assertEquals(globalSession_db.getStatus(), session.getStatus());
+        Assertions.assertEquals(globalSession_db.getTransactionId(), session.getTransactionId());
+        Assertions.assertEquals(globalSession_db.getXid(), session.getXid());
+        Assertions.assertEquals(globalSession_db.getApplicationData(), session.getApplicationData());
+        Assertions.assertEquals(globalSession_db.getApplicationId(), session.getApplicationId());
+        Assertions.assertEquals(globalSession_db.getTransactionName(), session.getTransactionName());
+        Assertions.assertEquals(globalSession_db.getTransactionServiceGroup(), session.getTransactionServiceGroup());
+        Assertions.assertEquals(globalSession_db.getBeginTime(), session.getBeginTime());
+        Assertions.assertEquals(globalSession_db.getTimeout(), session.getTimeout());
+        Assertions.assertEquals(globalSession_db.getStatus(), session.getStatus());
 
         String delSql = "delete from global_table where xid= '"+xid+"'";
         Connection conn = null;
@@ -297,9 +297,9 @@ public class DataBaseSessionManagerTest {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(true);
+                Assertions.assertTrue(true);
             }else{
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }
 
             conn.createStatement().execute(delSql);
@@ -346,10 +346,10 @@ public class DataBaseSessionManagerTest {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(true);
-                Assert.assertEquals(rs.getInt("status"), BranchStatus.PhaseOne_Timeout.getCode());
+                Assertions.assertTrue(true);
+                Assertions.assertEquals(rs.getInt("status"), BranchStatus.PhaseOne_Timeout.getCode());
             }else{
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }
 
             conn.createStatement().execute(delSql);
@@ -394,9 +394,9 @@ public class DataBaseSessionManagerTest {
             conn = dataSource.getConnection();
             ResultSet rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){
-                Assert.assertTrue(false);
+                Assertions.assertTrue(false);
             }else{
-                Assert.assertTrue(true);
+                Assertions.assertTrue(true);
             }
 
             conn.createStatement().execute(delSql);
@@ -453,16 +453,16 @@ public class DataBaseSessionManagerTest {
         sessionManager.addBranchSession(globalSession, branchSession2);
 
         Collection<GlobalSession> rets = sessionManager.allSessions();
-        Assert.assertNotNull(rets);
-        Assert.assertEquals(1, rets.size());
+        Assertions.assertNotNull(rets);
+        Assertions.assertEquals(1, rets.size());
 
         GlobalSession globalSession_db = (io.seata.server.session.GlobalSession) new ArrayList(rets).get(0);
 
-        Assert.assertNotNull(globalSession_db.getReverseSortedBranches());
-        Assert.assertEquals(2, globalSession_db.getReverseSortedBranches().size());
+        Assertions.assertNotNull(globalSession_db.getReverseSortedBranches());
+        Assertions.assertEquals(2, globalSession_db.getReverseSortedBranches().size());
 
-        Assert.assertNotNull(globalSession_db.getBranch(1L));
-        Assert.assertNotNull(globalSession_db.getBranch(2L));
+        Assertions.assertNotNull(globalSession_db.getBranch(1L));
+        Assertions.assertNotNull(globalSession_db.getBranch(2L));
 
         String delSql = "delete from branch_table where xid= '"+xid+"'" + ";" + "delete from global_table where xid= '"+xid+"'";
         Connection conn = null;
@@ -535,15 +535,15 @@ public class DataBaseSessionManagerTest {
 
 
         Collection<GlobalSession> rets = sessionManager.findGlobalSessions(new SessionCondition( GlobalStatus.Begin));
-        Assert.assertNotNull(rets);
-        Assert.assertEquals(1, rets.size());
+        Assertions.assertNotNull(rets);
+        Assertions.assertEquals(1, rets.size());
 
         GlobalSession globalSession_db = (io.seata.server.session.GlobalSession) new ArrayList(rets).get(0);
 
-        Assert.assertNotNull(globalSession_db.getReverseSortedBranches());
-        Assert.assertEquals(1, globalSession_db.getReverseSortedBranches().size());
+        Assertions.assertNotNull(globalSession_db.getReverseSortedBranches());
+        Assertions.assertEquals(1, globalSession_db.getReverseSortedBranches().size());
 
-        Assert.assertNotNull(globalSession_db.getBranch(1L));
+        Assertions.assertNotNull(globalSession_db.getBranch(1L));
 
         String delSql = "delete from branch_table where xid= '"+xid+"'" + ";" + "delete from global_table where xid= '"+xid+"'";
         String delSql2 = "delete from branch_table where xid= '"+xid2+"'" + ";" + "delete from global_table where xid= '"+xid2+"'";
