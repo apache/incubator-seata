@@ -46,6 +46,7 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-core</artifactId>
             <version>${project.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
