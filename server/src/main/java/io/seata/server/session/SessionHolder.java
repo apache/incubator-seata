@@ -225,7 +225,7 @@ public class SessionHolder {
     }
 
     /**
-     * Find global session global session.
+     * Find global session.
      *
      * @param transactionId the transaction id
      * @return the global session
