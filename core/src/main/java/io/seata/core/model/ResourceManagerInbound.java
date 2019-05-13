@@ -16,10 +16,11 @@
 package io.seata.core.model;
 
 import io.seata.core.exception.TransactionException;
-import io.seata.core.exception.TransactionException;
 
 /**
+ * Resource Manager.
  *
+ * Control a branch transaction commit or rollback.
  *
  * @author sharajava
  */
@@ -28,28 +29,28 @@ public interface ResourceManagerInbound {
     /**
      * Commit a branch transaction.
      *
-     * s@param branchType the branch type
+     * @param branchType      the branch type
      * @param xid             Transaction id.
      * @param branchId        Branch id.
      * @param resourceId      Resource id.
      * @param applicationData Application data bind with this branch.
      * @return Status of the branch after committing.
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
-     * out.
+     *                              out.
      */
     BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException;
 
     /**
      * Rollback a branch transaction.
      *
-     * @param branchType the branch type
+     * @param branchType      the branch type
      * @param xid             Transaction id.
      * @param branchId        Branch id.
      * @param resourceId      Resource id.
      * @param applicationData Application data bind with this branch.
      * @return Status of the branch after rollbacking.
      * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
-     * out.
+     *                              out.
      */
     BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException;
 }

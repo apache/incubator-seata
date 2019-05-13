@@ -21,8 +21,8 @@ import java.sql.SQLException;
 
 import javax.sql.rowset.serial.SerialBlob;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -78,7 +78,7 @@ public class StringUtilsTest {
      * Test input stream 2 string.
      */
     @Test
-    @Ignore
+    @Disabled
     public void testInputStream2String() throws IOException {
         InputStream inputStream = StringUtilsTest.class.getClassLoader().getResourceAsStream("test.txt");
         assertThat(StringUtils.inputStream2String(inputStream))
