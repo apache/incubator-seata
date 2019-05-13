@@ -382,6 +382,10 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("register to RM resourceId:" + resourceId);
         }
+        if (channels.isEmpty()) {
+            reconnect(transactionServiceGroup);
+            return;
+        }
         synchronized (channels) {
             for (Map.Entry<String, Channel> entry : channels.entrySet()) {
                 String serverAddress = entry.getKey();
