@@ -413,7 +413,7 @@
                             <createSourcesJar>true</createSourcesJar>
                             <promoteTransitiveDependencies>false</promoteTransitiveDependencies>
                             <keepDependenciesWithProvidedScope>false</keepDependenciesWithProvidedScope>
-                            <createDependencyReducedPom>true</createDependencyReducedPom>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
                             <artifactSet>
                                 <includes>
                                     <include>io.seata:seata-common</include>
