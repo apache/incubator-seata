@@ -274,7 +274,6 @@
                 <version>${javax-inject.version}</version>
                 <scope>provided</scope>
             </dependency>
-
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
@@ -292,7 +291,6 @@
                 <artifactId>caffeine</artifactId>
                 <version>${caffeine.version}</version>
             </dependency>
-
 
         </dependencies>
     </dependencyManagement>
