@@ -16,8 +16,8 @@
 package io.seata.core.rpc;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.*;
 import java.util.HashSet;
 
 /**
@@ -32,7 +32,7 @@ import java.util.HashSet;
 
 public class RpcContextTest {
 	/** RpcContext constructor parameter set as constant **/
-	private static RpcContext RC;
+	private static RpcContext rpcContext;
 	/** Version value **/
 	private static final String VERSION = "a";
 	/** TransactionServiceGroup value **/
@@ -50,7 +50,7 @@ public class RpcContextTest {
 
 	@BeforeAll
 	public static void setup() {
-		RC = new RpcContext();
+		rpcContext = new RpcContext();
 	}
 
 	/**
@@ -58,8 +58,8 @@ public class RpcContextTest {
 	 */
 	@Test
 	public void testApplicationIdValue() {
-		RC.setApplicationId(ID);
-		Assertions.assertEquals(ID, RC.getApplicationId());
+		rpcContext.setApplicationId(ID);
+		Assertions.assertEquals(ID, rpcContext.getApplicationId());
 	}
 
 	/**
@@ -67,8 +67,8 @@ public class RpcContextTest {
 	 */
 	@Test
 	public void testVersionValue() {
-		RC.setVersion(VERSION);
-		Assertions.assertEquals(VERSION, RC.getVersion());
+		rpcContext.setVersion(VERSION);
+		Assertions.assertEquals(VERSION, rpcContext.getVersion());
 	}
 
 	/**
@@ -76,8 +76,8 @@ public class RpcContextTest {
 	 */
 	@Test
 	public void testClientIdValue() {
-		RC.setClientId(ID);
-		Assertions.assertEquals(ID, RC.getClientId());
+		rpcContext.setClientId(ID);
+		Assertions.assertEquals(ID, rpcContext.getClientId());
 	}
 
 	/**
@@ -85,8 +85,8 @@ public class RpcContextTest {
 	 */
 	@Test
 	public void testChannelNull() {
-		RC.setChannel(null);
-		Assertions.assertNull(RC.getChannel());
+		rpcContext.setChannel(null);
+		Assertions.assertNull(rpcContext.getChannel());
 	}
 
 	/**
@@ -95,8 +95,8 @@ public class RpcContextTest {
 	 */
 	@Test
 	public void testTransactionServiceGroupValue() {
-		RC.setTransactionServiceGroup(TSG);
-		Assertions.assertEquals(TSG, RC.getTransactionServiceGroup());
+		rpcContext.setTransactionServiceGroup(TSG);
+		Assertions.assertEquals(TSG, rpcContext.getTransactionServiceGroup());
 	}
 
 	/**
@@ -104,8 +104,8 @@ public class RpcContextTest {
 	 */
 	@Test
 	public void testClientRoleNull() {
-		RC.setClientRole(null);
-		Assertions.assertNull(RC.getClientRole());
+		rpcContext.setClientRole(null);
+		Assertions.assertNull(rpcContext.getClientRole());
 	}
 
 	/**
@@ -113,8 +113,8 @@ public class RpcContextTest {
 	 */
 	@Test
 	public void testResourceSetsNull() {
-		RC.setResourceSets(null);
-		Assertions.assertNull(RC.getResourceSets());
+		rpcContext.setResourceSets(null);
+		Assertions.assertNull(rpcContext.getResourceSets());
 	}
 
 	/**
@@ -122,10 +122,10 @@ public class RpcContextTest {
 	 */
 	@Test
 	public void testAddResourceNull() {
-		RC.addResource(null);
+		rpcContext.addResource(null);
 		HashSet<String> resourceSet = new HashSet<String>();
 		resourceSet.add(null);
-		Assertions.assertEquals(resourceSet, RC.getResourceSets());
+		Assertions.assertEquals(resourceSet, rpcContext.getResourceSets());
 	}
 
 	/**
@@ -134,9 +134,9 @@ public class RpcContextTest {
 	 */
 	@Test
 	public void testAddResourcesNull() {
-		RC.addResources(null);
-		RC.setResourceSets(null);
-		Assertions.assertNull(RC.getResourceSets());
+		rpcContext.addResources(null);
+		rpcContext.setResourceSets(null);
+		Assertions.assertNull(rpcContext.getResourceSets());
 	}
 
 	/**
@@ -146,8 +146,8 @@ public class RpcContextTest {
 	public void testAddResourcesResourceValue() {
 		HashSet<String> resourceSet = new HashSet<String>();
 		resourceSet.add(RV);
-		RC.addResources(resourceSet);
-		Assertions.assertEquals(resourceSet, RC.getResourceSets());
+		rpcContext.addResources(resourceSet);
+		Assertions.assertEquals(resourceSet, rpcContext.getResourceSets());
 	}
 
 	/**
@@ -160,10 +160,10 @@ public class RpcContextTest {
 		resourceSets.add(RS);
 		HashSet<String> resourceSet = new HashSet<String>();
 		resourceSet.add(RV);
-		RC.addResources(resourceSet);
-		RC.setResourceSets(resourceSets);
-		RC.addResources(resourceSet);
-		Assertions.assertEquals(resourceSets, RC.getResourceSets());
+		rpcContext.addResources(resourceSet);
+		rpcContext.setResourceSets(resourceSets);
+		rpcContext.addResources(resourceSet);
+		Assertions.assertEquals(resourceSets, rpcContext.getResourceSets());
 	}
 
 	/**
@@ -171,16 +171,16 @@ public class RpcContextTest {
 	 */
 	@Test
 	public void testToString() {
-		RC.setApplicationId(null);
-		RC.setTransactionServiceGroup(null);
-		RC.setClientId(null);
-		RC.setChannel(null);
-		RC.setResourceSets(null);
+		rpcContext.setApplicationId(null);
+		rpcContext.setTransactionServiceGroup(null);
+		rpcContext.setClientId(null);
+		rpcContext.setChannel(null);
+		rpcContext.setResourceSets(null);
 		Assertions.assertEquals(
-				"RpcContext{" + "applicationId='" + RC.getApplicationId() + '\'' + ", transactionServiceGroup='"
-						+ RC.getTransactionServiceGroup() + '\'' + ", clientId='" + RC.getClientId() + '\''
-						+ ", channel=" + RC.getChannel() + ", resourceSets=" + RC.getResourceSets() + '}',
-				RC.toString());
+				"RpcContext{" + "applicationId='" + rpcContext.getApplicationId() + '\'' + ", transactionServiceGroup='"
+						+ rpcContext.getTransactionServiceGroup() + '\'' + ", clientId='" + rpcContext.getClientId() + '\''
+						+ ", channel=" + rpcContext.getChannel() + ", resourceSets=" + rpcContext.getResourceSets() + '}',
+						rpcContext.toString());
 	}
 
 }
