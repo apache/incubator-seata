@@ -52,9 +52,15 @@
             <groupId>cglib</groupId>
             <artifactId>cglib</artifactId>
         </dependency>
+
+        <!-- spring  -->
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-aop</artifactId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
@@ -62,8 +68,9 @@
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
-            <artifactId>spring-context</artifactId>
+            <artifactId>spring-aop</artifactId>
         </dependency>
+
     </dependencies>
 
 
