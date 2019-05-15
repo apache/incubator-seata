@@ -29,6 +29,7 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockDO;
 import io.seata.server.lock.AbstractLockManager;
 import io.seata.server.session.BranchSession;
@@ -68,7 +69,7 @@ public class MemoryLockManagerImpl extends AbstractLockManager {
             return true;
         }
         //get locks of branch
-        List<LockDO> locks = collectRowLocks(branchSession);
+        List<RowLock> locks = collectRowLocks(branchSession);
         if(CollectionUtils.isEmpty(locks)){
             //no lock
             return true;
@@ -83,7 +84,7 @@ public class MemoryLockManagerImpl extends AbstractLockManager {
             dbLockMap = LOCK_MAP.get(resourceId);
         }
 
-        for(LockDO lock : locks){
+        for(RowLock lock : locks){
             String tableName = lock.getTableName();
             String pk = lock.getPk();
             ConcurrentHashMap<Integer, Map<String, Long>> tableLockMap = dbLockMap.get(tableName);

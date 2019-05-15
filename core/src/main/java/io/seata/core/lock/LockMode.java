@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.constants;
+package io.seata.core.lock;
 
 /**
  * lock mode
@@ -24,12 +24,17 @@ package io.seata.core.constants;
 public enum LockMode {
 
     /**
-     * store the lock in memory
+     * Local db lock mode.
+     */
+    LOCAL_DB,
+
+    /**
+     * store the lock in memory of server
      */
     MEMORY,
 
     /**
-     * store the lock in db
+     * store the lock in db of server
      */
     DB;
 

@@ -1,25 +1,6 @@
-/*
- *  Copyright 1999-2019 Seata.io Group.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-package io.seata.server.lock;
+package io.seata.core.lock;
 
 import io.seata.common.util.StringUtils;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.lock.RowLock;
-import io.seata.core.store.LockDO;
-import io.seata.server.session.BranchSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,55 +8,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type Abstract lock manager.
+ * The type Abstract locker.
  *
  * @author zhangsen
- * @data 2019 /4/25
+ * @data 2019 -05-15
  */
-public abstract class AbstractLockManager implements LockManager {
+public abstract class AbstractLocker implements Locker {
 
     /**
      * The constant LOGGER.
      */
-    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockManager.class);
-
+    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractLocker.class);
 
     /**
      * The constant LOCK_SPLIT.
      */
     protected static final String LOCK_SPLIT = "^^^";
-
-    /**
-     * Collect row locks list.`
-     *
-     * @param branchSession the branch session
-     * @return the list
-     */
-    protected List<RowLock> collectRowLocks(BranchSession branchSession){
-        List<RowLock> locks = new ArrayList<>();
-        if(branchSession == null || StringUtils.isBlank(branchSession.getLockKey())){
-            return locks;
-        }
-        String xid = branchSession.getXid();
-        String resourceId = branchSession.getResourceId();
-        long transactionId = branchSession.getTransactionId();
-
-        String lockKey = branchSession.getLockKey();
-
-        return collectRowLocks(lockKey, resourceId, xid, transactionId, branchSession.getBranchId());
-    }
-
-    /**
-     * Collect row locks list.
-     *
-     * @param lockKey    the lock key
-     * @param resourceId the resource id
-     * @param xid        the xid
-     * @return the list
-     */
-    protected List<RowLock> collectRowLocks(String lockKey, String resourceId, String xid) {
-        return collectRowLocks(lockKey, resourceId, xid, null, null);
-    }
 
     /**
      * Collect row locks list.
@@ -135,7 +83,7 @@ public abstract class AbstractLockManager implements LockManager {
     }
 
     @Override
-    public void cleanAllLocks() throws TransactionException {
+    public void cleanAllLocks() {
 
     }
 }

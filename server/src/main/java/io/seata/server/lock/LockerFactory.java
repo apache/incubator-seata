@@ -20,6 +20,7 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.lock.LockMode;
+import io.seata.core.lock.Locker;
 import io.seata.core.store.db.DataSourceGenerator;
 
 import javax.sql.DataSource;
@@ -29,26 +30,23 @@ import javax.sql.DataSource;
  *
  * @author sharajava
  */
-public class LockManagerFactory {
+public class LockerFactory {
 
     /**
      * The constant CONFIG.
      */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
-    /**
-     * The constant lockManager.
-     */
-    protected static LockManager lockManager = null;
+    protected static Locker locker = null;
 
     /**
      * Get lock manager.
      *
      * @return the lock manager
      */
-    public static synchronized final LockManager get() {
-        if(lockManager != null){
-            return lockManager;
+    public static synchronized final Locker get() {
+        if(locker != null){
+            return locker;
         }
         String lockMode = CONFIG.getConfig(ConfigurationKeys.LOCK_MODE);
         if(LockMode.DB.name().equalsIgnoreCase(lockMode)){
@@ -56,11 +54,13 @@ public class LockManagerFactory {
             String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
             DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, datasourceType);
             DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
-            lockManager = EnhancedServiceLoader.load(LockManager.class, lockMode, new Object[]{logStoreDataSource});
+            locker = EnhancedServiceLoader.load(Locker.class, lockMode, new Object[]{logStoreDataSource});
+        }else if(LockMode.MEMORY.name().equalsIgnoreCase(lockMode)){
+
         }else {
-            lockManager = EnhancedServiceLoader.load(LockManager.class, lockMode);
+            locker = EnhancedServiceLoader.load(Locker.class, lockMode);
         }
-        return lockManager;
+        return locker;
     }
 
 

@@ -19,14 +19,16 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.core.constants.LockMode;
+import io.seata.core.lock.LockMode;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
 import io.seata.server.lock.AbstractLockManager;
 import io.seata.server.session.BranchSession;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -69,13 +71,13 @@ public class DataBaseLockManagerImpl extends AbstractLockManager {
             return true;
         }
         //get locks of branch
-        List<LockDO> locks = collectRowLocks(branchSession);
+        List<RowLock> locks = collectRowLocks(branchSession);
         if(CollectionUtils.isEmpty(locks)){
             //no lock
             return true;
         }
         try{
-            return lockStore.acquireLock(locks);
+            return lockStore.acquireLock(convertToLockDO(locks));
         }catch(Exception t){
             LOGGER.error("AcquireLock error, branchSession:" + branchSession, t);
             return false;
@@ -91,13 +93,13 @@ public class DataBaseLockManagerImpl extends AbstractLockManager {
     @Override
     public boolean unLock(BranchSession branchSession) throws TransactionException {
         //get locks of branch
-        List<LockDO> locks = collectRowLocks(branchSession);
+        List<RowLock> locks = collectRowLocks(branchSession);
         if(CollectionUtils.isEmpty(locks)){
             //no lock
             return true;
         }
         try{
-            return lockStore.unLock(locks);
+            return lockStore.unLock(convertToLockDO(locks));
         }catch(Exception t){
             LOGGER.error("unLock error, branchSession:" + branchSession, t);
             return false;
@@ -114,13 +116,38 @@ public class DataBaseLockManagerImpl extends AbstractLockManager {
      */
     @Override
     public boolean isLockable(String xid, String resourceId, String lockKey) throws TransactionException {
-        List<LockDO> locks = collectRowLocks(lockKey, resourceId, xid);
+        List<RowLock> locks = collectRowLocks(lockKey, resourceId, xid);
         try{
-            return lockStore.isLockable(locks);
+            return lockStore.isLockable(convertToLockDO(locks));
         }catch(Exception t){
             LOGGER.error("isLockable error, xid:" + xid + ", resourceId:"+resourceId + ", lockKey:"+lockKey, t);
             return false;
         }
+    }
+
+    /**
+     * Convert to lock do list.
+     *
+     * @param locks the locks
+     * @return the list
+     */
+    protected List<LockDO> convertToLockDO(List<RowLock> locks){
+        List<LockDO> lockDOs = new ArrayList<>();
+        if(CollectionUtils.isEmpty(locks)){
+            return lockDOs;
+        }
+        for(RowLock rowLock : locks){
+            LockDO lockDO = new LockDO();
+            lockDO.setBranchId(rowLock.getBranchId());
+            lockDO.setPk(rowLock.getPk());
+            lockDO.setResourceId(rowLock.getResourceId());
+            lockDO.setRowKey(rowLock.getRowKey());
+            lockDO.setXid(rowLock.getXid());
+            lockDO.setTransactionId(rowLock.getTransactionId());
+            lockDO.setTableName(rowLock.getTableName());
+            lockDOs.add(lockDO);
+        }
+        return lockDOs;
     }
 
     /**

@@ -15,6 +15,7 @@
  */
 package io.seata.common.util;
 
+import java.lang.reflect.Array;
 import java.util.Collection;
 
 /**
@@ -62,5 +63,19 @@ public class CollectionUtils {
      */
     public static boolean isNotEmpty(Object[] array){
         return array != null && array.length > 0;
+    }
+
+    /**
+     * To arrays t [ ].
+     *
+     * @param <T> the type parameter
+     * @param col the col
+     * @return the t [ ]
+     */
+    public static <T> T[] toArrays(Collection col){
+        if(isEmpty(col)){
+            return null;
+        }
+        return (T[]) col.toArray();
     }
 }
