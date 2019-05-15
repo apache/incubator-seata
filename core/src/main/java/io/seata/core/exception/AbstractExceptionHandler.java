@@ -44,6 +44,7 @@ public abstract class AbstractExceptionHandler {
 
         /**
          * on Success
+         *
          * @param request
          * @param response
          */
@@ -51,6 +52,7 @@ public abstract class AbstractExceptionHandler {
 
         /**
          * onTransactionException
+         *
          * @param request
          * @param response
          * @param exception
@@ -59,16 +61,17 @@ public abstract class AbstractExceptionHandler {
 
         /**
          * on other exception
+         *
          * @param request
          * @param response
          * @param exception
          */
-        void onError(T request, S response, Exception exception);
+        void onException(T request, S response, Exception exception);
 
     }
 
     public abstract class AbstractCallback<T extends AbstractTransactionRequest, S extends AbstractTransactionResponse>
-            implements Callback<T, S> {
+        implements Callback<T, S> {
 
         @Override
         public void onSuccess(T request, S response) {
@@ -77,14 +80,14 @@ public abstract class AbstractExceptionHandler {
 
         @Override
         public void onTransactionException(T request, S response,
-                                           TransactionException tex) {
+            TransactionException tex) {
             response.setTransactionExceptionCode(tex.getCode());
             response.setResultCode(ResultCode.Failed);
             response.setMsg("TransactionException[" + tex.getMessage() + "]");
         }
 
         @Override
-        public void onError(T request, S response, Exception rex) {
+        public void onException(T request, S response, Exception rex) {
             response.setResultCode(ResultCode.Failed);
             response.setMsg("RuntimeException[" + rex.getMessage() + "]");
         }
@@ -98,14 +101,14 @@ public abstract class AbstractExceptionHandler {
      * @param response the response
      */
     public void exceptionHandleTemplate(Callback callback, AbstractTransactionRequest request,
-                                        AbstractTransactionResponse response) {
+        AbstractTransactionResponse response) {
         try {
             callback.execute(request, response);
             callback.onSuccess(request, response);
         } catch (TransactionException tex) {
             callback.onTransactionException(request, response, tex);
         } catch (RuntimeException rex) {
-            callback.onError(request, response, rex);
+            callback.onException(request, response, rex);
         }
     }
 
