@@ -18,6 +18,7 @@ package io.seata.integration.sofa.rpc;
 import io.seata.core.context.RootContext;
 
 /**
+ * @author Geng Zhang
  */
 public class HelloServiceProxy implements HelloService {
 

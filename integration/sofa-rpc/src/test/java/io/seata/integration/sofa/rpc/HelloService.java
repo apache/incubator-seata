@@ -16,7 +16,7 @@
 package io.seata.integration.sofa.rpc;
 
 /**
- *
+ * @author Geng Zhang
  */
 public interface HelloService {
 
