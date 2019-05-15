@@ -45,7 +45,7 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
      * @return the global session
      * @throws TransactionException the transaction exception
      */
-    GlobalSession findGlobalSession(Long transactionId) throws TransactionException;
+    GlobalSession findGlobalSession(Long transactionId);
 
     /**
      * Update global session status.

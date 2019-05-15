@@ -55,7 +55,7 @@ public class WriteStoreMultithreadTest {
                     }
 
                     @Override
-                    public GlobalSession findGlobalSession(Long transactionId) throws TransactionException {
+                    public GlobalSession findGlobalSession(Long transactionId) {
                         return null;
                     }
 

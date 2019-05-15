@@ -31,7 +31,6 @@ import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.protocol.transaction.RMInboundHandler;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +47,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
     @Override
     public BranchCommitResponse handle(BranchCommitRequest request) {
         BranchCommitResponse response = new BranchCommitResponse();
-        exceptionHandleTemplate(new AbstractExceptionHandler.Callback<BranchCommitRequest, BranchCommitResponse>() {
+        exceptionHandleTemplate(new AbstractCallback<BranchCommitRequest, BranchCommitResponse>() {
             @Override
             public void execute(BranchCommitRequest request, BranchCommitResponse response)
                 throws TransactionException {
@@ -61,7 +60,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
     @Override
     public BranchRollbackResponse handle(BranchRollbackRequest request) {
         BranchRollbackResponse response = new BranchRollbackResponse();
-        exceptionHandleTemplate(new Callback<BranchRollbackRequest, BranchRollbackResponse>() {
+        exceptionHandleTemplate(new AbstractCallback<BranchRollbackRequest, BranchRollbackResponse>() {
             @Override
             public void execute(BranchRollbackRequest request, BranchRollbackResponse response)
                 throws TransactionException {

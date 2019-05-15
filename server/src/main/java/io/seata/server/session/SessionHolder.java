@@ -229,9 +229,8 @@ public class SessionHolder {
      *
      * @param transactionId the transaction id
      * @return the global session
-     * @throws TransactionException the transaction exception
      */
-    public static GlobalSession findGlobalSession(Long transactionId) throws TransactionException {
+    public static GlobalSession findGlobalSession(Long transactionId) {
         return getRootSessionManager().findGlobalSession(transactionId);
     }
 
