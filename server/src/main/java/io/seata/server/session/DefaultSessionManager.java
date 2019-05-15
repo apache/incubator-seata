@@ -63,7 +63,7 @@ public class DefaultSessionManager extends AbstractSessionManager {
     }
 
     @Override
-    public GlobalSession findGlobalSession(String xid) throws TransactionException {
+    public GlobalSession findGlobalSession(String xid)  {
         return sessionMap.get(xid);
     }
 
