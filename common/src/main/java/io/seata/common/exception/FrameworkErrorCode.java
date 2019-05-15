@@ -50,17 +50,17 @@ public enum FrameworkErrorCode {
     /**
      * The Net disconnect.
      */
-    NetDisconnect("0103", "Seata Connection closed", "The network is disconnected. Please check the network connection to the port (client or seata server)."),
+    NetDisconnect("0103", "Seata Connection closed", "The network is disconnected. Please check the network connection to the client or seata server."),
 
     /**
      * The Net dispatch.
      */
-    NetDispatch("0104", "Dispatch error", "Network processing error. Please check the network connection to the port (client or seata server)."),
+    NetDispatch("0104", "Dispatch error", "Network processing error. Please check the network connection to the client or seata server."),
 
     /**
      * The Net on message.
      */
-    NetOnMessage("0105", "On message error", "Network processing error. Please check the network connection to the port (client or seata server)."),
+    NetOnMessage("0105", "On message error", "Network processing error. Please check the network connection to the client or seata server."),
     /**
      * Get channel error framework error code.
      */
