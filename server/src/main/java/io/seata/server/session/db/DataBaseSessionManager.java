@@ -152,7 +152,7 @@ public class DataBaseSessionManager extends AbstractSessionManager implements Se
     }
 
     @Override
-    public GlobalSession findGlobalSession(String xid) throws TransactionException {
+    public GlobalSession findGlobalSession(String xid)  {
         return transactionStoreManager.readSession(xid);
     }
 
