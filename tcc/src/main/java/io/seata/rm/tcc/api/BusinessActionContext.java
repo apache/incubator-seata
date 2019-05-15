@@ -43,12 +43,12 @@ public class BusinessActionContext implements Serializable {
      * Instantiates a new Business action context.
      *
      * @param xid           the xid
-     * @param actionName    the action name
+     * @param branchId      the branch id
      * @param actionContext the action context
      */
-    public BusinessActionContext(String xid, String actionName, Map<String, Object> actionContext) {
+    public BusinessActionContext(String xid, String branchId, Map<String, Object> actionContext) {
         this.xid = xid;
-        this.actionName = actionName;
+        this.branchId = branchId;
         this.setActionContext(actionContext);
     }
 
