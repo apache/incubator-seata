@@ -31,6 +31,7 @@ target/
 /server/*root.*
 /server/.root.*
 /server/sessionStore/
+/sessionStore/
 
 # system ignore
 .DS_Store
