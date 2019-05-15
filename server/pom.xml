@@ -31,28 +31,18 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-all</artifactId>
-            <version>${project.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>io.seata</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!-- for compile of IDE -->
-        <dependency>
-            <groupId>${project.groupId}</groupId>
             <artifactId>seata-core</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-common</artifactId>
+            <artifactId>seata-discovery-all</artifactId>
             <version>${project.version}</version>
-            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-config-all</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
