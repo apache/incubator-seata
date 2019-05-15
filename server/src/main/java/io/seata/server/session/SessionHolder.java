@@ -246,9 +246,8 @@ public class SessionHolder {
      *
      * @param xid the xid
      * @return the global session
-     * @throws TransactionException the transaction exception
      */
-    public static GlobalSession findGlobalSession(String xid) throws TransactionException {
+    public static GlobalSession findGlobalSession(String xid)  {
         return getRootSessionManager().findGlobalSession(xid);
     }
 

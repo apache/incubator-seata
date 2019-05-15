@@ -73,7 +73,7 @@ public class WriteStoreTest {
                 }
 
                 @Override
-                public GlobalSession findGlobalSession(String xid) throws TransactionException {
+                public GlobalSession findGlobalSession(String xid)  {
                     return null;
                 }
 
