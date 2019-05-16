@@ -13,25 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.constants;
+package io.seata.server.lock.memory;
+
+import io.seata.core.lock.Locker;
+import io.seata.server.lock.DefaultLockManager;
+import io.seata.server.session.BranchSession;
 
 /**
- * lock mode
- *
  * @author zhangsen
- * @data 2019 /4/25
+ * @data 2019-05-16
  */
-public enum LockMode {
+public class MemoryLockManagerForTest extends DefaultLockManager {
 
-    /**
-     * store the lock in memory
-     */
-    MEMORY,
-
-    /**
-     * store the lock in db
-     */
-    DB;
-
-
+    @Override
+    protected Locker getLocker(BranchSession branchSession) {
+        return new MemoryLocker(branchSession);
+    }
 }

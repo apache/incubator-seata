@@ -46,9 +46,9 @@ public interface LockManager {
     /**
      * Is lockable boolean.
      *
-     * @param xid the xid
-     * @param resourceId    the resource id
-     * @param lockKey       the lock key
+     * @param xid        the xid
+     * @param resourceId the resource id
+     * @param lockKey    the lock key
      * @return the boolean
      * @throws TransactionException the transaction exception
      */

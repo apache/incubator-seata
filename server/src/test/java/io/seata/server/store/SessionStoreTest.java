@@ -25,8 +25,8 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.lock.LockManager;
-import io.seata.server.lock.LockManagerFactory;
-import io.seata.server.lock.memory.MemoryLockManagerImpl;
+import io.seata.server.lock.LockerFactory;
+import io.seata.server.lock.memory.MemoryLockManagerForTest;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
@@ -66,7 +66,8 @@ public class SessionStoreTest {
         if (rootDataFileHis.exists()) {
             rootDataFileHis.delete();
         }
-        LockManagerFactory.get().cleanAllLocks();
+        LockManager lockManager = new MemoryLockManagerForTest();
+        lockManager.cleanAllLocks();
     }
 
     /**
@@ -90,7 +91,7 @@ public class SessionStoreTest {
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
-        LockManager lockManager = new MemoryLockManagerImpl();
+        LockManager lockManager = new MemoryLockManagerForTest();
 
         String otherXID = XID.generateXID(0L);
 
@@ -164,7 +165,7 @@ public class SessionStoreTest {
         Assertions.assertTrue(branchSession1.lock());
         globalSession.addBranch(branchSession1);
 
-        LockManager lockManager = new MemoryLockManagerImpl();
+        LockManager lockManager = new MemoryLockManagerForTest();
 
         String otherXID = XID.generateXID(0L);
 
@@ -216,7 +217,7 @@ public class SessionStoreTest {
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
-        LockManager lockManager =  new MemoryLockManagerImpl();
+        LockManager lockManager =  new MemoryLockManagerForTest();
 
         String otherXID = XID.generateXID(0L);
 
@@ -273,7 +274,7 @@ public class SessionStoreTest {
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
-        LockManager lockManager =  new MemoryLockManagerImpl();
+        LockManager lockManager =  new MemoryLockManagerForTest();
 
         String otherXID = XID.generateXID(0L);
 
@@ -330,7 +331,7 @@ public class SessionStoreTest {
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
-        LockManager lockManager =  new MemoryLockManagerImpl();
+        LockManager lockManager =  new MemoryLockManagerForTest();
 
         String otherXID = XID.generateXID(0L);
 

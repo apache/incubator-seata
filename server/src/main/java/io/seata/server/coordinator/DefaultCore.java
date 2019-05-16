@@ -23,7 +23,7 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.ResourceManagerInbound;
 import io.seata.server.lock.LockManager;
-import io.seata.server.lock.LockManagerFactory;
+import io.seata.server.lock.LockerFactory;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
@@ -46,7 +46,7 @@ public class DefaultCore implements Core {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCore.class);
 
-    private LockManager lockManager = LockManagerFactory.get();
+    private LockManager lockManager = LockerFactory.getLockManager();
 
     private ResourceManagerInbound resourceManagerInbound;
 

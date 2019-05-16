@@ -15,8 +15,10 @@
  */
 package io.seata.server.lock;
 
+import io.seata.common.XID;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockDO;
 import io.seata.server.session.BranchSession;
 import org.slf4j.Logger;
@@ -33,13 +35,10 @@ import java.util.List;
  */
 public abstract class AbstractLockManager implements LockManager {
 
-    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockManager.class);
-
-
     /**
-     * The constant LOCK_SPLIT.
+     * The constant LOGGER.
      */
-    protected static final String LOCK_SPLIT = "^^^";
+    protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockManager.class);
 
     /**
      * Collect row locks list.`
@@ -47,8 +46,8 @@ public abstract class AbstractLockManager implements LockManager {
      * @param branchSession the branch session
      * @return the list
      */
-    protected List<LockDO> collectRowLocks(BranchSession branchSession){
-        List<LockDO> locks = new ArrayList<>();
+    protected List<RowLock> collectRowLocks(BranchSession branchSession){
+        List<RowLock> locks = new ArrayList<>();
         if(branchSession == null || StringUtils.isBlank(branchSession.getLockKey())){
             return locks;
         }
@@ -61,12 +60,30 @@ public abstract class AbstractLockManager implements LockManager {
         return collectRowLocks(lockKey, resourceId, xid, transactionId, branchSession.getBranchId());
     }
 
-    protected List<LockDO> collectRowLocks(String lockKey, String resourceId, String xid) {
-        return collectRowLocks(lockKey, resourceId, xid, null, null);
+    /**
+     * Collect row locks list.
+     *
+     * @param lockKey    the lock key
+     * @param resourceId the resource id
+     * @param xid        the xid
+     * @return the list
+     */
+    protected List<RowLock> collectRowLocks(String lockKey, String resourceId, String xid) {
+        return collectRowLocks(lockKey, resourceId, xid, XID.getTransactionId(xid), null);
     }
 
-    protected List<LockDO> collectRowLocks(String lockKey, String resourceId, String xid, Long transactionId, Long branchID){
-        List<LockDO> locks = new ArrayList<LockDO>();
+    /**
+     * Collect row locks list.
+     *
+     * @param lockKey       the lock key
+     * @param resourceId    the resource id
+     * @param xid           the xid
+     * @param transactionId the transaction id
+     * @param branchID      the branch id
+     * @return the list
+     */
+    protected List<RowLock> collectRowLocks(String lockKey, String resourceId, String xid, Long transactionId, Long branchID){
+        List<RowLock> locks = new ArrayList<RowLock>();
 
         String[] tableGroupedLockKeys = lockKey.split(";");
         for (String tableGroupedLockKey : tableGroupedLockKeys) {
@@ -85,35 +102,18 @@ public abstract class AbstractLockManager implements LockManager {
             }
             for(String pk : pks){
                 if(StringUtils.isNotBlank(pk)){
-                    LockDO lockDO = new LockDO();
-                    lockDO.setXid(xid);
-                    lockDO.setTransactionId(transactionId);
-                    lockDO.setBranchId(branchID);
-                    lockDO.setTableName(tableName);
-                    lockDO.setPk(pk);
-                    lockDO.setResourceId(resourceId);
-                    lockDO.setRowKey(getRowKey(resourceId, tableName, pk));
-                    locks.add(lockDO);
+                    RowLock rowLock = new RowLock();
+                    rowLock.setXid(xid);
+                    rowLock.setTransactionId(transactionId);
+                    rowLock.setBranchId(branchID);
+                    rowLock.setTableName(tableName);
+                    rowLock.setPk(pk);
+                    rowLock.setResourceId(resourceId);
+                    locks.add(rowLock);
                 }
             }
         }
         return locks;
     }
 
-    /**
-     * Get row key string.
-     *
-     * @param resourceId the resource id
-     * @param tableName  the table name
-     * @param pk         the pk
-     * @return the string
-     */
-    protected String getRowKey(String resourceId, String tableName, String pk){
-        return new StringBuilder().append(resourceId).append(LOCK_SPLIT).append(tableName).append(LOCK_SPLIT).append(pk).toString();
-    }
-
-    @Override
-    public void cleanAllLocks() throws TransactionException {
-
-    }
 }
