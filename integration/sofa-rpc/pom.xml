@@ -21,23 +21,24 @@
         <groupId>io.seata</groupId>
         <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-rm</artifactId>
+    <artifactId>seata-sofa-rpc</artifactId>
     <packaging>jar</packaging>
-    <name>seata-rm ${project.version}</name>
+    <name>seata-sofa-rpc ${project.version}</name>
 
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-core</artifactId>
+            <artifactId>seata-tm</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib</artifactId>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-all</artifactId>
         </dependency>
+        
     </dependencies>
-
 
 </project>
