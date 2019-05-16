@@ -21,6 +21,7 @@ import java.sql.SQLException;
 
 import javax.sql.rowset.serial.SerialBlob;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The type String utils test.
  *
  * @author Otis.z
+ * @author Geng Zhang
  * @date 2019 /2/20
  */
 public class StringUtilsTest {
@@ -83,5 +85,27 @@ public class StringUtilsTest {
         InputStream inputStream = StringUtilsTest.class.getClassLoader().getResourceAsStream("test.txt");
         assertThat(StringUtils.inputStream2String(inputStream))
             .isEqualTo("abc\n" + ":\"klsdf\n" + "2ks,x:\".,-3sd˚ø≤ø¬≥");
+    }
+
+    @Test
+    void testEquals() {
+        Assertions.assertTrue(StringUtils.equals("1", "1"));
+        Assertions.assertFalse(StringUtils.equals("1", "2"));
+        Assertions.assertFalse(StringUtils.equals(null, "1"));
+        Assertions.assertFalse(StringUtils.equals("1", null));
+        Assertions.assertFalse(StringUtils.equals("", null));
+        Assertions.assertFalse(StringUtils.equals(null, ""));
+    }
+
+    @Test
+    void testEqualsIgnoreCase() {
+        Assertions.assertTrue(StringUtils.equalsIgnoreCase("a", "a"));
+        Assertions.assertTrue(StringUtils.equalsIgnoreCase("a", "A"));
+        Assertions.assertTrue(StringUtils.equalsIgnoreCase("A", "a"));
+        Assertions.assertFalse(StringUtils.equalsIgnoreCase("1", "2"));
+        Assertions.assertFalse(StringUtils.equalsIgnoreCase(null, "1"));
+        Assertions.assertFalse(StringUtils.equalsIgnoreCase("1", null));
+        Assertions.assertFalse(StringUtils.equalsIgnoreCase("", null));
+        Assertions.assertFalse(StringUtils.equalsIgnoreCase(null, ""));
     }
 }
