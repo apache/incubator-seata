@@ -19,7 +19,7 @@ import io.seata.common.util.CompressUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
-import io.seata.server.lock.LockManagerFactory;
+import io.seata.server.lock.LockerFactory;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
@@ -269,12 +269,12 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     @Override
     public boolean lock() throws TransactionException {
-        return LockManagerFactory.get().acquireLock(this);
+        return LockerFactory.getLockManager().acquireLock(this);
     }
 
     @Override
     public boolean unlock() throws TransactionException {
-        return LockManagerFactory.get().unLock(this);
+        return LockerFactory.getLockManager().unLock(this);
     }
 
     @Override

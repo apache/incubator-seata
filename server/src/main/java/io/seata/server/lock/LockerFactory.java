@@ -22,8 +22,11 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.lock.LockMode;
 import io.seata.core.lock.Locker;
 import io.seata.core.store.db.DataSourceGenerator;
+import io.seata.server.session.BranchSession;
 
 import javax.sql.DataSource;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The type Lock manager factory.
@@ -37,27 +40,56 @@ public class LockerFactory {
      */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
+    /**
+     * The constant locker.
+     */
     protected static Locker locker = null;
+
+    /**
+     * The constant lockerMap.
+     */
+    protected static Map<String, Locker> lockerMap = new ConcurrentHashMap<>();
+
+    /**
+     * The constant lockManager.
+     */
+    protected static LockManager lockManager = new DefaultLockManager();
 
     /**
      * Get lock manager.
      *
      * @return the lock manager
      */
-    public static synchronized final Locker get() {
-        if(locker != null){
-            return locker;
-        }
+    public static synchronized final LockManager getLockManager() {
+        return lockManager;
+    }
+
+    /**
+     * Get lock manager.
+     *
+     * @param branchSession the branch session
+     * @return the lock manager
+     */
+    public static synchronized final Locker get(BranchSession branchSession) {
         String lockMode = CONFIG.getConfig(ConfigurationKeys.LOCK_MODE);
         if(LockMode.DB.name().equalsIgnoreCase(lockMode)){
+            if(lockerMap.get(lockMode) != null){
+                return lockerMap.get(lockMode);
+            }
             //init dataSource
             String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
             DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, datasourceType);
             DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
             locker = EnhancedServiceLoader.load(Locker.class, lockMode, new Object[]{logStoreDataSource});
+            lockerMap.put(lockMode, locker);
         }else if(LockMode.MEMORY.name().equalsIgnoreCase(lockMode)){
-
+            if(branchSession == null){
+                throw new IllegalArgumentException("branchSession can be null for memory lockMode.");
+            }
+            locker = EnhancedServiceLoader.load(Locker.class, lockMode,
+                    new Class[]{BranchSession.class}, new Object[]{branchSession} );
         }else {
+            //other locker
             locker = EnhancedServiceLoader.load(Locker.class, lockMode);
         }
         return locker;

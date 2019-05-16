@@ -15,6 +15,7 @@
  */
 package io.seata.server.lock;
 
+import io.seata.common.XID;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.RowLock;
@@ -38,12 +39,6 @@ public abstract class AbstractLockManager implements LockManager {
      * The constant LOGGER.
      */
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockManager.class);
-
-
-    /**
-     * The constant LOCK_SPLIT.
-     */
-    protected static final String LOCK_SPLIT = "^^^";
 
     /**
      * Collect row locks list.`
@@ -74,7 +69,7 @@ public abstract class AbstractLockManager implements LockManager {
      * @return the list
      */
     protected List<RowLock> collectRowLocks(String lockKey, String resourceId, String xid) {
-        return collectRowLocks(lockKey, resourceId, xid, null, null);
+        return collectRowLocks(lockKey, resourceId, xid, XID.getTransactionId(xid), null);
     }
 
     /**
@@ -114,7 +109,6 @@ public abstract class AbstractLockManager implements LockManager {
                     rowLock.setTableName(tableName);
                     rowLock.setPk(pk);
                     rowLock.setResourceId(resourceId);
-                    rowLock.setRowKey(getRowKey(resourceId, tableName, pk));
                     locks.add(rowLock);
                 }
             }
@@ -122,20 +116,4 @@ public abstract class AbstractLockManager implements LockManager {
         return locks;
     }
 
-    /**
-     * Get row key string.
-     *
-     * @param resourceId the resource id
-     * @param tableName  the table name
-     * @param pk         the pk
-     * @return the string
-     */
-    protected String getRowKey(String resourceId, String tableName, String pk){
-        return new StringBuilder().append(resourceId).append(LOCK_SPLIT).append(tableName).append(LOCK_SPLIT).append(pk).toString();
-    }
-
-    @Override
-    public void cleanAllLocks() throws TransactionException {
-
-    }
 }

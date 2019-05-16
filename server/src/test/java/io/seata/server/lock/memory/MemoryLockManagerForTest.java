@@ -13,30 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.lock;
+package io.seata.server.lock.memory;
 
-import java.util.List;
+import io.seata.core.lock.Locker;
+import io.seata.server.lock.DefaultLockManager;
+import io.seata.server.session.BranchSession;
 
 /**
- * The type Local db locker.
- *
  * @author zhangsen
- * @data 2019 -05-15
+ * @data 2019-05-16
  */
-public class LocalDBLocker extends AbstractLocker {
+public class MemoryLockManagerForTest extends DefaultLockManager {
 
     @Override
-    public boolean acquireLock(List<RowLock> rowLock) {
-        return false;
-    }
-
-    @Override
-    public boolean unLock(List<RowLock> rowLock) {
-        return false;
-    }
-
-    @Override
-    public boolean isLockable(List<RowLock> rowLock) {
-        return false;
+    protected Locker getLocker(BranchSession branchSession) {
+        return new MemoryLocker(branchSession);
     }
 }

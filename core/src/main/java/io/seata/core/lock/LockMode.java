@@ -24,11 +24,6 @@ package io.seata.core.lock;
 public enum LockMode {
 
     /**
-     * Local db lock mode.
-     */
-    LOCAL_DB,
-
-    /**
      * store the lock in memory of server
      */
     MEMORY,

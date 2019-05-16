@@ -1,6 +1,23 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.core.lock;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.core.store.LockDO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,48 +43,28 @@ public abstract class AbstractLocker implements Locker {
     protected static final String LOCK_SPLIT = "^^^";
 
     /**
-     * Collect row locks list.
+     * Convert to lock do list.
      *
-     * @param lockKey       the lock key
-     * @param resourceId    the resource id
-     * @param xid           the xid
-     * @param transactionId the transaction id
-     * @param branchID      the branch id
+     * @param locks the locks
      * @return the list
      */
-    protected List<RowLock> collectRowLocks(String lockKey, String resourceId, String xid, Long transactionId, Long branchID){
-        List<RowLock> locks = new ArrayList<RowLock>();
-
-        String[] tableGroupedLockKeys = lockKey.split(";");
-        for (String tableGroupedLockKey : tableGroupedLockKeys) {
-            int idx = tableGroupedLockKey.indexOf(":");
-            if (idx < 0) {
-                return locks;
-            }
-            String tableName = tableGroupedLockKey.substring(0, idx);
-            String mergedPKs = tableGroupedLockKey.substring(idx + 1);
-            if(StringUtils.isBlank(mergedPKs)){
-                return locks;
-            }
-            String[] pks = mergedPKs.split(",");
-            if(pks == null || pks.length == 0){
-                return locks;
-            }
-            for(String pk : pks){
-                if(StringUtils.isNotBlank(pk)){
-                    RowLock rowLock = new RowLock();
-                    rowLock.setXid(xid);
-                    rowLock.setTransactionId(transactionId);
-                    rowLock.setBranchId(branchID);
-                    rowLock.setTableName(tableName);
-                    rowLock.setPk(pk);
-                    rowLock.setResourceId(resourceId);
-                    rowLock.setRowKey(getRowKey(resourceId, tableName, pk));
-                    locks.add(rowLock);
-                }
-            }
+    protected List<LockDO> convertToLockDO(List<RowLock> locks){
+        List<LockDO> lockDOs = new ArrayList<>();
+        if(CollectionUtils.isEmpty(locks)){
+            return lockDOs;
         }
-        return locks;
+        for(RowLock rowLock : locks){
+            LockDO lockDO = new LockDO();
+            lockDO.setBranchId(rowLock.getBranchId());
+            lockDO.setPk(rowLock.getPk());
+            lockDO.setResourceId(rowLock.getResourceId());
+            lockDO.setRowKey(getRowKey(rowLock.getResourceId(), rowLock.getTableName(), rowLock.getPk()));
+            lockDO.setXid(rowLock.getXid());
+            lockDO.setTransactionId(rowLock.getTransactionId());
+            lockDO.setTableName(rowLock.getTableName());
+            lockDOs.add(lockDO);
+        }
+        return lockDOs;
     }
 
     /**

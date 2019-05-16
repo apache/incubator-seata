@@ -1,31 +1,36 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.server.lock;
 
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
-import io.seata.core.lock.LockMode;
 import io.seata.core.lock.Locker;
 import io.seata.core.lock.RowLock;
-import io.seata.core.store.db.DataSourceGenerator;
 import io.seata.server.session.BranchSession;
 
-import javax.sql.DataSource;
 import java.util.List;
 
 /**
+ * The type Default lock manager.
+ *
  * @author zhangsen
- * @data 2019-05-15
+ * @data 2019 -05-15
  */
 public class DefaultLockManager extends AbstractLockManager {
-
-    /**
-     * The constant CONFIG.
-     */
-    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     private static Locker locker = null;
 
@@ -42,8 +47,7 @@ public class DefaultLockManager extends AbstractLockManager {
             //no lock
             return true;
         }
-        //TODO
-
+        return getLocker(branchSession).acquireLock(locks);
     }
 
     @Override
@@ -54,7 +58,7 @@ public class DefaultLockManager extends AbstractLockManager {
             return true;
         }
         try{
-            return getLocker().unLock(CollectionUtils.toArrays(locks));
+            return getLocker(branchSession).unLock(locks);
         }catch(Exception t){
             LOGGER.error("unLock error, branchSession:" + branchSession, t);
             return false;
@@ -63,7 +67,13 @@ public class DefaultLockManager extends AbstractLockManager {
 
     @Override
     public boolean isLockable(String xid, String resourceId, String lockKey) throws TransactionException {
-        return false;
+        List<RowLock> locks = collectRowLocks(lockKey, resourceId, xid);
+        try{
+            return getLocker().isLockable(locks);
+        }catch(Exception t){
+            LOGGER.error("isLockable error, xid:" + xid + ", resourceId:"+resourceId + ", lockKey:"+lockKey, t);
+            return false;
+        }
     }
 
     @Override
@@ -71,22 +81,23 @@ public class DefaultLockManager extends AbstractLockManager {
         getLocker().cleanAllLocks();
     }
 
-    public static synchronized final Locker getLocker() {
-        if(locker != null){
-            return locker;
-        }
-        String lockMode = CONFIG.getConfig(ConfigurationKeys.LOCK_MODE);
-        if(LockMode.DB.name().equalsIgnoreCase(lockMode)){
-            //init dataSource
-            String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
-            DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, datasourceType);
-            DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
-            locker = EnhancedServiceLoader.load(Locker.class, lockMode, new Object[]{logStoreDataSource});
-        }else if(LockMode.MEMORY.name().equalsIgnoreCase(lockMode)){
-
-        }else {
-            locker = EnhancedServiceLoader.load(Locker.class, lockMode);
-        }
-        return locker;
+    /**
+     * Gets locker.
+     *
+     * @return the locker
+     */
+    protected Locker getLocker() {
+        return getLocker(null);
     }
+
+    /**
+     * Gets locker.
+     *
+     * @param branchSession the branch session
+     * @return the locker
+     */
+    protected Locker getLocker(BranchSession branchSession) {
+        return LockerFactory.get(branchSession);
+    }
+
 }

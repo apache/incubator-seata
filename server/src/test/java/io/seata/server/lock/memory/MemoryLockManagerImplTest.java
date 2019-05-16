@@ -13,12 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.lock;
+package io.seata.server.lock.memory;
 
 import io.seata.common.XID;
+import io.seata.core.lock.Locker;
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
-import io.seata.server.lock.memory.MemoryLockManagerImpl;
+import io.seata.server.lock.DefaultLockManager;
+import io.seata.server.lock.LockManager;
+import io.seata.server.lock.LockerFactory;
 import io.seata.server.session.BranchSession;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -34,9 +37,9 @@ import java.util.stream.Stream;
  * @author zhimo.xiao @gmail.com
  * @since 2019 /1/23
  */
-public class DefaultLockManagerImplTest {
+public class MemoryLockManagerImplTest {
 
-    private LockManager lockManager = new MemoryLockManagerImpl();
+    private LockManager lockManager = new MemoryLockManagerForTest();;
 
     private static final long transactionId = UUIDGenerator.generateUUID();
 
@@ -53,6 +56,7 @@ public class DefaultLockManagerImplTest {
     @ParameterizedTest
     @MethodSource("branchSessionProvider")
     public void acquireLockTest(BranchSession branchSession) throws Exception {
+
         boolean result = lockManager.acquireLock(branchSession);
         Assertions.assertTrue(result);
         branchSession.unlock();
