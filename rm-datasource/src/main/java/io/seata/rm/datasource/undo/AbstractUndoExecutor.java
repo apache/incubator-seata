@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
+import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
@@ -29,6 +30,7 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
  * The type Abstract undo executor.
  *
  * @author sharajava
+ * @author Geng Zhang
  */
 public abstract class AbstractUndoExecutor {
 
@@ -60,8 +62,12 @@ public abstract class AbstractUndoExecutor {
      * @throws SQLException the sql exception
      */
     public void executeOn(Connection conn) throws SQLException {
-        dataValidation(conn);
 
+        // no need undo if the before data snapshot is equivalent to the after data snapshot.
+        if (DataCompareUtils.isRecordsEquals(sqlUndoLog.getBeforeImage(), sqlUndoLog.getAfterImage())) {
+            return;
+        }
+        dataValidation(conn);
         try {
             String undoSQL = buildUndoSQL();
 
@@ -87,7 +93,7 @@ public abstract class AbstractUndoExecutor {
 
         } catch (Exception ex) {
             if (ex instanceof SQLException) {
-                throw (SQLException)ex;
+                throw (SQLException) ex;
             } else {
                 throw new SQLException(ex);
             }

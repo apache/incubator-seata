@@ -32,6 +32,7 @@ import javax.sql.rowset.serial.SerialBlob;
  * The type String utils.
  *
  * @author jimin.jm @alibaba-inc.com
+ * @author Geng Zhang
  */
 public class StringUtils {
 
@@ -44,7 +45,7 @@ public class StringUtils {
      * @param str the str
      * @return the boolean
      */
-    public static final boolean isNullOrEmpty(String str) {
+    public static boolean isNullOrEmpty(String str) {
         return (str == null) || (str.isEmpty());
     }
 
@@ -222,5 +223,33 @@ public class StringUtils {
             sb.append(";");
         }
         return sb.toString();
+    }
+
+    /**
+     * Equals boolean.
+     *
+     * @param a the a
+     * @param b the b
+     * @return boolean
+     */
+    public static boolean equals(String a, String b) {
+        if (a == null) {
+            return b == null;
+        }
+        return a.equals(b);
+    }
+
+    /**
+     * Equals ignore case boolean.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the boolean
+     */
+    public static boolean equalsIgnoreCase(String a, String b) {
+        if (a == null) {
+            return b == null;
+        }
+        return a.equalsIgnoreCase(b);
     }
 }
