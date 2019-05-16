@@ -128,19 +128,17 @@ public class TableRecords {
      */
     public List<Field> pkRows() {
         final String pkName = getTableMeta().getPkName();
-        return new ArrayList<Field>() {
-            {
-                for (Row row : rows) {
-                    List<Field> fields = row.getFields();
-                    for (Field field : fields) {
-                        if (field.getName().equalsIgnoreCase(pkName)) {
-                            add(field);
-                            break;
-                        }
-                    }
+        List<Field> pkRows = new ArrayList<>();
+        for (Row row : rows) {
+            List<Field> fields = row.getFields();
+            for (Field field : fields) {
+                if (field.getName().equalsIgnoreCase(pkName)) {
+                    pkRows.add(field);
+                    break;
                 }
             }
-        };
+        }
+        return pkRows;
     }
 
     /**
