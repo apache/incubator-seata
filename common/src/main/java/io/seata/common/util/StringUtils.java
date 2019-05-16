@@ -224,32 +224,4 @@ public class StringUtils {
         }
         return sb.toString();
     }
-
-    /**
-     * Equals boolean.
-     *
-     * @param a the a
-     * @param b the b
-     * @return boolean
-     */
-    public static boolean equals(String a, String b) {
-        if (a == null) {
-            return b == null;
-        }
-        return a.equals(b);
-    }
-
-    /**
-     * Equals ignore case boolean.
-     *
-     * @param a the a
-     * @param b the b
-     * @return the boolean
-     */
-    public static boolean equalsIgnoreCase(String a, String b) {
-        if (a == null) {
-            return b == null;
-        }
-        return a.equalsIgnoreCase(b);
-    }
 }
