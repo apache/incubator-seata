@@ -16,7 +16,7 @@
   -->
 
 <configuration>
-	<!-- 控制台输出日志 -->
+	<!-- Console output log -->
 	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
 		<layout class="ch.qos.logback.classic.PatternLayout">
 			<Pattern>%date [SEATA] [%thread] %-5level %logger{80} - %msg%n</Pattern>
@@ -26,4 +26,4 @@
 	<root level="DEBUG">
 		<appender-ref ref="STDOUT" />
 	</root>
-</configuration> 
+</configuration>

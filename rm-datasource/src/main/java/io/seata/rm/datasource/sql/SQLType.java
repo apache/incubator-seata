@@ -91,7 +91,7 @@ public enum SQLType {
      */
     EXPLAIN(16),
     /**
-     * 存储过程
+     * Stored procedure
      */
     PROCEDURE(17),
     /**
@@ -99,7 +99,7 @@ public enum SQLType {
      */
     DESC(18),
     /**
-     * 获取上一个insert id
+     * Select last insert id
      */
     SELECT_LAST_INSERT_ID(19),
     /**
@@ -200,7 +200,7 @@ public enum SQLType {
     CHECK_TABLE(43),
 
     /**
-     * 获取上sql_calc_found_rows 的结果
+     * Select found rows.
      */
     SELECT_FOUND_ROWS(44),
 
