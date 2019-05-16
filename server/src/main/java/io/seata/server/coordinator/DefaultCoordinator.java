@@ -157,6 +157,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             request.setBranchType(branchType);
 
             GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+            if(globalSession == null){
+                return BranchStatus.PhaseTwo_Committed;
+            }
             BranchSession branchSession = globalSession.getBranch(branchId);
 
             BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
@@ -183,6 +186,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             request.setBranchType(branchType);
 
             GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+            if(globalSession == null){
+                return BranchStatus.PhaseTwo_Rollbacked;
+            }
             BranchSession branchSession = globalSession.getBranch(branchId);
 
             BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSyncRequest(resourceId,

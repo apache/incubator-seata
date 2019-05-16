@@ -28,13 +28,12 @@ target/
 /distribution/bin
 /distribution/conf
 /distribution/lib
-server/*root.*
-server/.root.*
-*.data
+/server/*root.*
+/server/.root.*
+/server/sessionStore/
+/sessionStore/
 
 # system ignore
 .DS_Store
 Thumbs.db
 *.orig
-*.class
-data*

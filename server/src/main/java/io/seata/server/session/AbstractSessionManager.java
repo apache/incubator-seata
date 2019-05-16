@@ -80,7 +80,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
 
 
     @Override
-    public GlobalSession findGlobalSession(Long transactionId) throws TransactionException {
+    public GlobalSession findGlobalSession(Long transactionId) {
         return sessionMap.get(transactionId);
     }
 
