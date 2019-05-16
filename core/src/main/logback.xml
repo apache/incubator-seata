@@ -17,7 +17,7 @@
   -->
 <configuration debug="false">
 
-    <!-- 日志输出级别 -->
+    <!-- log output level -->
     <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
