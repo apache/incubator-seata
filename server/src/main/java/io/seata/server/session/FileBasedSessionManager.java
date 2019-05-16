@@ -214,6 +214,7 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
 
     private void setMaxId(long maxRecoverId) {
         long currentId;
+        // will be recover multi-thread later
         while ((currentId = UUIDGenerator.getCurrentUUID()) < maxRecoverId) {
             if (UUIDGenerator.setUUID(currentId, maxRecoverId)) {
                 break;
