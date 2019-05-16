@@ -169,6 +169,11 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-sofa-rpc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-rm</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -435,6 +440,7 @@
                                     <include>io.seata:seata-dubbo-alibaba</include>
                                     <include>io.seata:seata-rm</include>
                                     <include>io.seata:seata-rm-datasource</include>
+                                    <include>io.seata:seata-sofa-rpc</include>
                                     <include>io.seata:seata-spring</include>
                                     <include>io.seata:seata-tcc</include>
                                     <include>io.seata:seata-tm</include>
