@@ -50,7 +50,7 @@ public enum FrameworkErrorCode {
     /**
      * The Net disconnect.
      */
-    NetDisconnect("0103", "Seata Connection closed", "The network is disconnected. Please check the network connection to the client or seata server."),
+    NetDisconnect("0103", "Seata connection closed", "The network is disconnected. Please check the network connection to the client or seata server."),
 
     /**
      * The Net dispatch.
