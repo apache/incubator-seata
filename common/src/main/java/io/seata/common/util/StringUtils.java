@@ -90,32 +90,32 @@ public class StringUtils {
         return false;
     }
 
-    /**
+     /**
      * Equals boolean.
      *
-     * @param str1 the str 1
-     * @param str2 the str 2
-     * @return the boolean
+     * @param a the a
+     * @param b the b
+     * @return boolean
      */
-    public static boolean equals(String str1, String str2){
-        if(isBlank(str1)){
-            return isBlank(str2);
+    public static boolean equals(String a, String b) {
+        if (a == null) {
+            return b == null;
         }
-        return str1.equals(str2);
+        return a.equals(b);
     }
 
     /**
      * Equals ignore case boolean.
      *
-     * @param str1 the str 1
-     * @param str2 the str 2
+     * @param a the a
+     * @param b the b
      * @return the boolean
      */
-    public static boolean equalsIgnoreCase(String str1, String str2){
-        if(isBlank(str1)){
-            return isBlank(str2);
+    public static boolean equalsIgnoreCase(String a, String b) {
+        if (a == null) {
+            return b == null;
         }
-        return str1.equalsIgnoreCase(str2);
+        return a.equalsIgnoreCase(b);
     }
 
     /**
