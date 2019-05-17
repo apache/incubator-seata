@@ -56,6 +56,15 @@ public abstract class AbstractUndoExecutor {
     }
 
     /**
+     * Gets sql undo log.
+     *
+     * @return the sql undo log
+     */
+    public SQLUndoLog getSqlUndoLog() {
+        return sqlUndoLog;
+    }
+
+    /**
      * Execute on.
      *
      * @param conn the conn
