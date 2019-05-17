@@ -23,7 +23,6 @@ import java.util.List;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
@@ -38,6 +37,16 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
  */
 public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
 
+    /**
+     * DELETE FROM a WHERE pk = ?
+     */
+    private static final String DELETE_SQL_TEMPLATE = "DELETE FROM %s WHERE %s = ?";
+
+    /**
+     * Undo Inset.
+     *
+     * @return sql
+     */
     @Override
     protected String buildUndoSQL() {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
@@ -47,17 +56,10 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = afterImageRows.get(0);
-        StringBuffer mainSQL = new StringBuffer(
-            "DELETE FROM " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()));
-        StringBuffer where = new StringBuffer(" WHERE ");
-        boolean first = true;
-        for (Field field : row.getFields()) {
-            if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
-            }
-
-        }
-        return mainSQL.append(where).toString();
+        Field pkField = row.primaryKeys().get(0);
+        return String.format(DELETE_SQL_TEMPLATE,
+                             keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
+                             keywordChecker.checkAndReplace(pkField.getName()));
     }
 
     @Override
