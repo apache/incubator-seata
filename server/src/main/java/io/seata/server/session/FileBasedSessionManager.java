@@ -26,6 +26,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.GlobalStatus;
+import io.seata.server.UUIDGenerator;
 import io.seata.server.store.FileTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
@@ -39,7 +40,7 @@ import io.seata.server.store.TransactionWriteStore;
 public class FileBasedSessionManager extends AbstractSessionManager implements Reloadable {
 
     private static final int READ_SIZE = ConfigurationFactory.getInstance().getInt(
-            ConfigurationKeys.SERVICE_SESSION_RELOAD_READ_SIZE, 100);
+        ConfigurationKeys.SERVICE_SESSION_RELOAD_READ_SIZE, 100);
 
     /**
      * Instantiates a new File based session manager.
@@ -122,13 +123,15 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
     }
 
     private void restore(List<TransactionWriteStore> stores, Map<Long, BranchSession> unhandledBranchSessions) {
+        long maxRecoverId = UUIDGenerator.getCurrentUUID();
         for (TransactionWriteStore store : stores) {
             TransactionStoreManager.LogOperation logOperation = store.getOperate();
             SessionStorable sessionStorable = store.getSessionRequest();
+            maxRecoverId = getMaxId(maxRecoverId, sessionStorable);
             switch (logOperation) {
                 case GLOBAL_ADD:
                 case GLOBAL_UPDATE: {
-                    GlobalSession globalSession = (GlobalSession) sessionStorable;
+                    GlobalSession globalSession = (GlobalSession)sessionStorable;
                     long tid = globalSession.getTransactionId();
                     GlobalSession foundGlobalSession = sessionMap.get(tid);
                     if (foundGlobalSession == null) {
@@ -139,7 +142,7 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
                     break;
                 }
                 case GLOBAL_REMOVE: {
-                    GlobalSession globalSession = (GlobalSession) sessionStorable;
+                    GlobalSession globalSession = (GlobalSession)sessionStorable;
                     long tid = globalSession.getTransactionId();
                     if (sessionMap.remove(tid) == null) {
                         if (LOGGER.isInfoEnabled()) {
@@ -150,7 +153,7 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
                 }
                 case BRANCH_ADD:
                 case BRANCH_UPDATE: {
-                    BranchSession branchSession = (BranchSession) sessionStorable;
+                    BranchSession branchSession = (BranchSession)sessionStorable;
                     long tid = branchSession.getTransactionId();
                     GlobalSession foundGlobalSession = sessionMap.get(tid);
                     if (foundGlobalSession == null) {
@@ -166,15 +169,15 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
                     break;
                 }
                 case BRANCH_REMOVE: {
-                    BranchSession branchSession = (BranchSession) sessionStorable;
+                    BranchSession branchSession = (BranchSession)sessionStorable;
                     long tid = branchSession.getTransactionId();
                     long bid = branchSession.getBranchId();
                     GlobalSession found = sessionMap.get(tid);
                     if (found == null) {
                         if (LOGGER.isInfoEnabled()) {
                             LOGGER.info(
-                                    "GlobalSession To Be Updated (Remove Branch) Does Not Exists [" + bid + "/" + tid
-                                            + "]");
+                                "GlobalSession To Be Updated (Remove Branch) Does Not Exists [" + bid + "/" + tid
+                                    + "]");
                         }
                     } else {
                         BranchSession theBranch = found.getBranch(bid);
@@ -194,7 +197,29 @@ public class FileBasedSessionManager extends AbstractSessionManager implements R
 
             }
         }
+        setMaxId(maxRecoverId);
 
+    }
+
+    private long getMaxId(long maxRecoverId, SessionStorable sessionStorable) {
+        long currentId = 0;
+        if (sessionStorable instanceof GlobalSession) {
+            currentId = ((GlobalSession)sessionStorable).getTransactionId();
+        } else if (sessionStorable instanceof BranchSession) {
+            currentId = ((BranchSession)sessionStorable).getBranchId();
+        }
+
+        return maxRecoverId > currentId ? maxRecoverId : currentId;
+    }
+
+    private void setMaxId(long maxRecoverId) {
+        long currentId;
+        // will be recover multi-thread later
+        while ((currentId = UUIDGenerator.getCurrentUUID()) < maxRecoverId) {
+            if (UUIDGenerator.setUUID(currentId, maxRecoverId)) {
+                break;
+            }
+        }
     }
 
     private void restore(TransactionWriteStore store) {

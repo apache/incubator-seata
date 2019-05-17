@@ -53,6 +53,27 @@ public class UUIDGenerator {
     }
 
     /**
+     * Gets current uuid.
+     *
+     * @return the current uuid
+     */
+    public static long getCurrentUUID() {
+        return UUID.get();
+    }
+
+    /**
+     * Sets uuid.
+     *
+     * @param expect the expect
+     * @param update the update
+     * @return the uuid
+     */
+    public static boolean setUUID(long expect, long update) {
+        return UUID.compareAndSet(expect, update);
+
+    }
+
+    /**
      * Init.
      *
      * @param serverNodeId the server node id

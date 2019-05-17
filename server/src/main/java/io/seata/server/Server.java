@@ -71,6 +71,8 @@ public class Server {
         if (args.length > 1) {
             storeMode = args[1];
         }
+
+        UUIDGenerator.init(1);
         SessionHolder.init(storeMode);
 
         DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
@@ -78,8 +80,6 @@ public class Server {
         rpcServer.setHandler(coordinator);
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
-
-        UUIDGenerator.init(1);
 
         if (args.length > 2) {
             XID.setIpAddress(args[2]);
