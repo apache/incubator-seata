@@ -93,8 +93,8 @@ public class StringUtilsTest {
         Assertions.assertFalse(StringUtils.equals("1", "2"));
         Assertions.assertFalse(StringUtils.equals(null, "1"));
         Assertions.assertFalse(StringUtils.equals("1", null));
-        Assertions.assertTrue(StringUtils.equals("", null));
-        Assertions.assertTrue(StringUtils.equals(null, ""));
+        Assertions.assertFalse(StringUtils.equals("", null));
+        Assertions.assertFalse(StringUtils.equals(null, ""));
     }
 
     @Test
