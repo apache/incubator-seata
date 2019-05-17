@@ -20,7 +20,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-bom</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.5.2</version>
 
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
@@ -111,7 +111,6 @@
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
                 <version>${logback-classic.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>commons-lang</groupId>
@@ -132,13 +131,11 @@
                 <groupId>org.apache.dubbo</groupId>
                 <artifactId>dubbo</artifactId>
                 <version>${dubbo.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>
                 <artifactId>dubbo</artifactId>
                 <version>${dubbo.alibaba.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>cglib</groupId>
@@ -154,7 +151,6 @@
                 <groupId>com.101tec</groupId>
                 <artifactId>zkclient</artifactId>
                 <version>${zkclient.version}</version>
-                <scope>provided</scope>
                 <exclusions>
                     <exclusion>
                         <artifactId>slf4j-log4j12</artifactId>
@@ -170,19 +166,16 @@
                 <groupId>org.apache.curator</groupId>
                 <artifactId>curator-test</artifactId>
                 <version>${curator-test.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>registry-client-all</artifactId>
                 <version>${sofa.registry.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>registry-test</artifactId>
                 <version>${sofa.registry.version}</version>
-                <scope>test</scope>
                 <exclusions>
                     <exclusion>
                         <artifactId>log4j-over-slf4j</artifactId>
@@ -206,91 +199,71 @@
                 <groupId>com.alibaba.spring</groupId>
                 <artifactId>spring-context-support</artifactId>
                 <version>${spring-context-support.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.alibaba.nacos</groupId>
                 <artifactId>nacos-client</artifactId>
                 <version>${nacos-client.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.ctrip.framework.apollo</groupId>
                 <artifactId>apollo-client</artifactId>
                 <version>${apollo-client.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>redis.clients</groupId>
                 <artifactId>jedis</artifactId>
                 <version>${redis-clients.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.netflix.eureka</groupId>
                 <artifactId>eureka-client</artifactId>
                 <version>${eureka-clients.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.netflix.archaius</groupId>
                 <artifactId>archaius-core</artifactId>
                 <version>${archaius-core.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.ecwid.consul</groupId>
                 <artifactId>consul-api</artifactId>
                 <version>${consul-clients.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>io.etcd</groupId>
                 <artifactId>jetcd-core</artifactId>
                 <version>${etcd-client-v3.version}</version>
-                <scope>provided</scope>
-                <exclusions>
-                    <exclusion>
-                        <groupId>com.google.guava</groupId>
-                        <artifactId>guava</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>io.etcd</groupId>
                 <artifactId>jetcd-launcher</artifactId>
                 <version>${etcd-client-v3.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.testcontainers</groupId>
                 <artifactId>testcontainers</artifactId>
                 <version>${testcontainers.version}</version>
-                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>javax.inject</groupId>
                 <artifactId>javax.inject</artifactId>
                 <version>${javax-inject.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${httpclient.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpcore</artifactId>
                 <version>${httpcore.version}</version>
-                <scope>provided</scope>
             </dependency>
             <dependency>
                 <groupId>com.github.ben-manes.caffeine</groupId>
