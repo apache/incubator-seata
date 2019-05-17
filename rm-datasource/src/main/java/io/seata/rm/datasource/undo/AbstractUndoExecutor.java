@@ -17,14 +17,21 @@ package io.seata.rm.datasource.undo;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
+import com.alibaba.fastjson.JSON;
+import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
+import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Abstract undo executor.
@@ -33,6 +40,18 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
  * @author Geng Zhang
  */
 public abstract class AbstractUndoExecutor {
+
+    /**
+     * Logger for AbstractUndoExecutor
+     **/
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractUndoExecutor.class);
+
+    /**
+     * template of check sql
+     * 
+     * TODO support multiple primary key
+     */
+    private static final String CHECK_SQL_TEMPLATE = "SELECT * FROM %s WHERE %S in (?)";
 
     /**
      * The Sql undo log.
@@ -56,6 +75,15 @@ public abstract class AbstractUndoExecutor {
     }
 
     /**
+     * Gets sql undo log.
+     *
+     * @return the sql undo log
+     */
+    public SQLUndoLog getSqlUndoLog() {
+        return sqlUndoLog;
+    }
+
+    /**
      * Execute on.
      *
      * @param conn the conn
@@ -63,11 +91,11 @@ public abstract class AbstractUndoExecutor {
      */
     public void executeOn(Connection conn) throws SQLException {
 
-        // no need undo if the before data snapshot is equivalent to the after data snapshot.
-        if (DataCompareUtils.isRecordsEquals(sqlUndoLog.getBeforeImage(), sqlUndoLog.getAfterImage())) {
+        // when the data validation is not ok 
+        if (!dataValidation(conn)) {
             return;
         }
-        dataValidation(conn);
+        
         try {
             String undoSQL = buildUndoSQL();
 
@@ -136,9 +164,96 @@ public abstract class AbstractUndoExecutor {
      * Data validation.
      *
      * @param conn the conn
+     * @return return true if data validation is ok and need continue
+     * @throws SQLException the sql exception such as has dirty data
+     */
+    protected boolean dataValidation(Connection conn) throws SQLException {
+        
+        TableRecords beforeRecords = sqlUndoLog.getBeforeImage();
+        TableRecords afterRecords = sqlUndoLog.getAfterImage();
+
+        // Compare current data with before data
+        // No need undo if the before data snapshot is equivalent to the after data snapshot.
+        if (DataCompareUtils.isRecordsEquals(beforeRecords, afterRecords)) {
+            return false;
+        }
+
+        // Validate if data is dirty.
+        TableRecords currentRecords = queryCurrentRecords(conn);
+        // compare with current data and after image.
+        if (!DataCompareUtils.isRecordsEquals(afterRecords, currentRecords)) {
+            
+            // If current data is not equivalent to the after data, then compare the current data with the before 
+            // data, too. No need continue to undo if current data is equivalent to the before data snapshot
+            if (DataCompareUtils.isRecordsEquals(beforeRecords, currentRecords)) {
+                return false;
+            } else {
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("check dirty datas failed, old and new data are not equal," +
+                            "tableName:[" + sqlUndoLog.getTableName() + "]," +
+                            "oldRows:[" + JSON.toJSONString(afterRecords.getRows()) + "]," +
+                            "newRows:[" + JSON.toJSONString(currentRecords.getRows()) + "].");
+                }
+                throw new SQLException("Has dirty records when undo.");
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Query current records.
+     *
+     * @param conn the conn
+     * @return the table records
      * @throws SQLException the sql exception
      */
-    protected void dataValidation(Connection conn) throws SQLException {
-        // Validate if data is dirty.
+    protected TableRecords queryCurrentRecords(Connection conn) throws SQLException {
+        TableRecords undoRecords = getUndoRows();
+        TableMeta tableMeta = undoRecords.getTableMeta();
+        String pkName = tableMeta.getPkName();
+        String pkTypeName = tableMeta.getColumnMeta(pkName).getDataTypeName();
+
+        // build check sql
+        String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(), pkName);
+        // parese pk values
+        Object[] pkValues = parsePkValues(getUndoRows());
+        
+        PreparedStatement statement = conn.prepareStatement(checkSQL);
+        statement.setArray(1, conn.createArrayOf(pkTypeName, pkValues));
+
+        ResultSet checkSet = statement.executeQuery();
+
+        TableRecords currentRecords;
+        try {
+            currentRecords = TableRecords.buildRecords(tableMeta, checkSet);
+        } finally {
+            if (checkSet != null) {
+                checkSet.close();
+            }
+        }
+        return currentRecords;
+    }
+
+    /**
+     * Parse pk values object [ ].
+     *
+     * @param records the records
+     * @return the object [ ]
+     */
+    protected Object[] parsePkValues(TableRecords records) {
+        String pkName = records.getTableMeta().getPkName();
+        List<Row> undoRows = records.getRows();
+        Object[] pkValues = new Object[undoRows.size()];
+        for (int i = 0; i < undoRows.size(); i++) {
+            List<Field> fields = undoRows.get(i).getFields();
+            if (fields != null) {
+                for (Field field : fields) {
+                    if (StringUtils.equalsIgnoreCase(pkName, field.getName())) {
+                        pkValues[i] = field.getValue();
+                    }
+                }
+            }
+        }
+        return pkValues;
     }
 }
