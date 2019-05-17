@@ -80,7 +80,7 @@ public class LockerFactory {
             String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
             DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, datasourceType);
             DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
-            locker = EnhancedServiceLoader.load(Locker.class, lockMode, new Object[]{logStoreDataSource});
+            locker = EnhancedServiceLoader.load(Locker.class, lockMode, new Class[]{DataSource.class}, new Object[]{logStoreDataSource});
             lockerMap.put(lockMode, locker);
         }else if(LockMode.MEMORY.name().equalsIgnoreCase(lockMode)){
             if(branchSession == null){
