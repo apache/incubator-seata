@@ -59,6 +59,7 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 /**
  * The type Undo executor test.
@@ -147,9 +148,12 @@ public class UndoExecutorTest {
         SQLUndoLog.setAfterImage(afterImage);
 
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
-
+        MockConnection connection = new MockConnection();
+        AbstractUndoExecutor spy = Mockito.spy(executor);
         try {
-            executor.executeOn(new MockConnection());
+            // skip data validation
+            Mockito.doReturn(true).when(spy).dataValidation(connection);
+            spy.executeOn(connection);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -217,9 +221,12 @@ public class UndoExecutorTest {
         SQLUndoLog.setAfterImage(afterImage);
 
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
-
+        MockConnection connection = new MockConnection();
+        AbstractUndoExecutor spy = Mockito.spy(executor);
         try {
-            executor.executeOn(new MockConnection());
+            // skip data validation
+            Mockito.doReturn(true).when(spy).dataValidation(connection);
+            spy.executeOn(connection);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -287,9 +294,12 @@ public class UndoExecutorTest {
         SQLUndoLog.setBeforeImage(beforeImage);
 
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
-
+        MockConnection connection = new MockConnection();
+        AbstractUndoExecutor spy = Mockito.spy(executor);
         try {
-            executor.executeOn(new MockConnection());
+            // skip data validation
+            Mockito.doReturn(true).when(spy).dataValidation(connection);
+            spy.executeOn(connection);
         } catch (SQLException e) {
             e.printStackTrace();
         }

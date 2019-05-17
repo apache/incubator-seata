@@ -16,59 +16,83 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.rm.datasource.sql.SQLType;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import org.apache.commons.dbcp.BasicDataSource;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author Geng Zhang
  */
-public class AbstractUndoExecutorTest extends BaseExecutorTest{
+public class AbstractUndoExecutorTest extends BaseExecutorTest {
+
+    static BasicDataSource dataSource = null;
+
+    static Connection connection = null;
+
+    static TableMeta tableMeta = null;
+
+    @BeforeAll
+    public static void start() throws SQLException {
+        dataSource = new BasicDataSource();
+        dataSource.setDriverClassName("org.h2.Driver");
+        dataSource.setUrl("jdbc:h2:./db_store/test_undo");
+        dataSource.setUsername("sa");
+        dataSource.setPassword("");
+
+        connection = dataSource.getConnection();
+
+        tableMeta = mockTableMeta();
+    }
+
+    @AfterAll
+    public static void stop() {
+        if (connection != null) {
+            try {
+                connection.close();
+            } catch (SQLException e) {
+            }
+        }
+        if (dataSource != null) {
+            try {
+                dataSource.close();
+            } catch (SQLException e) {
+            }
+        }
+    }
+
+    @BeforeEach
+    private void prepareTable() {
+        execSQL("DROP TABLE table_name");
+        execSQL("CREATE TABLE table_name ( `id` int(8), `name` varchar(64), PRIMARY KEY (`id`))");
+    }
 
     @Test
     public void dataValidationUpdate() throws SQLException {
-        TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPkName()).thenReturn("id");
-        Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
+        execSQL("INSERT INTO table_name(id, name) VALUES (12345,'aaa');");
+        execSQL("INSERT INTO table_name(id, name) VALUES (12346,'aaa');");
 
-        TableRecords beforeImage = new TableRecords();
-        beforeImage.setTableName("table_name");
-        beforeImage.setTableMeta(tableMeta);
+        TableRecords beforeImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
 
-        List<Row> beforeRows = new ArrayList<>();
-        Row row0 = new Row();
-        Field field01 = addField(row0, "id", 1, "12345");
-        Field field02 = addField(row0, "age", 1, "1");
-        beforeRows.add(row0);
-        Row row1 = new Row();
-        Field field11 = addField(row1, "id", 1, "12346");
-        Field field12 = addField(row1, "age", 1, "1");
-        beforeRows.add(row1);
-        beforeImage.setRows(beforeRows);
+        execSQL("update table_name set name = 'xxx' where id in (12345, 12346);");
 
-        TableRecords afterImage = new TableRecords();
-        afterImage.setTableName("table_name");
-        afterImage.setTableMeta(tableMeta);
-
-        List<Row> afterRows = new ArrayList<>();
-        Row row2 = new Row();
-        Field field21 = addField(row2, "id", 1, "12345");
-        Field field22 = addField(row2, "age", 1, "2");
-        afterRows.add(row2);
-        Row row3 = new Row();
-        Field field31 = addField(row3, "id", 1, "12346");
-        Field field32 = addField(row3, "age", 1, "2");
-        afterRows.add(row3);
-        afterImage.setRows(afterRows);
+        TableRecords afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
 
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
         sqlUndoLog.setSqlType(SQLType.UPDATE);
@@ -77,197 +101,95 @@ public class AbstractUndoExecutorTest extends BaseExecutorTest{
         sqlUndoLog.setBeforeImage(beforeImage);
         sqlUndoLog.setAfterImage(afterImage);
 
-        TableRecords currentRecords = new TableRecords();
-        currentRecords.setTableName("table_name");
-        currentRecords.setTableMeta(tableMeta);
+        TestUndoExecutor spy = new TestUndoExecutor(sqlUndoLog, false);
 
-        List<Row> currentRows = new ArrayList<>();
-        Row rows4 = new Row();
-        Field field41 = addField(rows4, "id", 1, "12345");
-        Field field42 = addField(rows4, "age", 1, "2");
-        currentRows.add(rows4);
-        Row row5 = new Row();
-        Field field51 = addField(row5, "id", 1, "12346");
-        Field field52 = addField(row5, "age", 1, "2");
-        currentRows.add(row5);
-        currentRecords.setRows(currentRows);
-
-        TestUndoExecutor executor = new TestUndoExecutor(sqlUndoLog, false);
-        Connection connection = Mockito.mock(Connection.class);
-        TestUndoExecutor spy = Mockito.spy(executor);
-
-        Mockito.doReturn(currentRecords).when(spy).queryCurrentRecords(connection);
-
-        // case1: normal case  before:1 -> after:2 -> current:2 
+        // case1: normal case  before:aaa -> after:xxx -> current:xxx
         Assertions.assertTrue(spy.dataValidation(connection));
 
-        // case2: dirty data   before:1 -> after:2 -> current:3
-        field52.setValue("3");
+        // case2: dirty data   before:aaa -> after:xxx -> current:yyy
+        execSQL("update table_name set name = 'yyy' where id in (12345, 12346);");
         try {
             spy.dataValidation(connection);
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e instanceof SQLException);
-        } finally {
-            field52.setValue("2");
         }
 
-        // case 3: before == current before:1 -> after:2 -> current:1
-        field42.setValue("1");
-        field52.setValue("1");
-        try {
-            Assertions.assertFalse(spy.dataValidation(connection));
-        } finally {
-            field42.setValue("2");
-            field52.setValue("2");
-        }
+        // case 3: before == current before:aaa -> after:xxx -> current:aaa
+        execSQL("update table_name set name = 'aaa' where id in (12345, 12346);");
+        Assertions.assertFalse(spy.dataValidation(connection));
 
-        // case 4: before == after
-        field22.setValue("1");
-        field32.setValue("1");
-        try {
-            Assertions.assertFalse(spy.dataValidation(connection));
-        } finally {
-            field22.setValue("2");
-            field32.setValue("2");
-        }
+        // case 4: before == after   before:aaa -> after:aaa
+        afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
+        sqlUndoLog.setAfterImage(afterImage);
+        Assertions.assertFalse(spy.dataValidation(connection));
     }
 
     @Test
     public void dataValidationInsert() throws SQLException {
-        TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPkName()).thenReturn("id");
-        Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
+        TableRecords beforeImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
 
-        TableRecords beforeImage = new TableRecords();
-        beforeImage.setTableName("table_name");
-        beforeImage.setTableMeta(tableMeta);
+        execSQL("INSERT INTO table_name(id, name) VALUES (12345,'aaa');");
+        execSQL("INSERT INTO table_name(id, name) VALUES (12346,'aaa');");
 
-        List<Row> beforeRows = new ArrayList<>();
-        beforeImage.setRows(beforeRows);
-
-        TableRecords afterImage = new TableRecords();
-        afterImage.setTableName("table_name");
-        afterImage.setTableMeta(tableMeta);
-
-        List<Row> afterRows = new ArrayList<>();
-        Row row2 = new Row();
-        Field field21 = addField(row2, "id", 1, "12345");
-        Field field22 = addField(row2, "age", 1, "2");
-        afterRows.add(row2);
-        Row row3 = new Row();
-        Field field31 = addField(row3, "id", 1, "12346");
-        Field field32 = addField(row3, "age", 1, "2");
-        afterRows.add(row3);
-        afterImage.setRows(afterRows);
+        TableRecords afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
 
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        sqlUndoLog.setSqlType(SQLType.UPDATE);
+        sqlUndoLog.setSqlType(SQLType.INSERT);
         sqlUndoLog.setTableMeta(tableMeta);
         sqlUndoLog.setTableName("table_name");
         sqlUndoLog.setBeforeImage(beforeImage);
         sqlUndoLog.setAfterImage(afterImage);
 
-        TableRecords currentRecords = new TableRecords();
-        currentRecords.setTableName("table_name");
-        currentRecords.setTableMeta(tableMeta);
-
-        List<Row> currentRows = new ArrayList<>();
-        Row rows4 = new Row();
-        Field field41 = addField(rows4, "id", 1, "12345");
-        Field field42 = addField(rows4, "age", 1, "2");
-        currentRows.add(rows4);
-        Row row5 = new Row();
-        Field field51 = addField(row5, "id", 1, "12346");
-        Field field52 = addField(row5, "age", 1, "2");
-        currentRows.add(row5);
-        currentRecords.setRows(currentRows);
-
-        TestUndoExecutor executor = new TestUndoExecutor(sqlUndoLog, false);
-        Connection connection = Mockito.mock(Connection.class);
-        TestUndoExecutor spy = Mockito.spy(executor);
-
-        Mockito.doReturn(currentRecords).when(spy).queryCurrentRecords(connection);
+        TestUndoExecutor spy = new TestUndoExecutor(sqlUndoLog, false);
 
         // case1: normal case  before:0 -> after:2 -> current:2 
         Assertions.assertTrue(spy.dataValidation(connection));
 
         // case2: dirty data   before:0 -> after:2 -> current:2' 
-        field52.setValue("3");
+        execSQL("update table_name set name = 'yyy' where id in (12345, 12346);");
         try {
             Assertions.assertTrue(spy.dataValidation(connection));
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e instanceof SQLException);
-        } finally {
-            field52.setValue("2");
         }
 
-        // case3: before == current   before:0 -> after:2 -> current:2' 
-        currentRows.clear();
+        // case3: before == current   before:0 -> after:2 -> current:0
+        execSQL("delete from table_name where id in (12345, 12346);");
         Assertions.assertFalse(spy.dataValidation(connection));
 
-        // case 4: before == after
-        afterRows.clear();
+        // case 4: before == after   before:0 -> after:0
+        afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
+        sqlUndoLog.setAfterImage(afterImage);
         Assertions.assertFalse(spy.dataValidation(connection));
     }
 
     @Test
     public void dataValidationDelete() throws SQLException {
-        TableMeta tableMeta = Mockito.mock(TableMeta.class);
-        Mockito.when(tableMeta.getPkName()).thenReturn("id");
-        Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
+        execSQL("INSERT INTO table_name(id, name) VALUES (12345,'aaa');");
+        execSQL("INSERT INTO table_name(id, name) VALUES (12346,'aaa');");
 
-        TableRecords beforeImage = new TableRecords();
-        beforeImage.setTableName("table_name");
-        beforeImage.setTableMeta(tableMeta);
+        TableRecords beforeImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
 
-        List<Row> beforeRows = new ArrayList<>();
-        Row row0 = new Row();
-        Field field01 = addField(row0, "id", 1, "12345");
-        Field field02 = addField(row0, "age", 1, "2");
-        beforeRows.add(row0);
-        Row row1 = new Row();
-        Field field11 = addField(row1, "id", 1, "12346");
-        Field field12 = addField(row1, "age", 1, "2");
-        beforeRows.add(row1);
-        beforeImage.setRows(beforeRows);
+        execSQL("delete from table_name where id in (12345, 12346);");
 
-        TableRecords afterImage = new TableRecords();
-        afterImage.setTableName("table_name");
-        afterImage.setTableMeta(tableMeta);
-
-        List<Row> afterRows = new ArrayList<>();
-        afterImage.setRows(afterRows);
+        TableRecords afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
 
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        sqlUndoLog.setSqlType(SQLType.UPDATE);
+        sqlUndoLog.setSqlType(SQLType.INSERT);
         sqlUndoLog.setTableMeta(tableMeta);
         sqlUndoLog.setTableName("table_name");
         sqlUndoLog.setBeforeImage(beforeImage);
         sqlUndoLog.setAfterImage(afterImage);
 
-        TableRecords currentRecords = new TableRecords();
-        currentRecords.setTableName("table_name");
-        currentRecords.setTableMeta(tableMeta);
-
-        List<Row> currentRows = new ArrayList<>();
-        currentRecords.setRows(currentRows);
-
-        TestUndoExecutor executor = new TestUndoExecutor(sqlUndoLog, true);
-        Connection connection = Mockito.mock(Connection.class);
-        TestUndoExecutor spy = Mockito.spy(executor);
-
-        Mockito.doReturn(currentRecords).when(spy).queryCurrentRecords(connection);
+        TestUndoExecutor spy = new TestUndoExecutor(sqlUndoLog, true);
 
         // case1: normal case  before:2 -> after:0 -> current:0
         Assertions.assertTrue(spy.dataValidation(connection));
 
         // case2: dirty data   before:2 -> after:0 -> current:1
-        Row rows4 = new Row();
-        Field field41 = addField(rows4, "id", 1, "12345");
-        Field field42 = addField(rows4, "age", 1, "2");
-        currentRows.add(rows4);
+        execSQL("INSERT INTO table_name(id, name) VALUES (12345,'aaa');");
         try {
             Assertions.assertTrue(spy.dataValidation(connection));
             Assertions.fail();
@@ -276,26 +198,17 @@ public class AbstractUndoExecutorTest extends BaseExecutorTest{
         }
 
         // case3: before == current   before:2 -> after:0 -> current:2
-        Row row5 = new Row();
-        Field field51 = addField(row5, "id", 1, "12346");
-        Field field52 = addField(row5, "age", 1, "2");
-        currentRows.add(row5);
+        execSQL("INSERT INTO table_name(id, name) VALUES (12346,'aaa');");
         Assertions.assertFalse(spy.dataValidation(connection));
 
-        // case 4: before == after  before:2 -> after:2 -> current:2
-        Row row2 = new Row();
-        Field field21 = addField(row2, "id", 1, "12345");
-        Field field22 = addField(row2, "age", 1, "2");
-        afterRows.add(row2);
-        Row row3 = new Row();
-        Field field31 = addField(row3, "id", 1, "12346");
-        Field field32 = addField(row3, "age", 1, "2");
-        afterRows.add(row3);
+        // case 4: before == after  before:2 -> after:2
+        afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
+        sqlUndoLog.setAfterImage(afterImage);
         Assertions.assertFalse(spy.dataValidation(connection));
     }
 
     @Test
-    public void testParsePK(){
+    public void testParsePK() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
         Mockito.when(tableMeta.getPkName()).thenReturn("id");
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
@@ -325,6 +238,62 @@ public class AbstractUndoExecutorTest extends BaseExecutorTest{
         TestUndoExecutor executor = new TestUndoExecutor(sqlUndoLog, true);
         Object[] pkValues = executor.parsePkValues(beforeImage);
         Assertions.assertEquals(2, pkValues.length);
+    }
+
+
+    private static TableMeta mockTableMeta() {
+        TableMeta tableMeta = Mockito.mock(TableMeta.class);
+        Mockito.when(tableMeta.getPkName()).thenReturn("ID");
+        Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
+        ColumnMeta meta0 = Mockito.mock(ColumnMeta.class);
+        Mockito.when(meta0.getDataType()).thenReturn(Types.INTEGER);
+        Mockito.when(meta0.getColumnName()).thenReturn("ID");
+        Mockito.when(tableMeta.getColumnMeta("ID")).thenReturn(meta0);
+        ColumnMeta meta1 = Mockito.mock(ColumnMeta.class);
+        Mockito.when(meta1.getDataType()).thenReturn(Types.VARCHAR);
+        Mockito.when(meta1.getColumnName()).thenReturn("NAME");
+        Mockito.when(tableMeta.getColumnMeta("NAME")).thenReturn(meta1);
+        return tableMeta;
+    }
+
+    private void execSQL(String sql) {
+        Statement s = null;
+        try {
+            s = connection.createStatement();
+            s.execute(sql);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (s != null) {
+                try {
+                    s.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
+    }
+
+    private TableRecords execQuery(TableMeta tableMeta, String sql) throws SQLException {
+        Statement s = null;
+        ResultSet set = null;
+        try {
+            s = connection.createStatement();
+            set = s.executeQuery(sql);
+            return TableRecords.buildRecords(tableMeta, set);
+        } finally {
+            if (set != null) {
+                try {
+                    set.close();
+                } catch (Exception e) {
+                }
+            }
+            if (s != null) {
+                try {
+                    s.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
     }
 }
 

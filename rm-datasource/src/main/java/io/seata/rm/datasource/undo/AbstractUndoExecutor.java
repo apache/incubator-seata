@@ -15,13 +15,6 @@
  */
 package io.seata.rm.datasource.undo;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.alibaba.fastjson.JSON;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.DataCompareUtils;
@@ -32,6 +25,13 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The type Abstract undo executor.
@@ -51,7 +51,7 @@ public abstract class AbstractUndoExecutor {
      * 
      * TODO support multiple primary key
      */
-    private static final String CHECK_SQL_TEMPLATE = "SELECT * FROM %s WHERE %S in (?)";
+    private static final String CHECK_SQL_TEMPLATE = "SELECT * FROM %s WHERE %s in (%s)";
 
     /**
      * The Sql undo log.
@@ -211,24 +211,43 @@ public abstract class AbstractUndoExecutor {
         TableRecords undoRecords = getUndoRows();
         TableMeta tableMeta = undoRecords.getTableMeta();
         String pkName = tableMeta.getPkName();
-        String pkTypeName = tableMeta.getColumnMeta(pkName).getDataTypeName();
+        int pkType = tableMeta.getColumnMeta(pkName).getDataType();
 
-        // build check sql
-        String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(), pkName);
-        // parese pk values
+        // pares pk values
         Object[] pkValues = parsePkValues(getUndoRows());
+        if (pkValues.length == 0) {
+            return TableRecords.empty(tableMeta);
+        }
+        StringBuffer replace = new StringBuffer();
+        for (int i = 0; i < pkValues.length; i++) {
+            replace.append("?,");
+        }
+        // build check sql
+        String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(), pkName,
+                replace.substring(0, replace.length() - 1));
         
-        PreparedStatement statement = conn.prepareStatement(checkSQL);
-        statement.setArray(1, conn.createArrayOf(pkTypeName, pkValues));
-
-        ResultSet checkSet = statement.executeQuery();
-
+        PreparedStatement statement = null;
+        ResultSet checkSet = null;
         TableRecords currentRecords;
         try {
+            statement = conn.prepareStatement(checkSQL);
+            for (int i = 1; i <= pkValues.length; i++) {
+                statement.setObject(i, pkValues[i - 1], pkType);
+            }
+            checkSet = statement.executeQuery();
             currentRecords = TableRecords.buildRecords(tableMeta, checkSet);
         } finally {
             if (checkSet != null) {
-                checkSet.close();
+                try {
+                    checkSet.close();
+                } catch (Exception e) {
+                }
+            }
+            if (statement != null) {
+                try {
+                    statement.close();
+                } catch (Exception e) {
+                }
             }
         }
         return currentRecords;
