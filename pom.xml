@@ -126,6 +126,7 @@
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <license-maven-plugin.version>3.0</license-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
+        <fabric8.maven.plugin.version>4.1.0</fabric8.maven.plugin.version>
     </properties>
     <!--test-->
     <dependencies>
@@ -378,6 +379,11 @@
                 <groupId>com.netflix.eureka</groupId>
                 <artifactId>eureka-client</artifactId>
                 <version>${eureka-clients.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-client</artifactId>
+                <version>${fabric8.maven.plugin.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.ecwid.consul</groupId>
