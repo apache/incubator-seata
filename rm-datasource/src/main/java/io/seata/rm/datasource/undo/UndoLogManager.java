@@ -234,13 +234,12 @@ public final class UndoLogManager {
      *
      * @param xids
      * @param branchIds
-     * @param limitSize
      * @param conn
      */
-    public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, int limitSize, Connection conn) throws SQLException {
+    public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, Connection conn) throws SQLException {
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
-        String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize,limitSize);
+        String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
         PreparedStatement deletePST = null;
         try {
             deletePST = conn.prepareStatement(batchDeleteSql);
@@ -268,15 +267,14 @@ public final class UndoLogManager {
 
     }
 
-    protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize,int limitSize) {
+    protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize) {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("DELETE FROM ")
                 .append(UNDO_LOG_TABLE_NAME)
                 .append(" WHERE  branch_id IN ");
-        appendInParam(xidSize, sqlBuilder);
-        sqlBuilder.append(" AND xid IN ");
         appendInParam(branchIdSize, sqlBuilder);
-        sqlBuilder.append(" LIMIT ").append(limitSize);
+        sqlBuilder.append(" AND xid IN ");
+        appendInParam(xidSize, sqlBuilder);
         return sqlBuilder.toString();
     }
 

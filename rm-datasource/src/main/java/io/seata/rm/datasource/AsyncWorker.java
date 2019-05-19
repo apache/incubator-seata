@@ -178,7 +178,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                     int maxSize = xids.size() > branchIds.size() ? xids.size() : branchIds.size();
                     if(maxSize == UNDOLOG_DELETE_LIMIT_SIZE){
                         try {
-                            UndoLogManager.batchDeleteUndoLog(xids, branchIds, UNDOLOG_DELETE_LIMIT_SIZE, conn);
+                            UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
                         } catch (Exception ex) {
                             LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                         }
@@ -192,7 +192,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                 }
 
                 try {
-                    UndoLogManager.batchDeleteUndoLog(xids, branchIds, UNDOLOG_DELETE_LIMIT_SIZE, conn);
+                    UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
                 }catch (Exception ex) {
                     LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                 }
