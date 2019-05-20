@@ -36,7 +36,6 @@ import io.seata.server.session.Reloadable;
 import io.seata.server.session.SessionManager;
 import io.seata.server.store.ReloadableStore;
 import io.seata.server.UUIDGenerator;
-import io.seata.server.store.FileTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.store.TransactionWriteStore;
