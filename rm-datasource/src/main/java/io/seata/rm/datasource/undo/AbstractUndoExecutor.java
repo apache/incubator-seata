@@ -91,8 +91,7 @@ public abstract class AbstractUndoExecutor {
      */
     public void executeOn(Connection conn) throws SQLException {
 
-        // when the data validation is not ok 
-        if (!dataValidation(conn)) {
+        if (!dataValidationAndGoOn(conn)) {
             return;
         }
         
@@ -167,7 +166,7 @@ public abstract class AbstractUndoExecutor {
      * @return return true if data validation is ok and need continue undo, and return false if no need continue undo.
      * @throws SQLException the sql exception such as has dirty data
      */
-    protected boolean dataValidation(Connection conn) throws SQLException {
+    protected boolean dataValidationAndGoOn(Connection conn) throws SQLException {
         
         TableRecords beforeRecords = sqlUndoLog.getBeforeImage();
         TableRecords afterRecords = sqlUndoLog.getAfterImage();
@@ -175,6 +174,11 @@ public abstract class AbstractUndoExecutor {
         // Compare current data with before data
         // No need undo if the before data snapshot is equivalent to the after data snapshot.
         if (DataCompareUtils.isRecordsEquals(beforeRecords, afterRecords)) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Stop rollback because there is no data change " +
+                        "between the before data snapshot and the after data snapshot.");
+            }
+            // no need continue undo.
             return false;
         }
 
@@ -186,6 +190,11 @@ public abstract class AbstractUndoExecutor {
             // If current data is not equivalent to the after data, then compare the current data with the before 
             // data, too. No need continue to undo if current data is equivalent to the before data snapshot
             if (DataCompareUtils.isRecordsEquals(beforeRecords, currentRecords)) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Stop rollback because there is no data change " +
+                            "between the before data snapshot and the current data snapshot.");
+                }
+                // no need continue undo.
                 return false;
             } else {
                 if (LOGGER.isDebugEnabled()) {

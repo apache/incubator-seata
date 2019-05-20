@@ -151,7 +151,7 @@ public class UndoExecutorTest {
         MockConnection connection = new MockConnection();
         AbstractUndoExecutor spy = Mockito.spy(executor);
         // skip data validation
-        Mockito.doReturn(true).when(spy).dataValidation(connection);
+        Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connection);
         spy.executeOn(connection);
     }
 
@@ -220,7 +220,7 @@ public class UndoExecutorTest {
         MockConnection connection = new MockConnection();
         AbstractUndoExecutor spy = Mockito.spy(executor);
         // skip data validation
-        Mockito.doReturn(true).when(spy).dataValidation(connection);
+        Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connection);
         spy.executeOn(connection);
     }
 
@@ -289,7 +289,7 @@ public class UndoExecutorTest {
         MockConnection connection = new MockConnection();
         AbstractUndoExecutor spy = Mockito.spy(executor);
         // skip data validation
-        Mockito.doReturn(true).when(spy).dataValidation(connection);
+        Mockito.doReturn(true).when(spy).dataValidationAndGoOn(connection);
         spy.executeOn(connection);
     }
 

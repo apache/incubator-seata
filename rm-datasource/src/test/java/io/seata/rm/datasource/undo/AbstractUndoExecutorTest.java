@@ -104,12 +104,12 @@ public class AbstractUndoExecutorTest extends BaseExecutorTest {
         TestUndoExecutor spy = new TestUndoExecutor(sqlUndoLog, false);
 
         // case1: normal case  before:aaa -> after:xxx -> current:xxx
-        Assertions.assertTrue(spy.dataValidation(connection));
+        Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
 
         // case2: dirty data   before:aaa -> after:xxx -> current:yyy
         execSQL("update table_name set name = 'yyy' where id in (12345, 12346);");
         try {
-            spy.dataValidation(connection);
+            spy.dataValidationAndGoOn(connection);
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e instanceof SQLException);
@@ -117,12 +117,12 @@ public class AbstractUndoExecutorTest extends BaseExecutorTest {
 
         // case 3: before == current before:aaa -> after:xxx -> current:aaa
         execSQL("update table_name set name = 'aaa' where id in (12345, 12346);");
-        Assertions.assertFalse(spy.dataValidation(connection));
+        Assertions.assertFalse(spy.dataValidationAndGoOn(connection));
 
         // case 4: before == after   before:aaa -> after:aaa
         afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
         sqlUndoLog.setAfterImage(afterImage);
-        Assertions.assertFalse(spy.dataValidation(connection));
+        Assertions.assertFalse(spy.dataValidationAndGoOn(connection));
     }
 
     @Test
@@ -144,12 +144,12 @@ public class AbstractUndoExecutorTest extends BaseExecutorTest {
         TestUndoExecutor spy = new TestUndoExecutor(sqlUndoLog, false);
 
         // case1: normal case  before:0 -> after:2 -> current:2 
-        Assertions.assertTrue(spy.dataValidation(connection));
+        Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
 
         // case2: dirty data   before:0 -> after:2 -> current:2' 
         execSQL("update table_name set name = 'yyy' where id in (12345, 12346);");
         try {
-            Assertions.assertTrue(spy.dataValidation(connection));
+            Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e instanceof SQLException);
@@ -157,12 +157,12 @@ public class AbstractUndoExecutorTest extends BaseExecutorTest {
 
         // case3: before == current   before:0 -> after:2 -> current:0
         execSQL("delete from table_name where id in (12345, 12346);");
-        Assertions.assertFalse(spy.dataValidation(connection));
+        Assertions.assertFalse(spy.dataValidationAndGoOn(connection));
 
         // case 4: before == after   before:0 -> after:0
         afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
         sqlUndoLog.setAfterImage(afterImage);
-        Assertions.assertFalse(spy.dataValidation(connection));
+        Assertions.assertFalse(spy.dataValidationAndGoOn(connection));
     }
 
     @Test
@@ -186,12 +186,12 @@ public class AbstractUndoExecutorTest extends BaseExecutorTest {
         TestUndoExecutor spy = new TestUndoExecutor(sqlUndoLog, true);
 
         // case1: normal case  before:2 -> after:0 -> current:0
-        Assertions.assertTrue(spy.dataValidation(connection));
+        Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
 
         // case2: dirty data   before:2 -> after:0 -> current:1
         execSQL("INSERT INTO table_name(id, name) VALUES (12345,'aaa');");
         try {
-            Assertions.assertTrue(spy.dataValidation(connection));
+            Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
             Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e instanceof SQLException);
@@ -199,12 +199,12 @@ public class AbstractUndoExecutorTest extends BaseExecutorTest {
 
         // case3: before == current   before:2 -> after:0 -> current:2
         execSQL("INSERT INTO table_name(id, name) VALUES (12346,'aaa');");
-        Assertions.assertFalse(spy.dataValidation(connection));
+        Assertions.assertFalse(spy.dataValidationAndGoOn(connection));
 
         // case 4: before == after  before:2 -> after:2
         afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
         sqlUndoLog.setAfterImage(afterImage);
-        Assertions.assertFalse(spy.dataValidation(connection));
+        Assertions.assertFalse(spy.dataValidationAndGoOn(connection));
     }
 
     @Test
