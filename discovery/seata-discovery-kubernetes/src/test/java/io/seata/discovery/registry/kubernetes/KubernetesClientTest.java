@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import static javax.swing.UIManager.put;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author zhanghao
@@ -82,6 +83,6 @@ public class KubernetesClientTest {
 
         final List<InetSocketAddress> inetSocketAddressList = kubernetesRegistryServic.lookup("my_test_tx_group");
 
-        System.out.println(inetSocketAddressList);
+        assertThat(inetSocketAddressList).isNotEmpty();
     }
 }
