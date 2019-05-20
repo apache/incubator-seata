@@ -41,16 +41,11 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
 
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesRegistryServiceImpl.class);
 
-    private static final String FILE_CONFIG_SPLIT_CHAR = ".";
-    private static final String DEFAULT_SERVICE_NAME = "default";
-    private static final String REGISTRY_TYPE = "kubernetes";
-    private static final String CLUSTER = "serviceName";
-    private static final String FILE_ROOT_REGISTRY = "registry";
 
     private static volatile boolean subscribeListener = false;
     private static volatile KubernetesRegistryServiceImpl instance;
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private static  ConcurrentMap<String, Set<InetSocketAddress>> clusterAddressMap;
+    private static  ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap;
 
     private static volatile KubernetesClient kubernetesClient;
 
@@ -58,12 +53,12 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
     }
 
 
-    static KubernetesRegistryServiceImpl getInstance(){
+    static KubernetesRegistryServiceImpl getInstance(KubernetesClient client){
         if (null == instance) {
             synchronized (KubernetesRegistryServiceImpl.class) {
                 if (null == instance) {
                     clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    kubernetesClient = new DefaultKubernetesClient();
+                    kubernetesClient = client;
                     instance = new KubernetesRegistryServiceImpl();
                 }
             }
@@ -74,12 +69,16 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
 
     @Override
     public void register(InetSocketAddress address) throws Exception {
-        // No registration required
+        if (!subscribeListener){
+            refreshCluster();
+        }
     }
 
     @Override
     public void unregister(InetSocketAddress address) throws Exception {
-
+        if (!subscribeListener){
+            refreshCluster();
+        }
     }
 
     @Override
@@ -100,27 +99,23 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
         if (null == clusterName) {
             return null;
         }
-        if (subscribeListener){
-           return new ArrayList(clusterAddressMap.get(clusterName));
-        }else{
-            Endpoints endpoints = kubernetesClient.endpoints().withName(clusterName).get();
-            List<EndpointSubset> subsets = getSubsetsFromEndpoints(endpoints);
-            List<InetSocketAddress> socketAddresses = new ArrayList<>();
-            if (!subsets.isEmpty()) {
-                subsets.forEach(subset -> {
-                    List<EndpointAddress> addressList = subset.getAddresses();
-                    EndpointPort endpointPort = findEndpointPort(subset);
-                    addressList.forEach(address -> {
-                        final String ip = address.getIp();
-                        final Integer port = endpointPort.getPort();
-                        socketAddresses.add(new InetSocketAddress(ip,port));
-                    });
-                });
-            }
-            return  socketAddresses;
+        if (!clusterAddressMap.containsKey(key)){
+            refreshCluster();
         }
+        return clusterAddressMap.get(clusterName);
     }
 
+
+    public Endpoints getEndpointsByName(String name){
+        final List<Endpoints> endpointsList = kubernetesClient.endpoints().list().getItems();
+        Endpoints endpoints = null;
+        for (Endpoints e : endpointsList) {
+            if (e.getMetadata().getName().equals(name)){
+                endpoints = e;
+            }
+        }
+        return endpoints;
+    }
 
     private List<EndpointSubset> getSubsetsFromEndpoints(Endpoints endpoints) {
         if (endpoints == null) {
@@ -129,7 +124,6 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
         if (endpoints.getSubsets() == null) {
             return new ArrayList<>();
         }
-
         return endpoints.getSubsets();
     }
 
@@ -145,7 +139,7 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
             final List<EndpointSubset> subsets = endpoints.getSubsets();
             final String serviceName = endpoints.getMetadata().getName();
             if (subsets != null && !subsets.isEmpty()){
-                Set<InetSocketAddress> addressSet = new HashSet<>();
+                List<InetSocketAddress> addressSet = new ArrayList();
                 subsets.forEach(endpointSubset -> {
                     final List<EndpointAddress> addresses = endpointSubset.getAddresses();
                     final EndpointPort endpointPort = findEndpointPort(endpointSubset);
@@ -162,8 +156,8 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
     }
 
 
-    private EndpointPort findEndpointPort(EndpointSubset s) {
-        List<EndpointPort> ports = s.getPorts();
+    private EndpointPort findEndpointPort(EndpointSubset subset) {
+        List<EndpointPort> ports = subset.getPorts();
         EndpointPort endpointPort;
         if (ports.size() == 1) {
             endpointPort = ports.get(0);
