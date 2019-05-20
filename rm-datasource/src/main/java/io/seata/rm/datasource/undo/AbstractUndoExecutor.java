@@ -164,7 +164,7 @@ public abstract class AbstractUndoExecutor {
      * Data validation.
      *
      * @param conn the conn
-     * @return return true if data validation is ok and need continue
+     * @return return true if data validation is ok and need continue undo, and return false if no need continue undo.
      * @throws SQLException the sql exception such as has dirty data
      */
     protected boolean dataValidation(Connection conn) throws SQLException {

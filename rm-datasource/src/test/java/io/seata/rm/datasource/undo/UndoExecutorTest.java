@@ -89,7 +89,7 @@ public class UndoExecutorTest {
      * Test update.
      */
     @Test
-    public void testUpdate() {
+    public void testUpdate() throws SQLException {
         SQLUndoLog SQLUndoLog = new SQLUndoLog();
         SQLUndoLog.setTableName("my_test_table");
         SQLUndoLog.setSqlType(SQLType.UPDATE);
@@ -150,20 +150,16 @@ public class UndoExecutorTest {
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
         MockConnection connection = new MockConnection();
         AbstractUndoExecutor spy = Mockito.spy(executor);
-        try {
-            // skip data validation
-            Mockito.doReturn(true).when(spy).dataValidation(connection);
-            spy.executeOn(connection);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        // skip data validation
+        Mockito.doReturn(true).when(spy).dataValidation(connection);
+        spy.executeOn(connection);
     }
 
     /**
      * Test insert.
      */
     @Test
-    public void testInsert() {
+    public void testInsert() throws SQLException {
         SQLUndoLog SQLUndoLog = new SQLUndoLog();
         SQLUndoLog.setTableName("my_test_table");
         SQLUndoLog.setSqlType(SQLType.INSERT);
@@ -223,20 +219,16 @@ public class UndoExecutorTest {
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
         MockConnection connection = new MockConnection();
         AbstractUndoExecutor spy = Mockito.spy(executor);
-        try {
-            // skip data validation
-            Mockito.doReturn(true).when(spy).dataValidation(connection);
-            spy.executeOn(connection);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        // skip data validation
+        Mockito.doReturn(true).when(spy).dataValidation(connection);
+        spy.executeOn(connection);
     }
 
     /**
      * Test delete.
      */
     @Test
-    public void testDelete() {
+    public void testDelete() throws SQLException {
         SQLUndoLog SQLUndoLog = new SQLUndoLog();
         SQLUndoLog.setTableName("my_test_table");
         SQLUndoLog.setSqlType(SQLType.DELETE);
@@ -296,13 +288,9 @@ public class UndoExecutorTest {
         AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, SQLUndoLog);
         MockConnection connection = new MockConnection();
         AbstractUndoExecutor spy = Mockito.spy(executor);
-        try {
-            // skip data validation
-            Mockito.doReturn(true).when(spy).dataValidation(connection);
-            spy.executeOn(connection);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        // skip data validation
+        Mockito.doReturn(true).when(spy).dataValidation(connection);
+        spy.executeOn(connection);
     }
 
     /**
