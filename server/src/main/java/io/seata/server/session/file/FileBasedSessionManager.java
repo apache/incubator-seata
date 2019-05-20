@@ -35,6 +35,8 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.Reloadable;
 import io.seata.server.session.SessionManager;
 import io.seata.server.store.ReloadableStore;
+import io.seata.server.UUIDGenerator;
+import io.seata.server.store.FileTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 import io.seata.server.store.TransactionWriteStore;
@@ -49,7 +51,7 @@ import io.seata.server.store.TransactionWriteStore;
 public class FileBasedSessionManager extends DefaultSessionManager implements Reloadable {
 
     private static final int READ_SIZE = ConfigurationFactory.getInstance().getInt(
-            ConfigurationKeys.SERVICE_SESSION_RELOAD_READ_SIZE, 100);
+        ConfigurationKeys.SERVICE_SESSION_RELOAD_READ_SIZE, 100);
 
     /**
      * Instantiates a new File based session manager.
@@ -137,9 +139,11 @@ public class FileBasedSessionManager extends DefaultSessionManager implements Re
     }
 
     private void restore(List<TransactionWriteStore> stores, Map<Long, BranchSession> unhandledBranchSessions) {
+        long maxRecoverId = UUIDGenerator.getCurrentUUID();
         for (TransactionWriteStore store : stores) {
             TransactionStoreManager.LogOperation logOperation = store.getOperate();
             SessionStorable sessionStorable = store.getSessionRequest();
+            maxRecoverId = getMaxId(maxRecoverId, sessionStorable);
             switch (logOperation) {
                 case GLOBAL_ADD:
                 case GLOBAL_UPDATE: {
@@ -218,7 +222,29 @@ public class FileBasedSessionManager extends DefaultSessionManager implements Re
 
             }
         }
+        setMaxId(maxRecoverId);
 
+    }
+
+    private long getMaxId(long maxRecoverId, SessionStorable sessionStorable) {
+        long currentId = 0;
+        if (sessionStorable instanceof GlobalSession) {
+            currentId = ((GlobalSession)sessionStorable).getTransactionId();
+        } else if (sessionStorable instanceof BranchSession) {
+            currentId = ((BranchSession)sessionStorable).getBranchId();
+        }
+
+        return maxRecoverId > currentId ? maxRecoverId : currentId;
+    }
+
+    private void setMaxId(long maxRecoverId) {
+        long currentId;
+        // will be recover multi-thread later
+        while ((currentId = UUIDGenerator.getCurrentUUID()) < maxRecoverId) {
+            if (UUIDGenerator.setUUID(currentId, maxRecoverId)) {
+                break;
+            }
+        }
     }
 
     private void restore(TransactionWriteStore store) {
