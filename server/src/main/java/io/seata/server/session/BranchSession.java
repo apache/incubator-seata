@@ -64,7 +64,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     private String applicationData;
 
     private ConcurrentHashMap<Map<String, Long>, Set<String>> lockHolder
-        = new ConcurrentHashMap<Map<String, Long>, Set<String>>();
+        = new ConcurrentHashMap<>();
 
     /**
      * Gets application data.
@@ -369,7 +369,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
                 try {
                     this.lockKey = new String(CompressUtil.uncompress(byLockKey));
                 } catch (IOException e) {
-                    throw new RuntimeException("uncompress lockKey error", e);
+                    throw new RuntimeException("decompress lockKey error", e);
                 }
             } else {
                 this.lockKey = new String(byLockKey);
