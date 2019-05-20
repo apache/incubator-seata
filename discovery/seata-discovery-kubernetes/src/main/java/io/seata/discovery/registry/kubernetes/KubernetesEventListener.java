@@ -15,12 +15,6 @@
  */
 package io.seata.discovery.registry.kubernetes;
 
-import io.fabric8.kubernetes.api.model.EndpointSubset;
-import io.fabric8.kubernetes.api.model.Endpoints;
-import io.fabric8.kubernetes.api.model.Service;
-
-import java.util.List;
-
 /**
  * @author @hero_zhanghao
  * @date 2019/5/6 19:13
