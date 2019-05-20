@@ -81,7 +81,7 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ## Maven dependency
 ```xml
-<seata.version>0.5.1</seata.version>
+<seata.version>0.5.2</seata.version>
 
 <dependency>
     <groupId>io.seata</groupId>
