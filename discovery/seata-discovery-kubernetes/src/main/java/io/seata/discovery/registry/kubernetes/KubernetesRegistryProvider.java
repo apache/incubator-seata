@@ -15,6 +15,7 @@
  */
 package io.seata.discovery.registry.kubernetes;
 
+import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.seata.common.loader.LoadLevel;
 import io.seata.discovery.registry.RegistryProvider;
 import io.seata.discovery.registry.RegistryService;
@@ -27,6 +28,6 @@ import io.seata.discovery.registry.RegistryService;
 public class KubernetesRegistryProvider implements RegistryProvider {
     @Override
     public RegistryService provide() {
-        return null;
+        return KubernetesRegistryServiceImpl.getInstance(new DefaultKubernetesClient());
     }
 }

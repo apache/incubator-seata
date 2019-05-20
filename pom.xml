@@ -217,6 +217,13 @@
                 <version>${fabric8.maven.plugin.version}</version>
             </dependency>
             <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-server-mock</artifactId>
+                <version>${fabric8.maven.plugin.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <dependency>
                 <groupId>com.ecwid.consul</groupId>
                 <artifactId>consul-api</artifactId>
                 <version>${consul-clients.version}</version>
