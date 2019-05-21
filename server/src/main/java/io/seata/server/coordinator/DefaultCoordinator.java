@@ -82,22 +82,22 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     /**
      * The Committing retry delay.
      */
-    protected int committingRetryDelay = CONFIG.getInt(ConfigurationKeys.COMMITING_RETRY_DELAY, 1000);
+    protected int committingRetryDelay = CONFIG.getInt(ConfigurationKeys.COMMITING_RETRY_DELAY, 10);
 
     /**
      * The Asyn committing retry delay.
      */
-    protected int asynCommittingRetryDelay = CONFIG.getInt(ConfigurationKeys.ASYN_COMMITING_RETRY_DELAY, 1000);
+    protected int asynCommittingRetryDelay = CONFIG.getInt(ConfigurationKeys.ASYN_COMMITING_RETRY_DELAY, 10);
 
     /**
      * The Rollbacking retry delay.
      */
-    protected int rollbackingRetryDelay = CONFIG.getInt(ConfigurationKeys.ROLLBACKING_RETRY_DELAY, 1000);
+    protected int rollbackingRetryDelay = CONFIG.getInt(ConfigurationKeys.ROLLBACKING_RETRY_DELAY, 10);
 
     /**
      * The Timeout retry delay.
      */
-    protected int timeoutRetryDelay = CONFIG.getInt(ConfigurationKeys.TIMEOUT_RETRY_DELAY, 1000);
+    protected int timeoutRetryDelay = CONFIG.getInt(ConfigurationKeys.TIMEOUT_RETRY_DELAY, 30);
 
     private ServerMessageSender messageSender;
 
@@ -341,9 +341,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception retry rollbacking ... ", e);
             }
-
-            }
-        }, 0, rollbackingRetryDelay, TimeUnit.MILLISECONDS);
+        }, 0, rollbackingRetryDelay, TimeUnit.SECONDS);
 
         retryCommitting.scheduleAtFixedRate(() -> {
             try {
@@ -351,9 +349,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception retry committing ... ", e);
             }
-
-            }
-        }, 0, committingRetryDelay, TimeUnit.MILLISECONDS);
+        }, 0, committingRetryDelay, TimeUnit.SECONDS);
 
         asyncCommitting.scheduleAtFixedRate(() -> {
             try {
@@ -361,9 +357,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception async committing ... ", e);
             }
-
-            }
-        }, 0, asynCommittingRetryDelay, TimeUnit.MILLISECONDS);
+        }, 0, asynCommittingRetryDelay, TimeUnit.SECONDS);
 
         timeoutCheck.scheduleAtFixedRate(() -> {
             try {
@@ -371,9 +365,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception timeout checking ... ", e);
             }
-
-            }
-        }, 0, timeoutRetryDelay, TimeUnit.MILLISECONDS);
+        }, 0, timeoutRetryDelay, TimeUnit.SECONDS);
     }
 
     @Override

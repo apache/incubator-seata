@@ -51,14 +51,14 @@ public class DefaultLockManager extends AbstractLockManager {
     }
 
     @Override
-    public boolean unLock(BranchSession branchSession) throws TransactionException {
+    public boolean releaseLock(BranchSession branchSession) throws TransactionException {
         List<RowLock> locks = collectRowLocks(branchSession);
         if(CollectionUtils.isEmpty(locks)){
             //no lock
             return true;
         }
         try{
-            return getLocker(branchSession).unLock(locks);
+            return getLocker(branchSession).releaseLock(locks);
         }catch(Exception t){
             LOGGER.error("unLock error, branchSession:" + branchSession, t);
             return false;

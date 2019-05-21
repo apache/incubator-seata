@@ -41,7 +41,7 @@ public interface LockManager {
      * @return the boolean
      * @throws TransactionException the transaction exception
      */
-    boolean unLock(BranchSession branchSession) throws TransactionException;
+    boolean releaseLock(BranchSession branchSession) throws TransactionException;
 
     /**
      * Is lockable boolean.

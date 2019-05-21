@@ -218,7 +218,7 @@ public class DataBaseLockManagerImplTest {
             rs.close();
 
             //un lock
-            Assertions.assertTrue(lockManager.unLock(branchSession));
+            Assertions.assertTrue(lockManager.releaseLock(branchSession));
 
             rs = conn.createStatement().executeQuery(sql);
             if(rs.next()){

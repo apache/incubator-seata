@@ -122,7 +122,7 @@ public class MemoryLocker extends AbstractLocker {
     }
 
     @Override
-    public boolean unLock(List<RowLock> rowLock) {
+    public boolean releaseLock(List<RowLock> rowLock) {
         ConcurrentHashMap<Map<String, Long>, Set<String>> lockHolder = branchSession.getLockHolder();
         if (lockHolder == null || lockHolder.size() == 0) {
             return true;

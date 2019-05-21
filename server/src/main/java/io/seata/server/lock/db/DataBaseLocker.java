@@ -67,7 +67,7 @@ public class DataBaseLocker extends AbstractLocker {
     }
 
     @Override
-    public boolean unLock(List<RowLock> locks) {
+    public boolean releaseLock(List<RowLock> locks) {
         if(CollectionUtils.isEmpty(locks)){
             //no lock
             return true;

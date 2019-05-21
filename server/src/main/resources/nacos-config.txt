@@ -35,8 +35,8 @@ store.db.branch.table=branch_table
 store.db.query-limit=100
 lock.mode=memory
 lock.db.lock-table=lock_table
-recovery.committing-retry-delay = 1000
-recovery.asyn-committing-retry-delay = 1000
-recovery.rollbacking-retry-delay = 1000
-recovery.timeout-retry-delay = 1000
+recovery.committing-retry-delay = 10
+recovery.asyn-committing-retry-delay = 10
+recovery.rollbacking-retry-delay = 10
+recovery.timeout-retry-delay = 10
 
