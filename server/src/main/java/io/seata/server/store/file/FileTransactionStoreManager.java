@@ -279,7 +279,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                 ++retry;
                 try {
                     Thread.sleep(SHUTDOWN_CHECK_INTERNAL);
-                } catch (InterruptedException exx) {
+                } catch (InterruptedException ignore) {
                 }
             }
             if (retry >= MAX_SHUTDOWN_RETRY) {
@@ -327,7 +327,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             raf = new RandomAccessFile(file, "r");
             return currentOffset < raf.length();
 
-        } catch (IOException exx) {
+        } catch (IOException ignore) {
         } finally {
             closeFile(raf);
         }
@@ -534,7 +534,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                     StoreRequest storeRequest = storeRequests.poll(MAX_WAIT_TIME_MILLS, TimeUnit.MILLISECONDS);
                     handleStoreRequest(storeRequest);
                 } catch (Exception exx) {
-                    LOGGER.error("write file error", exx.getMessage());
+                    LOGGER.error("write file error: {}", exx.getMessage(), exx);
                 }
             }
             handleRestRequest();
