@@ -15,6 +15,7 @@
  */
 package io.seata.config;
 
+import java.time.Duration;
 import java.util.List;
 
 /**
@@ -79,6 +80,33 @@ public interface Configuration<T> {
      * @return the long
      */
     long getLong(String dataId);
+
+    /**
+     * Gets duration.
+     *
+     * @param dataId
+     * @return the duration
+     */
+    Duration getDuration(String dataId);
+
+    /**
+     * Gets duration.
+     *
+     * @param   dataId
+     * @param   defaultValue
+     * @return  the duration
+     */
+    Duration getDuration(String dataId, Duration defaultValue);
+
+    /**
+     * Gets duration.
+     *
+     * @param   dataId
+     * @param   defaultValue
+     * @param   timeoutMills
+     * @return  he duration
+     */
+    Duration getDuration(String dataId, Duration defaultValue, long timeoutMills);
 
     /**
      * Gets boolean.
