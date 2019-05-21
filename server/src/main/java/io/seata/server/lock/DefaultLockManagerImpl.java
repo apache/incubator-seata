@@ -46,7 +46,7 @@ public class DefaultLockManagerImpl implements LockManager {
         ConcurrentHashMap<String/* tableName */,
             ConcurrentHashMap<Integer/* bucketId */,
                 Map<String/* pk */, Long/* transactionId */>>>>
-        LOCK_MAP = new ConcurrentHashMap<String, ConcurrentHashMap<String, ConcurrentHashMap<Integer, Map<String, Long>>>>();
+        LOCK_MAP = new ConcurrentHashMap<>();
 
     @Override
     public boolean acquireLock(BranchSession branchSession) throws TransactionException {
@@ -55,7 +55,7 @@ public class DefaultLockManagerImpl implements LockManager {
         ConcurrentHashMap<String, ConcurrentHashMap<Integer, Map<String, Long>>> dbLockMap = LOCK_MAP.get(resourceId);
         if (dbLockMap == null) {
             LOCK_MAP.putIfAbsent(resourceId,
-                new ConcurrentHashMap<String, ConcurrentHashMap<Integer, Map<String, Long>>>());
+                new ConcurrentHashMap<>());
             dbLockMap = LOCK_MAP.get(resourceId);
         }
         ConcurrentHashMap<Map<String, Long>, Set<String>> bucketHolder = branchSession.getLockHolder();
@@ -76,7 +76,7 @@ public class DefaultLockManagerImpl implements LockManager {
             String mergedPKs = tableGroupedLockKey.substring(idx + 1);
             ConcurrentHashMap<Integer, Map<String, Long>> tableLockMap = dbLockMap.get(tableName);
             if (tableLockMap == null) {
-                dbLockMap.putIfAbsent(tableName, new ConcurrentHashMap<Integer, Map<String, Long>>());
+                dbLockMap.putIfAbsent(tableName, new ConcurrentHashMap<>());
                 tableLockMap = dbLockMap.get(tableName);
             }
             String[] pks = mergedPKs.split(",");
@@ -84,7 +84,7 @@ public class DefaultLockManagerImpl implements LockManager {
                 int bucketId = pk.hashCode() % BUCKET_PER_TABLE;
                 Map<String, Long> bucketLockMap = tableLockMap.get(bucketId);
                 if (bucketLockMap == null) {
-                    tableLockMap.putIfAbsent(bucketId, new HashMap<String, Long>());
+                    tableLockMap.putIfAbsent(bucketId, new HashMap<>());
                     bucketLockMap = tableLockMap.get(bucketId);
                 }
                 synchronized (bucketLockMap) {
@@ -99,7 +99,7 @@ public class DefaultLockManagerImpl implements LockManager {
                         }
                         keysInHolder.add(pk);
 
-                    } else if (lockingTransactionId.longValue() == transactionId) {
+                    } else if (lockingTransactionId == transactionId) {
                         // Locked by me
                         continue;
                     } else {
@@ -140,7 +140,7 @@ public class DefaultLockManagerImpl implements LockManager {
                     continue;
                 }
                 Long lockingTransactionId = bucketLockMap.get(pk);
-                if (lockingTransactionId == null || lockingTransactionId.longValue() == transactionId) {
+                if (lockingTransactionId == null || lockingTransactionId == transactionId) {
                     // Locked by me
                     continue;
                 } else {
@@ -174,7 +174,7 @@ public class DefaultLockManagerImpl implements LockManager {
                     if (v == null) {
                         continue;
                     }
-                    if (v.longValue() == branchSession.getTransactionId()) {
+                    if (v == branchSession.getTransactionId()) {
                         bucket.remove(key);
                     }
                 }

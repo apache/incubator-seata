@@ -121,7 +121,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
         initFile(fullFileName);
         fileWriteExecutor =
                 new ThreadPoolExecutor(MAX_THREAD_WRITE, MAX_THREAD_WRITE, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
-                        new LinkedBlockingQueue<Runnable>(),
+                    new LinkedBlockingQueue<>(),
                         new NamedThreadFactory("fileTransactionStore", MAX_THREAD_WRITE, true));
         writeDataFileRunnable = new WriteDataFileRunnable();
         fileWriteExecutor.submit(writeDataFileRunnable);
@@ -257,7 +257,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                 ++retry;
                 try {
                     Thread.sleep(SHUTDOWN_CHECK_INTERNAL);
-                } catch (InterruptedException exx) {
+                } catch (InterruptedException ignore) {
                 }
             }
             if (retry >= MAX_SHUTDOWN_RETRY) {
@@ -305,7 +305,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
             raf = new RandomAccessFile(file, "r");
             return currentOffset < raf.length();
 
-        } catch (IOException exx) {
+        } catch (IOException ignore) {
         } finally {
             closeFile(raf);
         }
@@ -512,7 +512,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                     StoreRequest storeRequest = storeRequests.poll(MAX_WAIT_TIME_MILLS, TimeUnit.MILLISECONDS);
                     handleStoreRequest(storeRequest);
                 } catch (Exception exx) {
-                    LOGGER.error("write file error", exx.getMessage());
+                    LOGGER.error("write file error: {}", exx.getMessage(), exx);
                 }
             }
             handleRestRequest();

@@ -165,9 +165,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
                 branchSession.getClientId(), request);
             return response.getBranchStatus();
-        } catch (IOException e) {
-            throw new TransactionException(FailedToSendBranchCommitRequest, branchId + "/" + xid, e);
-        } catch (TimeoutException e) {
+        } catch (IOException | TimeoutException e) {
             throw new TransactionException(FailedToSendBranchCommitRequest, branchId + "/" + xid, e);
         }
     }
@@ -194,9 +192,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSyncRequest(resourceId,
                 branchSession.getClientId(), request);
             return response.getBranchStatus();
-        } catch (IOException e) {
-            throw new TransactionException(FailedToSendBranchRollbackRequest, branchId + "/" + xid, e);
-        } catch (TimeoutException e) {
+        } catch (IOException | TimeoutException e) {
             throw new TransactionException(FailedToSendBranchRollbackRequest, branchId + "/" + xid, e);
         }
     }
@@ -288,53 +284,40 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
      * Init.
      */
     public void init() {
-        retryRollbacking.scheduleAtFixedRate(new Runnable() {
-
-            @Override
-            public void run() {
-                try {
-                    handleRetryRollbacking();
-                } catch (Exception e) {
-                    LOGGER.info("Exception retry rollbacking ... ", e);
-                }
-
+        retryRollbacking.scheduleAtFixedRate(() -> {
+            try {
+                handleRetryRollbacking();
+            } catch (Exception e) {
+                LOGGER.info("Exception retry rollbacking ... ", e);
             }
+
         }, 0, 5, TimeUnit.MILLISECONDS);
 
-        retryCommitting.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    handleRetryCommitting();
-                } catch (Exception e) {
-                    LOGGER.info("Exception retry committing ... ", e);
-                }
-
+        retryCommitting.scheduleAtFixedRate(() -> {
+            try {
+                handleRetryCommitting();
+            } catch (Exception e) {
+                LOGGER.info("Exception retry committing ... ", e);
             }
+
         }, 0, 5, TimeUnit.MILLISECONDS);
 
-        asyncCommitting.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    handleAsyncCommitting();
-                } catch (Exception e) {
-                    LOGGER.info("Exception async committing ... ", e);
-                }
-
+        asyncCommitting.scheduleAtFixedRate(() -> {
+            try {
+                handleAsyncCommitting();
+            } catch (Exception e) {
+                LOGGER.info("Exception async committing ... ", e);
             }
+
         }, 0, 10, TimeUnit.MILLISECONDS);
 
-        timeoutCheck.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    timeoutCheck();
-                } catch (Exception e) {
-                    LOGGER.info("Exception timeout checking ... ", e);
-                }
-
+        timeoutCheck.scheduleAtFixedRate(() -> {
+            try {
+                timeoutCheck();
+            } catch (Exception e) {
+                LOGGER.info("Exception timeout checking ... ", e);
             }
+
         }, 0, 2, TimeUnit.MILLISECONDS);
     }
 
@@ -369,14 +352,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             retryCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             asyncCommitting.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
             timeoutCheck.awaitTermination(TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException ingore) {
+        } catch (InterruptedException ignore) {
 
         }
-        // 2. sencond close netty flow
+        // 2. second close netty flow
         if (messageSender instanceof RpcServer){
             ((RpcServer) messageSender).destroy();
         }
-        // 3. last destory SessionHolder
+        // 3. last destroy SessionHolder
         SessionHolder.destory();
     }
 }
