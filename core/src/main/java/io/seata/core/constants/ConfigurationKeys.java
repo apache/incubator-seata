@@ -92,4 +92,14 @@ public class ConfigurationKeys {
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_PREFIX + "report.retry.count";
+
+    /**
+     * The constant TRANSACTION_PREFIX.
+     */
+    public static final String TRANSACTION_PREFIX = "transaction.";
+
+    /**
+     * The constant RM_DATASOURCE_UNOD_VALIDATION.
+     */
+    public static final String TRANSACTION_UNOD_DATA_VALIDATION = TRANSACTION_PREFIX + "undo.data.validation";
 }
