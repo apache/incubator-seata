@@ -25,16 +25,8 @@ import io.seata.server.store.TransactionStoreManager.LogOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 /**
  * The type Abstract session manager.
- *
- * @author sharajava
  */
 public abstract class AbstractSessionManager implements SessionManager, SessionLifecycleListener {
 
@@ -42,11 +34,6 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
      * The constant LOGGER.
      */
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractSessionManager.class);
-
-    /**
-     * The Session map.
-     */
-    protected Map<Long, GlobalSession> sessionMap = new ConcurrentHashMap<>();
 
     /**
      * The Transaction store manager.
@@ -57,6 +44,12 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
      * The Name.
      */
     protected String name;
+
+    /**
+     * Instantiates a new Abstract session manager.
+     */
+    public AbstractSessionManager() {
+    }
 
     /**
      * Instantiates a new Abstract session manager.
@@ -73,15 +66,6 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_ADD);
         }
         writeSession(LogOperation.GLOBAL_ADD, session);
-        sessionMap.put(session.getTransactionId(), session);
-
-    }
-
-
-
-    @Override
-    public GlobalSession findGlobalSession(Long transactionId) {
-        return sessionMap.get(transactionId);
     }
 
     @Override
@@ -98,8 +82,6 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + session + "] " + LogOperation.GLOBAL_REMOVE);
         }
         writeSession(LogOperation.GLOBAL_REMOVE, session);
-        sessionMap.remove(session.getTransactionId());
-
     }
 
     @Override
@@ -126,23 +108,6 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
             LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.GLOBAL_ADD);
         }
         writeSession(LogOperation.BRANCH_REMOVE, branchSession);
-
-    }
-
-    @Override
-    public Collection<GlobalSession> allSessions() {
-        return sessionMap.values();
-    }
-
-    @Override
-    public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
-        List<GlobalSession> found = new ArrayList<>();
-        for (GlobalSession globalSession : sessionMap.values()) {
-                if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
-                    found.add(globalSession);
-                }
-        }
-        return found;
     }
 
     @Override
@@ -174,18 +139,29 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     @Override
     public void onClose(GlobalSession globalSession) throws TransactionException {
         globalSession.setActive(false);
-
     }
 
     @Override
     public void onEnd(GlobalSession globalSession) throws TransactionException {
         removeGlobalSession(globalSession);
-
     }
 
-    private void writeSession(LogOperation logOperation, SessionStorable sessionStorable) throws TransactionException{
+    private void writeSession(LogOperation logOperation, SessionStorable sessionStorable) throws TransactionException {
         if (!transactionStoreManager.writeSession(logOperation, sessionStorable)) {
             throw new TransactionException(TransactionExceptionCode.FailedWriteSession);
         }
+    }
+
+    @Override
+    public void destroy() {
+    }
+
+    /**
+     * Sets transaction store manager.
+     *
+     * @param transactionStoreManager the transaction store manager
+     */
+    public void setTransactionStoreManager(TransactionStoreManager transactionStoreManager) {
+        this.transactionStoreManager = transactionStoreManager;
     }
 }

@@ -82,7 +82,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>0.5.2</revision>
+        <revision>0.6.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -107,6 +107,7 @@
         <mockito-core.version>2.23.4</mockito-core.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <junit-platform-launcher.version>1.4.2</junit-platform-launcher.version>
+
     </properties>
 
     <!--test-->
@@ -142,7 +143,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <dependencyManagement>
         <dependencies>
             <dependency>

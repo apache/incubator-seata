@@ -35,7 +35,6 @@ import java.util.Map;
 public class StringUtils {
 
     private StringUtils() {
-
     }
 
     /**
@@ -52,7 +51,7 @@ public class StringUtils {
      * Is blank string ?
      *
      * @param str the str
-     * @return boolean
+     * @return boolean boolean
      */
     public static boolean isBlank(String str) {
         int length;
@@ -72,7 +71,7 @@ public class StringUtils {
      * Is Not blank string ?
      *
      * @param str the str
-     * @return boolean
+     * @return boolean boolean
      */
     public static boolean isNotBlank(String str) {
         int length;
@@ -87,6 +86,34 @@ public class StringUtils {
             }
         }
         return false;
+    }
+
+     /**
+     * Equals boolean.
+     *
+     * @param a the a
+     * @param b the b
+     * @return boolean
+     */
+    public static boolean equals(String a, String b) {
+        if (a == null) {
+            return b == null;
+        }
+        return a.equals(b);
+    }
+
+    /**
+     * Equals ignore case boolean.
+     *
+     * @param a the a
+     * @param b the b
+     * @return the boolean
+     */
+    public static boolean equalsIgnoreCase(String a, String b) {
+        if (a == null) {
+            return b == null;
+        }
+        return a.equalsIgnoreCase(b);
     }
 
     /**
@@ -137,7 +164,7 @@ public class StringUtils {
      * Object.toString()
      *
      * @param obj the obj
-     * @return string
+     * @return string string
      */
     public static String toString(Object obj){
         if (obj == null){
@@ -193,33 +220,5 @@ public class StringUtils {
             sb.append(";");
         }
         return sb.toString();
-    }
-
-    /**
-     * Equals boolean.
-     *
-     * @param a the a
-     * @param b the b
-     * @return boolean
-     */
-    public static boolean equals(String a, String b) {
-        if (a == null) {
-            return b == null;
-        }
-        return a.equals(b);
-    }
-
-    /**
-     * Equals ignore case boolean.
-     *
-     * @param a the a
-     * @param b the b
-     * @return the boolean
-     */
-    public static boolean equalsIgnoreCase(String a, String b) {
-        if (a == null) {
-            return b == null;
-        }
-        return a.equalsIgnoreCase(b);
     }
 }

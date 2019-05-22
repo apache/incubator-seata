@@ -15,6 +15,10 @@
  */
 package io.seata.server.store;
 
+import io.seata.core.model.GlobalStatus;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
+
 import java.util.List;
 
 /**
@@ -33,27 +37,28 @@ public interface TransactionStoreManager {
      */
     boolean writeSession(LogOperation logOperation, SessionStorable session);
 
+
+    /**
+     * Read global session global session.
+     *
+     * @param xid the xid
+     * @return the global session
+     */
+    GlobalSession readSession(String xid);
+
+    /**
+     * Read session by status list.
+     *
+     * @param sessionCondition the session condition
+     * @return the list
+     */
+    List<GlobalSession> readSession(SessionCondition sessionCondition);
+
     /**
      * Shutdown.
      */
     void shutdown();
 
-    /**
-     * Read write store from file list.
-     *
-     * @param readSize  the read size
-     * @param isHistory the is history
-     * @return the list
-     */
-    List<TransactionWriteStore> readWriteStoreFromFile(int readSize, boolean isHistory);
-
-    /**
-     * Has remaining boolean.
-     *
-     * @param isHistory the is history
-     * @return the boolean
-     */
-    boolean hasRemaining(boolean isHistory);
 
     /**
      * The enum Log operation.

@@ -1,0 +1,2 @@
+io.seata.server.store.db.DatabaseTransactionStoreManager
+io.seata.server.store.file.FileTransactionStoreManager

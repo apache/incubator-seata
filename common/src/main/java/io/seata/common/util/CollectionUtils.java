@@ -15,7 +15,9 @@
  */
 package io.seata.common.util;
 
+import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * The type Collection utils.
@@ -45,6 +47,49 @@ public class CollectionUtils {
         return col != null && col.size() > 0;
     }
 
+    /**
+     * Is empty boolean.
+     *
+     * @param array the array
+     * @return the boolean
+     */
+    public static boolean isEmpty(Object[] array){
+        return !isNotEmpty(array);
+    }
+
+    /**
+     * Is not empty boolean.
+     *
+     * @param array the array
+     * @return the boolean
+     */
+    public static boolean isNotEmpty(Object[] array){
+        return array != null && array.length > 0;
+    }
+
+    /**
+     * To string string.
+     *
+     * @param col the col
+     * @return the string
+     */
+    public static String toString(Collection col){
+        if(isEmpty(col)){
+            return "";
+        }
+        StringBuffer sb = new StringBuffer();
+        sb.append("[");
+        Iterator it = col.iterator();
+        while (it.hasNext()){
+            Object obj = it.next();
+            sb.append(StringUtils.toString(obj));
+            sb.append(",");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append("]");
+        return sb.toString();
+    }
+  
     /**
      * Is size equals boolean.
      *

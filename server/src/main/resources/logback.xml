@@ -41,7 +41,7 @@
         </encoder>
     </appender>
 
-    <logger name="io.seata.server.store.FileTransactionStoreManager" additivity="false">
+    <logger name="io.seata.server.store.file.FileTransactionStoreManager" additivity="false">
         <level value="INFO"/>
         <appender-ref ref="seata-default"/>
     </logger>

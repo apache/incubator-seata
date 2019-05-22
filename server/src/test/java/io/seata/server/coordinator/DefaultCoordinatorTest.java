@@ -31,6 +31,8 @@ import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -76,7 +78,7 @@ public class DefaultCoordinatorTest {
         SessionHolder.init(null);
         serverMessageSender = new MockServerMessageSender();
         defaultCoordinator = new DefaultCoordinator(serverMessageSender);
-        defaultCoordinator.init();
+//        defaultCoordinator.init();
     }
 
     @ParameterizedTest
@@ -103,6 +105,23 @@ public class DefaultCoordinatorTest {
             Assertions.fail(e.getMessage());
         }
         Assertions.assertEquals(result, BranchStatus.PhaseTwo_Rollbacked);
+    }
+
+
+    @Test
+    public void test_handleRetryRollbacking() throws TransactionException, InterruptedException {
+
+        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
+        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
+
+        Thread.sleep(100);
+
+        defaultCoordinator.timeoutCheck();
+        defaultCoordinator.handleRetryRollbacking();
+
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        Assertions.assertNull(globalSession);
+
     }
 
     @AfterAll
