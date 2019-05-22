@@ -29,3 +29,4 @@ store.db.driver_class=com.mysql.jdbc.Driver
 store.db.url=jdbc:mysql://localhost:3306/seata_demo
 store.db.user=user
 store.db.password=password
+transaction.undo.data.validation=true

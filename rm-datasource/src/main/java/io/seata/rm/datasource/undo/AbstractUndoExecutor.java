@@ -17,6 +17,8 @@ package io.seata.rm.datasource.undo;
 
 import com.alibaba.fastjson.JSON;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -52,6 +54,12 @@ public abstract class AbstractUndoExecutor {
      * TODO support multiple primary key
      */
     private static final String CHECK_SQL_TEMPLATE = "SELECT * FROM %s WHERE %s in (%s)";
+
+    /**
+     * Switch of undo data validation
+     */
+    public static final boolean IS_UNDO_DATA_VALIDATION_ENABLE = ConfigurationFactory.getInstance()
+            .getBoolean(ConfigurationKeys.TRANSACTION_UNOD_DATA_VALIDATION, true);
 
     /**
      * The Sql undo log.
@@ -91,7 +99,7 @@ public abstract class AbstractUndoExecutor {
      */
     public void executeOn(Connection conn) throws SQLException {
 
-        if (!dataValidationAndGoOn(conn)) {
+        if (IS_UNDO_DATA_VALIDATION_ENABLE && !dataValidationAndGoOn(conn)) {
             return;
         }
         
