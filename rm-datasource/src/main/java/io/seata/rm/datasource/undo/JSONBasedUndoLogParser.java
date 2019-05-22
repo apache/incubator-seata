@@ -17,6 +17,7 @@ package io.seata.rm.datasource.undo;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import io.seata.common.Constants;
 
 /**
  * The type Json based undo log parser.
@@ -26,12 +27,14 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 public class JSONBasedUndoLogParser implements UndoLogParser {
 
     @Override
-    public String encode(BranchUndoLog branchUndoLog) {
-        return JSON.toJSONString(branchUndoLog, SerializerFeature.WriteDateUseDateFormat);
+    public byte[] encode(BranchUndoLog branchUndoLog) {
+        String json = JSON.toJSONString(branchUndoLog, SerializerFeature.WriteDateUseDateFormat);
+        return json.getBytes(Constants.DEFAULT_CHARSET);
     }
 
     @Override
-    public BranchUndoLog decode(String text) {
+    public BranchUndoLog decode(byte[] bytes) {
+        String text = new String(bytes, Constants.DEFAULT_CHARSET);
         return JSON.parseObject(text, BranchUndoLog.class);
     }
 }
