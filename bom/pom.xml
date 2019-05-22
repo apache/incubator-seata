@@ -30,29 +30,28 @@
     <properties>
         <spring.version>4.3.23.RELEASE</spring.version>
         <netty4.version>4.1.24.Final</netty4.version>
-        <junit.version>4.12</junit.version>
         <dubbo.version>2.7.0</dubbo.version>
         <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
         <sofa.rpc.version>5.5.3</sofa.rpc.version>
-        <fastjson.version>1.2.48</fastjson.version>
+        <fastjson.version>1.2.58</fastjson.version>
         <config.version>1.2.1</config.version>
         <slf4j-api.version>1.7.22</slf4j-api.version>
         <logback-classic.version>1.2.0</logback-classic.version>
         <commons-lang.version>2.6</commons-lang.version>
         <commons-pool2.version>2.4.2</commons-pool2.version>
         <commons-pool.version>1.6</commons-pool.version>
+        <commons-dbcp.version>1.3</commons-dbcp.version>
         <cglib.version>3.1</cglib.version>
         <aopalliance.version>1.0</aopalliance.version>
         <zkclient.version>0.10</zkclient.version>
         <curator-test.version>2.9.1</curator-test.version>
         <spring-context-support.version>1.0.2</spring-context-support.version>
-        <testng.version>6.4</testng.version>
         <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
         <apollo-client.version>1.1.0</apollo-client.version>
         <redis-clients.version>2.9.0</redis-clients.version>
         <eureka-clients.version>1.9.5</eureka-clients.version>
         <consul-clients.version>1.4.2</consul-clients.version>
-        <nacos-client.version>0.9.1</nacos-client.version>
+        <nacos-client.version>1.0.0</nacos-client.version>
         <etcd-client-v3.version>0.3.0</etcd-client-v3.version>
         <testcontainers.version>1.11.2</testcontainers.version>
         <guava.version>27.0.1-jre</guava.version>
@@ -63,7 +62,6 @@
         <httpcore.version>4.4.11</httpcore.version>
         <druid.version>1.1.12</druid.version>
         <caffeine.version>2.7.0</caffeine.version>
-        <commons-dbcp.version>1.3</commons-dbcp.version>
         <h2.version>1.4.181</h2.version>
     </properties>
 
