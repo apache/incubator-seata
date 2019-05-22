@@ -28,7 +28,6 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.common.util.DurationUtil;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -69,12 +68,6 @@ import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchCommitRequest;
 import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchRollbackRequest;
 
@@ -110,15 +103,27 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
      */
     protected int timeoutRetryDelay = CONFIG.getInt(ConfigurationKeys.TIMEOUT_RETRY_DELAY, 30);
 
-    private ServerMessageSender messageSender;
-
-    private Core core = CoreFactory.get();
-
     private static final int ALWAYS_RETRY_BOUNDARY = 0;
 
     private static final Duration MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.SERVICE_PREFIX + "max.commit.retry.timeout", DurationUtil.DEFAULT_DURATION, 100);
 
     private static final Duration MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.SERVICE_PREFIX + "max.rollback.retry.timeout", DurationUtil.DEFAULT_DURATION, 100);
+
+    private ScheduledThreadPoolExecutor retryRollbacking = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("RetryRollbacking", 1));
+
+    private ScheduledThreadPoolExecutor retryCommitting = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("RetryCommitting", 1));
+
+    private ScheduledThreadPoolExecutor asyncCommitting = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("AsyncCommitting", 1));
+
+    private ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
+            new NamedThreadFactory("TxTimeoutCheck", 1));
+
+    private ServerMessageSender messageSender;
+
+    private Core core = CoreFactory.get();
 
     /**
      * Instantiates a new Default coordinator.
@@ -345,7 +350,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         return false;
     }
 
-    private void handleAsyncCommitting() {
     /**
      * Handle async committing.
      */
@@ -366,17 +370,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         }
     }
 
-    private ScheduledThreadPoolExecutor retryRollbacking = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("RetryRollbacking", 1));
-
-    private ScheduledThreadPoolExecutor retryCommitting = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("RetryCommitting", 1));
-
-    private ScheduledThreadPoolExecutor asyncCommitting = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("AsyncCommitting", 1));
-
-    private ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("TxTimeoutCheck", 1));
 
     /**
      * Init.
