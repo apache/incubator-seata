@@ -189,4 +189,14 @@ public class ConfigurationKeys {
      */
     public static final String  TIMEOUT_RETRY_DELAY = "recovery.timeout-retry-delay";
 
+
+    /**
+     * The constant TRANSACTION_PREFIX.
+     */
+    public static final String TRANSACTION_PREFIX = "transaction.";
+
+    /**
+     * The constant RM_DATASOURCE_UNOD_VALIDATION.
+     */
+    public static final String TRANSACTION_UNOD_DATA_VALIDATION = TRANSACTION_PREFIX + "undo.data.validation";
 }

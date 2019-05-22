@@ -41,4 +41,5 @@ recovery.committing-retry-delay = 10
 recovery.asyn-committing-retry-delay = 10
 recovery.rollbacking-retry-delay = 10
 recovery.timeout-retry-delay = 10
+transaction.undo.data.validation=true
 
