@@ -15,19 +15,18 @@
  */
 package io.seata.common.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.sql.Blob;
 
 import javax.sql.rowset.serial.SerialBlob;
 
-import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.Constants;
 import io.seata.common.exception.ShouldNeverHappenException;
 
 /**
  * The type Blob utils.
  *
  * @author jimin.jm @alibaba-inc.com
+ * @author Geng Zhang
  */
 public class BlobUtils {
 
@@ -47,7 +46,7 @@ public class BlobUtils {
         }
 
         try {
-            return new SerialBlob(str.getBytes());
+            return new SerialBlob(str.getBytes(Constants.DEFAULT_CHARSET));
         } catch (Exception e) {
             throw new ShouldNeverHappenException(e);
         }
@@ -65,26 +64,43 @@ public class BlobUtils {
         }
 
         try {
-            return new String(blob.getBytes((long)1, (int)blob.length()));
+            return new String(blob.getBytes((long) 1, (int) blob.length()), Constants.DEFAULT_CHARSET);
         } catch (Exception e) {
             throw new ShouldNeverHappenException(e);
         }
     }
 
     /**
-     * Input stream 2 string string.
+     * Byte array to blob
      *
-     * @param is the is
-     * @return the string
+     * @param bytes the byte array
+     * @return the blob
      */
-    public static String inputStream2String(InputStream is) {
+    public static Blob bytes2Blob(byte[] bytes) {
+        if (bytes == null) {
+            return null;
+        }
+
         try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            int i = -1;
-            while ((i = is.read()) != -1) {
-                baos.write(i);
-            }
-            return baos.toString();
+            return new SerialBlob(bytes);
+        } catch (Exception e) {
+            throw new ShouldNeverHappenException(e);
+        }
+    }
+
+    /**
+     * Blob to byte array.
+     *
+     * @param blob the blob
+     * @return the byte array
+     */
+    public static byte[] blob2Bytes(Blob blob) {
+        if (blob == null) {
+            return null;
+        }
+
+        try {
+            return blob.getBytes((long) 1, (int) blob.length());
         } catch (Exception e) {
             throw new ShouldNeverHappenException(e);
         }

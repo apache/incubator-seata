@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import io.seata.common.Constants;
 import io.seata.common.executor.Initialize;
 import io.seata.common.util.CollectionUtils;
 
@@ -259,7 +260,7 @@ public class EnhancedServiceLoader {
                 java.net.URL url = urls.nextElement();
                 BufferedReader reader = null;
                 try {
-                    reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
+                    reader = new BufferedReader(new InputStreamReader(url.openStream(), Constants.DEFAULT_CHARSET));
                     String line = null;
                     while ((line = reader.readLine()) != null) {
                         final int ci = line.indexOf('#');

@@ -18,7 +18,6 @@ package io.seata.rm.datasource.undo;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
-import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
@@ -161,7 +160,7 @@ public final class UndoLogManager {
                     }
 
                     Blob b = rs.getBlob("rollback_info");
-                    String rollbackInfo = StringUtils.blob2string(b);
+                    String rollbackInfo = BlobUtils.blob2string(b);
                     BranchUndoLog branchUndoLog = UndoLogParserFactory.getInstance().decode(rollbackInfo);
 
                     for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {

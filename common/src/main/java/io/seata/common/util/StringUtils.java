@@ -15,18 +15,16 @@
  */
 package io.seata.common.util;
 
+import io.seata.common.Constants;
+import io.seata.common.exception.ShouldNeverHappenException;
+
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
-
-import javax.sql.rowset.serial.SerialBlob;
 
 /**
  * The type String utils.
@@ -92,48 +90,47 @@ public class StringUtils {
     }
 
     /**
-     * String 2 blob blob.
-     *
-     * @param str the str
-     * @return the blob
-     * @throws SQLException the sql exception
-     */
-    public static Blob string2blob(String str) throws SQLException {
-        if (str == null) {
-            return null;
-        }
-        return new SerialBlob(str.getBytes());
-    }
-
-    /**
-     * Blob 2 string string.
-     *
-     * @param blob the blob
-     * @return the string
-     * @throws SQLException the sql exception
-     */
-    public static String blob2string(Blob blob) throws SQLException {
-        if (blob == null) {
-            return null;
-        }
-
-        return new String(blob.getBytes((long)1, (int)blob.length()));
-    }
-
-    /**
      * Input stream 2 string string.
      *
      * @param is the is
      * @return the string
-     * @throws IOException the io exception
      */
-    public static String inputStream2String(InputStream is) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int i = -1;
-        while ((i = is.read()) != -1) {
-            baos.write(i);
+    public static String inputStream2String(InputStream is) {
+        if (is == null) {
+            return null;
         }
-        return baos.toString();
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            int i = -1;
+            while ((i = is.read()) != -1) {
+                baos.write(i);
+            }
+            return baos.toString(Constants.DEFAULT_CHARSET_NAME);
+        } catch (Exception e) {
+            throw new ShouldNeverHappenException(e);
+        }
+    }
+
+    /**
+     * Input stream to byte array
+     *
+     * @param is the is
+     * @return the byte array
+     */
+    public static byte[] inputStream2Bytes(InputStream is) {
+        if (is == null) {
+            return null;
+        }
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            int i = -1;
+            while ((i = is.read()) != -1) {
+                baos.write(i);
+            }
+            return baos.toByteArray();
+        } catch (Exception e) {
+            throw new ShouldNeverHappenException(e);
+        }
     }
 
     /**
