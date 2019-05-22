@@ -15,8 +15,19 @@
  */
 package io.seata.server.coordinator;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.common.util.DurationUtil;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -102,6 +113,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     private ServerMessageSender messageSender;
 
     private Core core = CoreFactory.get();
+
+    private static final int ALWAYS_RETRY_BOUNDARY = 0;
+
+    private static final Duration MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.SERVICE_PREFIX + "max.commit.retry.timeout", DurationUtil.DEFAULT_DURATION, 100);
+
+    private static final Duration MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.SERVICE_PREFIX + "max.rollback.retry.timeout", DurationUtil.DEFAULT_DURATION, 100);
 
     /**
      * Instantiates a new Default coordinator.
@@ -269,8 +286,17 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         if(CollectionUtils.isEmpty(rollbackingSessions)){
             return;
         }
+        long now = System.currentTimeMillis();
         for (GlobalSession rollbackingSession : rollbackingSessions) {
             try {
+                if(isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT.toMillis(), rollbackingSession.getBeginTime())){
+                    /**
+                     * Prevent thread safety issues
+                     */
+                    SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(rollbackingSession);
+                    LOGGER.error("GlobalSession rollback retry timeout [{}]", rollbackingSession.getTransactionId());
+                    continue;
+                }
                 rollbackingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalRollback(rollbackingSession, true);
             } catch (TransactionException ex) {
@@ -288,8 +314,17 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         if(CollectionUtils.isEmpty(committingSessions)){
            return;
         }
+        long now = System.currentTimeMillis();
         for (GlobalSession committingSession : committingSessions) {
             try {
+                if(isRetryTimeout(now, MAX_COMMIT_RETRY_TIMEOUT.toMillis(), committingSession.getBeginTime())){
+                    /**
+                     * Prevent thread safety issues
+                     */
+                    SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(committingSession);
+                    LOGGER.error("GlobalSession commit retry timeout [{}]", committingSession.getTransactionId());
+                    continue;
+                }
                 committingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(committingSession, true);
             } catch (TransactionException ex) {
@@ -299,6 +334,18 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         }
     }
 
+    private boolean isRetryTimeout(long now, long timeout, long beginTime){
+        /**
+         * Start timing when the session begin
+         */
+        if(timeout >= ALWAYS_RETRY_BOUNDARY &&
+                now - beginTime > timeout){
+            return true;
+        }
+        return false;
+    }
+
+    private void handleAsyncCommitting() {
     /**
      * Handle async committing.
      */
