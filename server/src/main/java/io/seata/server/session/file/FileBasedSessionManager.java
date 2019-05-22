@@ -148,6 +148,7 @@ public class FileBasedSessionManager extends DefaultSessionManager implements Re
                 case GLOBAL_UPDATE: {
                     GlobalSession globalSession = (GlobalSession) sessionStorable;
                     if(globalSession.getTransactionId() == 0){
+                        LOGGER.error("Restore globalSession from file failed, the transactionId is zero , xid:" + globalSession.getXid());
                         break;
                     }
                     GlobalSession foundGlobalSession = sessionMap.get(globalSession.getXid());
@@ -161,6 +162,7 @@ public class FileBasedSessionManager extends DefaultSessionManager implements Re
                 case GLOBAL_REMOVE: {
                     GlobalSession globalSession = (GlobalSession) sessionStorable;
                     if(globalSession.getTransactionId() == 0){
+                        LOGGER.error("Restore globalSession from file failed, the transactionId is zero , xid:" + globalSession.getXid());
                         break;
                     }
                     if (sessionMap.remove(globalSession.getXid()) == null) {
@@ -174,6 +176,7 @@ public class FileBasedSessionManager extends DefaultSessionManager implements Re
                 case BRANCH_UPDATE: {
                     BranchSession branchSession = (BranchSession) sessionStorable;
                     if( branchSession.getTransactionId() == 0){
+                        LOGGER.error("Restore branchSession from file failed, the transactionId is zero , xid:" + branchSession.getXid());
                         break;
                     }
                     GlobalSession foundGlobalSession = sessionMap.get(branchSession.getXid());
@@ -194,6 +197,7 @@ public class FileBasedSessionManager extends DefaultSessionManager implements Re
                     String xid = branchSession.getXid();
                     long bid = branchSession.getBranchId();
                     if(branchSession.getTransactionId() == 0){
+                        LOGGER.error("Restore branchSession from file failed, the transactionId is zero , xid:" + branchSession.getXid());
                         break;
                     }
                     GlobalSession found = sessionMap.get(xid);

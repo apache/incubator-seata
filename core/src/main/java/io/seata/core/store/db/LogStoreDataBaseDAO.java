@@ -480,7 +480,6 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     private BranchTransactionDO convertBranchTransactionDO(ResultSet rs) throws SQLException {
         BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
-        branchTransactionDO.setStatus(rs.getInt("status"));
         branchTransactionDO.setResourceGroupId(rs.getString("resource_group_id"));
         branchTransactionDO.setStatus(rs.getInt("status"));
         branchTransactionDO.setApplicationData(rs.getString("application_data"));

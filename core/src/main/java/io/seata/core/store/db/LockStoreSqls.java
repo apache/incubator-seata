@@ -136,7 +136,7 @@ public class LockStoreSqls {
      * @param dbType         the db type
      * @return the string
      */
-    public static String getCheckLockSql(String lockTable, String paramPlaceHold, String dbType){
+    public static String getCheckLockableSql(String lockTable, String paramPlaceHold, String dbType){
         return CHECK_LOCK_SQL.replace(LOCK_TABLE_PLACEHOLD, lockTable).replace(IN_PARAMS_PLACEHOLD, paramPlaceHold);
     }
 

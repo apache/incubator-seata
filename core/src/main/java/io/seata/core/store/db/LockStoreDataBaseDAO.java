@@ -109,7 +109,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             }
             boolean canLock = true, isReLock = false;
             //query
-            String checkLockSQL = LockStoreSqls.getCheckLockSql(lockTable, sb.toString(), dbType);
+            String checkLockSQL = LockStoreSqls.getCheckLockableSql(lockTable, sb.toString(), dbType);
             ps = conn.prepareStatement(checkLockSQL);
             for (int i = 0; i < lockDOs.size(); i++){
                 ps.setString(i+1, lockDOs.get(i).getRowKey());
@@ -296,7 +296,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             }
 
             //query
-            String checkLockSQL = LockStoreSqls.getCheckLockSql(lockTable, sb.toString(), dbType);
+            String checkLockSQL = LockStoreSqls.getCheckLockableSql(lockTable, sb.toString(), dbType);
             ps = conn.prepareStatement(checkLockSQL);
             for (int i = 0; i < lockDOs.size(); i++){
                 ps.setString(i+1, lockDOs.get(i).getRowKey());
