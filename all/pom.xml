@@ -498,32 +498,6 @@
             <id>release</id>
             <build>
                 <plugins>
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-javadoc-plugin</artifactId>-->
-<!--                        <version>2.10.4</version>-->
-<!--                        <configuration>-->
-<!--                            <failOnError>false</failOnError>-->
-<!--                            <encoding>${project.build.sourceEncoding}</encoding>-->
-<!--                            <detectOfflineLinks>true</detectOfflineLinks>-->
-<!--                            <breakiterator>true</breakiterator>-->
-<!--                            <author>false</author>-->
-<!--                            <keywords>true</keywords>-->
-<!--                            <quiet>true</quiet>-->
-<!--                            <includeDependencySources>true</includeDependencySources>-->
-<!--                            <dependencySourceIncludes>-->
-<!--                                <dependencySourceInclude>io.seata:seata-*</dependencySourceInclude>-->
-<!--                            </dependencySourceIncludes>-->
-<!--                        </configuration>-->
-<!--                        <executions>-->
-<!--                            <execution>-->
-<!--                                <id>attach-javadocs</id>-->
-<!--                                <goals>-->
-<!--                                    <goal>jar</goal>-->
-<!--                                </goals>-->
-<!--                            </execution>-->
-<!--                        </executions>-->
-<!--                    </plugin>-->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
