@@ -15,17 +15,6 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.concurrent.atomic.AtomicBoolean;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -45,6 +34,17 @@ import io.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 
@@ -66,8 +66,8 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     private String transactionServiceGroup;
 
     private static volatile RmRpcClient instance;
-    private final ConcurrentMap<String, Object> channelLocks = new ConcurrentHashMap<String, Object>();
-    private final ConcurrentMap<String, NettyPoolKey> poolKeyMap = new ConcurrentHashMap<String, NettyPoolKey>();
+    private final ConcurrentMap<String, Object> channelLocks = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, NettyPoolKey> poolKeyMap = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Channel> channels = new ConcurrentHashMap<>();
     private String customerKeys;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
@@ -125,7 +125,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                     final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
                         nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
                         KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-                        new LinkedBlockingQueue(MAX_QUEUE_SIZE),
+                        new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
                         new NamedThreadFactory(nettyClientConfig.getRmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()),
                         new ThreadPoolExecutor.CallerRunsPolicy());
@@ -149,7 +149,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
             ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
                 MAX_MERGE_SEND_THREAD,
                 KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<Runnable>(),
+                new LinkedBlockingQueue<>(),
                 new NamedThreadFactory(getThreadPrefix(MERGE_THREAD_PREFIX), MAX_MERGE_SEND_THREAD));
             mergeSendExecutorService.submit(new MergedSendRunnable());
         }
@@ -237,9 +237,8 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     @Override
     protected void releaseChannel(Channel channel, String serverAddress) {
         if (null == channel || null == serverAddress) { return; }
-        Object connectLock = channelLocks.get(serverAddress);
         try {
-            synchronized (connectLock) {
+            synchronized (channelLocks.get(serverAddress)) {
                 Channel ch = channels.get(serverAddress);
                 if (null == ch) {
                     nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
@@ -272,10 +271,8 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
             LOGGER.info("will connect to " + serverAddress);
         }
         channelLocks.putIfAbsent(serverAddress, new Object());
-        Object connectLock = channelLocks.get(serverAddress);
-        synchronized (connectLock) {
-            Channel channel = doConnect(serverAddress);
-            return channel;
+        synchronized (channelLocks.get(serverAddress)) {
+            return doConnect(serverAddress);
         }
     }
 
@@ -290,13 +287,13 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         if (channelToServer != null && channelToServer.isActive()) {
             return channelToServer;
         }
-        Channel channelFromPool = null;
+        Channel channelFromPool;
         try {
             String resourceIds = customerKeys == null ? getMergedResourceKeys(resourceManager) : customerKeys;
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("RM will register :" + resourceIds);
             }
-            RegisterRMRequest message = null;
+            RegisterRMRequest message;
             if (null == poolKeyMap.get(serverAddress)) {
                 message = new RegisterRMRequest(applicationId, transactionServiceGroup);
                 message.setResourceIds(resourceIds);
@@ -458,7 +455,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         Map<String, Resource> managedResources = resourceManager.getManagedResources();
         Set<String> resourceIds = managedResources.keySet();
         if (!resourceIds.isEmpty()) {
-            StringBuffer sb = new StringBuffer();
+            StringBuilder sb = new StringBuilder();
             boolean first = true;
             for (String resourceId : resourceIds) {
                 if (first) {

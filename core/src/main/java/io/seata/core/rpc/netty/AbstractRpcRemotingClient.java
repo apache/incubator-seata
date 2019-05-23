@@ -15,31 +15,6 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import io.seata.common.exception.FrameworkErrorCode;
-import io.seata.common.exception.FrameworkException;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.NetUtil;
-import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.HeartbeatMessage;
-import io.seata.core.protocol.MergeResultMessage;
-import io.seata.core.protocol.MergedWarpMessage;
-import io.seata.core.protocol.MessageFuture;
-import io.seata.core.protocol.RpcMessage;
-import io.seata.core.rpc.ClientMessageListener;
-import io.seata.core.rpc.ClientMessageSender;
-import io.seata.core.rpc.RemotingService;
-
-import io.seata.discovery.loadbalance.LoadBalanceFactory;
-import io.seata.discovery.registry.RegistryFactory;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -60,10 +35,34 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.internal.PlatformDependent;
+import io.seata.common.exception.FrameworkErrorCode;
+import io.seata.common.exception.FrameworkException;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.NetUtil;
+import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.HeartbeatMessage;
+import io.seata.core.protocol.MergeResultMessage;
+import io.seata.core.protocol.MergedWarpMessage;
+import io.seata.core.protocol.MessageFuture;
+import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.ClientMessageListener;
+import io.seata.core.rpc.ClientMessageSender;
+import io.seata.core.rpc.RemotingService;
+import io.seata.discovery.loadbalance.LoadBalanceFactory;
+import io.seata.discovery.registry.RegistryFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
@@ -137,6 +136,8 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         NettyPoolableFactory keyPoolableFactory = new NettyPoolableFactory(this);
         nettyClientKeyPool = new GenericKeyedObjectPool<>(keyPoolableFactory);
         nettyClientKeyPool.setConfig(getNettyPoolConfig());
+        setChannelHandlers(this);
+        this.start();
         super.init();
     }
 

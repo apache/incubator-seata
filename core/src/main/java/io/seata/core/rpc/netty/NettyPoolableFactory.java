@@ -15,17 +15,16 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.net.InetSocketAddress;
-
+import io.netty.channel.Channel;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.RegisterTMResponse;
-
-import io.netty.channel.Channel;
 import org.apache.commons.pool.KeyedPoolableObjectFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
 
 /**
  * The type Netty key poolable factory.
@@ -45,19 +44,17 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
      */
     public NettyPoolableFactory(AbstractRpcRemotingClient rpcRemotingClient) {
         this.rpcRemotingClient = rpcRemotingClient;
-        this.rpcRemotingClient.setChannelHandlers(rpcRemotingClient);
-        this.rpcRemotingClient.start();
     }
 
     @Override
-    public Channel makeObject(NettyPoolKey key) throws Exception {
+    public Channel makeObject(NettyPoolKey key) {
         InetSocketAddress address = NetUtil.toInetSocketAddress(key.getAddress());
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("NettyPool create channel to " + key);
         }
         Channel tmpChannel = rpcRemotingClient.getNewChannel(address);
         long start = System.currentTimeMillis();
-        Object response = null;
+        Object response;
         Channel channelToServer = null;
         if (null == key.getMessage()) {
             throw new FrameworkException(
