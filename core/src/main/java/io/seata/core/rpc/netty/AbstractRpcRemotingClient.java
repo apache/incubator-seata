@@ -20,6 +20,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
+import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.AbstractMessage;
@@ -27,7 +28,9 @@ import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
+import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.RpcMessage;
+import io.seata.core.protocol.transaction.GlobalBeginResponse;
 import io.seata.core.rpc.ClientMessageListener;
 import io.seata.core.rpc.ClientMessageSender;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
@@ -41,7 +44,11 @@ import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
@@ -61,7 +68,17 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     private static final int MAX_MERGE_SEND_MILLS = 1;
     private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
     
+    private static final int MAX_MERGE_SEND_THREAD = 1;
+    private static final long KEEP_ALIVE_TIME = Integer.MAX_VALUE;
+    private static final int MAX_QUEUE_SIZE = 20000;
+    private static final int SCHEDULE_INTERVAL_MILLS = 5;
+    private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
+    
     private final RpcClient clientRemotingService;
+    
+    protected String applicationId;
+    
+    protected String transactionServiceGroup;
     
     /**
      * The Netty client key pool.
@@ -85,9 +102,21 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         nettyClientKeyPool = new GenericKeyedObjectPool<>(keyPoolableFactory);
         nettyClientKeyPool.setConfig(getNettyPoolConfig());
         setChannelHandlers(this);
+        timerExecutor.scheduleAtFixedRate(new Runnable() {
+            @Override
+            public void run() {
+                reconnect(transactionServiceGroup);
+            }
+        }, SCHEDULE_INTERVAL_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.SECONDS);
+        ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
+            MAX_MERGE_SEND_THREAD,
+            KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<>(),
+            new NamedThreadFactory(getThreadPrefix(MERGE_THREAD_PREFIX), MAX_MERGE_SEND_THREAD));
+        mergeSendExecutorService.submit(new MergedSendRunnable());
         super.init();
     }
-
+    
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         if (!(msg instanceof RpcMessage)) {
@@ -130,6 +159,30 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         releaseChannel(ctx.channel(), NetUtil.toStringAddress(ctx.channel().remoteAddress()));
         super.channelInactive(ctx);
     }
+    
+    @Override
+    public Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException {
+        String validAddress = loadBalance(transactionServiceGroup);
+        Channel acquireChannel = connect(validAddress);
+        Object result = super.sendAsyncRequestWithResponse(validAddress, acquireChannel, msg, timeout);
+        if (result instanceof GlobalBeginResponse
+            && ((GlobalBeginResponse) result).getResultCode() == ResultCode.Failed) {
+            LOGGER.error("begin response error,release channel:" + acquireChannel);
+            releaseChannel(acquireChannel, validAddress);
+        }
+        return result;
+    }
+    
+    @Override
+    public Object sendMsgWithResponse(Object msg) throws TimeoutException {
+        return sendMsgWithResponse(msg, NettyClientConfig.getRpcRequestTimeout());
+    }
+    
+    @Override
+    public Object sendMsgWithResponse(String serverAddress, Object msg, long timeout)
+        throws TimeoutException {
+        return sendAsyncRequestWithResponse(serverAddress, connect(serverAddress), msg, timeout);
+    }
 
     /**
      * Gets client message listener.
@@ -155,6 +208,24 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             String remoteAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
             clientMessageListener.onMessage(msgId, remoteAddress, msg, this);
         }
+    }
+    
+    /**
+     * Sets application id.
+     *
+     * @param applicationId the application id
+     */
+    public void setApplicationId(String applicationId) {
+        this.applicationId = applicationId;
+    }
+    
+    /**
+     * Sets transaction service group.
+     *
+     * @param transactionServiceGroup the transaction service group
+     */
+    public void setTransactionServiceGroup(String transactionServiceGroup) {
+        this.transactionServiceGroup = transactionServiceGroup;
     }
 
     protected void reconnect(String transactionServiceGroup) {

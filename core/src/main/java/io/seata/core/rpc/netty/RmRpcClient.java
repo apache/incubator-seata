@@ -39,7 +39,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -60,10 +59,6 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     private static final Logger LOGGER = LoggerFactory.getLogger(RmRpcClient.class);
 
     private ResourceManager resourceManager;
-
-    private String applicationId;
-
-    private String transactionServiceGroup;
 
     private static volatile RmRpcClient instance;
     private final ConcurrentMap<String, Object> channelLocks = new ConcurrentHashMap<>();
@@ -135,37 +130,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     public void init() {
         if (initialized.compareAndSet(false, true)) {
             super.init();
-            timerExecutor.scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    reconnect(transactionServiceGroup);
-                }
-            }, SCHEDULE_INTERVAL_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.SECONDS);
-            ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
-                MAX_MERGE_SEND_THREAD,
-                KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
-                new LinkedBlockingQueue<>(),
-                new NamedThreadFactory(getThreadPrefix(MERGE_THREAD_PREFIX), MAX_MERGE_SEND_THREAD));
-            mergeSendExecutorService.submit(new MergedSendRunnable());
         }
-    }
-
-    /**
-     * Sets application id.
-     *
-     * @param applicationId the application id
-     */
-    public void setApplicationId(String applicationId) {
-        this.applicationId = applicationId;
-    }
-
-    /**
-     * Sets transaction service group.
-     *
-     * @param transactionServiceGroup the transaction service group
-     */
-    public void setTransactionServiceGroup(String transactionServiceGroup) {
-        this.transactionServiceGroup = transactionServiceGroup;
     }
 
     @Override
@@ -183,23 +148,6 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     @Override
     protected NettyPoolKey.TransactionRole getTransactionRole() {
         return TransactionRole.RMROLE;
-    }
-
-    @Override
-    public Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException {
-        String validAddress = loadBalance(transactionServiceGroup);
-        Channel acquireChannel = connect(validAddress);
-        return super.sendAsyncRequestWithResponse(validAddress, acquireChannel, msg, timeout);
-    }
-
-    @Override
-    public Object sendMsgWithResponse(String serverAddress, Object msg, long timeout) throws TimeoutException {
-        return super.sendAsyncRequestWithResponse(serverAddress, connect(serverAddress), msg, timeout);
-    }
-
-    @Override
-    public Object sendMsgWithResponse(Object msg) throws TimeoutException {
-        return sendMsgWithResponse(msg, NettyClientConfig.getRpcRequestTimeout());
     }
 
     @Override
@@ -293,7 +241,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                 message = new RegisterRMRequest(applicationId, transactionServiceGroup);
                 message.setResourceIds(resourceIds);
                 poolKeyMap.putIfAbsent(serverAddress,
-                    new NettyPoolKey(getTransactionRole(), serverAddress, message));
+                    new NettyPoolKey(TransactionRole.RMROLE, serverAddress, message));
             } else {
                 message = (RegisterRMRequest)poolKeyMap.get(serverAddress).getMessage();
                 message.setResourceIds(resourceIds);
@@ -344,8 +292,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     }
 
     private void sendRegisterMessage(String serverAddress, Channel channel, String dbKey) {
-        RegisterRMRequest message = new RegisterRMRequest(applicationId,
-            transactionServiceGroup);
+        RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
         message.setResourceIds(dbKey);
         try {
             super.sendAsyncRequestWithoutResponse(channel, message);

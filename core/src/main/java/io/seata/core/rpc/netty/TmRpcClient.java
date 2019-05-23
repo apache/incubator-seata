@@ -33,19 +33,15 @@ import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
-import io.seata.core.protocol.ResultCode;
-import io.seata.core.protocol.transaction.GlobalBeginResponse;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -125,61 +121,9 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     @Override
     public void init() {
         if (initialized.compareAndSet(false, true)) {
-            init(SCHEDULE_INTERVAL_MILLS, SCHEDULE_INTERVAL_MILLS);
+            enableDegrade = CONFIG.getBoolean(ConfigurationKeys.SERVICE_PREFIX + ConfigurationKeys.ENABLE_DEGRADE_POSTFIX);
+            super.init();
         }
-    }
-
-    private void initVars() {
-        enableDegrade = CONFIG.getBoolean(ConfigurationKeys.SERVICE_PREFIX + ConfigurationKeys.ENABLE_DEGRADE_POSTFIX);
-        super.init();
-    }
-
-    /**
-     * Init.
-     *
-     * @param healthCheckDelay  the health check delay
-     * @param healthCheckPeriod the health check period
-     */
-    public void init(long healthCheckDelay, long healthCheckPeriod) {
-        initVars();
-        ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD, MAX_MERGE_SEND_THREAD,
-            KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-            new NamedThreadFactory(getThreadPrefix(MERGE_THREAD_PREFIX), MAX_MERGE_SEND_THREAD));
-        mergeSendExecutorService.submit(new MergedSendRunnable());
-        timerExecutor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    reconnect(transactionServiceGroup);
-                } catch (Exception ex) {
-                    LOGGER.error(ex.getMessage());
-                }
-            }
-        }, healthCheckDelay, healthCheckPeriod, TimeUnit.SECONDS);
-    }
-    
-    @Override
-    public Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException {
-        String validAddress = loadBalance(transactionServiceGroup);
-        Channel acquireChannel = connect(validAddress);
-        Object result = super.sendAsyncRequestWithResponse(validAddress, acquireChannel, msg, timeout);
-        if (result instanceof GlobalBeginResponse
-                && ((GlobalBeginResponse) result).getResultCode() == ResultCode.Failed) {
-            LOGGER.error("begin response error,release channel:" + acquireChannel);
-            releaseChannel(acquireChannel, validAddress);
-        }
-        return result;
-    }
-
-    @Override
-    public Object sendMsgWithResponse(Object msg) throws TimeoutException {
-        return sendMsgWithResponse(msg, NettyClientConfig.getRpcRequestTimeout());
-    }
-
-    @Override
-    public Object sendMsgWithResponse(String serverAddress, Object msg, long timeout)
-        throws TimeoutException {
-        return sendAsyncRequestWithResponse(serverAddress, connect(serverAddress), msg, timeout);
     }
 
     @Override

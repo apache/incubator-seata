@@ -47,6 +47,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * Rpc client.
  *
+ * @author jimin.jm @alibaba-inc.com
  * @author zhaojun
  */
 public class RpcClient implements RemotingClient {

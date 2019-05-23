@@ -119,13 +119,11 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
             @Override
             public void run() {
                 List<MessageFuture> timeoutMessageFutures = new ArrayList<MessageFuture>(futures.size());
-
                 for (MessageFuture future : futures.values()) {
                     if (future.isTimeout()) {
                         timeoutMessageFutures.add(future);
                     }
                 }
-
                 for (MessageFuture messageFuture : timeoutMessageFutures) {
                     futures.remove(messageFuture.getRequestMessage().getId());
                     messageFuture.setResultMessage(null);
