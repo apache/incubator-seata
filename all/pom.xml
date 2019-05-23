@@ -428,7 +428,7 @@
                             <createSourcesJar>true</createSourcesJar>
                             <promoteTransitiveDependencies>false</promoteTransitiveDependencies>
                             <keepDependenciesWithProvidedScope>false</keepDependenciesWithProvidedScope>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
                             <artifactSet>
                                 <includes>
                                     <include>io.seata:seata-common</include>
@@ -479,6 +479,12 @@
                                         <exclude>registry.conf</exclude>
                                     </excludes>
                                 </filter>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/maven/**</exclude>
+                                    </excludes>
+                                </filter>
                             </filters>
                         </configuration>
                     </execution>
@@ -503,20 +509,12 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <version>2.10.4</version>
                         <configuration>
-                            <encoding>${project.build.sourceEncoding}</encoding>
-                            <detectOfflineLinks>true</detectOfflineLinks>
-                            <breakiterator>true</breakiterator>
-                            <author>false</author>
-                            <keywords>true</keywords>
-                            <quiet>true</quiet>
-                            <includeDependencySources>true</includeDependencySources>
-                            <dependencySourceIncludes>
-                                <dependencySourceInclude>io.seata:seata-*</dependencySourceInclude>
-                            </dependencySourceIncludes>
+                            <charset>${project.build.sourceEncoding}</charset>
+                            <failOnError>false</failOnError>
                         </configuration>
                         <executions>
                             <execution>
-                                <id>attach-javadocs</id>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
