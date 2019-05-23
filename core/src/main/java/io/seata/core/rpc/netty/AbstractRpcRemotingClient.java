@@ -15,29 +15,11 @@
  */
 package io.seata.core.rpc.netty;
 
-import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.epoll.EpollChannelOption;
-import io.netty.channel.epoll.EpollMode;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.pool.AbstractChannelPoolMap;
-import io.netty.channel.pool.ChannelHealthChecker;
-import io.netty.channel.pool.FixedChannelPool;
-import io.netty.channel.pool.FixedChannelPool.AcquireTimeoutAction;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.timeout.IdleStateHandler;
-import io.netty.util.concurrent.DefaultEventExecutorGroup;
 import io.netty.util.concurrent.EventExecutorGroup;
-import io.netty.util.internal.PlatformDependent;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
-import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.AbstractMessage;
@@ -48,7 +30,6 @@ import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.ClientMessageListener;
 import io.seata.core.rpc.ClientMessageSender;
-import io.seata.core.rpc.RemotingService;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -61,8 +42,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
@@ -73,22 +52,17 @@ import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
  * @date 2018 /9/12
  */
 public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
-    implements RemotingService, RegisterMsgListener, ClientMessageSender {
+    implements RegisterMsgListener, ClientMessageSender {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingClient.class);
-    private final NettyClientConfig nettyClientConfig;
-    private final Bootstrap bootstrap = new Bootstrap();
-    private final EventLoopGroup eventLoopGroupWorker;
-    private EventExecutorGroup defaultEventExecutorGroup;
-    private AbstractChannelPoolMap<InetSocketAddress, FixedChannelPool> clientChannelPool;
-    private final AtomicBoolean initialized = new AtomicBoolean(false);
     private static final String MSG_ID_PREFIX = "msgId:";
     private static final String FUTURES_PREFIX = "futures:";
     private static final String SINGLE_LOG_POSTFIX = ";";
     private static final int MAX_MERGE_SEND_MILLS = 1;
     private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
-
-
+    
+    private final RpcClient clientRemotingService;
+    
     /**
      * The Netty client key pool.
      */
@@ -97,169 +71,21 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
      * The Client message listener.
      */
     protected ClientMessageListener clientMessageListener;
-
-    /**
-     * Instantiates a new Rpc remoting client.
-     *
-     * @param nettyClientConfig the netty client config
-     */
-    public AbstractRpcRemotingClient(final NettyClientConfig nettyClientConfig) {
-        this(nettyClientConfig, null, null);
-    }
-
-    /**
-     * Instantiates a new Rpc remoting client.
-     *
-     * @param nettyClientConfig  the netty client config
-     * @param eventExecutorGroup the event executor group
-     * @param messageExecutor    the message executor
-     */
-    public AbstractRpcRemotingClient(NettyClientConfig nettyClientConfig, final EventExecutorGroup eventExecutorGroup,
-                                     final ThreadPoolExecutor messageExecutor) {
+    
+    public AbstractRpcRemotingClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
+                                     ThreadPoolExecutor messageExecutor, NettyPoolKey.TransactionRole transactionRole) {
         super(messageExecutor);
-        if (null == nettyClientConfig) {
-            nettyClientConfig = new NettyClientConfig();
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("use default netty client config.");
-            }
-        }
-        this.nettyClientConfig = nettyClientConfig;
-        int selectorThreadSizeThreadSize = this.nettyClientConfig.getClientSelectorThreadSize();
-        this.eventLoopGroupWorker = new NioEventLoopGroup(selectorThreadSizeThreadSize,
-            new NamedThreadFactory(getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
-                selectorThreadSizeThreadSize));
-        this.defaultEventExecutorGroup = eventExecutorGroup;
+        clientRemotingService = new RpcClient(nettyClientConfig, eventExecutorGroup, this, transactionRole);
     }
 
     @Override
     public void init() {
-        NettyPoolableFactory keyPoolableFactory = new NettyPoolableFactory(this);
+        clientRemotingService.start();
+        NettyPoolableFactory keyPoolableFactory = new NettyPoolableFactory(this, clientRemotingService);
         nettyClientKeyPool = new GenericKeyedObjectPool<>(keyPoolableFactory);
         nettyClientKeyPool.setConfig(getNettyPoolConfig());
         setChannelHandlers(this);
-        this.start();
         super.init();
-    }
-
-    @Override
-    public void start() {
-
-        if (this.defaultEventExecutorGroup == null) {
-            this.defaultEventExecutorGroup = new DefaultEventExecutorGroup(nettyClientConfig.getClientWorkerThreads(),
-                new NamedThreadFactory(getThreadPrefix(nettyClientConfig.getClientWorkerThreadPrefix()),
-                    nettyClientConfig.getClientWorkerThreads()));
-        }
-        this.bootstrap.group(this.eventLoopGroupWorker).channel(
-            nettyClientConfig.getClientChannelClazz()).option(
-            ChannelOption.TCP_NODELAY, true).option(ChannelOption.SO_KEEPALIVE, true).option(
-            ChannelOption.CONNECT_TIMEOUT_MILLIS, nettyClientConfig.getConnectTimeoutMillis()).option(
-            ChannelOption.SO_SNDBUF, nettyClientConfig.getClientSocketSndBufSize()).option(ChannelOption.SO_RCVBUF,
-            nettyClientConfig.getClientSocketRcvBufSize());
-
-        if (nettyClientConfig.enableNative()) {
-            if (PlatformDependent.isOsx()) {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("client run on macOS");
-                }
-            } else {
-                bootstrap.option(EpollChannelOption.EPOLL_MODE, EpollMode.EDGE_TRIGGERED)
-                    .option(EpollChannelOption.TCP_QUICKACK, true);
-            }
-        }
-        if (nettyClientConfig.isUseConnPool()) {
-            clientChannelPool = new AbstractChannelPoolMap<InetSocketAddress, FixedChannelPool>() {
-                @Override
-                protected FixedChannelPool newPool(InetSocketAddress key) {
-                    return new FixedChannelPool(
-                        bootstrap.remoteAddress(key),
-                        new DefaultChannelPoolHandler() {
-                            @Override
-                            public void channelCreated(Channel ch) throws Exception {
-                                super.channelCreated(ch);
-                                final ChannelPipeline pipeline = ch.pipeline();
-                                pipeline.addLast(defaultEventExecutorGroup,
-                                    new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
-                                        nettyClientConfig.getChannelMaxWriteIdleSeconds(),
-                                        nettyClientConfig.getChannelMaxAllIdleSeconds()));
-                                pipeline.addLast(defaultEventExecutorGroup, new RpcClientHandler());
-                            }
-                        },
-                        ChannelHealthChecker.ACTIVE,
-                        AcquireTimeoutAction.FAIL,
-                        nettyClientConfig.getMaxAcquireConnMills(),
-                        nettyClientConfig.getPerHostMaxConn(),
-                        nettyClientConfig.getPendingConnSize(),
-                        false
-                    );
-                }
-            };
-        } else {
-            bootstrap.handler(
-                new ChannelInitializer<SocketChannel>() {
-
-                    @Override
-                    public void initChannel(SocketChannel ch) {
-                        ChannelPipeline pipeline = ch.pipeline();
-                        pipeline.addLast(
-                            new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
-                                nettyClientConfig.getChannelMaxWriteIdleSeconds(),
-                                nettyClientConfig.getChannelMaxAllIdleSeconds()))
-                            .addLast(new MessageCodecHandler());
-                        if (null != channelHandlers) {
-                            addChannelPipelineLast(ch, channelHandlers);
-                        }
-                    }
-                });
-        }
-        if (initialized.compareAndSet(false, true) && LOGGER.isInfoEnabled()) {
-            LOGGER.info("AbstractRpcRemotingClient has started");
-        }
-    }
-
-    /**
-     * Gets new channel.
-     *
-     * @param address the address
-     * @return the new channel
-     */
-    protected Channel getNewChannel(InetSocketAddress address) {
-        Channel channel;
-        ChannelFuture f = this.bootstrap.connect(address);
-        try {
-            f.await(this.nettyClientConfig.getConnectTimeoutMillis(), TimeUnit.MILLISECONDS);
-            if (f.isCancelled()) {
-                throw new FrameworkException(f.cause(), "connect cancelled, can not connect to services-server.");
-            } else if (!f.isSuccess()) {
-                throw new FrameworkException(f.cause(), "connect failed, can not connect to services-server.");
-            } else {
-                channel = f.channel();
-            }
-        } catch (Exception e) {
-            throw new FrameworkException(e, "can not connect to services-server.");
-        }
-        return channel;
-    }
-
-    @Override
-    public void shutdown() {
-        try {
-            if (null != clientChannelPool) {
-                clientChannelPool.close();
-            }
-            this.eventLoopGroupWorker.shutdownGracefully();
-            if (this.defaultEventExecutorGroup != null) {
-                this.defaultEventExecutorGroup.shutdownGracefully();
-            }
-            super.destroy();
-        } catch (Exception exx) {
-            LOGGER.error("Failed to shutdown: {}", exx.getMessage());
-        }
-    }
-
-    @Override
-    public void destroy() {
-        super.destroy();
-        shutdown();
     }
 
     @Override

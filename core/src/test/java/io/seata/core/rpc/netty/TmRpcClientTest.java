@@ -15,12 +15,6 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.lang.reflect.Field;
-import java.util.Map;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ChannelFactory;
 import io.netty.channel.Channel;
@@ -29,6 +23,12 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.lang.reflect.Field;
+import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Tm rpc client test.
@@ -77,9 +77,12 @@ public class TmRpcClientTest {
         tmRpcClient.init();
 
         //check if attr of tmRpcClient object has been set success
-        Field bootstrapField = getDeclaredField(tmRpcClient, "bootstrap");
+        Field clientRemotingServiceFiled = getDeclaredField(tmRpcClient, "clientRemotingService");
+        clientRemotingServiceFiled.setAccessible(true);
+        RpcClient clientRemotingService = (RpcClient)clientRemotingServiceFiled.get(tmRpcClient);
+        Field bootstrapField = getDeclaredField(clientRemotingService, "bootstrap");
         bootstrapField.setAccessible(true);
-        Bootstrap bootstrap = (Bootstrap)bootstrapField.get(tmRpcClient);
+        Bootstrap bootstrap = (Bootstrap) bootstrapField.get(clientRemotingService);
 
         Assertions.assertNotNull(bootstrap);
         Field optionsField = getDeclaredField(bootstrap, "options");

@@ -80,7 +80,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     private TmRpcClient(NettyClientConfig nettyClientConfig,
                         EventExecutorGroup eventExecutorGroup,
                         ThreadPoolExecutor messageExecutor) {
-        super(nettyClientConfig, eventExecutorGroup, messageExecutor);
+        super(nettyClientConfig, eventExecutorGroup, messageExecutor, NettyPoolKey.TransactionRole.TMROLE);
         this.tmClientConfig = nettyClientConfig;
     }
 

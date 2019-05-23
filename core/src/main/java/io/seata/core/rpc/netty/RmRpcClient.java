@@ -77,15 +77,10 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     private static final int SCHEDULE_INTERVAL_MILLS = 5;
     private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
     private final NettyClientConfig rmClientConfig;
-
-    private RmRpcClient(NettyClientConfig nettyClientConfig) {
-        super(nettyClientConfig);
-        this.rmClientConfig = nettyClientConfig;
-    }
-
+    
     private RmRpcClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
                         ThreadPoolExecutor messageExecutor) {
-        super(nettyClientConfig, eventExecutorGroup, messageExecutor);
+        super(nettyClientConfig, eventExecutorGroup, messageExecutor, TransactionRole.RMROLE);
         this.rmClientConfig = nettyClientConfig;
     }
 

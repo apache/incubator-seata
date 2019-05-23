@@ -35,24 +35,29 @@ import java.net.InetSocketAddress;
 public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoolKey, Channel> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyPoolableFactory.class);
+    
     private final AbstractRpcRemotingClient rpcRemotingClient;
+    
+    private final RpcClient clientRemotingService;
 
     /**
      * Instantiates a new Netty key poolable factory.
      *
      * @param rpcRemotingClient the rpc remoting client
      */
-    public NettyPoolableFactory(AbstractRpcRemotingClient rpcRemotingClient) {
+    public NettyPoolableFactory(AbstractRpcRemotingClient rpcRemotingClient,
+                                RpcClient clientRemotingService) {
         this.rpcRemotingClient = rpcRemotingClient;
+        this.clientRemotingService = clientRemotingService;
     }
 
     @Override
     public Channel makeObject(NettyPoolKey key) {
         InetSocketAddress address = NetUtil.toInetSocketAddress(key.getAddress());
-        if (LOGGER.isInfoEnabled()) {
+            if (LOGGER.isInfoEnabled()) {
             LOGGER.info("NettyPool create channel to " + key);
         }
-        Channel tmpChannel = rpcRemotingClient.getNewChannel(address);
+        Channel tmpChannel = clientRemotingService.getNewChannel(address);
         long start = System.currentTimeMillis();
         Object response;
         Channel channelToServer = null;
