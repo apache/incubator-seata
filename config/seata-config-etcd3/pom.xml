@@ -22,35 +22,28 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-config-all</artifactId>
-    <name>seata-config-all ${project.version}</name>
+    <artifactId>seata-config-etcd3</artifactId>
+    <name>seata-config-etcd3 ${project.version}</name>
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-apollo</artifactId>
-            <version>${project.version}</version>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-config-core</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-zk</artifactId>
-            <version>${project.version}</version>
+            <groupId>io.etcd</groupId>
+            <artifactId>jetcd-core</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.google.guava</groupId>
+                    <artifactId>guava</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-nacos</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-etcd3</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-config-consul</artifactId>
-            <version>${project.version}</version>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
     </dependencies>
-
 </project>
