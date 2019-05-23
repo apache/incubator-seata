@@ -135,7 +135,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     @Override
     public void init() {
         NettyPoolableFactory keyPoolableFactory = new NettyPoolableFactory(this);
-        nettyClientKeyPool = new GenericKeyedObjectPool(keyPoolableFactory);
+        nettyClientKeyPool = new GenericKeyedObjectPool<>(keyPoolableFactory);
         nettyClientKeyPool.setConfig(getNettyPoolConfig());
         super.init();
     }
@@ -169,7 +169,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             clientChannelPool = new AbstractChannelPoolMap<InetSocketAddress, FixedChannelPool>() {
                 @Override
                 protected FixedChannelPool newPool(InetSocketAddress key) {
-                    FixedChannelPool fixedClientChannelPool = new FixedChannelPool(
+                    return new FixedChannelPool(
                         bootstrap.remoteAddress(key),
                         new DefaultChannelPoolHandler() {
                             @Override
@@ -190,8 +190,6 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                         nettyClientConfig.getPendingConnSize(),
                         false
                     );
-                    return fixedClientChannelPool;
-
                 }
             };
         } else {
@@ -224,7 +222,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
      * @return the new channel
      */
     protected Channel getNewChannel(InetSocketAddress address) {
-        Channel channel = null;
+        Channel channel;
         ChannelFuture f = this.bootstrap.connect(address);
         try {
             f.await(this.nettyClientConfig.getConnectTimeoutMillis(), TimeUnit.MILLISECONDS);
@@ -265,21 +263,20 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
 
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
-        if (msg instanceof RpcMessage) {
-            RpcMessage rpcMessage = (RpcMessage) msg;
-            if (rpcMessage.getBody() == HeartbeatMessage.PONG) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("received PONG from {}", ctx.channel().remoteAddress());
-                }
-                return;
-            }
+        if (!(msg instanceof RpcMessage)) {
+            return;
         }
-
-        if (((RpcMessage) msg).getBody() instanceof MergeResultMessage) {
-            MergeResultMessage results = (MergeResultMessage) ((RpcMessage) msg).getBody();
-            MergedWarpMessage mergeMessage = (MergedWarpMessage) mergeMsgMap.remove(((RpcMessage) msg).getId());
-            int num = mergeMessage.msgs.size();
-            for (int i = 0; i < num; i++) {
+        RpcMessage rpcMessage = (RpcMessage) msg;
+        if (rpcMessage.getBody() == HeartbeatMessage.PONG) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("received PONG from {}", ctx.channel().remoteAddress());
+            }
+            return;
+        }
+        if (rpcMessage.getBody() instanceof MergeResultMessage) {
+            MergeResultMessage results = (MergeResultMessage) rpcMessage.getBody();
+            MergedWarpMessage mergeMessage = (MergedWarpMessage) mergeMsgMap.remove(rpcMessage.getId());
+            for (int i = 0; i < mergeMessage.msgs.size(); i++) {
                 long msgId = mergeMessage.msgIds.get(i);
                 MessageFuture future = futures.remove(msgId);
                 if (future == null) {
@@ -463,8 +460,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                         sendChannel = connect(address);
                         sendRequest(sendChannel, mergeMessage);
                     } catch (FrameworkException e) {
-                        if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable
-                            && address != null && sendChannel != null) {
+                        if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable && sendChannel != null) {
                             destroyChannel(address, sendChannel);
                         }
                         // fast fail
@@ -487,7 +483,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                 for (AbstractMessage cm : mergeMessage.msgs) {
                     LOGGER.debug(cm.toString());
                 }
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 for (long l : mergeMessage.msgIds) {
                     sb.append(MSG_ID_PREFIX).append(l).append(SINGLE_LOG_POSTFIX);
                 }

@@ -356,7 +356,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
             transactionServiceGroup);
         message.setResourceIds(dbKey);
         try {
-            super.sendAsyncRequestWithoutResponse(null, channel, message);
+            super.sendAsyncRequestWithoutResponse(channel, message);
         } catch (FrameworkException e) {
             if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable
                 && serverAddress != null) {

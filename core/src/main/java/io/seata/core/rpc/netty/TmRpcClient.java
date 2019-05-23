@@ -111,7 +111,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
                     final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
                         nettyClientConfig.getClientWorkerThreads(), nettyClientConfig.getClientWorkerThreads(),
                         KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-                        new LinkedBlockingQueue(MAX_QUEUE_SIZE),
+                        new LinkedBlockingQueue<>(MAX_QUEUE_SIZE),
                         new NamedThreadFactory(nettyClientConfig.getTmDispatchThreadPrefix(),
                             nettyClientConfig.getClientWorkerThreads()),
                         RejectedPolicies.runsOldestTaskPolicy());
@@ -143,7 +143,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     public void init(long healthCheckDelay, long healthCheckPeriod) {
         initVars();
         ExecutorService mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD, MAX_MERGE_SEND_THREAD,
-            KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
+            KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
             new NamedThreadFactory(getThreadPrefix(MERGE_THREAD_PREFIX), MAX_MERGE_SEND_THREAD));
         mergeSendExecutorService.submit(new MergedSendRunnable());
         timerExecutor.scheduleAtFixedRate(new Runnable() {
@@ -151,8 +151,8 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
             public void run() {
                 try {
                     reconnect(transactionServiceGroup);
-                } catch (Exception ignore) {
-                    LOGGER.error(ignore.getMessage());
+                } catch (Exception ex) {
+                    LOGGER.error(ex.getMessage());
                 }
             }
         }, healthCheckDelay, healthCheckPeriod, TimeUnit.SECONDS);
@@ -250,8 +250,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
             }
         }
         channelLocks.putIfAbsent(serverAddress, new Object());
-        Object connectLock = channelLocks.get(serverAddress);
-        synchronized (connectLock) {
+        synchronized (channelLocks.get(serverAddress)) {
             channelToServer = doConnect(serverAddress);
             channels.put(serverAddress, channelToServer);
             return channelToServer;
