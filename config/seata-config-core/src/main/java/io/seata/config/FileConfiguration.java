@@ -60,6 +60,7 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
     private static final long LISTENER_CONFIG_INTERNAL = 1 * 1000;
 
     private static final String REGISTRY_TYPE = "file";
+    private static final String CONFIG_BASEDIR = "seata.config.basedir";
 
     private final ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = new ConcurrentHashMap<>(8);
 
@@ -78,7 +79,7 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
      * @param name the name
      */
     public FileConfiguration(String name) {
-        String baseDir = System.getProperty("seata.basedir");
+        String baseDir = System.getProperty(CONFIG_BASEDIR);
         if (null == name) {
             CONFIG = ConfigFactory.load();
         } else if(baseDir == null || baseDir.length() == 0){
