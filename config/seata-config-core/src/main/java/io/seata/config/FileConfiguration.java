@@ -25,14 +25,15 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.config.ConfigFuture.ConfigOperation;
-
 import org.apache.commons.lang.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
+
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.config.ConfigFuture.ConfigOperation;
 
 /**
  * The type FileConfiguration.
@@ -77,17 +78,23 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
      * @param name the name
      */
     public FileConfiguration(String name) {
+        String baseDir = System.getProperty("seata.basedir");
         if (null == name) {
             CONFIG = ConfigFactory.load();
-        } else {
+        } else if(baseDir == null || baseDir.length() == 0){
             CONFIG = ConfigFactory.load(name);
+        }else{
+            //add by wuzq: load config file from basedir
+            ClassLoader realClassLoader = Thread.currentThread().getContextClassLoader();
+            ClassLoader loader = new SeataConfigFileClassLoaderProxy(realClassLoader, baseDir);
+            CONFIG = ConfigFactory.load(loader, name);
         }
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
-            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
-            new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD));
+                Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
+                new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD));
         configChangeExecutor = new ThreadPoolExecutor(CORE_CONFIG_CHANGE_THREAD, CORE_CONFIG_CHANGE_THREAD,
-            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
-            new NamedThreadFactory("configChange", CORE_CONFIG_CHANGE_THREAD));
+                Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
+                new NamedThreadFactory("configChange", CORE_CONFIG_CHANGE_THREAD));
         configChangeExecutor.submit(new ConfigChangeRunnable());
     }
 
@@ -253,7 +260,7 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
                     Map<String, List<ConfigChangeListener>> configListenerMap;
                     if (null != dataId && null != listener) {
                         configListenerMap = new ConcurrentHashMap<>(8);
-                        configListenerMap.put(dataId, new ArrayList<>());
+                        configListenerMap.put(dataId, new ArrayList<ConfigChangeListener>());
                         configListenerMap.get(dataId).add(listener);
                     } else {
                         configListenerMap = configListenersMap;
