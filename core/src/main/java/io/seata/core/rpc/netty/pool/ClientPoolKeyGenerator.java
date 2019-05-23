@@ -9,5 +9,5 @@ import io.seata.core.rpc.netty.NettyPoolKey;
  */
 public interface ClientPoolKeyGenerator {
     
-    NettyPoolKey generate();
+    NettyPoolKey generate(String serverAddress);
 }

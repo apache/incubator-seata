@@ -31,6 +31,8 @@ import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
+import io.seata.core.rpc.netty.pool.ClientPoolKeyGenerator;
+import io.seata.core.rpc.netty.pool.RmClientPoolKeyGenerator;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,10 +75,13 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     private static final String MERGE_THREAD_PREFIX = "rpcMergeMessageSend";
     private final NettyClientConfig rmClientConfig;
     
+    private final ClientPoolKeyGenerator poolKeyGenerator;
+    
     private RmRpcClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
                         ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, TransactionRole.RMROLE);
         this.rmClientConfig = nettyClientConfig;
+        poolKeyGenerator = new RmClientPoolKeyGenerator(applicationId, transactionServiceGroup, resourceManager, customerKeys);
     }
 
     /**
@@ -232,20 +237,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         }
         Channel channelFromPool;
         try {
-            String resourceIds = customerKeys == null ? getMergedResourceKeys(resourceManager) : customerKeys;
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("RM will register :" + resourceIds);
-            }
-            RegisterRMRequest message;
-            if (null == poolKeyMap.get(serverAddress)) {
-                message = new RegisterRMRequest(applicationId, transactionServiceGroup);
-                message.setResourceIds(resourceIds);
-                poolKeyMap.putIfAbsent(serverAddress,
-                    new NettyPoolKey(TransactionRole.RMROLE, serverAddress, message));
-            } else {
-                message = (RegisterRMRequest)poolKeyMap.get(serverAddress).getMessage();
-                message.setResourceIds(resourceIds);
-            }
+            poolKeyMap.put(serverAddress, poolKeyGenerator.generate(serverAddress));
             channelFromPool = nettyClientKeyPool.borrowObject(poolKeyMap.get(serverAddress));
         } catch (Exception exx) {
             LOGGER.error(FrameworkErrorCode.RegisterRM.getErrCode(), "register RM failed.", exx);

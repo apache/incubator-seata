@@ -10,20 +10,17 @@ import io.seata.core.rpc.netty.NettyPoolKey;
  */
 public class TmClientPoolKeyGenerator implements ClientPoolKeyGenerator {
     
-    private final String serverAddress;
-    
     private final String applicationId;
     
     private final String transactionServiceGroup;
     
-    public TmClientPoolKeyGenerator(final String serverAddress, final String applicationId, final String transactionServiceGroup) {
-        this.serverAddress = serverAddress;
+    public TmClientPoolKeyGenerator(final String applicationId, final String transactionServiceGroup) {
         this.applicationId = applicationId;
         this.transactionServiceGroup = transactionServiceGroup;
     }
     
     @Override
-    public NettyPoolKey generate() {
+    public NettyPoolKey generate(final String serverAddress) {
         RegisterTMRequest message = new RegisterTMRequest(applicationId, transactionServiceGroup);
         return new NettyPoolKey(NettyPoolKey.TransactionRole.TMROLE, serverAddress, message);
     }

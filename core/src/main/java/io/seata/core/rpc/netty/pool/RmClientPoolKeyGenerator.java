@@ -21,8 +21,6 @@ public final class RmClientPoolKeyGenerator implements ClientPoolKeyGenerator {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(RmClientPoolKeyGenerator.class);
     
-    private final String serverAddress;
-    
     private final String applicationId;
     
     private final String transactionServiceGroup;
@@ -31,9 +29,8 @@ public final class RmClientPoolKeyGenerator implements ClientPoolKeyGenerator {
     
     private final String customerKeys;
     
-    public RmClientPoolKeyGenerator(final String serverAddress, final String applicationId, final String transactionServiceGroup,
+    public RmClientPoolKeyGenerator(final String applicationId, final String transactionServiceGroup,
                                     final ResourceManager resourceManager, final String customerKeys) {
-        this.serverAddress = serverAddress;
         this.applicationId = applicationId;
         this.transactionServiceGroup = transactionServiceGroup;
         this.resourceManager = resourceManager;
@@ -41,7 +38,7 @@ public final class RmClientPoolKeyGenerator implements ClientPoolKeyGenerator {
     }
     
     @Override
-    public NettyPoolKey generate() {
+    public NettyPoolKey generate(final String serverAddress) {
         String resourceIds = customerKeys == null ? getMergedResourceKeys() : customerKeys;
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("RM will register :" + resourceIds);
