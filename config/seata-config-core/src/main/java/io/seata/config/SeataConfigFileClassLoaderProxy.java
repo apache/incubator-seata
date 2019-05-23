@@ -41,7 +41,6 @@ public class SeataConfigFileClassLoaderProxy extends ClassLoader{
 	
 	@Override
 	public Enumeration<URL> getResources(String name) throws IOException {
-		//加载yyt自己的资源文件
 		String extendResourceName = name;
 		if(baseDir != null) {
 			extendResourceName = baseDir + File.separator + name;
