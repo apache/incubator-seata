@@ -26,10 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -42,10 +39,19 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesRegistryServiceImpl.class);
 
 
+    private static final String DEFAULT_NAMESPACE= "any";
+
+    private static final String FILE_ROOT_REGISTRY = "registry";
+    private static final String FILE_CONFIG_SPLIT_CHAR = ".";
+    private static final String REGISTRY_TYPE = "kubernetes";
+    private static final String NAMESPACE = "namespace";
+
     private static volatile boolean subscribeListener = false;
     private static volatile KubernetesRegistryServiceImpl instance;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static  ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap;
+
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
 
     private static volatile KubernetesClient kubernetesClient;
 
@@ -106,30 +112,14 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
     }
 
 
-    public Endpoints getEndpointsByName(String name){
-        final List<Endpoints> endpointsList = kubernetesClient.endpoints().list().getItems();
-        Endpoints endpoints = null;
-        for (Endpoints e : endpointsList) {
-            if (e.getMetadata().getName().equals(name)){
-                endpoints = e;
-            }
-        }
-        return endpoints;
-    }
 
-    private List<EndpointSubset> getSubsetsFromEndpoints(Endpoints endpoints) {
-        if (endpoints == null) {
-            return new ArrayList<>();
-        }
-        if (endpoints.getSubsets() == null) {
-            return new ArrayList<>();
-        }
-        return endpoints.getSubsets();
-    }
 
 
     private void refreshCluster(){
-        final EndpointsList endpointsList = kubernetesClient.endpoints().list();
+        final EndpointsList endpointsList =  Optional.ofNullable(getNamespace())
+                .map(namespace -> kubernetesClient.endpoints().inNamespace(namespace).list())
+                .orElseGet(() -> kubernetesClient.endpoints().list());
+
         final List<Endpoints> endpointsItems = endpointsList.getItems();
         if (endpointsItems == null || endpointsItems.isEmpty()) {
             clusterAddressMap.clear();
@@ -172,15 +162,18 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
         kubernetesClient = null;
     }
 
-
-    private KubernetesClient getKubernetesClient(){
-        if (null == kubernetesClient) {
-            synchronized (KubernetesRegistryServiceImpl.class) {
-                if (null == kubernetesClient) {
-                    kubernetesClient = new DefaultKubernetesClient();
-                }
-            }
+    private String getNamespace() {
+        String namespace = FILE_CONFIG.getConfig(getKubernetesNamespaceFileKey());
+        if (DEFAULT_NAMESPACE.equals(namespace)){
+            return null;
         }
-        return kubernetesClient;
+        return namespace;
     }
+
+
+    private String getKubernetesNamespaceFileKey() {
+        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
+                + NAMESPACE;
+    }
+
 }
