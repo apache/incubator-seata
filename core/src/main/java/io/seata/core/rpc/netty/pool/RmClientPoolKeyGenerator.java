@@ -17,9 +17,9 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
  *
  * @author zhaojun
  */
-public final class RMClientPoolKeyGenerator implements ClientPoolKeyGenerator {
+public final class RmClientPoolKeyGenerator implements ClientPoolKeyGenerator {
     
-    private static final Logger LOGGER = LoggerFactory.getLogger(RMClientPoolKeyGenerator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RmClientPoolKeyGenerator.class);
     
     private final String serverAddress;
     
@@ -31,7 +31,7 @@ public final class RMClientPoolKeyGenerator implements ClientPoolKeyGenerator {
     
     private final String customerKeys;
     
-    public RMClientPoolKeyGenerator(final String serverAddress, final String applicationId, final String transactionServiceGroup,
+    public RmClientPoolKeyGenerator(final String serverAddress, final String applicationId, final String transactionServiceGroup,
                                     final ResourceManager resourceManager, final String customerKeys) {
         this.serverAddress = serverAddress;
         this.applicationId = applicationId;
@@ -57,7 +57,6 @@ public final class RMClientPoolKeyGenerator implements ClientPoolKeyGenerator {
      * @return the merged resource keys
      */
     public String getMergedResourceKeys() {
-        //TODO
         Map<String, Resource> managedResources = resourceManager.getManagedResources();
         Set<String> resourceIds = managedResources.keySet();
         if (!resourceIds.isEmpty()) {
