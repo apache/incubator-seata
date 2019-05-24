@@ -15,7 +15,6 @@
  */
 package io.seata.common.util;
 
-import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Iterator;
 

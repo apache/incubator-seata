@@ -26,7 +26,6 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.rm.datasource.undo.UndoExecutorTest;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;

@@ -25,7 +25,6 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.lock.LockManager;
-import io.seata.server.lock.LockerFactory;
 import io.seata.server.lock.memory.MemoryLockManagerForTest;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
