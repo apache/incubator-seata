@@ -92,8 +92,18 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         return clientChannelManager;
     }
     
+    /**
+     * Get pool key function.
+     *
+     * @return lambda function
+     */
     protected abstract Function<String, NettyPoolKey> getPoolKeyFunction();
     
+    /**
+     * Get transaction service group.
+     *
+     * @return transaction service group
+     */
     protected abstract String getTransactionServiceGroup();
 
     @Override
@@ -109,7 +119,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             MAX_MERGE_SEND_THREAD,
             KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(),
-            new NamedThreadFactory(getThreadPrefix(MERGE_THREAD_PREFIX), MAX_MERGE_SEND_THREAD));
+            new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
         mergeSendExecutorService.submit(new MergedSendRunnable());
         super.init();
     }
@@ -278,8 +288,8 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         return NetUtil.toStringAddress(address);
     }
     
-    private String getThreadPrefix(String threadPrefix) {
-        return threadPrefix + THREAD_PREFIX_SPLIT_CHAR + transactionRole.name();
+    private String getThreadPrefix() {
+        return AbstractRpcRemotingClient.MERGE_THREAD_PREFIX + THREAD_PREFIX_SPLIT_CHAR + transactionRole.name();
     }
 
     /**
