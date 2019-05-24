@@ -20,15 +20,12 @@ import io.seata.core.lock.Locker;
 import io.seata.core.store.db.LockStoreDataBaseDAO;
 import io.seata.server.lock.DefaultLockManager;
 import io.seata.server.lock.LockManager;
-import io.seata.server.lock.memory.MemoryLocker;
 import io.seata.server.session.BranchSession;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 
-import javax.sql.DataSource;
-import javax.xml.crypto.Data;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;

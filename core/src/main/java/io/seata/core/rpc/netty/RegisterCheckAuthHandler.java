@@ -17,8 +17,6 @@ package io.seata.core.rpc.netty;
 
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
 
 /**
  * The interface Register check auth handler.

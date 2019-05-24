@@ -15,7 +15,6 @@
  */
 package io.seata.server.store;
 
-import io.seata.core.model.GlobalStatus;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 

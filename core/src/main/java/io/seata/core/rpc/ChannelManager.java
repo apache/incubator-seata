@@ -29,7 +29,6 @@ import io.seata.core.protocol.IncompatibleVersionException;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.Version;
-import io.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
 
 import io.netty.channel.Channel;
 import io.seata.core.rpc.netty.NettyPoolKey;
