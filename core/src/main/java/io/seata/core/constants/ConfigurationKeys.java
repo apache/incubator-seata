@@ -92,4 +92,111 @@ public class ConfigurationKeys {
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_PREFIX + "report.retry.count";
+
+    /**
+     * The constant STORE_DB_GLOBAL_TABLE.
+     */
+    public static final String STORE_DB_GLOBAL_TABLE  = "store.db.global.table";
+
+    /**
+     * The constant STORE_DB_BRANCH_TABLE.
+     */
+    public static final String STORE_DB_BRANCH_TABLE  = "store.db.branch.table";
+
+    /**
+     * The constant STORE_DB_GLOBAL_DEFAULT_TABLE.
+     */
+    public static final String STORE_DB_GLOBAL_DEFAULT_TABLE  = "global_table";
+
+    /**
+     * The constant STORE_DB_BRANCH_DEFAULT_TABLE.
+     */
+    public static final String STORE_DB_BRANCH_DEFAULT_TABLE  = "branch_table";
+
+    /**
+     * The constant STORE_DB_DATASOURCE_TYPE.
+     */
+    public static final String STORE_DB_DATASOURCE_TYPE  = "store.db.datasource";
+
+
+    /**
+     * The constant STORE_DB_TYPE.
+     */
+    public static final String STORE_DB_TYPE  = "store.db.db-type";
+
+    /**
+     * The constant STORE_DB_URL.
+     */
+    public static final String STORE_DB_URL  = "store.db.url";
+
+    /**
+     * The constant STORE_DB_USER.
+     */
+    public static final String STORE_DB_USER  = "store.db.user";
+
+    /**
+     * The constant STORE_DB_PASSWORD.
+     */
+    public static final String STORE_DB_PASSWORD  = "store.db.password";
+
+    /**
+     * The constant STORE_DB_MIN_CONN.
+     */
+    public static final String STORE_DB_MIN_CONN = "store.db.min-conn";
+
+    /**
+     * The constant STORE_DB_MAX_CONN.
+     */
+    public static final String STORE_DB_MAX_CONN  = "store.db.max-conn";
+
+    /**
+     * The constant STORE_DB_LOG_QUERY_LIMIT.
+     */
+    public static final String STORE_DB_LOG_QUERY_LIMIT  = "store.db.query-limit";
+
+    /**
+     * The constant LOCK_MODE.
+     */
+    public static final String LOCK_MODE =  "lock.mode";
+
+    /**
+     * The constant LOCK_DB_TABLE.
+     */
+    public static final String LOCK_DB_TABLE  = "lock.db.lock-table";
+
+    /**
+     * The constant LOCK_DB_DEFAULT_TABLE.
+     */
+    public static final String LOCK_DB_DEFAULT_TABLE  = "lock_table";
+
+    /**
+     * The constant COMMITING_RETRY_DELAY.
+     */
+    public static final String  COMMITING_RETRY_DELAY = "recovery.committing-retry-delay";
+
+    /**
+     * The constant ASYN_COMMITING_RETRY_DELAY.
+     */
+    public static final String  ASYN_COMMITING_RETRY_DELAY = "recovery.asyn-committing-retry-delay";
+
+    /**
+     * The constant ROLLBACKING_RETRY_DELAY.
+     */
+    public static final String  ROLLBACKING_RETRY_DELAY = "recovery.rollbacking-retry-delay";
+
+    /**
+     * The constant TIMEOUT_RETRY_DELAY.
+     */
+    public static final String  TIMEOUT_RETRY_DELAY = "recovery.timeout-retry-delay";
+
+
+    /**
+     * The constant TRANSACTION_PREFIX.
+     */
+    public static final String TRANSACTION_PREFIX = "transaction.";
+
+    /**
+     * The constant RM_DATASOURCE_UNOD_VALIDATION.
+     */
+    public static final String TRANSACTION_UNOD_DATA_VALIDATION = TRANSACTION_PREFIX + "undo.data.validation";
 }

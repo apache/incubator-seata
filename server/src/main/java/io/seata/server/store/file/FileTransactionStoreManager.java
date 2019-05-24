@@ -13,16 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.store;
-
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.CollectionUtils;
-import io.seata.server.session.BranchSession;
-import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionCondition;
-import io.seata.server.session.SessionManager;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package io.seata.server.store.file;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,17 +24,39 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
+
+import io.seata.common.exception.StoreException;
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.CollectionUtils;
+import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
+import io.seata.server.session.SessionManager;
+import io.seata.server.store.AbstractTransactionStoreManager;
+import io.seata.server.store.FlushDiskMode;
+import io.seata.server.store.ReloadableStore;
+import io.seata.server.store.SessionStorable;
+import io.seata.server.store.StoreConfig;
+import io.seata.server.store.TransactionStoreManager;
+import io.seata.server.store.TransactionWriteStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type File transaction store manager.
  *
  * @author jimin.jm @alibaba-inc.com
  */
-public class FileTransactionStoreManager implements TransactionStoreManager {
-
+@LoadLevel(name = "file")
+public class FileTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager, ReloadableStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileTransactionStoreManager.class);
 
     private static final int MAX_THREAD_WRITE = 1;
@@ -119,8 +132,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
      */
     public FileTransactionStoreManager(String fullFileName, SessionManager sessionManager) throws IOException {
         initFile(fullFileName);
-        fileWriteExecutor =
-                new ThreadPoolExecutor(MAX_THREAD_WRITE, MAX_THREAD_WRITE, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
+        fileWriteExecutor = new ThreadPoolExecutor(MAX_THREAD_WRITE, MAX_THREAD_WRITE, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
                         new LinkedBlockingQueue<Runnable>(),
                         new NamedThreadFactory("fileTransactionStore", MAX_THREAD_WRITE, true));
         writeDataFileRunnable = new WriteDataFileRunnable();
@@ -248,6 +260,16 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
     }
 
     @Override
+    public GlobalSession readSession(String xid) {
+        throw new StoreException("unsupport for read from file, xid:" + xid);
+    }
+
+    @Override
+    public List<GlobalSession> readSession(SessionCondition sessionCondition) {
+        throw new StoreException("unsupport for read from file");
+    }
+
+    @Override
     public void shutdown() {
         if (null != fileWriteExecutor) {
             fileWriteExecutor.shutdown();
@@ -257,7 +279,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                 ++retry;
                 try {
                     Thread.sleep(SHUTDOWN_CHECK_INTERNAL);
-                } catch (InterruptedException exx) {
+                } catch (InterruptedException ignore) {
                 }
             }
             if (retry >= MAX_SHUTDOWN_RETRY) {
@@ -273,7 +295,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
     }
 
     @Override
-    public List<TransactionWriteStore> readWriteStoreFromFile(int readSize, boolean isHistory) {
+    public List<TransactionWriteStore> readWriteStore(int readSize, boolean isHistory) {
         File file = null;
         long currentOffset = 0;
         if (isHistory) {
@@ -305,7 +327,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
             raf = new RandomAccessFile(file, "r");
             return currentOffset < raf.length();
 
-        } catch (IOException exx) {
+        } catch (IOException ignore) {
         } finally {
             closeFile(raf);
         }
@@ -512,7 +534,7 @@ public class FileTransactionStoreManager implements TransactionStoreManager {
                     StoreRequest storeRequest = storeRequests.poll(MAX_WAIT_TIME_MILLS, TimeUnit.MILLISECONDS);
                     handleStoreRequest(storeRequest);
                 } catch (Exception exx) {
-                    LOGGER.error("write file error", exx.getMessage());
+                    LOGGER.error("write file error: {}", exx.getMessage(), exx);
                 }
             }
             handleRestRequest();
