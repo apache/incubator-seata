@@ -16,11 +16,13 @@
 package io.seata.common.util;
 
 import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * The type Collection utils.
  *
  * @author zhangsen
+ * @author Geng Zhang
  */
 public class CollectionUtils {
 
@@ -42,5 +44,67 @@ public class CollectionUtils {
      */
     public static boolean isNotEmpty(Collection col){
         return col != null && col.size() > 0;
+    }
+
+    /**
+     * Is empty boolean.
+     *
+     * @param array the array
+     * @return the boolean
+     */
+    public static boolean isEmpty(Object[] array){
+        return !isNotEmpty(array);
+    }
+
+    /**
+     * Is not empty boolean.
+     *
+     * @param array the array
+     * @return the boolean
+     */
+    public static boolean isNotEmpty(Object[] array){
+        return array != null && array.length > 0;
+    }
+
+    /**
+     * To string string.
+     *
+     * @param col the col
+     * @return the string
+     */
+    public static String toString(Collection col){
+        if(isEmpty(col)){
+            return "";
+        }
+        StringBuffer sb = new StringBuffer();
+        sb.append("[");
+        Iterator it = col.iterator();
+        while (it.hasNext()){
+            Object obj = it.next();
+            sb.append(StringUtils.toString(obj));
+            sb.append(",");
+        }
+        sb.deleteCharAt(sb.length() - 1);
+        sb.append("]");
+        return sb.toString();
+    }
+  
+    /**
+     * Is size equals boolean.
+     *
+     * @param col0 the col 0
+     * @param col1 the col 1
+     * @return the boolean
+     */
+    public static boolean isSizeEquals(Collection col0, Collection col1) {
+        if (col0 == null) {
+            return col1 == null;
+        } else {
+            if (col1 == null) {
+                return false;
+            } else {
+                return col0.size() == col1.size();
+            }
+        }
     }
 }

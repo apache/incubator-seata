@@ -17,6 +17,7 @@ package io.seata.server.store;
 
 import java.io.File;
 
+import io.seata.common.XID;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -24,15 +25,15 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.lock.LockManager;
-import io.seata.server.lock.LockManagerFactory;
+import io.seata.server.lock.memory.MemoryLockManagerForTest;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-import org.junit.Assert;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 /**
  * The type Session store test.
@@ -52,7 +53,7 @@ public class SessionStoreTest {
      *
      * @throws Exception the exception
      */
-    @BeforeMethod
+    @BeforeEach
     public void clean() throws Exception {
         String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
         File rootDataFile = new File(sessionStorePath + File.separator + SessionHolder.ROOT_SESSION_MANAGER_NAME);
@@ -64,7 +65,8 @@ public class SessionStoreTest {
         if (rootDataFileHis.exists()) {
             rootDataFileHis.delete();
         }
-        LockManagerFactory.get().cleanAllLocks();
+        LockManager lockManager = new MemoryLockManagerForTest();
+        lockManager.cleanAllLocks();
     }
 
     /**
@@ -76,43 +78,48 @@ public class SessionStoreTest {
     public void testRestoredFromFile() throws Exception {
         SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
+        String xid = XID.generateXID(globalSession.getTransactionId());
+        globalSession.setXid(xid);
 
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.begin();
 
         BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
                 "ta:1,2;tb:3", "xxx");
+        branchSession1.setXid(xid);
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
-        LockManager lockManager = LockManagerFactory.get();
+        LockManager lockManager = new MemoryLockManagerForTest();
 
-        Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
-        Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "ta:2"));
-        Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "tb:3"));
+        String otherXID = XID.generateXID(0L);
 
-        Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:4"));
-        Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "tb:5"));
+        Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
+        Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:2"));
+        Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "tb:3"));
+
+        Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:4"));
+        Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "tb:5"));
 
         lockManager.cleanAllLocks();
 
-        Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
-        Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:2"));
-        Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "tb:3"));
+        Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
+        Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:2"));
+        Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "tb:3"));
 
         // Re-init SessionHolder: restore sessions from file
         SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
-        GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
-        Assert.assertNotNull(reloadSession);
-        Assert.assertFalse(globalSession == reloadSession);
-        Assert.assertEquals(globalSession.getApplicationId(), reloadSession.getApplicationId());
+        GlobalSession reloadSession = SessionHolder.findGlobalSession(globalSession.getXid());
+        Assertions.assertNotNull(reloadSession);
+        Assertions.assertFalse(globalSession == reloadSession);
+        Assertions.assertEquals(globalSession.getApplicationId(), reloadSession.getApplicationId());
 
-        Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
-        Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "ta:2"));
-        Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "tb:3"));
-        Assert.assertTrue(lockManager.isLockable(globalSession.getTransactionId(), RESOURCE_ID, "tb:3"));
+        Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
+        Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:2"));
+        Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "tb:3"));
+        Assertions.assertTrue(lockManager.isLockable(xid, RESOURCE_ID, "tb:3"));
 
         //clear
         reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -146,37 +153,42 @@ public class SessionStoreTest {
         SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
+        String xid = XID.generateXID(globalSession.getTransactionId());
+        globalSession.setXid(xid);
+
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.begin();
 
         BranchSession branchSession1 = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, RESOURCE_ID,
                 "ta:1", "xxx");
-        Assert.assertTrue(branchSession1.lock());
+        Assertions.assertTrue(branchSession1.lock());
         globalSession.addBranch(branchSession1);
 
-        LockManager lockManager = LockManagerFactory.get();
+        LockManager lockManager = new MemoryLockManagerForTest();
 
-        Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
+        String otherXID = XID.generateXID(0L);
+
+        Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
         globalSession.changeStatus(GlobalStatus.AsyncCommitting);
 
         lockManager.cleanAllLocks();
 
-        Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
+        Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
         SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
-        GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
-        Assert.assertEquals(reloadSession.getStatus(), GlobalStatus.AsyncCommitting);
+        GlobalSession reloadSession = SessionHolder.findGlobalSession(globalSession.getXid());
+        Assertions.assertEquals(reloadSession.getStatus(), GlobalStatus.AsyncCommitting);
 
         GlobalSession sessionInAsyncCommittingQueue = SessionHolder.getAsyncCommittingSessionManager()
-                .findGlobalSession(tid);
-        Assert.assertTrue(reloadSession == sessionInAsyncCommittingQueue);
+                .findGlobalSession(globalSession.getXid());
+        Assertions.assertTrue(reloadSession == sessionInAsyncCommittingQueue);
 
         // No locking for session in AsyncCommitting status
-        Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
+        Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
         //clear
         reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -193,6 +205,9 @@ public class SessionStoreTest {
         SessionHolder.init("file");
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
+        String xid = XID.generateXID(globalSession.getTransactionId());
+        globalSession.setXid(xid);
+
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.begin();
 
@@ -201,9 +216,11 @@ public class SessionStoreTest {
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
-        LockManager lockManager = LockManagerFactory.get();
+        LockManager lockManager =  new MemoryLockManagerForTest();
 
-        Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
+        String otherXID = XID.generateXID(0L);
+
+        Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
         globalSession.changeStatus(GlobalStatus.Committing);
         globalSession.changeBranchStatus(branchSession1, BranchStatus.PhaseTwo_CommitFailed_Retryable);
@@ -211,23 +228,23 @@ public class SessionStoreTest {
 
         lockManager.cleanAllLocks();
 
-        Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
+        Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
         SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
-        GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
-        Assert.assertEquals(reloadSession.getStatus(), GlobalStatus.CommitRetrying);
+        GlobalSession reloadSession = SessionHolder.findGlobalSession(globalSession.getXid());
+        Assertions.assertEquals(reloadSession.getStatus(), GlobalStatus.CommitRetrying);
 
         GlobalSession sessionInRetryCommittingQueue = SessionHolder.getRetryCommittingSessionManager()
-                .findGlobalSession(tid);
-        Assert.assertTrue(reloadSession == sessionInRetryCommittingQueue);
+                .findGlobalSession(globalSession.getXid());
+        Assertions.assertTrue(reloadSession == sessionInRetryCommittingQueue);
         BranchSession reloadBranchSession = reloadSession.getBranch(branchSession1.getBranchId());
-        Assert.assertEquals(reloadBranchSession.getStatus(), BranchStatus.PhaseTwo_CommitFailed_Retryable);
+        Assertions.assertEquals(reloadBranchSession.getStatus(), BranchStatus.PhaseTwo_CommitFailed_Retryable);
 
         // Lock is held by session in CommitRetrying status
-        Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
+        Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
         //clear
         reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -245,6 +262,9 @@ public class SessionStoreTest {
 
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
+        String xid = XID.generateXID(globalSession.getTransactionId());
+        globalSession.setXid(xid);
+
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.begin();
 
@@ -253,9 +273,11 @@ public class SessionStoreTest {
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
-        LockManager lockManager = LockManagerFactory.get();
+        LockManager lockManager =  new MemoryLockManagerForTest();
 
-        Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
+        String otherXID = XID.generateXID(0L);
+
+        Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
         globalSession.changeStatus(GlobalStatus.Rollbacking);
         globalSession.changeBranchStatus(branchSession1, BranchStatus.PhaseTwo_RollbackFailed_Retryable);
@@ -263,23 +285,23 @@ public class SessionStoreTest {
 
         lockManager.cleanAllLocks();
 
-        Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
+        Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
         SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
-        GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
-        Assert.assertEquals(reloadSession.getStatus(), GlobalStatus.RollbackRetrying);
+        GlobalSession reloadSession = SessionHolder.findGlobalSession(globalSession.getXid());
+        Assertions.assertEquals(reloadSession.getStatus(), GlobalStatus.RollbackRetrying);
 
         GlobalSession sessionInRetryRollbackingQueue = SessionHolder.getRetryRollbackingSessionManager()
-                .findGlobalSession(tid);
-        Assert.assertTrue(reloadSession == sessionInRetryRollbackingQueue);
+                .findGlobalSession(globalSession.getXid());
+        Assertions.assertTrue(reloadSession == sessionInRetryRollbackingQueue);
         BranchSession reloadBranchSession = reloadSession.getBranch(branchSession1.getBranchId());
-        Assert.assertEquals(reloadBranchSession.getStatus(), BranchStatus.PhaseTwo_RollbackFailed_Retryable);
+        Assertions.assertEquals(reloadBranchSession.getStatus(), BranchStatus.PhaseTwo_RollbackFailed_Retryable);
 
         // Lock is held by session in RollbackRetrying status
-        Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
+        Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
         //clear
         reloadSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -297,6 +319,9 @@ public class SessionStoreTest {
 
         GlobalSession globalSession = new GlobalSession("demo-app", "my_test_tx_group", "test", 6000);
 
+        String xid = XID.generateXID(globalSession.getTransactionId());
+        globalSession.setXid(xid);
+
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.begin();
 
@@ -305,26 +330,28 @@ public class SessionStoreTest {
         branchSession1.lock();
         globalSession.addBranch(branchSession1);
 
-        LockManager lockManager = LockManagerFactory.get();
+        LockManager lockManager =  new MemoryLockManagerForTest();
 
-        Assert.assertFalse(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
+        String otherXID = XID.generateXID(0L);
+
+        Assertions.assertFalse(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
         globalSession.changeStatus(GlobalStatus.Rollbacking);
         globalSession.changeBranchStatus(branchSession1, BranchStatus.PhaseTwo_CommitFailed_Unretryable);
         SessionHelper.endRollbackFailed(globalSession);
 
         // Lock is released.
-        Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
+        Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
         lockManager.cleanAllLocks();
 
-        Assert.assertTrue(lockManager.isLockable(0L, RESOURCE_ID, "ta:1"));
+        Assertions.assertTrue(lockManager.isLockable(otherXID, RESOURCE_ID, "ta:1"));
 
         // Re-init SessionHolder: restore sessions from file
         SessionHolder.init("file");
 
         long tid = globalSession.getTransactionId();
-        GlobalSession reloadSession = SessionHolder.findGlobalSession(tid);
-        Assert.assertNull(reloadSession);
+        GlobalSession reloadSession = SessionHolder.findGlobalSession(globalSession.getXid());
+        Assertions.assertNull(reloadSession);
     }
 }

@@ -15,7 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -40,9 +40,10 @@ public class UndoLogManagerTest {
 
     private static final int APPEND_IN_SIZE = 10;
 
-    private static final int LIMIT_SIZE = 10;
 
-    private static final String THE_APPEND_IN_SIZE_PARAM_String = " (?,?,?,?,?,?,?,?,?,?) ";
+    private static final String THE_APPEND_IN_SIZE_PARAM_STRING = " (?,?,?,?,?,?,?,?,?,?) ";
+
+    private static final String THE_DOUBLE_APPEND_IN_SIZE_PARAM_STRING = " (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) ";
 
     @Test
     public void testBatchDeleteUndoLog() throws Exception {
@@ -57,7 +58,7 @@ public class UndoLogManagerTest {
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
-        UndoLogManager.batchDeleteUndoLog(xids, branchIds, LIMIT_SIZE, connection);
+        UndoLogManager.batchDeleteUndoLog(xids, branchIds, connection);
 
         //verify
         for (int i = 1;i <= APPEND_IN_SIZE;i++){
@@ -72,11 +73,10 @@ public class UndoLogManagerTest {
     @Test
     public void testToBatchDeleteUndoLogSql() {
         String expectedSqlString="DELETE FROM undo_log WHERE  branch_id IN " +
-                THE_APPEND_IN_SIZE_PARAM_String +
+                THE_APPEND_IN_SIZE_PARAM_STRING +
                 " AND xid IN " +
-                THE_APPEND_IN_SIZE_PARAM_String +
-                " LIMIT " + LIMIT_SIZE;
-        String batchDeleteUndoLogSql = UndoLogManager.toBatchDeleteUndoLogSql(APPEND_IN_SIZE, APPEND_IN_SIZE, LIMIT_SIZE);
+                THE_DOUBLE_APPEND_IN_SIZE_PARAM_STRING;
+        String batchDeleteUndoLogSql = UndoLogManager.toBatchDeleteUndoLogSql(APPEND_IN_SIZE * 2, APPEND_IN_SIZE);
         System.out.println(batchDeleteUndoLogSql);
         assertThat(batchDeleteUndoLogSql).isEqualTo(expectedSqlString);
     }
@@ -85,7 +85,7 @@ public class UndoLogManagerTest {
     public void testAppendInParam() {
         StringBuilder sqlBuilder = new StringBuilder();
         UndoLogManager.appendInParam(APPEND_IN_SIZE, sqlBuilder);
-        assertThat(sqlBuilder.toString()).isEqualTo(THE_APPEND_IN_SIZE_PARAM_String);
+        assertThat(sqlBuilder.toString()).isEqualTo(THE_APPEND_IN_SIZE_PARAM_STRING);
     }
 
 }

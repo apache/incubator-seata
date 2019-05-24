@@ -17,11 +17,14 @@ package io.seata.server.lock;
 
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
+import io.seata.server.lock.memory.MemoryLockManagerForTest;
 import io.seata.server.session.BranchSession;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
-import org.junit.Assert;
-import org.testng.annotations.DataProvider;
-import org.testng.annotations.Test;
+import java.util.stream.Stream;
 
 /**
  * The type Lock manager test.
@@ -37,10 +40,11 @@ public class LockManagerTest {
      * @param branchSession the branch session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "branchSessionProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
     public void acquireLock_success(BranchSession branchSession) throws Exception {
-        LockManager lockManager = LockManagerFactory.get();
-        Assert.assertTrue(lockManager.acquireLock(branchSession));
+        LockManager lockManager = new MemoryLockManagerForTest();
+        Assertions.assertTrue(lockManager.acquireLock(branchSession));
     }
 
     /**
@@ -50,11 +54,12 @@ public class LockManagerTest {
      * @param branchSession2 the branch session 2
      * @throws Exception the exception
      */
-    @Test(dataProvider = "branchSessionsProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionsProvider")
     public void acquireLock_failed(BranchSession branchSession1, BranchSession branchSession2) throws Exception {
-        LockManager lockManager = LockManagerFactory.get();
-        Assert.assertTrue(lockManager.acquireLock(branchSession1));
-        Assert.assertFalse(lockManager.acquireLock(branchSession2));
+        LockManager lockManager = new MemoryLockManagerForTest();
+        Assertions.assertTrue(lockManager.acquireLock(branchSession1));
+        Assertions.assertFalse(lockManager.acquireLock(branchSession2));
     }
 
     /**
@@ -63,16 +68,17 @@ public class LockManagerTest {
      * @param branchSession the branch session
      * @throws Exception the exception
      */
-    @Test(dataProvider = "branchSessionProvider")
+    @ParameterizedTest
+    @MethodSource("branchSessionProvider")
     public void isLockableTest(BranchSession branchSession) throws Exception {
         branchSession.setLockKey("t:4");
-        LockManager lockManager = LockManagerFactory.get();
-        Assert.assertTrue(lockManager
-            .isLockable(branchSession.getTransactionId(), branchSession.getResourceId(), branchSession.getLockKey()));
+        LockManager lockManager = new MemoryLockManagerForTest();
+        Assertions.assertTrue(lockManager
+                .isLockable(branchSession.getXid(), branchSession.getResourceId(), branchSession.getLockKey()));
         lockManager.acquireLock(branchSession);
         branchSession.setTransactionId(UUIDGenerator.generateUUID());
-        Assert.assertFalse(lockManager
-            .isLockable(branchSession.getTransactionId(), branchSession.getResourceId(), branchSession.getLockKey()));
+        Assertions.assertFalse(lockManager
+                .isLockable(branchSession.getXid(), branchSession.getResourceId(), branchSession.getLockKey()));
     }
 
     /**
@@ -80,8 +86,7 @@ public class LockManagerTest {
      *
      * @return the object [ ] [ ]
      */
-    @DataProvider
-    public static Object[][] branchSessionProvider() {
+    static Stream<Arguments> branchSessionProvider() {
         BranchSession branchSession = new BranchSession();
         branchSession.setTransactionId(UUIDGenerator.generateUUID());
         branchSession.setBranchId(0L);
@@ -92,7 +97,8 @@ public class LockManagerTest {
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
         branchSession.setBranchType(BranchType.AT);
-        return new Object[][] {{branchSession}};
+        return Stream.of(
+                Arguments.of(branchSession));
     }
 
     /**
@@ -100,8 +106,7 @@ public class LockManagerTest {
      *
      * @return the object [ ] [ ]
      */
-    @DataProvider
-    public static Object[][] branchSessionsProvider() {
+    static Stream<Arguments> branchSessionsProvider() {
         BranchSession branchSession1 = new BranchSession();
         branchSession1.setTransactionId(UUIDGenerator.generateUUID());
         branchSession1.setBranchId(1L);
@@ -123,6 +128,7 @@ public class LockManagerTest {
         branchSession2.setBranchType(BranchType.AT);
         branchSession2.setApplicationData("{\"data\":\"test\"}");
         branchSession2.setBranchType(BranchType.AT);
-        return new Object[][] {{branchSession1, branchSession2}};
+        return Stream.of(
+                Arguments.of(branchSession1, branchSession2));
     }
 }

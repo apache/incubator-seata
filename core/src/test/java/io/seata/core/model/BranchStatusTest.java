@@ -16,11 +16,12 @@
 package io.seata.core.model;
 
 import io.seata.common.exception.ShouldNeverHappenException;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * A unit test for {@link BranchStatus}
+ *
  * @author Lay
  * @date 2019/3/6
  */
@@ -32,23 +33,23 @@ public class BranchStatusTest {
     @Test
     public void testGetCode() {
         int code = BranchStatus.Registered.getCode();
-        Assert.assertEquals(code, REGISTERED_CODE);
+        Assertions.assertEquals(code, REGISTERED_CODE);
     }
 
     @Test
     public void testGetWithByte() {
-        BranchStatus branchStatus = BranchStatus.get((byte)REGISTERED_CODE);
-        Assert.assertEquals(branchStatus, BranchStatus.Registered);
+        BranchStatus branchStatus = BranchStatus.get((byte) REGISTERED_CODE);
+        Assertions.assertEquals(branchStatus, BranchStatus.Registered);
     }
 
     @Test
     public void testGetWithInt() {
         BranchStatus branchStatus = BranchStatus.get(REGISTERED_CODE);
-        Assert.assertEquals(branchStatus, BranchStatus.Registered);
+        Assertions.assertEquals(branchStatus, BranchStatus.Registered);
     }
 
-    @Test(expected = ShouldNeverHappenException.class)
+    @Test
     public void testGetException() {
-        BranchStatus.get(NONE);
+        Assertions.assertThrows(ShouldNeverHappenException.class, () -> BranchStatus.get(NONE));
     }
 }
