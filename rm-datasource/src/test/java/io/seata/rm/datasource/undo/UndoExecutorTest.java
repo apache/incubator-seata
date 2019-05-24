@@ -33,7 +33,10 @@ import java.sql.Types;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -41,7 +44,7 @@ import static org.mockito.Mockito.when;
  * The type Undo executor test.
  */
 public class UndoExecutorTest {
-    
+
     /**
      * Test field.
      */
@@ -115,21 +118,32 @@ public class UndoExecutorTest {
         });
     }
 
-    public void mockSQLUndoLogAndVerifyExecution(SQLType sqlType, String expectedSQL,
-                                                 Consumer<PreparedStatement> verifier)
+    /**
+     * The template method of mock data and assertion
+     *
+     * @param sqlType
+     * @param expectedSQL
+     * @param verifier
+     * @throws SQLException
+     */
+    void mockSQLUndoLogAndVerifyExecution(SQLType sqlType, String expectedSQL,
+                                          Consumer<PreparedStatement> verifier)
             throws SQLException {
-        AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, fixture(sqlType));
+        AbstractUndoExecutor executor = UndoExecutorFactory.getUndoExecutor(JdbcConstants.MYSQL, mockSqlUndoLog(sqlType));
 
         Connection mockedConnection = mock(Connection.class);
         PreparedStatement mockedPrepStmt = mock(PreparedStatement.class);
 
         when(mockedConnection.prepareStatement(expectedSQL)).thenReturn(mockedPrepStmt);
 
-        executor.executeOn(mockedConnection);
+        AbstractUndoExecutor spy = spy(executor);
+        doReturn(true).when(spy).dataValidationAndGoOn(any());
+
+        spy.executeOn(mockedConnection);
         verifier.accept(mockedPrepStmt);
     }
 
-    SQLUndoLog fixture(SQLType sqlType) {
+    SQLUndoLog mockSqlUndoLog(SQLType sqlType) {
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
         sqlUndoLog.setTableName("my_test_table");
         sqlUndoLog.setSqlType(sqlType);
