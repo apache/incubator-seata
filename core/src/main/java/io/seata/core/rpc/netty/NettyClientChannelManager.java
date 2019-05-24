@@ -38,7 +38,7 @@ import java.util.function.Function;
  * @author jimin.jm @alibaba-inc.com
  * @author zhaojun
  */
-public class NettyClientChannelManager {
+class NettyClientChannelManager {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyClientChannelManager.class);
     
@@ -52,7 +52,7 @@ public class NettyClientChannelManager {
     
     private Function<String, NettyPoolKey> poolKeyFunction;
     
-    public NettyClientChannelManager(final NettyPoolableFactory keyPoolableFactory, final Function<String, NettyPoolKey> poolKeyFunction,
+    NettyClientChannelManager(final NettyPoolableFactory keyPoolableFactory, final Function<String, NettyPoolKey> poolKeyFunction,
                                      final NettyClientConfig clientConfig) {
         nettyClientKeyPool = new GenericKeyedObjectPool<>(keyPoolableFactory);
         nettyClientKeyPool.setConfig(getNettyPoolConfig(clientConfig));
@@ -70,11 +70,22 @@ public class NettyClientChannelManager {
         return poolConfig;
     }
     
-    public ConcurrentMap<String, Channel> getChannels() {
+    /**
+     * Get all channels registered on current Rpc Client.
+     *
+     * @return channels
+     */
+    ConcurrentMap<String, Channel> getChannels() {
         return channels;
     }
     
-    public Channel acquireChannel(String serverAddress) {
+    /**
+     * Acquire netty client channel connected to remote server.
+     *
+     * @param serverAddress server address
+     * @return netty channel
+     */
+    Channel acquireChannel(String serverAddress) {
         Channel channelToServer = channels.get(serverAddress);
         if (channelToServer != null) {
             channelToServer = getExistAliveChannel(channelToServer, serverAddress);
@@ -91,7 +102,13 @@ public class NettyClientChannelManager {
         }
     }
     
-    public void releaseChannel(Channel channel, String serverAddress) {
+    /**
+     * Release channel to pool if necessary.
+     *
+     * @param channel channel
+     * @param serverAddress server address
+     */
+    void releaseChannel(Channel channel, String serverAddress) {
         if (null == channel || null == serverAddress) { return; }
         try {
             synchronized (channelLocks.get(serverAddress)) {
@@ -114,7 +131,13 @@ public class NettyClientChannelManager {
         }
     }
     
-    public void destroyChannel(String serverAddress, Channel channel) {
+    /**
+     * Destroy channel.
+     *
+     * @param serverAddress server address
+     * @param channel channel
+     */
+    void destroyChannel(String serverAddress, Channel channel) {
         if (null == channel) { return; }
         try {
             if (channel.equals(channels.get(serverAddress))) {
@@ -126,7 +149,12 @@ public class NettyClientChannelManager {
         }
     }
     
-    public void reconnect(String transactionServiceGroup) {
+    /**
+     * Reconnect to remote server of current transaction service group.
+     *
+     * @param transactionServiceGroup transaction service group
+     */
+    void reconnect(String transactionServiceGroup) {
         List<String> availList = null;
         try {
             availList = getAvailServerList(transactionServiceGroup);
@@ -145,6 +173,17 @@ public class NettyClientChannelManager {
                     "can not connect to " + serverAddress + " cause:" + e.getMessage(), e);
             }
         }
+    }
+    
+    void invalidateObject(final String serverAddress, final Channel channel) throws Exception {
+        nettyClientKeyPool.invalidateObject(poolKeyMap.get(serverAddress), channel);
+    }
+    
+    void registerChannel(final String serverAddress, final Channel channel) {
+        if (null != channels.get(serverAddress) && channels.get(serverAddress).isActive()) {
+            return;
+        }
+        channels.put(serverAddress, channel);
     }
     
     private Channel doConnect(String serverAddress) {
@@ -200,14 +239,5 @@ public class NettyClientChannelManager {
         return null;
     }
     
-    public void invalidateObject(final String serverAddress, final Channel channel) throws Exception {
-        nettyClientKeyPool.invalidateObject(poolKeyMap.get(serverAddress), channel);
-    }
     
-    public void registerChannel(final String serverAddress, final Channel channel) {
-        if (null != channels.get(serverAddress) && channels.get(serverAddress).isActive()) {
-            return;
-        }
-        channels.put(serverAddress, channel);
-    }
 }
