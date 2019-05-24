@@ -15,6 +15,9 @@
  */
 package io.seata.server.store;
 
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
+
 import java.util.List;
 
 /**
@@ -33,27 +36,28 @@ public interface TransactionStoreManager {
      */
     boolean writeSession(LogOperation logOperation, SessionStorable session);
 
+
+    /**
+     * Read global session global session.
+     *
+     * @param xid the xid
+     * @return the global session
+     */
+    GlobalSession readSession(String xid);
+
+    /**
+     * Read session by status list.
+     *
+     * @param sessionCondition the session condition
+     * @return the list
+     */
+    List<GlobalSession> readSession(SessionCondition sessionCondition);
+
     /**
      * Shutdown.
      */
     void shutdown();
 
-    /**
-     * Read write store from file list.
-     *
-     * @param readSize  the read size
-     * @param isHistory the is history
-     * @return the list
-     */
-    List<TransactionWriteStore> readWriteStoreFromFile(int readSize, boolean isHistory);
-
-    /**
-     * Has remaining boolean.
-     *
-     * @param isHistory the is history
-     * @return the boolean
-     */
-    boolean hasRemaining(boolean isHistory);
 
     /**
      * The enum Log operation.
@@ -107,29 +111,12 @@ public interface TransactionStoreManager {
          * @return the log operation by code
          */
         public static LogOperation getLogOperationByCode(byte code) {
-            LogOperation logOperation = null;
-            switch (code) {
-                case 1:
-                    logOperation = LogOperation.GLOBAL_ADD;
-                    break;
-                case 2:
-                    logOperation = LogOperation.GLOBAL_UPDATE;
-                    break;
-                case 3:
-                    logOperation = LogOperation.GLOBAL_REMOVE;
-                    break;
-                case 4:
-                    logOperation = LogOperation.BRANCH_ADD;
-                    break;
-                case 5:
-                    logOperation = LogOperation.BRANCH_UPDATE;
-                    break;
-                case 6:
-                    logOperation = LogOperation.BRANCH_REMOVE;
-                    break;
-                default:
+            for (LogOperation temp : values()) {
+                if (temp.getCode() == code) {
+                    return temp;
+                }
             }
-            return logOperation;
+            throw new IllegalArgumentException("Unknown LogOperation[" + code + "]");
         }
     }
 }

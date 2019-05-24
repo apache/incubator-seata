@@ -20,9 +20,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import io.seata.core.protocol.ResultCode;
-import io.seata.core.protocol.transaction.BranchRegisterRequest;
-import io.seata.core.protocol.transaction.BranchRegisterResponse;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.coordinator.DefaultCoordinator;
 
@@ -30,15 +27,15 @@ import io.netty.channel.Channel;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import io.seata.core.protocol.transaction.BranchRegisterResponse;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author jimin.jm@alibaba-inc.com
  * @date 2019/01/25
  */
-@Ignore
+@Disabled
 public class TmRpcClientTest {
 
     private static final ThreadPoolExecutor
@@ -77,7 +74,7 @@ public class TmRpcClientTest {
         doConnectMethod.setAccessible(true);
         String serverAddress = "0.0.0.0:8091";
         Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
-        Assert.assertNotNull(channel);
+        Assertions.assertNotNull(channel);
     }
 
     /**
@@ -135,16 +132,16 @@ public class TmRpcClientTest {
         doConnectMethod.setAccessible(true);
         String serverAddress = "0.0.0.0:8091";
         Channel channel = (Channel) doConnectMethod.invoke(tmRpcClient, serverAddress);
-        Assert.assertNotNull(channel);
+        Assertions.assertNotNull(channel);
 
         BranchRegisterRequest request = new BranchRegisterRequest();
         request.setXid("127.0.0.1:8091:1249853");
         request.setLockKey("lock key testSendMsgWithResponse");
         request.setResourceId("resoutceId1");
         BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse)tmRpcClient.sendMsgWithResponse(request);
-        Assert.assertNotNull(branchRegisterResponse);
-        Assert.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
-        Assert.assertEquals("RuntimeException[SessionManager is NOT init!]",
+        Assertions.assertNotNull(branchRegisterResponse);
+        Assertions.assertEquals(ResultCode.Failed, branchRegisterResponse.getResultCode());
+        Assertions.assertEquals("RuntimeException[SessionManager is NOT init!]",
                             branchRegisterResponse.getMsg());
     }
 }

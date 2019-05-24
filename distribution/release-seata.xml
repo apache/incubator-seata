@@ -1,5 +1,5 @@
 <!--
-  ~  Copyright 1999-2018 Alibaba Group Holding Ltd.
+  ~  Copyright 1999-2019 Seata.io Group.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~  you may not use this file except in compliance with the License.
@@ -42,19 +42,17 @@
             </includes>
             <fileMode>0755</fileMode>
         </fileSet>
+
+        <fileSet>
+            <includes>
+                <include>lib/*</include>
+            </includes>
+        </fileSet>
     </fileSets>
     <files>
         <file>
             <source>LICENSE-BIN</source>
             <destName>LICENSE</destName>
-        </file>
-        <file>
-            <source>NOTICE-BIN</source>
-            <destName>NOTICE</destName>
-        </file>
-        <file>
-            <source>../server/target/seata-server-${project.version}.jar</source>
-            <outputDirectory>/target/</outputDirectory>
         </file>
     </files>
 
