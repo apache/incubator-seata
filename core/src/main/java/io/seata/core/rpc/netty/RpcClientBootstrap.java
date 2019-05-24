@@ -151,7 +151,7 @@ public class RpcClientBootstrap implements RemotingClient {
                 });
         }
         if (initialized.compareAndSet(false, true) && LOGGER.isInfoEnabled()) {
-            LOGGER.info("AbstractRpcRemotingClient has started");
+            LOGGER.info("RpcClientBootstrap has started");
         }
     }
     

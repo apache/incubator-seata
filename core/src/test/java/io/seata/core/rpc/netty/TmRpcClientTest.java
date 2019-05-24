@@ -45,22 +45,23 @@ public class TmRpcClientTest {
     /**
      * Test get instance.
      *
-     * @throws Exception the exception
+     * @throws Exception the exceptionDataSourceManager.
      */
     @Test
     public void testGetInstance() throws Exception {
         String applicationId = "app 1";
         String transactionServiceGroup = "group A";
         TmRpcClient tmRpcClient = TmRpcClient.getInstance(applicationId, transactionServiceGroup);
-
+        Field nettyClientKeyPoolField = getDeclaredField(tmRpcClient.getClientChannelManager(), "nettyClientKeyPool");
+        nettyClientKeyPoolField.setAccessible(true);
+        GenericKeyedObjectPool nettyClientKeyPool = (GenericKeyedObjectPool) nettyClientKeyPoolField.get(tmRpcClient.getClientChannelManager());
         NettyClientConfig defaultNettyClientConfig = new NettyClientConfig();
-        GenericKeyedObjectPool.Config config = tmRpcClient.getNettyPoolConfig();
-        Assertions.assertEquals(defaultNettyClientConfig.getMaxPoolActive(), config.maxActive);
-        Assertions.assertEquals(defaultNettyClientConfig.getMinPoolIdle(), config.minIdle);
-        Assertions.assertEquals(defaultNettyClientConfig.getMaxAcquireConnMills(), config.maxWait);
-        Assertions.assertEquals(defaultNettyClientConfig.isPoolTestBorrow(), config.testOnBorrow);
-        Assertions.assertEquals(defaultNettyClientConfig.isPoolTestReturn(), config.testOnReturn);
-        Assertions.assertEquals(defaultNettyClientConfig.isPoolLifo(), config.lifo);
+        Assertions.assertEquals(defaultNettyClientConfig.getMaxPoolActive(), nettyClientKeyPool.getMaxActive());
+        Assertions.assertEquals(defaultNettyClientConfig.getMinPoolIdle(), nettyClientKeyPool.getMinIdle());
+        Assertions.assertEquals(defaultNettyClientConfig.getMaxAcquireConnMills(), nettyClientKeyPool.getMaxWait());
+        Assertions.assertEquals(defaultNettyClientConfig.isPoolTestBorrow(), nettyClientKeyPool.getTestOnBorrow());
+        Assertions.assertEquals(defaultNettyClientConfig.isPoolTestReturn(), nettyClientKeyPool.getTestOnReturn());
+        Assertions.assertEquals(defaultNettyClientConfig.isPoolLifo(), nettyClientKeyPool.getLifo());
     }
 
     /**
@@ -77,12 +78,12 @@ public class TmRpcClientTest {
         tmRpcClient.init();
 
         //check if attr of tmRpcClient object has been set success
-        Field clientRemotingServiceFiled = getDeclaredField(tmRpcClient, "clientRemotingService");
-        clientRemotingServiceFiled.setAccessible(true);
-        RpcClientBootstrap clientRemotingService = (RpcClientBootstrap)clientRemotingServiceFiled.get(tmRpcClient);
-        Field bootstrapField = getDeclaredField(clientRemotingService, "bootstrap");
+        Field clientBootstrapField = getDeclaredField(tmRpcClient, "clientBootstrap");
+        clientBootstrapField.setAccessible(true);
+        RpcClientBootstrap clientBootstrap = (RpcClientBootstrap)clientBootstrapField.get(tmRpcClient);
+        Field bootstrapField = getDeclaredField(clientBootstrap, "bootstrap");
         bootstrapField.setAccessible(true);
-        Bootstrap bootstrap = (Bootstrap) bootstrapField.get(clientRemotingService);
+        Bootstrap bootstrap = (Bootstrap) bootstrapField.get(clientBootstrap);
 
         Assertions.assertNotNull(bootstrap);
         Field optionsField = getDeclaredField(bootstrap, "options");

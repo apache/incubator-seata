@@ -145,7 +145,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
     }
     
     @Override
-    protected String getTransactionServiceGroup() {
+    public String getTransactionServiceGroup() {
         return transactionServiceGroup;
     }
     
