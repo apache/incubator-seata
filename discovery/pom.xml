@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~  Copyright 1999-2018 Alibaba Group Holding Ltd.
+  ~  Copyright 1999-2019 Seata.io Group.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~  you may not use this file except in compliance with the License.
@@ -19,45 +19,23 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>fescar-all</artifactId>
-        <groupId>com.alibaba.fescar</groupId>
-        <version>0.4.1</version>
+        <groupId>io.seata</groupId>
+        <artifactId>seata-parent</artifactId>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <packaging>jar</packaging>
-    <artifactId>fescar-discovery</artifactId>
-    <name>fescar-discovery ${project.version}</name>
-
-    <dependencies>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>fescar-config</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>redis.clients</groupId>
-            <artifactId>jedis</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.netflix.eureka</groupId>
-            <artifactId>eureka-client</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>javax.inject</groupId>
-            <artifactId>javax.inject</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.netflix.archaius</groupId>
-            <artifactId>archaius-core</artifactId>
-        </dependency>
-    </dependencies>
+    <packaging>pom</packaging>
+    <artifactId>seata-discovery</artifactId>
+    <name>seata-discovery ${project.version}</name>
+    <modules>
+        <module>seata-discovery-consul</module>
+        <module>seata-discovery-core</module>
+        <module>seata-discovery-all</module>
+        <module>seata-discovery-eureka</module>
+        <module>seata-discovery-zk</module>
+        <module>seata-discovery-redis</module>
+        <module>seata-discovery-nacos</module>
+        <module>seata-discovery-etcd3</module>
+        <module>seata-discovery-sofa</module>
+    </modules>
 </project>

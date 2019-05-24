@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~  Copyright 1999-2018 Alibaba Group Holding Ltd.
+  ~  Copyright 1999-2019 Seata.io Group.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~  you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
   -->
 <configuration debug="false">
 
-    <!-- 日志输出级别 -->
+    <!-- log output level -->
     <root level="INFO">
         <appender-ref ref="STDOUT" />
     </root>
