@@ -171,13 +171,9 @@ public abstract class AbstractUndoExecutor {
      * @throws SQLException the sql exception
      */
     protected boolean dataValidationAndGoOn(Connection conn) throws SQLException {
-
-        TableRecords beforeRecords = sqlUndoLog.getBeforeImage();
-        TableRecords afterRecords = sqlUndoLog.getAfterImage();
-
         // Compare current data with before data
         // No need undo if the before data snapshot is equivalent to the after data snapshot.
-        if (DataCompareUtils.isRecordsEquals(beforeRecords, afterRecords)) {
+        if (sqlUndoLog.hasNotAffected()) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Stop rollback because there is no data change " +
                         "between the before data snapshot and the after data snapshot.");
@@ -186,6 +182,8 @@ public abstract class AbstractUndoExecutor {
             return false;
         }
 
+        TableRecords beforeRecords = sqlUndoLog.getBeforeImage();
+        TableRecords afterRecords = sqlUndoLog.getAfterImage();
 
         TableRecords currentRecords = queryCurrentRecords(conn);
         // compare with current data and after image.
