@@ -38,7 +38,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
     
     private final AbstractRpcRemotingClient rpcRemotingClient;
     
-    private final RpcClient clientRemotingService;
+    private final RpcClientBootstrap clientBootstrap;
 
     /**
      * Instantiates a new Netty key poolable factory.
@@ -46,9 +46,9 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
      * @param rpcRemotingClient the rpc remoting client
      */
     public NettyPoolableFactory(AbstractRpcRemotingClient rpcRemotingClient,
-                                RpcClient clientRemotingService) {
+                                RpcClientBootstrap clientBootstrap) {
         this.rpcRemotingClient = rpcRemotingClient;
-        this.clientRemotingService = clientRemotingService;
+        this.clientBootstrap = clientBootstrap;
     }
 
     @Override
@@ -57,7 +57,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
             if (LOGGER.isInfoEnabled()) {
             LOGGER.info("NettyPool create channel to " + key);
         }
-        Channel tmpChannel = clientRemotingService.getNewChannel(address);
+        Channel tmpChannel = clientBootstrap.getNewChannel(address);
         long start = System.currentTimeMillis();
         Object response;
         Channel channelToServer = null;

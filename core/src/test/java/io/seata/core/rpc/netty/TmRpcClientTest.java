@@ -79,7 +79,7 @@ public class TmRpcClientTest {
         //check if attr of tmRpcClient object has been set success
         Field clientRemotingServiceFiled = getDeclaredField(tmRpcClient, "clientRemotingService");
         clientRemotingServiceFiled.setAccessible(true);
-        RpcClient clientRemotingService = (RpcClient)clientRemotingServiceFiled.get(tmRpcClient);
+        RpcClientBootstrap clientRemotingService = (RpcClientBootstrap)clientRemotingServiceFiled.get(tmRpcClient);
         Field bootstrapField = getDeclaredField(clientRemotingService, "bootstrap");
         bootstrapField.setAccessible(true);
         Bootstrap bootstrap = (Bootstrap) bootstrapField.get(clientRemotingService);

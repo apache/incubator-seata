@@ -142,6 +142,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     @Override
     public void destroy() {
         timerExecutor.shutdown();
+        messageExecutor.shutdown();
     }
 
     @Override
@@ -507,6 +508,4 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         }
         return address;
     }
-
-
 }

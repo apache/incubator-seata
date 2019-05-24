@@ -50,7 +50,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author jimin.jm @alibaba-inc.com
  * @author zhaojun
  */
-public class RpcClient implements RemotingClient {
+public class RpcClientBootstrap implements RemotingClient {
     
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingClient.class);
     private final NettyClientConfig nettyClientConfig;
@@ -63,8 +63,8 @@ public class RpcClient implements RemotingClient {
     private final ChannelHandler channelHandler;
     private final NettyPoolKey.TransactionRole transactionRole;
     
-    public RpcClient(NettyClientConfig nettyClientConfig, final EventExecutorGroup eventExecutorGroup,
-                     ChannelHandler channelHandler, NettyPoolKey.TransactionRole transactionRole) {
+    public RpcClientBootstrap(NettyClientConfig nettyClientConfig, final EventExecutorGroup eventExecutorGroup,
+                              ChannelHandler channelHandler, NettyPoolKey.TransactionRole transactionRole) {
         if (null == nettyClientConfig) {
             nettyClientConfig = new NettyClientConfig();
             if (LOGGER.isInfoEnabled()) {
