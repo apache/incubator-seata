@@ -15,8 +15,6 @@
  */
 package io.seata.core.rpc.netty;
 
-import io.seata.core.protocol.AbstractMessage;
-
 import io.netty.channel.Channel;
 import io.seata.core.protocol.AbstractMessage;
 

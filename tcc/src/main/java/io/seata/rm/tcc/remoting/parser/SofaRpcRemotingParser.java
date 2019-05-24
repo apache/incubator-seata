@@ -19,8 +19,6 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.tcc.remoting.Protocols;
 import io.seata.rm.tcc.remoting.RemotingDesc;
-import io.seata.rm.tcc.remoting.Protocols;
-import io.seata.rm.tcc.remoting.RemotingDesc;
 
 /**
  * sofa-rpc remoting bean parsing
