@@ -28,12 +28,9 @@ import io.seata.core.constants.ConfigurationKeys;
 public class UndoLogParserFactory {
 
     private static class SingletonHolder {
-        private static UndoLogParser INSTANCE;
-        static {
-            String st = ConfigurationFactory.getInstance().getConfig(
-                    ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, "fastjson");
-            INSTANCE = EnhancedServiceLoader.load(UndoLogParser.class, st);
-        }
+        private static final UndoLogParser INSTANCE = 
+                EnhancedServiceLoader.load(UndoLogParser.class, ConfigurationFactory.getInstance()
+                        .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, "fastjson"));
     }
 
     /**
