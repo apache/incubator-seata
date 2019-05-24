@@ -15,7 +15,6 @@
  */
 package io.seata.server;
 
-import io.seata.common.XID;
 import io.seata.core.exception.AbstractExceptionHandler;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
