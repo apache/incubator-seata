@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.undo.mysql;
 
 import com.alibaba.druid.util.JdbcConstants;
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -25,6 +24,7 @@ import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,26 +41,43 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
     private static final String UPDATE_SQL_TEMPLATE = "UPDATE %s SET %s WHERE %s = ?";
 
     /**
-     * Undo Update.
+     * Update SQL , PK column on last one
+     *
+     * @return
+     */
+    @Override
+    protected PreparedStatementParams buildUndoPreparedStatementParams() {
+        List<Row> pkOnLastOne = getUndoRecords().getRows().stream()
+                .map(src -> {
+                    List<Field> sortedFields = new ArrayList<>(src.getFields().size());
+                    sortedFields.addAll(src.nonPrimaryKeys());
+                    sortedFields.addAll(src.primaryKeys());
+
+                    return new Row(sortedFields);
+                })
+                .collect(Collectors.toList());
+        return PreparedStatementParams.create(buildUpdateSQL(), pkOnLastOne);
+    }
+
+    /**
+     * Undo Update => Update
      *
      * @return sql
      */
-    @Override
-    protected String buildUndoSQL() {
+    protected String buildUpdateSQL() {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-        TableRecords beforeImage = sqlUndoLog.getBeforeImage();
-        List<Row> beforeImageRows = beforeImage.getRows();
-        if (beforeImageRows == null || beforeImageRows.size() == 0) {
-            throw new ShouldNeverHappenException("Invalid UNDO LOG"); // TODO
-        }
-        Row row = beforeImageRows.get(0);
+
+        Row row = getRowDefinition();
         Field pkField = row.primaryKeys().get(0);
         List<Field> nonPkFields = row.nonPrimaryKeys();
-        String updateColumns = nonPkFields.stream()
-            .map(field -> keywordChecker.checkAndReplace(field.getName()) + " = ?")
-            .collect(Collectors.joining(", "));
-        return String.format(UPDATE_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
-                             updateColumns, keywordChecker.checkAndReplace(pkField.getName()));
+
+        String tableName = keywordChecker.checkAndReplace(sqlUndoLog.getTableName());
+        String columns = nonPkFields.stream()
+                .map(field -> keywordChecker.checkAndReplace(field.getName()) + " = ?")
+                .collect(Collectors.joining(", "));
+        String pkColumnName = keywordChecker.checkAndReplace(pkField.getName());
+
+        return String.format(UPDATE_SQL_TEMPLATE, tableName, columns, pkColumnName);
     }
 
     /**
@@ -73,7 +90,8 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
     }
 
     @Override
-    protected TableRecords getUndoRows() {
+    protected TableRecords getUndoRecords() {
         return sqlUndoLog.getBeforeImage();
     }
+
 }

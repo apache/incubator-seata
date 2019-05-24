@@ -15,13 +15,10 @@
  */
 package io.seata.rm.datasource.undo.mysql;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.alibaba.druid.util.JdbcConstants;
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -43,30 +40,36 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
     private static final String DELETE_SQL_TEMPLATE = "DELETE FROM %s WHERE %s = ?";
 
     /**
-     * Undo Inset.
+     * row records only require PK fields
+     *
+     * @return
+     */
+    @Override
+    protected PreparedStatementParams buildUndoPreparedStatementParams() {
+        List<Row> onlyPKField = getUndoRecords().getRows().stream()
+                .map(row -> new Row(row.primaryKeys()))
+                .collect(Collectors.toList());
+
+        return PreparedStatementParams.create(buildDeleteSQL(), onlyPKField);
+    }
+
+    /**
+     * Undo Insert => Delete
      *
      * @return sql
      */
-    @Override
-    protected String buildUndoSQL() {
+    protected String buildDeleteSQL() {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-        TableRecords afterImage = sqlUndoLog.getAfterImage();
-        List<Row> afterImageRows = afterImage.getRows();
-        if (afterImageRows == null || afterImageRows.size() == 0) {
-            throw new ShouldNeverHappenException("Invalid UNDO LOG");
-        }
-        Row row = afterImageRows.get(0);
+
+        Row row = getRowDefinition();
         Field pkField = row.primaryKeys().get(0);
-        return String.format(DELETE_SQL_TEMPLATE,
-                             keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
-                             keywordChecker.checkAndReplace(pkField.getName()));
+
+        String tableName = keywordChecker.checkAndReplace(sqlUndoLog.getTableName());
+        String pkColumnName = keywordChecker.checkAndReplace(pkField.getName());
+
+        return String.format(DELETE_SQL_TEMPLATE, tableName, pkColumnName);
     }
 
-    @Override
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue)
-        throws SQLException {
-        undoPST.setObject(1, pkValue.getValue(), pkValue.getType());
-    }
 
     /**
      * Instantiates a new My sql undo insert executor.
@@ -78,7 +81,8 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
     }
 
     @Override
-    protected TableRecords getUndoRows() {
+    protected TableRecords getUndoRecords() {
         return sqlUndoLog.getAfterImage();
     }
+
 }

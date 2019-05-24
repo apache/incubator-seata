@@ -37,3 +37,6 @@ target/
 .DS_Store
 Thumbs.db
 *.orig
+
+# test resources
+*/db_store/

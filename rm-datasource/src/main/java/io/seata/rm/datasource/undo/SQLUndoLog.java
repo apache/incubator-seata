@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
+import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -118,5 +119,14 @@ public class SQLUndoLog {
      */
     public void setAfterImage(TableRecords afterImage) {
         this.afterImage = afterImage;
+    }
+
+    /**
+     * Has not affected rows
+     *
+     * @return
+     */
+    public boolean hasNotAffected() {
+        return DataCompareUtils.isRecordsEquals(beforeImage, afterImage);
     }
 }

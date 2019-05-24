@@ -29,6 +29,9 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 /**
  * @author Geng Zhang
  */
@@ -36,8 +39,11 @@ public class MySQLUndoInsertExecutorTest extends BaseExecutorTest {
 
     private static MySQLUndoInsertExecutor executor;
 
+    static SQLUndoLog mockedSqlUndoLog;
+
+
     @BeforeAll
-    public static void init(){
+    public static void init() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
         Mockito.when(tableMeta.getPkName()).thenReturn("id");
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
@@ -70,26 +76,25 @@ public class MySQLUndoInsertExecutorTest extends BaseExecutorTest {
         afterRows.add(row3);
         afterImage.setRows(afterRows);
 
-        SQLUndoLog sqlUndoLog = new SQLUndoLog();
-        sqlUndoLog.setSqlType(SQLType.UPDATE);
-        sqlUndoLog.setTableMeta(tableMeta);
-        sqlUndoLog.setTableName("table_name");
-        sqlUndoLog.setBeforeImage(beforeImage);
-        sqlUndoLog.setAfterImage(afterImage);
+        mockedSqlUndoLog = new SQLUndoLog();
+        mockedSqlUndoLog.setSqlType(SQLType.UPDATE);
+        mockedSqlUndoLog.setTableMeta(tableMeta);
+        mockedSqlUndoLog.setTableName("table_name");
+        mockedSqlUndoLog.setBeforeImage(beforeImage);
+        mockedSqlUndoLog.setAfterImage(afterImage);
 
-        executor = new MySQLUndoInsertExecutor(sqlUndoLog);
+        executor = new MySQLUndoInsertExecutor(mockedSqlUndoLog);
     }
 
     @Test
-    public void buildUndoSQL() {
-        String sql = executor.buildUndoSQL().toLowerCase();
-        Assertions.assertNotNull(sql);
-        Assertions.assertTrue(sql.contains("delete"));
-        Assertions.assertTrue(sql.contains("id"));
+    public void testBuildDeleteSQL() {
+        String sql = executor.buildDeleteSQL().toLowerCase();
+        assertNotNull(sql);
+        assertEquals(sql, "delete from table_name where id = ?");
     }
 
     @Test
     public void getUndoRows() {
-        Assertions.assertEquals(executor.getUndoRows(), executor.getSqlUndoLog().getAfterImage());
+        assertEquals(executor.getUndoRecords(), mockedSqlUndoLog.getAfterImage());
     }
 }

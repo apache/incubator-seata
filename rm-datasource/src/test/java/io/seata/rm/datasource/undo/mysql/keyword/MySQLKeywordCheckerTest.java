@@ -31,7 +31,6 @@ import io.seata.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
 
-import io.seata.rm.datasource.undo.UndoExecutorTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -148,7 +147,7 @@ public class MySQLKeywordCheckerTest {
          * @return the sql
          */
         public String getSql() {
-            return super.buildUndoSQL();
+            return super.buildUpdateSQL();
         }
     }
 
@@ -235,7 +234,7 @@ public class MySQLKeywordCheckerTest {
          * @return the sql
          */
         public String getSql() {
-            return super.buildUndoSQL();
+            return super.buildDeleteSQL();
         }
     }
 
@@ -302,7 +301,7 @@ public class MySQLKeywordCheckerTest {
 
         MySQLUndoDeleteExecutorExtension mySQLUndoDeleteExecutor = new MySQLUndoDeleteExecutorExtension(sqlUndoLog);
 
-        Assertions.assertEquals("INSERT INTO `lock` (`desc`, since, `key`) VALUES (?, ?, ?)",
+        Assertions.assertEquals("INSERT INTO `lock` (`key`, `desc`, since) VALUES (?, ?, ?)",
             mySQLUndoDeleteExecutor.getSql());
 
     }
@@ -323,7 +322,7 @@ public class MySQLKeywordCheckerTest {
          * @return the sql
          */
         public String getSql() {
-            return super.buildUndoSQL();
+            return super.buildInsertSQL();
         }
     }
 

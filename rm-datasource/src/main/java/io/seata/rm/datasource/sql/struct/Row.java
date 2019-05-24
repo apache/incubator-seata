@@ -35,6 +35,10 @@ public class Row {
     public Row() {
     }
 
+    public Row(List<Field> fields) {
+        this.fields = fields;
+    }
+
     /**
      * Gets fields.
      *

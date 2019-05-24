@@ -18,11 +18,10 @@ package io.seata.rm.datasource.undo;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
+import java.util.List;
 
-import io.seata.rm.datasource.DataCompareUtils;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 
@@ -35,16 +34,27 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 public abstract class AbstractUndoExecutor {
 
     /**
+     * wrap sql with row records
+     */
+    public static class PreparedStatementParams {
+        String sql;
+        List<Row> rows;
+
+        private PreparedStatementParams() {
+        }
+
+        public static PreparedStatementParams create(String sql, List<Row> rows) {
+            PreparedStatementParams params = new PreparedStatementParams();
+            params.sql = sql;
+            params.rows = rows;
+            return params;
+        }
+    }
+
+    /**
      * The Sql undo log.
      */
     protected SQLUndoLog sqlUndoLog;
-
-    /**
-     * Build undo sql string.
-     *
-     * @return the string
-     */
-    protected abstract String buildUndoSQL();
 
     /**
      * Instantiates a new Abstract undo executor.
@@ -55,14 +65,6 @@ public abstract class AbstractUndoExecutor {
         this.sqlUndoLog = sqlUndoLog;
     }
 
-    /**
-     * Gets sql undo log.
-     *
-     * @return the sql undo log
-     */
-    public SQLUndoLog getSqlUndoLog() {
-        return sqlUndoLog;
-    }
 
     /**
      * Execute on.
@@ -71,75 +73,28 @@ public abstract class AbstractUndoExecutor {
      * @throws SQLException the sql exception
      */
     public void executeOn(Connection conn) throws SQLException {
-
-        // no need undo if the before data snapshot is equivalent to the after data snapshot.
-        if (DataCompareUtils.isRecordsEquals(sqlUndoLog.getBeforeImage(), sqlUndoLog.getAfterImage())) {
+        if (sqlUndoLog.hasNotAffected()) {
             return;
         }
-        dataValidation(conn);
+
+        assertConnectionNotDirty(conn);
+
         try {
-            String undoSQL = buildUndoSQL();
-
-            PreparedStatement undoPST = conn.prepareStatement(undoSQL);
-
-            TableRecords undoRows = getUndoRows();
-
-            for (Row undoRow : undoRows.getRows()) {
-                ArrayList<Field> undoValues = new ArrayList<>();
-                Field pkValue = null;
-                for (Field field : undoRow.getFields()) {
-                    if (field.getKeyType() == KeyType.PrimaryKey) {
-                        pkValue = field;
-                    } else {
-                        undoValues.add(field);
-                    }
-                }
-
-                undoPrepare(undoPST, undoValues, pkValue);
-
-                undoPST.executeUpdate();
+            PreparedStatementParams params = buildUndoPreparedStatementParams();
+            PreparedStatement undoPrepStmt = conn.prepareStatement(params.sql);
+            // TODO batch update
+            for (Row row : params.rows) {
+                fillPreparedStatement(undoPrepStmt, row);
+                undoPrepStmt.executeUpdate();
             }
-
         } catch (Exception ex) {
             if (ex instanceof SQLException) {
                 throw (SQLException) ex;
             } else {
                 throw new SQLException(ex);
             }
-
         }
-
     }
-
-    /**
-     * Undo prepare.
-     *
-     * @param undoPST    the undo pst
-     * @param undoValues the undo values
-     * @param pkValue    the pk value
-     * @throws SQLException the sql exception
-     */
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue)
-        throws SQLException {
-        int undoIndex = 0;
-        for (Field undoValue : undoValues) {
-            undoIndex++;
-            undoPST.setObject(undoIndex, undoValue.getValue(), undoValue.getType());
-        }
-        // PK is at last one.
-        // INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)
-        // UPDATE a SET x=?, y=?, z=? WHERE pk = ?
-        // DELETE FROM a WHERE pk = ?
-        undoIndex++;
-        undoPST.setObject(undoIndex, pkValue.getValue(), pkValue.getType());
-    }
-
-    /**
-     * Gets undo rows.
-     *
-     * @return the undo rows
-     */
-    protected abstract TableRecords getUndoRows();
 
     /**
      * Data validation.
@@ -147,7 +102,49 @@ public abstract class AbstractUndoExecutor {
      * @param conn the conn
      * @throws SQLException the sql exception
      */
-    protected void dataValidation(Connection conn) throws SQLException {
+    void assertConnectionNotDirty(Connection conn) throws SQLException {
         // Validate if data is dirty.
     }
+
+    /**
+     * build prepareStatement params of undo action
+     *
+     * @return
+     */
+    protected abstract PreparedStatementParams buildUndoPreparedStatementParams();
+
+    /**
+     * Fill column value to  PreparedStatement
+     *
+     * @param preparedStatement the undo statement
+     * @throws SQLException the sql exception
+     */
+    void fillPreparedStatement(PreparedStatement preparedStatement, Row row) throws SQLException {
+        List<Field> fields = row.getFields();
+        for (int i = 0; i < fields.size(); i++) {
+            Field field = fields.get(i);
+            preparedStatement.setObject(i + 1, field.getValue(), field.getType());
+        }
+    }
+
+    /**
+     * Assert not empty and get first row
+     *
+     * @return
+     */
+    protected Row getRowDefinition() {
+        List<Row> undoRows = getUndoRecords().getRows();
+        if (undoRows == null || undoRows.size() == 0) {
+            throw new ShouldNeverHappenException("Invalid UNDO LOG");
+        }
+        return undoRows.get(0);
+    }
+
+    /**
+     * Get undo image
+     *
+     * @return
+     */
+    protected abstract TableRecords getUndoRecords();
+
 }

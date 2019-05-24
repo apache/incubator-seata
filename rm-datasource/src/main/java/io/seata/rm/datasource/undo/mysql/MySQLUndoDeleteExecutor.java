@@ -15,12 +15,10 @@
  */
 package io.seata.rm.datasource.undo.mysql;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.alibaba.druid.util.JdbcConstants;
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -45,45 +43,38 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
         super(sqlUndoLog);
     }
 
-    /**
-     * INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)
-     */
     private static final String INSERT_SQL_TEMPLATE = "INSERT INTO %s (%s) VALUES (%s)";
 
+
+    @Override
+    protected PreparedStatementParams buildUndoPreparedStatementParams() {
+        return PreparedStatementParams.create(buildInsertSQL(), getUndoRecords().getRows());
+    }
+
+
     /**
-     * Undo delete.
-     *
-     * Notice: PK is at last one.
-     * @see AbstractUndoExecutor#undoPrepare
+     * Undo Delete => Insert
      *
      * @return sql
      */
-    @Override
-    protected String buildUndoSQL() {
+    protected String buildInsertSQL() {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-        TableRecords beforeImage = sqlUndoLog.getBeforeImage();
-        List<Row> beforeImageRows = beforeImage.getRows();
-        if (beforeImageRows == null || beforeImageRows.size() == 0) {
-            throw new ShouldNeverHappenException("Invalid UNDO LOG");
-        }
-        Row row = beforeImageRows.get(0);
-        List<Field> fields = new ArrayList<>(row.nonPrimaryKeys());
-        Field pkField = row.primaryKeys().get(0);
-        // PK is at last one.
-        fields.add(pkField);
 
-        String insertColumns = fields.stream()
-            .map(field -> keywordChecker.checkAndReplace(field.getName()))
-            .collect(Collectors.joining(", "));
-        String insertValues = fields.stream().map(field -> "?")
-            .collect(Collectors.joining(", "));
+        Row row = getRowDefinition();
+        List<Field> fields = row.getFields();
 
-        return String.format(INSERT_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
-                             insertColumns, insertValues);
+        String tableName = keywordChecker.checkAndReplace(sqlUndoLog.getTableName());
+        String columns = fields.stream()
+                .map(field -> keywordChecker.checkAndReplace(field.getName()))
+                .collect(Collectors.joining(", "));
+        String holders = fields.stream().map(field -> "?")
+                .collect(Collectors.joining(", "));
+
+        return String.format(INSERT_SQL_TEMPLATE, tableName, columns, holders);
     }
 
     @Override
-    protected TableRecords getUndoRows() {
+    protected TableRecords getUndoRecords() {
         return sqlUndoLog.getBeforeImage();
     }
 }
