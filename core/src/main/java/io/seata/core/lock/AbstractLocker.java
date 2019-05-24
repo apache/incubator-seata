@@ -16,7 +16,6 @@
 package io.seata.core.lock;
 
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
 import io.seata.core.store.LockDO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

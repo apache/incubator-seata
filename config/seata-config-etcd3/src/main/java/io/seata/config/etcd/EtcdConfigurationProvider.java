@@ -13,20 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.registry.redis;
+package io.seata.config.etcd;
 
 import io.seata.common.loader.LoadLevel;
-import io.seata.discovery.registry.RegistryProvider;
-import io.seata.discovery.registry.RegistryService;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationProvider;
 
 /**
  * @author xingfudeshi@gmail.com
  * @date 2019/04/12
  */
-@LoadLevel(name = "Redis", order = 1)
-public class RedisRegistryProvider implements RegistryProvider {
+@LoadLevel(name = "Etcd3", order = 1)
+public class EtcdConfigurationProvider implements ConfigurationProvider {
     @Override
-    public RegistryService provide() {
-        return RedisRegistryServiceImpl.getInstance();
+    public Configuration provide() {
+        return EtcdConfiguration.getInstance();
     }
 }
