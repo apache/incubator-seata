@@ -38,6 +38,7 @@ import java.util.Calendar;
 import java.util.List;
 
 import io.seata.rm.datasource.sql.struct.Null;
+import io.seata.rm.datasource.sql.struct.Null;
 
 /**
  * The type Abstract prepared statement proxy.

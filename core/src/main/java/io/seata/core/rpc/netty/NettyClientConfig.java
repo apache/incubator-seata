@@ -15,6 +15,8 @@
  */
 package io.seata.core.rpc.netty;
 
+import io.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
+
 import io.netty.channel.Channel;
 
 /**

@@ -13,12 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.lock.memory;
+package io.seata.server.lock;
 
-import io.seata.common.XID;
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
-import io.seata.server.lock.LockManager;
 import io.seata.server.session.BranchSession;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -27,16 +25,15 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
-
 /**
  * The type Default lock manager impl test.
  *
  * @author zhimo.xiao @gmail.com
  * @since 2019 /1/23
  */
-public class MemoryLockManagerImplTest {
+public class DefaultLockManagerImplTest {
 
-    private LockManager lockManager = new MemoryLockManagerForTest();;
+    private LockManager lockManager = new DefaultLockManagerImpl();
 
     private static final long transactionId = UUIDGenerator.generateUUID();
 
@@ -53,7 +50,6 @@ public class MemoryLockManagerImplTest {
     @ParameterizedTest
     @MethodSource("branchSessionProvider")
     public void acquireLockTest(BranchSession branchSession) throws Exception {
-
         boolean result = lockManager.acquireLock(branchSession);
         Assertions.assertTrue(result);
         branchSession.unlock();
@@ -66,8 +62,7 @@ public class MemoryLockManagerImplTest {
      */
     @Test
     public void isLockableTest() throws Exception {
-        boolean resultOne = lockManager.isLockable(XID.generateXID(transactionId), resourceId, lockKey);
-
+        boolean resultOne = lockManager.isLockable(transactionId, resourceId, lockKey);
         Assertions.assertTrue(resultOne);
     }
 
@@ -78,7 +73,6 @@ public class MemoryLockManagerImplTest {
      */
     static Stream<BranchSession> branchSessionProvider() {
         BranchSession branchSession = new BranchSession();
-        branchSession.setXid(XID.generateXID(transactionId));
         branchSession.setBranchId(1L);
         branchSession.setTransactionId(transactionId);
         branchSession.setClientId("c1");

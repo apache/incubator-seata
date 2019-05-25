@@ -18,6 +18,7 @@ package io.seata.rm.datasource.sql;
 import java.util.ArrayList;
 
 import io.seata.rm.datasource.ParametersHolder;
+import io.seata.rm.datasource.ParametersHolder;
 
 /**
  * The interface Where recognizer.

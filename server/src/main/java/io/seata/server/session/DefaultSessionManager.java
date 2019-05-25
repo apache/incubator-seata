@@ -15,29 +15,18 @@
  */
 package io.seata.server.session;
 
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.core.exception.TransactionException;
-import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
+import io.seata.server.store.TransactionStoreManager;
+import io.seata.server.store.TransactionWriteStore;
 
 /**
- * The type Default session manager, store session data in memory.
+ * The type Default session manager.
  *
  * @author sharajava
  */
-@LoadLevel(name = "default")
 public class DefaultSessionManager extends AbstractSessionManager {
-
-    /**
-     * The Session map.
-     */
-    protected Map<String, GlobalSession> sessionMap = new ConcurrentHashMap<String, GlobalSession>();
 
     /**
      * Instantiates a new Default session manager.
@@ -46,45 +35,27 @@ public class DefaultSessionManager extends AbstractSessionManager {
      */
     public DefaultSessionManager(String name) {
         super(name);
-        transactionStoreManager = new AbstractTransactionStoreManager() {
+        transactionStoreManager = new TransactionStoreManager() {
             @Override
             public boolean writeSession(LogOperation logOperation, SessionStorable session) {
                 return true;
             }
-        };
-    }
 
-    @Override
-    public void addGlobalSession(GlobalSession session) throws TransactionException {
-        super.addGlobalSession(session);
-        sessionMap.put(session.getXid(), session);
-    }
+            @Override
+            public void shutdown() {
 
-    @Override
-    public GlobalSession findGlobalSession(String xid)  {
-        return sessionMap.get(xid);
-    }
-
-    @Override
-    public void removeGlobalSession(GlobalSession session) throws TransactionException {
-        super.removeGlobalSession(session);
-        sessionMap.remove(session.getXid());
-    }
-
-    @Override
-    public Collection<GlobalSession> allSessions() {
-        return sessionMap.values();
-    }
-
-    @Override
-    public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
-        List<GlobalSession> found = new ArrayList<>();
-        for (GlobalSession globalSession : sessionMap.values()) {
-            if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
-                found.add(globalSession);
             }
-        }
-        return found;
+
+            @Override
+            public List<TransactionWriteStore> readWriteStoreFromFile(int readSize, boolean isHistory) {
+                return null;
+            }
+
+            @Override
+            public boolean hasRemaining(boolean isHistory) {
+                return false;
+            }
+        };
     }
 
     @Override

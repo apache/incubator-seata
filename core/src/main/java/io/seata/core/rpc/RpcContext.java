@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import io.seata.common.Constants;
+import io.seata.core.rpc.netty.NettyPoolKey.TransactionRole;
 
 import io.netty.channel.Channel;
 import io.seata.core.rpc.netty.NettyPoolKey;

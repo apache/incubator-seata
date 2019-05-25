@@ -35,24 +35,15 @@ public interface LockManager {
     boolean acquireLock(BranchSession branchSession) throws TransactionException;
 
     /**
-     * Un lock boolean.
-     *
-     * @param branchSession the branch session
-     * @return the boolean
-     * @throws TransactionException the transaction exception
-     */
-    boolean releaseLock(BranchSession branchSession) throws TransactionException;
-
-    /**
      * Is lockable boolean.
      *
-     * @param xid        the xid
-     * @param resourceId the resource id
-     * @param lockKey    the lock key
+     * @param transactionId the transaction id
+     * @param resourceId    the resource id
+     * @param lockKey       the lock key
      * @return the boolean
      * @throws TransactionException the transaction exception
      */
-    boolean isLockable(String xid, String resourceId, String lockKey) throws TransactionException;
+    boolean isLockable(long transactionId, String resourceId, String lockKey) throws TransactionException;
 
     /**
      * Clean all locks.
@@ -61,4 +52,12 @@ public interface LockManager {
      */
     void cleanAllLocks() throws TransactionException;
 
+    /**
+     * Release lock boolean.
+     *
+     * @param branchSession the branch session
+     * @return the boolean
+     * @throws TransactionException the transaction exception
+     */
+    boolean releaseLock(BranchSession branchSession) throws TransactionException;
 }

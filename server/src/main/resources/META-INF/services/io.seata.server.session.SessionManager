@@ -1,3 +1,0 @@
-io.seata.server.session.file.FileBasedSessionManager
-io.seata.server.session.db.DataBaseSessionManager
-io.seata.server.session.DefaultSessionManager
