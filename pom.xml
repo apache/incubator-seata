@@ -106,7 +106,6 @@
         <mockito-core.version>2.23.4</mockito-core.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <junit-platform-launcher.version>1.4.2</junit-platform-launcher.version>
-        <fabric8.maven.plugin.version>4.1.0</fabric8.maven.plugin.version>
     </properties>
 
     <!--test-->
