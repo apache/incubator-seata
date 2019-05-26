@@ -15,25 +15,16 @@
  */
 package io.seata.rm.datasource.undo;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import io.seata.common.loader.LoadLevel;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * The type Json based undo log parser.
- *
- * @author sharajava
+ * @author Geng Zhang
  */
-@LoadLevel(name = "fastjson")
-public class JSONBasedUndoLogParser implements UndoLogParser {
+class UndoLogParserFactoryTest {
 
-    @Override
-    public String encode(BranchUndoLog branchUndoLog) {
-        return JSON.toJSONString(branchUndoLog, SerializerFeature.WriteDateUseDateFormat);
-    }
-
-    @Override
-    public BranchUndoLog decode(String text) {
-        return JSON.parseObject(text, BranchUndoLog.class);
+    @Test
+    void getInstance() {
+        Assertions.assertTrue(UndoLogParserFactory.getInstance() instanceof JSONBasedUndoLogParser);
     }
 }

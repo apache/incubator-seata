@@ -64,7 +64,7 @@ public abstract class AbstractUndoExecutor {
      * Switch of undo data validation
      */
     public static final boolean IS_UNDO_DATA_VALIDATION_ENABLE = ConfigurationFactory.getInstance()
-            .getBoolean(ConfigurationKeys.TRANSACTION_UNOD_DATA_VALIDATION, true);
+            .getBoolean(ConfigurationKeys.TRANSACTION_UNDO_DATA_VALIDATION, true);
 
     /**
      * wrap sql with row records

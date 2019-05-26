@@ -16,30 +16,26 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
+import io.seata.common.loader.EnhancedServiceNotFoundException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * The type Undo log parser factory.
- *
- * @author sharajava
  * @author Geng Zhang
  */
-public class UndoLogParserFactory {
+class UndoLogParserProviderTest {
 
-    private static class SingletonHolder {
-        private static final UndoLogParser INSTANCE = 
-                EnhancedServiceLoader.load(UndoLogParser.class, ConfigurationFactory.getInstance()
-                        .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, "fastjson"));
+    @Test
+    void testError(){
+        UndoLogParser parser = EnhancedServiceLoader.load(UndoLogParser.class, "fastjson");
+        Assertions.assertNotNull(parser);
+        Assertions.assertTrue(parser instanceof JSONBasedUndoLogParser);
+        
+        try {
+            EnhancedServiceLoader.load(UndoLogParser.class, "adadad");
+            Assertions.fail();
+        } catch (Exception e) {
+            Assertions.assertTrue(e instanceof EnhancedServiceNotFoundException);
+        }
     }
-
-    /**
-     * Gets instance.
-     *
-     * @return the instance
-     */
-    public static UndoLogParser getInstance() {
-        return SingletonHolder.INSTANCE;
-    }
-
 }
