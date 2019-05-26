@@ -20,6 +20,7 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
+import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.discovery.registry.RegistryFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
@@ -193,7 +194,12 @@ class NettyClientChannelManager {
         }
         Channel channelFromPool;
         try {
-            poolKeyMap.put(serverAddress, poolKeyFunction.apply(serverAddress));
+            NettyPoolKey currentPoolKey = poolKeyFunction.apply(serverAddress);
+            NettyPoolKey previousPoolKey = poolKeyMap.putIfAbsent(serverAddress, currentPoolKey);
+            if (null != previousPoolKey && previousPoolKey.getMessage() instanceof RegisterRMRequest) {
+                RegisterRMRequest registerRMRequest = (RegisterRMRequest) currentPoolKey.getMessage();
+                ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());
+            }
             channelFromPool = nettyClientKeyPool.borrowObject(poolKeyMap.get(serverAddress));
         } catch (Exception exx) {
             LOGGER.error(FrameworkErrorCode.RegisterRM.getErrCode(), "register RM failed.", exx);
@@ -238,6 +244,5 @@ class NettyClientChannelManager {
         }
         return null;
     }
-    
-    
 }
+
