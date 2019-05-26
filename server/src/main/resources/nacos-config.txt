@@ -37,9 +37,10 @@ store.db.branch.table=branch_table
 store.db.query-limit=100
 lock.mode=memory
 lock.db.lock-table=lock_table
-recovery.committing-retry-delay = 5
-recovery.asyn-committing-retry-delay = 5
-recovery.rollbacking-retry-delay = 5
-recovery.timeout-retry-delay = 5
+recovery.committing-retry-delay=5
+recovery.asyn-committing-retry-delay=5
+recovery.rollbacking-retry-delay=5
+recovery.timeout-retry-delay=5
 transaction.undo.data.validation=true
+transaction.undo.log.serialization=fastjson
 
