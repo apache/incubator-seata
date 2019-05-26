@@ -77,9 +77,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
             byteBuffer.putShort((short)0);
             byteBuffer.putLong(msg.getId());
             byteBuffer.flip();
-            byte[] content = new byte[byteBuffer.limit()];
-            byteBuffer.get(content);
-            out.writeBytes(content);
+            out.writeBytes(byteBuffer);
             return;
         }
 
@@ -89,9 +87,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 byteBuffer.putLong(msg.getId());
 
                 byteBuffer.flip();
-                byte[] content = new byte[byteBuffer.limit()];
-                byteBuffer.get(content);
-                out.writeBytes(content);
+                out.writeBytes(byteBuffer);
                 out.writeBytes(msgCodec.encode());
             } else {
                 if (LOGGER.isInfoEnabled()) {
@@ -103,9 +99,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
                 byteBuffer.put(body);
 
                 byteBuffer.flip();
-                byte[] content = new byte[byteBuffer.limit()];
-                byteBuffer.get(content);
-                out.writeBytes(content);
+                out.writeBytes(byteBuffer);
             }
         } catch (Exception e) {
             LOGGER.error(msg.getBody() + " encode error", "", e);
