@@ -17,9 +17,8 @@ package io.seata.config;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -32,10 +31,22 @@ public final class ConfigurationFactory {
     private static final String REGISTRY_CONF = "registry.conf";
     private static final String REGISTRY_CONF_PREFIX = "registry";
     private static final String REGISTRY_CONF_SUFFIX = ".conf";
+    private static final String ENV_SYSTEM_KEY = "SEATA_CONFIG_ENV";
+    private static final String ENV_PROPERTY_KEY = "env";
     /**
      * The constant FILE_INSTANCE.
      */
-    private static final String ENV_VALUE = System.getProperty("env");
+    private static String ENV_VALUE;
+    static {
+        Map<String, String> map = System.getenv();
+        String env = map.get(ENV_SYSTEM_KEY);
+        if(env != null && System.getProperty(ENV_PROPERTY_KEY) == null){
+            //Help users get
+            System.setProperty(ENV_PROPERTY_KEY, env);
+        }
+        ENV_VALUE = System.getProperty(ENV_PROPERTY_KEY);
+    }
+
     private static final Configuration DEFAULT_FILE_INSTANCE = new FileConfiguration(REGISTRY_CONF_PREFIX + REGISTRY_CONF_SUFFIX);
     public static final Configuration CURRENT_FILE_INSTANCE = (ENV_VALUE == null || "default".equals(ENV_VALUE)) ? DEFAULT_FILE_INSTANCE : new FileConfiguration(REGISTRY_CONF_PREFIX + "-" + ENV_VALUE + REGISTRY_CONF_SUFFIX);
     private static final String NAME_KEY = "name";
