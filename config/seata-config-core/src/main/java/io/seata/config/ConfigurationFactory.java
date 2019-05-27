@@ -18,7 +18,6 @@ package io.seata.config;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -38,8 +37,7 @@ public final class ConfigurationFactory {
      */
     private static String ENV_VALUE;
     static {
-        Map<String, String> map = System.getenv();
-        String env = map.get(ENV_SYSTEM_KEY);
+        String env = System.getenv(ENV_SYSTEM_KEY);
         if(env != null && System.getProperty(ENV_PROPERTY_KEY) == null){
             //Help users get
             System.setProperty(ENV_PROPERTY_KEY, env);
