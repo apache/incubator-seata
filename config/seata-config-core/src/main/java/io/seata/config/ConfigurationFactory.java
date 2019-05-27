@@ -26,10 +26,10 @@ import java.util.Objects;
  * The type Configuration factory.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/24
+ * @author Geng Zhang
  */
 public final class ConfigurationFactory {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
+    private static final String REGISTRY_CONF = "registry.conf";
     private static final String REGISTRY_CONF_PREFIX = "registry";
     private static final String REGISTRY_CONF_SUFFIX = ".conf";
     /**
@@ -41,20 +41,33 @@ public final class ConfigurationFactory {
     private static final String NAME_KEY = "name";
     private static final String FILE_TYPE = "file";
 
+    private static volatile Configuration CONFIG_INSTANCE = null;
+
     /**
      * Gets instance.
      *
      * @return the instance
      */
-    public static synchronized Configuration getInstance() {
+    public static Configuration getInstance() {
+        if (CONFIG_INSTANCE == null) {
+            synchronized (Configuration.class) {
+                if (CONFIG_INSTANCE == null) {
+                    CONFIG_INSTANCE = buildConfiguration();
+                }
+            }
+        }
+        return CONFIG_INSTANCE;
+    }
+
+    private static Configuration buildConfiguration() {
         ConfigType configType = null;
         String configTypeName = null;
         try {
             configTypeName = CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + ConfigurationKeys.FILE_ROOT_TYPE);
             configType = ConfigType.getType(configTypeName);
-        } catch (Exception exx) {
-            throw new NotSupportYetException("not support register type: " + configTypeName);
+        } catch (Exception e) {
+            throw new NotSupportYetException("not support register type: " + configTypeName, e);
         }
         if (ConfigType.File == configType) {
             String pathDataId = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
