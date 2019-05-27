@@ -184,7 +184,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                             if(JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
                                 UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, UNDOLOG_DELETE_LIMIT_SIZE, conn);
                             } else {
-                                UndoLogManager.batchDeleteUndoLog(xids, branchIds, UNDOLOG_DELETE_LIMIT_SIZE, conn);
+                                UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
                             }
                         } catch (Exception ex) {
                             LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
@@ -202,7 +202,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                     if(JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
                         UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, UNDOLOG_DELETE_LIMIT_SIZE, conn);
                     } else {
-                        UndoLogManager.batchDeleteUndoLog(xids, branchIds, UNDOLOG_DELETE_LIMIT_SIZE, conn);
+                        UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
                     }
                 }catch (Exception ex) {
                     LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);

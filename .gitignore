@@ -7,6 +7,7 @@ target/
 *.tar.gz
 *.class
 .flattened-pom.xml
+dependency-reduced-pom.xml
 
 # eclipse ignore
 .settings/
@@ -31,6 +32,7 @@ target/
 /server/*root.*
 /server/.root.*
 /server/sessionStore/
+/sessionStore/
 
 # system ignore
 .DS_Store

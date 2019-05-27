@@ -17,12 +17,14 @@ package io.seata.rm.datasource.undo;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import io.seata.common.loader.LoadLevel;
 
 /**
  * The type Json based undo log parser.
  *
  * @author sharajava
  */
+@LoadLevel(name = "fastjson")
 public class JSONBasedUndoLogParser implements UndoLogParser {
 
     @Override

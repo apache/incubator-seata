@@ -43,5 +43,5 @@ public @interface LoadLevel {
      *
      * @return the int
      */
-    int order();
+    int order() default 0;
 }

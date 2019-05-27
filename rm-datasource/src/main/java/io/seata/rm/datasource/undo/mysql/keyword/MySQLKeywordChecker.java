@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.undo.mysql.keyword;
 
 import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordChecker;
 
 import java.util.Arrays;
 import java.util.Set;
