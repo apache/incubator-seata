@@ -32,6 +32,7 @@ public final class ConfigurationFactory {
     private static final String REGISTRY_CONF_SUFFIX = ".conf";
     private static final String ENV_SYSTEM_KEY = "SEATA_CONFIG_ENV";
     private static final String ENV_PROPERTY_KEY = "env";
+    private static final String DEFAULT_ENV_VALUE = "default";
     /**
      * The constant FILE_INSTANCE.
      */
@@ -46,7 +47,7 @@ public final class ConfigurationFactory {
     }
 
     private static final Configuration DEFAULT_FILE_INSTANCE = new FileConfiguration(REGISTRY_CONF_PREFIX + REGISTRY_CONF_SUFFIX);
-    public static final Configuration CURRENT_FILE_INSTANCE = (ENV_VALUE == null || "default".equals(ENV_VALUE)) ? DEFAULT_FILE_INSTANCE : new FileConfiguration(REGISTRY_CONF_PREFIX + "-" + ENV_VALUE + REGISTRY_CONF_SUFFIX);
+    public static final Configuration CURRENT_FILE_INSTANCE = (ENV_VALUE == null || DEFAULT_ENV_VALUE.equals(ENV_VALUE)) ? DEFAULT_FILE_INSTANCE : new FileConfiguration(REGISTRY_CONF_PREFIX + "-" + ENV_VALUE + REGISTRY_CONF_SUFFIX);
     private static final String NAME_KEY = "name";
     private static final String FILE_TYPE = "file";
 
