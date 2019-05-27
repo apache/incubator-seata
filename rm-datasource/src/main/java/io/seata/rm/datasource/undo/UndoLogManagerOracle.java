@@ -155,7 +155,7 @@ public final class UndoLogManagerOracle {
                         return;
                     }
                     Blob b = rs.getBlob("rollback_info");
-                    String rollbackInfo = StringUtils.blob2string(b);
+                    String rollbackInfo =  BlobUtils.blob2string(b);
                     BranchUndoLog branchUndoLog = UndoLogParserFactory.getInstance().decode(rollbackInfo);
 
                     for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
