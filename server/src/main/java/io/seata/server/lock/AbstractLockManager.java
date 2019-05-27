@@ -17,9 +17,7 @@ package io.seata.server.lock;
 
 import io.seata.common.XID;
 import io.seata.common.util.StringUtils;
-import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.RowLock;
-import io.seata.core.store.LockDO;
 import io.seata.server.session.BranchSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
