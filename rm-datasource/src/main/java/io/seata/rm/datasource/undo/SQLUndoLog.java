@@ -34,16 +34,6 @@ public class SQLUndoLog {
 
     private TableRecords afterImage;
 
-    private String executeDate;
-
-    public String getExecuteDate() {
-        return executeDate;
-    }
-
-    public void setExecuteDate(String executeDate) {
-        this.executeDate = executeDate;
-    }
-
     /**
      * Sets table meta.
      *

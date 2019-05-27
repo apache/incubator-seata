@@ -24,7 +24,6 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Set;
 
-import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
@@ -266,7 +265,6 @@ public final class UndoLogManagerOracle {
             }
         }
 
-        ElasticsearchUtil.deleteData(xids.toArray(new String[xids.size()]));
 
     }
 
@@ -318,7 +316,6 @@ public final class UndoLogManagerOracle {
                 deletePST.close();
             }
         }
-        ElasticsearchUtil.deleteData(new String[]{xid});
     }
 
     private static void insertUndoLogWithNormal(String xid, long branchID,
