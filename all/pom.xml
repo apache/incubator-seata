@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>0.5.2</version>
+    <version>0.6.0</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -110,6 +110,11 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-config-consul</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-config-etcd3</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -423,7 +428,7 @@
                             <createSourcesJar>true</createSourcesJar>
                             <promoteTransitiveDependencies>false</promoteTransitiveDependencies>
                             <keepDependenciesWithProvidedScope>false</keepDependenciesWithProvidedScope>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
                             <artifactSet>
                                 <includes>
                                     <include>io.seata:seata-common</include>
@@ -433,6 +438,7 @@
                                     <include>io.seata:seata-config-nacos</include>
                                     <include>io.seata:seata-config-zk</include>
                                     <include>io.seata:seata-config-consul</include>
+                                    <include>io.seata:seata-config-etcd3</include>
                                     <include>io.seata:seata-discovery-core</include>
                                     <include>io.seata:seata-discovery-consul</include>
                                     <include>io.seata:seata-discovery-eureka</include>
@@ -473,6 +479,12 @@
                                         <exclude>registry.conf</exclude>
                                     </excludes>
                                 </filter>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/maven/**</exclude>
+                                    </excludes>
+                                </filter>
                             </filters>
                         </configuration>
                     </execution>
@@ -497,20 +509,12 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <version>2.10.4</version>
                         <configuration>
-                            <encoding>${project.build.sourceEncoding}</encoding>
-                            <detectOfflineLinks>true</detectOfflineLinks>
-                            <breakiterator>true</breakiterator>
-                            <author>false</author>
-                            <keywords>true</keywords>
-                            <quiet>true</quiet>
-                            <includeDependencySources>true</includeDependencySources>
-                            <dependencySourceIncludes>
-                                <dependencySourceInclude>io.seata:seata-*</dependencySourceInclude>
-                            </dependencySourceIncludes>
+                            <charset>${project.build.sourceEncoding}</charset>
+                            <failOnError>false</failOnError>
                         </configuration>
                         <executions>
                             <execution>
-                                <id>attach-javadocs</id>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>

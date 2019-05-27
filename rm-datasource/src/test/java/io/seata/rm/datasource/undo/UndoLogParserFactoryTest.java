@@ -13,34 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.lock;
+package io.seata.rm.datasource.undo;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * The type Lock manager factory.
- *
- * @author sharajava
+ * @author Geng Zhang
  */
-public class LockManagerFactory {
+class UndoLogParserFactoryTest {
 
-    private static class SingletonHolder {
-        private static LockManager INSTANCE = new DefaultLockManagerImpl();
-    }
-
-    /**
-     * Get lock manager.
-     *
-     * @return the lock manager
-     */
-    public static final LockManager get() {
-        return SingletonHolder.INSTANCE;
-    }
-
-    /**
-     * Just for test mocking
-     *
-     * @param lockManager the lock manager
-     */
-    public static void set(LockManager lockManager) {
-        SingletonHolder.INSTANCE = lockManager;
+    @Test
+    void getInstance() {
+        Assertions.assertTrue(UndoLogParserFactory.getInstance() instanceof JSONBasedUndoLogParser);
     }
 }

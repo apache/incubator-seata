@@ -15,15 +15,22 @@
  */
 package io.seata.rm.datasource.undo;
 
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+
 /**
  * The type Undo log parser factory.
  *
  * @author sharajava
+ * @author Geng Zhang
  */
 public class UndoLogParserFactory {
 
     private static class SingletonHolder {
-        private static final UndoLogParser INSTANCE = new JSONBasedUndoLogParser();
+        private static final UndoLogParser INSTANCE = 
+                EnhancedServiceLoader.load(UndoLogParser.class, ConfigurationFactory.getInstance()
+                        .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, "fastjson"));
     }
 
     /**
@@ -31,7 +38,7 @@ public class UndoLogParserFactory {
      *
      * @return the instance
      */
-    public static final UndoLogParser getInstance() {
+    public static UndoLogParser getInstance() {
         return SingletonHolder.INSTANCE;
     }
 

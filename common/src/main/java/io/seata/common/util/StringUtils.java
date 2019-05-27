@@ -15,18 +15,16 @@
  */
 package io.seata.common.util;
 
+import io.seata.common.Constants;
+import io.seata.common.exception.ShouldNeverHappenException;
+
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
-
-import javax.sql.rowset.serial.SerialBlob;
 
 /**
  * The type String utils.
@@ -37,7 +35,6 @@ import javax.sql.rowset.serial.SerialBlob;
 public class StringUtils {
 
     private StringUtils() {
-
     }
 
     /**
@@ -54,7 +51,7 @@ public class StringUtils {
      * Is blank string ?
      *
      * @param str the str
-     * @return boolean
+     * @return boolean boolean
      */
     public static boolean isBlank(String str) {
         int length;
@@ -74,7 +71,7 @@ public class StringUtils {
      * Is Not blank string ?
      *
      * @param str the str
-     * @return boolean
+     * @return boolean boolean
      */
     public static boolean isNotBlank(String str) {
         int length;
@@ -91,33 +88,32 @@ public class StringUtils {
         return false;
     }
 
-    /**
-     * String 2 blob blob.
+     /**
+     * Equals boolean.
      *
-     * @param str the str
-     * @return the blob
-     * @throws SQLException the sql exception
+     * @param a the a
+     * @param b the b
+     * @return boolean
      */
-    public static Blob string2blob(String str) throws SQLException {
-        if (str == null) {
-            return null;
+    public static boolean equals(String a, String b) {
+        if (a == null) {
+            return b == null;
         }
-        return new SerialBlob(str.getBytes());
+        return a.equals(b);
     }
 
     /**
-     * Blob 2 string string.
+     * Equals ignore case boolean.
      *
-     * @param blob the blob
-     * @return the string
-     * @throws SQLException the sql exception
+     * @param a the a
+     * @param b the b
+     * @return the boolean
      */
-    public static String blob2string(Blob blob) throws SQLException {
-        if (blob == null) {
-            return null;
+    public static boolean equalsIgnoreCase(String a, String b) {
+        if (a == null) {
+            return b == null;
         }
-
-        return new String(blob.getBytes((long)1, (int)blob.length()));
+        return a.equalsIgnoreCase(b);
     }
 
     /**
@@ -125,22 +121,50 @@ public class StringUtils {
      *
      * @param is the is
      * @return the string
-     * @throws IOException the io exception
      */
-    public static String inputStream2String(InputStream is) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        int i = -1;
-        while ((i = is.read()) != -1) {
-            baos.write(i);
+    public static String inputStream2String(InputStream is) {
+        if (is == null) {
+            return null;
         }
-        return baos.toString();
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            int i = -1;
+            while ((i = is.read()) != -1) {
+                baos.write(i);
+            }
+            return baos.toString(Constants.DEFAULT_CHARSET_NAME);
+        } catch (Exception e) {
+            throw new ShouldNeverHappenException(e);
+        }
+    }
+
+    /**
+     * Input stream to byte array
+     *
+     * @param is the is
+     * @return the byte array
+     */
+    public static byte[] inputStream2Bytes(InputStream is) {
+        if (is == null) {
+            return null;
+        }
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            int i = -1;
+            while ((i = is.read()) != -1) {
+                baos.write(i);
+            }
+            return baos.toByteArray();
+        } catch (Exception e) {
+            throw new ShouldNeverHappenException(e);
+        }
     }
 
     /**
      * Object.toString()
      *
      * @param obj the obj
-     * @return string
+     * @return string string
      */
     public static String toString(Object obj){
         if (obj == null){
@@ -196,33 +220,5 @@ public class StringUtils {
             sb.append(";");
         }
         return sb.toString();
-    }
-
-    /**
-     * Equals boolean.
-     *
-     * @param a the a
-     * @param b the b
-     * @return boolean
-     */
-    public static boolean equals(String a, String b) {
-        if (a == null) {
-            return b == null;
-        }
-        return a.equals(b);
-    }
-
-    /**
-     * Equals ignore case boolean.
-     *
-     * @param a the a
-     * @param b the b
-     * @return the boolean
-     */
-    public static boolean equalsIgnoreCase(String a, String b) {
-        if (a == null) {
-            return b == null;
-        }
-        return a.equalsIgnoreCase(b);
     }
 }
