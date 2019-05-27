@@ -15,7 +15,16 @@
  */
 package io.seata.rm.datasource.undo;
 
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Set;
+
 import com.alibaba.druid.util.JdbcConstants;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
 import io.seata.core.exception.TransactionException;
@@ -26,14 +35,6 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.Blob;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Set;
 
 import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Retriable;
 
@@ -121,8 +122,8 @@ public final class UndoLogManager {
      * Undo.
      *
      * @param dataSourceProxy the data source proxy
-     * @param xid the xid
-     * @param branchId the branch id
+     * @param xid             the xid
+     * @param branchId        the branch id
      * @throws TransactionException the transaction exception
      */
     public static void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {
@@ -244,20 +245,20 @@ public final class UndoLogManager {
             deletePST = conn.prepareStatement(batchDeleteSql);
             int paramsIndex = 1;
             for (Long branchId : branchIds) {
-                deletePST.setLong(paramsIndex++,branchId);
+                deletePST.setLong(paramsIndex++, branchId);
             }
-            for (String xid: xids){
+            for (String xid : xids) {
                 deletePST.setString(paramsIndex++, xid);
             }
             int deleteRows = deletePST.executeUpdate();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("batch delete undo log size " + deleteRows);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
             }
-            throw (SQLException) e;
+            throw (SQLException)e;
         } finally {
             if (deletePST != null) {
                 deletePST.close();
@@ -269,8 +270,8 @@ public final class UndoLogManager {
     protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize) {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("DELETE FROM ")
-                .append(UNDO_LOG_TABLE_NAME)
-                .append(" WHERE  branch_id IN ");
+            .append(UNDO_LOG_TABLE_NAME)
+            .append(" WHERE  branch_id IN ");
         appendInParam(branchIdSize, sqlBuilder);
         sqlBuilder.append(" AND xid IN ");
         appendInParam(xidSize, sqlBuilder);
@@ -279,7 +280,7 @@ public final class UndoLogManager {
 
     protected static void appendInParam(int size, StringBuilder sqlBuilder) {
         sqlBuilder.append(" (");
-        for (int i = 0;i < size;i++) {
+        for (int i = 0; i < size; i++) {
             sqlBuilder.append("?");
             if (i < (size - 1)) {
                 sqlBuilder.append(",");
@@ -291,9 +292,9 @@ public final class UndoLogManager {
     /**
      * Delete undo log.
      *
-     * @param xid the xid
+     * @param xid      the xid
      * @param branchId the branch id
-     * @param conn the conn
+     * @param conn     the conn
      * @throws SQLException the sql exception
      */
     public static void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
@@ -303,11 +304,11 @@ public final class UndoLogManager {
             deletePST.setLong(1, branchId);
             deletePST.setString(2, xid);
             deletePST.executeUpdate();
-        }catch (Exception e){
+        } catch (Exception e) {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
             }
-            throw (SQLException) e;
+            throw (SQLException)e;
         } finally {
             if (deletePST != null) {
                 deletePST.close();
@@ -339,7 +340,7 @@ public final class UndoLogManager {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
             }
-            throw (SQLException) e;
+            throw (SQLException)e;
         } finally {
             if (pst != null) {
                 pst.close();

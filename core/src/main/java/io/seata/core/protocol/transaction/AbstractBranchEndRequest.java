@@ -247,10 +247,10 @@ public abstract class AbstractBranchEndRequest extends AbstractTransactionReques
             if (in.readableBytes() < applicationDataLen) {
                 return false;
             }
-           bs = new byte[applicationDataLen];
+            bs = new byte[applicationDataLen];
             in.readBytes(bs);
             setApplicationData(new String(bs, UTF8));
-        }else{
+        } else {
             //application data may be null
         }
         return true;
