@@ -1,22 +1,16 @@
 package io.seata.discovery.registry.kubernetes;
 
-import io.fabric8.kubernetes.api.model.*;
 import io.fabric8.kubernetes.client.Config;
 import io.fabric8.kubernetes.client.DefaultKubernetesClient;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.server.mock.KubernetesServer;
-import io.fabric8.zjsonpatch.internal.guava.Lists;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
-import static javax.swing.UIManager.put;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**

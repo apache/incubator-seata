@@ -15,10 +15,12 @@
  */
 package io.seata.discovery.registry.kubernetes;
 
-import io.fabric8.kubernetes.api.model.*;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
+import io.fabric8.kubernetes.api.model.EndpointsList;
+import io.fabric8.kubernetes.api.model.Endpoints;
+import io.fabric8.kubernetes.api.model.EndpointSubset;
+import io.fabric8.kubernetes.api.model.EndpointAddress;
+import io.fabric8.kubernetes.api.model.EndpointPort;
 import io.fabric8.kubernetes.client.KubernetesClient;
-import io.seata.common.util.NetUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryService;
@@ -26,7 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -129,18 +133,18 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
             final List<EndpointSubset> subsets = endpoints.getSubsets();
             final String serviceName = endpoints.getMetadata().getName();
             if (subsets != null && !subsets.isEmpty()){
-                List<InetSocketAddress> addressSet = new ArrayList();
+                List<InetSocketAddress> addressList = new ArrayList();
                 subsets.forEach(endpointSubset -> {
                     final List<EndpointAddress> addresses = endpointSubset.getAddresses();
                     final EndpointPort endpointPort = findEndpointPort(endpointSubset);
                     addresses.forEach(e -> {
                         final String ip = e.getIp();
                         final Integer port = endpointPort.getPort();
-                        addressSet.add(new InetSocketAddress(ip,port));
+                        addressList.add(new InetSocketAddress(ip,port));
                         LOGGER.info("serviceName = {} , ip = {} , port = {} ",serviceName,ip,port);
                     });
                 });
-                clusterAddressMap.putIfAbsent(serviceName,addressSet);
+                clusterAddressMap.putIfAbsent(serviceName,addressList);
             }
         });
     }

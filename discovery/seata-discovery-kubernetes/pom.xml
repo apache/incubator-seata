@@ -23,7 +23,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.seata</groupId>
     <artifactId>seata-discovery-kubernetes</artifactId>
     <name>seata-discovery-kubernetes ${project.version}</name>
 
