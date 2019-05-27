@@ -20,8 +20,8 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
+import io.seata.server.store.FileTransactionStoreManager;
 import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.store.file.FileTransactionStoreManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -55,10 +55,9 @@ public class WriteStoreMultithreadTest {
                     }
 
                     @Override
-                    public GlobalSession findGlobalSession(String xid)  {
+                    public GlobalSession findGlobalSession(Long transactionId) {
                         return null;
                     }
-
 
                     @Override
                     public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status)

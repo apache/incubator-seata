@@ -13,20 +13,34 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.lock.memory;
-
-import io.seata.core.lock.Locker;
-import io.seata.server.lock.DefaultLockManager;
-import io.seata.server.session.BranchSession;
+package io.seata.server.lock;
 
 /**
- * @author zhangsen
- * @data 2019-05-16
+ * The type Lock manager factory.
+ *
+ * @author sharajava
  */
-public class MemoryLockManagerForTest extends DefaultLockManager {
+public class LockManagerFactory {
 
-    @Override
-    protected Locker getLocker(BranchSession branchSession) {
-        return new MemoryLocker(branchSession);
+    private static class SingletonHolder {
+        private static LockManager INSTANCE = new DefaultLockManagerImpl();
+    }
+
+    /**
+     * Get lock manager.
+     *
+     * @return the lock manager
+     */
+    public static final LockManager get() {
+        return SingletonHolder.INSTANCE;
+    }
+
+    /**
+     * Just for test mocking
+     *
+     * @param lockManager the lock manager
+     */
+    public static void set(LockManager lockManager) {
+        SingletonHolder.INSTANCE = lockManager;
     }
 }

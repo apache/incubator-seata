@@ -17,6 +17,9 @@ package io.seata.rm.tcc;
 
 import io.seata.common.util.StringUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * the TCC method result
  *

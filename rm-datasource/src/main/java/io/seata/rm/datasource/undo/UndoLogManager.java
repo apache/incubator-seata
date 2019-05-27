@@ -18,6 +18,7 @@ package io.seata.rm.datasource.undo;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
@@ -160,7 +161,7 @@ public final class UndoLogManager {
                     }
 
                     Blob b = rs.getBlob("rollback_info");
-                    String rollbackInfo = BlobUtils.blob2string(b);
+                    String rollbackInfo = StringUtils.blob2string(b);
                     BranchUndoLog branchUndoLog = UndoLogParserFactory.getInstance().decode(rollbackInfo);
 
                     for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
@@ -233,12 +234,13 @@ public final class UndoLogManager {
      *
      * @param xids
      * @param branchIds
+     * @param limitSize
      * @param conn
      */
-    public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, Connection conn) throws SQLException {
+    public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, int limitSize, Connection conn) throws SQLException {
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
-        String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
+        String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize,limitSize);
         PreparedStatement deletePST = null;
         try {
             deletePST = conn.prepareStatement(batchDeleteSql);
@@ -266,14 +268,15 @@ public final class UndoLogManager {
 
     }
 
-    protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize) {
+    protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize,int limitSize) {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("DELETE FROM ")
                 .append(UNDO_LOG_TABLE_NAME)
                 .append(" WHERE  branch_id IN ");
-        appendInParam(branchIdSize, sqlBuilder);
-        sqlBuilder.append(" AND xid IN ");
         appendInParam(xidSize, sqlBuilder);
+        sqlBuilder.append(" AND xid IN ");
+        appendInParam(branchIdSize, sqlBuilder);
+        sqlBuilder.append(" LIMIT ").append(limitSize);
         return sqlBuilder.toString();
     }
 

@@ -23,7 +23,6 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.ResourceManagerInbound;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -85,7 +84,7 @@ public class DefaultCoreTest {
     public void branchRegisterTest(String xid) throws Exception {
         core.branchRegister(BranchType.AT, resourceId, clientId, xid, "abc", lockKeys_1);
         long transactionId = XID.getTransactionId(xid);
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        GlobalSession globalSession = SessionHolder.findGlobalSession(transactionId);
         Assertions.assertEquals(globalSession.getSortedBranches().size(), 1);
 
         //clear
@@ -104,7 +103,7 @@ public class DefaultCoreTest {
     public void branchReportTest(String xid, Long branchId) throws Exception {
         core.branchReport(BranchType.AT, xid, branchId, BranchStatus.PhaseOne_Done, applicationData);
         long transactionId = XID.getTransactionId(xid);
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        GlobalSession globalSession = SessionHolder.findGlobalSession(transactionId);
         BranchSession branchSession = globalSession.getBranch(branchId);
         Assertions.assertEquals(branchSession.getStatus(), BranchStatus.PhaseOne_Done);
 
@@ -121,12 +120,8 @@ public class DefaultCoreTest {
     public void beginTest() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
         long transactionId = XID.getTransactionId(xid);
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        GlobalSession globalSession = SessionHolder.findGlobalSession(transactionId);
         Assertions.assertNotNull(globalSession);
-
-        //clear
-        globalSession.end();
-
     }
 
     /**
@@ -151,9 +146,8 @@ public class DefaultCoreTest {
     @ParameterizedTest
     @MethodSource("xidProvider")
     public void doGlobalCommitCommitTest(String xid) throws Exception {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, resourceId,
-                applicationData, "t1:1", clientId);
+        GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+        BranchSession branchSession = new BranchSession();
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseOne_Done));
@@ -174,9 +168,8 @@ public class DefaultCoreTest {
     @ParameterizedTest
     @MethodSource("xidProvider")
     public void doGlobalCommitUnretryableTest(String xid) throws Exception {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, resourceId,
-                applicationData, "t1:1", clientId);
+        GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+        BranchSession branchSession = new BranchSession();
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_CommitFailed_Unretryable, BranchStatus.PhaseOne_Done));
@@ -196,9 +189,8 @@ public class DefaultCoreTest {
     @ParameterizedTest
     @MethodSource("xidProvider")
     public void doGlobalCommitExpTest(String xid) throws Exception {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, resourceId,
-                applicationData, "t1:1", clientId);
+        GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+        BranchSession branchSession = new BranchSession();
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseOne_Timeout, BranchStatus.PhaseOne_Done));
@@ -231,9 +223,8 @@ public class DefaultCoreTest {
     @ParameterizedTest
     @MethodSource("xidProvider")
     public void doGlobalRollBackRollbackedTest(String xid) throws Exception {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, resourceId,
-                applicationData, "t1:1", clientId);
+        GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+        BranchSession branchSession = new BranchSession();
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_Rollbacked));
@@ -254,9 +245,8 @@ public class DefaultCoreTest {
     @ParameterizedTest
     @MethodSource("xidProvider")
     public void doGlobalRollBackUnretryableTest(String xid) throws Exception {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, resourceId,
-                applicationData, "t1:1", clientId);
+        GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+        BranchSession branchSession = new BranchSession();
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_RollbackFailed_Unretryable));
@@ -276,16 +266,14 @@ public class DefaultCoreTest {
     @ParameterizedTest
     @MethodSource("xidProvider")
     public void doGlobalRollBackRetryableExpTest(String xid) throws Exception {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-        BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, BranchType.AT, resourceId,
-                applicationData, "t1:1", clientId);
+        GlobalSession globalSession = SessionHolder.findGlobalSession(XID.getTransactionId(xid));
+        BranchSession branchSession = new BranchSession();
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
         core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_RollbackFailed_Retryable));
         core.doGlobalRollback(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.RollbackRetrying);
 
-        //clear
         globalSession.end();
     }
 

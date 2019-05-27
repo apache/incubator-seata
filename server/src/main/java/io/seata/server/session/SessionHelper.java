@@ -47,7 +47,6 @@ public class SessionHelper {
             String applicationData, String lockKeys, String clientId) {
         BranchSession branchSession = new BranchSession();
 
-        branchSession.setXid(globalSession.getXid());
         branchSession.setTransactionId(globalSession.getTransactionId());
         branchSession.setBranchId(UUIDGenerator.generateUUID());
         branchSession.setBranchType(branchType);

@@ -41,10 +41,11 @@ public interface SessionManager extends SessionLifecycleListener, Disposable {
     /**
      * Find global session global session.
      *
-     * @param xid the xid
+     * @param transactionId the transaction id
      * @return the global session
+     * @throws TransactionException the transaction exception
      */
-    GlobalSession findGlobalSession(String xid) ;
+    GlobalSession findGlobalSession(Long transactionId);
 
     /**
      * Update global session status.

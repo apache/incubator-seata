@@ -15,8 +15,6 @@
  */
 package io.seata.server.session;
 
-import io.seata.core.model.GlobalStatus;
-
 /**
  * The type Session condition.
  *
@@ -24,45 +22,8 @@ import io.seata.core.model.GlobalStatus;
  * @date 2018 /12/13
  */
 public class SessionCondition {
-    private Long transactionId;
-    private String xid;
-    private GlobalStatus status;
-    private GlobalStatus[] statuses;
+
     private long overTimeAliveMills;
-
-    /**
-     * Instantiates a new Session condition.
-     */
-    public SessionCondition() {
-    }
-
-    /**
-     * Instantiates a new Session condition.
-     *
-     * @param xid the xid
-     */
-    public SessionCondition(String xid) {
-        this.xid = xid;
-    }
-
-    /**
-     * Instantiates a new Session condition.
-     *
-     * @param status the status
-     */
-    public SessionCondition(GlobalStatus status) {
-        this.status = status;
-        statuses = new GlobalStatus[]{status};
-    }
-
-    /**
-     * Instantiates a new Session condition.
-     *
-     * @param statuses the statuses
-     */
-    public SessionCondition(GlobalStatus[] statuses) {
-        this.statuses = statuses;
-    }
 
     /**
      * Instantiates a new Session condition.
@@ -73,23 +34,6 @@ public class SessionCondition {
         this.overTimeAliveMills = overTimeAliveMills;
     }
 
-    /**
-     * Gets status.
-     *
-     * @return the status
-     */
-    public GlobalStatus getStatus() {
-        return status;
-    }
-
-    /**
-     * Sets status.
-     *
-     * @param status the status
-     */
-    public void setStatus(GlobalStatus status) {
-        this.status = status;
-    }
 
     /**
      * Gets over time alive mills.
@@ -107,29 +51,5 @@ public class SessionCondition {
      */
     public void setOverTimeAliveMills(long overTimeAliveMills) {
         this.overTimeAliveMills = overTimeAliveMills;
-    }
-
-    public Long getTransactionId() {
-        return transactionId;
-    }
-
-    public void setTransactionId(Long transactionId) {
-        this.transactionId = transactionId;
-    }
-
-    public String getXid() {
-        return xid;
-    }
-
-    public void setXid(String xid) {
-        this.xid = xid;
-    }
-
-    public GlobalStatus[] getStatuses() {
-        return statuses;
-    }
-
-    public void setStatuses(GlobalStatus[] statuses) {
-        this.statuses = statuses;
     }
 }

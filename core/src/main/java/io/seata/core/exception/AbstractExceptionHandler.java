@@ -15,8 +15,6 @@
  */
 package io.seata.core.exception;
 
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.AbstractTransactionRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
@@ -27,11 +25,6 @@ import io.seata.core.protocol.transaction.AbstractTransactionResponse;
  * @author sharajava
  */
 public abstract class AbstractExceptionHandler {
-
-    /**
-     * The constant CONFIG.
-     */
-    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
      * The interface Callback.

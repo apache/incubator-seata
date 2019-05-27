@@ -41,11 +41,7 @@ public enum ConfigType {
     /**
      * Consul config type
      */
-    Consul,
-    /**
-     * Etcd3 config type
-     */
-    Etcd3;
+    Consul;
 
     /**
      * Gets type.
