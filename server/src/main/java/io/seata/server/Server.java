@@ -42,7 +42,7 @@ public class Server {
     private static final int SERVER_DEFAULT_PORT = 8091;
     private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(MIN_SERVER_POOL_SIZE,
         MAX_SERVER_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
-        new LinkedBlockingQueue(MAX_TASK_QUEUE_SIZE),
+        new LinkedBlockingQueue<>(MAX_TASK_QUEUE_SIZE),
         new NamedThreadFactory("ServerHandlerThread", MAX_SERVER_POOL_SIZE), new ThreadPoolExecutor.CallerRunsPolicy());
 
     /**

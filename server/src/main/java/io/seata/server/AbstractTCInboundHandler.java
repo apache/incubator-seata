@@ -15,7 +15,6 @@
  */
 package io.seata.server;
 
-import io.seata.common.XID;
 import io.seata.core.exception.AbstractExceptionHandler;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
@@ -106,8 +105,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
             public void onTransactionException(GlobalRollbackRequest request, GlobalRollbackResponse response,
                 TransactionException tex) {
                 super.onTransactionException(request, response, tex);
-                GlobalSession globalSession = SessionHolder.findGlobalSession(
-                    XID.getTransactionId(request.getXid()));
+                GlobalSession globalSession = SessionHolder.findGlobalSession(request.getXid());
                 if (globalSession != null) {
                     response.setGlobalStatus(globalSession.getStatus());
                 } else {
@@ -118,8 +116,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
             @Override
             public void onException(GlobalRollbackRequest request, GlobalRollbackResponse response, Exception rex) {
                 super.onException(request, response, rex);
-                GlobalSession globalSession = SessionHolder.findGlobalSession(
-                    XID.getTransactionId(request.getXid()));
+                GlobalSession globalSession = SessionHolder.findGlobalSession(request.getXid());
                 if (globalSession != null) {
                     response.setGlobalStatus(globalSession.getStatus());
                 } else {

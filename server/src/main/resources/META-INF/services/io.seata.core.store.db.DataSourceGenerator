@@ -1,0 +1,2 @@
+io.seata.server.store.db.DbcpDataSourceGenerator
+io.seata.server.store.db.DruidDataSourceGenerator
