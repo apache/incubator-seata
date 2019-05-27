@@ -26,6 +26,42 @@
     <packaging>pom</packaging>
 
     <name>Seata bom ${project.version}</name>
+    <description>Seata bom</description>
+
+    <url>http://seata.io</url>
+    <prerequisites>
+        <maven>3.6.0</maven>
+    </prerequisites>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+    <developers>
+        <developer>
+            <id>Seata</id>
+            <name>Seata</name>
+            <url>http://seata.io</url>
+        </developer>
+    </developers>
+
+    <organization>
+        <name>Seata</name>
+        <url>https://github.com/seata</url>
+    </organization>
+
+    <issueManagement>
+        <system>github</system>
+        <url>https://github.com/seata/seata/issues</url>
+    </issueManagement>
+
+    <scm>
+        <url>git@github.com:seata/seata.git</url>
+        <connection>scm:git@github.com:seata/seata.git</connection>
+        <developerConnection>scm:git@github.com:seata/seata.git</developerConnection>
+    </scm>
 
     <properties>
         <spring.version>4.3.23.RELEASE</spring.version>
@@ -65,6 +101,11 @@
         <oracle.client.version>10.2.0.3.0</oracle.client.version>
         <mysql.client.version>5.1.30</mysql.client.version>
         <h2.version>1.4.181</h2.version>
+
+        <!-- Compiler settings properties -->
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencyManagement>
@@ -296,6 +337,23 @@
             <id>release</id>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.10.4</version>
+                        <configuration>
+                            <charset>${project.build.sourceEncoding}</charset>
+                            <failOnError>false</failOnError>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <!-- GPG -->
                     <plugin>
                         <groupId>org.sonatype.plugins</groupId>
