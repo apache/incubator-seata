@@ -19,8 +19,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 
+import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
@@ -31,6 +33,7 @@ import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+import org.apache.commons.lang.time.DateFormatUtils;
 
 /**
  * The type Base transactional executor.
@@ -193,6 +196,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
         SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
         connectionProxy.appendUndoLog(sqlUndoLog);
+
+        //业务数据操作前后插入到es数据库
+        ConnectionContext connectionContext = connectionProxy.getContext();
+        String xid = connectionContext.getXid();
+        ElasticsearchUtil.addData(xid,sqlUndoLog);
+
     }
 
     /**
@@ -235,6 +244,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         sqlUndoLog.setTableName(tableName);
         sqlUndoLog.setBeforeImage(beforeImage);
         sqlUndoLog.setAfterImage(afterImage);
+        sqlUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(),"yyyy-MM-dd HH:mm:ss"));
+
         return sqlUndoLog;
     }
 

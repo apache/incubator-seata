@@ -19,6 +19,7 @@ import java.io.ByteArrayInputStream;
 import java.sql.*;
 import java.util.Set;
 
+import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
@@ -69,7 +70,7 @@ public final class UndoLogManagerOracle {
     private static String UNDO_LOG_TABLE_NAME = "undo_log";
     private static String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
         "\t(id,branch_id, xid, rollback_info, log_status, log_created, log_modified)\n" +
-        "VALUES (UNDO_LOG_SEQ.nextval,?, ?, ?, 0, sysdate, sysdate)";
+        "VALUES (UNDO_LOG_SEQ.nextval,?, ?, ?, ?, sysdate, sysdate)";
     private static String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + "\n" +
         "\tWHERE branch_id = ? AND xid = ?";
 
@@ -179,12 +180,12 @@ public final class UndoLogManagerOracle {
                     deleteUndoLog(xid, branchId, conn);
                     conn.commit();
                     LOGGER.info("xid {} branch {}, undo_log deleted with {}",
-                            xid, branchId, UndoLogManagerOracle.State.GlobalFinished.name());
+                            xid, branchId, State.GlobalFinished.name());
                 } else {
                     insertUndoLogWithGlobalFinished(xid, branchId, conn);
                     conn.commit();
                     LOGGER.info("xid {} branch {}, undo_log added with {}",
-                            xid, branchId, UndoLogManagerOracle.State.GlobalFinished.name());
+                            xid, branchId, State.GlobalFinished.name());
                 }
 
                 return;
@@ -220,6 +221,7 @@ public final class UndoLogManagerOracle {
         }
     }
 
+
     /**
      * batch Delete undo log.
      *
@@ -235,18 +237,33 @@ public final class UndoLogManagerOracle {
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize,limitSize);
-        PreparedStatement deletePST = conn.prepareStatement(batchDeleteSql);
-        int paramsIndex = 1;
-        for (Long branchId : branchIds) {
-            deletePST.setLong(paramsIndex++,branchId);
+        PreparedStatement deletePST = null;
+        try {
+            deletePST = conn.prepareStatement(batchDeleteSql);
+            int paramsIndex = 1;
+            for (Long branchId : branchIds) {
+                deletePST.setLong(paramsIndex++,branchId);
+            }
+            for (String xid: xids){
+                deletePST.setString(paramsIndex++, xid);
+            }
+            int deleteRows = deletePST.executeUpdate();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("batch delete undo log size " + deleteRows);
+            }
+        }catch (Exception e){
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
+            }
+            throw (SQLException) e;
+        } finally {
+            if (deletePST != null) {
+                deletePST.close();
+            }
         }
-        for (String xid: xids){
-            deletePST.setString(paramsIndex++, xid);
-        }
-        int deleteRows = deletePST.executeUpdate();
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("batch delete undo log size " + deleteRows);
-        }
+
+        ElasticsearchUtil.deleteData(xids.toArray(new String[xids.size()]));
+
     }
 
     protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize,int limitSize) {
@@ -254,9 +271,9 @@ public final class UndoLogManagerOracle {
         sqlBuilder.append("DELETE FROM ")
                 .append(UNDO_LOG_TABLE_NAME)
                 .append(" WHERE  branch_id IN ");
-        appendInParam(xidSize, sqlBuilder);
-        sqlBuilder.append(" AND xid IN ");
         appendInParam(branchIdSize, sqlBuilder);
+        sqlBuilder.append(" AND xid IN ");
+        appendInParam(xidSize, sqlBuilder);
 //        sqlBuilder.append(" LIMIT ").append(limitSize);
         return sqlBuilder.toString();
     }
@@ -275,16 +292,29 @@ public final class UndoLogManagerOracle {
     /**
      * Delete undo log.
      *
-     * @param xid      the xid
+     * @param xid the xid
      * @param branchId the branch id
-     * @param conn     the conn
+     * @param conn the conn
      * @throws SQLException the sql exception
      */
     public static void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
-        PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
-        deletePST.setLong(1, branchId);
-        deletePST.setString(2, xid);
-        deletePST.executeUpdate();
+        PreparedStatement deletePST = null;
+        try {
+            deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
+            deletePST.setLong(1, branchId);
+            deletePST.setString(2, xid);
+            deletePST.executeUpdate();
+        }catch (Exception e){
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
+            }
+            throw (SQLException) e;
+        } finally {
+            if (deletePST != null) {
+                deletePST.close();
+            }
+        }
+        ElasticsearchUtil.deleteData(new String[]{xid});
     }
 
     private static void insertUndoLogWithNormal(String xid, long branchID,
@@ -306,13 +336,13 @@ public final class UndoLogManagerOracle {
             pst.setString(2, xid);
             ByteArrayInputStream inputStream = new ByteArrayInputStream(undoLogContent.getBytes());
             pst.setBlob(3,inputStream);
+            pst.setInt(4, state.getValue());
             pst.executeUpdate();
         } catch (Exception e) {
-            if (e instanceof SQLException) {
-                throw (SQLException)e;
-            } else {
-                throw new SQLException(e);
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
             }
+            throw (SQLException) e;
         } finally {
             if (pst != null) {
                 pst.close();
