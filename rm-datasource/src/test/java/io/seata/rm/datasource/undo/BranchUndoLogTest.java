@@ -68,10 +68,9 @@ public class BranchUndoLogTest {
 
         branchUndoLog.setSqlUndoLogs(items);
 
-        String encodeString = UndoLogParserFactory.getInstance().encode(branchUndoLog);
-        System.out.println(encodeString);
+        byte[] bs = UndoLogParserFactory.getInstance().encode(branchUndoLog);
 
-        BranchUndoLog decodeObj = UndoLogParserFactory.getInstance().decode(encodeString);
+        BranchUndoLog decodeObj = UndoLogParserFactory.getInstance().decode(bs);
         Assertions.assertEquals(decodeObj.getBranchId(), branchUndoLog.getBranchId());
 
     }
