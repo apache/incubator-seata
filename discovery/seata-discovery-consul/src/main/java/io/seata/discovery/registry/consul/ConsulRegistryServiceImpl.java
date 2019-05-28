@@ -50,7 +50,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static volatile ConsulRegistryServiceImpl instance;
     private static volatile ConsulClient client;
 
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String FILE_ROOT_REGISTRY = "registry";
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
     private static final String REGISTRY_TYPE = "consul";
