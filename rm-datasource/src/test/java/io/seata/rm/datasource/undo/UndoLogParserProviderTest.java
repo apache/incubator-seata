@@ -17,6 +17,7 @@ package io.seata.rm.datasource.undo;
 
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.EnhancedServiceNotFoundException;
+import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -29,7 +30,7 @@ class UndoLogParserProviderTest {
     void testError(){
         UndoLogParser parser = EnhancedServiceLoader.load(UndoLogParser.class, "fastjson");
         Assertions.assertNotNull(parser);
-        Assertions.assertTrue(parser instanceof JSONBasedUndoLogParser);
+        Assertions.assertTrue(parser instanceof FastjsonUndoLogParser);
         
         try {
             EnhancedServiceLoader.load(UndoLogParser.class, "adadad");
