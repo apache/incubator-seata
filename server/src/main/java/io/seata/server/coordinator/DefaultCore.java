@@ -165,7 +165,7 @@ public class DefaultCore implements Core {
             }
             try {
                 BranchStatus branchStatus = resourceManagerInbound.branchCommit(branchSession.getBranchType(),
-                    XID.generateXID(branchSession.getTransactionId()), branchSession.getBranchId(),
+                    branchSession.getXid(), branchSession.getBranchId(),
                     branchSession.getResourceId(), branchSession.getApplicationData());
 
                 switch (branchStatus) {
@@ -274,7 +274,7 @@ public class DefaultCore implements Core {
             }
             try {
                 BranchStatus branchStatus = resourceManagerInbound.branchRollback(branchSession.getBranchType(),
-                    XID.generateXID(branchSession.getTransactionId()), branchSession.getBranchId(),
+                    branchSession.getXid(), branchSession.getBranchId(),
                     branchSession.getResourceId(), branchSession.getApplicationData());
 
                 switch (branchStatus) {
