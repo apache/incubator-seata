@@ -13,14 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo;
+package io.seata.rm.datasource.undo.parser;
+
+import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
+import io.seata.rm.datasource.undo.UndoLogParser;
 
 /**
  * @author Geng Zhang
  */
-public class JSONBasedUndoLogParserTest extends BaseUndoLogParserTest {
+class ProtostuffUndoLogParserTest extends BaseUndoLogParserTest {
 
-    JSONBasedUndoLogParser parser = new JSONBasedUndoLogParser();
+    ProtostuffUndoLogParser parser = new ProtostuffUndoLogParser();
 
     @Override
     public UndoLogParser getParser() {
