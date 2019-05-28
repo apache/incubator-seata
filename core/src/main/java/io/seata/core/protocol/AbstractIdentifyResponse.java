@@ -105,7 +105,7 @@ public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
         if (in.readableBytes() < 3) {
             return false;
         }
-        this.identified = (in.readByte() == 1);
+        this.identified = in.readByte() == 1;
         short len = in.readShort();
         if (len <= 0) {
             return false;

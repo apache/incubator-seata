@@ -32,7 +32,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.seata.common.Constants;
 import io.seata.common.executor.Initialize;
 import io.seata.common.util.CollectionUtils;
-
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -115,11 +114,12 @@ public class EnhancedServiceLoader {
      * @return the s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
-    public static <S> S load(Class<S> service, String activateName, Object[] args) throws EnhancedServiceNotFoundException {
+    public static <S> S load(Class<S> service, String activateName, Object[] args)
+        throws EnhancedServiceNotFoundException {
         Class[] argsType = null;
-        if(args != null && args.length > 0){
+        if (args != null && args.length > 0) {
             argsType = new Class[args.length];
-            for(int i = 0; i < args.length; i ++){
+            for (int i = 0; i < args.length; i++) {
                 argsType[i] = args[i].getClass();
             }
         }
@@ -137,7 +137,8 @@ public class EnhancedServiceLoader {
      * @return the s
      * @throws EnhancedServiceNotFoundException the enhanced service not found exception
      */
-    public static <S> S load(Class<S> service, String activateName, Class[] argsType, Object[] args) throws EnhancedServiceNotFoundException {
+    public static <S> S load(Class<S> service, String activateName, Class[] argsType, Object[] args)
+        throws EnhancedServiceNotFoundException {
         return loadFile(service, activateName, findClassLoader(), argsType, args);
     }
 
@@ -193,8 +194,9 @@ public class EnhancedServiceLoader {
         return loadFile(service, activateName, loader, null, null);
     }
 
-        @SuppressWarnings("rawtypes")
-    private static <S> S loadFile(Class<S> service, String activateName, ClassLoader loader, Class[] argTypes, Object[] args) {
+    @SuppressWarnings("rawtypes")
+    private static <S> S loadFile(Class<S> service, String activateName, ClassLoader loader, Class[] argTypes,
+                                  Object[] args) {
         try {
             boolean foundFromCache = true;
             List<Class> extensions = providers.get(service);
@@ -338,20 +340,20 @@ public class EnhancedServiceLoader {
      * @param argTypes  the arg types
      * @param args      the args
      * @return s s
-     * @throws IllegalAccessException    the illegal access exception
-     * @throws InstantiationException    the instantiation exception
-     * @throws NoSuchMethodException     the no such method exception
+     * @throws IllegalAccessException the illegal access exception
+     * @throws InstantiationException the instantiation exception
+     * @throws NoSuchMethodException the no such method exception
      * @throws InvocationTargetException the invocation target exception
      */
     protected static <S> S initInstance(Class<S> service, Class implClazz, Class[] argTypes, Object[] args)
-            throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
+        throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
         S s = null;
-        if(argTypes != null && args != null){
+        if (argTypes != null && args != null) {
             // Constructor with arguments
             Constructor<S> constructor = implClazz.getDeclaredConstructor(argTypes);
             constructor.setAccessible(true);
             s = service.cast(constructor.newInstance(args));
-        }else {
+        } else {
             // default Constructor
             s = service.cast(implClazz.newInstance());
         }

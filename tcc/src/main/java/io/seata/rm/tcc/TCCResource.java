@@ -15,10 +15,10 @@
  */
 package io.seata.rm.tcc;
 
+import java.lang.reflect.Method;
+
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
-
-import java.lang.reflect.Method;
 
 /**
  * The type Tcc resource.
@@ -44,7 +44,6 @@ public class TCCResource implements Resource {
     private String rollbackMethodName;
 
     private Method rollbackMethod;
-
 
     @Override
     public String getResourceGroupId() {
@@ -221,7 +220,7 @@ public class TCCResource implements Resource {
 
     @Override
     public boolean equals(Object obj) {
-        if(!(obj instanceof TCCResource)){
+        if (!(obj instanceof TCCResource)) {
             return false;
         }
         return this.actionName.equals(((TCCResource)obj).actionName);

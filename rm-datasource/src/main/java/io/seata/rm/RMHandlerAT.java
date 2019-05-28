@@ -27,6 +27,7 @@ public class RMHandlerAT extends AbstractRMHandler {
 
     /**
      * get AT resource managerDataSourceManager.java
+     *
      * @return
      */
     @Override
@@ -35,7 +36,7 @@ public class RMHandlerAT extends AbstractRMHandler {
     }
 
     @Override
-    public BranchType getBranchType(){
+    public BranchType getBranchType() {
         return BranchType.AT;
     }
 

@@ -15,7 +15,6 @@
  */
 package io.seata.rm.tcc.interceptor;
 
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -51,13 +50,13 @@ public class ActionContextUtil {
                 Annotation annotation = f.getAnnotation(BusinessActionContextParameter.class);
 
                 if (annotation != null) {
-                    BusinessActionContextParameter param = (BusinessActionContextParameter) annotation;
+                    BusinessActionContextParameter param = (BusinessActionContextParameter)annotation;
                     f.setAccessible(true);
                     Object paramObject = f.get(targetParam);
                     int index = param.index();
                     if (index >= 0) {
                         @SuppressWarnings("unchecked")
-						Object targetObject = ((List<Object>) paramObject).get(index);
+                        Object targetObject = ((List<Object>)paramObject).get(index);
                         if (param.isParamInProperty()) {
                             context.putAll(fetchContextFromObject(targetObject));
                         } else {
@@ -102,6 +101,5 @@ public class ActionContextUtil {
         }
         getAllField(interFace.getSuperclass(), fields);
     }
-
 
 }

@@ -15,6 +15,10 @@
  */
 package io.seata.server.lock.db;
 
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
@@ -22,9 +26,6 @@ import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.LockMode;
 import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockStore;
-
-import javax.sql.DataSource;
-import java.util.List;
 
 /**
  * The type Data base locker.
@@ -40,7 +41,7 @@ public class DataBaseLocker extends AbstractLocker {
     /**
      * Instantiates a new Data base locker.
      */
-    public DataBaseLocker(){
+    public DataBaseLocker() {
     }
 
     /**
@@ -48,19 +49,20 @@ public class DataBaseLocker extends AbstractLocker {
      *
      * @param logStoreDataSource the log store data source
      */
-    public DataBaseLocker(DataSource logStoreDataSource){
-        lockStore = EnhancedServiceLoader.load(LockStore.class, LockMode.DB.name(), new Class[]{DataSource.class}, new Object[]{logStoreDataSource});
+    public DataBaseLocker(DataSource logStoreDataSource) {
+        lockStore = EnhancedServiceLoader.load(LockStore.class, LockMode.DB.name(), new Class[] {DataSource.class},
+            new Object[] {logStoreDataSource});
     }
 
     @Override
     public boolean acquireLock(List<RowLock> locks) {
-        if(CollectionUtils.isEmpty(locks)){
+        if (CollectionUtils.isEmpty(locks)) {
             //no lock
             return true;
         }
-        try{
+        try {
             return lockStore.acquireLock(convertToLockDO(locks));
-        }catch(Exception t){
+        } catch (Exception t) {
             LOGGER.error("AcquireLock error, locks:" + CollectionUtils.toString(locks), t);
             return false;
         }
@@ -68,13 +70,13 @@ public class DataBaseLocker extends AbstractLocker {
 
     @Override
     public boolean releaseLock(List<RowLock> locks) {
-        if(CollectionUtils.isEmpty(locks)){
+        if (CollectionUtils.isEmpty(locks)) {
             //no lock
             return true;
         }
-        try{
+        try {
             return lockStore.unLock(convertToLockDO(locks));
-        }catch(Exception t){
+        } catch (Exception t) {
             LOGGER.error("unLock error, locks:" + CollectionUtils.toString(locks), t);
             return false;
         }
@@ -82,9 +84,9 @@ public class DataBaseLocker extends AbstractLocker {
 
     @Override
     public boolean isLockable(List<RowLock> locks) {
-        try{
+        try {
             return lockStore.isLockable(convertToLockDO(locks));
-        }catch(Exception t){
+        } catch (Exception t) {
             LOGGER.error("isLockable error, locks:" + CollectionUtils.toString(locks), t);
             return false;
         }

@@ -15,6 +15,9 @@
  */
 package io.seata.server.session.db;
 
+import java.util.Collection;
+import java.util.List;
+
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.EnhancedServiceLoader;
@@ -36,9 +39,6 @@ import io.seata.server.store.TransactionStoreManager.LogOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.List;
-
 /**
  * The Data base session manager.
  *
@@ -46,7 +46,8 @@ import java.util.List;
  * @data 2019 /4/4
  */
 @LoadLevel(name = "db")
-public class DataBaseSessionManager extends AbstractSessionManager implements SessionManager, SessionLifecycleListener, Initialize {
+public class DataBaseSessionManager extends AbstractSessionManager
+    implements SessionManager, SessionLifecycleListener, Initialize {
 
     /**
      * The constant LOGGER.
@@ -87,7 +88,7 @@ public class DataBaseSessionManager extends AbstractSessionManager implements Se
             if (!ret) {
                 throw new StoreException("addGlobalSession failed.");
             }
-        }else {
+        } else {
             boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_UPDATE, session);
             if (!ret) {
                 throw new StoreException("addGlobalSession failed.");
@@ -152,7 +153,7 @@ public class DataBaseSessionManager extends AbstractSessionManager implements Se
     }
 
     @Override
-    public GlobalSession findGlobalSession(String xid)  {
+    public GlobalSession findGlobalSession(String xid) {
         return transactionStoreManager.readSession(xid);
     }
 
@@ -162,16 +163,17 @@ public class DataBaseSessionManager extends AbstractSessionManager implements Se
         if (SessionHolder.ASYNC_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
             return findGlobalSessions(new SessionCondition(GlobalStatus.AsyncCommitting));
         } else if (SessionHolder.RETRY_COMMITTING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.CommitRetrying}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.CommitRetrying}));
         } else if (SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{GlobalStatus.RollbackRetrying,
-                    GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.RollbackRetrying,
+                GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
         } else {
             //all data
-            return findGlobalSessions(new SessionCondition(new GlobalStatus[]{
-                    GlobalStatus.UnKnown, GlobalStatus.Begin,
-                    GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking, GlobalStatus.RollbackRetrying,
-                    GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.AsyncCommitting}));
+            return findGlobalSessions(new SessionCondition(new GlobalStatus[] {
+                GlobalStatus.UnKnown, GlobalStatus.Begin,
+                GlobalStatus.Committing, GlobalStatus.CommitRetrying, GlobalStatus.Rollbacking,
+                GlobalStatus.RollbackRetrying,
+                GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying, GlobalStatus.AsyncCommitting}));
         }
     }
 
@@ -180,7 +182,5 @@ public class DataBaseSessionManager extends AbstractSessionManager implements Se
         //nothing need to do
         return transactionStoreManager.readSession(condition);
     }
-
-
 
 }

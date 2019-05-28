@@ -22,40 +22,40 @@ package io.seata.rm.tcc.remoting;
  */
 public class RemotingDesc {
 
-	/**
-	 * is referenc bean ?
-	 */
-	private boolean isReference = false;
-	
-	/**
-	 * rpc target bean, the service bean has this property
-	 */
-	private Object targetBean;
-	
-	/**
-	 * the tcc interface tyep
-	 */
-	private Class<?> interfaceClass ;
-	
-	/**
-	 * interface class name
-	 */
-	private String interfaceClassName ;
-	
-	/**
-	 * rpc uniqueId: hsf、dubbo's version、sofa-rpc's uniqueId
-	 */
-	private String uniqueId ;
-	
-	/**
-	 * dubbo/hsf 's group
-	 */
-	private String group;
-	
-	/**
-	 * protocol: sofa-rpc、dubbo、injvm etc.
-	 */
-	private short protocol;
+    /**
+     * is referenc bean ?
+     */
+    private boolean isReference = false;
+
+    /**
+     * rpc target bean, the service bean has this property
+     */
+    private Object targetBean;
+
+    /**
+     * the tcc interface tyep
+     */
+    private Class<?> interfaceClass;
+
+    /**
+     * interface class name
+     */
+    private String interfaceClassName;
+
+    /**
+     * rpc uniqueId: hsf、dubbo's version、sofa-rpc's uniqueId
+     */
+    private String uniqueId;
+
+    /**
+     * dubbo/hsf 's group
+     */
+    private String group;
+
+    /**
+     * protocol: sofa-rpc、dubbo、injvm etc.
+     */
+    private short protocol;
 
     /**
      * Gets target bean.
@@ -63,8 +63,8 @@ public class RemotingDesc {
      * @return the target bean
      */
     public Object getTargetBean() {
-		return targetBean;
-	}
+        return targetBean;
+    }
 
     /**
      * Sets target bean.
@@ -72,8 +72,8 @@ public class RemotingDesc {
      * @param targetBean the target bean
      */
     public void setTargetBean(Object targetBean) {
-		this.targetBean = targetBean;
-	}
+        this.targetBean = targetBean;
+    }
 
     /**
      * Gets interface class.
@@ -81,8 +81,8 @@ public class RemotingDesc {
      * @return the interface class
      */
     public Class<?> getInterfaceClass() {
-		return interfaceClass;
-	}
+        return interfaceClass;
+    }
 
     /**
      * Sets interface class.
@@ -90,8 +90,8 @@ public class RemotingDesc {
      * @param interfaceClass the interface class
      */
     public void setInterfaceClass(Class<?> interfaceClass) {
-		this.interfaceClass = interfaceClass;
-	}
+        this.interfaceClass = interfaceClass;
+    }
 
     /**
      * Gets interface class name.
@@ -99,8 +99,8 @@ public class RemotingDesc {
      * @return the interface class name
      */
     public String getInterfaceClassName() {
-		return interfaceClassName;
-	}
+        return interfaceClassName;
+    }
 
     /**
      * Sets interface class name.
@@ -108,8 +108,8 @@ public class RemotingDesc {
      * @param interfaceClassName the interface class name
      */
     public void setInterfaceClassName(String interfaceClassName) {
-		this.interfaceClassName = interfaceClassName;
-	}
+        this.interfaceClassName = interfaceClassName;
+    }
 
     /**
      * Gets unique id.
@@ -117,8 +117,8 @@ public class RemotingDesc {
      * @return the unique id
      */
     public String getUniqueId() {
-		return uniqueId;
-	}
+        return uniqueId;
+    }
 
     /**
      * Sets unique id.
@@ -126,8 +126,8 @@ public class RemotingDesc {
      * @param uniqueId the unique id
      */
     public void setUniqueId(String uniqueId) {
-		this.uniqueId = uniqueId;
-	}
+        this.uniqueId = uniqueId;
+    }
 
     /**
      * Gets group.
@@ -135,8 +135,8 @@ public class RemotingDesc {
      * @return the group
      */
     public String getGroup() {
-		return group;
-	}
+        return group;
+    }
 
     /**
      * Sets group.
@@ -144,8 +144,8 @@ public class RemotingDesc {
      * @param group the group
      */
     public void setGroup(String group) {
-		this.group = group;
-	}
+        this.group = group;
+    }
 
     /**
      * Gets protocol.
@@ -153,8 +153,8 @@ public class RemotingDesc {
      * @return the protocol
      */
     public short getProtocol() {
-		return protocol;
-	}
+        return protocol;
+    }
 
     /**
      * Sets protocol.
@@ -162,8 +162,8 @@ public class RemotingDesc {
      * @param protocol the protocol
      */
     public void setProtocol(short protocol) {
-		this.protocol = protocol;
-	}
+        this.protocol = protocol;
+    }
 
     /**
      * Is reference boolean.
@@ -171,8 +171,8 @@ public class RemotingDesc {
      * @return the boolean
      */
     public boolean isReference() {
-		return isReference;
-	}
+        return isReference;
+    }
 
     /**
      * Sets reference.
@@ -180,6 +180,6 @@ public class RemotingDesc {
      * @param reference the reference
      */
     public void setReference(boolean reference) {
-		isReference = reference;
-	}
+        isReference = reference;
+    }
 }

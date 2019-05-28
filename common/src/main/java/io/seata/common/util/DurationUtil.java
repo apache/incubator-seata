@@ -31,7 +31,7 @@ public class DurationUtil {
     public static final String MILLIS_SECOND_UNIT = "ms";
 
     public static Duration parse(String str) {
-        if(StringUtils.isBlank(str)){
+        if (StringUtils.isBlank(str)) {
             return DEFAULT_DURATION;
         }
 
@@ -54,7 +54,7 @@ public class DurationUtil {
         try {
             int millis = Integer.parseInt(str);
             return Duration.ofMillis(millis);
-        }catch (Exception e){
+        } catch (Exception e) {
             throw new UnsupportedOperationException(str + " can't parse to duration", e);
         }
     }

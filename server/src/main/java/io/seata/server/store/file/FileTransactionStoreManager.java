@@ -56,7 +56,8 @@ import org.slf4j.LoggerFactory;
  * @author jimin.jm @alibaba-inc.com
  */
 @LoadLevel(name = "file")
-public class FileTransactionStoreManager extends AbstractTransactionStoreManager implements TransactionStoreManager, ReloadableStore {
+public class FileTransactionStoreManager extends AbstractTransactionStoreManager
+    implements TransactionStoreManager, ReloadableStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileTransactionStoreManager.class);
 
     private static final int MAX_THREAD_WRITE = 1;
@@ -132,9 +133,10 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
      */
     public FileTransactionStoreManager(String fullFileName, SessionManager sessionManager) throws IOException {
         initFile(fullFileName);
-        fileWriteExecutor = new ThreadPoolExecutor(MAX_THREAD_WRITE, MAX_THREAD_WRITE, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
-                        new LinkedBlockingQueue<Runnable>(),
-                        new NamedThreadFactory("fileTransactionStore", MAX_THREAD_WRITE, true));
+        fileWriteExecutor = new ThreadPoolExecutor(MAX_THREAD_WRITE, MAX_THREAD_WRITE, Integer.MAX_VALUE,
+            TimeUnit.MILLISECONDS,
+            new LinkedBlockingQueue<Runnable>(),
+            new NamedThreadFactory("fileTransactionStore", MAX_THREAD_WRITE, true));
         writeDataFileRunnable = new WriteDataFileRunnable();
         fileWriteExecutor.submit(writeDataFileRunnable);
         this.sessionManager = sessionManager;
@@ -176,7 +178,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             lastModifiedTime = System.currentTimeMillis();
             curFileTrxNum = FILE_TRX_NUM.incrementAndGet();
             if (curFileTrxNum % PER_FILE_BLOCK_SIZE == 0 &&
-                    (System.currentTimeMillis() - trxStartTimeMills) > MAX_TRX_TIMEOUT_MILLS) {
+                (System.currentTimeMillis() - trxStartTimeMills) > MAX_TRX_TIMEOUT_MILLS) {
                 return saveHistory();
             }
         } catch (Exception exx) {
@@ -223,7 +225,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     private boolean findTimeoutAndSave() throws IOException {
         List<GlobalSession> globalSessionsOverMaxTimeout =
-                sessionManager.findGlobalSessions(new SessionCondition(MAX_TRX_TIMEOUT_MILLS));
+            sessionManager.findGlobalSessions(new SessionCondition(MAX_TRX_TIMEOUT_MILLS));
         if (CollectionUtils.isEmpty(globalSessionsOverMaxTimeout)) {
             return true;
         }
@@ -239,7 +241,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             if (null != branchSessIonsOverMaXTimeout) {
                 for (BranchSession branchSession : branchSessIonsOverMaXTimeout) {
                     TransactionWriteStore branchWriteStore =
-                            new TransactionWriteStore(branchSession, LogOperation.BRANCH_ADD);
+                        new TransactionWriteStore(branchSession, LogOperation.BRANCH_ADD);
                     data = branchWriteStore.encode();
                     listBytes.add(data);
                     totalSize += data.length + INT_BYTE_SIZE;
@@ -447,7 +449,8 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     interface StoreRequest {
 
     }
-    abstract class AbstractFlushRequest implements StoreRequest{
+
+    abstract class AbstractFlushRequest implements StoreRequest {
         private final long curFileTrxNum;
 
         private final FileChannel curFileChannel;
@@ -456,6 +459,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             this.curFileTrxNum = curFileTrxNum;
             this.curFileChannel = curFileChannel;
         }
+
         public long getCurFileTrxNum() {
             return curFileTrxNum;
         }
@@ -464,6 +468,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             return curFileChannel;
         }
     }
+
     class SyncFlushRequest extends AbstractFlushRequest {
 
         private final CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -471,7 +476,6 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         public SyncFlushRequest(long curFileTrxNum, FileChannel curFileChannel) {
             super(curFileTrxNum, curFileChannel);
         }
-
 
         public void wakeupCustomer() {
             this.countDownLatch.countDown();
@@ -521,11 +525,9 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
         private LinkedBlockingQueue<StoreRequest> storeRequests = new LinkedBlockingQueue<>();
 
-
         public void putRequest(final StoreRequest request) {
             storeRequests.add(request);
         }
-
 
         @Override
         public void run() {
@@ -551,15 +553,15 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         }
 
         private void handleStoreRequest(StoreRequest storeRequest) {
-            if (storeRequest == null){
+            if (storeRequest == null) {
                 flushOnCondition(currFileChannel);
             }
             if (storeRequest instanceof SyncFlushRequest) {
-                syncFlush((SyncFlushRequest) storeRequest);
+                syncFlush((SyncFlushRequest)storeRequest);
             } else if (storeRequest instanceof AsyncFlushRequest) {
-                async((AsyncFlushRequest) storeRequest);
+                async((AsyncFlushRequest)storeRequest);
             } else if (storeRequest instanceof CloseFileRequest) {
-                closeAndFlush((CloseFileRequest) storeRequest);
+                closeAndFlush((CloseFileRequest)storeRequest);
             }
         }
 
@@ -595,7 +597,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                 return;
             }
             if (diff % MAX_FLUSH_NUM == 0 ||
-                    System.currentTimeMillis() - lastModifiedTime > MAX_FLUSH_TIME_MILLS) {
+                System.currentTimeMillis() - lastModifiedTime > MAX_FLUSH_TIME_MILLS) {
                 flush(fileChannel);
                 FILE_FLUSH_NUM.addAndGet(diff);
             }

@@ -15,6 +15,15 @@
  */
 package io.seata.core.store.db;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
@@ -25,14 +34,6 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The type Log store data base dao.
@@ -68,7 +69,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
     /**
      * Instantiates a new Log store data base dao.
      */
-    public LogStoreDataBaseDAO(){
+    public LogStoreDataBaseDAO() {
     }
 
     /**
@@ -82,13 +83,15 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public void init() {
-        globalTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_GLOBAL_TABLE, ConfigurationKeys.STORE_DB_GLOBAL_DEFAULT_TABLE);
-        brachTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE, ConfigurationKeys.STORE_DB_BRANCH_DEFAULT_TABLE);
+        globalTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_GLOBAL_TABLE,
+            ConfigurationKeys.STORE_DB_GLOBAL_DEFAULT_TABLE);
+        brachTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE,
+            ConfigurationKeys.STORE_DB_BRANCH_DEFAULT_TABLE);
         dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
-        if(StringUtils.isBlank(dbType)){
+        if (StringUtils.isBlank(dbType)) {
             throw new StoreException("there must be db type.");
         }
-        if(logStoreDataSource == null){
+        if (logStoreDataSource == null) {
             throw new StoreException("there must be logStoreDataSource.");
         }
     }
@@ -105,27 +108,27 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps = conn.prepareStatement(sql);
             ps.setString(1, xid);
             rs = ps.executeQuery();
-            if(rs.next()){
+            if (rs.next()) {
                 return convertGlobalTransactionDO(rs);
-            }else {
+            } else {
                 return null;
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new StoreException(e);
-        }finally {
-            if(rs != null){
+        } finally {
+            if (rs != null) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
                 }
             }
-            if(ps != null){
+            if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
                 }
             }
-            if(conn != null){
+            if (conn != null) {
                 try {
                     conn.close();
                 } catch (SQLException e) {
@@ -134,9 +137,8 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         }
     }
 
-
     @Override
-    public GlobalTransactionDO queryGlobalTransactionDO(long transactionId){
+    public GlobalTransactionDO queryGlobalTransactionDO(long transactionId) {
         String sql = LogStoreSqls.getQueryGlobalTransactionSQLByTransactionId(globalTable, dbType);
         Connection conn = null;
         PreparedStatement ps = null;
@@ -147,27 +149,27 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps = conn.prepareStatement(sql);
             ps.setLong(1, transactionId);
             rs = ps.executeQuery();
-            if(rs.next()){
+            if (rs.next()) {
                 return convertGlobalTransactionDO(rs);
-            }else {
+            } else {
                 return null;
             }
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new StoreException(e);
-        }finally {
-            if(rs != null){
+        } finally {
+            if (rs != null) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
                 }
             }
-            if(ps != null){
+            if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
                 }
             }
-            if(conn != null){
+            if (conn != null) {
                 try {
                     conn.close();
                 } catch (SQLException e) {
@@ -187,41 +189,41 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             conn.setAutoCommit(true);
 
             StringBuilder sb = new StringBuilder();
-            for(int i = 0; i < statuses.length; i ++){
+            for (int i = 0; i < statuses.length; i++) {
                 sb.append("?");
-                if(i != (statuses.length -1)){
+                if (i != (statuses.length - 1)) {
                     sb.append(", ");
                 }
             }
 
             String sql = LogStoreSqls.getQueryGlobalTransactionSQLByStatus(globalTable, dbType, sb.toString());
             ps = conn.prepareStatement(sql);
-            for(int i = 0; i < statuses.length; i ++){
+            for (int i = 0; i < statuses.length; i++) {
                 int status = statuses[i];
-                ps.setInt(i+1, status);
+                ps.setInt(i + 1, status);
             }
-            ps.setInt(statuses.length +1, limit);
+            ps.setInt(statuses.length + 1, limit);
             rs = ps.executeQuery();
-            while(rs.next()){
+            while (rs.next()) {
                 ret.add(convertGlobalTransactionDO(rs));
             }
             return ret;
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new StoreException(e);
-        }finally {
-            if(rs != null){
+        } finally {
+            if (rs != null) {
                 try {
                     rs.close();
                 } catch (SQLException e) {
                 }
             }
-            if(ps != null){
+            if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
                 }
             }
-            if(conn != null){
+            if (conn != null) {
                 try {
                     conn.close();
                 } catch (SQLException e) {
@@ -235,7 +237,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         String sql = LogStoreSqls.getInsertGlobalTransactionSQL(globalTable, dbType);
         Connection conn = null;
         PreparedStatement ps = null;
-        try{
+        try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
@@ -249,16 +251,16 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps.setLong(8, globalTransactionDO.getBeginTime());
             ps.setString(9, globalTransactionDO.getApplicationData());
             return ps.executeUpdate() > 0;
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new StoreException(e);
-        }finally {
-            if(ps != null){
+        } finally {
+            if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
                 }
             }
-            if(conn != null){
+            if (conn != null) {
                 try {
                     conn.close();
                 } catch (SQLException e) {
@@ -272,23 +274,23 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         String sql = LogStoreSqls.getUpdateGlobalTransactionStatusSQL(globalTable, dbType);
         Connection conn = null;
         PreparedStatement ps = null;
-        try{
+        try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setInt(1, globalTransactionDO.getStatus());
             ps.setString(2, globalTransactionDO.getXid());
             return ps.executeUpdate() > 0;
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new StoreException(e);
-        }finally {
-            if(ps != null){
+        } finally {
+            if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
                 }
             }
-            if(conn != null){
+            if (conn != null) {
                 try {
                     conn.close();
                 } catch (SQLException e) {
@@ -302,22 +304,22 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         String sql = LogStoreSqls.getDeleteGlobalTransactionSQL(globalTable, dbType);
         Connection conn = null;
         PreparedStatement ps = null;
-        try{
+        try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setString(1, globalTransactionDO.getXid());
             return ps.executeUpdate() > 0;
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new StoreException(e);
-        }finally {
-            if(ps != null){
+        } finally {
+            if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
                 }
             }
-            if(conn != null){
+            if (conn != null) {
                 try {
                     conn.close();
                 } catch (SQLException e) {
@@ -340,7 +342,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps.setString(1, xid);
 
             ResultSet rs = ps.executeQuery();
-            while(rs.next()){
+            while (rs.next()) {
                 rets.add(convertBranchTransactionDO(rs));
             }
             return rets;
@@ -405,7 +407,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         String sql = LogStoreSqls.getUpdateBranchTransactionStatusSQL(brachTable, dbType);
         Connection conn = null;
         PreparedStatement ps = null;
-        try{
+        try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
@@ -413,16 +415,16 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps.setString(2, branchTransactionDO.getXid());
             ps.setLong(3, branchTransactionDO.getBranchId());
             return ps.executeUpdate() > 0;
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new StoreException(e);
-        }finally {
-            if(ps != null){
+        } finally {
+            if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
                 }
             }
-            if(conn != null){
+            if (conn != null) {
                 try {
                     conn.close();
                 } catch (SQLException e) {
@@ -436,23 +438,23 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         String sql = LogStoreSqls.getDeleteBranchTransactionByBranchIdSQL(brachTable, dbType);
         Connection conn = null;
         PreparedStatement ps = null;
-        try{
+        try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setString(1, branchTransactionDO.getXid());
             ps.setLong(2, branchTransactionDO.getBranchId());
             return ps.executeUpdate() > 0;
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new StoreException(e);
-        }finally {
-            if(ps != null){
+        } finally {
+            if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
                 }
             }
-            if(conn != null){
+            if (conn != null) {
                 try {
                     conn.close();
                 } catch (SQLException e) {
@@ -460,7 +462,6 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             }
         }
     }
-
 
     private GlobalTransactionDO convertGlobalTransactionDO(ResultSet rs) throws SQLException {
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();

@@ -15,11 +15,10 @@
  */
 package io.seata.core.store;
 
+import java.util.Date;
 
 import io.seata.common.util.StringUtils;
 import io.seata.core.model.BranchStatus;
-
-import java.util.Date;
 
 /**
  * branch transaction data object
@@ -270,7 +269,7 @@ public class BranchTransactionDO {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return StringUtils.toString(this);
     }
 

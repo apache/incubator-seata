@@ -15,6 +15,15 @@
  */
 package io.seata.core.store.db;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.sql.DataSource;
+
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
@@ -24,14 +33,6 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The type Data base lock store.
@@ -101,9 +102,9 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
 
             //check lock
             StringBuilder sb = new StringBuilder();
-            for(int i = 0; i < lockDOs.size(); i++){
+            for (int i = 0; i < lockDOs.size(); i++) {
                 sb.append("?");
-                if( i != (lockDOs.size() - 1)){
+                if (i != (lockDOs.size() - 1)) {
                     sb.append(", ");
                 }
             }
@@ -111,31 +112,31 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             //query
             String checkLockSQL = LockStoreSqls.getCheckLockableSql(lockTable, sb.toString(), dbType);
             ps = conn.prepareStatement(checkLockSQL);
-            for (int i = 0; i < lockDOs.size(); i++){
-                ps.setString(i+1, lockDOs.get(i).getRowKey());
+            for (int i = 0; i < lockDOs.size(); i++) {
+                ps.setString(i + 1, lockDOs.get(i).getRowKey());
             }
             rs = ps.executeQuery();
             while (rs.next()) {
-                if(StringUtils.equals(rs.getString("xid"), lockDOs.get(0).getXid())){
+                if (StringUtils.equals(rs.getString("xid"), lockDOs.get(0).getXid())) {
                     isReLock = true;
-                }else {
+                } else {
                     canLock &= false;
                 }
             }
 
-            if(!canLock){
+            if (!canLock) {
                 conn.rollback();
                 return false;
             }
 
-            if(isReLock){
+            if (isReLock) {
                 conn.rollback();
                 return true;
             }
 
             //lock
-            for(LockDO lockDO : lockDOs){
-                if(!doAcquireLock(conn, lockDO)) {
+            for (LockDO lockDO : lockDOs) {
+                if (!doAcquireLock(conn, lockDO)) {
                     conn.rollback();
                     return false;
                 }
@@ -182,9 +183,9 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             conn.setAutoCommit(true);
 
             StringBuilder sb = new StringBuilder();
-            for(int i = 0; i< lockDOs.size(); i++){
+            for (int i = 0; i < lockDOs.size(); i++) {
                 sb.append("?");
-                if(i != (lockDOs.size() - 1)){
+                if (i != (lockDOs.size() - 1)) {
                     sb.append(", ");
                 }
             }
@@ -192,14 +193,14 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             String batchDeleteSQL = LockStoreSqls.getBatchDeleteLockSql(lockTable, sb.toString(), dbType);
             ps = conn.prepareStatement(batchDeleteSQL);
             ps.setString(1, lockDOs.get(0).getXid());
-            for(int i = 0; i< lockDOs.size(); i++){
-                ps.setString(i+2, lockDOs.get(i).getRowKey());
+            for (int i = 0; i < lockDOs.size(); i++) {
+                ps.setString(i + 2, lockDOs.get(i).getRowKey());
             }
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if(ps != null){
+            if (ps != null) {
                 try {
                     ps.close();
                 } catch (SQLException e) {
@@ -220,7 +221,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
-            if(!checkLockable(conn, lockDOs)){
+            if (!checkLockable(conn, lockDOs)) {
                 return false;
             }
             return true;
@@ -283,14 +284,14 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
      * @param lockDOs the lock do
      * @return the boolean
      */
-    protected boolean checkLockable(Connection conn, List<LockDO> lockDOs){
+    protected boolean checkLockable(Connection conn, List<LockDO> lockDOs) {
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
             StringBuilder sb = new StringBuilder();
-            for(int i = 0; i < lockDOs.size(); i++){
+            for (int i = 0; i < lockDOs.size(); i++) {
                 sb.append("?");
-                if( i != (lockDOs.size() - 1)){
+                if (i != (lockDOs.size() - 1)) {
                     sb.append(", ");
                 }
             }
@@ -298,18 +299,18 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             //query
             String checkLockSQL = LockStoreSqls.getCheckLockableSql(lockTable, sb.toString(), dbType);
             ps = conn.prepareStatement(checkLockSQL);
-            for (int i = 0; i < lockDOs.size(); i++){
-                ps.setString(i+1, lockDOs.get(i).getRowKey());
+            for (int i = 0; i < lockDOs.size(); i++) {
+                ps.setString(i + 1, lockDOs.get(i).getRowKey());
             }
             rs = ps.executeQuery();
             while (rs.next()) {
                 String xid = rs.getString("xid");
-                if(!StringUtils.equals(xid, lockDOs.get(0).getXid())){
+                if (!StringUtils.equals(xid, lockDOs.get(0).getXid())) {
                     return false;
                 }
             }
             return true;
-        }catch (SQLException e) {
+        } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
             if (rs != null) {

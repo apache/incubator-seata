@@ -40,7 +40,7 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      *
      * @return the db type
      */
-    protected DBType getDBType(){
+    protected DBType getDBType() {
         return DBType.valueof(CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
     }
 
@@ -49,9 +49,9 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      *
      * @return the string
      */
-    protected String getUrl(){
+    protected String getUrl() {
         String url = CONFIG.getConfig(ConfigurationKeys.STORE_DB_URL);
-        if(StringUtils.isBlank(url)){
+        if (StringUtils.isBlank(url)) {
             throw new StoreException("the {store.db.url} can't empty.");
         }
         return url;
@@ -62,9 +62,9 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      *
      * @return the string
      */
-    protected String getUser(){
+    protected String getUser() {
         String user = CONFIG.getConfig(ConfigurationKeys.STORE_DB_USER);
-        if(StringUtils.isBlank(user)){
+        if (StringUtils.isBlank(user)) {
             throw new StoreException("the {store.db.user} can't empty.");
         }
         return user;
@@ -75,7 +75,7 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      *
      * @return the string
      */
-    protected String getPassword(){
+    protected String getPassword() {
         String password = CONFIG.getConfig(ConfigurationKeys.STORE_DB_PASSWORD);
         return password;
     }
@@ -85,9 +85,9 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      *
      * @return the int
      */
-    protected int getMinConn(){
+    protected int getMinConn() {
         int minConn = CONFIG.getInt(ConfigurationKeys.STORE_DB_MIN_CONN);
-        return minConn<0?0:minConn;
+        return minConn < 0 ? 0 : minConn;
     }
 
     /**
@@ -95,11 +95,10 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      *
      * @return the int
      */
-    protected int getMaxConn(){
+    protected int getMaxConn() {
         int maxConn = CONFIG.getInt(ConfigurationKeys.STORE_DB_MAX_CONN);
-        return maxConn<0?1:maxConn;
+        return maxConn < 0 ? 1 : maxConn;
     }
-
 
     /**
      * Get driver name string.
@@ -107,26 +106,26 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      * @param dbType the db type
      * @return the string
      */
-    protected static String getDriverName(DBType dbType){
-        if(DBType.H2.equals(dbType)){
+    protected static String getDriverName(DBType dbType) {
+        if (DBType.H2.equals(dbType)) {
             return "org.h2.Driver";
-        }else if(DBType.MYSQL.equals(dbType)){
+        } else if (DBType.MYSQL.equals(dbType)) {
             return "com.mysql.jdbc.Driver";
-        }else if(DBType.ORACLE.equals(dbType)){
+        } else if (DBType.ORACLE.equals(dbType)) {
             return "oracle.jdbc.OracleDriver";
-        }else if(DBType.SYBAEE.equals(dbType)){
+        } else if (DBType.SYBAEE.equals(dbType)) {
             return "com.sybase.jdbc2.jdbc.SybDriver";
-        }else if(DBType.SQLSERVER.equals(dbType)){
+        } else if (DBType.SQLSERVER.equals(dbType)) {
             return "com.microsoft.sqlserver.jdbc.SQLServerDriver";
-        }else if(DBType.SQLITE.equals(dbType)){
+        } else if (DBType.SQLITE.equals(dbType)) {
             return "org.sqlite.JDBC";
-        }else if(DBType.POSTGRESQL.equals(dbType)){
+        } else if (DBType.POSTGRESQL.equals(dbType)) {
             return "org.postgresql.Driver";
-        }else if(DBType.ACCESS.equals(dbType)){
+        } else if (DBType.ACCESS.equals(dbType)) {
             return "com.hxtt.sql.access.AccessDriver";
-        }else if(DBType.DB2.equals(dbType)){
+        } else if (DBType.DB2.equals(dbType)) {
             return "com.ibm.db2.jcc.DB2Driver";
-        }else {
+        } else {
             throw new StoreException("Unsupported database type, dbType:" + dbType);
         }
     }
@@ -137,10 +136,10 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      * @param dbType the db type
      * @return the string
      */
-    protected String getValidationQuery(DBType dbType){
-        if(DBType.ORACLE.equals(dbType)){
+    protected String getValidationQuery(DBType dbType) {
+        if (DBType.ORACLE.equals(dbType)) {
             return "select sysdate from dual";
-        }else {
+        } else {
             return "select 1";
         }
     }

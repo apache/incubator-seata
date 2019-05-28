@@ -15,7 +15,18 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.concurrent.TimeUnit;
+
+import javax.sql.DataSource;
+
 import com.alibaba.druid.util.StringUtils;
+
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -24,15 +35,6 @@ import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The type Table meta cache.
@@ -46,7 +48,7 @@ public class TableMetaCache {
     private static final long EXPIRE_TIME = 900 * 1000;
 
     private static final Cache<String, TableMeta> TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
-            .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
+        .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TableMetaCache.class);
 
@@ -93,7 +95,7 @@ public class TableMetaCache {
     }
 
     private static TableMeta fetchSchemeInDefaultWay(DataSource dataSource, String tableName)
-            throws SQLException {
+        throws SQLException {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -108,7 +110,7 @@ public class TableMetaCache {
             return resultSetMetaToSchema(rsmd, dbmd, tableName);
         } catch (Exception e) {
             if (e instanceof SQLException) {
-                throw ((SQLException) e);
+                throw e;
             }
             throw new SQLException("Failed to fetch schema of " + tableName, e);
 
@@ -154,9 +156,9 @@ public class TableMetaCache {
         try {
             stmt = conn.getTargetConnection().createStatement();
             rs1 = stmt.executeQuery(
-                    "select a.constraint_name,  a.column_name from user_cons_columns a, user_constraints b  where a"
-                            + ".constraint_name = b.constraint_name and b.constraint_type = 'P' and a.table_name ='"
-                            + tableName + "'");
+                "select a.constraint_name,  a.column_name from user_cons_columns a, user_constraints b  where a"
+                    + ".constraint_name = b.constraint_name and b.constraint_type = 'P' and a.table_name ='"
+                    + tableName + "'");
             while (rs1.next()) {
                 String indexName = rs1.getString(1);
                 String colName = rs1.getString(2);
@@ -187,7 +189,7 @@ public class TableMetaCache {
     }
 
     private static TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
-            throws SQLException {
+        throws SQLException {
         String schemaName = rsmd.getSchemaName(1);
         String catalogName = rsmd.getCatalogName(1);
 
@@ -241,7 +243,7 @@ public class TableMetaCache {
                 index.setCardinality(rs2.getInt("CARDINALITY"));
                 index.getValues().add(col);
                 if ("PRIMARY".equalsIgnoreCase(indexName) || indexName.equalsIgnoreCase(
-                        rsmd.getTableName(1) + "_pkey")) {
+                    rsmd.getTableName(1) + "_pkey")) {
                     index.setIndextype(IndexType.PRIMARY);
                 } else if (!index.isNonUnique()) {
                     index.setIndextype(IndexType.Unique);

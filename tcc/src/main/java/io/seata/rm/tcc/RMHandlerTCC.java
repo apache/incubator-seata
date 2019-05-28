@@ -29,6 +29,7 @@ public class RMHandlerTCC extends AbstractRMHandler {
 
     /**
      * get TCC resource manager
+     *
      * @return
      */
     @Override
@@ -37,7 +38,7 @@ public class RMHandlerTCC extends AbstractRMHandler {
     }
 
     @Override
-    public BranchType getBranchType(){
+    public BranchType getBranchType() {
         return BranchType.TCC;
     }
 
