@@ -41,7 +41,7 @@ public class RegistryFactory {
      */
     public static RegistryService getInstance() {
         RegistryType registryType;
-        String registryTypeName = ConfigurationFactory.FILE_INSTANCE.getConfig(
+        String registryTypeName = ConfigurationFactory.CURRENT_FILE_INSTANCE.getConfig(
             ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + ConfigurationKeys.FILE_ROOT_TYPE);
         try {
