@@ -32,7 +32,7 @@ public class CollectionUtils {
      * @param col the col
      * @return the boolean
      */
-    public static boolean isEmpty(Collection col){
+    public static boolean isEmpty(Collection col) {
         return !isNotEmpty(col);
     }
 
@@ -42,7 +42,7 @@ public class CollectionUtils {
      * @param col the col
      * @return the boolean
      */
-    public static boolean isNotEmpty(Collection col){
+    public static boolean isNotEmpty(Collection col) {
         return col != null && col.size() > 0;
     }
 
@@ -52,7 +52,7 @@ public class CollectionUtils {
      * @param array the array
      * @return the boolean
      */
-    public static boolean isEmpty(Object[] array){
+    public static boolean isEmpty(Object[] array) {
         return !isNotEmpty(array);
     }
 
@@ -62,7 +62,7 @@ public class CollectionUtils {
      * @param array the array
      * @return the boolean
      */
-    public static boolean isNotEmpty(Object[] array){
+    public static boolean isNotEmpty(Object[] array) {
         return array != null && array.length > 0;
     }
 
@@ -72,14 +72,14 @@ public class CollectionUtils {
      * @param col the col
      * @return the string
      */
-    public static String toString(Collection col){
-        if(isEmpty(col)){
+    public static String toString(Collection col) {
+        if (isEmpty(col)) {
             return "";
         }
         StringBuffer sb = new StringBuffer();
         sb.append("[");
         Iterator it = col.iterator();
-        while (it.hasNext()){
+        while (it.hasNext()) {
             Object obj = it.next();
             sb.append(StringUtils.toString(obj));
             sb.append(",");
@@ -88,7 +88,7 @@ public class CollectionUtils {
         sb.append("]");
         return sb.toString();
     }
-  
+
     /**
      * Is size equals boolean.
      *

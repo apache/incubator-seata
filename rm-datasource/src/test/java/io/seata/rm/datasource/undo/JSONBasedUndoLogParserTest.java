@@ -13,21 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.tcc.api;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+package io.seata.rm.datasource.undo;
 
 /**
- * Local TCC bean annotation, add on the TCC interface
- *
- * @author zhangsen
+ * @author Geng Zhang
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
-@Inherited
-public @interface LocalTCC {
+public class JSONBasedUndoLogParserTest extends BaseUndoLogParserTest {
+
+    JSONBasedUndoLogParser parser = new JSONBasedUndoLogParser();
+
+    @Override
+    public UndoLogParser getParser() {
+        return parser;
+    }
 }
