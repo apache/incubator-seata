@@ -21,13 +21,13 @@ import java.util.Collection;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.exception.StoreException;
+import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
-
 import io.seata.core.store.StoreMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +45,11 @@ public class SessionHolder {
      * The constant CONFIG.
      */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
+    /**
+     * The constant DEFAULT.
+     */
+    public static final String DEFAULT = "default";
 
     /**
      * The constant ROOT_SESSION_MANAGER_NAME.
@@ -82,25 +87,48 @@ public class SessionHolder {
         //the store mode
         StoreMode storeMode = StoreMode.valueof(mode);
         if (StoreMode.DB.equals(storeMode)) {
-            //TODO database store
-
+            //database store
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.name());
+            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.name(),
+                new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
+            ;
+            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.name(),
+                new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
+            ;
+            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.name(),
+                new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+            ;
         } else if (StoreMode.FILE.equals(storeMode)) {
             //file store
             String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
             if (sessionStorePath == null) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
-            ROOT_SESSION_MANAGER = new FileBasedSessionManager(ROOT_SESSION_MANAGER_NAME, sessionStorePath);
-            ASYNC_COMMITTING_SESSION_MANAGER = new DefaultSessionManager(ASYNC_COMMITTING_SESSION_MANAGER_NAME);
-            RETRY_COMMITTING_SESSION_MANAGER = new DefaultSessionManager(RETRY_COMMITTING_SESSION_MANAGER_NAME);
-            RETRY_ROLLBACKING_SESSION_MANAGER = new DefaultSessionManager(RETRY_ROLLBACKING_SESSION_MANAGER_NAME);
+            ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.name(),
+                new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
+            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, DEFAULT,
+                new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
+            ;
+            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, DEFAULT,
+                new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
+            ;
+            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, DEFAULT,
+                new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+            ;
         } else {
             //unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
         }
+        //relaod
+        reload();
+    }
 
+    /**
+     * Reload.
+     */
+    protected static void reload() {
         if (ROOT_SESSION_MANAGER instanceof Reloadable) {
-            ((Reloadable) ROOT_SESSION_MANAGER).reload();
+            ((Reloadable)ROOT_SESSION_MANAGER).reload();
 
             Collection<GlobalSession> reloadedSessions = ROOT_SESSION_MANAGER.allSessions();
             if (reloadedSessions != null && !reloadedSessions.isEmpty()) {
@@ -140,7 +168,7 @@ public class SessionHolder {
                                 case CommitRetrying:
                                     try {
                                         globalSession.addSessionLifecycleListener(
-                                                getRetryCommittingSessionManager());
+                                            getRetryCommittingSessionManager());
                                         getRetryCommittingSessionManager().addGlobalSession(globalSession);
                                     } catch (TransactionException e) {
                                         throw new ShouldNeverHappenException(e);
@@ -152,7 +180,7 @@ public class SessionHolder {
                                 case TimeoutRollbackRetrying:
                                     try {
                                         globalSession.addSessionLifecycleListener(
-                                                getRetryRollbackingSessionManager());
+                                            getRetryRollbackingSessionManager());
                                         getRetryRollbackingSessionManager().addGlobalSession(globalSession);
                                     } catch (TransactionException e) {
                                         throw new ShouldNeverHappenException(e);
@@ -173,7 +201,6 @@ public class SessionHolder {
                 });
             }
         }
-
     }
 
     /**
@@ -227,11 +254,11 @@ public class SessionHolder {
     /**
      * Find global session.
      *
-     * @param transactionId the transaction id
+     * @param xid the xid
      * @return the global session
      */
-    public static GlobalSession findGlobalSession(Long transactionId) {
-        return getRootSessionManager().findGlobalSession(transactionId);
+    public static GlobalSession findGlobalSession(String xid) {
+        return getRootSessionManager().findGlobalSession(xid);
     }
 
     public static void destory() {

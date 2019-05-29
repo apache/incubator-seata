@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.6.0</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -114,6 +114,11 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-config-etcd3</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-core</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -170,6 +175,11 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-sofa-rpc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-motan</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -346,6 +356,21 @@
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-all</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.weibo</groupId>
+            <artifactId>motan-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.weibo</groupId>
+            <artifactId>motan-transport-netty</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -418,7 +443,7 @@
                             <createSourcesJar>true</createSourcesJar>
                             <promoteTransitiveDependencies>false</promoteTransitiveDependencies>
                             <keepDependenciesWithProvidedScope>false</keepDependenciesWithProvidedScope>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <createDependencyReducedPom>true</createDependencyReducedPom>
                             <artifactSet>
                                 <includes>
                                     <include>io.seata:seata-common</include>
@@ -428,6 +453,7 @@
                                     <include>io.seata:seata-config-nacos</include>
                                     <include>io.seata:seata-config-zk</include>
                                     <include>io.seata:seata-config-consul</include>
+                                    <include>io.seata:seata-config-etcd3</include>
                                     <include>io.seata:seata-discovery-core</include>
                                     <include>io.seata:seata-discovery-consul</include>
                                     <include>io.seata:seata-discovery-eureka</include>
@@ -438,6 +464,7 @@
                                     <include>io.seata:seata-discovery-etcd3</include>
                                     <include>io.seata:seata-dubbo</include>
                                     <include>io.seata:seata-dubbo-alibaba</include>
+                                    <include>io.seata:seata-motan</include>
                                     <include>io.seata:seata-rm</include>
                                     <include>io.seata:seata-rm-datasource</include>
                                     <include>io.seata:seata-sofa-rpc</include>
@@ -468,6 +495,12 @@
                                         <exclude>registry.conf</exclude>
                                     </excludes>
                                 </filter>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/maven/**</exclude>
+                                    </excludes>
+                                </filter>
                             </filters>
                         </configuration>
                     </execution>
@@ -492,6 +525,8 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <version>2.10.4</version>
                         <configuration>
+                            <charset>${project.build.sourceEncoding}</charset>
+                            <failOnError>false</failOnError>
                             <encoding>${project.build.sourceEncoding}</encoding>
                             <detectOfflineLinks>true</detectOfflineLinks>
                             <breakiterator>true</breakiterator>

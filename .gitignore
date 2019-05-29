@@ -7,6 +7,7 @@ target/
 *.tar.gz
 *.class
 .flattened-pom.xml
+dependency-reduced-pom.xml
 
 # eclipse ignore
 .settings/

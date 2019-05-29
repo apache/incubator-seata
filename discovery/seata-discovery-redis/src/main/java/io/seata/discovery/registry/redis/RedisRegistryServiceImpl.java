@@ -35,7 +35,6 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 
 import io.seata.discovery.registry.RegistryService;
-import io.seata.discovery.registry.RegistryService;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +67,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         new NamedThreadFactory("RedisRegistryService", 1));
 
     private RedisRegistryServiceImpl() {
-        Configuration seataConfig = ConfigurationFactory.FILE_INSTANCE;
+        Configuration seataConfig = ConfigurationFactory.CURRENT_FILE_INSTANCE;
         this.clusterName = seataConfig.getConfig(REDIS_FILEKEY_PREFIX + REGISTRY_CLUSTER_KEY, DEFAULT_CLUSTER);
         String password = seataConfig.getConfig(getRedisPasswordFileKey());
         String serverAddr = seataConfig.getConfig(getRedisAddrFileKey());
