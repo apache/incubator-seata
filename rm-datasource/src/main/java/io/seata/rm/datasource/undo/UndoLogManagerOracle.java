@@ -25,6 +25,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Set;
 
 import com.alibaba.druid.util.JdbcConstants;
+import io.seata.common.Constants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
 import io.seata.common.util.CollectionUtils;
@@ -72,13 +73,13 @@ public final class UndoLogManagerOracle {
 
     private static String UNDO_LOG_TABLE_NAME = "undo_log";
     private static String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
-        "\t(id,branch_id, xid, rollback_info, log_status, log_created, log_modified)\n" +
-        "VALUES (UNDO_LOG_SEQ.nextval,?, ?, ?, ?, sysdate, sysdate)";
+            "\t(id,branch_id, xid, rollback_info, log_status, log_created, log_modified)\n" +
+            "VALUES (UNDO_LOG_SEQ.nextval,?, ?, ?, ?, sysdate, sysdate)";
     private static String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + "\n" +
-        "\tWHERE branch_id = ? AND xid = ?";
+            "\tWHERE branch_id = ? AND xid = ?";
 
     private static String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME
-        + " WHERE log_status = 0 AND branch_id = ? AND xid = ? FOR UPDATE";
+            + " WHERE log_status = 0 AND branch_id = ? AND xid = ? FOR UPDATE";
 
     private UndoLogManagerOracle() {
 
@@ -102,14 +103,13 @@ public final class UndoLogManagerOracle {
         branchUndoLog.setBranchId(branchID);
         branchUndoLog.setSqlUndoLogs(connectionContext.getUndoItems());
 
-        String undoLogContent = UndoLogParserFactory.getInstance().encode(branchUndoLog);
+        byte[] undoLogContent = UndoLogParserFactory.getInstance().encode(branchUndoLog);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Flushing UNDO LOG: " + undoLogContent);
+            LOGGER.debug("Flushing UNDO LOG: {}",new String(undoLogContent, Constants.DEFAULT_CHARSET));
         }
 
-        insertUndoLogWithNormal(xid,branchID,undoLogContent,cp.getTargetConnection());
-
+        insertUndoLogWithNormal(xid, branchID, undoLogContent, cp.getTargetConnection());
     }
 
     private static void assertDbSupport(String dbType) {
@@ -157,8 +157,9 @@ public final class UndoLogManagerOracle {
                                 xid, branchId, state);
                         return;
                     }
+
                     Blob b = rs.getBlob("rollback_info");
-                    String rollbackInfo =  BlobUtils.blob2string(b);
+                    byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
                     BranchUndoLog branchUndoLog = UndoLogParserFactory.getInstance().decode(rollbackInfo);
 
                     for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
@@ -233,13 +234,13 @@ public final class UndoLogManagerOracle {
      * @param limitSize
      * @param conn
      */
-    public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, int limitSize, Connection conn) throws SQLException {
+    public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, Connection conn) throws SQLException {
         if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
             return;
         }
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
-        String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize,limitSize);
+        String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
         PreparedStatement deletePST = null;
         try {
             deletePST = conn.prepareStatement(batchDeleteSql);
@@ -265,10 +266,9 @@ public final class UndoLogManagerOracle {
             }
         }
 
-
     }
 
-    protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize,int limitSize) {
+    protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize) {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("DELETE FROM ")
                 .append(UNDO_LOG_TABLE_NAME)
@@ -276,7 +276,6 @@ public final class UndoLogManagerOracle {
         appendInParam(branchIdSize, sqlBuilder);
         sqlBuilder.append(" AND xid IN ");
         appendInParam(xidSize, sqlBuilder);
-//        sqlBuilder.append(" LIMIT ").append(limitSize);
         return sqlBuilder.toString();
     }
 
@@ -319,24 +318,24 @@ public final class UndoLogManagerOracle {
     }
 
     private static void insertUndoLogWithNormal(String xid, long branchID,
-                                                String undoLogContent, Connection conn) throws SQLException {
+                                                byte[] undoLogContent, Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, undoLogContent, State.Normal, conn);
     }
 
     private static void insertUndoLogWithGlobalFinished(String xid, long branchID,
                                                         Connection conn) throws SQLException {
-        insertUndoLog(xid, branchID, "{}", State.GlobalFinished, conn);
+        insertUndoLog(xid, branchID, "{}".getBytes(Constants.DEFAULT_CHARSET), State.GlobalFinished, conn);
     }
 
     private static void insertUndoLog(String xid, long branchID,
-                                      String undoLogContent, State state, Connection conn) throws SQLException {
+                                      byte[] undoLogContent, State state, Connection conn) throws SQLException {
         PreparedStatement pst = null;
         try {
             pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL);
             pst.setLong(1, branchID);
             pst.setString(2, xid);
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(undoLogContent.getBytes());
-            pst.setBlob(3,inputStream);
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(undoLogContent);
+            pst.setBlob(3, inputStream);
             pst.setInt(4, state.getValue());
             pst.executeUpdate();
         } catch (Exception e) {
