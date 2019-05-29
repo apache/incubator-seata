@@ -17,9 +17,6 @@ package io.seata.rm.tcc;
 
 import io.seata.common.util.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * the TCC method result
  *
@@ -30,12 +27,12 @@ public class TwoPhaseResult {
     /**
      * is Success ?
      */
-    private boolean             isSuccess = false;
+    private boolean isSuccess = false;
 
     /**
      * result message
      */
-    private String              message;
+    private String message;
 
     /**
      * Instantiates a new Two phase result.
@@ -89,7 +86,7 @@ public class TwoPhaseResult {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
         sb.append("isSuccess:").append(isSuccess);
-        if(StringUtils.isNotBlank(message)){
+        if (StringUtils.isNotBlank(message)) {
             sb.append(", msg").append(message);
         }
         sb.append("]");

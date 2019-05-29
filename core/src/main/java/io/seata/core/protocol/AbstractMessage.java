@@ -18,6 +18,9 @@ package io.seata.core.protocol;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.ChannelHandlerContext;
+import io.seata.common.Constants;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
@@ -36,9 +39,6 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.ChannelHandlerContext;
 
 /**
  * The type Abstract message.
@@ -152,7 +152,7 @@ public abstract class AbstractMessage implements MessageCodec, Serializable {
     /**
      * The constant UTF8.
      */
-    protected static final Charset UTF8 = Charset.forName("utf-8");
+    protected static final Charset UTF8 = Constants.DEFAULT_CHARSET;
     /**
      * The Ctx.
      */
@@ -236,8 +236,9 @@ public abstract class AbstractMessage implements MessageCodec, Serializable {
 
         try {
             msgCodec = (MessageCodec)getMergeRequestInstanceByCode(typeCode);
-        } catch (Exception exx) {}
+        } catch (Exception exx) {
 
+        }
         if (null != msgCodec) {
             return msgCodec;
         }

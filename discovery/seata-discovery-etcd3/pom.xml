@@ -27,7 +27,7 @@
 
     <dependencies>
         <dependency>
-            <groupId>io.seata</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>seata-discovery-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>

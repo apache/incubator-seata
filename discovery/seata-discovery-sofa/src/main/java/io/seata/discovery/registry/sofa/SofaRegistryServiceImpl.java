@@ -69,7 +69,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     private static final String DEFAULT_CLUSTER = "default";
     private static final String DEFAULT_ADDRESS_WAIT_TIME = "3000";
 
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
 
     private static final String HOST_SEPERATOR = ":";
     private static final String REGISTRY_TYPE = "sofa";
