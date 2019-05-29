@@ -15,7 +15,6 @@
  */
 package io.seata.rm.tcc.api;
 
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -25,12 +24,12 @@ import java.lang.annotation.Target;
  * the TCC parameters that need to be passed to  the BusinessActivityContext；
  * <p>
  * add this annotation on the parameters of the try method, and the parameters will be passed to  the
- * BusinessActivityContext；
+ * BusinessActivityContext
  *
  * @author zhangsen
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.PARAMETER, ElementType.FIELD })
+@Target({ElementType.PARAMETER, ElementType.FIELD})
 public @interface BusinessActionContextParameter {
 
     /**
