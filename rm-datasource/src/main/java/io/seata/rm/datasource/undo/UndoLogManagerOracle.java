@@ -339,7 +339,8 @@ public final class UndoLogManagerOracle {
             pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL);
             pst.setLong(1, branchID);
             pst.setString(2, xid);
-            pst.setBlob(3, BlobUtils.bytes2Blob(undoLogContent));
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(undoLogContent);
+            pst.setBlob(3, inputStream);
             pst.setInt(4, state.getValue());
             pst.executeUpdate();
         } catch (Exception e) {
