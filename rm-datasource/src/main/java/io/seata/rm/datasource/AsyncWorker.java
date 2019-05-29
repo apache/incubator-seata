@@ -182,7 +182,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                     if(maxSize == UNDOLOG_DELETE_LIMIT_SIZE){
                         try {
                             if(JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
-                                UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, UNDOLOG_DELETE_LIMIT_SIZE, conn);
+                                UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, conn);
                             } else {
                                 UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
                             }
@@ -200,7 +200,7 @@ public class AsyncWorker implements ResourceManagerInbound {
 
                 try {
                     if(JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
-                        UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, UNDOLOG_DELETE_LIMIT_SIZE, conn);
+                        UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, conn);
                     } else {
                         UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
                     }

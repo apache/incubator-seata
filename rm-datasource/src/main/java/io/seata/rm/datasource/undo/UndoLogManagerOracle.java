@@ -235,13 +235,13 @@ public final class UndoLogManagerOracle {
      * @param limitSize
      * @param conn
      */
-    public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, int limitSize, Connection conn) throws SQLException {
+    public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, Connection conn) throws SQLException {
         if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
             return;
         }
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
-        String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize,limitSize);
+        String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
         PreparedStatement deletePST = null;
         try {
             deletePST = conn.prepareStatement(batchDeleteSql);
@@ -271,7 +271,7 @@ public final class UndoLogManagerOracle {
 
     }
 
-    protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize,int limitSize) {
+    protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize) {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("DELETE FROM ")
                 .append(UNDO_LOG_TABLE_NAME)
@@ -279,7 +279,6 @@ public final class UndoLogManagerOracle {
         appendInParam(branchIdSize, sqlBuilder);
         sqlBuilder.append(" AND xid IN ");
         appendInParam(xidSize, sqlBuilder);
-//        sqlBuilder.append(" LIMIT ").append(limitSize);
         return sqlBuilder.toString();
     }
 
