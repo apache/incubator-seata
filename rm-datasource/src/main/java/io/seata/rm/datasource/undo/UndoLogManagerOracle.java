@@ -26,6 +26,7 @@ import java.util.Set;
 
 import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
 import com.alibaba.druid.util.JdbcConstants;
+import io.seata.common.Constants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
 import io.seata.common.util.CollectionUtils;
@@ -103,14 +104,13 @@ public final class UndoLogManagerOracle {
         branchUndoLog.setBranchId(branchID);
         branchUndoLog.setSqlUndoLogs(connectionContext.getUndoItems());
 
-        String undoLogContent = UndoLogParserFactory.getInstance().encode(branchUndoLog);
+        byte[] undoLogContent = UndoLogParserFactory.getInstance().encode(branchUndoLog);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Flushing UNDO LOG: " + undoLogContent);
+            LOGGER.debug("Flushing UNDO LOG: {}",new String(undoLogContent, Constants.DEFAULT_CHARSET));
         }
 
-        insertUndoLogWithNormal(xid,branchID,undoLogContent,cp.getTargetConnection());
-
+        insertUndoLogWithNormal(xid, branchID, undoLogContent, cp.getTargetConnection());
     }
 
     private static void assertDbSupport(String dbType) {
@@ -158,8 +158,9 @@ public final class UndoLogManagerOracle {
                                 xid, branchId, state);
                         return;
                     }
+
                     Blob b = rs.getBlob("rollback_info");
-                    String rollbackInfo =  BlobUtils.blob2string(b);
+                    byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
                     BranchUndoLog branchUndoLog = UndoLogParserFactory.getInstance().decode(rollbackInfo);
 
                     for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
@@ -322,24 +323,23 @@ public final class UndoLogManagerOracle {
     }
 
     private static void insertUndoLogWithNormal(String xid, long branchID,
-                                                String undoLogContent, Connection conn) throws SQLException {
+                                                byte[] undoLogContent, Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, undoLogContent, State.Normal, conn);
     }
 
     private static void insertUndoLogWithGlobalFinished(String xid, long branchID,
                                                         Connection conn) throws SQLException {
-        insertUndoLog(xid, branchID, "{}", State.GlobalFinished, conn);
+        insertUndoLog(xid, branchID, "{}".getBytes(Constants.DEFAULT_CHARSET), State.GlobalFinished, conn);
     }
 
     private static void insertUndoLog(String xid, long branchID,
-                                      String undoLogContent, State state, Connection conn) throws SQLException {
+                                      byte[] undoLogContent, State state, Connection conn) throws SQLException {
         PreparedStatement pst = null;
         try {
             pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL);
             pst.setLong(1, branchID);
             pst.setString(2, xid);
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(undoLogContent.getBytes());
-            pst.setBlob(3,inputStream);
+            pst.setBlob(3, BlobUtils.bytes2Blob(undoLogContent));
             pst.setInt(4, state.getValue());
             pst.executeUpdate();
         } catch (Exception e) {

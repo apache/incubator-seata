@@ -91,14 +91,24 @@ public class ExecuteTemplate {
                 }
                 if(executor!=null) {
                     //保存数据前后镜像
-                    TableRecords beforeImage = executor.beforeImage();
+                    TableRecords beforeImage = null;
+                    try {
+                        beforeImage = executor.beforeImage();
+                    } catch (Exception e) {
+
+                    }
                     T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
-                    TableRecords afterImage = executor.afterImage(beforeImage);
-                    SQLUndoLog sQLUndoLog = buildUndoItem(sqlRecognizer, beforeImage, afterImage);
-                    //业务数据操作前后插入到es数据库
-                    ConnectionContext connectionContext = statementProxy.getConnectionProxy().getContext();
-                    String xid = connectionContext.getXid();
-                    ElasticsearchUtil.addData(xid,sQLUndoLog);
+
+                    try {
+                        TableRecords afterImage = executor.afterImage(beforeImage);
+                        SQLUndoLog sQLUndoLog = buildUndoItem(sqlRecognizer, beforeImage, afterImage);
+                        //业务数据操作前后插入到es数据库
+                        ConnectionContext connectionContext = statementProxy.getConnectionProxy().getContext();
+                        String xid = connectionContext.getXid();
+                        ElasticsearchUtil.addData(xid,sQLUndoLog);
+                    } catch (Exception e) {
+
+                    }
                     return result;
                 } else {
                     // Just work as original statement
