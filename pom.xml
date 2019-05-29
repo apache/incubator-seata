@@ -33,6 +33,7 @@
         <module>integration/dubbo</module>
         <module>integration/dubbo-alibaba</module>
         <module>integration/sofa-rpc</module>
+        <module>integration/motan</module>
         <module>rm</module>
         <module>rm-datasource</module>
         <module>server</module>
