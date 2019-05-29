@@ -43,7 +43,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     private static final String SEATA_GROUP = "SEATA_GROUP";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String REGISTRY_TYPE = "nacos";
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
 
     /**

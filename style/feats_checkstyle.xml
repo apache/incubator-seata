@@ -53,10 +53,6 @@
     </module>
 
     <module name="RegexpSingleline">
-        <property name="format" value="@alibaba"/>
-        <property name="message" value="Recommended remove @alibaba keyword!"/>
-    </module>
-    <module name="RegexpSingleline">
         <property name="format" value="@taobao"/>
         <property name="message" value="Recommended remove @taobao keyword!"/>
     </module>
