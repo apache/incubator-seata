@@ -15,14 +15,14 @@
  */
 package io.seata.server.lock;
 
+import java.util.List;
+
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.core.lock.RowLock;
 import io.seata.server.session.BranchSession;
-
-import java.util.List;
 
 /**
  * The type Default lock manager.
@@ -43,7 +43,7 @@ public class DefaultLockManager extends AbstractLockManager {
         }
         //get locks of branch
         List<RowLock> locks = collectRowLocks(branchSession);
-        if(CollectionUtils.isEmpty(locks)){
+        if (CollectionUtils.isEmpty(locks)) {
             //no lock
             return true;
         }
@@ -53,13 +53,13 @@ public class DefaultLockManager extends AbstractLockManager {
     @Override
     public boolean releaseLock(BranchSession branchSession) throws TransactionException {
         List<RowLock> locks = collectRowLocks(branchSession);
-        if(CollectionUtils.isEmpty(locks)){
+        if (CollectionUtils.isEmpty(locks)) {
             //no lock
             return true;
         }
-        try{
+        try {
             return getLocker(branchSession).releaseLock(locks);
-        }catch(Exception t){
+        } catch (Exception t) {
             LOGGER.error("unLock error, branchSession:" + branchSession, t);
             return false;
         }
@@ -68,10 +68,10 @@ public class DefaultLockManager extends AbstractLockManager {
     @Override
     public boolean isLockable(String xid, String resourceId, String lockKey) throws TransactionException {
         List<RowLock> locks = collectRowLocks(lockKey, resourceId, xid);
-        try{
+        try {
             return getLocker().isLockable(locks);
-        }catch(Exception t){
-            LOGGER.error("isLockable error, xid:" + xid + ", resourceId:"+resourceId + ", lockKey:"+lockKey, t);
+        } catch (Exception t) {
+            LOGGER.error("isLockable error, xid:" + xid + ", resourceId:" + resourceId + ", lockKey:" + lockKey, t);
             return false;
         }
     }

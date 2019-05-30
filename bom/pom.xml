@@ -102,7 +102,8 @@
         <mysql.client.version>5.1.30</mysql.client.version>
         <h2.version>1.4.181</h2.version>
         <jackson.version>2.9.8</jackson.version>
-
+        <motan.version>1.0.0</motan.version>
+  
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -344,7 +345,15 @@
                 <artifactId>jackson-annotations</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
-
+                <groupId>com.weibo</groupId>
+                <artifactId>motan-core</artifactId>
+                <version>${motan.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.weibo</groupId>
+                <artifactId>motan-transport-netty</artifactId>
+                <version>${motan.version}</version>
+            </dependency>
 
         </dependencies>
     </dependencyManagement>
