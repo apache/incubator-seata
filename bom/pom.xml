@@ -79,7 +79,8 @@
         <commons-dbcp.version>1.3</commons-dbcp.version>
         <cglib.version>3.1</cglib.version>
         <aopalliance.version>1.0</aopalliance.version>
-        <zkclient.version>0.10</zkclient.version>
+        <zkclient.version>0.11</zkclient.version>
+        <apache-zookeeper.version>3.4.14</apache-zookeeper.version>
         <curator-test.version>2.9.1</curator-test.version>
         <spring-context-support.version>1.0.2</spring-context-support.version>
         <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
@@ -204,7 +205,16 @@
                         <artifactId>io.netty</artifactId>
                         <groupId>netty</groupId>
                     </exclusion>
+                    <exclusion>
+                        <artifactId>org.apache.zookeeper</artifactId>
+                        <groupId>zookeeper</groupId>
+                    </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.zookeeper</groupId>
+                <artifactId>zookeeper</artifactId>
+                <version>${apache-zookeeper.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.curator</groupId>
