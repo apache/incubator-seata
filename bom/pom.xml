@@ -345,6 +345,7 @@
                 <artifactId>jackson-annotations</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
+            <dependency>
                 <groupId>com.weibo</groupId>
                 <artifactId>motan-core</artifactId>
                 <version>${motan.version}</version>
