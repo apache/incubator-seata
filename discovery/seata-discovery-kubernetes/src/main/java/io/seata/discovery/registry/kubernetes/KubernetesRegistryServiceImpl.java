@@ -55,7 +55,7 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static  ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap;
 
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
 
     private static volatile KubernetesClient kubernetesClient;
 
