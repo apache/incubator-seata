@@ -157,27 +157,7 @@ public class TableRecords {
      * @return the table records
      */
     public static TableRecords empty(TableMeta tableMeta) {
-        return new TableRecords(tableMeta) {
-            @Override
-            public int size() {
-                return 0;
-            }
-
-            @Override
-            public List<Field> pkRows() {
-                return new ArrayList<>();
-            }
-
-            @Override
-            public void add(Row row) {
-                throw new UnsupportedOperationException("xxx");
-            }
-
-            @Override
-            public TableMeta getTableMeta() {
-                throw new UnsupportedOperationException("xxx");
-            }
-        };
+        return new EmptyTableRecords(tableMeta);
     }
 
     /**
@@ -214,5 +194,34 @@ public class TableRecords {
             records.add(row);
         }
         return records;
+    }
+
+    public static class EmptyTableRecords extends TableRecords {
+
+        public EmptyTableRecords() {}
+
+        public EmptyTableRecords(TableMeta tableMeta) {
+            this.setTableMeta(tableMeta);
+        }
+
+        @Override
+        public int size() {
+            return 0;
+        }
+
+        @Override
+        public List<Field> pkRows() {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public void add(Row row) {
+            throw new UnsupportedOperationException("xxx");
+        }
+
+        @Override
+        public TableMeta getTableMeta() {
+            throw new UnsupportedOperationException("xxx");
+        }
     }
 }
