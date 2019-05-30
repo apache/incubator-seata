@@ -30,7 +30,7 @@ public class UndoLogParserFactory {
     private static class SingletonHolder {
         private static final UndoLogParser INSTANCE = 
                 EnhancedServiceLoader.load(UndoLogParser.class, ConfigurationFactory.getInstance()
-                        .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, "fastjson"));
+                        .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, "jackson"));
     }
 
     /**
