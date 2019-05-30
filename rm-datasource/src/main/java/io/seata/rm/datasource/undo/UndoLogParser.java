@@ -19,22 +19,23 @@ package io.seata.rm.datasource.undo;
  * The interface Undo log parser.
  *
  * @author sharajava
+ * @author Geng Zhang
  */
 public interface UndoLogParser {
 
     /**
-     * Encode string.
+     * Encode branch undo log to byte array.
      *
      * @param branchUndoLog the branch undo log
-     * @return the string
+     * @return the byte array
      */
-    String encode(BranchUndoLog branchUndoLog);
+    byte[] encode(BranchUndoLog branchUndoLog);
 
     /**
-     * Decode branch undo log.
+     * Decode byte array to branch undo log.
      *
-     * @param text the text
+     * @param bytes the byte array
      * @return the branch undo log
      */
-    BranchUndoLog decode(String text);
+    BranchUndoLog decode(byte[] bytes);
 }

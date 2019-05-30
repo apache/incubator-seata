@@ -15,10 +15,10 @@
  */
 package io.seata.rm.tcc.remoting.parser;
 
-import io.seata.common.util.ReflectionUtil;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+
+import io.seata.common.util.ReflectionUtil;
 
 /**
  * dubbo attribute analysis
@@ -32,32 +32,35 @@ public class DubboUtil {
      *
      * @param proxyBean the proxy bean
      * @return the assist interface
-     * @throws NoSuchFieldException      the no such field exception
-     * @throws SecurityException         the security exception
-     * @throws IllegalArgumentException  the illegal argument exception
-     * @throws IllegalAccessException    the illegal access exception
-     * @throws NoSuchMethodException     the no such method exception
+     * @throws NoSuchFieldException the no such field exception
+     * @throws SecurityException the security exception
+     * @throws IllegalArgumentException the illegal argument exception
+     * @throws IllegalAccessException the illegal access exception
+     * @throws NoSuchMethodException the no such method exception
      * @throws InvocationTargetException the invocation target exception
      */
-    public static Class<?> getAssistInterface(Object proxyBean) throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-		if(proxyBean == null){
-			return null;
-		}
-		if(!proxyBean.getClass().getName().startsWith("com.alibaba.dubbo.common.bytecode.proxy")
-				&&  !proxyBean.getClass().getName().startsWith("org.apache.dubbo.common.bytecode.proxy")){
-			return null;
-		}
-		Field handlerField=proxyBean.getClass().getDeclaredField("handler");  
-        handlerField.setAccessible(true);  
-        Object invokerInvocationHandler = handlerField.get(proxyBean);  
-        Field invokerField = invokerInvocationHandler.getClass().getDeclaredField("invoker");  
-        invokerField.setAccessible(true);  
-        Object invoker =  invokerField.get(invokerInvocationHandler);  
-        Field failoverClusterInvokerField=invoker.getClass().getDeclaredField("invoker");  
+    public static Class<?> getAssistInterface(Object proxyBean)
+        throws NoSuchFieldException, SecurityException, IllegalArgumentException, IllegalAccessException,
+        NoSuchMethodException, InvocationTargetException {
+        if (proxyBean == null) {
+            return null;
+        }
+        if (!proxyBean.getClass().getName().startsWith("com.alibaba.dubbo.common.bytecode.proxy")
+            && !proxyBean.getClass().getName().startsWith("org.apache.dubbo.common.bytecode.proxy")) {
+            return null;
+        }
+        Field handlerField = proxyBean.getClass().getDeclaredField("handler");
+        handlerField.setAccessible(true);
+        Object invokerInvocationHandler = handlerField.get(proxyBean);
+        Field invokerField = invokerInvocationHandler.getClass().getDeclaredField("invoker");
+        invokerField.setAccessible(true);
+        Object invoker = invokerField.get(invokerInvocationHandler);
+        Field failoverClusterInvokerField = invoker.getClass().getDeclaredField("invoker");
         failoverClusterInvokerField.setAccessible(true);
-        Object failoverClusterInvoker = failoverClusterInvokerField.get(invoker);  
-        Class failoverClusterInvokerInterfaceClass = (Class) ReflectionUtil.invokeMethod(failoverClusterInvoker, "getInterface");
+        Object failoverClusterInvoker = failoverClusterInvokerField.get(invoker);
+        Class failoverClusterInvokerInterfaceClass = (Class)ReflectionUtil.invokeMethod(failoverClusterInvoker,
+            "getInterface");
         return failoverClusterInvokerInterfaceClass;
-	}
+    }
 
 }
