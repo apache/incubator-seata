@@ -87,6 +87,8 @@
                     <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
                     <repositoryLayout>flat</repositoryLayout>
                     <repositoryName>lib</repositoryName>
+                    <encoding>UTF-8</encoding>
+                    <useWildcardClassPath>true</useWildcardClassPath>
                     <binFileExtensions>
                         <unix>.sh</unix>
                     </binFileExtensions>
@@ -101,6 +103,10 @@
                                     <extraArgument>-XX:MaxDirectMemorySize=1024M</extraArgument>
                                 </extraArguments>
                             </jvmSettings>
+                            <platforms>
+                                <platform>windows</platform>
+                                <platform>unix</platform>
+                            </platforms>
                         </program>
                     </programs>
                 </configuration>
