@@ -91,6 +91,7 @@
                     <useWildcardClassPath>true</useWildcardClassPath>
                     <binFileExtensions>
                         <unix>.sh</unix>
+                        <windows>.bat</windows>
                     </binFileExtensions>
                     <assembleDirectory>../distribution</assembleDirectory>
                     <programs>
