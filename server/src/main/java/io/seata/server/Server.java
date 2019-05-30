@@ -15,18 +15,17 @@
  */
 package io.seata.server;
 
-import java.io.IOException;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.NetUtil;
 import io.seata.core.rpc.netty.RpcServer;
 import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.session.SessionHolder;
+
+import java.io.IOException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Server.
@@ -39,7 +38,6 @@ public class Server {
     private static final int MAX_SERVER_POOL_SIZE = 500;
     private static final int MAX_TASK_QUEUE_SIZE = 20000;
     private static final int KEEP_ALIVE_TIME = 500;
-    private static final int SERVER_DEFAULT_PORT = 8091;
     private static final ThreadPoolExecutor WORKING_THREADS = new ThreadPoolExecutor(MIN_SERVER_POOL_SIZE,
         MAX_SERVER_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS,
         new LinkedBlockingQueue<>(MAX_TASK_QUEUE_SIZE),
@@ -52,28 +50,17 @@ public class Server {
      * @throws IOException the io exception
      */
     public static void main(String[] args) throws IOException {
+        //initialize the parameter parser
+        ParameterParser parameterParser = new ParameterParser(args);
+
         RpcServer rpcServer = new RpcServer(WORKING_THREADS);
-
-        int port = SERVER_DEFAULT_PORT;
+        //server host
+        rpcServer.setHost(parameterParser.getHost());
         //server port
-        if (args.length > 0) {
-            try {
-                port = Integer.parseInt(args[0]);
-            } catch (NumberFormatException e) {
-                System.err.println("Usage: sh services-server.sh $LISTEN_PORT $PATH_FOR_PERSISTENT_DATA");
-                System.exit(0);
-            }
-        }
-        rpcServer.setListenPort(port);
-
-        //log store mode : file、db
-        String storeMode = null;
-        if (args.length > 1) {
-            storeMode = args[1];
-        }
-
+        rpcServer.setListenPort(parameterParser.getPort());
         UUIDGenerator.init(1);
-        SessionHolder.init(storeMode);
+        //log store mode : file、db
+        SessionHolder.init(parameterParser.getStoreMode());
 
         DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
         coordinator.init();
@@ -81,11 +68,7 @@ public class Server {
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
 
-        if (args.length > 2) {
-            XID.setIpAddress(args[2]);
-        } else {
-            XID.setIpAddress(NetUtil.getLocalIp());
-        }
+        XID.setIpAddress(parameterParser.getHost());
         XID.setPort(rpcServer.getListenPort());
 
         rpcServer.init();
