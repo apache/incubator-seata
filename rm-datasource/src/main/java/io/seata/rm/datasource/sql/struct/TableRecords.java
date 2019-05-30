@@ -15,19 +15,21 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.seata.common.exception.ShouldNeverHappenException;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.seata.common.exception.ShouldNeverHappenException;
-
 /**
  * The type Table records.
  *
  * @author sharajava
  */
+@JsonIgnoreProperties({"tableMeta"})
 public class TableRecords {
 
     private transient TableMeta tableMeta;

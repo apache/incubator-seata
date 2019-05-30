@@ -25,6 +25,6 @@ class UndoLogParserFactoryTest {
 
     @Test
     void getInstance() {
-        Assertions.assertTrue(UndoLogParserFactory.getInstance() instanceof JSONBasedUndoLogParser);
+        Assertions.assertTrue(UndoLogParserFactory.getInstance() instanceof JacksonUndoLogParser);
     }
 }

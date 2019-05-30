@@ -25,6 +25,7 @@ import io.seata.common.loader.LoadLevel;
  *
  * @author sharajava
  */
+@Deprecated
 @LoadLevel(name = "fastjson")
 public class JSONBasedUndoLogParser implements UndoLogParser {
 

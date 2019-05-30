@@ -27,9 +27,9 @@ class UndoLogParserProviderTest {
 
     @Test
     void testError(){
-        UndoLogParser parser = EnhancedServiceLoader.load(UndoLogParser.class, "fastjson");
+        UndoLogParser parser = EnhancedServiceLoader.load(UndoLogParser.class, "jackson");
         Assertions.assertNotNull(parser);
-        Assertions.assertTrue(parser instanceof JSONBasedUndoLogParser);
+        Assertions.assertTrue(parser instanceof JacksonUndoLogParser);
         
         try {
             EnhancedServiceLoader.load(UndoLogParser.class, "adadad");
