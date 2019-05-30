@@ -101,6 +101,7 @@
         <oracle.client.version>10.2.0.3.0</oracle.client.version>
         <mysql.client.version>5.1.30</mysql.client.version>
         <h2.version>1.4.181</h2.version>
+        <jackson.version>2.9.8</jackson.version>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -328,6 +329,22 @@
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.client.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+
 
         </dependencies>
     </dependencyManagement>

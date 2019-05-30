@@ -15,28 +15,51 @@
  */
 package io.seata.rm.datasource.undo;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import io.seata.common.Constants;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.common.loader.LoadLevel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 /**
  * The type Json based undo log parser.
  *
  * @author sharajava
  */
-@LoadLevel(name = "fastjson")
+@LoadLevel(name = "jackson")
 public class JSONBasedUndoLogParser implements UndoLogParser {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JSONBasedUndoLogParser.class);
+
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+    static {
+        MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        MAPPER.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+    }
 
     @Override
     public byte[] encode(BranchUndoLog branchUndoLog) {
-        String json = JSON.toJSONString(branchUndoLog, SerializerFeature.WriteDateUseDateFormat);
-        return json.getBytes(Constants.DEFAULT_CHARSET);
+        try {
+            byte[] bytes = MAPPER.writeValueAsBytes(branchUndoLog);
+            return bytes;
+        } catch (JsonProcessingException e) {
+            LOGGER.error("json encode exception, {}", e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     public BranchUndoLog decode(byte[] bytes) {
-        String text = new String(bytes, Constants.DEFAULT_CHARSET);
-        return JSON.parseObject(text, BranchUndoLog.class);
+        try {
+            BranchUndoLog branchUndoLog = MAPPER.readValue(bytes, BranchUndoLog.class);
+            return branchUndoLog;
+        } catch (IOException e) {
+            LOGGER.error("json decode exception, {}", e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
     }
 }

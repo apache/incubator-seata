@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.seata.common.exception.ShouldNeverHappenException;
 
 /**
@@ -28,6 +29,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
  *
  * @author sharajava
  */
+@JsonIgnoreProperties({"tableMeta"})
 public class TableRecords {
 
     private transient TableMeta tableMeta;
