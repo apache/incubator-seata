@@ -198,6 +198,7 @@ public class NetUtil {
 
     /**
      * is valid address
+     *
      * @param address
      * @return true if the given address is valid
      */
@@ -206,16 +207,22 @@ public class NetUtil {
             return false;
         }
         String name = address.getHostAddress();
-        return (name != null && !ANY_HOST.equals(name) && !LOCALHOST.equals(name) && IP_PATTERN.matcher(name).matches());
+        return isValidIp(name, false);
     }
 
     /**
      * is valid IP
      *
      * @param ip
+     * @param validLocalAndAny Are 127.0.0.1 and 0.0.0.0 valid IPs?
      * @return true if the given IP is valid
      */
-    public static boolean isValidIp(String ip) {
-        return IP_PATTERN.matcher(ip).matches();
+    public static boolean isValidIp(String ip, boolean validLocalAndAny) {
+        if (validLocalAndAny) {
+            return ip != null && IP_PATTERN.matcher(ip).matches();
+        } else {
+            return (ip != null && !ANY_HOST.equals(ip) && !LOCALHOST.equals(ip) && IP_PATTERN.matcher(ip).matches());
+        }
+
     }
 }

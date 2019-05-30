@@ -17,6 +17,7 @@ package io.seata.server;
 
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.NetUtil;
 import io.seata.core.rpc.netty.RpcServer;
 import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.server.coordinator.DefaultCoordinator;
@@ -68,7 +69,12 @@ public class Server {
         // register ShutdownHook
         ShutdownHook.getInstance().addDisposable(coordinator);
 
-        XID.setIpAddress(parameterParser.getHost());
+        //127.0.0.1 and 0.0.0.0 are not valid here.
+        if (NetUtil.isValidIp(parameterParser.getHost(), false)) {
+            XID.setIpAddress(parameterParser.getHost());
+        } else {
+            XID.setIpAddress(NetUtil.getLocalIp());
+        }
         XID.setPort(rpcServer.getListenPort());
 
         rpcServer.init();
