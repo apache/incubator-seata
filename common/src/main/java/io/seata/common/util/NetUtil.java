@@ -206,8 +206,7 @@ public class NetUtil {
         if (address == null || address.isLoopbackAddress()) {
             return false;
         }
-        String name = address.getHostAddress();
-        return isValidIp(name, false);
+        return isValidIp(address.getHostAddress(), false);
     }
 
     /**

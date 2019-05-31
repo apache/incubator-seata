@@ -26,7 +26,7 @@ import com.beust.jcommander.ParameterException;
  * @date 2019/05/30
  */
 public class ParameterParser {
-    private static final String PROGRAM_NAME = "seata-server";
+    private static final String PROGRAM_NAME = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
     private static final int SERVER_DEFAULT_PORT = 8091;
     private static final String SERVER_DEFAULT_BIND_IP = "0.0.0.0";
     private static final String SERVER_DEFAULT_STORE_MODE = "file";
