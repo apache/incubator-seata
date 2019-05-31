@@ -20,11 +20,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import io.seata.common.XID;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.core.rpc.RemotingServer;
-import io.seata.discovery.registry.RegistryFactory;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -37,6 +32,10 @@ import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.seata.common.XID;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.core.rpc.RemotingServer;
+import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +53,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     private final NettyServerConfig nettyServerConfig;
     private int listenPort;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
+
     /**
      * Sets listen port.
      *
@@ -159,14 +159,13 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
 
     }
 
-
     @Override
     public void shutdown() {
         try {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Shuting server down. ");
             }
-            if (initialized.get()){
+            if (initialized.get()) {
                 RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
                 RegistryFactory.getInstance().close();
                 //wait a few seconds for server transport

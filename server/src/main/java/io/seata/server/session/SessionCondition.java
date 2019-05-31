@@ -52,7 +52,7 @@ public class SessionCondition {
      */
     public SessionCondition(GlobalStatus status) {
         this.status = status;
-        statuses = new GlobalStatus[]{status};
+        statuses = new GlobalStatus[] {status};
     }
 
     /**
@@ -69,7 +69,7 @@ public class SessionCondition {
      *
      * @param overTimeAliveMills the over time alive mills
      */
-    public SessionCondition( long overTimeAliveMills) {
+    public SessionCondition(long overTimeAliveMills) {
         this.overTimeAliveMills = overTimeAliveMills;
     }
 

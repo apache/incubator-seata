@@ -29,7 +29,7 @@ import io.seata.common.Constants;
 public class BusinessActivityContext implements Serializable {
 
     /**  */
-    private static final long   serialVersionUID = 6539226288677737992L;
+    private static final long serialVersionUID = 6539226288677737992L;
 
     private Map<String, Object> context = new HashMap<String, Object>();
 
@@ -64,7 +64,7 @@ public class BusinessActivityContext implements Serializable {
      * @return the long
      */
     public Long fetchStartTime() {
-        return (Long) context.get(Constants.START_TIME);
+        return (Long)context.get(Constants.START_TIME);
     }
 
     /**
@@ -73,7 +73,7 @@ public class BusinessActivityContext implements Serializable {
      * @param key the key
      * @return the object
      */
-    public Object getContext(String key){
+    public Object getContext(String key) {
         return context.get(key);
     }
 
