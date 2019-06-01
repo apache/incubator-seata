@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.registery.etcd;
+package io.seata.discovery.registry.etcd3;
 
 
 import io.etcd.jetcd.ByteSequence;
