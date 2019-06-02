@@ -15,16 +15,15 @@
  */
 package io.seata.core.protocol;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
-
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.buffer.UnpooledByteBufAllocator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Merged warp message.
@@ -37,11 +36,11 @@ public class MergedWarpMessage extends AbstractMessage implements Serializable, 
     /**
      * The Msgs.
      */
-    public List<AbstractMessage> msgs = new ArrayList<AbstractMessage>();
+    public List<AbstractMessage> msgs = new ArrayList<>();
     /**
      * The Msg ids.
      */
-    public List<Long> msgIds = new ArrayList<Long>();
+    public List<Long> msgIds = new ArrayList<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(MergedWarpMessage.class);
 
     @Override
