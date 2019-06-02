@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.buffer.UnpooledByteBufAllocator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,21 +51,21 @@ public class MergedWarpMessage extends AbstractMessage implements Serializable, 
 
     @Override
     public byte[] encode() {
-        int bufferSize = msgs.size() * 1024;
-        ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
-        byteBuffer.putShort((short)msgs.size());
-        for (AbstractMessage msg : msgs) {
-            //msg.setChannelHandlerContext(ctx);
-            byte[] data = msg.encode();
-            byteBuffer.putShort(msg.getTypeCode());
-            byteBuffer.put(data);
+        final ByteBuf buffer = Unpooled.buffer();
+        buffer.writeInt(0); // write placeholder for content length
+
+        buffer.writeShort((short) msgs.size());
+        for (final AbstractMessage msg : msgs) {
+            final byte[] bytes = msg.encode();
+            buffer.writeShort(msg.getTypeCode());
+            buffer.writeBytes(bytes);
         }
 
-        byteBuffer.flip();
-        int length = byteBuffer.limit();
-        byte[] content = new byte[length + 4];
-        intToBytes(length, content, 0);
-        byteBuffer.get(content, 4, length);
+        final int length = buffer.readableBytes();
+        final byte[] content = new byte[length];
+        buffer.setInt(0, length - 4);  // minus the placeholder length itself
+        buffer.readBytes(content);
+
         if (msgs.size() > 20) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("msg in one packet:" + msgs.size() + ",buffer size:" + content.length);
