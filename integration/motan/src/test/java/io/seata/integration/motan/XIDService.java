@@ -13,25 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.registry.etcd;
-
-import io.seata.discovery.registry.etcd3.EtcdRegistryProvider;
-import io.seata.discovery.registry.etcd3.EtcdRegistryServiceImpl;
-import org.junit.jupiter.api.Test;
-
-import static org.assertj.core.api.Assertions.assertThat;
+package io.seata.integration.motan;
 
 /**
- * @author xingfudeshi@gmail.com
- * @date 2019/04/26
- * the type etcd registry provider test
+ * @author jimin.jm@alibaba-inc.com
+ * @date 2019/05/27
  */
-public class EtcdRegistryProviderTest {
-    /**
-     * test provide
-     */
-    @Test
-    public void testProvide() {
-        assertThat(new EtcdRegistryProvider().provide()).isInstanceOf(EtcdRegistryServiceImpl.class);
-    }
+public interface XIDService {
+    String getXid();
 }
