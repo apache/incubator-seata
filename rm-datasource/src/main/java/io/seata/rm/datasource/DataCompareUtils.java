@@ -40,9 +40,9 @@ public class DataCompareUtils {
      *
      * @param f0 the f0
      * @param f1  the f1
-     * @return the boolean
+     * @return the boolean null:not compare, false:not equal, true:equal
      */
-    public static boolean isFieldEquals(Field f0, Field f1) {
+    public static Boolean isFieldEquals(Field f0, Field f1) {
         if (f0 == null) {
             return f1 == null;
         } else {
@@ -66,7 +66,7 @@ public class DataCompareUtils {
                                 f1.setValue(Timestamp.valueOf(f1.getValue().toString()));
                             }
                             if (!checkType(f0.getValue())) {
-                                return true;
+                                return null;
                             }
                             return f0.getValue().equals(f1.getValue());
                         }
@@ -133,8 +133,13 @@ public class DataCompareUtils {
                 if (newField == null) {
                     return false;
                 }
-                if (!isFieldEquals(oldField, newField)) {
-                    return false;
+                Boolean fieldEquals = isFieldEquals(oldField, newField);
+                if (fieldEquals == null) {
+                    continue;
+                } else {
+                    if (!fieldEquals) {
+                        return false;
+                    }
                 }
             }
         }

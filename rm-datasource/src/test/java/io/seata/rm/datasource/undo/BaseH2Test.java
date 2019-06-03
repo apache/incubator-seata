@@ -15,23 +15,14 @@
  */
 package io.seata.rm.datasource.undo;
 
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.KeyType;
-import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.sql.struct.*;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
+import java.sql.*;
 
 /**
  * @author Geng Zhang
@@ -75,7 +66,7 @@ public abstract class BaseH2Test {
 
     @BeforeEach
     private void prepareTable() {
-        execSQL("DROP TABLE table_name");
+        execSQL("DROP TABLE IF EXISTS table_name");
         execSQL("CREATE TABLE table_name ( `id` int(8), `name` varchar(64), PRIMARY KEY (`id`))");
     }
 
