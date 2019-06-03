@@ -104,6 +104,7 @@
         <h2.version>1.4.181</h2.version>
         <motan.version>1.0.0</motan.version>
         <jackson.version>2.9.8</jackson.version>
+        <jcommander.version>1.72</jcommander.version>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -355,7 +356,11 @@
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.beust</groupId>
+                <artifactId>jcommander</artifactId>
+                <version>${jcommander.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
