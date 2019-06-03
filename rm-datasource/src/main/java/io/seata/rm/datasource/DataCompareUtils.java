@@ -65,6 +65,9 @@ public class DataCompareUtils {
                             if (f1Type == Types.TIMESTAMP && f1.getValue().getClass().equals(String.class)) {
                                 f1.setValue(Timestamp.valueOf(f1.getValue().toString()));
                             }
+                            if (!checkType(f0)) {
+                                return true;
+                            }
                             return f0.getValue().equals(f1.getValue());
                         }
                     }
@@ -155,6 +158,22 @@ public class DataCompareUtils {
             rowMap.put(rowKey, colsMap);
         }
         return rowMap;
+    }
+
+    private static boolean checkType(Object f0) {
+        return (f0 instanceof java.lang.String ||
+                f0 instanceof java.math.BigDecimal ||
+                f0 instanceof java.math.BigInteger ||
+                f0 instanceof java.lang.Boolean ||
+                f0 instanceof java.lang.Byte ||
+                f0 instanceof java.lang.Short ||
+                f0 instanceof java.lang.Integer ||
+                f0 instanceof java.lang.Long ||
+                f0 instanceof java.lang.Double ||
+                f0 instanceof java.sql.Date ||
+                f0 instanceof java.sql.Time ||
+                f0 instanceof java.sql.Timestamp ||
+                f0 instanceof java.net.URL);
     }
 
 }
