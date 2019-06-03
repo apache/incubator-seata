@@ -103,6 +103,7 @@
         <mysql.client.version>5.1.30</mysql.client.version>
         <h2.version>1.4.181</h2.version>
         <motan.version>1.0.0</motan.version>
+        <jcommander.version>1.72</jcommander.version>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -349,7 +350,11 @@
                 <artifactId>motan-transport-netty</artifactId>
                 <version>${motan.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.beust</groupId>
+                <artifactId>jcommander</artifactId>
+                <version>${jcommander.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
