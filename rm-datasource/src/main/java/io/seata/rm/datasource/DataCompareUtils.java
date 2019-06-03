@@ -65,7 +65,7 @@ public class DataCompareUtils {
                             if (f1Type == Types.TIMESTAMP && f1.getValue().getClass().equals(String.class)) {
                                 f1.setValue(Timestamp.valueOf(f1.getValue().toString()));
                             }
-                            if (!checkType(f0)) {
+                            if (!checkType(f0.getValue())) {
                                 return true;
                             }
                             return f0.getValue().equals(f1.getValue());
