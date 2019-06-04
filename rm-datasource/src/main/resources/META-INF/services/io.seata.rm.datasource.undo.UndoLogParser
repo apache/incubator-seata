@@ -1,1 +1,1 @@
-io.seata.rm.datasource.undo.JacksonUndoLogParser
+io.seata.rm.datasource.undo.parser.JacksonUndoLogParser
