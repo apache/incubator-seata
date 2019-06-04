@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MergedWarpMessage extends AbstractMessage implements Serializable, MergeMessage {
     private static final long serialVersionUID = -5758802337446717090L;
+
     /**
      * The Msgs.
      */
@@ -51,7 +52,7 @@ public class MergedWarpMessage extends AbstractMessage implements Serializable, 
 
     @Override
     public byte[] encode() {
-        final ByteBuf buffer = Unpooled.buffer();
+        final ByteBuf buffer = Unpooled.buffer(1024);
         buffer.writeInt(0); // write placeholder for content length
 
         buffer.writeShort((short) msgs.size());
