@@ -15,15 +15,16 @@
  */
 package io.seata.rm.datasource.undo;
 
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+
 /**
  * @author Geng Zhang
  */
-public class JSONBasedUndoLogParserTest extends BaseUndoLogParserTest {
+public class UndoLogConstants {
 
-    JSONBasedUndoLogParser parser = new JSONBasedUndoLogParser();
-
-    @Override
-    public UndoLogParser getParser() {
-        return parser;
-    }
+    public final static String SERIALIZER_KEY = "serializer";
+    
+    public static final String DEFAULT_SERIALIZER = ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, "fastjson");
 }
