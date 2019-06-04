@@ -15,24 +15,54 @@
  */
 package io.seata.rm.datasource.undo;
 
+import io.seata.common.loader.EnhancedServiceLoader;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 /**
  * The type Undo log parser factory.
  *
  * @author sharajava
+ * @author Geng Zhang
  */
 public class UndoLogParserFactory {
 
+    /**
+     * {serializerName:UndoLogParser}
+     */
+    private static final ConcurrentMap<String, UndoLogParser> INSTANCES = new ConcurrentHashMap<>();
+
     private static class SingletonHolder {
-        private static final UndoLogParser INSTANCE = new JSONBasedUndoLogParser();
+        private static final UndoLogParser INSTANCE = getInstance(UndoLogConstants.DEFAULT_SERIALIZER);
     }
 
     /**
-     * Gets instance.
+     * Gets default UndoLogParser instance.
      *
      * @return the instance
      */
-    public static final UndoLogParser getInstance() {
+    public static UndoLogParser getInstance() {
         return SingletonHolder.INSTANCE;
     }
 
+    /**
+     * Gets UndoLogParser by name
+     *
+     * @param name parser name
+     * @return the UndoLogParser
+     */
+    public static UndoLogParser getInstance(String name) {
+        UndoLogParser parser = INSTANCES.get(name);
+        if (parser == null) {
+            synchronized (UndoLogParserFactory.class) {
+                parser = INSTANCES.get(name);
+                if (parser == null) {
+                    parser = EnhancedServiceLoader.load(UndoLogParser.class, name);
+                    INSTANCES.putIfAbsent(name, parser);
+                }
+            }
+        }
+        return parser;
+    }
 }

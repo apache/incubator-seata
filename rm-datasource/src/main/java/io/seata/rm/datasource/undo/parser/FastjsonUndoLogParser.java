@@ -13,25 +13,42 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo;
+package io.seata.rm.datasource.undo.parser;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import io.seata.common.Constants;
+import io.seata.common.loader.LoadLevel;
+import io.seata.rm.datasource.undo.BranchUndoLog;
+import io.seata.rm.datasource.undo.UndoLogParser;
 
 /**
  * The type Json based undo log parser.
  *
  * @author sharajava
  */
-public class JSONBasedUndoLogParser implements UndoLogParser {
+@LoadLevel(name = "fastjson")
+public class FastjsonUndoLogParser implements UndoLogParser {
 
     @Override
-    public String encode(BranchUndoLog branchUndoLog) {
-        return JSON.toJSONString(branchUndoLog, SerializerFeature.WriteDateUseDateFormat);
+    public String getName() {
+        return "fastjson";
     }
 
     @Override
-    public BranchUndoLog decode(String text) {
+    public byte[] getDefaultContent() {
+        return "{}".getBytes(Constants.DEFAULT_CHARSET);
+    }
+
+    @Override
+    public byte[] encode(BranchUndoLog branchUndoLog) {
+        String json = JSON.toJSONString(branchUndoLog, SerializerFeature.WriteDateUseDateFormat);
+        return json.getBytes(Constants.DEFAULT_CHARSET);
+    }
+
+    @Override
+    public BranchUndoLog decode(byte[] bytes) {
+        String text = new String(bytes, Constants.DEFAULT_CHARSET);
         return JSON.parseObject(text, BranchUndoLog.class);
     }
 }
