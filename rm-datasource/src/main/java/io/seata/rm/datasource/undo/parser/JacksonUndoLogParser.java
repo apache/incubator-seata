@@ -42,6 +42,16 @@ public class JacksonUndoLogParser implements UndoLogParser {
     }
 
     @Override
+    public String getName() {
+        return "jackson";
+    }
+
+    @Override
+    public byte[] getDefaultContent() {
+        return new byte[0];
+    }
+
+    @Override
     public byte[] encode(BranchUndoLog branchUndoLog) {
         try {
             byte[] bytes = MAPPER.writeValueAsBytes(branchUndoLog);
