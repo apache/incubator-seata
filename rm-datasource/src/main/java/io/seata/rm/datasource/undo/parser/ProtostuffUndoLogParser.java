@@ -49,7 +49,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
         ID_STRATEGY.registerDelegate(new TimeDelegate());
     }
 
-    private Schema<BranchUndoLog> schema = RuntimeSchema.getSchema(BranchUndoLog.class);
+    private static final Schema<BranchUndoLog> SCHEMA = RuntimeSchema.getSchema(BranchUndoLog.class);
 
     @Override
     public String getName() {
@@ -67,7 +67,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
         LinkedBuffer buffer = LinkedBuffer.allocate(512);
         // ser
         try {
-            return ProtostuffIOUtil.toByteArray(branchUndoLog, schema, buffer);
+            return ProtostuffIOUtil.toByteArray(branchUndoLog, SCHEMA, buffer);
         } finally {
             buffer.clear();
         }
@@ -78,8 +78,8 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
         if (bytes.length == 0) {
             return new BranchUndoLog();
         }
-        BranchUndoLog fooParsed = schema.newMessage();
-        ProtostuffIOUtil.mergeFrom(bytes, fooParsed, schema);
+        BranchUndoLog fooParsed = SCHEMA.newMessage();
+        ProtostuffIOUtil.mergeFrom(bytes, fooParsed, SCHEMA);
         return fooParsed;
     }
 
