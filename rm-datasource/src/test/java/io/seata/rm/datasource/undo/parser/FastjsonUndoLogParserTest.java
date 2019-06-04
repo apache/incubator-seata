@@ -13,19 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo;
+package io.seata.rm.datasource.undo.parser;
 
-import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
+import io.seata.rm.datasource.undo.UndoLogParser;
 
 /**
  * @author Geng Zhang
  */
-class UndoLogParserFactoryTest {
+public class FastjsonUndoLogParserTest extends BaseUndoLogParserTest {
 
-    @Test
-    void getInstance() {
-        Assertions.assertTrue(UndoLogParserFactory.getInstance() instanceof FastjsonUndoLogParser);
+    FastjsonUndoLogParser parser = new FastjsonUndoLogParser();
+
+    @Override
+    public UndoLogParser getParser() {
+        return parser;
     }
 }
