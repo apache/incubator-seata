@@ -496,5 +496,11 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
             LOGGER.error("return channel to rmPool error:" + exx.getMessage());
         }
     }
-
+    
+    @Override
+    public void destroy() {
+        super.destroy();
+        initialized.getAndSet(false);
+        instance = null;
+    }
 }

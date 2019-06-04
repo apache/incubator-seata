@@ -157,7 +157,7 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
             }
         }, healthCheckDelay, healthCheckPeriod, TimeUnit.SECONDS);
     }
-
+    
     @Override
     public Object sendMsgWithResponse(Object msg, long timeout) throws TimeoutException {
         String validAddress = loadBalance(transactionServiceGroup);
@@ -407,6 +407,13 @@ public final class TmRpcClient extends AbstractRpcRemotingClient {
         } catch (Exception exx) {
             LOGGER.error("return channel to rpcPool error:" + exx.getMessage());
         }
+    }
+    
+    @Override
+    public void destroy() {
+        super.destroy();
+        initialized.getAndSet(false);
+        instance = null;
     }
 
 }
