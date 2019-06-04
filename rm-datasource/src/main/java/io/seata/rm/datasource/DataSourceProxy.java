@@ -110,7 +110,11 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     @Override
     public String getResourceId() {
-        return jdbcUrl;
+        if (jdbcUrl.contains("?")) {
+            return jdbcUrl.substring(0, jdbcUrl.indexOf("?"));
+        } else {
+            return jdbcUrl;
+        }
     }
 
     @Override
