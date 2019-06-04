@@ -76,7 +76,7 @@ public final class UndoLogManager {
     private static String UNDO_LOG_TABLE_NAME = "undo_log";
 
     private static String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME +
-            " (branch_id, xid, rollback_ctx, rollback_info, log_status, log_created, log_modified)" +
+            " (branch_id, xid, context, rollback_info, log_status, log_created, log_modified)" +
             " VALUES (?, ?, ?, ?, now(), now())";
 
     private static String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
@@ -167,7 +167,7 @@ public final class UndoLogManager {
                         return;
                     }
 
-                    String contextString = rs.getString("rollback_ctx");
+                    String contextString = rs.getString("context");
                     Map<String, String> context = parseContext(contextString);
                     Blob b = rs.getBlob("rollback_info");
                     byte[] rollbackInfo = BlobUtils.blob2Bytes(b);

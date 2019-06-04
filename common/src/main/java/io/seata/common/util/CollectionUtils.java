@@ -112,7 +112,7 @@ public class CollectionUtils {
 
     private static final String KV_SPLIT = "=";
     
-    private static final String VALUE_SPLIT = "&";
+    private static final String PAIR_SPLIT = "&";
 
     /**
      * Encode map to string
@@ -129,7 +129,7 @@ public class CollectionUtils {
         }
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : map.entrySet()) {
-            sb.append(entry.getKey()).append(KV_SPLIT).append(entry.getValue()).append(VALUE_SPLIT);
+            sb.append(entry.getKey()).append(KV_SPLIT).append(entry.getValue()).append(PAIR_SPLIT);
         }
         return sb.substring(0, sb.length() - 1);
     }
@@ -148,15 +148,15 @@ public class CollectionUtils {
         if (StringUtils.isBlank(data)) {
             return map;
         }
-        String[] values = data.split(VALUE_SPLIT);
-        if (values.length == 0) {
+        String[] kvPairs = data.split(PAIR_SPLIT);
+        if (kvPairs.length == 0) {
             return map;
         }
-        for (String value : values) {
-            if (StringUtils.isNullOrEmpty(value)) {
+        for (String kvPair : kvPairs) {
+            if (StringUtils.isNullOrEmpty(kvPair)) {
                 continue;
             }
-            String[] kvs = value.split(KV_SPLIT);
+            String[] kvs = kvPair.split(KV_SPLIT);
             if (kvs.length != 2) {
                 continue;
             }
