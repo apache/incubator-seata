@@ -21,8 +21,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 /**
  * The type Merged warp message.
@@ -32,14 +34,15 @@ import org.slf4j.LoggerFactory;
  */
 public class MergedWarpMessage extends AbstractMessage implements Serializable, MergeMessage {
     private static final long serialVersionUID = -5758802337446717090L;
+
     /**
      * The Msgs.
      */
-    public List<AbstractMessage> msgs = new ArrayList<AbstractMessage>();
+    public List<AbstractMessage> msgs = new ArrayList<>();
     /**
      * The Msg ids.
      */
-    public List<Long> msgIds = new ArrayList<Long>();
+    public List<Long> msgIds = new ArrayList<>();
     private static final Logger LOGGER = LoggerFactory.getLogger(MergedWarpMessage.class);
 
     @Override
@@ -49,21 +52,21 @@ public class MergedWarpMessage extends AbstractMessage implements Serializable, 
 
     @Override
     public byte[] encode() {
-        int bufferSize = msgs.size() * 1024;
-        ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
-        byteBuffer.putShort((short)msgs.size());
-        for (AbstractMessage msg : msgs) {
-            //msg.setChannelHandlerContext(ctx);
-            byte[] data = msg.encode();
-            byteBuffer.putShort(msg.getTypeCode());
-            byteBuffer.put(data);
+        final ByteBuf buffer = Unpooled.buffer(1024);
+        buffer.writeInt(0); // write placeholder for content length
+
+        buffer.writeShort((short) msgs.size());
+        for (final AbstractMessage msg : msgs) {
+            final byte[] bytes = msg.encode();
+            buffer.writeShort(msg.getTypeCode());
+            buffer.writeBytes(bytes);
         }
 
-        byteBuffer.flip();
-        int length = byteBuffer.limit();
-        byte[] content = new byte[length + 4];
-        intToBytes(length, content, 0);
-        byteBuffer.get(content, 4, length);
+        final int length = buffer.readableBytes();
+        final byte[] content = new byte[length];
+        buffer.setInt(0, length - 4);  // minus the placeholder length itself
+        buffer.readBytes(content);
+
         if (msgs.size() > 20) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("msg in one packet:" + msgs.size() + ",buffer size:" + content.length);
