@@ -381,6 +381,11 @@
             <artifactId>motan-transport-netty</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.fabric8</groupId>
+            <artifactId>kubernetes-client</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -472,6 +477,7 @@
                                     <include>io.seata:seata-discovery-sofa</include>
                                     <include>io.seata:seata-discovery-zk</include>
                                     <include>io.seata:seata-discovery-etcd3</include>
+                                    <include>io.seata:seata-discovery-kubernetes</include>
                                     <include>io.seata:seata-dubbo</include>
                                     <include>io.seata:seata-dubbo-alibaba</include>
                                     <include>io.seata:seata-motan</include>
