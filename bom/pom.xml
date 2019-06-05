@@ -103,6 +103,7 @@
         <mysql.client.version>5.1.30</mysql.client.version>
         <h2.version>1.4.181</h2.version>
         <motan.version>1.0.0</motan.version>
+        <jackson.version>2.9.8</jackson.version>
         <jcommander.version>1.72</jcommander.version>
 
         <!-- Compiler settings properties -->
@@ -349,6 +350,11 @@
                 <groupId>com.weibo</groupId>
                 <artifactId>motan-transport-netty</artifactId>
                 <version>${motan.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.beust</groupId>
