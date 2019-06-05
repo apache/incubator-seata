@@ -21,6 +21,8 @@ import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.undo.UndoLogManager;
+import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -58,7 +60,10 @@ public class DataCompareUtils {
                         if (f1.getValue() == null) {
                             return false;
                         } else {
-                            convertType(f0, f1);
+                            String currentSerializer = UndoLogManager.getCurrentSerializer();
+                            if (StringUtils.equals(currentSerializer, FastjsonUndoLogParser.NAME)) {
+                                convertType(f0, f1);
+                            }
                             return f0.getValue().equals(f1.getValue());
                         }
                     }

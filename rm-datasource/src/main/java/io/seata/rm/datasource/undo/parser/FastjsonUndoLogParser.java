@@ -28,12 +28,14 @@ import io.seata.rm.datasource.undo.UndoLogParser;
  * @author sharajava
  */
 @Deprecated
-@LoadLevel(name = "fastjson")
+@LoadLevel(name = FastjsonUndoLogParser.NAME)
 public class FastjsonUndoLogParser implements UndoLogParser {
+
+    public static final String NAME = "fastjson";
 
     @Override
     public String getName() {
-        return "fastjson";
+        return NAME;
     }
 
     @Override

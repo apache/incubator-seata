@@ -86,6 +86,8 @@ public final class UndoLogManager {
     private static String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME +
         " WHERE branch_id = ? AND xid = ? FOR UPDATE";
 
+    private static final ThreadLocal<String> SERIALIZER_LOCAL = new ThreadLocal<>();
+
     private UndoLogManager() {
 
     }
@@ -179,6 +181,9 @@ public final class UndoLogManager {
                         UndoLogParserFactory.getInstance(serializer);
                     BranchUndoLog branchUndoLog = parser.decode(rollbackInfo);
 
+                    // put serializer name to local
+                    SERIALIZER_LOCAL.set(parser.getName());
+
                     for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
                         TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
                         sqlUndoLog.setTableMeta(tableMeta);
@@ -187,6 +192,8 @@ public final class UndoLogManager {
                             sqlUndoLog);
                         undoExecutor.executeOn(conn);
                     }
+                    // remove serializer name
+                    SERIALIZER_LOCAL.remove();
                 }
 
                 // If undo_log exists, it means that the branch transaction has completed the first phase,
@@ -337,6 +344,10 @@ public final class UndoLogManager {
         }
     }
 
+    public static String getCurrentSerializer() {
+        return SERIALIZER_LOCAL.get();
+    }
+
     private static void insertUndoLogWithNormal(String xid, long branchID, String rollbackCtx,
         byte[] undoLogContent, Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, rollbackCtx, undoLogContent, State.Normal, conn);
@@ -384,4 +395,5 @@ public final class UndoLogManager {
     private static Map<String, String> parseContext(String data) {
         return CollectionUtils.decodeMap(data);
     }
+
 }
