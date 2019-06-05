@@ -21,7 +21,10 @@ import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.undo.UndoLogManager;
+import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.HashMap;
@@ -57,13 +60,9 @@ public class DataCompareUtils {
                         if (f1.getValue() == null) {
                             return false;
                         } else {
-                            int f0Type = f0.getType();
-                            int f1Type = f1.getType();
-                            if (f0Type == Types.TIMESTAMP && f0.getValue().getClass().equals(String.class)) {
-                                f0.setValue(Timestamp.valueOf(f0.getValue().toString()));
-                            }
-                            if (f1Type == Types.TIMESTAMP && f1.getValue().getClass().equals(String.class)) {
-                                f1.setValue(Timestamp.valueOf(f1.getValue().toString()));
+                            String currentSerializer = UndoLogManager.getCurrentSerializer();
+                            if (StringUtils.equals(currentSerializer, FastjsonUndoLogParser.NAME)) {
+                                convertType(f0, f1);
                             }
                             return f0.getValue().equals(f1.getValue());
                         }
@@ -72,6 +71,23 @@ public class DataCompareUtils {
                     return false;
                 }
             }
+        }
+    }
+
+    private static void convertType(Field f0, Field f1) {
+        int f0Type = f0.getType();
+        int f1Type = f1.getType();
+        if (f0Type == Types.TIMESTAMP && f0.getValue().getClass().equals(String.class)) {
+            f0.setValue(Timestamp.valueOf(f0.getValue().toString()));
+        }
+        if (f1Type == Types.TIMESTAMP && f1.getValue().getClass().equals(String.class)) {
+            f1.setValue(Timestamp.valueOf(f1.getValue().toString()));
+        }
+        if (f0Type == Types.DECIMAL && f0.getValue().getClass().equals(Integer.class)) {
+            f0.setValue(new BigDecimal(f0.getValue().toString()));
+        }
+        if (f1Type == Types.DECIMAL && f1.getValue().getClass().equals(Integer.class)) {
+            f1.setValue(new BigDecimal(f1.getValue().toString()));
         }
     }
 
