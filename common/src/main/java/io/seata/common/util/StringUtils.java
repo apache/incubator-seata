@@ -38,6 +38,11 @@ public class StringUtils {
     }
 
     /**
+     * empty string
+     */
+    public static final String EMPTY = "";
+    
+    /**
      * Is empty boolean.
      *
      * @param str the str
