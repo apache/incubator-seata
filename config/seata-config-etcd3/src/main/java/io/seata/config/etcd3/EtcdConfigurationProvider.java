@@ -13,19 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo;
+package io.seata.config.etcd3;
 
-import io.seata.rm.datasource.undo.parser.JacksonUndoLogParser;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import io.seata.common.loader.LoadLevel;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationProvider;
 
 /**
- * @author Geng Zhang
+ * @author xingfudeshi@gmail.com
+ * @date 2019/04/12
  */
-class UndoLogParserFactoryTest {
-
-    @Test
-    void getInstance() {
-        Assertions.assertTrue(UndoLogParserFactory.getInstance() instanceof JacksonUndoLogParser);
+@LoadLevel(name = "Etcd3", order = 1)
+public class EtcdConfigurationProvider implements ConfigurationProvider {
+    @Override
+    public Configuration provide() {
+        return EtcdConfiguration.getInstance();
     }
 }
