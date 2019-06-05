@@ -16,8 +16,9 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * The type Undo log parser factory.
@@ -27,14 +28,17 @@ import io.seata.core.constants.ConfigurationKeys;
  */
 public class UndoLogParserFactory {
 
+    /**
+     * {serializerName:UndoLogParser}
+     */
+    private static final ConcurrentMap<String, UndoLogParser> INSTANCES = new ConcurrentHashMap<>();
+
     private static class SingletonHolder {
-        private static final UndoLogParser INSTANCE = 
-                EnhancedServiceLoader.load(UndoLogParser.class, ConfigurationFactory.getInstance()
-                        .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, "fastjson"));
+        private static final UndoLogParser INSTANCE = getInstance(UndoLogConstants.DEFAULT_SERIALIZER);
     }
 
     /**
-     * Gets instance.
+     * Gets default UndoLogParser instance.
      *
      * @return the instance
      */
@@ -42,4 +46,23 @@ public class UndoLogParserFactory {
         return SingletonHolder.INSTANCE;
     }
 
+    /**
+     * Gets UndoLogParser by name
+     *
+     * @param name parser name
+     * @return the UndoLogParser
+     */
+    public static UndoLogParser getInstance(String name) {
+        UndoLogParser parser = INSTANCES.get(name);
+        if (parser == null) {
+            synchronized (UndoLogParserFactory.class) {
+                parser = INSTANCES.get(name);
+                if (parser == null) {
+                    parser = EnhancedServiceLoader.load(UndoLogParser.class, name);
+                    INSTANCES.putIfAbsent(name, parser);
+                }
+            }
+        }
+        return parser;
+    }
 }
