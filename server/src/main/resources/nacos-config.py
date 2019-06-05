@@ -25,7 +25,7 @@ for line in open('nacos-config.txt'):
     res = conn.getresponse()
     data = res.read()
     if data.decode("utf-8") != "true":
-        hasError=True
+        hasError = True
 if hasError:
     print ("init nacos config fail.")
 else:
