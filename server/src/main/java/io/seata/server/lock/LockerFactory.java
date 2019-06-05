@@ -15,19 +15,21 @@
  */
 package io.seata.server.lock;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import javax.sql.DataSource;
-
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.lock.LockMode;
 import io.seata.core.lock.Locker;
+import io.seata.core.store.StoreMode;
 import io.seata.core.store.db.DataSourceGenerator;
 import io.seata.server.session.BranchSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The type Lock manager factory.
@@ -35,6 +37,8 @@ import io.seata.server.session.BranchSession;
  * @author sharajava
  */
 public class LockerFactory {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(LockerFactory.class);
 
     /**
      * The constant CONFIG.
@@ -72,7 +76,15 @@ public class LockerFactory {
      * @return the lock manager
      */
     public static synchronized final Locker get(BranchSession branchSession) {
+        String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         String lockMode = CONFIG.getConfig(ConfigurationKeys.LOCK_MODE);
+        //storeMode == db and lockMode == memeory is not allowed
+        if(StoreMode.DB.name().equalsIgnoreCase(storeMode)){
+            if(LockMode.MEMORY.name().equalsIgnoreCase(lockMode)) {
+                LOGGER.warn("The LockMode will be changed from MEMORY to DB, when the StoreMode is DB.");
+                lockMode = LockMode.DB.name();
+            }
+        }
         if (LockMode.DB.name().equalsIgnoreCase(lockMode)) {
             if (lockerMap.get(lockMode) != null) {
                 return lockerMap.get(lockMode);
