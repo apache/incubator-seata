@@ -32,8 +32,10 @@ import java.io.IOException;
  *
  * @author jsbxyyx
  */
-@LoadLevel(name = "jackson")
+@LoadLevel(name = JacksonUndoLogParser.NAME)
 public class JacksonUndoLogParser implements UndoLogParser {
+
+    public static final String NAME = "jackson";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JacksonUndoLogParser.class);
 
@@ -45,7 +47,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
 
     @Override
     public String getName() {
-        return "jackson";
+        return NAME;
     }
 
     @Override

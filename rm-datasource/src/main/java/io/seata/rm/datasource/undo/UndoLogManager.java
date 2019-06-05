@@ -181,19 +181,22 @@ public final class UndoLogManager {
                         UndoLogParserFactory.getInstance(serializer);
                     BranchUndoLog branchUndoLog = parser.decode(rollbackInfo);
 
-                    // put serializer name to local
-                    SERIALIZER_LOCAL.set(parser.getName());
+                    try {
+                        // put serializer name to local
+                        SERIALIZER_LOCAL.set(parser.getName());
 
-                    for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
-                        TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
-                        sqlUndoLog.setTableMeta(tableMeta);
-                        AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
-                            dataSourceProxy.getDbType(),
-                            sqlUndoLog);
-                        undoExecutor.executeOn(conn);
+                        for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
+                            TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
+                            sqlUndoLog.setTableMeta(tableMeta);
+                            AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
+                                    dataSourceProxy.getDbType(),
+                                    sqlUndoLog);
+                            undoExecutor.executeOn(conn);
+                        }
+                    } finally {
+                        // remove serializer name
+                        SERIALIZER_LOCAL.remove();
                     }
-                    // remove serializer name
-                    SERIALIZER_LOCAL.remove();
                 }
 
                 // If undo_log exists, it means that the branch transaction has completed the first phase,
