@@ -37,9 +37,11 @@ import java.io.IOException;
  *
  * @author Geng Zhang
  */
-@LoadLevel(name = "protostuff")
+@LoadLevel(name = ProtostuffUndoLogParser.NAME)
 public class ProtostuffUndoLogParser implements UndoLogParser {
 
+    public static final String NAME = "protostuff";
+    
     private final static DefaultIdStrategy ID_STRATEGY = ((DefaultIdStrategy) RuntimeEnv.ID_STRATEGY);
 
     static {
@@ -53,7 +55,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
 
     @Override
     public String getName() {
-        return "protostuff";
+        return ProtostuffUndoLogParser.NAME;
     }
 
     @Override

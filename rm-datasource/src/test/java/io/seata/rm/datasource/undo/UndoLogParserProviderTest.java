@@ -29,8 +29,12 @@ import org.junit.jupiter.api.Test;
 class UndoLogParserProviderTest {
 
     @Test
-    void testError(){
-        UndoLogParser parser = EnhancedServiceLoader.load(UndoLogParser.class, "jackson");
+    void testLoad(){
+        UndoLogParser parser = EnhancedServiceLoader.load(UndoLogParser.class, "fastjson");
+        Assertions.assertNotNull(parser);
+        Assertions.assertTrue(parser instanceof FastjsonUndoLogParser);
+        
+        parser = EnhancedServiceLoader.load(UndoLogParser.class, "jackson");
         Assertions.assertNotNull(parser);
         Assertions.assertTrue(parser instanceof JacksonUndoLogParser);
 
