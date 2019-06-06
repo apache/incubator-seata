@@ -58,7 +58,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-        </dependency>`
+        </dependency>
 
         <dependency>
             <groupId>commons-dbcp</groupId>
