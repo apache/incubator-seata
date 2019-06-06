@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
@@ -52,7 +53,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
 
     @Override
     public byte[] getDefaultContent() {
-        return new byte[0];
+        return "{}".getBytes(Constants.DEFAULT_CHARSET);
     }
 
     @Override
