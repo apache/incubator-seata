@@ -13,20 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config.etcd;
+package io.seata.rm.datasource.undo;
 
-import io.seata.common.loader.LoadLevel;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationProvider;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 
 /**
- * @author xingfudeshi@gmail.com
- * @date 2019/04/12
+ * @author Geng Zhang
  */
-@LoadLevel(name = "Etcd3", order = 1)
-public class EtcdConfigurationProvider implements ConfigurationProvider {
-    @Override
-    public Configuration provide() {
-        return EtcdConfiguration.getInstance();
-    }
+public class UndoLogConstants {
+
+    public final static String SERIALIZER_KEY = "serializer";
+    
+    public static final String DEFAULT_SERIALIZER = ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, "fastjson");
 }

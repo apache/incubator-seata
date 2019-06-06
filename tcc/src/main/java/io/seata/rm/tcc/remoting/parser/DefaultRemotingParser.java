@@ -15,6 +15,12 @@
  */
 package io.seata.rm.tcc.remoting.parser;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
@@ -25,10 +31,6 @@ import io.seata.rm.tcc.api.BusinessActionContext;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.remoting.RemotingDesc;
 import io.seata.rm.tcc.remoting.RemotingParser;
-
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * parsing remoting bean
@@ -45,8 +47,7 @@ public class DefaultRemotingParser {
     /**
      * all remoting beans beanName -> RemotingDesc
      */
-    protected static Map<String, RemotingDesc> remotingServiceMap = new ConcurrentHashMap<String,RemotingDesc>();
-
+    protected static Map<String, RemotingDesc> remotingServiceMap = new ConcurrentHashMap<String, RemotingDesc>();
 
     private static class SingletonHolder {
         private static DefaultRemotingParser INSTANCE = new DefaultRemotingParser();
@@ -64,7 +65,7 @@ public class DefaultRemotingParser {
     /**
      * Instantiates a new Default remoting parser.
      */
-    protected DefaultRemotingParser(){
+    protected DefaultRemotingParser() {
         initRemotingParser();
     }
 
@@ -74,7 +75,7 @@ public class DefaultRemotingParser {
     protected void initRemotingParser() {
         //init all resource managers
         List<RemotingParser> remotingParsers = EnhancedServiceLoader.loadAll(RemotingParser.class);
-        if(CollectionUtils.isNotEmpty(remotingParsers)){
+        if (CollectionUtils.isNotEmpty(remotingParsers)) {
             allRemotingParsers.addAll(remotingParsers);
         }
     }
@@ -87,8 +88,8 @@ public class DefaultRemotingParser {
      * @return boolean boolean
      */
     public boolean isRemoting(Object bean, String beanName) {
-        for(RemotingParser remotingParser : allRemotingParsers){
-            if(remotingParser.isRemoting(bean, beanName)){
+        for (RemotingParser remotingParser : allRemotingParsers) {
+            if (remotingParser.isRemoting(bean, beanName)) {
                 return true;
             }
         }
@@ -103,8 +104,8 @@ public class DefaultRemotingParser {
      * @return boolean boolean
      */
     public boolean isReference(Object bean, String beanName) {
-        for(RemotingParser remotingParser : allRemotingParsers){
-            if(remotingParser.isReference(bean, beanName)){
+        for (RemotingParser remotingParser : allRemotingParsers) {
+            if (remotingParser.isReference(bean, beanName)) {
                 return true;
             }
         }
@@ -119,8 +120,8 @@ public class DefaultRemotingParser {
      * @return boolean boolean
      */
     public boolean isService(Object bean, String beanName) {
-        for(RemotingParser remotingParser : allRemotingParsers){
-            if(remotingParser.isService(bean, beanName)){
+        for (RemotingParser remotingParser : allRemotingParsers) {
+            if (remotingParser.isService(bean, beanName)) {
                 return true;
             }
         }
@@ -134,19 +135,19 @@ public class DefaultRemotingParser {
      * @param beanName the bean name
      * @return service desc
      */
-    public RemotingDesc getServiceDesc(Object bean, String beanName)  {
-        List<RemotingDesc>  ret = new ArrayList<RemotingDesc>();
-        for(RemotingParser remotingParser : allRemotingParsers){
+    public RemotingDesc getServiceDesc(Object bean, String beanName) {
+        List<RemotingDesc> ret = new ArrayList<RemotingDesc>();
+        for (RemotingParser remotingParser : allRemotingParsers) {
             RemotingDesc s = remotingParser.getServiceDesc(bean, beanName);
-            if(s != null){
+            if (s != null) {
                 ret.add(s);
             }
         }
-        if(ret.size() == 1){
+        if (ret.size() == 1) {
             return ret.get(0);
-        }else if(ret.size() > 1){
+        } else if (ret.size() > 1) {
             throw new FrameworkException("More than one RemotingParser for bean:" + beanName);
-        }else{
+        } else {
             return null;
         }
     }
@@ -158,40 +159,44 @@ public class DefaultRemotingParser {
      * @param beanName the bean name
      * @return remoting desc
      */
-    public RemotingDesc parserRemotingServiceInfo(Object bean, String beanName)  {
+    public RemotingDesc parserRemotingServiceInfo(Object bean, String beanName) {
         RemotingDesc remotingBeanDesc = getServiceDesc(bean, beanName);
-        if(remotingBeanDesc == null){
+        if (remotingBeanDesc == null) {
             return null;
         }
         remotingServiceMap.put(beanName, remotingBeanDesc);
 
         Class<?> interfaceClass = remotingBeanDesc.getInterfaceClass();
         Method[] methods = interfaceClass.getMethods();
-        if(isService(bean, beanName)){
+        if (isService(bean, beanName)) {
             try {
                 //service bean， registry resource
                 Object targetBean = remotingBeanDesc.getTargetBean();
-                for(Method m : methods){
+                for (Method m : methods) {
                     TwoPhaseBusinessAction twoPhaseBusinessAction = m.getAnnotation(TwoPhaseBusinessAction.class);
-                    if(twoPhaseBusinessAction != null){
+                    if (twoPhaseBusinessAction != null) {
                         //
                         TCCResource tccResource = new TCCResource();
                         tccResource.setActionName(twoPhaseBusinessAction.name());
                         tccResource.setTargetBean(targetBean);
                         tccResource.setPrepareMethod(m);
                         tccResource.setCommitMethodName(twoPhaseBusinessAction.commitMethod());
-                        tccResource.setCommitMethod(ReflectionUtil.getMethod(interfaceClass, twoPhaseBusinessAction.commitMethod(), new Class[]{BusinessActionContext.class}));
+                        tccResource.setCommitMethod(ReflectionUtil
+                            .getMethod(interfaceClass, twoPhaseBusinessAction.commitMethod(),
+                                new Class[] {BusinessActionContext.class}));
                         tccResource.setRollbackMethodName(twoPhaseBusinessAction.rollbackMethod());
-                        tccResource.setRollbackMethod(ReflectionUtil.getMethod(interfaceClass, twoPhaseBusinessAction.rollbackMethod(), new Class[]{BusinessActionContext.class}));
+                        tccResource.setRollbackMethod(ReflectionUtil
+                            .getMethod(interfaceClass, twoPhaseBusinessAction.rollbackMethod(),
+                                new Class[] {BusinessActionContext.class}));
                         //registry tcc resource
                         DefaultResourceManager.get().registerResource(tccResource);
                     }
                 }
-            }catch (Throwable t){
+            } catch (Throwable t) {
                 throw new FrameworkException(t, "parser remting service error");
             }
         }
-        if(isReference(bean, beanName)){
+        if (isReference(bean, beanName)) {
             //reference bean， TCC proxy
             remotingBeanDesc.setReference(true);
         }
@@ -204,7 +209,7 @@ public class DefaultRemotingParser {
      * @param beanName the bean name
      * @return the remoting desc
      */
-    public RemotingDesc getRemotingBeanDesc(String beanName){
+    public RemotingDesc getRemotingBeanDesc(String beanName) {
         return remotingServiceMap.get(beanName);
     }
 

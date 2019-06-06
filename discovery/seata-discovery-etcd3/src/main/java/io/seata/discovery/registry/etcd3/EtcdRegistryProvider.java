@@ -13,25 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo;
+package io.seata.discovery.registry.etcd3;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializerFeature;
+import io.seata.common.loader.LoadLevel;
+import io.seata.discovery.registry.RegistryProvider;
+import io.seata.discovery.registry.RegistryService;
 
 /**
- * The type Json based undo log parser.
- *
- * @author sharajava
+ * @author xingfudeshi@gmail.com
+ * @date 2019/04/18
  */
-public class JSONBasedUndoLogParser implements UndoLogParser {
-
+@LoadLevel(name = "Etcd3", order = 1)
+public class EtcdRegistryProvider implements RegistryProvider {
     @Override
-    public String encode(BranchUndoLog branchUndoLog) {
-        return JSON.toJSONString(branchUndoLog, SerializerFeature.WriteDateUseDateFormat);
-    }
-
-    @Override
-    public BranchUndoLog decode(String text) {
-        return JSON.parseObject(text, BranchUndoLog.class);
+    public RegistryService provide() {
+        return EtcdRegistryServiceImpl.getInstance();
     }
 }
