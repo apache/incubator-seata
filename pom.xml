@@ -41,6 +41,7 @@
         <module>tcc</module>
         <module>test</module>
         <module>tm</module>
+        <module>seata-spring-boot-autoconfigure</module>
     </modules>
     <packaging>pom</packaging>
 
