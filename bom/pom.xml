@@ -70,6 +70,7 @@
         <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
         <sofa.rpc.version>5.5.3</sofa.rpc.version>
         <fastjson.version>1.2.58</fastjson.version>
+        <protostuff.version>1.5.9</protostuff.version>
         <config.version>1.2.1</config.version>
         <slf4j-api.version>1.7.22</slf4j-api.version>
         <logback-classic.version>1.2.0</logback-classic.version>
@@ -103,6 +104,7 @@
         <mysql.client.version>5.1.30</mysql.client.version>
         <h2.version>1.4.181</h2.version>
         <motan.version>1.0.0</motan.version>
+        <jackson.version>2.9.8</jackson.version>
         <jcommander.version>1.72</jcommander.version>
 
         <!-- Compiler settings properties -->
@@ -142,6 +144,16 @@
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>sofa-rpc-all</artifactId>
                 <version>${sofa.rpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.protostuff</groupId>
+                <artifactId>protostuff-core</artifactId>
+                <version>${protostuff.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.protostuff</groupId>
+                <artifactId>protostuff-runtime</artifactId>
+                <version>${protostuff.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.typesafe</groupId>
@@ -349,6 +361,11 @@
                 <groupId>com.weibo</groupId>
                 <artifactId>motan-transport-netty</artifactId>
                 <version>${motan.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.beust</groupId>

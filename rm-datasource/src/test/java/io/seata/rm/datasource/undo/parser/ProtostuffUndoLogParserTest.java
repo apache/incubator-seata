@@ -13,18 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo;
+package io.seata.rm.datasource.undo.parser;
 
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
+import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
+import io.seata.rm.datasource.undo.UndoLogParser;
 
 /**
  * @author Geng Zhang
  */
-public class UndoLogConstants {
+class ProtostuffUndoLogParserTest extends BaseUndoLogParserTest {
 
-    public final static String SERIALIZER_KEY = "serializer";
-    
-    public static final String DEFAULT_SERIALIZER = ConfigurationFactory.getInstance()
-            .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, "jackson");
+    ProtostuffUndoLogParser parser = new ProtostuffUndoLogParser();
+
+    @Override
+    public UndoLogParser getParser() {
+        return parser;
+    }
 }
