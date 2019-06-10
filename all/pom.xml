@@ -562,14 +562,15 @@
                 </plugins>
             </build>
             <distributionManagement>
-                <snapshotRepository>
-                    <id>oss_seata</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-                </snapshotRepository>
                 <repository>
-                    <id>oss_seata</id>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                    <id>releases</id>
+                    <name>Nexus Release Repository</name>
+                    <url>http://192.168.150.59:8081/repository/maven-releases/</url>
                 </repository>
+                <snapshotRepository>
+                    <id>snapshots</id>
+                    <url>http://192.168.150.59:8081/repository/maven-snapshots/</url>
+                </snapshotRepository>
             </distributionManagement>
         </profile>
     </profiles>

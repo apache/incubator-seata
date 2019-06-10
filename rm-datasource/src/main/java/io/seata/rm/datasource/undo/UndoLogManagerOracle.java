@@ -232,7 +232,6 @@ public final class UndoLogManagerOracle {
      *
      * @param xids
      * @param branchIds
-     * @param limitSize
      * @param conn
      */
     public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, Connection conn) throws SQLException {
@@ -241,6 +240,7 @@ public final class UndoLogManagerOracle {
         }
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
+        commitTraceData(xids,branchIds,conn);
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
         PreparedStatement deletePST = null;
         try {
@@ -267,13 +267,52 @@ public final class UndoLogManagerOracle {
             }
         }
 
-        ElasticsearchUtil.deleteData(xids.toArray(new String[xids.size()]));
+    }
 
+    /**
+     * 事务提交时，记录到es
+     * @param xids
+     * @param branchIds
+     * @param conn
+     */
+    protected static void commitTraceData(Set<String> xids, Set<Long> branchIds, Connection conn) {
+        try {
+            String selectSql= toBatchSelectUndoLogSql(xids.size(), branchIds.size());
+            PreparedStatement selectPST = conn.prepareStatement(selectSql);
+            int paramsIndex = 1;
+            for (Long branchId : branchIds) {
+                selectPST.setLong(paramsIndex++,branchId);
+            }
+            for (String xid: xids){
+                selectPST.setString(paramsIndex++, xid);
+            }
+
+            ResultSet rs = selectPST.executeQuery();
+            while (rs.next()) {
+                Blob b = rs.getBlob("rollback_info");
+                byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
+                BranchUndoLog branchUndoLog = UndoLogParserFactory.getInstance().decode(rollbackInfo);
+                ElasticsearchUtil.addData(branchUndoLog.getXid(), branchUndoLog.getSqlUndoLogs().get(0));
+            }
+            ElasticsearchUtil.commitData();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize) {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("DELETE FROM ")
+                .append(UNDO_LOG_TABLE_NAME)
+                .append(" WHERE  branch_id IN ");
+        appendInParam(branchIdSize, sqlBuilder);
+        sqlBuilder.append(" AND xid IN ");
+        appendInParam(xidSize, sqlBuilder);
+        return sqlBuilder.toString();
+    }
+    protected static String toBatchSelectUndoLogSql(int xidSize, int branchIdSize) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select * FROM ")
                 .append(UNDO_LOG_TABLE_NAME)
                 .append(" WHERE  branch_id IN ");
         appendInParam(branchIdSize, sqlBuilder);
@@ -318,7 +357,6 @@ public final class UndoLogManagerOracle {
                 deletePST.close();
             }
         }
-        ElasticsearchUtil.deleteData(new String[]{xid});
     }
 
     private static void insertUndoLogWithNormal(String xid, long branchID,

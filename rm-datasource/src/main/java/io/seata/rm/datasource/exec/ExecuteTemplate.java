@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
+import co.faao.plugin.starter.seata.util.SeataXidWorker;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.StatementProxy;
@@ -94,7 +95,7 @@ public class ExecuteTemplate {
                     TableRecords beforeImage = null;
                     try {
                         beforeImage = executor.beforeImage();
-                    } catch (Exception e) {
+                    } catch (Throwable e) {
 
                     }
                     T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
@@ -103,10 +104,12 @@ public class ExecuteTemplate {
                         TableRecords afterImage = executor.afterImage(beforeImage);
                         SQLUndoLog sQLUndoLog = buildUndoItem(sqlRecognizer, beforeImage, afterImage);
                         //业务数据操作前后插入到es数据库
-                        ConnectionContext connectionContext = statementProxy.getConnectionProxy().getContext();
-                        String xid = connectionContext.getXid();
+                        String xid = String.valueOf(SeataXidWorker.xidWorker.getId());
                         ElasticsearchUtil.addData(xid,sQLUndoLog);
-                    } catch (Exception e) {
+                        if(statementProxy.getConnection().getAutoCommit()) {// 如果不是事务直接提交
+                            ElasticsearchUtil.commitData();
+                        }
+                    } catch (Throwable e) {
 
                     }
                     return result;
