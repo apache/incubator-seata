@@ -13,18 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo;
-
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
+package io.seata.core.rpc;
 
 /**
- * @author Geng Zhang
+ * The interface remoting client.
+ *
+ * @author zhaojun
  */
-public class UndoLogConstants {
-
-    public final static String SERIALIZER_KEY = "serializer";
-    
-    public static final String DEFAULT_SERIALIZER = ConfigurationFactory.getInstance()
-            .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, "jackson");
+public interface RemotingClient extends RemotingService {
 }
