@@ -19,7 +19,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Geng Zhang
@@ -39,5 +41,34 @@ public class CollectionUtilsTest {
         Assertions.assertFalse(CollectionUtils.isSizeEquals(list0, list1));
         list1.add("111");
         Assertions.assertTrue(CollectionUtils.isSizeEquals(list0, list1));
+    }
+
+    @Test
+    public void encodeMap() {
+        Map<String, String> map = null;
+        Assertions.assertNull(CollectionUtils.encodeMap(map));
+
+        map = new HashMap<>();
+        Assertions.assertEquals("", CollectionUtils.encodeMap(map));
+        map.put("x", "1");
+        Assertions.assertEquals("x=1", CollectionUtils.encodeMap(map));
+        map.put("y", "2");
+        Assertions.assertEquals("x=1&y=2", CollectionUtils.encodeMap(map));
+    }
+
+    @Test
+    public void decodeMap() {
+        Assertions.assertNull(CollectionUtils.decodeMap(null));
+
+        Map<String, String> map = CollectionUtils.decodeMap("");
+        Assertions.assertEquals(0, map.size());
+
+        map = CollectionUtils.decodeMap("x=1");
+        Assertions.assertEquals(1, map.size());
+        Assertions.assertEquals("1", map.get("x"));
+
+        map = CollectionUtils.decodeMap("x=1&y=2");
+        Assertions.assertEquals(2, map.size());
+        Assertions.assertEquals("2", map.get("y"));
     }
 }
