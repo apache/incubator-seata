@@ -184,7 +184,11 @@ public class TableRecords {
                     field.setKeyType(KeyType.PrimaryKey);
                 }
                 field.setType(col.getDataType());
-                field.setValue(resultSet.getObject(i));
+                if(field.getKeyType() == KeyType.PrimaryKey && resultSet.getObject(i) instanceof Long) {
+                	field.setValue((resultSet.getInt(i)));
+                }else {
+                	field.setValue(resultSet.getObject(i));
+                }
                 fields.add(field);
             }
 
