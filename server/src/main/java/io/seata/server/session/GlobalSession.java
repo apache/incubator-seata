@@ -18,6 +18,8 @@ package io.seata.server.session;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -68,7 +70,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private boolean active = true;
 
-    private ArrayList<BranchSession> branchSessions = new ArrayList<>();
+    private final ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
 
@@ -92,7 +94,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return branchSessions.remove(branchSession);
     }
 
-    private ArrayList<SessionLifecycleListener> lifecycleListeners = new ArrayList<>();
+    private Set<SessionLifecycleListener> lifecycleListeners = new HashSet<>();
 
     /**
      * Can be committed async boolean.
@@ -249,8 +251,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the sorted branches
      */
     public ArrayList<BranchSession> getSortedBranches() {
-        ArrayList<BranchSession> sorted = new ArrayList();
-        sorted.addAll(branchSessions);
+        ArrayList<BranchSession> sorted = new ArrayList<>(branchSessions);
         return sorted;
     }
 
@@ -260,8 +261,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the reverse sorted branches
      */
     public ArrayList<BranchSession> getReverseSortedBranches() {
-        ArrayList<BranchSession> reversed = new ArrayList();
-        reversed.addAll(branchSessions);
+        ArrayList<BranchSession> reversed = new ArrayList<>(branchSessions);
         Collections.reverse(reversed);
         return reversed;
     }
@@ -507,7 +507,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private int calGlobalSessionSize(byte[] byApplicationIdBytes, byte[] byServiceGroupBytes, byte[] byTxNameBytes,
                                      byte[] xidBytes, byte[] applicationDataBytes) {
-        final int size = 8 // trascationId
+        final int size = 8 // transactionId
             + 4 // timeout
             + 2 // byApplicationIdBytes.length
             + 2 // byServiceGroupBytes.length
@@ -601,11 +601,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
         private Lock globalSessionLock = new ReentrantLock();
 
-        private static final int GLOBAL_SESSOION_LOCK_TIME_OUT_MILLS = 2 * 1000;
+        private static final int GLOBAL_SESSION_LOCK_TIME_OUT_MILLS = 2 * 1000;
 
         public void lock() throws TransactionException {
             try {
-                if (globalSessionLock.tryLock(GLOBAL_SESSOION_LOCK_TIME_OUT_MILLS, TimeUnit.MILLISECONDS)) {
+                if (globalSessionLock.tryLock(GLOBAL_SESSION_LOCK_TIME_OUT_MILLS, TimeUnit.MILLISECONDS)) {
                     return;
                 }
             } catch (InterruptedException e) {
