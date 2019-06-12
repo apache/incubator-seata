@@ -26,29 +26,14 @@ import io.seata.core.store.StoreMode;
 public enum LockMode {
 
     /**
-     * store the lock in memory of server
+     * store the lock in user's database
      */
-    MEMORY,
+    LOCAL,
 
     /**
-     * store the lock in db of server
+     * store the lock in seata's server
      */
-    DB;
+    REMOTE;
 
-    /**
-     * Get lock mode by store mode lock mode.
-     *
-     * @param storeMode the store mode
-     * @return the lock mode
-     */
-    public static LockMode getLockModeByStoreMode(String storeMode){
-        if(StoreMode.DB.name().equalsIgnoreCase(storeMode)){
-            return DB;
-        } else if (StoreMode.FILE.name().equalsIgnoreCase(storeMode)) {
-            return MEMORY;
-        }else {
-            throw new IllegalArgumentException("Unknown store mode.");
-        }
-    }
 
 }
