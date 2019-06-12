@@ -65,19 +65,19 @@ public class TccActionInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
+        if(!RootContext.inGlobalTransaction()){
+            //not in transaction
+            return invocation.proceed();
+        }
         Method method = getActionInterfaceMethod(invocation);
         TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
         //try method
-        if (businessAction != null && RootContext.inGlobalTransaction()) {
+        if (businessAction != null) {
             //save the xid
             String xid = RootContext.getXID();
             //clear the context
             RootContext.unbind();
-            try{
-                if (StringUtils.isBlank(RootContext.getXID())) {
-                    //not in distribute transaction
-                    return invocation.proceed();
-                }
+            try {
                 Object[] methodArgs = invocation.getArguments();
                 //Handler the TCC Aspect
                 Map<String, Object> ret = actionInterceptorHandler.proceed(method, methodArgs, businessAction,
@@ -89,11 +89,10 @@ public class TccActionInterceptor implements MethodInterceptor {
                         });
                 //return the final result
                 return ret.get(Constants.TCC_METHOD_RESULT);
-            }finally {
+            } finally {
                 //recovery the context
                 RootContext.bind(xid);
             }
-
         }
         return invocation.proceed();
     }
