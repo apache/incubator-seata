@@ -15,6 +15,8 @@
  */
 package io.seata.core.lock;
 
+import io.seata.core.store.StoreMode;
+
 /**
  * lock mode
  *
@@ -33,5 +35,20 @@ public enum LockMode {
      */
     DB;
 
+    /**
+     * Get lock mode by store mode lock mode.
+     *
+     * @param storeMode the store mode
+     * @return the lock mode
+     */
+    public static LockMode getLockModeByStoreMode(String storeMode){
+        if(StoreMode.DB.name().equalsIgnoreCase(storeMode)){
+            return DB;
+        } else if (StoreMode.FILE.name().equalsIgnoreCase(storeMode)) {
+            return MEMORY;
+        }else {
+            throw new IllegalArgumentException("Unknown store mode.");
+        }
+    }
 
 }
