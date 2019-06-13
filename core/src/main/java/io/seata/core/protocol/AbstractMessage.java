@@ -38,7 +38,7 @@ public abstract class AbstractMessage implements MessageTypeAware, Serializable 
     /**
      * The constant UTF8.
      */
-    protected static final Charset UTF8 = Charset.forName("utf-8");
+    protected static final Charset UTF8 = Constants.DEFAULT_CHARSET;
     /**
      * The Ctx.
      */

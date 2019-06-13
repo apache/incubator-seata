@@ -15,14 +15,13 @@
  */
 package io.seata.rm.tcc.remoting.parser;
 
+import java.util.Set;
+
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.ReflectionUtil;
 import io.seata.rm.tcc.api.LocalTCC;
 import io.seata.rm.tcc.remoting.Protocols;
 import io.seata.rm.tcc.remoting.RemotingDesc;
-import io.seata.rm.tcc.remoting.RemotingDesc;
-
-import java.util.Set;
 
 /**
  * local tcc bean parsing
@@ -32,11 +31,11 @@ import java.util.Set;
 public class LocalTCCRemotingParser extends AbstractedRemotingParser {
 
     @Override
-    public boolean isReference(Object bean, String beanName)  {
+    public boolean isReference(Object bean, String beanName) {
         Class<?> classType = bean.getClass();
         Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);
-        for(Class<?> interClass : interfaceClasses){
-            if(interClass.isAnnotationPresent(LocalTCC.class)){
+        for (Class<?> interClass : interfaceClasses) {
+            if (interClass.isAnnotationPresent(LocalTCC.class)) {
                 return true;
             }
         }
@@ -47,8 +46,8 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
     public boolean isService(Object bean, String beanName) {
         Class<?> classType = bean.getClass();
         Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);
-        for(Class<?> interClass : interfaceClasses){
-            if(interClass.isAnnotationPresent(LocalTCC.class)){
+        for (Class<?> interClass : interfaceClasses) {
+            if (interClass.isAnnotationPresent(LocalTCC.class)) {
                 return true;
             }
         }
@@ -57,7 +56,7 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
 
     @Override
     public RemotingDesc getServiceDesc(Object bean, String beanName) throws FrameworkException {
-        if(!this.isRemoting(bean, beanName)){
+        if (!this.isRemoting(bean, beanName)) {
             return null;
         }
         RemotingDesc remotingDesc = new RemotingDesc();
@@ -65,8 +64,8 @@ public class LocalTCCRemotingParser extends AbstractedRemotingParser {
         remotingDesc.setProtocol(Protocols.IN_JVM);
         Class<?> classType = bean.getClass();
         Set<Class<?>> interfaceClasses = ReflectionUtil.getInterfaces(classType);
-        for(Class<?> interClass : interfaceClasses){
-            if(interClass.isAnnotationPresent(LocalTCC.class)){
+        for (Class<?> interClass : interfaceClasses) {
+            if (interClass.isAnnotationPresent(LocalTCC.class)) {
                 remotingDesc.setInterfaceClassName(interClass.getName());
                 remotingDesc.setInterfaceClass(interClass);
                 remotingDesc.setTargetBean(bean);

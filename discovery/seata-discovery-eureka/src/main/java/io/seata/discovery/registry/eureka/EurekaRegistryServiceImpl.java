@@ -67,7 +67,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static final int EUREKA_REFRESH_INTERVAL = 5;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final String DEFAULT_WEIGHT = "1";
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static ConcurrentMap<String, Set<InetSocketAddress>> clusterAddressMap;
 
     private static volatile boolean subscribeListener = false;

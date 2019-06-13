@@ -15,16 +15,6 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import io.seata.common.XID;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.core.rpc.RemotingServer;
-import io.seata.discovery.registry.RegistryFactory;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -37,13 +27,24 @@ import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
+import io.seata.common.XID;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.NetUtil;
+import io.seata.core.rpc.RemotingServer;
+import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.InetSocketAddress;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The type Rpc remoting server.
  *
  * @author jimin.jm @alibaba-inc.com
+ * @author xingfudeshi@gmail.com
  * @date 2018 /9/12
  */
 public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements RemotingServer {
@@ -53,7 +54,9 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     private final EventLoopGroup eventLoopGroupBoss;
     private final NettyServerConfig nettyServerConfig;
     private int listenPort;
+    private String host;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
+
     /**
      * Sets listen port.
      *
@@ -74,6 +77,27 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
      */
     public int getListenPort() {
         return listenPort;
+    }
+
+    /**
+     * Gets the host
+     *
+     * @return
+     */
+    public String getHost() {
+        return this.host;
+    }
+
+    /**
+     * Sets the host
+     *
+     * @param host
+     */
+    public void setHost(String host) {
+        if (!NetUtil.isValidIp(host, true)) {
+            throw new IllegalArgumentException("host: " + host + " is invalid!");
+        }
+        this.host = host;
     }
 
     /**
@@ -148,7 +172,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         }
 
         try {
-            ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
+            ChannelFuture future = this.serverBootstrap.bind(host, listenPort).sync();
             LOGGER.info("Server started ... ");
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             initialized.set(true);
@@ -159,14 +183,13 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
 
     }
 
-
     @Override
     public void shutdown() {
         try {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Shuting server down. ");
             }
-            if (initialized.get()){
+            if (initialized.get()) {
                 RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
                 RegistryFactory.getInstance().close();
                 //wait a few seconds for server transport

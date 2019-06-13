@@ -32,6 +32,8 @@
         <module>distribution</module>
         <module>integration/dubbo</module>
         <module>integration/dubbo-alibaba</module>
+        <module>integration/sofa-rpc</module>
+        <module>integration/motan</module>
         <module>rm</module>
         <module>rm-datasource</module>
         <module>server</module>
@@ -82,7 +84,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>0.6.0-SNAPSHOT</revision>
+        <revision>0.6.1</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -104,9 +106,10 @@
 
         <!-- for test -->
         <junit-jupiter.version>5.4.2</junit-jupiter.version>
-        <mockito-core.version>2.23.4</mockito-core.version>
+        <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <junit-platform-launcher.version>1.4.2</junit-platform-launcher.version>
+
     </properties>
 
     <!--test-->
@@ -132,7 +135,13 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>${mockito-core.version}</version>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -142,7 +151,6 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-
     <dependencyManagement>
         <dependencies>
             <dependency>

@@ -81,25 +81,11 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ## Maven dependency
 ```xml
-<seata.version>0.5.1</seata.version>
+<seata.version>0.6.1</seata.version>
 
 <dependency>
     <groupId>io.seata</groupId>
-    <artifactId>seata-spring</artifactId>
-    <version>${seata.version}</version>
-</dependency>
-
-<!--dependency for Apache Dubbo-->
-<dependency>
-    <groupId>io.seata</groupId>
-    <artifactId>seata-dubbo</artifactId>
-    <version>${seata.version}</version>
-</dependency>
-
-<!--dependency for Alibaba Dubbo-->
-<dependency>
-    <groupId>io.seata</groupId>
-    <artifactId>seata-dubbo-alibaba</artifactId>
+    <artifactId>seata-all</artifactId>
     <version>${seata.version}</version>
 </dependency>
 

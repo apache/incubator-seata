@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.6.1</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -66,54 +66,19 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <!-- Maven plugin versions -->
-        <maven-compiler-plugin.version>3.6.0</maven-compiler-plugin.version>
-        <maven-pmd-plugin.version>3.8</maven-pmd-plugin.version>
-        <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
-        <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
-        <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
-        <p3c-pmd.version>1.3.6</p3c-pmd.version>
-        <license-maven-plugin.version>3.0</license-maven-plugin.version>
-        <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
-        <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
-        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-
-        <!-- the 3rd party package version -->
-        <spring.version>4.3.9.RELEASE</spring.version>
-        <netty4.version>4.1.24.Final</netty4.version>
-        <junit.version>4.12</junit.version>
-        <dubbo.version>2.7.0</dubbo.version>
-        <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
-        <fastjson.version>1.2.48</fastjson.version>
-        <druid.version>1.1.12</druid.version>
-        <config.version>1.2.1</config.version>
-        <slf4j-api.version>1.7.22</slf4j-api.version>
-        <logback-classic.version>1.2.0</logback-classic.version>
-        <commons-lang.version>2.6</commons-lang.version>
-        <commons-pool2.version>2.4.2</commons-pool2.version>
-        <commons-pool.version>1.6</commons-pool.version>
-        <cglib.version>3.1</cglib.version>
-        <aopalliance.version>1.0</aopalliance.version>
-        <zkclient.version>0.10</zkclient.version>
-        <spring-context-support.version>1.0.2</spring-context-support.version>
-        <testng.version>6.4</testng.version>
-        <apollo-client.version>1.1.0</apollo-client.version>
-        <redis-clients.version>2.9.0</redis-clients.version>
-        <eureka-clients.version>1.9.5</eureka-clients.version>
-        <consul-clients.version>1.4.2</consul-clients.version>
-        <nacos-client.version>0.9.1</nacos-client.version>
-        <etcd-client-v3.version>0.3.0</etcd-client-v3.version>
-        <testcontainers.version>1.11.2</testcontainers.version>
-        <guava.version>27.0.1-jre</guava.version>
-        <javax-inject.version>1</javax-inject.version>
-        <archaius-core.version>0.7.6</archaius-core.version>
-        <sofa.registry.version>5.2.0</sofa.registry.version>
-        <httpclient.version>4.5.8</httpclient.version>
-        <httpcore.version>4.4.11</httpcore.version>
-        <caffeine.version>2.7.0</caffeine.version>
-        <protobuf.version>3.7.1</protobuf.version>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-bom</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- seata projects -->
@@ -145,6 +110,11 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-config-consul</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-config-etcd3</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -204,6 +174,16 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-sofa-rpc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-motan</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-rm</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -242,70 +222,57 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-core</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-beans</artifactId>
-            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-aop</artifactId>
-            <version>${spring.version}</version>
         </dependency>
 
         <!-- the 3rd part -->
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>${netty4.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>${fastjson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>druid</artifactId>
-            <version>${druid.version}</version>
         </dependency>
         <dependency>
             <groupId>com.typesafe</groupId>
             <artifactId>config</artifactId>
-            <version>${config.version}</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>${slf4j-api.version}</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>${logback-classic.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
-            <version>${commons-lang.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-pool2</artifactId>
-            <version>${commons-pool2.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-pool</groupId>
             <artifactId>commons-pool</artifactId>
-            <version>${commons-pool.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.protobuf</groupId>
@@ -315,113 +282,124 @@
         <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo</artifactId>
-            <version>${dubbo.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
-            <version>${dubbo.alibaba.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>cglib</groupId>
             <artifactId>cglib</artifactId>
-            <version>${cglib.version}</version>
         </dependency>
         <dependency>
             <groupId>aopalliance</groupId>
             <artifactId>aopalliance</artifactId>
-            <version>${aopalliance.version}</version>
         </dependency>
         <dependency>
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
-            <version>${zkclient.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>registry-client-all</artifactId>
-            <version>${sofa.registry.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.alibaba.spring</groupId>
             <artifactId>spring-context-support</artifactId>
-            <version>${spring-context-support.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.alibaba.nacos</groupId>
             <artifactId>nacos-client</artifactId>
-            <version>${nacos-client.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.ctrip.framework.apollo</groupId>
             <artifactId>apollo-client</artifactId>
-            <version>${apollo-client.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>${redis-clients.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.netflix.eureka</groupId>
             <artifactId>eureka-client</artifactId>
-            <version>${eureka-clients.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.netflix.archaius</groupId>
             <artifactId>archaius-core</artifactId>
-            <version>${archaius-core.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.ecwid.consul</groupId>
             <artifactId>consul-api</artifactId>
-            <version>${consul-clients.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.etcd</groupId>
             <artifactId>jetcd-core</artifactId>
-            <version>${etcd-client-v3.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>${guava.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>javax.inject</groupId>
             <artifactId>javax.inject</artifactId>
-            <version>${javax-inject.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>${httpclient.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>${httpcore.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>caffeine</artifactId>
-            <version>${caffeine.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-all</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.weibo</groupId>
+            <artifactId>motan-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.weibo</groupId>
+            <artifactId>motan-transport-netty</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-runtime</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
@@ -505,6 +483,7 @@
                                     <include>io.seata:seata-config-nacos</include>
                                     <include>io.seata:seata-config-zk</include>
                                     <include>io.seata:seata-config-consul</include>
+                                    <include>io.seata:seata-config-etcd3</include>
                                     <include>io.seata:seata-discovery-core</include>
                                     <include>io.seata:seata-discovery-consul</include>
                                     <include>io.seata:seata-discovery-eureka</include>
@@ -515,8 +494,10 @@
                                     <include>io.seata:seata-discovery-etcd3</include>
                                     <include>io.seata:seata-dubbo</include>
                                     <include>io.seata:seata-dubbo-alibaba</include>
+                                    <include>io.seata:seata-motan</include>
                                     <include>io.seata:seata-rm</include>
                                     <include>io.seata:seata-rm-datasource</include>
+                                    <include>io.seata:seata-sofa-rpc</include>
                                     <include>io.seata:seata-spring</include>
                                     <include>io.seata:seata-tcc</include>
                                     <include>io.seata:seata-tm</include>
@@ -546,20 +527,16 @@
                                         <exclude>registry.conf</exclude>
                                     </excludes>
                                 </filter>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/maven/**</exclude>
+                                    </excludes>
+                                </filter>
                             </filters>
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>${maven-surefire-plugin.version}</version>
-                <configuration>
-                    <useSystemClassLoader>false</useSystemClassLoader>
-                    <skipTests>true</skipTests>
-                </configuration>
             </plugin>
 
             <plugin>
@@ -580,6 +557,8 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <version>2.10.4</version>
                         <configuration>
+                            <charset>${project.build.sourceEncoding}</charset>
+                            <failOnError>false</failOnError>
                             <encoding>${project.build.sourceEncoding}</encoding>
                             <detectOfflineLinks>true</detectOfflineLinks>
                             <breakiterator>true</breakiterator>

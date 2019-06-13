@@ -15,14 +15,16 @@
  */
 package io.seata.rm.datasource;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import javax.sql.DataSource;
+
 import com.alibaba.druid.util.JdbcUtils;
+
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * The type Data source proxy.
@@ -65,7 +67,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             jdbcUrl = connection.getMetaData().getURL();
             dbType = JdbcUtils.getDbType(jdbcUrl, null);
         } catch (SQLException e) {
-            throw new IllegalStateException(String.format("can not init dataSource :%s", e.getSQLState()));
+            throw new IllegalStateException("can not init dataSource", e);
         }
         DefaultResourceManager.get().registerResource(this);
     }
@@ -108,7 +110,11 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     @Override
     public String getResourceId() {
-        return jdbcUrl;
+        if (jdbcUrl.contains("?")) {
+            return jdbcUrl.substring(0, jdbcUrl.indexOf("?"));
+        } else {
+            return jdbcUrl;
+        }
     }
 
     @Override
