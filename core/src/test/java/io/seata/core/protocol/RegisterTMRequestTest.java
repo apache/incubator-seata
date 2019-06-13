@@ -15,6 +15,8 @@
  */
 package io.seata.core.protocol;
 
+import io.seata.core.codec.CodecFactory;
+import io.seata.core.codec.CodecType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -81,7 +83,8 @@ public class RegisterTMRequestTest {
 	@Test
 	public void testDecodeEmpty() {
 		BB.clear();
-		Assertions.assertFalse(air.decode(BB));
+		Assertions.assertFalse(
+			CodecFactory.decode(CodecType.SEATA.getCode(),BB.array()));
 	}
 	
 	/**
@@ -93,7 +96,7 @@ public class RegisterTMRequestTest {
 		for (int i = 0; i < 2; i++) {
 			BB.writeShort(i);
 		}
-		Assertions.assertFalse(air.decode(BB));
+		Assertions.assertFalse(CodecFactory.decode(CodecType.SEATA.getCode(),BB.array()));
 	}
 	
 	/**
@@ -105,7 +108,7 @@ public class RegisterTMRequestTest {
 		for (int i = 0; i < 3; i++) {
 			BB.writeShort(i);
 		}
-		Assertions.assertFalse(air.decode(BB));
+		Assertions.assertFalse(CodecFactory.decode(CodecType.SEATA.getCode(),BB.array()));
 	}
 	
 	/**
@@ -117,7 +120,7 @@ public class RegisterTMRequestTest {
 		for (int i = 0; i < 4; i++) {
 			BB.writeShort(i);
 		}
-		Assertions.assertFalse(air.decode(BB));
+		Assertions.assertFalse(CodecFactory.decode(CodecType.SEATA.getCode(),BB.array()));
 	}
 	
 	/**
@@ -129,7 +132,7 @@ public class RegisterTMRequestTest {
 		for (int i = 0; i < 1; i++) {
 			BB.writeShort(i);
 		}
-		Assertions.assertFalse(air.decode(BB));
+		Assertions.assertFalse(CodecFactory.decode(CodecType.SEATA.getCode(),BB.array()));
 	}
 	
 	/**
@@ -141,7 +144,9 @@ public class RegisterTMRequestTest {
 		for (int i = 0; i < 4; i++) {
 			BB.writeZero(i);
 		}
-		Assertions.assertFalse(air.decode(BB));
+
+
+		Assertions.assertFalse(CodecFactory.decode(CodecType.SEATA.getCode(),BB.array()));
 	}
 	
 	/**
@@ -156,7 +161,7 @@ public class RegisterTMRequestTest {
 		for (int i = 1; i < 2; i++) {
 			BB.writeShort(i);
 		}
-		Assertions.assertFalse(air.decode(BB));
+		Assertions.assertFalse(CodecFactory.decode(CodecType.SEATA.getCode(),BB.array()));
 	}
 	
 	/**
@@ -171,7 +176,7 @@ public class RegisterTMRequestTest {
 		for (int i = 4; i < 5; i++) {
 			BB.writeShort(i);
 		}
-		Assertions.assertTrue(air.decode(BB));
+		Assertions.assertTrue(CodecFactory.decode(CodecType.SEATA.getCode(),BB.array()));
 	}
 	
 	/**
@@ -186,7 +191,7 @@ public class RegisterTMRequestTest {
 		for (int i = 15; i < 16; i++) {
 			BB.writeShort(i);
 		}
-		Assertions.assertTrue(air.decode(BB));
+		Assertions.assertTrue(CodecFactory.decode(CodecType.SEATA.getCode(),BB.array()));
 	}
 	
 }
