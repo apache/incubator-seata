@@ -15,6 +15,8 @@
  */
 package io.seata.codec.seata.protocol;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.seata.codec.seata.MessageCodecFactory;
 import io.seata.codec.seata.MessageSeataCodec;
 import io.seata.core.protocol.AbstractMessage;
@@ -42,30 +44,29 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
         MergedWarpMessage mergedWarpMessage = (MergedWarpMessage) t;
         List<AbstractMessage> msgs = mergedWarpMessage.msgs;
 
-        int bufferSize = msgs.size() * 1024;
-        ByteBuffer byteBuffer = ByteBuffer.allocate(bufferSize);
-        byteBuffer.putShort((short)msgs.size());
+        final ByteBuf buffer = Unpooled.buffer(1024);
+        buffer.writeInt(0); // write placeholder for content length
 
-        for (AbstractMessage msg : msgs) {
-
+        buffer.writeShort((short) msgs.size());
+        for (final AbstractMessage msg : msgs) {
+            ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
             short typeCode = msg.getTypeCode();
-            byteBuffer.putShort(typeCode);
-
             MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
-            messageCodec.encode(msg, byteBuffer);
+            messageCodec.encode(msg, buffer.nioBuffer());
+            buffer.writeShort(msg.getTypeCode());
+            buffer.writeBytes(byteBuffer);
         }
 
-        byteBuffer.flip();
-        int length = byteBuffer.limit();
-        byte[] content = new byte[length + 4];
-        intToBytes(length, content, 0);
-        byteBuffer.get(content, 4, length);
+        final int length = buffer.readableBytes();
+        final byte[] content = new byte[length];
+        buffer.setInt(0, length - 4);  // minus the placeholder length itself
+        buffer.readBytes(content);
+
         if (msgs.size() > 20) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("msg in one packet:" + msgs.size() + ",buffer size:" + content.length);
             }
         }
-
         out.put(content);
     }
 
