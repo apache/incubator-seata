@@ -33,6 +33,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.stream.Stream;
 
@@ -64,13 +65,21 @@ public class DefaultCoreTest {
 
     private static final String applicationData = "{\"data\":\"test\"}";
 
+    static  {
+        try {
+            initSessionManager();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * Init session manager.
      *
      * @throws Exception the exception
      */
-    @BeforeEach
-    public void initSessionManager() throws Exception {
+//    @BeforeEach
+    public static void initSessionManager() throws Exception {
         SessionHolder.init(null);
     }
 
@@ -87,6 +96,7 @@ public class DefaultCoreTest {
         long transactionId = XID.getTransactionId(xid);
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertEquals(globalSession.getSortedBranches().size(), 1);
+
 
         //clear
         globalSession.end();
