@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,13 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.core.event;
 
 public interface EventBus {
-  void register(Object subscriber);
+    void register(Object subscriber);
 
-  void unregister(Object subscriber);
+    void unregister(Object subscriber);
 
-  void post(Event event);
+    void post(Event event);
 }

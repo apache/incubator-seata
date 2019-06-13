@@ -15,7 +15,6 @@
  */
 package io.seata.server.coordinator;
 
-import io.seata.common.XID;
 import io.seata.core.event.EventBus;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -129,9 +128,9 @@ public class DefaultCore implements Core {
 
         session.begin();
 
-      //transaction start event
+        //transaction start event
         eventBus.post(new GlobalTransactionEvent(session.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-          session.getTransactionName(),session.getBeginTime(), null,session.getStatus()));
+            session.getTransactionName(), session.getBeginTime(), null, session.getStatus()));
 
         return session.getXid();
     }
@@ -170,7 +169,7 @@ public class DefaultCore implements Core {
     public void doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
         //start committing event
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-            globalSession.getTransactionName(), globalSession.getBeginTime(), null,globalSession.getStatus()));
+            globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
 
         for (BranchSession branchSession : globalSession.getSortedBranches()) {
             BranchStatus currentStatus = branchSession.getStatus();
@@ -230,13 +229,12 @@ public class DefaultCore implements Core {
         }
         SessionHelper.endCommitted(globalSession);
 
-      //committed event
+        //committed event
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-          globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
-          globalSession.getStatus()));
+            globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
+            globalSession.getStatus()));
 
         LOGGER.info("Global[{}] committing is successfully done.", globalSession.getXid());
-
 
     }
 
@@ -291,7 +289,7 @@ public class DefaultCore implements Core {
     public void doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
         //start rollback event
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-            globalSession.getTransactionName(), globalSession.getBeginTime(), null,globalSession.getStatus()));
+            globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
 
         for (BranchSession branchSession : globalSession.getReverseSortedBranches()) {
             BranchStatus currentBranchStatus = branchSession.getStatus();

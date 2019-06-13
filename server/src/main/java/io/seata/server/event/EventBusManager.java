@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,18 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.server.event;
 
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GuavaEventBus;
 
 public class EventBusManager {
-  private static class SingletonHolder {
-    private static EventBus INSTANCE = new GuavaEventBus("tc");
-  }
+    private static class SingletonHolder {
+        private static EventBus INSTANCE = new GuavaEventBus("tc");
+    }
 
-  public static final EventBus get() {
-    return SingletonHolder.INSTANCE;
-  }
+    public static final EventBus get() {
+        return SingletonHolder.INSTANCE;
+    }
 }

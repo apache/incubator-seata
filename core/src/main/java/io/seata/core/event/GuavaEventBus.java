@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,28 +13,27 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.core.event;
 
 public class GuavaEventBus implements EventBus {
-  private final com.google.common.eventbus.EventBus eventBus;
+    private final com.google.common.eventbus.EventBus eventBus;
 
-  public GuavaEventBus(String identifier) {
-    this.eventBus = new com.google.common.eventbus.EventBus(identifier);
-  }
+    public GuavaEventBus(String identifier) {
+        this.eventBus = new com.google.common.eventbus.EventBus(identifier);
+    }
 
-  @Override
-  public void register(Object subscriber) {
-    this.eventBus.register(subscriber);
-  }
+    @Override
+    public void register(Object subscriber) {
+        this.eventBus.register(subscriber);
+    }
 
-  @Override
-  public void unregister(Object subscriber) {
-    this.eventBus.unregister(subscriber);
-  }
+    @Override
+    public void unregister(Object subscriber) {
+        this.eventBus.unregister(subscriber);
+    }
 
-  @Override
-  public void post(Event event) {
-    this.eventBus.post(event);
-  }
+    @Override
+    public void post(Event event) {
+        this.eventBus.post(event);
+    }
 }

@@ -272,18 +272,22 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
 
                 //transaction timeout and start rollbacking event
-                eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
-                  globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
+                eventBus.post(
+                    new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+                        globalSession.getTransactionName(), globalSession.getBeginTime(), null,
+                        globalSession.getStatus()));
 
                 return true;
             });
             if (!shouldTimeout) {
                 continue;
             }
+            LOGGER.info(
+                "Global transaction[" + globalSession.getXid() + "] is timeout and will be rolled back.");
 
-            if (globalSession.getStatus() != GlobalStatus.Begin || !globalSession.isTimeout()) {
-                continue;
-            }
+            globalSession.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
+            SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(globalSession);
+
         }
         if (allSessions.size() > 0 && LOGGER.isDebugEnabled()) {
             LOGGER.debug("Transaction Timeout Check End. ");
