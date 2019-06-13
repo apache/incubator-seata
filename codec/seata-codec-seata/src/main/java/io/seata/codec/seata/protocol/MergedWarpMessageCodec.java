@@ -52,7 +52,8 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
             ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
             short typeCode = msg.getTypeCode();
             MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
-            messageCodec.encode(msg, buffer.nioBuffer());
+            messageCodec.encode(msg, byteBuffer);
+            byteBuffer.flip();
             buffer.writeShort(msg.getTypeCode());
             buffer.writeBytes(byteBuffer);
         }
