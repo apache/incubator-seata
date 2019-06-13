@@ -16,6 +16,7 @@
 package io.seata.core.protocol;
 
 import io.netty.channel.ChannelHandlerContext;
+import io.seata.common.Constants;
 import io.seata.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
