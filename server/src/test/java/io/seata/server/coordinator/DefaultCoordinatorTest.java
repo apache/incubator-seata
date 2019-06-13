@@ -83,7 +83,7 @@ public class DefaultCoordinatorTest {
 
     @ParameterizedTest
     @MethodSource("xidAndBranchIdProviderForCommit")
-    public void branchCommit(String xid, Long branchId) {
+    public void branchCommit(String xid, Long branchId) throws TransactionException {
         BranchStatus result = null;
 
         try {
@@ -93,6 +93,10 @@ public class DefaultCoordinatorTest {
         }
         Assertions.assertEquals(result, BranchStatus.PhaseTwo_Committed);
 
+        //clear
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        Assertions.assertNotNull(globalSession);
+        globalSession.end();
     }
     @Disabled
     @ParameterizedTest

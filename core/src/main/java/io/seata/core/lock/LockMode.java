@@ -15,6 +15,8 @@
  */
 package io.seata.core.lock;
 
+import io.seata.core.store.StoreMode;
+
 /**
  * lock mode
  *
@@ -24,14 +26,14 @@ package io.seata.core.lock;
 public enum LockMode {
 
     /**
-     * store the lock in memory of server
+     * store the lock in user's database
      */
-    MEMORY,
+    LOCAL,
 
     /**
-     * store the lock in db of server
+     * store the lock in seata's server
      */
-    DB;
+    REMOTE;
 
 
 }
