@@ -88,6 +88,7 @@ public class DefaultCoreTest {
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertEquals(globalSession.getSortedBranches().size(), 1);
 
+
         //clear
         globalSession.end();
     }
