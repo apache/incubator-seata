@@ -162,7 +162,7 @@ public class ConfigurationKeys {
     /**
      * The constant LOCK_DB_TABLE.
      */
-    public static final String LOCK_DB_TABLE  = "lock.db.lock-table";
+    public static final String LOCK_DB_TABLE  = "store.db.lock-table";
 
     /**
      * The constant LOCK_DB_DEFAULT_TABLE.

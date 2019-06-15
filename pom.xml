@@ -104,7 +104,7 @@
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
         <!-- for test -->
         <junit-jupiter.version>5.4.2</junit-jupiter.version>
-        <mockito-core.version>2.23.4</mockito-core.version>
+        <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <junit-platform-launcher.version>1.4.2</junit-platform-launcher.version>
     </properties>
@@ -132,7 +132,13 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>${mockito-core.version}</version>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -220,6 +226,41 @@
                 </repository>
             </distributionManagement>
 
+        </profile>
+        <profile>
+            <id>licenseCheck</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>1.20</version>
+                        <executions>
+                            <execution>
+                                <id>license-check</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>add-third-party</goal>
+                                </goals>
+                                <configuration>
+                                    <includeOptional>false</includeOptional>
+                                    <useMissingFile>false</useMissingFile>
+                                    <failOnMissing>false</failOnMissing>
+                                    <licenseMerges>
+                                        <licenseMerge>Apache License, Version 2.0|The Apache Software License, Version
+                                            2.0|ASF 2.0|Apache 2|Apache-2.0|Apache 2.0 License|Apache 2.0|Apache License v2.0|Apache License 2.0|The Apache License, Version 2.0|The Apache Software License, Version 2.0
+                                        </licenseMerge>
+                                        <licenseMerge>The MIT License|MIT License</licenseMerge>
+                                        <licenseMerge>The 3-Clause BSD License|New BSD License|3-Clause BSD
+                                            License|BSD|3-Clause BSD License|The New BSD License
+                                        </licenseMerge>
+                                    </licenseMerges>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
