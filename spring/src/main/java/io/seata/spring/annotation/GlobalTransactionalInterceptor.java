@@ -60,10 +60,8 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
      * @param failureHandler the failure handler
      */
     public GlobalTransactionalInterceptor(FailureHandler failureHandler) {
-        if (null == failureHandler) {
-            failureHandler = DEFAULT_FAIL_HANDLER;
-        }
-        this.failureHandler = failureHandler;
+        this.failureHandler = failureHandler == null ? DEFAULT_FAIL_HANDLER : failureHandler;
+
     }
 
     @Override
@@ -158,10 +156,7 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
     }
 
     private <T extends Annotation> T getAnnotation(Method method, Class<T> clazz) {
-        if (method == null) {
-            return null;
-        }
-        return method.getAnnotation(clazz);
+        return method == null ? null : method.getAnnotation(clazz);
     }
 
     private String formatMethod(Method method) {

@@ -41,6 +41,9 @@ public class TccActionInterceptor implements MethodInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptor.class);
 
+    private static final String DUBBO_PROXY_NAME_PREFIX="com.alibaba.dubbo.common.bytecode.proxy";
+
+
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
     /**
@@ -135,7 +138,7 @@ public class TccActionInterceptor implements MethodInterceptor {
      * @throws Exception the exception
      */
     protected Class<?> getProxyInterface(Object proxyBean) throws Exception {
-        if (proxyBean.getClass().getName().startsWith("com.alibaba.dubbo.common.bytecode.proxy")) {
+        if (proxyBean.getClass().getName().startsWith(DUBBO_PROXY_NAME_PREFIX)) {
             //dubbo javaassist proxy
             return DubboUtil.getAssistInterface(proxyBean);
         } else {
