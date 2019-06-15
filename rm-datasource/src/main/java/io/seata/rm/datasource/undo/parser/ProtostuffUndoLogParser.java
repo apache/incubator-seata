@@ -92,22 +92,27 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
      */
     public static class TimestampDelegate implements Delegate<java.sql.Timestamp> {
 
+        @Override
         public FieldType getFieldType() {
             return FieldType.FIXED64;
         }
 
+        @Override
         public Class<?> typeClass() {
             return java.sql.Timestamp.class;
         }
 
+        @Override
         public java.sql.Timestamp readFrom(Input input) throws IOException {
             return new java.sql.Timestamp(input.readFixed64());
         }
 
+        @Override
         public void writeTo(Output output, int number, java.sql.Timestamp value, boolean repeated) throws IOException {
             output.writeFixed64(number, value.getTime(), repeated);
         }
 
+        @Override
         public void transfer(Pipe pipe, Input input, Output output, int number, boolean repeated) throws IOException {
             output.writeFixed64(number, input.readFixed64(), repeated);
         }
@@ -135,6 +140,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
             return new java.sql.Date(input.readFixed64());
         }
 
+        @Override
         public void transfer(Pipe pipe, Input input, Output output, int number, boolean repeated) throws IOException {
             output.writeFixed64(number, input.readFixed64(), repeated);
         }
@@ -167,6 +173,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
             return new java.sql.Time(input.readFixed64());
         }
 
+        @Override
         public void transfer(Pipe pipe, Input input, Output output, int number, boolean repeated) throws IOException {
             output.writeFixed64(number, input.readFixed64(), repeated);
         }
@@ -199,6 +206,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
             return new java.util.Date(input.readFixed64());
         }
 
+        @Override
         public void transfer(Pipe pipe, Input input, Output output, int number, boolean repeated) throws IOException {
             output.writeFixed64(number, input.readFixed64(), repeated);
         }
