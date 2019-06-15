@@ -246,7 +246,6 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
      */
     protected boolean doAcquireLock(Connection conn, LockDO lockDO) {
         PreparedStatement ps = null;
-        ResultSet rs = null;
         try {
             //insert
             String insertLockSQL = LockStoreSqls.getInsertLockSQL(lockTable, dbType);
@@ -262,12 +261,6 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
             if (ps != null) {
                 try {
                     ps.close();
