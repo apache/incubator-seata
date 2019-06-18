@@ -25,6 +25,7 @@ import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoLogManager;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -163,7 +164,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private void processLocalCommitWithGlobalLocks() throws SQLException {
 
-        checkLock(context.buildLockKeys());
+        String lockKeys = getContext().buildLockKeys();
+        if (StringUtils.isNotBlank(lockKeys)) {
+            checkLock(lockKeys);
+        }
+
         try {
             targetConnection.commit();
         } catch (Throwable ex) {
