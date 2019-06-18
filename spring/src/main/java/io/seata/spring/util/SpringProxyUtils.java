@@ -48,10 +48,7 @@ public class SpringProxyUtils {
             Object target = advised.getTargetSource().getTarget();
             return findTargetClass(target);
         } else {
-            if (proxy == null) {
-                return null;
-            }
-            return proxy.getClass();
+            return proxy == null ? null :proxy.getClass();
         }
     }
 

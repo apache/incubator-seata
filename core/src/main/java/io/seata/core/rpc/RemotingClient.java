@@ -13,27 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.lock;
-
-import io.seata.core.store.StoreMode;
+package io.seata.core.rpc;
 
 /**
- * lock mode
+ * The interface remoting client.
  *
- * @author zhangsen
- * @data 2019 /4/25
+ * @author zhaojun
  */
-public enum LockMode {
-
-    /**
-     * store the lock in user's database
-     */
-    LOCAL,
-
-    /**
-     * store the lock in seata's server
-     */
-    REMOTE;
-
-
+public interface RemotingClient extends RemotingService {
 }
