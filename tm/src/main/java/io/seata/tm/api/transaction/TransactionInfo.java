@@ -60,8 +60,16 @@ public final class TransactionInfo implements Serializable {
 
         RollbackRule winner = null;
         int deepest = Integer.MAX_VALUE;
+        boolean setRollback = false;
 
         if (this.rollbackRules != null) {
+            for (RollbackRule rule : this.rollbackRules){
+                if(rule instanceof NoRollbackRule){
+                    continue;
+                }
+                setRollback = true;
+            }
+
             for (RollbackRule rule : this.rollbackRules) {
                 int depth = rule.getDepth(ex);
                 if (depth >= 0 && depth < deepest) {
@@ -71,6 +79,7 @@ public final class TransactionInfo implements Serializable {
             }
         }
 
-        return winner == null || !(winner instanceof NoRollbackRule);
+        return (!setRollback && winner == null)
+            || (winner != null && !(winner instanceof NoRollbackRule));
     }
 }
