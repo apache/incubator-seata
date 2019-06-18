@@ -13,20 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.registery.etcd;
-
-import io.seata.common.loader.LoadLevel;
-import io.seata.discovery.registry.RegistryProvider;
-import io.seata.discovery.registry.RegistryService;
+package io.seata.core.rpc;
 
 /**
- * @author xingfudeshi@gmail.com
- * @date 2019/04/18
+ * The interface remoting client.
+ *
+ * @author zhaojun
  */
-@LoadLevel(name = "Etcd3", order = 1)
-public class EtcdRegistryProvider implements RegistryProvider {
-    @Override
-    public RegistryService provide() {
-        return EtcdRegistryServiceImpl.getInstance();
-    }
+public interface RemotingClient extends RemotingService {
 }
