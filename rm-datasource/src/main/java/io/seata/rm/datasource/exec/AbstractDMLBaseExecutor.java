@@ -15,16 +15,15 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * The type Abstract dml base executor.
@@ -88,9 +87,10 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         LockRetryController lockRetryController = new LockRetryController();
         try {
             connectionProxy.setAutoCommit(false);
+
+            result = executeAutoCommitFalse(args);
             while (true) {
                 try {
-                    result = executeAutoCommitFalse(args);
                     connectionProxy.commit();
                     break;
                 } catch (LockConflictException lockConflict) {
