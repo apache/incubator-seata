@@ -177,7 +177,11 @@ public class CollectionUtils {
         if (null == sourceList || sourceList.size() == 0) { return sourceList; }
         List<String> destList = new ArrayList<>(sourceList.size());
         for (String element : sourceList) {
-            destList.add(element.toUpperCase());
+            if (null != element) {
+                destList.add(element.toUpperCase());
+            } else {
+                destList.add(element);
+            }
         }
         return destList;
     }
