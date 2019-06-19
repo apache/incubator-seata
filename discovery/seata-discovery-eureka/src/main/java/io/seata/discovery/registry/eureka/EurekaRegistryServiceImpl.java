@@ -160,18 +160,17 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private void refreshCluster() throws EurekaRegistryException {
         Applications applications = getEurekaClient(false).getApplications();
         List<Application> list = applications.getRegisteredApplications();
-        if (list == null || list.isEmpty()) {
+        if (CollectionUtils.isEmpty(list)) {
             clusterAddressMap.clear();
             return;
         }
         for (Application app : list) {
             Set<InetSocketAddress> addressSet = new HashSet<>();
             List<InstanceInfo> instances = app.getInstances();
-            if (CollectionUtils.isEmpty(instances)) {
-                continue;
-            }
-            for (InstanceInfo instance : instances) {
-                addressSet.add(new InetSocketAddress(instance.getIPAddr(), instance.getPort()));
+            if (CollectionUtils.isNotEmpty(instances)) {
+                for (InstanceInfo instance : instances) {
+                    addressSet.add(new InetSocketAddress(instance.getIPAddr(), instance.getPort()));
+                }
             }
             clusterAddressMap.put(app.getName(), addressSet);
         }
