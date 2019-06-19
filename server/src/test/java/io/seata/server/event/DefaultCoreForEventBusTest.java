@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import com.google.common.eventbus.Subscribe;
+import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.coordinator.Core;
@@ -30,6 +31,11 @@ import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Test events come from Default Core.
+ *
+ * @author zhengyangyong
+ */
 public class DefaultCoreForEventBusTest {
     @Test
     public void test() throws IOException, TransactionException, InterruptedException {

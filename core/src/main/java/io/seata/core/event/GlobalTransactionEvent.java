@@ -13,11 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.event;
+package io.seata.core.event;
 
-import io.seata.core.event.Event;
 import io.seata.core.model.GlobalStatus;
 
+/**
+ * Event data for global transaction.
+ *
+ * @author zhengyangyong
+ */
 public class GlobalTransactionEvent implements Event {
     public static final String ROLE_TC = "tc";
 

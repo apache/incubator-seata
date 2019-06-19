@@ -62,7 +62,7 @@ import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.RpcServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
-import io.seata.server.event.GlobalTransactionEvent;
+import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;

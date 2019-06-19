@@ -15,6 +15,11 @@
  */
 package io.seata.core.event;
 
+/**
+ * The interface fot event bus.
+ *
+ * @author zhengyangyong
+ */
 public interface EventBus {
     void register(Object subscriber);
 

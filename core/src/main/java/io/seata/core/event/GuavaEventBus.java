@@ -15,6 +15,11 @@
  */
 package io.seata.core.event;
 
+/**
+ * Default event bus implement with Guava EventBus.
+ *
+ * @author zhengyangyong
+ */
 public class GuavaEventBus implements EventBus {
     private final com.google.common.eventbus.EventBus eventBus;
 

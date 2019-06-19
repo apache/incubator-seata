@@ -21,6 +21,11 @@ import com.google.common.eventbus.Subscribe;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+/**
+ * Test default GuavaEventBus.
+ *
+ * @author zhengyangyong
+ */
 public class GuavaEventBusTest {
     @Test
     public void test() {
