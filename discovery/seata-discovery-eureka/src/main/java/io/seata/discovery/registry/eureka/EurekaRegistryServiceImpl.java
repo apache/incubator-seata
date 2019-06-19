@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import io.seata.common.exception.EurekaRegistryException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -166,8 +167,8 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         for (Application app : list) {
             Set<InetSocketAddress> addressSet = new HashSet<>();
             List<InstanceInfo> instances = app.getInstances();
-            if (instances == null || instances.isEmpty()) {
-                break;
+            if (CollectionUtils.isEmpty(instances)) {
+                continue;
             }
             for (InstanceInfo instance : instances) {
                 addressSet.add(new InetSocketAddress(instance.getIPAddr(), instance.getPort()));
