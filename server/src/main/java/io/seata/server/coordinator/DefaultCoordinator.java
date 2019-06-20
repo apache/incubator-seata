@@ -27,6 +27,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.event.EventBus;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -60,6 +61,8 @@ import io.seata.core.rpc.ServerMessageSender;
 import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.RpcServer;
 import io.seata.server.AbstractTCInboundHandler;
+import io.seata.server.event.EventBusManager;
+import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
@@ -124,6 +127,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     private ServerMessageSender messageSender;
 
     private Core core = CoreFactory.get();
+
+    private EventBus eventBus = EventBusManager.get();
 
     /**
      * Instantiates a new Default coordinator.
@@ -265,6 +270,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 globalSession.close();
                 globalSession.changeStatus(GlobalStatus.TimeoutRollbacking);
+
+                //transaction timeout and start rollbacking event
+                eventBus.post(
+                    new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+                        globalSession.getTransactionName(), globalSession.getBeginTime(), null,
+                        globalSession.getStatus()));
+
                 return true;
             });
             if (!shouldTimeout) {
