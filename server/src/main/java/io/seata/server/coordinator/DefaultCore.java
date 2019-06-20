@@ -15,7 +15,6 @@
  */
 package io.seata.server.coordinator;
 
-import io.seata.common.XID;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -77,6 +76,7 @@ public class DefaultCore implements Core {
             try {
                 globalSession.addBranch(branchSession);
             } catch (RuntimeException ex) {
+                branchSession.unlock();
                 throw new TransactionException(FailedToAddBranch);
             }
             return branchSession.getBranchId();
@@ -281,7 +281,7 @@ public class DefaultCore implements Core {
                 switch (branchStatus) {
                     case PhaseTwo_Rollbacked:
                         globalSession.removeBranch(branchSession);
-                        LOGGER.error("Successfully rolled back branch " + branchSession);
+                        LOGGER.error("Successfully rollbacked branch " + branchSession);
                         continue;
                     case PhaseTwo_RollbackFailed_Unretryable:
                         SessionHelper.endRollbackFailed(globalSession);
