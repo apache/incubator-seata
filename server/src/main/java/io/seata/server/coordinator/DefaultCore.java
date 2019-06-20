@@ -15,12 +15,15 @@
  */
 package io.seata.server.coordinator;
 
+import io.seata.core.event.EventBus;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.ResourceManagerInbound;
+import io.seata.server.event.EventBusManager;
+import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.LockerFactory;
 import io.seata.server.session.BranchSession;
@@ -48,6 +51,8 @@ public class DefaultCore implements Core {
     private LockManager lockManager = LockerFactory.getLockManager();
 
     private ResourceManagerInbound resourceManagerInbound;
+
+    private EventBus eventBus = EventBusManager.get();
 
     @Override
     public void setResourceManagerInbound(ResourceManagerInbound resourceManagerInbound) {
@@ -123,6 +128,10 @@ public class DefaultCore implements Core {
 
         session.begin();
 
+        //transaction start event
+        eventBus.post(new GlobalTransactionEvent(session.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+            session.getTransactionName(), session.getBeginTime(), null, session.getStatus()));
+
         return session.getXid();
     }
 
@@ -158,6 +167,10 @@ public class DefaultCore implements Core {
 
     @Override
     public void doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
+        //start committing event
+        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+            globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
+
         for (BranchSession branchSession : globalSession.getSortedBranches()) {
             BranchStatus currentStatus = branchSession.getStatus();
             if (currentStatus == BranchStatus.PhaseOne_Failed) {
@@ -215,7 +228,14 @@ public class DefaultCore implements Core {
             return;
         }
         SessionHelper.endCommitted(globalSession);
+
+        //committed event
+        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+            globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
+            globalSession.getStatus()));
+
         LOGGER.info("Global[{}] committing is successfully done.", globalSession.getXid());
+
     }
 
     private void asyncCommit(GlobalSession globalSession) throws TransactionException {
@@ -267,6 +287,10 @@ public class DefaultCore implements Core {
 
     @Override
     public void doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
+        //start rollback event
+        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+            globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
+
         for (BranchSession branchSession : globalSession.getReverseSortedBranches()) {
             BranchStatus currentBranchStatus = branchSession.getStatus();
             if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
@@ -281,7 +305,7 @@ public class DefaultCore implements Core {
                 switch (branchStatus) {
                     case PhaseTwo_Rollbacked:
                         globalSession.removeBranch(branchSession);
-                        LOGGER.error("Successfully rolled back branch " + branchSession);
+                        LOGGER.error("Successfully rollbacked branch " + branchSession);
                         continue;
                     case PhaseTwo_RollbackFailed_Unretryable:
                         SessionHelper.endRollbackFailed(globalSession);
@@ -306,6 +330,11 @@ public class DefaultCore implements Core {
 
         }
         SessionHelper.endRollbacked(globalSession);
+
+        //rollbacked event
+        eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
+            globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
+            globalSession.getStatus()));
     }
 
     @Override

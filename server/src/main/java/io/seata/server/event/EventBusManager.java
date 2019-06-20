@@ -13,27 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.lock;
+package io.seata.server.event;
 
-import io.seata.core.store.StoreMode;
+import io.seata.core.event.EventBus;
+import io.seata.core.event.GuavaEventBus;
 
 /**
- * lock mode
+ * Manager hold the singleton event bus instance.
  *
- * @author zhangsen
- * @data 2019 /4/25
+ * @author zhengyangyong
  */
-public enum LockMode {
+public class EventBusManager {
+    private static class SingletonHolder {
+        private static EventBus INSTANCE = new GuavaEventBus("tc");
+    }
 
-    /**
-     * store the lock in user's database
-     */
-    LOCAL,
-
-    /**
-     * store the lock in seata's server
-     */
-    REMOTE;
-
-
+    public static final EventBus get() {
+        return SingletonHolder.INSTANCE;
+    }
 }
