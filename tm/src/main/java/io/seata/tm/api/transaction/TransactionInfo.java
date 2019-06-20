@@ -63,19 +63,17 @@ public final class TransactionInfo implements Serializable {
         boolean setRollback = false;
 
         if (this.rollbackRules != null) {
-            for (RollbackRule rule : this.rollbackRules){
-                if(rule instanceof NoRollbackRule){
-                    continue;
-                }
-                setRollback = true;
-            }
-
             for (RollbackRule rule : this.rollbackRules) {
                 int depth = rule.getDepth(ex);
                 if (depth >= 0 && depth < deepest) {
                     deepest = depth;
                     winner = rule;
                 }
+
+                if(rule instanceof NoRollbackRule){
+                    continue;
+                }
+                setRollback = true;
             }
         }
 
