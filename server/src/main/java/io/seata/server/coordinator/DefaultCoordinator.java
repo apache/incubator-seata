@@ -15,13 +15,7 @@
  */
 package io.seata.server.coordinator;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
+import io.netty.channel.Channel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
@@ -54,6 +48,8 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
+import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
+import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.ServerMessageSender;
@@ -65,6 +61,14 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchCommitRequest;
 import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchRollbackRequest;
@@ -120,6 +124,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
     private ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("TxTimeoutCheck", 1));
+
+    private ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
+        new NamedThreadFactory("UndoLogDelete", 1));
 
     private ServerMessageSender messageSender;
 
@@ -371,6 +378,27 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     }
 
     /**
+     * undoLog Delete
+     */
+    protected void undoLogDelete() {
+        Map<String,Channel> rmChannels = ChannelManager.getRmChannels();
+        if (rmChannels == null || rmChannels.isEmpty()) {
+            LOGGER.info("no active rm channels to delete undo log");
+            return;
+        }
+        for (Map.Entry<String, Channel> channelEntry : rmChannels.entrySet()) {
+            String resourceId = channelEntry.getKey();
+            UndoLogDeleteRequest deleteRequest = new UndoLogDeleteRequest();
+            deleteRequest.setResourceId(resourceId);
+            try {
+                messageSender.sendASyncRequest(channelEntry.getValue(), deleteRequest);
+            } catch (Exception e) {
+                LOGGER.error("Failed to async delete undo log resourceId = " + resourceId);
+            }
+        }
+    }
+
+    /**
      * Init.
      */
     public void init() {
@@ -405,6 +433,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 LOGGER.info("Exception timeout checking ... ", e);
             }
         }, 0, timeoutRetryDelay, TimeUnit.SECONDS);
+
+        undoLogDelete.scheduleAtFixedRate(() -> {
+            try {
+                undoLogDelete();
+            } catch (Exception e) {
+                LOGGER.info("Exception undoLog deleting ... ", e);
+            }
+        },0,24,TimeUnit.MILLISECONDS);
     }
 
     @Override

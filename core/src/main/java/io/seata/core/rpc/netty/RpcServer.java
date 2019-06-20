@@ -15,9 +15,11 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeoutException;
-
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.RegisterRMRequest;
@@ -29,14 +31,12 @@ import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.ServerMessageListener;
 import io.seata.core.rpc.ServerMessageSender;
 import io.seata.core.rpc.TransactionMessageHandler;
-
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler.Sharable;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.timeout.IdleState;
-import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeoutException;
 
 /**
  * The type Abstract rpc server.
@@ -234,6 +234,19 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
     public Object sendSyncRequest(String resourceId, String clientId, Object message)
         throws TimeoutException {
         return sendSyncRequest(resourceId, clientId, message, NettyServerConfig.getRpcRequestTimeout());
+    }
+
+    /**
+     * Send request with response object.
+     *
+     * @param channel   the channel
+     * @param message    the msg
+     * @return the object
+     * @throws TimeoutException the timeout exception
+     */
+    @Override
+    public Object sendASyncRequest(Channel channel, Object message) throws IOException, TimeoutException {
+       return sendAsyncRequestWithoutResponse(channel, message);
     }
 
     /**

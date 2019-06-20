@@ -15,9 +15,6 @@
  */
 package io.seata.core.protocol;
 
-import java.io.Serializable;
-import java.nio.charset.Charset;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.Constants;
@@ -39,6 +36,9 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
+
+import java.io.Serializable;
+import java.nio.charset.Charset;
 
 /**
  * The type Abstract message.
@@ -148,6 +148,11 @@ public abstract class AbstractMessage implements MessageCodec, Serializable {
      * The constant TYPE_REG_RM_RESULT.
      */
     public static final short TYPE_REG_RM_RESULT = 104;
+
+    /**
+     * The constant TYPE_RM_DELETE_UNDOLOG.
+     */
+    public static final short TYPE_RM_DELETE_UNDOLOG = 111;
 
     /**
      * The constant UTF8.

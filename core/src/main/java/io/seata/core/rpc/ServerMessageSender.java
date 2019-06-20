@@ -15,10 +15,10 @@
  */
 package io.seata.core.rpc;
 
+import io.netty.channel.Channel;
+
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-
-import io.netty.channel.Channel;
 
 /**
  * The interface Server message sender.
@@ -62,4 +62,18 @@ public interface ServerMessageSender {
      * @throws TimeoutException the timeout exception
      */
     Object sendSyncRequest(String resourceId, String clientId, Object message) throws IOException, TimeoutException;
+
+
+    /**
+     * ASync call to RM
+     *
+     * @param channel   channel
+     * @param message    Request message
+     * @return Response message
+     * @throws IOException .
+     * @throws TimeoutException the timeout exception
+     */
+    Object sendASyncRequest(Channel channel, Object message) throws IOException, TimeoutException;
+
+
 }

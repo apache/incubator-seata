@@ -21,6 +21,7 @@ import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
+import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.core.rpc.ClientMessageListener;
 import io.seata.core.rpc.ClientMessageSender;
 import io.seata.core.rpc.TransactionMessageHandler;
@@ -63,9 +64,11 @@ public class RmMessageListener implements ClientMessageListener {
             LOGGER.info("onMessage:" + msg);
         }
         if (msg instanceof BranchCommitRequest) {
-            handleBranchCommit(msgId, serverAddress, (BranchCommitRequest)msg, sender);
+            handleBranchCommit(msgId, serverAddress, (BranchCommitRequest) msg, sender);
         } else if (msg instanceof BranchRollbackRequest) {
-            handleBranchRollback(msgId, serverAddress, (BranchRollbackRequest)msg, sender);
+            handleBranchRollback(msgId, serverAddress, (BranchRollbackRequest) msg, sender);
+        }else if (msg instanceof UndoLogDeleteRequest) {
+            handleUndoLogDelete((UndoLogDeleteRequest) msg);
         }
     }
 
@@ -100,6 +103,14 @@ public class RmMessageListener implements ClientMessageListener {
             resultMessage.setResultCode(ResultCode.Failed);
             resultMessage.setMsg(e.getMessage());
             sender.sendResponse(msgId, serverAddress, resultMessage);
+        }
+    }
+
+    private void handleUndoLogDelete(UndoLogDeleteRequest undoLogDeleteRequest) {
+        try {
+            handler.onRequest(undoLogDeleteRequest, null);
+        } catch (Exception e) {
+            LOGGER.error("Failed to delete undo log by undoLogDeleteRequest on" + undoLogDeleteRequest.getResourceId());
         }
     }
 }
