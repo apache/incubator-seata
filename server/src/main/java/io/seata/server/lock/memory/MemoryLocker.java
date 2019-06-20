@@ -36,7 +36,7 @@ import io.seata.server.session.BranchSession;
  * @author zhangsen
  * @data 2019 -05-15
  */
-@LoadLevel(name = "memory")
+@LoadLevel(name = "file")
 public class MemoryLocker extends AbstractLocker {
 
     private static final int BUCKET_PER_TABLE = 128;

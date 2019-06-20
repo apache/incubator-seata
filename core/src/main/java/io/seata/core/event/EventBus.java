@@ -13,27 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.lock;
-
-import io.seata.core.store.StoreMode;
+package io.seata.core.event;
 
 /**
- * lock mode
+ * The interface fot event bus.
  *
- * @author zhangsen
- * @data 2019 /4/25
+ * @author zhengyangyong
  */
-public enum LockMode {
+public interface EventBus {
+    void register(Object subscriber);
 
-    /**
-     * store the lock in user's database
-     */
-    LOCAL,
+    void unregister(Object subscriber);
 
-    /**
-     * store the lock in seata's server
-     */
-    REMOTE;
-
-
+    void post(Event event);
 }
