@@ -26,5 +26,5 @@ public class UndoLogConstants {
     public final static String SERIALIZER_KEY = "serializer";
     
     public static final String DEFAULT_SERIALIZER = ConfigurationFactory.getInstance()
-            .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, "fastjson");
+            .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, "jackson");
 }
