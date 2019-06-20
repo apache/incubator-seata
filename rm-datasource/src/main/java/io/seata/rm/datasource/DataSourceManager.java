@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -37,6 +38,7 @@ import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManager;
+import io.seata.rm.datasource.undo.UndoLogManagerOracle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -174,7 +176,11 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
             throw new ShouldNeverHappenException();
         }
         try {
-            UndoLogManager.undo(dataSourceProxy, xid, branchId);
+            if(JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
+                UndoLogManagerOracle.undo(dataSourceProxy, xid, branchId);
+            } else {
+                UndoLogManager.undo(dataSourceProxy, xid, branchId);
+            }
         } catch (TransactionException te) {
             if (LOGGER.isInfoEnabled()){
                 LOGGER.info("branchRollback failed reason [{}]", te.getMessage());

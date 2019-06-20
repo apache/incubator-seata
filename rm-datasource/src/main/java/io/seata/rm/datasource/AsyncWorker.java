@@ -29,6 +29,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
@@ -40,6 +41,7 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManagerInbound;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManager;
+import io.seata.rm.datasource.undo.UndoLogManagerOracle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -160,6 +162,7 @@ public class AsyncWorker implements ResourceManagerInbound {
 
         for (Map.Entry<String, List<Phase2Context>> entry : mappedContexts.entrySet()) {
             Connection conn = null;
+            String dbType = null;
             try {
                 try {
                     DataSourceManager resourceManager = (DataSourceManager)DefaultResourceManager.get()
@@ -169,6 +172,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                         throw new ShouldNeverHappenException("Failed to find resource on " + entry.getKey());
                     }
                     conn = dataSourceProxy.getPlainConnection();
+                    dbType = dataSourceProxy.getDbType();
                 } catch (SQLException sqle) {
                     LOGGER.warn("Failed to get connection for async committing on " + entry.getKey(), sqle);
                     continue;
@@ -182,7 +186,11 @@ public class AsyncWorker implements ResourceManagerInbound {
                     int maxSize = xids.size() > branchIds.size() ? xids.size() : branchIds.size();
                     if (maxSize == UNDOLOG_DELETE_LIMIT_SIZE) {
                         try {
-                            UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
+                            if(JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
+                                UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, conn);
+                            } else {
+                                UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
+                            }
                         } catch (Exception ex) {
                             LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                         }
@@ -196,7 +204,11 @@ public class AsyncWorker implements ResourceManagerInbound {
                 }
 
                 try {
-                    UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
+                    if(JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
+                        UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, conn);
+                    } else {
+                        UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
+                    }
                 } catch (Exception ex) {
                     LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                 }

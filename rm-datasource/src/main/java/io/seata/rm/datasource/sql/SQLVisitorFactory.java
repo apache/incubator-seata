@@ -26,6 +26,10 @@ import io.seata.rm.datasource.sql.druid.MySQLDeleteRecognizer;
 import io.seata.rm.datasource.sql.druid.MySQLInsertRecognizer;
 import io.seata.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
 import io.seata.rm.datasource.sql.druid.MySQLUpdateRecognizer;
+import io.seata.rm.datasource.sql.druid.oracle.OracleDeleteRecognizer;
+import io.seata.rm.datasource.sql.druid.oracle.OracleInsertRecognizer;
+import io.seata.rm.datasource.sql.druid.oracle.OracleSelectForUpdateRecognizer;
+import io.seata.rm.datasource.sql.druid.oracle.OracleUpdateRecognizer;
 
 import java.util.List;
 
@@ -60,6 +64,18 @@ public class SQLVisitorFactory {
             } else if (ast instanceof SQLSelectStatement) {
                 if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
                     recognizer = new MySQLSelectForUpdateRecognizer(sql, ast);
+                }
+            }
+        }else if (JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
+            if (ast instanceof SQLInsertStatement) {
+                recognizer = new OracleInsertRecognizer(sql, ast);
+            } else if (ast instanceof SQLUpdateStatement) {
+                recognizer = new OracleUpdateRecognizer(sql, ast);
+            } else if (ast instanceof SQLDeleteStatement) {
+                recognizer = new OracleDeleteRecognizer(sql, ast);
+            } else if (ast instanceof SQLSelectStatement) {
+                if (((SQLSelectStatement) ast).getSelect().getQueryBlock().isForUpdate()) {
+                    recognizer = new OracleSelectForUpdateRecognizer(sql, ast);
                 }
             }
         } else {
