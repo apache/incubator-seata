@@ -15,8 +15,10 @@
  */
 package io.seata.common.util;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -111,14 +113,14 @@ public class CollectionUtils {
     }
 
     private static final String KV_SPLIT = "=";
-    
+
     private static final String PAIR_SPLIT = "&";
 
     /**
      * Encode map to string
      *
      * @param map origin map
-     * @return String
+     * @return String string
      */
     public static String encodeMap(Map<String, String> map) {
         if (map == null) {
@@ -138,7 +140,7 @@ public class CollectionUtils {
      * Decode string to map
      *
      * @param data data
-     * @return map
+     * @return map map
      */
     public static Map<String, String> decodeMap(String data) {
         if (data == null) {
@@ -163,5 +165,24 @@ public class CollectionUtils {
             map.put(kvs[0], kvs[1]);
         }
         return map;
+    }
+
+    /**
+     * To upper list list.
+     *
+     * @param sourceList the source list
+     * @return the list
+     */
+    public static List<String> toUpperList(List<String> sourceList) {
+        if (null == sourceList || sourceList.size() == 0) { return sourceList; }
+        List<String> destList = new ArrayList<>(sourceList.size());
+        for (String element : sourceList) {
+            if (null != element) {
+                destList.add(element.toUpperCase());
+            } else {
+                destList.add(element);
+            }
+        }
+        return destList;
     }
 }

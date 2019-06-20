@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.util.CollectionUtils;
 
 /**
  * The type Table meta.
@@ -164,7 +165,11 @@ public class TableMeta {
             return false;
         }
 
-        return cols.containsAll(pk);
+        if (cols.containsAll(pk)) {
+            return true;
+        } else {
+            return CollectionUtils.toUpperList(cols).containsAll(CollectionUtils.toUpperList(pk));
+        }
     }
 
     /**
