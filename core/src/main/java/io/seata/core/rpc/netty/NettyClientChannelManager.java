@@ -160,7 +160,7 @@ class NettyClientChannelManager {
         try {
             availList = getAvailServerList(transactionServiceGroup);
         } catch (Exception exx) {
-            LOGGER.error("Failed to get available servers: {}" + exx.getMessage());
+            LOGGER.error("Failed to get available servers: {}", exx.getMessage());
         }
         if (CollectionUtils.isEmpty(availList)) {
             LOGGER.error("no available server to connect.");
