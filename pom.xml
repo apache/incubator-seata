@@ -83,7 +83,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>0.6.1</revision>
+        <revision>0.7.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
