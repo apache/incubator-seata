@@ -180,7 +180,7 @@ public class TableRecords {
                 ColumnMeta col = tmeta.getColumnMeta(colName);
                 Field field = new Field();
                 field.setName(col.getColumnName());
-                if (tmeta.getPkName().equals(field.getName())) {
+                if (tmeta.getPkName().equalsIgnoreCase(field.getName())) {
                     field.setKeyType(KeyType.PrimaryKey);
                 }
                 field.setType(col.getDataType());
