@@ -218,6 +218,7 @@ public abstract class AbstractUndoExecutor {
     }
 
     /**
+     *
      * Query current records.
      *
      * @param conn the conn
@@ -227,29 +228,28 @@ public abstract class AbstractUndoExecutor {
     protected TableRecords queryCurrentRecords(Connection conn) throws SQLException {
         TableRecords undoRecords = getUndoRows();
         TableMeta tableMeta = undoRecords.getTableMeta();
-        String pkName = tableMeta.getPkName();
-        int pkType = tableMeta.getColumnMeta(pkName).getDataType();
 
-        // pares pk values
-        Object[] pkValues = parsePkValues(getUndoRows());
-        if (pkValues.length == 0) {
+        Object[] pkValues = parsePkValues(undoRecords);
+        if (pkValues.length== 0) {
             return TableRecords.empty(tableMeta);
         }
-        StringBuffer replace = new StringBuffer();
-        for (int i = 0; i < pkValues.length; i++) {
-            replace.append("?,");
-        }
         // build check sql
-        String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(), pkName,
-                replace.substring(0, replace.length() - 1));
-        
+        String pkNames = getPkColumns(tableMeta);
+        String placeholder  = getPkPlaceholder(getUndoRows().getRows());
+        String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(), pkNames,placeholder);
+        // pares pk values
+        List<Field> pkFields = parsePkFields(undoRecords);
+
+
         PreparedStatement statement = null;
         ResultSet checkSet = null;
         TableRecords currentRecords;
         try {
             statement = conn.prepareStatement(checkSQL);
-            for (int i = 1; i <= pkValues.length; i++) {
-                statement.setObject(i, pkValues[i - 1], pkType);
+            for (int i = 0; i <= pkFields.size(); i++) {
+                Field field = pkFields.get(i);
+                int pkType = tableMeta.getColumnMeta(field.getName()).getDataType();
+                statement.setObject(i+1, field.getValue(), pkType);
             }
             checkSet = statement.executeQuery();
             currentRecords = TableRecords.buildRecords(tableMeta, checkSet);
@@ -270,26 +270,98 @@ public abstract class AbstractUndoExecutor {
         return currentRecords;
     }
 
+
+    /**
+     * get getPkColumns
+     * simple: select * from table_name where (column1,column2) in ((?,?),(?,?))
+     * @param tableMeta tableMeta
+     * @return getPkColumns  (column1,column2)
+     */
+    private String getPkColumns(TableMeta tableMeta){
+        StringBuilder pkBuilder = new StringBuilder("(");
+        List<String> primaryKeys = tableMeta.getPrimaryKeyOnlyName();
+        for(int i=0;i<primaryKeys.size(); i++){
+            pkBuilder.append(primaryKeys.get(i));
+            if(i != primaryKeys.size()-1){
+                pkBuilder.append(",");
+            }
+        }
+        pkBuilder.append(")");
+        return pkBuilder.toString();
+    }
+
+    /**
+     * simple: select * from table_name where (column1,column2) in ((?,?),(?,?))
+     * getPkPlaceholder
+     * @param rowList rowList
+     * @return pkPlaceHolder ((?,?),(?,?))
+     *
+     */
+    private String getPkPlaceholder(List<Row> rowList){
+        StringBuilder placeholder = new StringBuilder("(");
+        int rowSize = rowList.size();
+        for (int j=0;j<rowSize;j++) {
+            StringBuilder field = new StringBuilder("(");
+            int fieldsSize = rowList.get(0).primaryKeys().size();
+            for(int i=0;i<fieldsSize;i++){
+                 field.append("?");
+                 if(i != fieldsSize-1){
+                     field.append(",");
+                 }else{
+                     field.append(")");
+                 }
+             }
+            if(j != rowSize-1){
+                placeholder.append(field).append(",");
+            }else{
+                placeholder.append(")");
+            }
+        }
+        return placeholder.toString();
+    }
+
     /**
      * Parse pk values object [ ].
-     *
      * @param records the records
      * @return the object [ ]
      */
     protected Object[] parsePkValues(TableRecords records) {
-        String pkName = records.getTableMeta().getPkName();
-        List<Row> undoRows = records.getRows();
-        Object[] pkValues = new Object[undoRows.size()];
-        for (int i = 0; i < undoRows.size(); i++) {
-            List<Field> fields = undoRows.get(i).getFields();
-            if (fields != null) {
-                for (Field field : fields) {
-                    if (StringUtils.equalsIgnoreCase(pkName, field.getName())) {
-                        pkValues[i] = field.getValue();
-                    }
-                }
-            }
+        List<Field> pkFields = parsePkFields(records);
+        Object[] pkValues = new Object[pkFields.size()];
+        for(int i=0;i<pkFields.size();i++){
+            pkValues[i] = pkFields.get(i).getValue();
         }
         return pkValues;
+    }
+
+    /**
+     * Parse pk field list [ ].
+     * @param records  the records
+     * @return
+     */
+    private List<Field> parsePkFields(TableRecords records){
+        List<Field> pkFields = new ArrayList<>();
+        List<Row> undoRows = records.getRows();
+        for(Row row:undoRows){
+            pkFields.addAll(row.primaryKeys());
+        }
+        return pkFields;
+    }
+
+
+    /**
+     * Undo SQL
+     * @param fields PK fields
+     * @return SQL
+     */
+    protected String buildPkFields(List<Field> fields){
+        StringBuilder builder = new StringBuilder();
+        for(int i=0; i < fields.size(); i++){
+            builder.append(fields.get(i).getName()).append(" = ?");
+            if(i != fields.size()-1){
+                builder.append(" AND ");
+            }
+        }
+        return builder.toString();
     }
 }

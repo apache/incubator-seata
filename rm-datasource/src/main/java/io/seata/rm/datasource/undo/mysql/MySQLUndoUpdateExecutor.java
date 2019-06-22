@@ -37,8 +37,10 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
 
     /**
      * UPDATE a SET x = ?, y = ?, z = ? WHERE pk = ?
+     *
+     * multi-pk : SET x = ?, y = ?, z = ? WHERE pk0 = ? and pk1 = ?
      */
-    private static final String UPDATE_SQL_TEMPLATE = "UPDATE %s SET %s WHERE %s = ?";
+    private static final String UPDATE_SQL_TEMPLATE = "UPDATE %s SET %s WHERE %s";
 
     /**
      * Undo Update.
@@ -54,14 +56,18 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
             throw new ShouldNeverHappenException("Invalid UNDO LOG"); // TODO
         }
         Row row = beforeImageRows.get(0);
-        Field pkField = row.primaryKeys().get(0);
         List<Field> nonPkFields = row.nonPrimaryKeys();
         String updateColumns = nonPkFields.stream()
             .map(field -> keywordChecker.checkAndReplace(field.getName()) + " = ?")
             .collect(Collectors.joining(", "));
+
+        String pkFields = buildPkFields(row.primaryKeys());
+
         return String.format(UPDATE_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
-                             updateColumns, keywordChecker.checkAndReplace(pkField.getName()));
+                             updateColumns, keywordChecker.checkAndReplace(pkFields));
     }
+
+
 
     /**
      * Instantiates a new My sql undo update executor.
