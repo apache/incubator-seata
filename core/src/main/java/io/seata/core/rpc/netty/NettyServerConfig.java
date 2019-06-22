@@ -48,7 +48,7 @@ public class NettyServerConfig extends NettyBaseConfig {
     /**
      * Shutdown timeout default 1s
      */
-    private static final int DEFAULT_SHUTDOWN_TIMEOUT_SEC = 1;
+    private static final int DEFAULT_SHUTDOWN_TIMEOUT_SEC = 3;
 
     /**
      * The Server channel clazz.
