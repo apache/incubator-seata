@@ -68,9 +68,13 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
 
 
     @Override
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue)
+    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValues)
         throws SQLException {
-        undoPST.setObject(1, pkValue.getValue(), pkValue.getType());
+        int parameterIndex =0;
+        for(Field field : pkValues){
+            parameterIndex++;
+            undoPST.setObject(parameterIndex, field.getValue(), field.getType());
+        }
     }
 
     /**

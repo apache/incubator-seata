@@ -118,11 +118,6 @@ public class TableMeta {
                 }
             }
         }
-
-        if (pk.size() > 1) {
-            throw new NotSupportYetException("Multi PK");
-        }
-
         return pk;
     }
 

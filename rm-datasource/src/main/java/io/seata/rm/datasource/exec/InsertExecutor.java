@@ -88,10 +88,9 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         // insert values including PK
         SQLInsertRecognizer recogizier = (SQLInsertRecognizer)sqlRecognizer;
         List<String> insertColumns = recogizier.getInsertColumns();
-        String pk = getTableMeta().getPkName();
         List<Object> pkValues = null;
         for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
-            if (insertColumns.get(paramIdx).equalsIgnoreCase(pk)) {
+            if (containsPkName(insertColumns.get(paramIdx))) {
                 if (statementProxy instanceof PreparedStatementProxy) {
                     pkValues = ((PreparedStatementProxy)statementProxy).getParamsByIndex(paramIdx);
                 } else {
@@ -112,6 +111,22 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             pkValues = getPkValuesByAuto();
         }
         return pkValues;
+    }
+
+
+    /**
+     * check columnName is primary key
+     * @param columnName columnName
+     * @return true or false
+     */
+    private boolean containsPkName(String columnName){
+        List<String> primaryKeyRowNames = getTableMeta().getPrimaryKeyOnlyName();
+        for(String rowsName : primaryKeyRowNames){
+            if(rowsName.equalsIgnoreCase(columnName)){
+                return true;
+            }
+        }
+        return false;
     }
 
 

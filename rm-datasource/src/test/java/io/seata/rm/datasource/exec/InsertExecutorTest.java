@@ -95,6 +95,7 @@ public class InsertExecutorTest {
         doReturn(true).when(insertExecutor).containsPK();
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
+        pkValues.add(101);
         doReturn(pkValues).when(insertExecutor).getPkValuesByColumn();
         TableRecords tableRecords = new TableRecords();
         doReturn(tableRecords).when(insertExecutor).getTableRecords(pkValues);
@@ -141,8 +142,13 @@ public class InsertExecutorTest {
         mockInsertColumns();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+        List<String> pkNames = new ArrayList<>();
+        pkNames.add(ID_COLUMN);
+        pkNames.add(USER_ID_COLUMN);
+        when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(pkNames);
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
+        pkValues.add(101);
         when(statementProxy.getParamsByIndex(0)).thenReturn(pkValues);
         List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         Assertions.assertEquals(pkValuesByColumn, pkValues);

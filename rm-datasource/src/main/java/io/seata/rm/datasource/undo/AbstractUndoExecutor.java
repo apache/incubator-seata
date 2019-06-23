@@ -16,15 +16,10 @@
 package io.seata.rm.datasource.undo;
 
 import com.alibaba.fastjson.JSON;
-import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.rm.datasource.DataCompareUtils;
-import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.KeyType;
-import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.sql.struct.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +45,7 @@ public abstract class AbstractUndoExecutor {
 
     /**
      * template of check sql
-     * 
-     * TODO support multiple primary key
+     *
      */
     private static final String CHECK_SQL_TEMPLATE = "SELECT * FROM %s WHERE %s in (%s)";
 
@@ -112,16 +106,16 @@ public abstract class AbstractUndoExecutor {
 
             for (Row undoRow : undoRows.getRows()) {
                 ArrayList<Field> undoValues = new ArrayList<>();
-                Field pkValue = null;
+                List<Field> pkValues = new ArrayList<>();
                 for (Field field : undoRow.getFields()) {
                     if (field.getKeyType() == KeyType.PrimaryKey) {
-                        pkValue = field;
+                        pkValues.add(field);
                     } else {
                         undoValues.add(field);
                     }
                 }
 
-                undoPrepare(undoPST, undoValues, pkValue);
+                undoPrepare(undoPST, undoValues, pkValues);
 
                 undoPST.executeUpdate();
             }
@@ -142,22 +136,22 @@ public abstract class AbstractUndoExecutor {
      *
      * @param undoPST    the undo pst
      * @param undoValues the undo values
-     * @param pkValue    the pk value
+     * @param pkValues    the pk values
      * @throws SQLException the sql exception
      */
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue)
+    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValues)
         throws SQLException {
+        // PK append last
+        // INSERT INTO a (x, y, z, pk0, pk1) VALUES (?, ?, ?, ?, ?)
+        // UPDATE a SET x=?, y=?, z=? WHERE pk0 = ? and pk1= ?
+        // DELETE FROM a WHERE pk0 = ? and pk1 = ? ..
+        undoValues.addAll(pkValues);
         int undoIndex = 0;
         for (Field undoValue : undoValues) {
             undoIndex++;
             undoPST.setObject(undoIndex, undoValue.getValue(), undoValue.getType());
         }
-        // PK is at last one.
-        // INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)
-        // UPDATE a SET x=?, y=?, z=? WHERE pk = ?
-        // DELETE FROM a WHERE pk = ?
-        undoIndex++;
-        undoPST.setObject(undoIndex, pkValue.getValue(), pkValue.getType());
+
     }
 
     /**
@@ -298,7 +292,7 @@ public abstract class AbstractUndoExecutor {
      *
      */
     private String getPkPlaceholder(List<Row> rowList){
-        StringBuilder placeholder = new StringBuilder("(");
+        StringBuilder placeholder = new StringBuilder();
         int rowSize = rowList.size();
         for (int j=0;j<rowSize;j++) {
             StringBuilder field = new StringBuilder("(");
@@ -311,10 +305,9 @@ public abstract class AbstractUndoExecutor {
                      field.append(")");
                  }
              }
+            placeholder.append(field);
             if(j != rowSize-1){
-                placeholder.append(field).append(",");
-            }else{
-                placeholder.append(")");
+                placeholder.append(",");
             }
         }
         return placeholder.toString();

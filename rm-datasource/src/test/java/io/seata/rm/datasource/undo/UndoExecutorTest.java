@@ -104,6 +104,7 @@ public class UndoExecutorTest {
         beforeRow.add(pkField);
 
         Field name = new Field();
+        name.setKeyType(KeyType.PrimaryKey);
         name.setName("name");
         name.setType(Types.VARCHAR);
         name.setValue("SEATA");
@@ -279,6 +280,7 @@ public class UndoExecutorTest {
         afterRow1.add(pkField);
 
         Field name = new Field();
+        name.setKeyType(KeyType.PrimaryKey);
         name.setName("name");
         name.setType(Types.VARCHAR);
         name.setValue("SEATA");
