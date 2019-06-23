@@ -130,6 +130,27 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     /**
+     * Gets column name in sql
+     * @param columnNames the columnsName
+     * @return the column name in sql
+     */
+    protected String getColumnNameInSQL(List<String> columnNames) {
+        String tableAlias = sqlRecognizer.getTableAlias();
+        if (tableAlias == null) {
+            return String.join(",",columnNames);
+        } else {
+            StringBuilder stringBuilder = new StringBuilder();
+            for(int i=0;i<columnNames.size();i++){
+                stringBuilder.append(columnNames.get(i));
+                if(i < columnNames.size()-1){
+                    stringBuilder.append(",");
+                }
+            }
+            return stringBuilder.toString();
+        }
+    }
+
+    /**
      * Gets from table in sql.
      *
      * @return the from table in sql

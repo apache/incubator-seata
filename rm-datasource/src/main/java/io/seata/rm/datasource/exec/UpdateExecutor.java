@@ -64,7 +64,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
         if (!tmeta.containsPK(updateColumns)) {
             // PK should be included.
-            selectSQLAppender.append(getColumnNameInSQL(tmeta.getPkName()) + ", ");
+            selectSQLAppender.append(getColumnNameInSQL(tmeta.getPrimaryKeyOnlyName()) + ", ");
         }
         for (int i = 0; i < updateColumns.size(); i++) {
             selectSQLAppender.append(updateColumns.get(i));
@@ -131,7 +131,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
         if (!tmeta.containsPK(updateColumns)) {
             // PK should be included.
-            selectSQLAppender.append(getColumnNameInSQL(tmeta.getPkName()) + ", ");
+            selectSQLAppender.append(getColumnNameInSQL(tmeta.getPrimaryKeyOnlyName()) + ", ");
         }
         for (int i = 0; i < updateColumns.size(); i++) {
             selectSQLAppender.append(updateColumns.get(i));

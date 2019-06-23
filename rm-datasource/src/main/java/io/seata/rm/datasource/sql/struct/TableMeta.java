@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 
 /**
  * The type Table meta.
@@ -146,8 +146,26 @@ public class TableMeta {
 
 
     /**
+     * Contains pk boolean .
+     * @param columnName the colName
+     * @return the boolean
+     */
+    public boolean containsPK(String columnName) {
+        if (StringUtils.isBlank(columnName)) {
+            return false;
+        }
+        List<String> pkColumns = getPrimaryKeyOnlyName();
+        for(String pkColumn:pkColumns){
+            if(pkColumn.equalsIgnoreCase(columnName)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    /**
      * Contains pk boolean.
-     *
      * @param cols the cols
      * @return the boolean
      */

@@ -274,13 +274,8 @@ public abstract class AbstractUndoExecutor {
     private String getPkColumns(TableMeta tableMeta){
         StringBuilder pkBuilder = new StringBuilder("(");
         List<String> primaryKeys = tableMeta.getPrimaryKeyOnlyName();
-        for(int i=0;i<primaryKeys.size(); i++){
-            pkBuilder.append(primaryKeys.get(i));
-            if(i != primaryKeys.size()-1){
-                pkBuilder.append(",");
-            }
-        }
-        pkBuilder.append(")");
+        String item = String.join(",",primaryKeys);
+        pkBuilder.append(item).append(")");
         return pkBuilder.toString();
     }
 
@@ -296,7 +291,7 @@ public abstract class AbstractUndoExecutor {
         int rowSize = rowList.size();
         for (int j=0;j<rowSize;j++) {
             StringBuilder field = new StringBuilder("(");
-            int fieldsSize = rowList.get(0).primaryKeys().size();
+            int fieldsSize = rowList.get(j).primaryKeys().size();
             for(int i=0;i<fieldsSize;i++){
                  field.append("?");
                  if(i != fieldsSize-1){

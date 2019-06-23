@@ -130,9 +130,9 @@ public class DataCompareUtils {
 
     private static boolean compareRows(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows) {
         // old row to map
-        Map<String, Map<String, Field>> oldRowsMap = rowListToMap(oldRows, tableMetaData.getPkName());
+        Map<String, Map<String, Field>> oldRowsMap = rowListToMap(oldRows, tableMetaData.getPrimaryKeyOnlyName());
         // new row to map
-        Map<String, Map<String, Field>> newRowsMap = rowListToMap(newRows, tableMetaData.getPkName());
+        Map<String, Map<String, Field>> newRowsMap = rowListToMap(newRows, tableMetaData.getPrimaryKeyOnlyName());
         // compare data
         for (String rowKey : oldRowsMap.keySet()) {
             Map<String, Field> oldRow = oldRowsMap.get(rowKey);
@@ -154,7 +154,8 @@ public class DataCompareUtils {
         return true;
     }
 
-    private static Map<String, Map<String, Field>> rowListToMap(List<Row> rowList, String primaryKey) {
+    //todo wait verfiy multi-primary key
+    private static Map<String, Map<String, Field>> rowListToMap(List<Row> rowList, List<String> primaryKeysNames) {
         // {value of primaryKey, value of all columns}
         Map<String, Map<String, Field>> rowMap = new HashMap<>();
         for (Row row : rowList) {
@@ -163,7 +164,7 @@ public class DataCompareUtils {
             String rowKey = null;
             for (int j = 0; j < row.getFields().size(); j++) {
                 Field field = row.getFields().get(j);
-                if (field.getName().equalsIgnoreCase(primaryKey)) {
+                if (primaryKeysNames.contains(field.getName().toUpperCase())) {
                     rowKey = String.valueOf(field.getValue());
                 }
                 colsMap.put(field.getName().trim().toUpperCase(), field);

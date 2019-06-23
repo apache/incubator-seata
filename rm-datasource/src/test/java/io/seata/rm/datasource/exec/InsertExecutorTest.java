@@ -53,6 +53,7 @@ public class InsertExecutorTest {
     private static final String USER_ID_COLUMN = "user_id";
     private static final String USER_NAME_COLUMN = "user_name";
     private static final Integer PK_VALUE = 100;
+    private static final Integer PK_VALUE1 = 101;
 
     private PreparedStatementProxy statementProxy;
 
@@ -95,7 +96,7 @@ public class InsertExecutorTest {
         doReturn(true).when(insertExecutor).containsPK();
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
-        pkValues.add(101);
+        pkValues.add(PK_VALUE1);
         doReturn(pkValues).when(insertExecutor).getPkValuesByColumn();
         TableRecords tableRecords = new TableRecords();
         doReturn(tableRecords).when(insertExecutor).getTableRecords(pkValues);
@@ -148,7 +149,7 @@ public class InsertExecutorTest {
         when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(pkNames);
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
-        pkValues.add(101);
+        pkValues.add(PK_VALUE1);
         when(statementProxy.getParamsByIndex(0)).thenReturn(pkValues);
         List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         Assertions.assertEquals(pkValuesByColumn, pkValues);
