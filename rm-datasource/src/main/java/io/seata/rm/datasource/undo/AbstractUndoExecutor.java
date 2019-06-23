@@ -246,7 +246,7 @@ public abstract class AbstractUndoExecutor {
         TableRecords currentRecords;
         try {
             statement = conn.prepareStatement(checkSQL);
-            for (int i = 0; i <= pkFields.size(); i++) {
+            for (int i = 0; i < pkFields.size(); i++) {
                 Field field = pkFields.get(i);
                 int pkType = tableMeta.getColumnMeta(field.getName()).getDataType();
                 statement.setObject(i+1, field.getValue(), pkType);
