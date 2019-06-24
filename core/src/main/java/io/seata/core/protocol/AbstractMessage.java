@@ -36,6 +36,7 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
+import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 
 import java.io.Serializable;
 import java.nio.charset.Charset;
@@ -230,6 +231,9 @@ public abstract class AbstractMessage implements MessageCodec, Serializable {
                 break;
             case AbstractMessage.TYPE_BRANCH_ROLLBACK:
                 msgCodec = new BranchRollbackRequest();
+                break;
+            case AbstractMessage.TYPE_RM_DELETE_UNDOLOG:
+                msgCodec = new UndoLogDeleteRequest();
                 break;
             default:
                 break;

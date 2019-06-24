@@ -108,6 +108,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
      */
     protected int timeoutRetryDelay = CONFIG.getInt(ConfigurationKeys.TIMEOUT_RETRY_DELAY, 5);
 
+    /**
+     * The Timeout retry delay.
+     */
+    protected int transactionUndologDeleteDelay = CONFIG.getInt(ConfigurationKeys.TRANSACTION_UNDO_LOG_DELETE_DELAY, 24 * 60);
+
     private static final int ALWAYS_RETRY_BOUNDARY = 0;
 
     private static final Duration MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(
@@ -398,10 +403,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             LOGGER.info("no active rm channels to delete undo log");
             return;
         }
+        int saveDays = CONFIG.getInt(ConfigurationKeys.TRANSACTION_UNDO_LOG_SAVE_DAYS, UndoLogDeleteRequest.DEFAULT_SAVE_DAYS);
         for (Map.Entry<String, Channel> channelEntry : rmChannels.entrySet()) {
             String resourceId = channelEntry.getKey();
             UndoLogDeleteRequest deleteRequest = new UndoLogDeleteRequest();
             deleteRequest.setResourceId(resourceId);
+            deleteRequest.setSaveDays(saveDays);
             try {
                 messageSender.sendASyncRequest(channelEntry.getValue(), deleteRequest);
             } catch (Exception e) {
@@ -452,7 +459,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception undoLog deleting ... ", e);
             }
-        },0,24,TimeUnit.MILLISECONDS);
+        },0,transactionUndologDeleteDelay,TimeUnit.SECONDS);
     }
 
     @Override

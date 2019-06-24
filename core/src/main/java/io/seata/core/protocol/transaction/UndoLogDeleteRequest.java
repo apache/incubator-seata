@@ -128,4 +128,12 @@ public class UndoLogDeleteRequest extends AbstractTransactionRequestToRM impleme
         this.saveDays = in.readInt();
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "UndoLogDeleteRequest{" +
+                "resourceId='" + resourceId + '\'' +
+                ", saveDays=" + saveDays +
+                '}';
+    }
 }

@@ -202,4 +202,14 @@ public class ConfigurationKeys {
      * The constant TRANSACTION_UNDO_LOG_SERIALIZATION.
      */
     public static final String TRANSACTION_UNDO_LOG_SERIALIZATION = TRANSACTION_PREFIX + "undo.log.serialization";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_SAVE_DAYS.
+     */
+    public static final String TRANSACTION_UNDO_LOG_SAVE_DAYS = TRANSACTION_PREFIX + "undo.log.save.days";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_DELETE_DELAY
+     */
+    public static final String TRANSACTION_UNDO_LOG_DELETE_DELAY = TRANSACTION_PREFIX + "undo.log.delete.delay";
 }
