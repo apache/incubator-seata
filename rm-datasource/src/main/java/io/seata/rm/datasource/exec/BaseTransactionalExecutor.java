@@ -141,7 +141,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         } else {
             StringBuilder stringBuilder = new StringBuilder();
             for (int i = 0;i < columnNames.size(); i++) {
-                stringBuilder.append(columnNames.get(i));
+                stringBuilder.append(tableAlias + "." + columnNames.get(i));
                 if (i < columnNames.size() - 1) {
                     stringBuilder.append(",");
                 }
