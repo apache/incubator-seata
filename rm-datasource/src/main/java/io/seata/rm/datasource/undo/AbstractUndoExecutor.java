@@ -29,6 +29,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * The type Abstract undo executor.
@@ -272,11 +273,12 @@ public abstract class AbstractUndoExecutor {
      * @return getPkColumns  (column1,column2)
      */
     private String getPkColumns(TableMeta tableMeta) {
-        StringBuilder pkBuilder = new StringBuilder("(");
         List<String> primaryKeys = tableMeta.getPrimaryKeyOnlyName();
-        String item = String.join(",",primaryKeys);
-        pkBuilder.append(item).append(")");
-        return pkBuilder.toString();
+        StringJoiner stringJoiner = new StringJoiner(",","(",")");
+        for (String primaryKey:primaryKeys) {
+            stringJoiner.add(primaryKey);
+        }
+        return stringJoiner.toString();
     }
 
     /**
@@ -287,26 +289,17 @@ public abstract class AbstractUndoExecutor {
      *
      */
     private String getPkPlaceholder(List<Row> rowList) {
-        StringBuilder placeholder = new StringBuilder();
-        int rowSize = rowList.size();
-        for (int j = 0;j < rowSize; j++) {
-            StringBuilder field = new StringBuilder("(");
-            int fieldsSize = rowList.get(j).primaryKeys().size();
-            for (int i = 0;i < fieldsSize; i++) {
-                 field.append("?");
-                 if ( i != fieldsSize - 1) {
-                     field.append(",");
-                 } else {
-                     field.append(")");
-                 }
-             }
-            placeholder.append(field);
-            if (j != rowSize - 1) {
-                placeholder.append(",");
+        StringJoiner placeholder = new StringJoiner(",");
+        for(Row row:rowList){
+            StringJoiner joinerField = new StringJoiner(",","(",")");
+            for (Field field: row.primaryKeys()) {
+                joinerField.add("?");
             }
+            placeholder.add(joinerField.toString());
         }
         return placeholder.toString();
     }
+
 
     /**
      * Parse pk values object [ ].
@@ -344,13 +337,10 @@ public abstract class AbstractUndoExecutor {
      * @return SQL
      */
     protected String buildPkFields (KeywordChecker keywordChecker,List<Field> fields) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < fields.size(); i++) {
-            builder.append(keywordChecker.checkAndReplace(fields.get(i).getName())).append(" = ?");
-            if( i != fields.size() - 1) {
-                builder.append(" AND ");
-            }
+        StringJoiner stringJoiner = new StringJoiner(" AND ");
+        for(Field field: fields){
+            stringJoiner.add(keywordChecker.checkAndReplace(field.getName())+" = ?");
         }
-        return builder.toString();
+        return stringJoiner.toString();
     }
 }

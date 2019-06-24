@@ -18,6 +18,7 @@ package io.seata.rm.datasource.exec;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
+import java.util.StringJoiner;
 
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ConnectionProxy;
@@ -139,14 +140,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (tableAlias == null) {
             return String.join(",",columnNames);
         } else {
-            StringBuilder stringBuilder = new StringBuilder();
-            for (int i = 0;i < columnNames.size(); i++) {
-                stringBuilder.append(tableAlias + "." + columnNames.get(i));
-                if (i < columnNames.size() - 1) {
-                    stringBuilder.append(",");
-                }
+            StringJoiner joiner = new StringJoiner(",");
+            for (String columnName: columnNames) {
+                joiner.add(tableAlias + "." + columnName);
             }
-            return stringBuilder.toString();
+            return joiner.toString();
         }
     }
 
