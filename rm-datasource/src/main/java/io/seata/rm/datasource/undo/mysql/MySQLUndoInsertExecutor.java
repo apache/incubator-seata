@@ -58,7 +58,7 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = afterImageRows.get(0);
-        String pkFields = buildPkFields(row.primaryKeys());
+        String pkFields = buildPkFields(keywordChecker,row.primaryKeys());
         return String.format(DELETE_SQL_TEMPLATE,
                 keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
                 keywordChecker.checkAndReplace(pkFields));
@@ -70,8 +70,8 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
     @Override
     protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValues)
         throws SQLException {
-        int parameterIndex =0;
-        for(Field field : pkValues){
+        int parameterIndex = 0;
+        for (Field field : pkValues) {
             parameterIndex++;
             undoPST.setObject(parameterIndex, field.getValue(), field.getType());
         }

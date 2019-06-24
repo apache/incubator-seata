@@ -213,7 +213,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
-        if ((autoCommit) && !getAutoCommit()) {
+        if (autoCommit && !getAutoCommit()) {
             // change autocommit from false to true, we should commit() first according to JDBC spec.
             commit();
         }
@@ -224,8 +224,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         int retry = REPORT_RETRY_COUNT;
         while (retry > 0) {
             try {
-                DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),
-                        (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
+                DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(), commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed, null);
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["

@@ -61,7 +61,7 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
             .map(field -> keywordChecker.checkAndReplace(field.getName()) + " = ?")
             .collect(Collectors.joining(", "));
 
-        String pkFields = buildPkFields(row.primaryKeys());
+        String pkFields = buildPkFields(keywordChecker,row.primaryKeys());
 
         return String.format(UPDATE_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
                              updateColumns, keywordChecker.checkAndReplace(pkFields));

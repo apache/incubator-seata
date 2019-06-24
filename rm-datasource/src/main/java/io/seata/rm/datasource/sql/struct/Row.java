@@ -18,8 +18,6 @@ package io.seata.rm.datasource.sql.struct;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.seata.common.exception.NotSupportYetException;
-
 /**
  * The type Row.
  *

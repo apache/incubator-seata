@@ -224,7 +224,7 @@ public abstract class AbstractUndoExecutor {
         TableMeta tableMeta = undoRecords.getTableMeta();
 
         Object[] pkValues = parsePkValues(undoRecords);
-        if (pkValues.length== 0) {
+        if (pkValues.length == 0) {
             return TableRecords.empty(tableMeta);
         }
         // build check sql
@@ -243,7 +243,7 @@ public abstract class AbstractUndoExecutor {
             for (int i = 0; i < pkFields.size(); i++) {
                 Field field = pkFields.get(i);
                 int pkType = tableMeta.getColumnMeta(field.getName()).getDataType();
-                statement.setObject(i+1, field.getValue(), pkType);
+                statement.setObject(i + 1, field.getValue(), pkType);
             }
             checkSet = statement.executeQuery();
             currentRecords = TableRecords.buildRecords(tableMeta, checkSet);
@@ -271,7 +271,7 @@ public abstract class AbstractUndoExecutor {
      * @param tableMeta tableMeta
      * @return getPkColumns  (column1,column2)
      */
-    private String getPkColumns(TableMeta tableMeta){
+    private String getPkColumns(TableMeta tableMeta) {
         StringBuilder pkBuilder = new StringBuilder("(");
         List<String> primaryKeys = tableMeta.getPrimaryKeyOnlyName();
         String item = String.join(",",primaryKeys);
@@ -286,22 +286,22 @@ public abstract class AbstractUndoExecutor {
      * @return pkPlaceHolder ((?,?),(?,?))
      *
      */
-    private String getPkPlaceholder(List<Row> rowList){
+    private String getPkPlaceholder(List<Row> rowList) {
         StringBuilder placeholder = new StringBuilder();
         int rowSize = rowList.size();
-        for (int j=0;j<rowSize;j++) {
+        for (int j = 0;j < rowSize; j++) {
             StringBuilder field = new StringBuilder("(");
             int fieldsSize = rowList.get(j).primaryKeys().size();
-            for(int i=0;i<fieldsSize;i++){
+            for (int i = 0;i < fieldsSize; i++) {
                  field.append("?");
-                 if(i != fieldsSize-1){
+                 if ( i != fieldsSize - 1) {
                      field.append(",");
-                 }else{
+                 } else {
                      field.append(")");
                  }
              }
             placeholder.append(field);
-            if(j != rowSize-1){
+            if (j != rowSize - 1) {
                 placeholder.append(",");
             }
         }
@@ -316,7 +316,7 @@ public abstract class AbstractUndoExecutor {
     protected Object[] parsePkValues(TableRecords records) {
         List<Field> pkFields = parsePkFields(records);
         Object[] pkValues = new Object[pkFields.size()];
-        for(int i=0;i<pkFields.size();i++){
+        for (int i = 0; i < pkFields.size(); i++) {
             pkValues[i] = pkFields.get(i).getValue();
         }
         return pkValues;
@@ -327,10 +327,10 @@ public abstract class AbstractUndoExecutor {
      * @param records  the records
      * @return
      */
-    private List<Field> parsePkFields(TableRecords records){
+    private List<Field> parsePkFields(TableRecords records) {
         List<Field> pkFields = new ArrayList<>();
         List<Row> undoRows = records.getRows();
-        for(Row row:undoRows){
+        for (Row row:undoRows) {
             pkFields.addAll(row.primaryKeys());
         }
         return pkFields;
@@ -339,14 +339,15 @@ public abstract class AbstractUndoExecutor {
 
     /**
      * Undo SQL
+     * @param keywordChecker keywordChecker
      * @param fields PK fields
      * @return SQL
      */
-    protected String buildPkFields(List<Field> fields){
+    protected String buildPkFields (KeywordChecker keywordChecker,List<Field> fields) {
         StringBuilder builder = new StringBuilder();
-        for(int i=0; i < fields.size(); i++){
-            builder.append(fields.get(i).getName()).append(" = ?");
-            if(i != fields.size()-1){
+        for (int i = 0; i < fields.size(); i++) {
+            builder.append(keywordChecker.checkAndReplace(fields.get(i).getName())).append(" = ?");
+            if( i != fields.size() - 1) {
                 builder.append(" AND ");
             }
         }

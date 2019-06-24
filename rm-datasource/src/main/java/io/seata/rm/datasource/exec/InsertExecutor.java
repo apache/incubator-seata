@@ -119,7 +119,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @param columnName columnName
      * @return true or false
      */
-    private boolean containsPkName(String columnName){
+    private boolean containsPkName(String columnName) {
         List<String> primaryKeyRowNames = getTableMeta().getPrimaryKeyOnlyName();
         return primaryKeyRowNames.contains(columnName);
     }
@@ -161,10 +161,10 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         TableRecords afterImage;
         List<String> pkNames = getTableMeta().getPrimaryKeyOnlyName();
         StringBuffer selectSQLAppender = new StringBuffer("SELECT * FROM " + getTableMeta().getTableName() + " WHERE ");
-        for (int i = 1; i <= pkValues.size(); i++) {
-            for(int j=0;j<pkNames.size();j++){
-                selectSQLAppender.append(pkNames.get(j)+ "=?");
-                if(j< pkNames.size()){
+        for (int i = 0; i < pkValues.size(); i++) {
+            for (int j = 0;j < pkNames.size();j++) {
+                selectSQLAppender.append(pkNames.get(j) + "=?");
+                if (j < pkNames.size() ) {
                     selectSQLAppender.append(" AND ");
                 }
             }

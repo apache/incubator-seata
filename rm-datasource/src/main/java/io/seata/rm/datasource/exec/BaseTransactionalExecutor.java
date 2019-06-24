@@ -140,9 +140,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             return String.join(",",columnNames);
         } else {
             StringBuilder stringBuilder = new StringBuilder();
-            for(int i=0;i<columnNames.size();i++){
+            for (int i = 0;i < columnNames.size(); i++) {
                 stringBuilder.append(columnNames.get(i));
-                if(i < columnNames.size()-1){
+                if (i < columnNames.size() - 1) {
                     stringBuilder.append(",");
                 }
             }
