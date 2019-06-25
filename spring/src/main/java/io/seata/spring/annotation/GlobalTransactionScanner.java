@@ -42,9 +42,12 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.core.PriorityOrdered;
 
 /**
  * The type Global transaction scanner.
@@ -54,7 +57,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     implements InitializingBean, ApplicationContextAware,
-    DisposableBean {
+    DisposableBean, BeanFactoryPostProcessor, PriorityOrdered {
 
     /**
      *
@@ -297,4 +300,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         this.setBeanFactory(applicationContext);
     }
 
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        //do nothing
+    }
+
+    @Override
+    public int getOrder() {
+        return HIGHEST_PRECEDENCE;
+    }
 }
