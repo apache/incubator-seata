@@ -290,6 +290,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
         byte[] xidBytes = xid != null ? xid.getBytes() : null;
 
+        byte branchTypeByte = branchType != null ? (byte) branchType.ordinal() : -1;
+
         int size = calBranchSessionSize(resourceIdBytes, lockKeyBytes, clientIdBytes, applicationDataBytes, xidBytes);
 
         if (size > MAX_BRANCH_SESSION_SIZE) {
@@ -356,6 +358,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             byteBuffer.putInt(0);
         }
 
+        byteBuffer.put(branchTypeByte);
+
         byteBuffer.put((byte)status.getCode());
         byteBuffer.flip();
         byte[] result = new byte[byteBuffer.limit()];
@@ -376,7 +380,8 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             + (lockKeyBytes == null ? 0 : lockKeyBytes.length)
             + (clientIdBytes == null ? 0 : clientIdBytes.length)
             + (applicationDataBytes == null ? 0 : applicationDataBytes.length)
-            + (xidBytes == null ? 0 : xidBytes.length);
+            + (xidBytes == null ? 0 : xidBytes.length)
+            + 1; //branchType
         return size;
     }
 
@@ -423,6 +428,10 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             byte[] xidBytes = new byte[xidLen];
             byteBuffer.get(xidBytes);
             this.xid = new String(xidBytes);
+        }
+        int branchTypeId = byteBuffer.get();
+        if (branchTypeId >= 0) {
+            this.branchType = BranchType.values()[branchTypeId];
         }
         this.status = BranchStatus.get(byteBuffer.get());
 
