@@ -30,7 +30,7 @@ import java.util.List;
 
 /**
  * @author Geng Zhang
- * //todo verify unit test
+ * //
  */
 public class AbstractUndoExecutorTest extends BaseH2Test {
 
@@ -55,8 +55,7 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         TestUndoExecutor spy = new TestUndoExecutor(sqlUndoLog, false);
 
         // case1: normal case  before:aaa -> after:xxx -> current:xxx
-        //todo wait verify
-       // Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
+         Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
 
         // case2: dirty data   before:aaa -> after:xxx -> current:yyy
         execSQL("update table_name set name = 'yyy' where id in (12345, 12346);");
@@ -68,8 +67,9 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         }
 
         // case 3: before == current before:aaa -> after:xxx -> current:aaa
+        // //todo wait verfiy
         execSQL("update table_name set name = 'aaa' where id in (12345, 12346);");
-       // Assertions.assertFalse(spy.dataValidationAndGoOn(connection));
+        Assertions.assertFalse(spy.dataValidationAndGoOn(connection));
 
         // case 4: before == after   before:aaa -> after:aaa
         afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
