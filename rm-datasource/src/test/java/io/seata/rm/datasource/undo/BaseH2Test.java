@@ -79,7 +79,7 @@ public abstract class BaseH2Test {
     @BeforeEach
     private void prepareTable() {
         execSQL("DROP TABLE IF EXISTS table_name");
-        execSQL("CREATE TABLE table_name ( `id` int(8), `name` varchar(64), PRIMARY KEY (`id`))");
+        execSQL("CREATE TABLE table_name ( `id` int(8), `name` varchar(64), `blog` varchar(128), PRIMARY KEY (`id`,`name`))");
     }
 
     protected static void execSQL(String sql) {
@@ -140,6 +140,10 @@ public abstract class BaseH2Test {
         Mockito.when(meta1.getDataType()).thenReturn(Types.VARCHAR);
         Mockito.when(meta1.getColumnName()).thenReturn("NAME");
         Mockito.when(tableMeta.getColumnMeta("NAME")).thenReturn(meta1);
+        ColumnMeta meta2 = Mockito.mock(ColumnMeta.class);
+        Mockito.when(meta2.getDataType()).thenReturn(Types.VARCHAR);
+        Mockito.when(meta2.getColumnName()).thenReturn("BLOG");
+        Mockito.when(tableMeta.getColumnMeta("BLOG")).thenReturn(meta2);
         return tableMeta;
     }
 
