@@ -127,7 +127,10 @@ public abstract class BaseH2Test {
         Mockito.when(tableMeta.getPkName()).thenReturn("ID");
         List<String> list = new ArrayList<>();
         list.add("ID");
+        list.add("NAME");
         Mockito.when(tableMeta.getPrimaryKeyOnlyName()).thenReturn(list);
+        Mockito.when(tableMeta.containsPK(list.get(0))).thenReturn(true);
+        Mockito.when(tableMeta.containsPK(list.get(1))).thenReturn(true);
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
         ColumnMeta meta0 = Mockito.mock(ColumnMeta.class);
         Mockito.when(meta0.getDataType()).thenReturn(Types.INTEGER);
