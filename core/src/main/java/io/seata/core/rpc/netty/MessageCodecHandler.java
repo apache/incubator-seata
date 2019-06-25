@@ -17,6 +17,7 @@ package io.seata.core.rpc.netty;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
@@ -60,17 +61,15 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
     private static final short FLAG_ASYNC = 0x40;
     private static final short FLAG_HEARTBEAT = 0x20;
     private static final short FLAG_SEATA_CODEC = 0x10;
-    private static final int MAGIC_HALF = -38;
-    private static final int NOT_FOUND_INDEX = -1;
 
     private static Configuration configuration = ConfigurationFactory.getInstance();
 
-    private static String serialize = configuration.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC);
+    private static String serialize = configuration.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC,CodecType.SEATA.name());
 
     /**
      * The constant UTF8.
      */
-    protected static final Charset UTF8 = Charset.forName("utf-8");
+    protected static final Charset UTF8 = StandardCharsets.UTF_8;
 
     /**
      * encode the msg: magic, flag, msgId, bodyLength, body
@@ -162,7 +161,6 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
         boolean isHeartbeat = (FLAG_HEARTBEAT & flag) > 0;
         boolean isRequest = (FLAG_REQUEST & flag) > 0;
-        boolean isSeataCodec = (FLAG_SEATA_CODEC & flag) > 0;
         CodecType codecType = CodecType.getByCode(flag & 0x0F);
 
         //msgId
