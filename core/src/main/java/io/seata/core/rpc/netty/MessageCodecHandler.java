@@ -64,7 +64,8 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
     private static Configuration configuration = ConfigurationFactory.getInstance();
 
-    private static String serialize = configuration.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC,CodecType.SEATA.name());
+    private static String serialize = configuration.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC,
+        CodecType.SEATA.name());
 
     /**
      * The constant UTF8.
@@ -99,12 +100,12 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
         //header, the flag: 0000 0000 flags(4) codec(4)
         byteBuffer.putShort(MAGIC);
-        short flag = (short) ((msg.isAsync() ? FLAG_ASYNC : 0)
-                | (msg.isHeartbeat() ? FLAG_HEARTBEAT : 0)
-                | (msg.isRequest() ? FLAG_REQUEST : 0)
-//                | (msgCodec != null ? FLAG_SEATA_CODEC : 0)
-                | FLAG_SEATA_CODEC
-                | codecCode);
+        short flag = (short)((msg.isAsync() ? FLAG_ASYNC : 0)
+            | (msg.isHeartbeat() ? FLAG_HEARTBEAT : 0)
+            | (msg.isRequest() ? FLAG_REQUEST : 0)
+            //                | (msgCodec != null ? FLAG_SEATA_CODEC : 0)
+            | FLAG_SEATA_CODEC
+            | codecCode);
 
         byteBuffer.putShort(flag);
 
@@ -140,11 +141,10 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-//      the msg: magic, flag, msgId, bodyLength, body
+        //      the msg: magic, flag, msgId, bodyLength, body
 
         //header length: 16
         if (in.readableBytes() < HEAD_LENGTH) {
-            LOGGER.error("decode less than header length");
             return;
         }
         in.markReaderIndex();
