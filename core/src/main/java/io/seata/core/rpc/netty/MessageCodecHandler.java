@@ -84,16 +84,6 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
     protected void encode(ChannelHandlerContext ctx, RpcMessage msg, ByteBuf out) throws Exception {
         ByteBuffer byteBuffer = ByteBuffer.allocate(128);
 
-        //heart beat
-        if (msg.isHeartbeat()) {
-            byteBuffer.putShort((short)0);
-            byteBuffer.putLong(msg.getId());
-            byteBuffer.flip();
-            byte[] content = new byte[byteBuffer.limit()];
-            byteBuffer.get(content);
-            out.writeBytes(content);
-            return;
-        }
         //codec
         CodecType codecType = CodecType.getByCode(this.getSerializer());
         byte codecCode = codecType.getCode();
@@ -109,8 +99,21 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
         byteBuffer.putShort(flag);
 
+        //heart beat
+        if (msg.isHeartbeat()) {
+            byteBuffer.putLong(msg.getId());
+            //body length
+            byteBuffer.putInt(0);
+            byteBuffer.flip();
+            byte[] content = new byte[byteBuffer.limit()];
+            byteBuffer.get(content);
+            out.writeBytes(content);
+            return;
+        }
+
         //msgId before body
         byteBuffer.putLong(msg.getId());
+
         //the body
         try {
             //codec
@@ -168,6 +171,8 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
         //heart beat msg
         if (isHeartbeat) {
+            //read length=0
+            in.readInt();
             RpcMessage rpcMessage = new RpcMessage();
             rpcMessage.setId(msgId);
             rpcMessage.setAsync(true);
