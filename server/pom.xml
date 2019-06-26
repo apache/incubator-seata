@@ -45,6 +45,18 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!--NOTICE:If want disable metrics you only need replace this dependency with seata-metrics-api-->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-metrics-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>${project.groupId}</groupId>-->
+<!--            <artifactId>seata-metrics-api</artifactId>-->
+<!--            <version>${project.version}</version>-->
+<!--        </dependency>-->
+
         <!-- for database -->
         <dependency>
             <groupId>com.alibaba</groupId>
