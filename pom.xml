@@ -41,6 +41,7 @@
         <module>tcc</module>
         <module>test</module>
         <module>tm</module>
+        <module>metrics</module>
         <module>codec</module>
     </modules>
     <packaging>pom</packaging>
