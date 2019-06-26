@@ -20,7 +20,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-bom</artifactId>
-    <version>0.6.1</version>
+    <version>0.6.1.1</version>
 
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
@@ -398,7 +398,7 @@
                         </executions>
                     </plugin>
                     <!-- GPG -->
-                    <plugin>
+                   <!-- <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
                         <version>1.6.7</version>
@@ -425,18 +425,19 @@
                                 </configuration>
                             </execution>
                         </executions>
-                    </plugin>
+                    </plugin>-->
                 </plugins>
             </build>
 
             <distributionManagement>
                 <snapshotRepository>
-                    <id>oss_seata</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                    <id>nexus-snapshots</id>
+                    <url>http://192.168.8.21:8081/repository/maven-snapshots/</url>
                 </snapshotRepository>
                 <repository>
-                    <id>oss_seata</id>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                    <id>nexus-releases</id>
+                    <name>Nexus Release Repository</name>
+                    <url>http://192.168.8.21:8081/repository/maven-releases/</url>
                 </repository>
             </distributionManagement>
 
