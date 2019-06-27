@@ -40,6 +40,7 @@ public class BranchRollbackRequestConvertor implements PbConvertor<BranchRollbac
                 abstractMessage).build();
 
         final String applicationData = branchRollbackRequest.getApplicationData();
+        final String resourceId = branchRollbackRequest.getResourceId();
         final AbstractBranchEndRequestProto abstractBranchEndRequestProto = AbstractBranchEndRequestProto
             .newBuilder().
                 setAbstractTransactionRequest(abstractTransactionRequestProto)
@@ -47,7 +48,7 @@ public class BranchRollbackRequestConvertor implements PbConvertor<BranchRollbac
             .setBranchId(branchRollbackRequest.getBranchId())
             .setBranchType(BranchTypeProto.valueOf(branchRollbackRequest.getBranchType().name()))
             .setApplicationData(applicationData==null?"":applicationData)
-            .setResourceId(branchRollbackRequest.getResourceId())
+            .setResourceId(resourceId == null ? "" : resourceId)
             .build();
 
         BranchRollbackRequestProto result = BranchRollbackRequestProto.newBuilder().setAbstractBranchEndRequest(

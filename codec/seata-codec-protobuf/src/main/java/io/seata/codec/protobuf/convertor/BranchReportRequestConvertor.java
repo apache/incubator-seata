@@ -15,14 +15,14 @@
  */
 package io.seata.codec.protobuf.convertor;
 
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
 import io.seata.codec.protobuf.generated.AbstractMessageProto;
 import io.seata.codec.protobuf.generated.AbstractTransactionRequestProto;
 import io.seata.codec.protobuf.generated.BranchReportRequestProto;
 import io.seata.codec.protobuf.generated.BranchStatusProto;
 import io.seata.codec.protobuf.generated.BranchTypeProto;
 import io.seata.codec.protobuf.generated.MessageTypeProto;
+import io.seata.core.model.BranchStatus;
+import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 
 /**
@@ -41,13 +41,14 @@ public class BranchReportRequestConvertor implements PbConvertor<BranchReportReq
                 abstractMessage).build();
 
         final String applicationData = branchReportRequest.getApplicationData();
+        final String resourceId = branchReportRequest.getResourceId();
         BranchReportRequestProto result = BranchReportRequestProto.newBuilder().setAbstractTransactionRequest(
             abstractTransactionRequestProto)
             .setXid(branchReportRequest.getXid())
             .setBranchId(branchReportRequest.getBranchId())
             .setBranchType(BranchTypeProto.valueOf(branchReportRequest.getBranchType().name()))
-            .setApplicationData(applicationData==null?"":applicationData)
-            .setResourceId(branchReportRequest.getResourceId())
+            .setApplicationData(applicationData == null ? "" : applicationData)
+            .setResourceId(resourceId == null ? "" : resourceId)
             .setStatus(BranchStatusProto.valueOf(branchReportRequest.getStatus().name()))
             .build();
 
