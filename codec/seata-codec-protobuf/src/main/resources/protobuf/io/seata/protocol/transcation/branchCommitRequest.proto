@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+import "abstractBranchEndRequest.proto";
+
+
+option java_multiple_files = true;
+option java_outer_classname = "BranchCommitRequest";
+option java_package = "io.seata.codec.protobuf.generated";
+
+// PublishRequest is a publish request.
+message BranchCommitRequestProto {
+    AbstractBranchEndRequestProto abstractBranchEndRequest = 1;
+}

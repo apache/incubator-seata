@@ -45,42 +45,4 @@ public class GlobalBeginRequestTest {
         Assertions.assertEquals("timeout=60000,transactionName=tran 1", globalBeginRequest.toString());
     }
 
-    /**
-     * Test encode.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testEncode() throws Exception {
-        GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
-        globalBeginRequest.setTransactionName("tran 1");
-
-        byte[] encodeResult = globalBeginRequest.encode();
-        String encodeResultStr = Arrays.toString(encodeResult);
-
-        Assertions.assertEquals("[0, 0, -22, 96, 0, 6, 116, 114, 97, 110, 32, 49]", encodeResultStr);
-    }
-
-    /**
-     * Test decode.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testDecode() throws Exception {
-        GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
-        globalBeginRequest.setTransactionName("tran 1");
-
-        byte[] encodeResult = globalBeginRequest.encode();
-
-        ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
-        byteBuffer.put(encodeResult);
-        byteBuffer.flip();
-
-        GlobalBeginRequest decodeGlobalBeginRequest = new GlobalBeginRequest();
-        decodeGlobalBeginRequest.decode(byteBuffer);
-        System.out.println(decodeGlobalBeginRequest);
-        Assertions.assertEquals(globalBeginRequest.getTimeout(), decodeGlobalBeginRequest.getTimeout());
-        Assertions.assertEquals(globalBeginRequest.getTransactionName(), decodeGlobalBeginRequest.getTransactionName());
-    }
 }

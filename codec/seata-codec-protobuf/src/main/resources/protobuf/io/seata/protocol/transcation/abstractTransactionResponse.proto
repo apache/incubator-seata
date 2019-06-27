@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+import "abstractResultMessage.proto";
+import "transactionExceptionCode.proto";
+
+
+option java_multiple_files = true;
+option java_outer_classname = "AbstractTransactionResponse";
+option java_package = "io.seata.codec.protobuf.generated";
+
+// PublishRequest is a publish request.
+message AbstractTransactionResponseProto {
+    AbstractResultMessageProto abstractResultMessage = 1;
+    TransactionExceptionCodeProto transactionExceptionCode = 2;
+}

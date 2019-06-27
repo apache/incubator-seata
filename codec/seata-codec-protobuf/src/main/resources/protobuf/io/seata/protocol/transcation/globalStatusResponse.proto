@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+import "abstractGlobalEndResponse.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "GlobalStatusResponse";
+option java_package = "io.seata.codec.protobuf.generated";
+
+message GlobalStatusResponseProto {
+    AbstractGlobalEndResponseProto abstractGlobalEndResponse = 1;
+}

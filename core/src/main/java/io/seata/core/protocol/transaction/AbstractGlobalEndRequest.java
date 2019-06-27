@@ -15,16 +15,12 @@
  */
 package io.seata.core.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
-import io.seata.core.protocol.MergedMessage;
-
 /**
  * The type Abstract global end request.
  *
  * @author sharajava
  */
-public abstract class AbstractGlobalEndRequest extends AbstractTransactionRequestToTC implements MergedMessage {
+public abstract class AbstractGlobalEndRequest extends AbstractTransactionRequestToTC {
 
     private String xid;
 
@@ -67,51 +63,6 @@ public abstract class AbstractGlobalEndRequest extends AbstractTransactionReques
      */
     public void setExtraData(String extraData) {
         this.extraData = extraData;
-    }
-
-    @Override
-    public byte[] encode() {
-        ByteBuffer byteBuffer = ByteBuffer.allocate(256);
-        // 1. xid
-        if (this.xid != null) {
-            byte[] bs = xid.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
-            if (bs.length > 0) {
-                byteBuffer.put(bs);
-            }
-        } else {
-            byteBuffer.putShort((short)0);
-        }
-        if (this.extraData != null) {
-            byte[] bs = extraData.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
-            if (bs.length > 0) {
-                byteBuffer.put(bs);
-            }
-        } else {
-            byteBuffer.putShort((short)0);
-        }
-
-        byteBuffer.flip();
-        byte[] content = new byte[byteBuffer.limit()];
-        byteBuffer.get(content);
-        return content;
-    }
-
-    @Override
-    public void decode(ByteBuffer byteBuffer) {
-        short xidLen = byteBuffer.getShort();
-        if (xidLen > 0) {
-            byte[] bs = new byte[xidLen];
-            byteBuffer.get(bs);
-            this.setXid(new String(bs, UTF8));
-        }
-        short len = byteBuffer.getShort();
-        if (len > 0) {
-            byte[] bs = new byte[len];
-            byteBuffer.get(bs);
-            this.setExtraData(new String(bs, UTF8));
-        }
     }
 
     @Override

@@ -42,6 +42,7 @@
         <module>test</module>
         <module>tm</module>
         <module>metrics</module>
+        <module>codec</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -311,6 +312,9 @@
                         <ruleset>rulesets/java/ali-other.xml</ruleset>
                         <ruleset>rulesets/java/ali-set.xml</ruleset>
                     </rulesets>
+                    <excludes>
+                        <exclude>**/generated/*.java</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -406,6 +410,9 @@
                         <include>**/src/main/java/**</include>
                         <include>**/src/test/java/**</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/generated/**</exclude>
+                    </excludes>
                     <strictCheck>true</strictCheck>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
@@ -426,6 +433,7 @@
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>false</failsOnError>
                             <failOnViolation>false</failOnViolation>
+                            <excludes>**/generated/**</excludes>
                         </configuration>
                         <goals>
                             <goal>check</goal>

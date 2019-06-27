@@ -15,11 +15,6 @@
  */
 package io.seata.core.protocol;
 
-import java.nio.ByteBuffer;
-
-import io.netty.buffer.ByteBuf;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Abstract identify request.
@@ -27,8 +22,6 @@ import org.slf4j.LoggerFactory;
  * @author sharajava
  */
 public abstract class AbstractIdentifyRequest extends AbstractMessage {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractIdentifyRequest.class);
 
     /**
      * The Version.
@@ -146,125 +139,4 @@ public abstract class AbstractIdentifyRequest extends AbstractMessage {
         this.extraData = extraData;
     }
 
-    /**
-     * The Byte buffer.
-     */
-    public ByteBuffer byteBuffer = ByteBuffer.allocate(10 * 1024);
-
-    /**
-     * Do encode.
-     */
-    protected void doEncode() {
-        byteBuffer.clear();
-        if (this.version != null) {
-            byte[] bs = version.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
-            if (bs.length > 0) {
-                byteBuffer.put(bs);
-            }
-        } else {
-            byteBuffer.putShort((short)0);
-        }
-
-        if (this.applicationId != null) {
-            byte[] bs = applicationId.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
-            if (bs.length > 0) {
-                byteBuffer.put(bs);
-            }
-        } else {
-            byteBuffer.putShort((short)0);
-        }
-
-        if (this.transactionServiceGroup != null) {
-            byte[] bs = transactionServiceGroup.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
-            if (bs.length > 0) {
-                byteBuffer.put(bs);
-            }
-        } else {
-            byteBuffer.putShort((short)0);
-        }
-
-        if (this.extraData != null) {
-            byte[] bs = extraData.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
-            if (bs.length > 0) {
-                byteBuffer.put(bs);
-            }
-        } else {
-            byteBuffer.putShort((short)0);
-        }
-
-    }
-
-    private final byte[] flushEncode() {
-        byteBuffer.flip();
-        byte[] content = new byte[byteBuffer.limit()];
-        byteBuffer.get(content);
-        byteBuffer.clear(); // >?
-        return content;
-    }
-
-    @Override
-    public final byte[] encode() {
-        doEncode();
-        return flushEncode();
-    }
-
-    @Override
-    public boolean decode(ByteBuf in) {
-
-        short len;
-        if (in.readableBytes() < 2) {
-            return false;
-        }
-        len = in.readShort();
-
-        if (in.readableBytes() < len) {
-            return false;
-        }
-        byte[] bs = new byte[len];
-        in.readBytes(bs);
-        this.setVersion(new String(bs, UTF8));
-
-        if (in.readableBytes() < 2) {
-            return false;
-        }
-        len = in.readShort();
-
-        if (in.readableBytes() < len) {
-            return false;
-        }
-        bs = new byte[len];
-        in.readBytes(bs);
-        this.setApplicationId(new String(bs, UTF8));
-
-        if (in.readableBytes() < 2) {
-            return false;
-        }
-        len = in.readShort();
-
-        if (in.readableBytes() < len) {
-            return false;
-        }
-        bs = new byte[len];
-        in.readBytes(bs);
-        this.setTransactionServiceGroup(new String(bs, UTF8));
-
-        if (in.readableBytes() < 2) {
-            return false;
-        }
-        len = in.readShort();
-
-        if (in.readableBytes() >= len) {
-            bs = new byte[len];
-            in.readBytes(bs);
-            this.setExtraData(new String(bs, UTF8));
-        } else {
-            //maybe null
-        }
-
-        return true;
-    }
 }

@@ -15,9 +15,7 @@
  */
 package io.seata.core.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
-import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.MessageType;
 
 /**
  * The type Global begin response.
@@ -25,8 +23,6 @@ import io.seata.core.protocol.AbstractMessage;
  * @author jimin.jm @alibaba-inc.com
  */
 public class GlobalBeginResponse extends AbstractTransactionResponse {
-
-    private static final long serialVersionUID = -5947172130577163908L;
 
     private String xid;
 
@@ -70,50 +66,7 @@ public class GlobalBeginResponse extends AbstractTransactionResponse {
 
     @Override
     public short getTypeCode() {
-        return AbstractMessage.TYPE_GLOBAL_BEGIN_RESULT;
+        return MessageType.TYPE_GLOBAL_BEGIN_RESULT;
     }
 
-    @Override
-    protected void doEncode() {
-        super.doEncode();
-
-        if (this.xid != null) {
-            byte[] bs = xid.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
-            if (bs.length > 0) {
-                byteBuffer.put(bs);
-            }
-        } else {
-            byteBuffer.putShort((short)0);
-        }
-
-        if (this.extraData != null) {
-            byte[] bs = extraData.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
-            if (bs.length > 0) {
-                byteBuffer.put(bs);
-            }
-        } else {
-            byteBuffer.putShort((short)0);
-        }
-    }
-
-    @Override
-    public void decode(ByteBuffer byteBuffer) {
-        super.decode(byteBuffer);
-
-        short len = byteBuffer.getShort();
-        if (len > 0) {
-            byte[] bs = new byte[len];
-            byteBuffer.get(bs);
-            setXid(new String(bs, UTF8));
-        }
-
-        len = byteBuffer.getShort();
-        if (len > 0) {
-            byte[] bs = new byte[len];
-            byteBuffer.get(bs);
-            setExtraData(new String(bs, UTF8));
-        }
-    }
 }

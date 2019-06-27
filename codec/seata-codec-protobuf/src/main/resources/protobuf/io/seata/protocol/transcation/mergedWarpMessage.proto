@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+import "abstractMessage.proto";
+import "google/protobuf/any.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "MergedWarpMessage";
+option java_package = "io.seata.codec.protobuf.generated";
+
+// PublishRequest is a publish request.
+message MergedWarpMessageProto {
+    AbstractMessageProto abstractMessage=1;
+    repeated google.protobuf.Any msgs = 2;
+    repeated int64 msgIds=3;
+}

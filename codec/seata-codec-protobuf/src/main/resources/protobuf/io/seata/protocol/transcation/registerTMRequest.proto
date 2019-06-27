@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+import "abstractIdentifyRequest.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "RegisterTMRequest";
+option java_package = "io.seata.codec.protobuf.generated";
+
+// PublishRequest is a publish request.
+message RegisterTMRequestProto {
+    AbstractIdentifyRequestProto abstractIdentifyRequest = 1;
+}

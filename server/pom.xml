@@ -44,6 +44,11 @@
             <artifactId>seata-discovery-all</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-codec-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!--NOTICE:If want disable metrics you only need replace this dependency with seata-metrics-api-->
         <dependency>

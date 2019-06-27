@@ -15,6 +15,8 @@
  */
 package io.seata.core.protocol.transaction;
 
+import io.seata.core.protocol.MessageType;
+
 /**
  * The type Branch report response.
  *
@@ -24,6 +26,6 @@ public class BranchReportResponse extends AbstractTransactionResponse {
 
     @Override
     public short getTypeCode() {
-        return TYPE_BRANCH_STATUS_REPORT_RESULT;
+        return MessageType.TYPE_BRANCH_STATUS_REPORT_RESULT;
     }
 }

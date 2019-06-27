@@ -134,6 +134,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
             isSuccess = false;
             LOGGER.error(exx.getMessage());
         }
+        //FIXME please add success or fail
         sender.sendResponse(msgId, ctx.channel(),
             new RegisterTMResponse(isSuccess));
     }
