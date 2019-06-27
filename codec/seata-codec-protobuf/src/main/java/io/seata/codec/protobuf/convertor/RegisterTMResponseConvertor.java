@@ -15,14 +15,14 @@
  */
 package io.seata.codec.protobuf.convertor;
 
-import io.seata.core.protocol.RegisterTMResponse;
-import io.seata.core.protocol.ResultCode;
 import io.seata.codec.protobuf.generated.AbstractIdentifyResponseProto;
 import io.seata.codec.protobuf.generated.AbstractMessageProto;
 import io.seata.codec.protobuf.generated.AbstractResultMessageProto;
 import io.seata.codec.protobuf.generated.MessageTypeProto;
 import io.seata.codec.protobuf.generated.RegisterTMResponseProto;
 import io.seata.codec.protobuf.generated.ResultCodeProto;
+import io.seata.core.protocol.RegisterTMResponse;
+import io.seata.core.protocol.ResultCode;
 
 /**
  * @author leizhiyuan
@@ -35,14 +35,26 @@ public class RegisterTMResponseConvertor implements PbConvertor<RegisterTMRespon
         final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
             MessageTypeProto.forNumber(typeCode)).build();
 
+        final String msg = registerTMResponse.getMsg();
+        //for code
+        if (registerTMResponse.getResultCode() == null) {
+            if (registerTMResponse.isIdentified()) {
+                registerTMResponse.setResultCode(ResultCode.Success);
+            } else {
+                registerTMResponse.setResultCode(ResultCode.Failed);
+
+            }
+        }
+
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            registerTMResponse.getMsg())
+            msg == null ? "" : msg)
             .setResultCode(ResultCodeProto.valueOf(registerTMResponse.getResultCode().name())).setAbstractMessage(
                 abstractMessage).build();
 
+        final String extraData = registerTMResponse.getExtraData();
         AbstractIdentifyResponseProto abstractIdentifyResponseProto = AbstractIdentifyResponseProto.newBuilder()
             .setAbstractResultMessage(abstractResultMessageProto)
-            .setExtraData(registerTMResponse.getExtraData())
+            .setExtraData(extraData == null ? "" : extraData)
             .setVersion(registerTMResponse.getVersion())
             .setIdentified(registerTMResponse.isIdentified())
             .build();

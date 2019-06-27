@@ -37,8 +37,9 @@ public class BranchReportResponseConvertor implements PbConvertor<BranchReportRe
         final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
             MessageTypeProto.forNumber(typeCode)).build();
 
+        final String msg = branchReportResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            branchReportResponse.getMsg())
+            msg == null ? "" : msg)
             .setResultCode(ResultCodeProto.valueOf(branchReportResponse.getResultCode().name())).setAbstractMessage(
                 abstractMessage).build();
 

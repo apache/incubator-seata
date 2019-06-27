@@ -40,8 +40,9 @@ public class BranchCommitResponseConvertor implements PbConvertor<BranchCommitRe
         final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
             MessageTypeProto.forNumber(typeCode)).build();
 
+        final String msg = branchCommitResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            branchCommitResponse.getMsg())
+            msg == null ? "" : msg)
             .setResultCode(ResultCodeProto.valueOf(branchCommitResponse.getResultCode().name())).setAbstractMessage(
                 abstractMessage).build();
 

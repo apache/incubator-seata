@@ -40,8 +40,9 @@ public class GlobalCommitResponseConvertor implements PbConvertor<GlobalCommitRe
         final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
             MessageTypeProto.forNumber(typeCode)).build();
 
+        final String msg = globalCommitResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            globalCommitResponse.getMsg())
+            msg == null ? "" : msg)
             .setResultCode(ResultCodeProto.valueOf(globalCommitResponse.getResultCode().name())).setAbstractMessage(
                 abstractMessage).build();
 

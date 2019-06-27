@@ -15,8 +15,6 @@
  */
 package io.seata.codec.protobuf.convertor;
 
-import io.seata.core.exception.TransactionExceptionCode;
-import io.seata.core.protocol.ResultCode;
 import io.seata.codec.protobuf.generated.AbstractMessageProto;
 import io.seata.codec.protobuf.generated.AbstractResultMessageProto;
 import io.seata.codec.protobuf.generated.AbstractTransactionResponseProto;
@@ -24,6 +22,8 @@ import io.seata.codec.protobuf.generated.GlobalBeginResponseProto;
 import io.seata.codec.protobuf.generated.MessageTypeProto;
 import io.seata.codec.protobuf.generated.ResultCodeProto;
 import io.seata.codec.protobuf.generated.TransactionExceptionCodeProto;
+import io.seata.core.exception.TransactionExceptionCode;
+import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.GlobalBeginResponse;
 
 /**
@@ -37,8 +37,9 @@ public class GlobalBeginResponseConvertor implements PbConvertor<GlobalBeginResp
         final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
             MessageTypeProto.forNumber(typeCode)).build();
 
+        final String msg = globalBeginResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            globalBeginResponse.getMsg())
+            msg == null ? "" : msg)
             .setResultCode(ResultCodeProto.valueOf(globalBeginResponse.getResultCode().name())).setAbstractMessage(
                 abstractMessage).build();
 
@@ -49,9 +50,10 @@ public class GlobalBeginResponseConvertor implements PbConvertor<GlobalBeginResp
                 TransactionExceptionCodeProto.valueOf(globalBeginResponse.getTransactionExceptionCode().name()))
             .build();
 
+        final String extraData = globalBeginResponse.getExtraData();
         GlobalBeginResponseProto result = GlobalBeginResponseProto.newBuilder().setAbstractTransactionResponse(
             abstractTransactionRequestProto)
-            .setExtraData(globalBeginResponse.getExtraData())
+            .setExtraData(extraData == null ? "" : extraData)
             .setXid(globalBeginResponse.getXid()).build();
         return result;
     }

@@ -15,14 +15,14 @@
  */
 package io.seata.codec.protobuf.convertor;
 
-import io.seata.core.protocol.RegisterRMResponse;
-import io.seata.core.protocol.ResultCode;
 import io.seata.codec.protobuf.generated.AbstractIdentifyResponseProto;
 import io.seata.codec.protobuf.generated.AbstractMessageProto;
 import io.seata.codec.protobuf.generated.AbstractResultMessageProto;
 import io.seata.codec.protobuf.generated.MessageTypeProto;
 import io.seata.codec.protobuf.generated.RegisterRMResponseProto;
 import io.seata.codec.protobuf.generated.ResultCodeProto;
+import io.seata.core.protocol.RegisterRMResponse;
+import io.seata.core.protocol.ResultCode;
 
 /**
  * @author leizhiyuan
@@ -35,8 +35,20 @@ public class RegisterRMResponseConvertor implements PbConvertor<RegisterRMRespon
         final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
             MessageTypeProto.forNumber(typeCode)).build();
 
+        final String msg = registerRMResponse.getMsg();
+
+        //for code
+        if (registerRMResponse.getResultCode() == null) {
+            if (registerRMResponse.isIdentified()) {
+                registerRMResponse.setResultCode(ResultCode.Success);
+            } else {
+                registerRMResponse.setResultCode(ResultCode.Failed);
+
+            }
+        }
+
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            registerRMResponse.getMsg())
+            msg == null ? "" : msg)
             .setResultCode(ResultCodeProto.valueOf(registerRMResponse.getResultCode().name())).setAbstractMessage(
                 abstractMessage).build();
 

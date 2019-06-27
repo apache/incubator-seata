@@ -38,8 +38,9 @@ public class BranchRegisterResponseConvertor
         final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
             MessageTypeProto.forNumber(typeCode)).build();
 
+        final String msg = branchRegisterResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            branchRegisterResponse.getMsg())
+            msg == null ? "" : msg)
             .setResultCode(ResultCodeProto.valueOf(branchRegisterResponse.getResultCode().name())).setAbstractMessage(
                 abstractMessage).build();
 

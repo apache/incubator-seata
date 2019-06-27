@@ -41,8 +41,9 @@ public class BranchRollbackResponseConvertor
         final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
             MessageTypeProto.forNumber(typeCode)).build();
 
+        final String msg = branchRollbackResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            branchRollbackResponse.getMsg())
+            msg == null ? "" : msg)
             .setResultCode(ResultCodeProto.valueOf(branchRollbackResponse.getResultCode().name())).setAbstractMessage(
                 abstractMessage).build();
 

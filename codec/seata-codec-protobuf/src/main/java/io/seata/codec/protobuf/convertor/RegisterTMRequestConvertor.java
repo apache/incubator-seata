@@ -32,10 +32,11 @@ public class RegisterTMRequestConvertor implements PbConvertor<RegisterTMRequest
         final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
             MessageTypeProto.forNumber(typeCode)).build();
 
+        final String extraData = registerTMRequest.getExtraData();
         AbstractIdentifyRequestProto abstractIdentifyRequestProto = AbstractIdentifyRequestProto.newBuilder()
             .setAbstractMessage(abstractMessage)
             .setApplicationId(registerTMRequest.getApplicationId())
-            .setExtraData(registerTMRequest.getExtraData())
+            .setExtraData(extraData==null?"":extraData)
             .setTransactionServiceGroup(registerTMRequest.getTransactionServiceGroup())
             .setVersion(registerTMRequest.getVersion())
             .build();

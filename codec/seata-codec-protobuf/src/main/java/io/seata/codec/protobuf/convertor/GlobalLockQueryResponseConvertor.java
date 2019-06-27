@@ -38,8 +38,9 @@ public class GlobalLockQueryResponseConvertor
         final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
             MessageTypeProto.forNumber(typeCode)).build();
 
+        final String msg = globalLockQueryResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            globalLockQueryResponse.getMsg())
+            msg == null ? "" : msg)
             .setResultCode(ResultCodeProto.valueOf(globalLockQueryResponse.getResultCode().name())).setAbstractMessage(
                 abstractMessage).build();
 

@@ -40,8 +40,9 @@ public class GlobalStatusResponseConvertor implements PbConvertor<GlobalStatusRe
         final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
             MessageTypeProto.forNumber(typeCode)).build();
 
+        final String msg = globalStatusResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            globalStatusResponse.getMsg())
+            msg == null ? "" : msg)
             .setResultCode(ResultCodeProto.valueOf(globalStatusResponse.getResultCode().name())).setAbstractMessage(
                 abstractMessage).build();
 

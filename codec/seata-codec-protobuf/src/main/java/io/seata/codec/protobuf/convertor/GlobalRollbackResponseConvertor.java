@@ -41,8 +41,9 @@ public class GlobalRollbackResponseConvertor
         final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
             MessageTypeProto.forNumber(typeCode)).build();
 
+        final String msg = globalRollbackResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            globalRollbackResponse.getMsg())
+            msg == null ? "" : msg)
             .setResultCode(ResultCodeProto.valueOf(globalRollbackResponse.getResultCode().name())).setAbstractMessage(
                 abstractMessage).build();
 

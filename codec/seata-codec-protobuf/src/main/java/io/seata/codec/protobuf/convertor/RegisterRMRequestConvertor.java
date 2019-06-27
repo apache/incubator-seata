@@ -15,11 +15,11 @@
  */
 package io.seata.codec.protobuf.convertor;
 
-import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.codec.protobuf.generated.AbstractIdentifyRequestProto;
 import io.seata.codec.protobuf.generated.AbstractMessageProto;
 import io.seata.codec.protobuf.generated.MessageTypeProto;
 import io.seata.codec.protobuf.generated.RegisterRMRequestProto;
+import io.seata.core.protocol.RegisterRMRequest;
 
 /**
  * @author leizhiyuan
@@ -32,10 +32,11 @@ public class RegisterRMRequestConvertor implements PbConvertor<RegisterRMRequest
         final AbstractMessageProto abstractMessage = AbstractMessageProto.newBuilder().setMessageType(
             MessageTypeProto.forNumber(typeCode)).build();
 
+        final String extraData = registerRMRequest.getExtraData();
         AbstractIdentifyRequestProto abstractIdentifyRequestProto = AbstractIdentifyRequestProto.newBuilder()
             .setAbstractMessage(abstractMessage)
             .setApplicationId(registerRMRequest.getApplicationId())
-            .setExtraData(registerRMRequest.getExtraData())
+            .setExtraData(extraData == null ? "" : extraData)
             .setTransactionServiceGroup(registerRMRequest.getTransactionServiceGroup())
             .setVersion(registerRMRequest.getVersion())
             .build();

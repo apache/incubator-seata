@@ -37,10 +37,11 @@ public class GlobalCommitRequestConvertor implements PbConvertor<GlobalCommitReq
             .newBuilder().setAbstractMessage(
                 abstractMessage).build();
 
+        final String extraData = globalCommitRequest.getExtraData();
         AbstractGlobalEndRequestProto abstractGlobalEndRequestProto = AbstractGlobalEndRequestProto.newBuilder()
             .setAbstractTransactionRequest(abstractTransactionRequestProto)
             .setXid(globalCommitRequest.getXid())
-            .setExtraData(globalCommitRequest.getExtraData())
+            .setExtraData(extraData == null ? "" : extraData)
             .build();
 
         GlobalCommitRequestProto result = GlobalCommitRequestProto.newBuilder().setAbstractGlobalEndRequest(
