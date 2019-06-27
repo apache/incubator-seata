@@ -198,10 +198,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         connectionProxy.appendUndoLog(sqlUndoLog);
 
         //业务数据操作前后插入到es数据库
-        ConnectionContext connectionContext = connectionProxy.getContext();
-        String xid = connectionContext.getXid();
-        ElasticsearchUtil.addData(xid,sqlUndoLog);
-
+       if("true".equals(System.getProperty("dataTrace"))) {
+           ConnectionContext connectionContext = connectionProxy.getContext();
+           String xid = connectionContext.getXid();
+           ElasticsearchUtil.addData(xid, sqlUndoLog);
+       }
     }
 
     /**

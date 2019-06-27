@@ -16,6 +16,7 @@
 package io.seata.tm.api;
 
 
+import co.faao.plugin.transmission.response.MessageCoreResult;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.exception.TransactionException;
 import io.seata.tm.api.transaction.TransactionHook;
@@ -25,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+
+import static io.seata.tm.api.TransactionalExecutor.Code.RollbackDone;
 
 /**
  * Template of executing business logic with a global transaction.
@@ -66,12 +69,30 @@ public class TransactionalTemplate {
             } catch (Throwable ex) {
 
                 // 3.the needed business exception to rollback.
-                completeTransactionAfterThrowing(txInfo,tx,ex);
+                completeTransactionAfterThrowing(txInfo, tx, ex);
                 throw ex;
             }
-
-            // 4. everything is fine, commit.
-            commitTransaction(tx);
+            //业务code判断来回滚
+            if (rs != null && rs instanceof MessageCoreResult) {
+                MessageCoreResult msr = (MessageCoreResult) rs;
+                if (msr.getStatus().equals(0)) {
+                    //回滚但不抛出异常
+                    try {
+                      completeTransactionAfterThrowing(txInfo, tx, new Exception(msr.getMessage()));
+                    } catch (TransactionalExecutor.ExecutionException e) {
+                        TransactionalExecutor.Code code = e.getCode();
+                        if(!code.toString().equals(RollbackDone.toString())) {
+                            throw new TransactionalExecutor.ExecutionException(tx, e, TransactionalExecutor.Code.RollbackFailure,e);
+                        }
+                    }
+                } else {
+                    // 4. everything is fine, commit.
+                    commitTransaction(tx);
+                }
+            } else {
+                // 4. everything is fine, commit.
+                commitTransaction(tx);
+            }
 
             return rs;
         } finally {
@@ -114,7 +135,7 @@ public class TransactionalTemplate {
         tx.rollback();
         triggerAfterRollback();
         // 3.1 Successfully rolled back
-        throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
+        throw new TransactionalExecutor.ExecutionException(tx, RollbackDone, ex);
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {

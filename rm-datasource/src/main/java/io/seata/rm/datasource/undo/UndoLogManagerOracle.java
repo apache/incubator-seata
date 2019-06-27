@@ -240,7 +240,9 @@ public final class UndoLogManagerOracle {
         }
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
-        commitTraceData(xids,branchIds,conn);
+        if("true".equals(System.getProperty("dataTrace"))) {
+            commitTraceData(xids, branchIds, conn);
+        }
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
         PreparedStatement deletePST = null;
         try {

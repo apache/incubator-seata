@@ -73,7 +73,7 @@ public class SQLVisitorFactory {
             } else if (ast instanceof SQLDeleteStatement) {
                 recognizer = new OracleDeleteRecognizer(sql, ast);
             } else if (ast instanceof SQLSelectStatement) {
-                if (((SQLSelectStatement) ast).getSelect().getQueryBlock().isForUpdate()) {
+                if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
                     recognizer = new OracleSelectForUpdateRecognizer(sql, ast);
                 }
             }

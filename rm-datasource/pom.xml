@@ -62,7 +62,7 @@
         <dependency>
             <groupId>co.faao</groupId>
             <artifactId>speed-seata-starter</artifactId>
-            <version>6.1.3-SNAPSHOT</version>
+            <version>${co.faao.speed.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>

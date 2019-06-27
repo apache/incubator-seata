@@ -71,10 +71,20 @@ public class ExecuteTemplate {
                                                      StatementProxy<S> statementProxy,
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
+        if(!ElasticsearchUtil.isStarted) {//在启动过程中执行的sql,直接执行。类似flyway执行
+            // Just work as original statement
+            return statementCallback.execute(statementProxy.getTargetStatement(), args);
+        }
 
         if (!RootContext.inGlobalTransaction() && !RootContext.requireGlobalLock()) {
-            sqlRecognizer = SQLVisitorFactory.get( statementProxy.getTargetSQL(),  statementProxy.getConnectionProxy().getDbType());
-            if (sqlRecognizer != null) {
+            if (sqlRecognizer == null) {
+                try {
+                    sqlRecognizer = SQLVisitorFactory.get(statementProxy.getTargetSQL(), statementProxy.getConnectionProxy().getDbType());
+                } catch (Throwable t) {
+
+                }
+             }
+            if (sqlRecognizer != null&&"true".equals(System.getProperty("dataTrace"))) {
                 NoSeata executor = null;
                 switch (sqlRecognizer.getSQLType()) {
                     case INSERT:
