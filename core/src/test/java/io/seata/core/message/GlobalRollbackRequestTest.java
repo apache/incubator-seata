@@ -38,21 +38,4 @@ public class GlobalRollbackRequestTest {
         Assertions.assertEquals("xid=127.0.0.1:8091:1249853,extraData=test_extra_data", globalRollbackRequest.toString());
     }
 
-    /**
-     * Test decode.
-     */
-    @Test
-    public void testDecode() {
-        GlobalRollbackRequest globalRollbackRequest = new GlobalRollbackRequest();
-        globalRollbackRequest.setXid("127.0.0.1:8091:1249853");
-        globalRollbackRequest.setExtraData("test_extra_data");
-        byte[] encodeResult = globalRollbackRequest.encode();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
-        byteBuffer.put(encodeResult);
-        byteBuffer.flip();
-        GlobalRollbackRequest decodeGlobalRollbackRequest = new GlobalRollbackRequest();
-        decodeGlobalRollbackRequest.decode(byteBuffer);
-        Assertions.assertEquals(globalRollbackRequest.getXid(), decodeGlobalRollbackRequest.getXid());
-        Assertions.assertEquals(globalRollbackRequest.getExtraData(), decodeGlobalRollbackRequest.getExtraData());
-    }
 }

@@ -15,7 +15,7 @@
  */
 package io.seata.core.protocol.transaction;
 
-import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.MessageType;
 
 /**
  * The type Branch commit response.
@@ -26,6 +26,6 @@ public class BranchCommitResponse extends AbstractBranchEndResponse {
 
     @Override
     public short getTypeCode() {
-        return AbstractMessage.TYPE_BRANCH_COMMIT_RESULT;
+        return MessageType.TYPE_BRANCH_COMMIT_RESULT;
     }
 }
