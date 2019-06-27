@@ -52,9 +52,10 @@ public class RegisterRMResponseConvertor implements PbConvertor<RegisterRMRespon
             .setResultCode(ResultCodeProto.valueOf(registerRMResponse.getResultCode().name())).setAbstractMessage(
                 abstractMessage).build();
 
+        final String extraData = registerRMResponse.getExtraData();
         AbstractIdentifyResponseProto abstractIdentifyResponseProto = AbstractIdentifyResponseProto.newBuilder()
             .setAbstractResultMessage(abstractResultMessageProto)
-            .setExtraData(registerRMResponse.getExtraData())
+            .setExtraData(extraData==null?"":extraData)
             .setVersion(registerRMResponse.getVersion())
             .setIdentified(registerRMResponse.isIdentified())
             .build();

@@ -38,9 +38,10 @@ public class BranchRegisterRequestConvertor implements PbConvertor<BranchRegiste
             .newBuilder().setAbstractMessage(
                 abstractMessage).build();
 
+        final String applicationData = branchRegisterRequest.getApplicationData();
         BranchRegisterRequestProto result = BranchRegisterRequestProto.newBuilder()
             .setAbstractTransactionRequest(abstractTransactionRequestProto)
-            .setApplicationData(branchRegisterRequest.getApplicationData())
+            .setApplicationData(applicationData==null?"":applicationData)
             .setBranchType(BranchTypeProto.valueOf(branchRegisterRequest.getBranchType().name()))
             .setLockKey(branchRegisterRequest.getLockKey())
             .setResourceId(branchRegisterRequest.getResourceId())

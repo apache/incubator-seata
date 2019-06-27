@@ -40,12 +40,13 @@ public class BranchReportRequestConvertor implements PbConvertor<BranchReportReq
             .newBuilder().setAbstractMessage(
                 abstractMessage).build();
 
+        final String applicationData = branchReportRequest.getApplicationData();
         BranchReportRequestProto result = BranchReportRequestProto.newBuilder().setAbstractTransactionRequest(
             abstractTransactionRequestProto)
             .setXid(branchReportRequest.getXid())
             .setBranchId(branchReportRequest.getBranchId())
             .setBranchType(BranchTypeProto.valueOf(branchReportRequest.getBranchType().name()))
-            .setApplicationData(branchReportRequest.getApplicationData())
+            .setApplicationData(applicationData==null?"":applicationData)
             .setResourceId(branchReportRequest.getResourceId())
             .setStatus(BranchStatusProto.valueOf(branchReportRequest.getStatus().name()))
             .build();

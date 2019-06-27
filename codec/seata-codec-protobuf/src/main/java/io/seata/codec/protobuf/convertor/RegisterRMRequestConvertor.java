@@ -42,7 +42,8 @@ public class RegisterRMRequestConvertor implements PbConvertor<RegisterRMRequest
             .build();
         RegisterRMRequestProto result = RegisterRMRequestProto.newBuilder().setAbstractIdentifyRequest(
             abstractIdentifyRequestProto)
-            .setResourceIds(registerRMRequest.getResourceIds()).build();
+            .setResourceIds(registerRMRequest.getResourceIds() == null ? "" : registerRMRequest.getResourceIds())
+            .build();
 
         return result;
     }

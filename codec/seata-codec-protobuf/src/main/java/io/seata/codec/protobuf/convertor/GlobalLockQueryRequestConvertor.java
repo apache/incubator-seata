@@ -40,9 +40,10 @@ public class GlobalLockQueryRequestConvertor
             .newBuilder().setAbstractMessage(
                 abstractMessage).build();
 
+        final String applicationData = globalLockQueryRequest.getApplicationData();
         BranchRegisterRequestProto branchRegisterRequestProto = BranchRegisterRequestProto.newBuilder()
             .setAbstractTransactionRequest(abstractTransactionRequestProto)
-            .setApplicationData(globalLockQueryRequest.getApplicationData())
+            .setApplicationData(applicationData==null?"":applicationData)
             .setBranchType(BranchTypeProto.valueOf(globalLockQueryRequest.getBranchType().name()))
             .setLockKey(globalLockQueryRequest.getLockKey())
             .setResourceId(globalLockQueryRequest.getResourceId())

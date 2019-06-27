@@ -39,13 +39,14 @@ public class BranchCommitRequestConvertor implements PbConvertor<BranchCommitReq
             .newBuilder().setAbstractMessage(
                 abstractMessage).build();
 
+        final String applicationData = branchCommitRequest.getApplicationData();
         final AbstractBranchEndRequestProto abstractBranchEndRequestProto = AbstractBranchEndRequestProto
             .newBuilder().
                 setAbstractTransactionRequest(abstractTransactionRequestProto)
             .setXid(branchCommitRequest.getXid())
             .setBranchId(branchCommitRequest.getBranchId())
             .setBranchType(BranchTypeProto.valueOf(branchCommitRequest.getBranchType().name()))
-            .setApplicationData(branchCommitRequest.getApplicationData())
+            .setApplicationData(applicationData==null?"":applicationData)
             .setResourceId(branchCommitRequest.getResourceId())
             .build();
 
