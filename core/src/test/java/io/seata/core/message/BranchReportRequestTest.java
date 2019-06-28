@@ -47,33 +47,4 @@ public class BranchReportRequestTest {
             branchReportRequest.toString());
     }
 
-    /**
-     * Test decode.
-     *
-     * @throws Exception the exception
-     */
-    @Test
-    public void testDecode() {
-        BranchReportRequest branchReportRequest = new BranchReportRequest();
-        branchReportRequest.setXid("127.0.0.1:8091:1249853");
-        branchReportRequest.setBranchId(3);
-        branchReportRequest.setResourceId("resource003");
-        branchReportRequest.setStatus(BranchStatus.PhaseOne_Timeout);
-        branchReportRequest.setApplicationData("test app data");
-        branchReportRequest.setBranchType(BranchType.AT);
-
-        byte[] encodeResult = branchReportRequest.encode();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
-        byteBuffer.put(encodeResult);
-        byteBuffer.flip();
-
-        BranchReportRequest decodeBranchReportRequest = new BranchReportRequest();
-        decodeBranchReportRequest.decode(byteBuffer);
-        Assertions.assertEquals(branchReportRequest.getXid(), decodeBranchReportRequest.getXid());
-        Assertions.assertEquals(branchReportRequest.getBranchId(), decodeBranchReportRequest.getBranchId());
-        Assertions.assertEquals(branchReportRequest.getResourceId(), decodeBranchReportRequest.getResourceId());
-        Assertions.assertEquals(branchReportRequest.getStatus(), decodeBranchReportRequest.getStatus());
-        Assertions.assertEquals(branchReportRequest.getApplicationData(), decodeBranchReportRequest.getApplicationData());
-        Assertions.assertEquals(branchReportRequest.getBranchType(), decodeBranchReportRequest.getBranchType());
-    }
 }
