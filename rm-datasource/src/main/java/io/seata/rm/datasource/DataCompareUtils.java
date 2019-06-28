@@ -27,9 +27,7 @@ import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * The type Data compare utils.
@@ -154,24 +152,40 @@ public class DataCompareUtils {
         return true;
     }
 
-    //todo wait verfiy multi-primary key
+
     private static Map<String, Map<String, Field>> rowListToMap(List<Row> rowList, List<String> primaryKeysNames) {
         // {value of primaryKey, value of all columns}
-        Map<String, Map<String, Field>> rowMap = new HashMap<>();
+        Map<String, Map<String, Field>> rowMap = new HashMap<>(16);
         for (Row row : rowList) {
             // {uppercase fieldName : field}
             Map<String, Field> colsMap = new HashMap<>();
-            String rowKey = null;
+            Map<String,Object> rowKeys = new HashMap<>();
             for (int j = 0; j < row.getFields().size(); j++) {
                 Field field = row.getFields().get(j);
-                if (primaryKeysNames.contains(field.getName().toUpperCase())) {
-                    rowKey = String.valueOf(field.getValue());
+                String fieldName = field.getName();
+                if (primaryKeysNames.contains(fieldName.toUpperCase()) || primaryKeysNames.contains(fieldName)) {
+                    rowKeys.put(fieldName,field.getValue());
                 }
-                colsMap.put(field.getName().trim().toUpperCase(), field);
+                colsMap.put(fieldName.trim().toUpperCase(), field);
             }
+            String rowKey = getRowKey(rowKeys.keySet(),rowKeys);
             rowMap.put(rowKey, colsMap);
         }
         return rowMap;
+    }
+
+    /**
+     * get RowKey
+     * @return rowKey
+     */
+    private static String getRowKey(Set<String> fields,Map<String,Object> rowsKeysMap){
+        List<String> list = new ArrayList<>(fields);
+        Collections.sort(list);
+        StringBuilder rowKey = new StringBuilder();
+        for(String item:list){
+            rowKey.append(rowsKeysMap.get(item));
+        }
+        return rowKey.toString();
     }
 
 }

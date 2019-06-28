@@ -67,9 +67,8 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         }
 
         // case 3: before == current before:aaa -> after:xxx -> current:aaa
-        // //todo wait verfiy
-       // execSQL("update table_name set blog = 'aaa' where (id,name) in ((12345,'aaa'),(12346,'aaa'));");
-        //Assertions.assertFalse(spy.dataValidationAndGoOn(connection));
+        execSQL("update table_name set blog = 'https://github.com/seata' where (id,name) in ((12345,'aaa'),(12346,'aaa'));");
+        Assertions.assertFalse(spy.dataValidationAndGoOn(connection));
 
         // case 4: before == after   before:aaa -> after:aaa
         afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE (id,name) IN ((12345,'aaa'),(12346,'aaa'));");
@@ -81,10 +80,10 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
     public void dataValidationInsert() throws SQLException {
         TableRecords beforeImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
 
-        execSQL("INSERT INTO table_name(id, name) VALUES (12345,'aaa');");
-        execSQL("INSERT INTO table_name(id, name) VALUES (12346,'aaa');");
+        execSQL("INSERT INTO table_name(id, name, blog) VALUES (12345,'aaa', 'https://github.com/seata');");
+        execSQL("INSERT INTO table_name(id, name, blog) VALUES (12346,'aaa', 'https://github.com/seata');");
 
-        TableRecords afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
+        TableRecords afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE (id,name) IN ((12345,'aaa'),(12346,'aaa'));");
 
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
         sqlUndoLog.setSqlType(SQLType.INSERT);
@@ -96,37 +95,37 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         TestUndoExecutor spy = new TestUndoExecutor(sqlUndoLog, false);
 
         // case1: normal case  before:0 -> after:2 -> current:2 
-       // Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
+        Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
 
         // case2: dirty data   before:0 -> after:2 -> current:2' 
-        execSQL("update table_name set name = 'yyy' where id in (12345, 12346);");
+        execSQL("update table_name set blog = 'yyy' where (id, name) in ((12345,'aaa'),(12346,'aaa'));");
         try {
-          //  Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
-          //  Assertions.fail();
+          Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
+          Assertions.fail();
         } catch (Exception e) {
             Assertions.assertTrue(e instanceof SQLException);
         }
 
         // case3: before == current   before:0 -> after:2 -> current:0
-        execSQL("delete from table_name where id in (12345, 12346);");
+        execSQL("delete from table_name where (id, name) in ((12345,'aaa'),(12346,'aaa'));");
         Assertions.assertFalse(spy.dataValidationAndGoOn(connection));
 
         // case 4: before == after   before:0 -> after:0
-        afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
+        afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE (id, name) in ((12345,'aaa'),(12346,'aaa'));");
         sqlUndoLog.setAfterImage(afterImage);
         Assertions.assertFalse(spy.dataValidationAndGoOn(connection));
     }
 
     @Test
     public void dataValidationDelete() throws SQLException {
-        execSQL("INSERT INTO table_name(id, name) VALUES (12345,'aaa');");
-        execSQL("INSERT INTO table_name(id, name) VALUES (12346,'aaa');");
+        execSQL("INSERT INTO table_name(id, name, blog) VALUES (12345,'aaa', 'https://github.com/seata');");
+        execSQL("INSERT INTO table_name(id, name, blog) VALUES (12346,'aaa', 'https://github.com/seata');");
 
-        TableRecords beforeImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
+        TableRecords beforeImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE (id, name) IN ((12345,'aaa'), (12346,'aaa'));");
 
-        execSQL("delete from table_name where id in (12345, 12346);");
+        execSQL("delete from table_name where (id, name) IN ((12345,'aaa'), (12346,'aaa'));");
 
-        TableRecords afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
+        TableRecords afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE (id, name) IN ((12345,'aaa'), (12346,'aaa'));");
 
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
         sqlUndoLog.setSqlType(SQLType.INSERT);
@@ -141,7 +140,7 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
 
         // case2: dirty data   before:2 -> after:0 -> current:1
-        execSQL("INSERT INTO table_name(id, name) VALUES (12345,'aaa');");
+        execSQL("INSERT INTO table_name(id, name, blog) VALUES (12345,'aaa', 'https://github.com/seata');");
         try {
             Assertions.assertTrue(spy.dataValidationAndGoOn(connection));
             //Assertions.fail();
@@ -150,11 +149,11 @@ public class AbstractUndoExecutorTest extends BaseH2Test {
         }
 
         // case3: before == current   before:2 -> after:0 -> current:2
-        execSQL("INSERT INTO table_name(id, name) VALUES (12346,'aaa');");
+        execSQL("INSERT INTO table_name(id, name, blog) VALUES (12346,'aaa','https://github.com/seata');");
         //Assertions.assertFalse(spy.dataValidationAndGoOn(connection));
 
         // case 4: before == after  before:2 -> after:2
-        afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE id IN (12345, 12346);");
+        afterImage = execQuery(tableMeta, "SELECT * FROM table_name WHERE (id,name) IN ((12345,'aaa'),(12346,'aaa'));");
         sqlUndoLog.setAfterImage(afterImage);
         Assertions.assertFalse(spy.dataValidationAndGoOn(connection));
     }

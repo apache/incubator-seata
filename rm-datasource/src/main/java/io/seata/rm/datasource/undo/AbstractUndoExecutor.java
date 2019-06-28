@@ -290,7 +290,7 @@ public abstract class AbstractUndoExecutor {
      */
     private String getPkPlaceholder(List<Row> rowList) {
         StringJoiner placeholder = new StringJoiner(",");
-        for(Row row:rowList){
+        for (Row row:rowList) {
             StringJoiner joinerField = new StringJoiner(",","(",")");
             for (Field field: row.primaryKeys()) {
                 joinerField.add("?");

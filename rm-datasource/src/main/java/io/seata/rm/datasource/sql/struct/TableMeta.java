@@ -15,10 +15,7 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import io.seata.common.util.CollectionUtils;
@@ -134,6 +131,19 @@ public class TableMeta {
         }
         return list;
     }
+
+
+    /**
+     * Gets primary key uniquePkName.
+     * @return UniquePk Name
+     */
+    public String getUniquePkName(){
+        List<String> pkNames = getPrimaryKeyOnlyName();
+        Collections.sort(pkNames);
+        return String.join("",pkNames);
+    }
+
+
 
     /**
      * Gets pk name.
