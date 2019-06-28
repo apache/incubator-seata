@@ -43,4 +43,12 @@ public class HeartbeatMessage implements Serializable {
     public String toString() {
         return this.pingOrPong ? "services ping" : "services pong";
     }
+
+    public boolean isPingOrPong() {
+        return pingOrPong;
+    }
+
+    public void setPingOrPong(boolean pingOrPong) {
+        this.pingOrPong = pingOrPong;
+    }
 }
