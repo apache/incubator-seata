@@ -17,6 +17,7 @@ package io.seata.rm.datasource.exec;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
@@ -121,7 +122,13 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      */
     private boolean containsPkName(String columnName) {
         List<String> primaryKeyRowNames = getTableMeta().getPrimaryKeyOnlyName();
-        return primaryKeyRowNames.contains(columnName);
+        if(CollectionUtils.isEmpty(primaryKeyRowNames)){
+            return false;
+        }
+        if (primaryKeyRowNames.contains(columnName)) {
+            return true;
+        }
+        return  CollectionUtils.toUpperList(primaryKeyRowNames).contains(columnName.toUpperCase());
     }
 
 

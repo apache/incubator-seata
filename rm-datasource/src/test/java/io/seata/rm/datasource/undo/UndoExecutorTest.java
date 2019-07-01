@@ -43,7 +43,11 @@ import java.sql.Struct;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.Executor;
 
 import com.alibaba.druid.util.JdbcConstants;

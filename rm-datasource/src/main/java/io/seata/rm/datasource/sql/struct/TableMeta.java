@@ -160,17 +160,15 @@ public class TableMeta {
      * @param columnName the colName
      * @return the boolean
      */
-    public boolean containsPK (String columnName) {
+    public boolean containsPK(String columnName) {
         if (StringUtils.isBlank(columnName)) {
             return false;
         }
         List<String> pkColumns = getPrimaryKeyOnlyName();
-        for (String pkColumn : pkColumns) {
-            if (pkColumn.equalsIgnoreCase(columnName)) {
-                return true;
-            }
+        if (pkColumns.contains(columnName)) {
+            return true;
         }
-        return false;
+        return CollectionUtils.toUpperList(pkColumns).contains(columnName.toUpperCase());
     }
 
 
