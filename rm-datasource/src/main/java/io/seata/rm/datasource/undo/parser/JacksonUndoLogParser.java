@@ -20,6 +20,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
@@ -28,6 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 
 /**
  * The type Json based undo log parser.
@@ -45,6 +48,8 @@ public class JacksonUndoLogParser implements UndoLogParser {
 
     static {
         MAPPER.registerModule(new JavaTimeModule());
+        MAPPER.registerModule(new Hibernate5Module());
+
         MAPPER.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
         MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         MAPPER.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);

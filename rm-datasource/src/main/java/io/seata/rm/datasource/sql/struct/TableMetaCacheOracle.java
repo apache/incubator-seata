@@ -195,8 +195,15 @@ public class TableMetaCacheOracle {
             col.setTableSchemaName(rs1.getString("TABLE_SCHEM"));
             col.setTableName(rs1.getString("TABLE_NAME"));
             col.setColumnName(rs1.getString("COLUMN_NAME"));
-            col.setDataType(rs1.getInt("DATA_TYPE"));
-            col.setDataTypeName(rs1.getString("TYPE_NAME"));
+            int dataType = rs1.getInt("DATA_TYPE");
+            String typeName = rs1.getString("TYPE_NAME");
+            if(dataType ==Types.TIMESTAMP){
+                logger.debug("dateType:{}", dataType);
+                logger.debug("data_type_name:{}", typeName);
+            }
+            col.setDataType(dataType);
+            col.setDataTypeName(typeName);
+
             col.setColumnSize(rs1.getInt("COLUMN_SIZE"));
             col.setDecimalDigits(rs1.getInt("DECIMAL_DIGITS"));
             col.setNumPrecRadix(rs1.getInt("NUM_PREC_RADIX"));

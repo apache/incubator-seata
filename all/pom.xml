@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>0.6.1</version>
+    <version>0.6.1.2</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -30,6 +30,22 @@
     <prerequisites>
         <maven>3.6.0</maven>
     </prerequisites>
+    <repositories>
+        <!-- more information at https://blogs.oracle.com/dev2dev/entry/how_to_get_oracle_jdbc -->
+        <repository>
+            <id>maven-public</id>
+            <name>maven-public</name>
+            <url>http://192.168.8.21:8081/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <!-- jhipster-needle-maven-repository -->
+    </repositories>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -106,6 +122,11 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-config-zk</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.jdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>18.3.0.0</version>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>

@@ -17,10 +17,12 @@ package io.seata.rm.datasource.sql.struct;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.seata.common.exception.ShouldNeverHappenException;
+import oracle.sql.TIMESTAMP;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +39,75 @@ public class TableRecords {
     private String tableName;
 
     private List<Row> rows = new ArrayList<Row>();
+
+    /**
+     * Instantiates a new Table records.
+     */
+    public TableRecords() {
+
+    }
+
+    /**
+     * Instantiates a new Table records.
+     *
+     * @param tableMeta the table meta
+     */
+    public TableRecords(TableMeta tableMeta) {
+        setTableMeta(tableMeta);
+    }
+
+    /**
+     * Empty table records.
+     *
+     * @param tableMeta the table meta
+     * @return the table records
+     */
+    public static TableRecords empty(TableMeta tableMeta) {
+        return new EmptyTableRecords(tableMeta);
+    }
+
+    /**
+     * Build records table records.
+     *
+     * @param tmeta     the tmeta
+     * @param resultSet the result set
+     * @return the table records
+     * @throws SQLException the sql exception
+     */
+    public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet) throws SQLException {
+        TableRecords records = new TableRecords(tmeta);
+        ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
+        int columnCount = resultSetMetaData.getColumnCount();
+
+        while (resultSet.next()) {
+            List<Field> fields = new ArrayList<>(columnCount);
+            for (int i = 1; i <= columnCount; i++) {
+                String colName = resultSetMetaData.getColumnName(i);
+                ColumnMeta col = tmeta.getColumnMeta(colName);
+                Field field = new Field();
+                field.setName(col.getColumnName());
+                if (tmeta.getPkName().equals(field.getName())) {
+                    field.setKeyType(KeyType.PrimaryKey);
+                }
+                field.setType(col.getDataType());
+                Object object = resultSet.getObject(i);
+                if (col.getDataType() == Types.TIMESTAMP) {
+                    TIMESTAMP timestamp = (TIMESTAMP) object;
+                    field.setValue(timestamp.timestampValue());
+                } else {
+                    field.setValue(object);
+                }
+
+                fields.add(field);
+            }
+
+            Row row = new Row();
+            row.setFields(fields);
+
+            records.add(row);
+        }
+        return records;
+    }
 
     /**
      * Gets table name.
@@ -72,35 +143,6 @@ public class TableRecords {
      */
     public void setRows(List<Row> rows) {
         this.rows = rows;
-    }
-
-    /**
-     * Instantiates a new Table records.
-     */
-    public TableRecords() {
-
-    }
-
-    /**
-     * Instantiates a new Table records.
-     *
-     * @param tableMeta the table meta
-     */
-    public TableRecords(TableMeta tableMeta) {
-        setTableMeta(tableMeta);
-    }
-
-    /**
-     * Sets table meta.
-     *
-     * @param tableMeta the table meta
-     */
-    public void setTableMeta(TableMeta tableMeta) {
-        if (this.tableMeta != null) {
-            throw new ShouldNeverHappenException();
-        }
-        this.tableMeta = tableMeta;
-        this.tableName = tableMeta.getTableName();
     }
 
     /**
@@ -151,54 +193,22 @@ public class TableRecords {
     }
 
     /**
-     * Empty table records.
+     * Sets table meta.
      *
      * @param tableMeta the table meta
-     * @return the table records
      */
-    public static TableRecords empty(TableMeta tableMeta) {
-        return new EmptyTableRecords(tableMeta);
-    }
-
-    /**
-     * Build records table records.
-     *
-     * @param tmeta     the tmeta
-     * @param resultSet the result set
-     * @return the table records
-     * @throws SQLException the sql exception
-     */
-    public static TableRecords buildRecords(TableMeta tmeta, ResultSet resultSet) throws SQLException {
-        TableRecords records = new TableRecords(tmeta);
-        ResultSetMetaData resultSetMetaData = resultSet.getMetaData();
-        int columnCount = resultSetMetaData.getColumnCount();
-
-        while (resultSet.next()) {
-            List<Field> fields = new ArrayList<>(columnCount);
-            for (int i = 1; i <= columnCount; i++) {
-                String colName = resultSetMetaData.getColumnName(i);
-                ColumnMeta col = tmeta.getColumnMeta(colName);
-                Field field = new Field();
-                field.setName(col.getColumnName());
-                if (tmeta.getPkName().equals(field.getName())) {
-                    field.setKeyType(KeyType.PrimaryKey);
-                }
-                field.setType(col.getDataType());
-                field.setValue(resultSet.getObject(i));
-                fields.add(field);
-            }
-
-            Row row = new Row();
-            row.setFields(fields);
-
-            records.add(row);
+    public void setTableMeta(TableMeta tableMeta) {
+        if (this.tableMeta != null) {
+            throw new ShouldNeverHappenException();
         }
-        return records;
+        this.tableMeta = tableMeta;
+        this.tableName = tableMeta.getTableName();
     }
 
     public static class EmptyTableRecords extends TableRecords {
 
-        public EmptyTableRecords() {}
+        public EmptyTableRecords() {
+        }
 
         public EmptyTableRecords(TableMeta tableMeta) {
             this.setTableMeta(tableMeta);
