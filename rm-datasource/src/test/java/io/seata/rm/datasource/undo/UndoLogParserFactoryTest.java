@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
+import io.seata.rm.datasource.undo.parser.JacksonUndoLogParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -25,6 +26,6 @@ class UndoLogParserFactoryTest {
 
     @Test
     void getInstance() {
-        Assertions.assertTrue(UndoLogParserFactory.getInstance() instanceof JSONBasedUndoLogParser);
+        Assertions.assertTrue(UndoLogParserFactory.getInstance() instanceof JacksonUndoLogParser);
     }
 }

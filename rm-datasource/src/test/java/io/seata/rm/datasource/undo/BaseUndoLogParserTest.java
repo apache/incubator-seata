@@ -32,7 +32,7 @@ import java.util.List;
  */
 public abstract class BaseUndoLogParserTest extends BaseH2Test{
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BaseUndoLogParserTest.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
     
     public abstract UndoLogParser getParser();
     

@@ -33,6 +33,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
 
+
 /**
  * @author Geng Zhang
  */
@@ -75,7 +76,7 @@ public abstract class BaseH2Test {
 
     @BeforeEach
     private void prepareTable() {
-        execSQL("DROP TABLE table_name");
+        execSQL("DROP TABLE IF EXISTS table_name");
         execSQL("CREATE TABLE table_name ( `id` int(8), `name` varchar(64), PRIMARY KEY (`id`))");
     }
 
