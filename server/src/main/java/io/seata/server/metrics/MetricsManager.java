@@ -17,9 +17,10 @@ package io.seata.server.metrics;
 
 import java.util.List;
 
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.metrics.Exporter;
-import io.seata.metrics.Registry;
+import io.seata.metrics.exporter.Exporter;
+import io.seata.metrics.exporter.ExporterFactory;
+import io.seata.metrics.registry.Registry;
+import io.seata.metrics.registry.RegistryFactory;
 import io.seata.server.event.EventBusManager;
 
 /**
@@ -43,9 +44,9 @@ public class MetricsManager {
     }
 
     public void init() {
-        registry = EnhancedServiceLoader.load(Registry.class);
+        registry = RegistryFactory.getInstance();
         if (registry != null) {
-            List<Exporter> exporters = EnhancedServiceLoader.loadAll(Exporter.class);
+            List<Exporter> exporters = ExporterFactory.getInstanceList();
             //only at least one metrics exporter implement had imported in pom then need register MetricsSubscriber
             if (exporters.size() != 0) {
                 exporters.forEach(exporter -> exporter.setRegistry(registry));

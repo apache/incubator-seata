@@ -15,7 +15,7 @@
  */
 package io.seata.server.metrics;
 
-import io.seata.metrics.constants.IdConstants;
+import io.seata.metrics.IdConstants;
 import io.seata.metrics.Id;
 
 /**

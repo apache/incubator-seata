@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 import com.google.common.eventbus.Subscribe;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.model.GlobalStatus;
-import io.seata.metrics.Registry;
+import io.seata.metrics.registry.Registry;
 
 /**
  * Event subscriber for metrics
@@ -31,9 +31,9 @@ import io.seata.metrics.Registry;
  * @author zhengyangyong
  */
 public class MetricsSubscriber {
-    public final Registry registry;
+    private final Registry registry;
 
-    public final Map<GlobalStatus, Consumer<GlobalTransactionEvent>> consumers;
+    private final Map<GlobalStatus, Consumer<GlobalTransactionEvent>> consumers;
 
     public MetricsSubscriber(Registry registry) {
         this.registry = registry;

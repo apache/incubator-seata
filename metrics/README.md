@@ -2,12 +2,12 @@
 #### 设计思路
 1. Seata作为一个被集成的数据一致性框架，Metrics模块将尽可能少的使用第三方依赖以降低发生冲突的风险；
 2. Metrics模块将竭力争取更高的度量性能和更低的资源开销，尽可能降低开启后带来的副作用；
-3. 插件式——Metrics是否激活、数据如何发布，去取决于是否引入了对应的依赖，例如在TC Server中引入`seata-metrics-prometheus`，则自动启用并将度量数据发布到[Prometheus](https://github.com/prometheus)；
+3. 配置式，Metrics是否激活、数据如何发布，取决于对应的配置；
 4. 不使用Spring，使用SPI(Service Provider Interface)加载扩展；
 5. 初始仅发布核心Transaction相关指标，之后结合社区的需求，逐步完善运维方面的所有其他指标。
 
 #### 模块说明
-由1个核心API模块`seata-metrics-api`和N个对接实现模块如`seata-metrics-core`，`seata-metrics-prometheus`构成：
+由2个核心API模块`seata-metrics-api`和`seata-metrics-core`，以及N个实现模块例如`seata-metrics-registry-compact`、`seata-metrics-exporter-prometheus`构成：
 
 - seata-metrics-api模块
 
@@ -25,49 +25,46 @@
 
 - seata-metrics-core模块
 
-这是我们默认提供的Metrics实现，不使用其它Metrics开源实现，并轻量级的实现了以下三个Meter：
+Metrics核心模块，根据配置组织（加载）1个Registry和N个Exporter；
+
+- seata-metrics-registry-compact模块
+
+这是我们提供的默认（内置）的Registry实现，不使用其它Metrics开源库，轻量级的实现了以下四种Meter：
 
 | Meter类型  | 描述                                                                                                                         |
 | --------- | ------------------------------------------------------------ |
-| Gauge     | 单一最新值度量器                                                                                                                |
-| Counter   | 单一累加度量器，可增可减                                                                                                         |
-| Summary   | 多Measurement输出计数器，将输出`total`(合计)、`count`(计数)、`max`(最大)、`average`(合计/计数)和`tps`(合计/时间间隔)，无单位  |
-| Timer     | 多Measurement输出计时器，将输出`total`(合计)、`count`(计数)、`max`(最大)和`average`(合计/计数)，支持微秒为单位累计              |
+| CompactGauge     | 单一最新值度量器                                                                                                                |
+| CompactCounter   | 单一累加度量器，可增可减                                                                                                         |
+| CompactSummary   | 多Measurement输出计数器，将输出`total`(合计)、`count`(计数)、`max`(最大)、`average`(合计/计数)和`tps`(合计/时间间隔)，无单位  |
+| CompactTimer     | 多Measurement输出计时器，将输出`total`(合计)、`count`(计数)、`max`(最大)和`average`(合计/计数)，支持微秒为单位累计              |
 
-其中也包含了一个简单的默认Registry，即`DefaultRegistry`，它只有接受measure()方法调用的时候才计算度量值，因此计算窗口完全取决于Exporter的实现，不适合多Exporter并存时使用。
+其中包含的Registry，即`CompactRegistry`，它只有接受measure()方法调用的时候才计算度量值，因此计算窗口完全取决于Exporter的实现，故目前不太适合需要多Exporter的场景使用（如何扩展请参见后文）。
 
 >说明：
 >1. 未来可能增加更丰富复杂的度量器例如Histogram，这是一种可以本地统计聚合75th, 90th, 95th, 98th, 99th,99.9th...的度量器，适合某些场合，但需要更多内存。
 >2. 所有的计量器都将继承自Meter，所有的计量器执行measure()方法后，都将归一化的生成1或N个Measurement结果。
 
-- seata-metrics-prometheus模块
+- seata-metrics-exporter-prometheus模块
 
 Prometheus发布器`PrometheusExporter`，将度量数据同步给Prometheus。
 
 >说明：不同的监控系统，采集度量数据的方式不尽相同，例如Zabbix支持用zabbix-agent推送，Prometheus则推荐使用prometheus-server[拉取](https://prometheus.io/docs/practices/pushing/)的方式；同样数据交换协议也不同，因此往往需要逐一适配。
 
 #### 如何使用
-##### 引入依赖
-如果需要开启TC的Metrics，只需要在`seata-server`的pom中增加：
-```xml
-<dependencies>
-        <!--NOTICE:If want disable metrics you only need replace this dependency with seata-metrics-api-->
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-metrics-all</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <!--<dependency>-->
-            <!--<groupId>${project.groupId}</groupId>-->
-            <!--<artifactId>seata-metrics-api</artifactId>-->
-            <!--<version>${project.version}</version>-->
-        <!--</dependency>-->
-</dependencies>
+如果需要开启TC的Metrics，需要在其配置中增加配置项：
+```text
+## metrics settings
+metrics {
+  registry-type = "compact"
+  # multi exporters use comma divided
+  exporter-list = "prometheus"
+  exporter-prometheus-port = 9898
+}
 ```
 
-之后启动TC，即可在`http://tc-server-ip:9898/metrics`上获取到Metrics的文本格式数据。
+启动TC，即可在`http://tc-server-ip:9898/metrics`上获取到Metrics的文本格式数据。
 
->提示：默认使用`9898`端口，Prometheus已登记的端口列表[在此](https://github.com/prometheus/prometheus/wiki/Default-port-allocations)，如果想更换端口，可通过`metrics.exporter.prometheus.port`配置修改。
+>提示：默认使用`9898`端口，Prometheus已登记的端口列表[在此](https://github.com/prometheus/prometheus/wiki/Default-port-allocations)，如果想更换端口，可通过`metrics.exporter-prometheus-port`配置修改。
 
 ##### 下载并启动Prometheus
 下载完毕后，修改Prometheus的配置文件`prometheus.yml`，在`scrape_configs`中增加一项抓取Seata的度量数据：
@@ -122,12 +119,13 @@ seata.transaction(role=rm,name={BranchTransactionalName},mode=at/mt,meter=counte
 如果有下面几种情况：
 
 1. 您不是使用Prometheus作为运维监控系统，但希望能够将Seata的Metrics数据集成进Dashboard中；
+
+您需要实现新的Exporter，例如如果需要对接Zabbix，创建`seata-metrics-exporter-zabbix`模块，然后在ExporterType中添加新的Exporter类型，最后在`metrics.exporter-list`中配置。
+
 2. 您需要更复杂强大的度量器类型，这些度量器在其他Metrics实现库中已有，希望集成这些第三方依赖直接使用；
+
+您可以不使用内置的CompactRegistry的实现，完全扩展一个新的Registry库，例如希望使用Netflix Spectator的实现，扩展名为`seata-metrics-registry-spectator`的模块，然后在RegistryType中添加新的Registry类型，开发完成后，设置`metrics.registry-type`为对应的类型。
+
 3. 您需要改变默认Metric的Measurement输出，例如在Timer中增加一个`min`或`sd`(方差)；
-4. ...
 
-那么需要自行扩展Metrics的实现，请创建新的模块项目例如`seata-metrics-xxxx`，之后：
-
-- 针对1：您需要实现新的Exporter；
-- 针对2：您可以改变默认Registry的实现，返回第三方的Meter计量器实现；
-- 针对3：您可以修改对应Meter的实现，包括`measure()`方法返回的Measurement列表。
+您可以修改对应Meter的实现，包括`measure()`方法返回的Measurement列表。
