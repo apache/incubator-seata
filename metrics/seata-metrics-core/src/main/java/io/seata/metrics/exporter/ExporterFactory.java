@@ -22,7 +22,7 @@ import java.util.Objects;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.metrics.constants.ConfigurationKeys;
+import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -25,8 +25,8 @@ import io.prometheus.client.Collector.MetricFamilySamples.Sample;
 import io.prometheus.client.exporter.HTTPServer;
 import io.seata.common.loader.LoadLevel;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.metrics.Measurement;
-import io.seata.metrics.constants.ConfigurationKeys;
 import io.seata.metrics.exporter.Exporter;
 import io.seata.metrics.registry.Registry;
 
@@ -37,13 +37,15 @@ import io.seata.metrics.registry.Registry;
  */
 @LoadLevel(name = "Prometheus", order = 1)
 public class PrometheusExporter extends Collector implements Collector.Describable, Exporter {
+    private static final String METRICS_EXPORTER_PROMETHEUS_PORT = "exporter-prometheus-port";
+
     private final HTTPServer server;
 
     private Registry registry;
 
     public PrometheusExporter() throws IOException {
         int port = ConfigurationFactory.getInstance().getInt(
-            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_EXPORTER_PROMETHEUS_PORT, 9898);
+            ConfigurationKeys.METRICS_PREFIX + METRICS_EXPORTER_PROMETHEUS_PORT, 9898);
         this.server = new HTTPServer(port, true);
         this.register();
     }
