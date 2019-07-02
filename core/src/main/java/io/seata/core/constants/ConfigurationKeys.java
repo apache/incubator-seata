@@ -213,4 +213,19 @@ public class ConfigurationKeys {
      * The constant TRANSACTION_UNDO_LOG_SERIALIZATION.
      */
     public static final String TRANSACTION_UNDO_LOG_SERIALIZATION = TRANSACTION_PREFIX + "undo.log.serialization";
+
+    /**
+     * The constant METRICS_PREFIX.
+     */
+    public static final String METRICS_PREFIX = "metrics.";
+
+    /**
+     * The constant METRICS_REGISTRY_TYPE.
+     */
+    public static final String METRICS_REGISTRY_TYPE = "registry-type";
+
+    /**
+     * The constant METRICS_EXPORTER_LIST.
+     */
+    public static final String METRICS_EXPORTER_LIST = "exporter-list";
 }
