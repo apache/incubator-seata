@@ -34,7 +34,13 @@
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-metrics-core</artifactId>
+            <artifactId>seata-metrics-api</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-core</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
