@@ -20,9 +20,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.seata</groupId>
-
-
-
     <artifactId>seata-parent</artifactId>
     <version>${revision}</version>
     <modules>
@@ -60,6 +57,22 @@
             <distribution>repo</distribution>
         </license>
     </licenses>
+    <repositories>
+        <!-- more information at https://blogs.oracle.com/dev2dev/entry/how_to_get_oracle_jdbc -->
+        <repository>
+            <id>maven-public</id>
+            <name>maven-public</name>
+            <url>http://192.168.8.21:8081/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <!-- jhipster-needle-maven-repository -->
+    </repositories>
     <developers>
         <developer>
             <id>Seata</id>
@@ -86,7 +99,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>0.6.1.1</revision>
+        <revision>0.6.1.3</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>

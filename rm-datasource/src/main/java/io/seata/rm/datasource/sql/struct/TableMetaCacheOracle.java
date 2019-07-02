@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The type Table meta cache.
  */
+@SuppressWarnings("Duplicates")
 public class TableMetaCacheOracle {
 
     private static final long CACHE_SIZE = 100000;
@@ -39,7 +40,7 @@ public class TableMetaCacheOracle {
     private static final long EXPIRE_TIME = 900 * 1000;
 
     private static final Cache<String, TableMeta> TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
-        .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
+            .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
 
     private static Logger logger = LoggerFactory.getLogger(TableMetaCacheOracle.class);
 
@@ -55,7 +56,7 @@ public class TableMetaCacheOracle {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
-        String dataSourceKey =  dataSourceProxy.getResourceId();
+        String dataSourceKey = dataSourceProxy.getResourceId();
 
         TableMeta tmeta = null;
         final String key = dataSourceKey + "." + tableName;
@@ -85,22 +86,21 @@ public class TableMetaCacheOracle {
     }
 
     private static TableMeta fetchSchemeInDefaultWay(DataSource dataSource, String tableName)
-        throws SQLException {
+            throws SQLException {
         Connection conn = null;
         java.sql.Statement stmt = null;
         ResultSet rs = null;
         try {
             conn = dataSource.getConnection();
             stmt = conn.createStatement();
-            StringBuffer sb = new StringBuffer("SELECT * FROM " + tableName +" where rownum=1" );
+            StringBuffer sb = new StringBuffer("SELECT * FROM " + tableName + " where rownum=1");
             rs = stmt.executeQuery(sb.toString());
             ResultSetMetaData rsmd = rs.getMetaData();
             DatabaseMetaData dbmd = conn.getMetaData();
-
-            return resultSetMetaToSchema(rsmd, dbmd, tableName);
+            return resultSetMetaToSchema(rsmd, dbmd, conn, tableName);
         } catch (Exception e) {
             if (e instanceof SQLException) {
-                throw ((SQLException)e);
+                throw ((SQLException) e);
             }
             throw new SQLException("Failed to fetch schema of " + tableName, e);
 
@@ -148,9 +148,7 @@ public class TableMetaCacheOracle {
         try {
             stmt = conn.getTargetConnection().createStatement();
             rs1 = stmt.executeQuery(
-                "select a.constraint_name,  a.column_name from user_cons_columns a, user_constraints b  where a"
-                    + ".constraint_name = b.constraint_name and b.constraint_type = 'P' and a.table_name ='"
-                    + tableName + "'");
+                    String.format("select a.constraint_name, a.column_name from user_cons_columns a, user_constraints b  where a.constraint_name = b.constraint_name and b.constraint_type = 'P' and a.table_name ='%s'", tableName));
             while (rs1.next()) {
                 String indexName = rs1.getString(1);
                 String colName = rs1.getString(2);
@@ -180,10 +178,12 @@ public class TableMetaCacheOracle {
         return tm;
     }
 
-    private static TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
-        throws SQLException {
-//        String schemaName = rsmd.getSchemaName(1);
-//        String catalogName = rsmd.getCatalogName(1);
+    private static TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, Connection conn, String tableName)
+            throws SQLException {
+        String schemaName = rsmd.getSchemaName(1);
+        String catalogName = rsmd.getCatalogName(1);
+        logger.debug("schemaName {}", schemaName);
+        logger.debug("catalogName {}", catalogName);
 
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
@@ -195,8 +195,14 @@ public class TableMetaCacheOracle {
             col.setTableSchemaName(rs1.getString("TABLE_SCHEM"));
             col.setTableName(rs1.getString("TABLE_NAME"));
             col.setColumnName(rs1.getString("COLUMN_NAME"));
-            col.setDataType(rs1.getInt("DATA_TYPE"));
-            col.setDataTypeName(rs1.getString("TYPE_NAME"));
+            int dataType = rs1.getInt("DATA_TYPE");
+            String typeName = rs1.getString("TYPE_NAME");
+            if (dataType == Types.TIMESTAMP) {
+                logger.debug("dateType:{}", dataType);
+                logger.debug("data_type_name:{}", typeName);
+            }
+            col.setDataType(dataType);
+            col.setDataTypeName(typeName);
             col.setColumnSize(rs1.getInt("COLUMN_SIZE"));
             col.setDecimalDigits(rs1.getInt("DECIMAL_DIGITS"));
             col.setNumPrecRadix(rs1.getInt("NUM_PREC_RADIX"));
@@ -219,7 +225,7 @@ public class TableMetaCacheOracle {
         String indexName = "";
         while (rs2.next()) {
             indexName = rs2.getString("INDEX_NAME");
-            if( StringUtils.isEmpty(indexName) ){
+            if (StringUtils.isEmpty(indexName)) {
                 continue;
             }
             String colName = rs2.getString("COLUMN_NAME").toUpperCase();
@@ -233,44 +239,71 @@ public class TableMetaCacheOracle {
                 index.setIndexName(indexName);
                 index.setNonUnique(rs2.getBoolean("NON_UNIQUE"));
                 index.setIndexQualifier(rs2.getString("INDEX_QUALIFIER"));
-                index.setIndexName(rs2.getString("INDEX_NAME"));
                 index.setType(rs2.getShort("TYPE"));
                 index.setOrdinalPosition(rs2.getShort("ORDINAL_POSITION"));
                 index.setAscOrDesc(rs2.getString("ASC_OR_DESC"));
                 index.setCardinality(rs2.getInt("CARDINALITY"));
                 index.getValues().add(col);
                 if ("PRIMARY".equalsIgnoreCase(indexName) || (
-                        tableName+ "_pkey").equalsIgnoreCase(indexName)) {
+                        tableName + "_pkey").equalsIgnoreCase(indexName)) {
                     index.setIndextype(IndexType.PRIMARY);
-                } else if (index.isNonUnique() == false) {
+                } else if (!index.isNonUnique()) {
                     index.setIndextype(IndexType.Unique);
                 } else {
                     index.setIndextype(IndexType.Normal);
                 }
                 tm.getAllIndexes().put(indexName, index);
-
             }
         }
-        ResultSet pk = dbmd.getPrimaryKeys(null, dbmd.getUserName(), tableName);
+
+        Statement statement = conn.createStatement();
+        String sql = String.format("select a.constraint_name,a.column_name ,b.index_name from user_cons_columns a, user_constraints b where a.constraint_name = b.constraint_name and b.constraint_type = 'P' and a.table_name = '%s'", tableName);
+
+        ResultSet pkResult = statement.executeQuery(sql);
+        while (pkResult.next()) {
+            String pkIndexName = pkResult.getString("index_name");
+            String constraintName = pkResult.getString("constraint_name");
+            if (tm.getAllIndexes().containsKey(pkIndexName)) {
+                IndexMeta index = tm.getAllIndexes().get(pkIndexName);
+                index.setIndextype(IndexType.PRIMARY);
+            } else {
+                IndexMeta index = new IndexMeta();
+                index.setIndexName(constraintName);
+                index.setNonUnique(false);
+                String columnName = pkResult.getString("column_name");
+                ColumnMeta col = tm.getAllColumns().get(columnName);
+                index.setOrdinalPosition((short) 1);
+                index.setAscOrDesc(null);
+                index.setType((short) 1);
+                index.setIndexQualifier(null);
+                index.setCardinality(0);
+                index.getValues().add(col);
+                index.setIndextype(IndexType.PRIMARY);
+                tm.getAllIndexes().put(indexName, index);
+            }
+        }
+ /*       ResultSet pk = dbmd.getPrimaryKeys(null, dbmd.getUserName(), tableName);
         while (pk.next()) {
             String pkIndexName = pk.getObject(6).toString();
             if (tm.getAllIndexes().containsKey(pkIndexName)) {
                 IndexMeta index = tm.getAllIndexes().get(pkIndexName);
                 index.setIndextype(IndexType.PRIMARY);
+            } else {
+                IndexMeta index = new IndexMeta();
+                index.setIndexName(pkIndexName);
+                index.setNonUnique(true);
+                String columnName = pk.getString("COLUMN_NAME");
+                index.setOrdinalPosition(pk.getShort("key_seq"));
+                index.setAscOrDesc(null);
+                index.setType((short) 1);
+                index.setIndexQualifier(null);
+                index.setCardinality(0);
+                ColumnMeta col = tm.getAllColumns().get(columnName);
+                index.getValues().add(col);
+                index.setIndextype(IndexType.PRIMARY);
+                tm.getAllIndexes().put(indexName, index);
             }
-        }
-        IndexMeta index = tm.getAllIndexes().get(indexName);
-        if (index.getIndextype().value() != 0) {
-            if ("H2 JDBC Driver".equals(dbmd.getDriverName())) {
-                if (indexName.length() > 11 && "PRIMARY_KEY".equalsIgnoreCase(indexName.substring(0, 11))) {
-                    index.setIndextype(IndexType.PRIMARY);
-                }
-            } else if (dbmd.getDriverName() != null && dbmd.getDriverName().toLowerCase().indexOf("postgresql") >= 0) {
-                if ((tableName + "_pkey").equalsIgnoreCase(indexName)) {
-                    index.setIndextype(IndexType.PRIMARY);
-                }
-            }
-        }
+        }*/
         return tm;
     }
 }
