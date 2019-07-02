@@ -15,7 +15,6 @@
  */
 package io.seata.core.protocol.transaction;
 
-import java.nio.ByteBuffer;
 
 import io.seata.core.model.GlobalStatus;
 
@@ -50,18 +49,6 @@ public abstract class AbstractGlobalEndResponse extends AbstractTransactionRespo
     }
 
     @Override
-    protected void doEncode() {
-        super.doEncode();
-        byteBuffer.put((byte)globalStatus.getCode());
-    }
-
-    @Override
-    public void decode(ByteBuffer byteBuffer) {
-        super.decode(byteBuffer);
-        globalStatus = GlobalStatus.get(byteBuffer.get());
-    }
-
-    @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
         result.append("globalStatus=");
@@ -75,4 +62,5 @@ public abstract class AbstractGlobalEndResponse extends AbstractTransactionRespo
 
         return result.toString();
     }
+
 }

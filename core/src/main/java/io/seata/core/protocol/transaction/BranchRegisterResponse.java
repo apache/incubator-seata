@@ -16,9 +16,8 @@
 package io.seata.core.protocol.transaction;
 
 import java.io.Serializable;
-import java.nio.ByteBuffer;
 
-import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.MessageType;
 
 /**
  * The type Branch register response.
@@ -27,7 +26,6 @@ import io.seata.core.protocol.AbstractMessage;
  */
 public class BranchRegisterResponse extends AbstractTransactionResponse implements Serializable {
 
-    private static final long serialVersionUID = 8317040433102745774L;
     private long branchId;
 
     /**
@@ -50,20 +48,7 @@ public class BranchRegisterResponse extends AbstractTransactionResponse implemen
 
     @Override
     public short getTypeCode() {
-        return AbstractMessage.TYPE_BRANCH_REGISTER_RESULT;
-    }
-
-    @Override
-    protected void doEncode() {
-        super.doEncode();
-        byteBuffer.putLong(branchId);
-
-    }
-
-    @Override
-    public void decode(ByteBuffer byteBuffer) {
-        super.decode(byteBuffer);
-        this.branchId = byteBuffer.getLong();
+        return MessageType.TYPE_BRANCH_REGISTER_RESULT;
     }
 
     @Override
