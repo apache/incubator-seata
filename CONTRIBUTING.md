@@ -9,6 +9,7 @@ It is warmly welcomed if you have interest to hack on Seata. First, we encourage
 * [Code and doc contribution](#code-and-doc-contribution)
 * [Test case contribution](#test-case-contribution)
 * [Engage to help anything](#engage-to-help-anything)
+* [Code Style](#code-style)
 
 ## Reporting security issues
 
@@ -16,11 +17,11 @@ Security issues are always treated seriously. As our usual principle, we discour
 
 ## Reporting general issues
 
-To be honest, we regard every user of Seata as a very kind contributor. After experiencing Seata, you may have some feedback for the project. Then feel free to open an issue via [NEW ISSUE](https://github.com/seata/seata/issues/new).
+To be honest, we regard every user of Seata as a very kind contributor. After experiencing Seata, you may have some feedback for the project. Then feel free to open an issue via [NEW ISSUE](https://github.com/seata/seata/issues/new/choose).
 
 Since we collaborate project Seata in a distributed way, we appreciate **WELL-WRITTEN**, **DETAILED**, **EXPLICIT** issue reports. To make the communication more efficient, we wish everyone could search if your issue is an existing one in the searching list. If you find it existing, please add your details in comments under the existing issue instead of opening a brand new one.
 
-To make the issue details as standard as possible, we setup an [ISSUE TEMPLATE](./.github/ISSUE_TEMPLATE.md) for issue reporters. Please **BE SURE** to follow the instructions to fill fields in template.
+To make the issue details as standard as possible, we setup an [ISSUE TEMPLATE](./.github/ISSUE_TEMPLATE) for issue reporters. Please **BE SURE** to follow the instructions to fill fields in template.
 
 There are a lot of cases when you could open an issue:
 
@@ -190,6 +191,5 @@ Seata code style Comply with Alibaba Java Coding Guidelines.
 #### eclipse IDE
 [p3c-eclipse-plugin-install](https://github.com/alibaba/p3c/blob/master/eclipse-plugin/README.md)
 
-#### Acknowledgement [Alibaba p3c](https://github.com/alibaba/p3c)
 
 In a word, **ANY HELP IS CONTRIBUTION.**
