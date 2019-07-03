@@ -17,6 +17,8 @@ package io.seata.server.metrics;
 
 import java.util.List;
 
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.metrics.exporter.Exporter;
 import io.seata.metrics.exporter.ExporterFactory;
 import io.seata.metrics.registry.Registry;
@@ -44,13 +46,17 @@ public class MetricsManager {
     }
 
     public void init() {
-        registry = RegistryFactory.getInstance();
-        if (registry != null) {
-            List<Exporter> exporters = ExporterFactory.getInstanceList();
-            //only at least one metrics exporter implement had imported in pom then need register MetricsSubscriber
-            if (exporters.size() != 0) {
-                exporters.forEach(exporter -> exporter.setRegistry(registry));
-                EventBusManager.get().register(new MetricsSubscriber(registry));
+        boolean enabled = ConfigurationFactory.getInstance().getBoolean(
+            ConfigurationKeys.METRICS_PREFIX + ConfigurationKeys.METRICS_ENABLED, false);
+        if (enabled) {
+            registry = RegistryFactory.getInstance();
+            if (registry != null) {
+                List<Exporter> exporters = ExporterFactory.getInstanceList();
+                //only at least one metrics exporter implement had imported in pom then need register MetricsSubscriber
+                if (exporters.size() != 0) {
+                    exporters.forEach(exporter -> exporter.setRegistry(registry));
+                    EventBusManager.get().register(new MetricsSubscriber(registry));
+                }
             }
         }
     }
