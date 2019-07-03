@@ -16,14 +16,20 @@
 package io.seata.core.rpc.netty;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageCodec;
-import io.seata.core.protocol.AbstractMessage;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.codec.Codec;
+import io.seata.core.codec.CodecFactory;
+import io.seata.core.codec.CodecType;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.protocol.HeartbeatMessage;
-import io.seata.core.protocol.MessageCodec;
 import io.seata.core.protocol.RpcMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,57 +56,83 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageCodecHandler.class);
     private static short MAGIC = (short)0xdada;
-    private static int HEAD_LENGTH = 14;
-    private static final int FLAG_REQUEST = 0x80;
-    private static final int FLAG_ASYNC = 0x40;
-    private static final int FLAG_HEARTBEAT = 0x20;
-    private static final int FLAG_SEATA_CODEC = 0x10;
-    private static final int MAGIC_HALF = -38;
-    private static final int NOT_FOUND_INDEX = -1;
+    private static int HEAD_LENGTH = 16;
+    private static final short FLAG_REQUEST = 0x80;
+    private static final short FLAG_ASYNC = 0x40;
+    private static final short FLAG_HEARTBEAT = 0x20;
+    private static final short FLAG_SEATA_CODEC = 0x10;
 
+    private static Configuration configuration = ConfigurationFactory.getInstance();
+
+    private static String serialize = configuration.getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC,
+        CodecType.SEATA.name());
+
+    /**
+     * The constant UTF8.
+     */
+    protected static final Charset UTF8 = StandardCharsets.UTF_8;
+
+    /**
+     * encode the msg: magic, flag, msgId, bodyLength, body
+     *
+     * @param ctx
+     * @param msg
+     * @param out
+     * @throws Exception
+     */
     @Override
     protected void encode(ChannelHandlerContext ctx, RpcMessage msg, ByteBuf out) throws Exception {
-        MessageCodec msgCodec = null;
         ByteBuffer byteBuffer = ByteBuffer.allocate(128);
-        if (msg.getBody() instanceof MessageCodec) {
-            msgCodec = (MessageCodec)msg.getBody();
-        }
+
+        //codec
+        CodecType codecType = CodecType.getByCode(this.getSerializer());
+        byte codecCode = codecType.getCode();
+
+        //header, the flag: 0000 0000 flags(4) codec(4)
         byteBuffer.putShort(MAGIC);
-        int flag = (msg.isAsync() ? FLAG_ASYNC : 0)
+        short flag = (short)((msg.isAsync() ? FLAG_ASYNC : 0)
             | (msg.isHeartbeat() ? FLAG_HEARTBEAT : 0)
             | (msg.isRequest() ? FLAG_REQUEST : 0)
-            | (msgCodec != null ? FLAG_SEATA_CODEC : 0);
+            //                | (msgCodec != null ? FLAG_SEATA_CODEC : 0)
+            | FLAG_SEATA_CODEC
+            | codecCode);
 
-        byteBuffer.putShort((short)flag);
+        byteBuffer.putShort(flag);
 
-        if (msg.getBody() instanceof HeartbeatMessage) {
-            byteBuffer.putShort((short)0);
+        //heart beat
+        if (msg.isHeartbeat()) {
             byteBuffer.putLong(msg.getId());
+            //body length
+            byteBuffer.putInt(0);
             byteBuffer.flip();
-            out.writeBytes(byteBuffer);
+            byte[] content = new byte[byteBuffer.limit()];
+            byteBuffer.get(content);
+            out.writeBytes(content);
             return;
         }
 
+        //msgId before body
+        byteBuffer.putLong(msg.getId());
+
+        //the body
         try {
-            if (null != msgCodec) {
-                byteBuffer.putShort(msgCodec.getTypeCode());
-                byteBuffer.putLong(msg.getId());
+            //codec
+            Codec codec = CodecFactory.getCodec(codecCode);
+            //get body bytes
+            byte[] bodyBytes = codec.encode(msg.getBody());
+            int bodyBytesLength = bodyBytes.length;
+            ByteBuffer contentByteBuffer = ByteBuffer.allocate(bodyBytesLength + 20);
 
-                byteBuffer.flip();
-                out.writeBytes(byteBuffer);
-                out.writeBytes(msgCodec.encode());
-            } else {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("msg:" + msg.getBody().toString());
-                }
-                byte[] body = hessianSerialize(msg.getBody());
-                byteBuffer.putShort((short)body.length);
-                byteBuffer.putLong(msg.getId());
-                byteBuffer.put(body);
+            byteBuffer.flip();
+            contentByteBuffer.put(byteBuffer);
+            contentByteBuffer.putInt(bodyBytesLength);
+            contentByteBuffer.put(bodyBytes);
+            contentByteBuffer.flip();
 
-                byteBuffer.flip();
-                out.writeBytes(byteBuffer);
-            }
+            //write content
+            byte[] content = new byte[contentByteBuffer.limit()];
+            contentByteBuffer.get(content);
+            out.writeBytes(content);
         } catch (Exception e) {
             LOGGER.error(msg.getBody() + " encode error", "", e);
             throw e;
@@ -112,11 +144,14 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+        //      the msg: magic, flag, msgId, bodyLength, body
 
+        //header length: 16
         if (in.readableBytes() < HEAD_LENGTH) {
             return;
         }
         in.markReaderIndex();
+        //magic
         short protocol = in.readShort();
         if (protocol != MAGIC) {
             String emsg = "decode error,Unknown protocol: " + protocol + ",will close channel:" + ctx.channel();
@@ -124,18 +159,20 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
             ctx.channel().close();
             return;
         }
-
-        int flag = (int)in.readShort();
+        //flag
+        short flag = in.readShort();
 
         boolean isHeartbeat = (FLAG_HEARTBEAT & flag) > 0;
         boolean isRequest = (FLAG_REQUEST & flag) > 0;
-        boolean isSeataCodec = (FLAG_SEATA_CODEC & flag) > 0;
+        CodecType codecType = CodecType.getByCode(flag & 0x0F);
 
-        short bodyLength = 0;
-        short typeCode = 0;
-        if (!isSeataCodec) { bodyLength = in.readShort(); } else { typeCode = in.readShort(); }
+        //msgId
         long msgId = in.readLong();
+
+        //heart beat msg
         if (isHeartbeat) {
+            //read length=0
+            in.readInt();
             RpcMessage rpcMessage = new RpcMessage();
             rpcMessage.setId(msgId);
             rpcMessage.setAsync(true);
@@ -146,9 +183,13 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
             } else {
                 rpcMessage.setBody(HeartbeatMessage.PONG);
             }
+
             out.add(rpcMessage);
             return;
         }
+
+        //bodyLength
+        int bodyLength = in.readInt();
 
         if (bodyLength > 0 && in.readableBytes() < bodyLength) {
             in.resetReaderIndex();
@@ -162,19 +203,12 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
         rpcMessage.setRequest(isRequest);
 
         try {
-            if (isSeataCodec) {
-                MessageCodec msgCodec = AbstractMessage.getMsgInstanceByCode(typeCode);
-                if (!msgCodec.decode(in)) {
-                    in.resetReaderIndex();
-                    return;
-                }
-                rpcMessage.setBody(msgCodec);
-            } else {
-                byte[] body = new byte[bodyLength];
-                in.readBytes(body);
-                Object bodyObject = hessianDeserialize(body);
-                rpcMessage.setBody(bodyObject);
-            }
+            //codec
+            Codec codec = CodecFactory.getCodec(codecType.getCode());
+            byte[] bodyBytes = new byte[bodyLength];
+            in.readBytes(bodyBytes);
+            rpcMessage.setBody(codec.decode(bodyBytes));
+
         } catch (Exception e) {
             LOGGER.error("decode error", "", e);
             throw e;
@@ -187,35 +221,7 @@ public class MessageCodecHandler extends ByteToMessageCodec<RpcMessage> {
 
     }
 
-    /**
-     * Hessian serialize byte [ ].
-     *
-     * @param object the object
-     * @return the byte [ ]
-     * @throws Exception the exception
-     */
-    private static byte[] hessianSerialize(Object object) throws Exception {
-        if (object == null) {
-            throw new NullPointerException();
-        }
-        //todo user defined exx
-        throw new RuntimeException("hessianSerialize not support");
-
-    }
-
-    /**
-     * Hessian deserialize object.
-     *
-     * @param bytes the bytes
-     * @return the object
-     * @throws Exception the exception
-     */
-    private static Object hessianDeserialize(byte[] bytes) throws Exception {
-        if (bytes == null) {
-            throw new NullPointerException();
-        }
-        //todo user defined exx
-        throw new RuntimeException("hessianDeserialize not support");
-
+    protected String getSerializer() {
+        return serialize;
     }
 }
