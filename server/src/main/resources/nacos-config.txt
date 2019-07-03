@@ -10,6 +10,7 @@ transport.thread-factory.client-selector-thread-size=1
 transport.thread-factory.client-worker-thread-prefix=NettyClientWorkerThread
 transport.thread-factory.boss-thread-size=1
 transport.thread-factory.worker-thread-size=8
+transport.shutdown.wait=3
 service.vgroup_mapping.my_test_tx_group=default
 service.enableDegrade=false
 service.disable=false

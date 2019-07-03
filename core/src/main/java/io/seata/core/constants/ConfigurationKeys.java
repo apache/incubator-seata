@@ -71,6 +71,11 @@ public class ConfigurationKeys {
     public static final String CLIENT_PREFIX = "client.";
 
     /**
+     * The constant TRANSPORT_PREFIX.
+     */
+    public static final String TRANSPORT_PREFIX = "transport.";
+
+    /**
      * The constant CLIENT_ASYNC_COMMIT_BUFFER_LIMIT.
      */
     public static final String CLIENT_ASYNC_COMMIT_BUFFER_LIMIT = CLIENT_PREFIX + "async.commit.buffer.limit";
@@ -92,6 +97,12 @@ public class ConfigurationKeys {
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_PREFIX + "report.retry.count";
+
+
+    /**
+     * The constant SERIALIZE_FOR_RPC.
+     */
+    public static final String SERIALIZE_FOR_RPC = TRANSPORT_PREFIX + "serialization";
 
     /**
      * The constant STORE_DB_GLOBAL_TABLE.
@@ -202,4 +213,19 @@ public class ConfigurationKeys {
      * The constant TRANSACTION_UNDO_LOG_SERIALIZATION.
      */
     public static final String TRANSACTION_UNDO_LOG_SERIALIZATION = TRANSACTION_PREFIX + "undo.log.serialization";
+
+    /**
+     * The constant METRICS_PREFIX.
+     */
+    public static final String METRICS_PREFIX = "metrics.";
+
+    /**
+     * The constant METRICS_REGISTRY_TYPE.
+     */
+    public static final String METRICS_REGISTRY_TYPE = "registry-type";
+
+    /**
+     * The constant METRICS_EXPORTER_LIST.
+     */
+    public static final String METRICS_EXPORTER_LIST = "exporter-list";
 }

@@ -1,0 +1,2 @@
+ignore:
+  - "codec/seata-codec-protobuf/src/main/java/io/seata/codec/protobuf/generated"

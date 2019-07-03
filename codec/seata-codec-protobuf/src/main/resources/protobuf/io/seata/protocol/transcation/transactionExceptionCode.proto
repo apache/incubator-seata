@@ -1,0 +1,113 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+option java_multiple_files = true;
+option java_outer_classname = "TransactionExceptionCode";
+option java_package = "io.seata.codec.protobuf.generated";
+
+// PublishRequest is a publish request.
+enum TransactionExceptionCodeProto {
+
+    /**
+     * Unknown transaction exception code.
+     */
+    //
+    Unknown = 0;
+
+    /**
+     * Lock key conflict transaction exception code.
+     */
+    //
+    LockKeyConflict = 1;
+
+    /**
+     * Io transaction exception code.
+     */
+    //
+    IO = 2;
+
+    /**
+     * Branch rollback failed retriable transaction exception code.
+     */
+    //
+    BranchRollbackFailed_Retriable = 3;
+
+    /**
+     * Branch rollback failed unretriable transaction exception code.
+     */
+    //
+    BranchRollbackFailed_Unretriable = 4;
+
+    /**
+     * Branch register failed transaction exception code.
+     */
+    //
+    BranchRegisterFailed = 5;
+
+    /**
+     * Branch report failed transaction exception code.
+     */
+    //
+    BranchReportFailed = 6;
+
+    /**
+     * Lockable check failed transaction exception code.
+     */
+    //
+    LockableCheckFailed = 7;
+
+    /**
+     * Branch transaction not exist transaction exception code.
+     */
+    //
+    BranchTransactionNotExist = 8;
+
+    /**
+     * Global transaction not exist transaction exception code.
+     */
+    //
+    GlobalTransactionNotExist = 9;
+
+    /**
+     * Global transaction not active transaction exception code.
+     */
+    //
+    GlobalTransactionNotActive = 10;
+
+    /**
+     * Global transaction status invalid transaction exception code.
+     */
+    //
+    GlobalTransactionStatusInvalid = 11;
+
+    /**
+     * Failed to send branch commit request transaction exception code.
+     */
+    //
+    FailedToSendBranchCommitRequest = 12;
+
+    /**
+     * Failed to send branch rollback request transaction exception code.
+     */
+    //
+    FailedToSendBranchRollbackRequest = 13;
+
+    /**
+     * Failed to add branch transaction exception code.
+     */
+    //
+    FailedToAddBranch = 14;
+
+    /**
+  *  Failed to lock global transaction exception code.
+  */
+    FailedLockGlobalTranscation = 15;
+
+    /**
+     * FailedWriteSession
+     */
+    FailedWriteSession = 16;
+
+
+}

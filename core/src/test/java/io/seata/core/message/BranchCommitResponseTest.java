@@ -48,28 +48,4 @@ public class BranchCommitResponseTest {
 
     }
 
-    @Test
-    public void testEncodeDecode() {
-        BranchCommitResponse branchCommitResponse = new BranchCommitResponse();
-
-        branchCommitResponse.setXid("127.0.0.1:9999:39875642");
-        branchCommitResponse.setBranchId(10241024L);
-        branchCommitResponse.setResultCode(ResultCode.Success);
-        branchCommitResponse.setBranchStatus(BranchStatus.PhaseTwo_Committed);
-
-        byte[] encodeResult = branchCommitResponse.encode();
-
-        ByteBuf byteBuffer = UnpooledByteBufAllocator.DEFAULT.directBuffer(encodeResult.length);
-        byteBuffer.writeBytes(encodeResult);
-
-        BranchCommitResponse decodeBranchCommitResponse = new BranchCommitResponse();
-        decodeBranchCommitResponse.decode(byteBuffer);
-        Assertions.assertEquals(decodeBranchCommitResponse.getXid(), branchCommitResponse.getXid());
-        Assertions.assertEquals(decodeBranchCommitResponse.getBranchId(), branchCommitResponse.getBranchId());
-        Assertions.assertEquals(decodeBranchCommitResponse.getResultCode(), branchCommitResponse.getResultCode());
-        Assertions.assertEquals(decodeBranchCommitResponse.getBranchStatus(), branchCommitResponse.getBranchStatus());
-        Assertions.assertEquals(decodeBranchCommitResponse.getTransactionExceptionCode(),
-            branchCommitResponse.getTransactionExceptionCode());
-        Assertions.assertEquals(decodeBranchCommitResponse.getMsg(), branchCommitResponse.getMsg());
-    }
 }
