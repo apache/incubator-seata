@@ -52,6 +52,7 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
     private static final String REGISTRY_TYPE = "apollo";
     private static final String APP_ID = "app.id";
     private static final String APOLLO_META = "apollo.meta";
+    private static final String SEATA_NAMESPACE = "application-seata";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile Config config;
     private ExecutorService configOperateExecutor;
@@ -65,7 +66,8 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
         if (null == config) {
             synchronized (ApolloConfiguration.class) {
                 if (null == config) {
-                    config = ConfigService.getAppConfig();
+                    config = ConfigService.getConfig(SEATA_NAMESPACE);
+//                    config = ConfigService.getAppConfig();
                     configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD,
                         MAX_CONFIG_OPERATE_THREAD,
                         Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
