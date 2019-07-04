@@ -32,6 +32,7 @@ dependency-reduced-pom.xml
 /server/*root.*
 /server/.root.*
 /server/sessionStore/
+/server/db_store/
 /sessionStore/
 
 # system ignore
