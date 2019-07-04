@@ -220,6 +220,11 @@ public class ConfigurationKeys {
     public static final String METRICS_PREFIX = "metrics.";
 
     /**
+     * The constant METRICS_ENABLED.
+     */
+    public static final String METRICS_ENABLED = "enabled";
+
+    /**
      * The constant METRICS_REGISTRY_TYPE.
      */
     public static final String METRICS_REGISTRY_TYPE = "registry-type";
