@@ -117,10 +117,10 @@ public abstract class AbstractExceptionHandler {
             callback.execute(request, response);
             callback.onSuccess(request, response);
         } catch (TransactionException tex) {
-            LOGGER.error("Do RPC Failed, request: {}", request, tex);
+            LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
             callback.onTransactionException(request, response, tex);
         } catch (RuntimeException rex) {
-            LOGGER.error("Do RPC Failed, request: {}", request, rex);
+            LOGGER.error("Catch RuntimeException while do RPC, request: {}", request, rex);
             callback.onException(request, response, rex);
         }
     }
