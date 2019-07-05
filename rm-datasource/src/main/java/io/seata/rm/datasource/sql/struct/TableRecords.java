@@ -218,10 +218,5 @@ public class TableRecords {
         public void add(Row row) {
             throw new UnsupportedOperationException("xxx");
         }
-
-        @Override
-        public TableMeta getTableMeta() {
-            throw new UnsupportedOperationException("xxx");
-        }
     }
 }
