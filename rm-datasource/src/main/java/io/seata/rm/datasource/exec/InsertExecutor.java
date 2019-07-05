@@ -45,8 +45,8 @@ import java.util.Map;
  * @date 2019-03-21 21:30:02
  */
 public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(InsertExecutor.class);
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(InsertExecutor.class);
     protected static final String ERR_SQL_STATE = "S1009";
 
     /**
