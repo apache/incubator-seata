@@ -47,7 +47,7 @@ public interface MergedWarpMessageProtoOrBuilder extends
   /**
    * <code>repeated int64 msgIds = 3;</code>
    */
-  java.util.List<java.lang.Long> getMsgIdsList();
+  java.util.List<java.lang.Integer> getMsgIdsList();
   /**
    * <code>repeated int64 msgIds = 3;</code>
    */

@@ -24,7 +24,7 @@ import io.seata.codec.protobuf.generated.HeartbeatMessageProto;
 public class HeartbeatMessageConvertor implements PbConvertor<HeartbeatMessage, HeartbeatMessageProto> {
     @Override
     public HeartbeatMessageProto convert2Proto(HeartbeatMessage heartbeatMessage) {
-        HeartbeatMessageProto result = HeartbeatMessageProto.newBuilder().setPingOrPong(heartbeatMessage.isPingOrPong())
+        HeartbeatMessageProto result = HeartbeatMessageProto.newBuilder().setPingOrPong(heartbeatMessage.isPing())
             .build();
         return result;
     }
