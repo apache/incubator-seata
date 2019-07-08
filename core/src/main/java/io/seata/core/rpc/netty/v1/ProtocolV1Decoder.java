@@ -80,8 +80,7 @@ public class ProtocolV1Decoder extends io.netty.handler.codec.LengthFieldBasedFr
     }
 
     public Object decodeFrame(ByteBuf frame) throws IOException {
-        LOGGER.info("readable byte here:{}", frame.readableBytes());
-
+        // LOGGER.info("readable byte here:{}", frame.readableBytes());
         byte b0 = frame.readByte();
         byte b1 = frame.readByte();
         if (ProtocolConstants.MAGIC_CODE_BYTES[0] != b0
