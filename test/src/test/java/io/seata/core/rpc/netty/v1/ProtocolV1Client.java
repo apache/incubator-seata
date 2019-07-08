@@ -118,7 +118,7 @@ public class ProtocolV1Client {
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setId(client.idGenerator.incrementAndGet());
         rpcMessage.setCodec(CodecType.SEATA.getCode());
-        rpcMessage.setCompressor(ProtocolConstants.COMPRESS_NONE);
+        rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
         rpcMessage.setHeadMap(head);
         rpcMessage.setBody(body);
         rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST);

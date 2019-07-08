@@ -71,16 +71,9 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
      */
     protected final ThreadPoolExecutor messageExecutor;
 
-    private static PositiveAtomicCounter NEXT_ID = new PositiveAtomicCounter();
+    /** Id generator of this remoting */
+    protected final PositiveAtomicCounter idGenerator = new PositiveAtomicCounter();
 
-    /**
-     * Gets next message id.
-     *
-     * @return the next message id
-     */
-    public static int getNextMessageId() {
-        return NEXT_ID.incrementAndGet();
-    }
     /**
      * The Futures.
      */
@@ -122,6 +115,15 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
      */
     public AbstractRpcRemoting(ThreadPoolExecutor messageExecutor) {
         this.messageExecutor = messageExecutor;
+    }
+
+    /**
+     * Gets next message id.
+     *
+     * @return the next message id
+     */
+    public int getNextMessageId() {
+        return idGenerator.incrementAndGet();
     }
 
     /**
@@ -221,8 +223,8 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         final RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setId(getNextMessageId());
         rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
-        rpcMessage.setCodec(ProtocolConstants.DEFAULT_CODEC);
-        rpcMessage.setCompressor(ProtocolConstants.DEFAULT_COMPRESSOR);
+        rpcMessage.setCodec(ProtocolConstants.CONFIGURED_CODEC);
+        rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
         rpcMessage.setBody(msg);
 
         final MessageFuture messageFuture = new MessageFuture();
@@ -288,10 +290,10 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     protected void sendRequest(Channel channel, Object msg) {
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setMessageType(msg instanceof HeartbeatMessage ?
-                ProtocolConstants.MSGTYPE_RESQUEST
-                : ProtocolConstants.MSGTYPE_HEARTBEAT);
-        rpcMessage.setCodec(ProtocolConstants.DEFAULT_CODEC);
-        rpcMessage.setCompressor(ProtocolConstants.DEFAULT_COMPRESSOR);
+                ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
+                : ProtocolConstants.MSGTYPE_RESQUEST);
+        rpcMessage.setCodec(ProtocolConstants.CONFIGURED_CODEC);
+        rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
         rpcMessage.setBody(msg);
         rpcMessage.setId(getNextMessageId());
         if (msg instanceof MergeMessage) {
@@ -315,7 +317,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     protected void sendResponse(RpcMessage request, Channel channel, Object msg) {
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setMessageType(msg instanceof HeartbeatMessage ?
-                ProtocolConstants.MSGTYPE_HEARTBEAT :
+                ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE :
                 ProtocolConstants.MSGTYPE_RESPONSE);
         rpcMessage.setCodec(request.getCodec()); // same with request
         rpcMessage.setCompressor(request.getCompressor());

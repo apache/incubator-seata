@@ -31,7 +31,7 @@ import java.util.Map;
  * <p>
  * 0     1     2     3     4     5     6     7     8     9    10     11    12    13    14    15    16
  * +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
- * |   magic   |Proto|     Full length       |    Head   | Msg |Seria|Compr|     RequestId         |
+ * |   magic   |Proto|     Full length       |  HeadMap  | Msg |Seria|Compr|     RequestId         |
  * |   code    |colVer|    （head+body)      |   Length  |Type |lizer|ess  |                       |
  * +-----------+-----------+-----------+-----------+-----------+-----------+-----------+-----------+
  * |                                                                                               |
@@ -75,7 +75,9 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
                 }
 
                 byte[] bodyBytes = null;
-                if (rpcMessage.getMessageType() != ProtocolConstants.MSGTYPE_HEARTBEAT) {
+                byte messageType = rpcMessage.getMessageType();
+                if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
+                        && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
                     // heartbeat has no body
                     Codec codec = CodecFactory.getCodec(rpcMessage.getCodec());
                     bodyBytes = codec.encode(rpcMessage.getBody());
@@ -86,7 +88,7 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
                 out.writeByte(ProtocolConstants.VERSION);
                 out.writeInt(fullLength);
                 out.writeShort(headLength);
-                out.writeByte(rpcMessage.getMessageType());
+                out.writeByte(messageType);
                 out.writeByte(rpcMessage.getCodec());
                 out.writeByte(rpcMessage.getCompressor());
                 out.writeInt(rpcMessage.getId());

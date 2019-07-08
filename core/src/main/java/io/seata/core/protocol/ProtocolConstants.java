@@ -17,6 +17,7 @@ package io.seata.core.protocol;
 
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.codec.CodecType;
+import io.seata.core.codec.CompressorType;
 import io.seata.core.constants.ConfigurationKeys;
 
 /**
@@ -25,24 +26,54 @@ import io.seata.core.constants.ConfigurationKeys;
  */
 public class ProtocolConstants {
 
+    /**
+     * Magic code
+     */
     public static final byte[] MAGIC_CODE_BYTES = {(byte) 0xda, (byte) 0xda};
 
+    /**
+     * Protocol version
+     */
     public static final byte VERSION = 1;
 
+    /**
+     * Message type: Request
+     */
     public static final byte MSGTYPE_RESQUEST = 0;
+    /**
+     * Message type: Response
+     */
     public static final byte MSGTYPE_RESPONSE = 1;
+    /**
+     * Message type: Request which no need response
+     */
     public static final byte MSGTYPE_RESQUEST_ONEWAY = 2;
-    public static final byte MSGTYPE_HEARTBEAT = 3;
+    /**
+     * Message type: Heartbeat Request
+     */
+    public static final byte MSGTYPE_HEARTBEAT_REQUEST = 3;
+    /**
+     * Message type: Heartbeat Response
+     */
+    public static final byte MSGTYPE_HEARTBEAT_RESPONSE = 4;
 
-    // public static final byte MSGTYPE_NEGOTIATOR_REQUEST = 4;
-    // public static final byte MSGTYPE_NEGOTIATOR_RESPONSE = 5;
+    // public static final byte MSGTYPE_NEGOTIATOR_REQUEST = 5;
+    // public static final byte MSGTYPE_NEGOTIATOR_RESPONSE = 6;
 
-    // TODO add compressor like CodecFactory
-    public static final byte COMPRESS_NONE = 0;
+    /**
+     * Configured codec by user, default is SEATA
+     * 
+     * @see CodecType#SEATA
+     */
+    public static final byte CONFIGURED_CODEC = CodecType.getByName(ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.SERIALIZE_FOR_RPC, CodecType.SEATA.name())).getCode();
 
-    public static final byte DEFAULT_CODEC = CodecType.valueOf(ConfigurationFactory.getInstance().getConfig(
-            ConfigurationKeys.SERIALIZE_FOR_RPC, CodecType.SEATA.name()).toUpperCase()).getCode();
-
-    public static final byte DEFAULT_COMPRESSOR = COMPRESS_NONE;
+    /**
+     * Configured compressor by user, default is NONE
+     *
+     * @see CompressorType#NONE
+     */
+    public static final byte CONFIGURED_COMPRESSOR = CompressorType.getByName(ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.COMPRESSOR_FOR_RPC, CompressorType.NONE.name())).getCode();
 
 }

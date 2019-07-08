@@ -19,10 +19,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.seata.core.codec.Codec;
 import io.seata.core.codec.CodecFactory;
+import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
@@ -31,7 +30,7 @@ import java.util.Map;
  * <p>
  * 0     1     2     3     4     5     6     7     8     9    10     11    12    13    14    15    16
  * +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
- * |   magic   |Proto|     Full length       |    Head   | Msg |Seria|Compr|     RequestId         |
+ * |   magic   |Proto|     Full length       |  HeadMap  | Msg |Seria|Compr|     RequestId         |
  * |   code    |colVer|    （head+body)      |   Length  |Type |lizer|ess  |                       |
  * +-----------+-----------+-----------+-----------+-----------+-----------+-----------+-----------+
  * |                                                                                               |
@@ -50,22 +49,18 @@ import java.util.Map;
  */
 public class ProtocolV1Decoder extends io.netty.handler.codec.LengthFieldBasedFrameDecoder {
 
-    /**
-     * Logger for ProtocolV1Decoder
-     **/
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV1Decoder.class);
-
     public ProtocolV1Decoder() {
-        this(8 * 1024 * 1024); // 最多8M
+        // default is 8M
+        this(8 * 1024 * 1024);
     }
 
     public ProtocolV1Decoder(int maxFrameLength) {
         /*
-        int maxFrameLength,     最大值
-        int lengthFieldOffset,  魔术位2B，然后版本1b，再是长度4B，所以偏移：3
-        int lengthFieldLength,  总长度占4B，所以长度是：4
-        int lengthAdjustment,   总长度的值包括自己，剩下的长度=总长度-4 所以调整值是：0
-        int initialBytesToStrip 我们要校验魔术位和版本位，所以就不跳过：0
+        int maxFrameLength,      
+        int lengthFieldOffset,  magic code is 2B, and version is 1B, and then FullLength. so value is 3
+        int lengthFieldLength,  FullLength is int(4B). so values is 4
+        int lengthAdjustment,   FullLength include 4 bytes self, so the left length is (FullLength-4). so values is -4
+        int initialBytesToStrip we will check magic code and version self, so do not strip any bytes. so values is                                                                                                          0
         */
         super(maxFrameLength, 3, 4, -4, 0);
     }
@@ -80,7 +75,6 @@ public class ProtocolV1Decoder extends io.netty.handler.codec.LengthFieldBasedFr
     }
 
     public Object decodeFrame(ByteBuf frame) throws IOException {
-        // LOGGER.info("readable byte here:{}", frame.readableBytes());
         byte b0 = frame.readByte();
         byte b1 = frame.readByte();
         if (ProtocolConstants.MAGIC_CODE_BYTES[0] != b0
@@ -93,7 +87,7 @@ public class ProtocolV1Decoder extends io.netty.handler.codec.LengthFieldBasedFr
 
         int fullLength = frame.readInt();
         short headLength = frame.readShort();
-        byte msgType = frame.readByte();
+        byte messageType = frame.readByte();
         byte codecType = frame.readByte();
         byte compressor = frame.readByte();
         int requestId = frame.readInt();
@@ -102,7 +96,7 @@ public class ProtocolV1Decoder extends io.netty.handler.codec.LengthFieldBasedFr
         rpcMessage.setCodec(codecType);
         rpcMessage.setId(requestId);
         rpcMessage.setCompressor(compressor);
-        rpcMessage.setMessageType(msgType);
+        rpcMessage.setMessageType(messageType);
 
         if (headLength > 0) {
             byte[] bs = new byte[headLength];
@@ -110,13 +104,18 @@ public class ProtocolV1Decoder extends io.netty.handler.codec.LengthFieldBasedFr
             Map<String, String> map = HeadMapSerializer.getInstance().decode(bs);
             rpcMessage.getHeadMap().putAll(map);
         }
-
-        int bodyLength = fullLength - headLength - 13;
-        if (bodyLength > 0) {
-            byte[] bs = new byte[bodyLength];
-            frame.readBytes(bs);
-            Codec codec = CodecFactory.getCodec(codecType);
-            rpcMessage.setBody(codec.decode(bs));
+        if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST) {
+            rpcMessage.setBody(HeartbeatMessage.PING);
+        } else if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
+            rpcMessage.setBody(HeartbeatMessage.PONG);
+        } else {
+            int bodyLength = fullLength - headLength - 13;
+            if (bodyLength > 0) {
+                byte[] bs = new byte[bodyLength];
+                frame.readBytes(bs);
+                Codec codec = CodecFactory.getCodec(codecType);
+                rpcMessage.setBody(codec.decode(bs));
+            }
         }
 
         return rpcMessage;

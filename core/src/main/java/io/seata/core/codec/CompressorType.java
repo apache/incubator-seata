@@ -16,29 +16,23 @@
 package io.seata.core.codec;
 
 /**
- * The enum serialize type.
- *
- * @author leizhiyuan
+ * @author Geng Zhang
  */
-public enum CodecType {
+public enum CompressorType {
 
     /**
-     * The seata.
-     * <p>
-     * Math.pow(2, 0)
+     * Not compress
      */
-    SEATA((byte)0x1),
+    NONE((byte) 0),
 
     /**
-     * The protobuf.
-     * <p>
-     * Math.pow(2, 1)
+     * The gzip.
      */
-    PROTOBUF((byte)0x2);
+    GZIP((byte) 1);
 
     private final byte code;
 
-    CodecType(final byte code) {
+    CompressorType(final byte code) {
         this.code = code;
     }
 
@@ -48,8 +42,8 @@ public enum CodecType {
      * @param code the code
      * @return the result code
      */
-    public static CodecType getByCode(int code) {
-        for (CodecType b : CodecType.values()) {
+    public static CompressorType getByCode(int code) {
+        for (CompressorType b : CompressorType.values()) {
             if (code == b.code) {
                 return b;
             }
@@ -60,11 +54,11 @@ public enum CodecType {
     /**
      * Gets result code.
      *
-     * @param name the name
+     * @param name the code
      * @return the result code
      */
-    public static CodecType getByName(String name) {
-        for (CodecType b : CodecType.values()) {
+    public static CompressorType getByName(String name) {
+        for (CompressorType b : CompressorType.values()) {
             if (b.name().equalsIgnoreCase(name)) {
                 return b;
             }

@@ -34,21 +34,19 @@ public interface ServerMessageListener {
      *
      * @param request the msg id
      * @param ctx     the ctx
-     * @param message the message
      * @param sender  the sender
      */
-    void onTrxMessage(RpcMessage request, ChannelHandlerContext ctx, Object message, ServerMessageSender sender);
+    void onTrxMessage(RpcMessage request, ChannelHandlerContext ctx, ServerMessageSender sender);
 
     /**
      * On reg rm message.
      *
      * @param request          the msg id
      * @param ctx              the ctx
-     * @param message          the message
      * @param sender           the sender
      * @param checkAuthHandler the check auth handler
      */
-    void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterRMRequest message,
+    void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx,
                         ServerMessageSender sender, RegisterCheckAuthHandler checkAuthHandler);
 
     /**
@@ -56,11 +54,10 @@ public interface ServerMessageListener {
      *
      * @param request          the msg id
      * @param ctx              the ctx
-     * @param message          the message
      * @param sender           the sender
      * @param checkAuthHandler the check auth handler
      */
-    void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterTMRequest message,
+    void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx,
                         ServerMessageSender sender, RegisterCheckAuthHandler checkAuthHandler);
 
     /**

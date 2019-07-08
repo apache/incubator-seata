@@ -245,11 +245,11 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
     public void dispatch(RpcMessage request, ChannelHandlerContext ctx) {
         Object msg = request.getBody();
         if (msg instanceof RegisterRMRequest) {
-            serverMessageListener.onRegRmMessage(request, ctx, (RegisterRMRequest)msg, this,
+            serverMessageListener.onRegRmMessage(request, ctx, this,
                 checkAuthHandler);
         } else {
             if (ChannelManager.isRegistered(ctx.channel())) {
-                serverMessageListener.onTrxMessage(request, ctx, msg, this);
+                serverMessageListener.onTrxMessage(request, ctx, this);
             } else {
                 try {
                     closeChannelHandlerContext(ctx);
@@ -310,8 +310,7 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
             RpcMessage rpcMessage = (RpcMessage) msg;
             debugLog("read:" + rpcMessage.getBody().toString());
             if (rpcMessage.getBody() instanceof RegisterTMRequest) {
-                RegisterTMRequest request = (RegisterTMRequest) rpcMessage.getBody();
-                serverMessageListener.onRegTmMessage(rpcMessage, ctx, request, this, checkAuthHandler);
+                serverMessageListener.onRegTmMessage(rpcMessage, ctx, this, checkAuthHandler);
                 return;
             }
             if (rpcMessage.getBody() == HeartbeatMessage.PING) {

@@ -67,7 +67,8 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     }
 
     @Override
-    public void onTrxMessage(RpcMessage request, ChannelHandlerContext ctx, Object message, ServerMessageSender sender) {
+    public void onTrxMessage(RpcMessage request, ChannelHandlerContext ctx, ServerMessageSender sender) {
+        Object message = request.getBody();
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(
@@ -94,9 +95,9 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     }
 
     @Override
-    public void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterRMRequest message,
+    public void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx,
                                ServerMessageSender sender, RegisterCheckAuthHandler checkAuthHandler) {
-
+        RegisterRMRequest message = (RegisterRMRequest) request.getBody();
         boolean isSuccess = false;
         try {
             if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
@@ -115,8 +116,9 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     }
 
     @Override
-    public void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx, RegisterTMRequest message,
+    public void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx,
                                ServerMessageSender sender, RegisterCheckAuthHandler checkAuthHandler) {
+        RegisterTMRequest message = (RegisterTMRequest) request.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         Version.putChannelVersion(ctx.channel(), message.getVersion());
         boolean isSuccess = false;
