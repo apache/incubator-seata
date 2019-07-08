@@ -15,12 +15,8 @@
  */
 package io.seata.spring.tcc;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-
 import io.seata.common.Constants;
 import io.seata.common.executor.Callback;
-import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.interceptor.ActionInterceptorHandler;
@@ -31,6 +27,9 @@ import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Method;
+import java.util.Map;
 
 /**
  * TCC Interceptor
@@ -83,7 +82,7 @@ public class TccActionInterceptor implements MethodInterceptor {
             try {
                 Object[] methodArgs = invocation.getArguments();
                 //Handler the TCC Aspect
-                Map<String, Object> ret = actionInterceptorHandler.proceed(method, methodArgs, businessAction,
+                Map<String, Object> ret = actionInterceptorHandler.proceed(method, methodArgs, xid, businessAction,
                         new Callback<Object>() {
                             @Override
                             public Object execute() throws Throwable {
