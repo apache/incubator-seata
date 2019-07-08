@@ -160,7 +160,7 @@ class NettyClientChannelManager {
         try {
             availList = getAvailServerList(transactionServiceGroup);
         } catch (Exception exx) {
-            LOGGER.error("Failed to get available servers: {}" + exx.getMessage());
+            LOGGER.error("Failed to get available servers: {}", exx.getMessage());
         }
         if (CollectionUtils.isEmpty(availList)) {
             LOGGER.error("no available server to connect.");
@@ -201,6 +201,7 @@ class NettyClientChannelManager {
                 ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());
             }
             channelFromPool = nettyClientKeyPool.borrowObject(poolKeyMap.get(serverAddress));
+            channels.put(serverAddress, channelFromPool);
         } catch (Exception exx) {
             LOGGER.error(FrameworkErrorCode.RegisterRM.getErrCode(), "register RM failed.", exx);
             throw new FrameworkException("can not register RM,err:" + exx.getMessage());

@@ -154,14 +154,12 @@ public class ConnectionContext {
         this.branchId = branchId;
     }
 
+
     /**
      * Reset.
      */
-    void reset() {
-        xid = null;
-        branchId = null;
-        lockKeysBuffer.clear();
-        sqlUndoItemsBuffer.clear();
+    void reset(){
+        this.reset(null);
     }
 
     /**
@@ -172,6 +170,7 @@ public class ConnectionContext {
     void reset(String xid) {
         this.xid = xid;
         branchId = null;
+        this.isGlobalLockRequire = false;
         lockKeysBuffer.clear();
         sqlUndoItemsBuffer.clear();
     }

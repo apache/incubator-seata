@@ -1,5 +1,5 @@
 -- the table to store GlobalSession data
-drop table `global_table`;
+drop table if exists `global_table`;
 create table `global_table` (
   `xid` varchar(128)  not null,
   `transaction_id` bigint,
@@ -18,7 +18,7 @@ create table `global_table` (
 );
 
 -- the table to store BranchSession data
-drop table `branch_table`;
+drop table if exists `branch_table`;
 create table `branch_table` (
   `branch_id` bigint not null,
   `xid` varchar(128) not null,
@@ -37,7 +37,7 @@ create table `branch_table` (
 );
 
 -- the table to store lock data
-drop table `lock_table`;
+drop table if exists `lock_table`;
 create table `lock_table` (
   `row_key` varchar(128) not null,
   `xid` varchar(96),

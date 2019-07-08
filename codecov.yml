@@ -1,0 +1,12 @@
+coverage:
+  status:
+    patch:
+      default:
+        threshold: 1%
+ignore:
+  - "codec/seata-codec-protobuf/src/main/java/io/seata/codec/protobuf/generated"
+  - "test/.*"
+  - ".github/.*"
+  - ".mvn/.*"
+  - ".style/.*"
+  - "*.md"
