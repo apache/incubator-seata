@@ -23,29 +23,20 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-metrics-all</artifactId>
-    <name>seata-metrics-all ${project.version}</name>
+
+    <artifactId>seata-metrics-registry-compact</artifactId>
+    <name>seata-metrics-registry-compact ${project.version}</name>
 
     <dependencies>
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>io.seata</groupId>
             <artifactId>seata-metrics-api</artifactId>
-            <version>${project.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-metrics-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-metrics-registry-compact</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>${project.groupId}</groupId>
-            <artifactId>seata-metrics-exporter-prometheus</artifactId>
-            <version>${project.version}</version>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-common</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
     </dependencies>
 
