@@ -25,6 +25,8 @@ import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Null;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -45,6 +47,7 @@ import java.util.StringJoiner;
  */
 public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(InsertExecutor.class);
     protected static final String ERR_SQL_STATE = "S1009";
 
     /**
@@ -135,6 +138,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             // specify Statement.RETURN_GENERATED_KEYS to
             // Statement.executeUpdate() or Connection.prepareStatement().
             if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
+                LOGGER.warn("Fail to get auto-generated keys, use \'SELECT LAST_INSERT_ID()\' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
                 genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
             } else {
                 throw e;

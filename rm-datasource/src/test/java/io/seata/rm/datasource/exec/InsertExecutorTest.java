@@ -219,6 +219,23 @@ public class InsertExecutorTest {
     }
 
     @Test
+    public void testGetPkValuesByAuto_SQLException_WarnLog() throws SQLException {
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        ColumnMeta columnMeta = mock(ColumnMeta.class);
+        Map<String, ColumnMeta> columnMetaMap = new HashMap<>();
+        columnMetaMap.put(ID_COLUMN, columnMeta);
+        when(columnMeta.isAutoincrement()).thenReturn(true);
+        when(tableMeta.getPrimaryKeyMap()).thenReturn(columnMetaMap);
+        PreparedStatement preparedStatement = mock(PreparedStatement.class);
+        when(statementProxy.getTargetStatement()).thenReturn(preparedStatement);
+        SQLException e = new SQLException("test warn log", InsertExecutor.ERR_SQL_STATE, 1);
+        when(preparedStatement.getGeneratedKeys()).thenThrow(e);
+        ResultSet genKeys = mock(ResultSet.class);
+        when(statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()")).thenReturn(genKeys);
+        Assertions.assertTrue(insertExecutor.getPkValuesByAuto().isEmpty());
+    }
+
+    @Test
     public void testGetPkValuesByAuto_GeneratedKeys_NoResult() throws SQLException {
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         ColumnMeta columnMeta = mock(ColumnMeta.class);
