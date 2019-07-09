@@ -33,6 +33,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 /**
  * The type Insert executor.
@@ -151,12 +152,12 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         TableRecords afterImage;
         String pk = getTableMeta().getPkName();
         StringBuffer selectSQLAppender = new StringBuffer("SELECT * FROM " + getTableMeta().getTableName() + " WHERE ");
-        for (int i = 1; i <= pkValues.size(); i++) {
-            selectSQLAppender.append(pk + "=?");
-            if (i < pkValues.size()) {
-                selectSQLAppender.append(" OR ");
-            }
+
+        StringJoiner pkValuesJoiner = new StringJoiner(" OR ");
+        for (Object pkValue:pkValues) {
+            pkValuesJoiner.add(pk + "=?");
         }
+        selectSQLAppender.append(pkValuesJoiner.toString());
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {

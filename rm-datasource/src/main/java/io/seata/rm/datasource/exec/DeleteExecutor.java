@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.ParametersHolder;
@@ -66,15 +67,12 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         for (String column : tmeta.getAllColumns().keySet()) {
             columns.add(keywordChecker.checkAndReplace(column));
         }
-
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
-
-        for (int i = 0; i < columns.size(); i++) {
-            selectSQLAppender.append(getColumnNameInSQL(columns.get(i)));
-            if (i < (columns.size() - 1)) {
-                selectSQLAppender.append(", ");
-            }
+        StringJoiner columnSQL = new StringJoiner(", ");
+        for (String column:columns) {
+            columnSQL.add(getColumnNameInSQL(column));
         }
+        selectSQLAppender.append(columnSQL.toString());
         String whereCondition = null;
         ArrayList<Object> paramAppender = new ArrayList<>();
         if (statementProxy instanceof ParametersHolder) {
