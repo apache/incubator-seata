@@ -17,7 +17,6 @@ package io.seata.rm.datasource.exec;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
@@ -34,6 +33,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
 /**
  * The type Insert executor.
@@ -89,9 +89,10 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         // insert values including PK
         SQLInsertRecognizer recogizier = (SQLInsertRecognizer)sqlRecognizer;
         List<String> insertColumns = recogizier.getInsertColumns();
+        String pk = getTableMeta().getPkName();
         List<Object> pkValues = null;
         for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
-            if (containsPkName(insertColumns.get(paramIdx))) {
+            if (insertColumns.get(paramIdx).equalsIgnoreCase(pk)) {
                 if (statementProxy instanceof PreparedStatementProxy) {
                     pkValues = ((PreparedStatementProxy)statementProxy).getParamsByIndex(paramIdx);
                 } else {
@@ -112,23 +113,6 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             pkValues = getPkValuesByAuto();
         }
         return pkValues;
-    }
-
-
-    /**
-     * check columnName is primary key
-     * @param columnName columnName
-     * @return true or false
-     */
-    private boolean containsPkName(String columnName) {
-        List<String> primaryKeyRowNames = getTableMeta().getPrimaryKeyOnlyName();
-        if(CollectionUtils.isEmpty(primaryKeyRowNames)){
-            return false;
-        }
-        if (primaryKeyRowNames.contains(columnName)) {
-            return true;
-        }
-        return  CollectionUtils.toUpperList(primaryKeyRowNames).contains(columnName.toUpperCase());
     }
 
 
@@ -166,19 +150,14 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     protected TableRecords getTableRecords(List<Object> pkValues) throws SQLException {
         TableRecords afterImage;
-        List<String> pkNames = getTableMeta().getPrimaryKeyOnlyName();
+        String pk = getTableMeta().getPkName();
         StringBuffer selectSQLAppender = new StringBuffer("SELECT * FROM " + getTableMeta().getTableName() + " WHERE ");
-        for (int i = 0; i < pkValues.size(); i++) {
-            for (int j = 0;j < pkNames.size();j++) {
-                selectSQLAppender.append(pkNames.get(j) + "=?");
-                if (j < pkNames.size() ) {
-                    selectSQLAppender.append(" AND ");
-                }
-            }
-            if (i < pkValues.size()) {
-                selectSQLAppender.append(" OR ");
-            }
+
+        StringJoiner pkValuesJoiner = new StringJoiner(" OR ");
+        for (Object pkValue:pkValues) {
+            pkValuesJoiner.add(pk + "=?");
         }
+        selectSQLAppender.append(pkValuesJoiner.toString());
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
