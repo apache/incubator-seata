@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>0.6.0</version>
+    <version>0.7.0-SNAPSHOT</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -179,6 +179,11 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-motan</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-rm</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -200,6 +205,16 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-tm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-codec-seata</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-codec-protobuf</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -260,6 +275,10 @@
             <artifactId>commons-pool</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo</artifactId>
             <scope>provided</scope>
@@ -280,6 +299,11 @@
         <dependency>
             <groupId>com.101tec</groupId>
             <artifactId>zkclient</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.zookeeper</groupId>
+            <artifactId>zookeeper</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -354,6 +378,26 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-all</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.weibo</groupId>
+            <artifactId>motan-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.weibo</groupId>
+            <artifactId>motan-transport-netty</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-runtime</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -449,12 +493,15 @@
                                     <include>io.seata:seata-discovery-etcd3</include>
                                     <include>io.seata:seata-dubbo</include>
                                     <include>io.seata:seata-dubbo-alibaba</include>
+                                    <include>io.seata:seata-motan</include>
                                     <include>io.seata:seata-rm</include>
                                     <include>io.seata:seata-rm-datasource</include>
                                     <include>io.seata:seata-sofa-rpc</include>
                                     <include>io.seata:seata-spring</include>
                                     <include>io.seata:seata-tcc</include>
                                     <include>io.seata:seata-tm</include>
+                                    <include>io.seata:seata-codec-seata</include>
+                                    <include>io.seata:seata-codec-protobuf</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
@@ -511,10 +558,20 @@
                         <configuration>
                             <charset>${project.build.sourceEncoding}</charset>
                             <failOnError>false</failOnError>
+                            <encoding>${project.build.sourceEncoding}</encoding>
+                            <detectOfflineLinks>true</detectOfflineLinks>
+                            <breakiterator>true</breakiterator>
+                            <author>false</author>
+                            <keywords>true</keywords>
+                            <quiet>true</quiet>
+                            <includeDependencySources>true</includeDependencySources>
+                            <dependencySourceIncludes>
+                                <dependencySourceInclude>io.seata:seata-*</dependencySourceInclude>
+                            </dependencySourceIncludes>
                         </configuration>
                         <executions>
                             <execution>
-                                <phase>package</phase>
+                                <id>attach-javadocs</id>
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>

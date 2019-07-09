@@ -21,7 +21,6 @@ import io.seata.core.model.TransactionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  * The type Default transaction manager.
  *

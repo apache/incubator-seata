@@ -15,17 +15,25 @@
  */
 package io.seata.common.util;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
+ * The type Collection utils test.
+ *
  * @author Geng Zhang
  */
 public class CollectionUtilsTest {
 
+    /**
+     * Is size equals.
+     */
     @Test
     public void isSizeEquals() {
         List<String> list0 = new ArrayList<>();
@@ -39,5 +47,62 @@ public class CollectionUtilsTest {
         Assertions.assertFalse(CollectionUtils.isSizeEquals(list0, list1));
         list1.add("111");
         Assertions.assertTrue(CollectionUtils.isSizeEquals(list0, list1));
+    }
+
+    /**
+     * Encode map.
+     */
+    @Test
+    public void encodeMap() {
+        Map<String, String> map = null;
+        Assertions.assertNull(CollectionUtils.encodeMap(map));
+
+        map = new HashMap<>();
+        Assertions.assertEquals("", CollectionUtils.encodeMap(map));
+        map.put("x", "1");
+        Assertions.assertEquals("x=1", CollectionUtils.encodeMap(map));
+        map.put("y", "2");
+        Assertions.assertEquals("x=1&y=2", CollectionUtils.encodeMap(map));
+    }
+
+    /**
+     * Decode map.
+     */
+    @Test
+    public void decodeMap() {
+        Assertions.assertNull(CollectionUtils.decodeMap(null));
+
+        Map<String, String> map = CollectionUtils.decodeMap("");
+        Assertions.assertEquals(0, map.size());
+
+        map = CollectionUtils.decodeMap("x=1");
+        Assertions.assertEquals(1, map.size());
+        Assertions.assertEquals("1", map.get("x"));
+
+        map = CollectionUtils.decodeMap("x=1&y=2");
+        Assertions.assertEquals(2, map.size());
+        Assertions.assertEquals("2", map.get("y"));
+    }
+
+    /**
+     * Test to upper list.
+     */
+    @Test
+    public void testToUpperList() {
+        List<String> sourceList = null;
+        Assertions.assertNull(CollectionUtils.toUpperList(sourceList));
+        sourceList = new ArrayList<>();
+        Assertions.assertEquals(Collections.EMPTY_LIST, CollectionUtils.toUpperList(sourceList));
+        List<String> anotherList = new ArrayList<>();
+        sourceList.add("a");
+        anotherList.add("A");
+        sourceList.add("b");
+        anotherList.add("b");
+        sourceList.add("c");
+        anotherList.add("C");
+        Assertions.assertEquals(CollectionUtils.toUpperList(sourceList), CollectionUtils.toUpperList(anotherList));
+        anotherList.add("D");
+        Assertions.assertTrue(
+            CollectionUtils.toUpperList(anotherList).containsAll(CollectionUtils.toUpperList(sourceList)));
     }
 }

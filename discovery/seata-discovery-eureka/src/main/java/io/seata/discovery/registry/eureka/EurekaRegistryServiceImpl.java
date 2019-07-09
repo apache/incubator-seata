@@ -25,6 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import io.seata.common.exception.EurekaRegistryException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -67,7 +68,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static final int EUREKA_REFRESH_INTERVAL = 5;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final String DEFAULT_WEIGHT = "1";
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.FILE_INSTANCE;
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static ConcurrentMap<String, Set<InetSocketAddress>> clusterAddressMap;
 
     private static volatile boolean subscribeListener = false;
@@ -159,18 +160,17 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private void refreshCluster() throws EurekaRegistryException {
         Applications applications = getEurekaClient(false).getApplications();
         List<Application> list = applications.getRegisteredApplications();
-        if (list == null || list.isEmpty()) {
+        if (CollectionUtils.isEmpty(list)) {
             clusterAddressMap.clear();
             return;
         }
         for (Application app : list) {
             Set<InetSocketAddress> addressSet = new HashSet<>();
             List<InstanceInfo> instances = app.getInstances();
-            if (instances == null || instances.isEmpty()) {
-                break;
-            }
-            for (InstanceInfo instance : instances) {
-                addressSet.add(new InetSocketAddress(instance.getIPAddr(), instance.getPort()));
+            if (CollectionUtils.isNotEmpty(instances)) {
+                for (InstanceInfo instance : instances) {
+                    addressSet.add(new InetSocketAddress(instance.getIPAddr(), instance.getPort()));
+                }
             }
             clusterAddressMap.put(app.getName(), addressSet);
         }
