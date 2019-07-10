@@ -55,9 +55,6 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
 
     @Override
     public void encode(ChannelHandlerContext ctx, Object msg, ByteBuf out) {
-        if (out == null) {
-            out = ctx.alloc().buffer();
-        }
         try {
             if (msg instanceof RpcMessage) {
                 RpcMessage rpcMessage = (RpcMessage) msg;

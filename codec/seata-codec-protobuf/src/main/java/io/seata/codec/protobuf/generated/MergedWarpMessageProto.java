@@ -189,22 +189,22 @@ private static final long serialVersionUID = 0L;
   public static final int MSGIDS_FIELD_NUMBER = 3;
   private com.google.protobuf.Internal.IntList msgIds_;
   /**
-   * <code>repeated int64 msgIds = 3;</code>
+   * <code>repeated int32 msgIds = 3;</code>
    */
   public java.util.List<java.lang.Integer>
       getMsgIdsList() {
     return msgIds_;
   }
   /**
-   * <code>repeated int64 msgIds = 3;</code>
+   * <code>repeated int32 msgIds = 3;</code>
    */
   public int getMsgIdsCount() {
     return msgIds_.size();
   }
   /**
-   * <code>repeated int64 msgIds = 3;</code>
+   * <code>repeated int32 msgIds = 3;</code>
    */
-  public long getMsgIds(int index) {
+  public int getMsgIds(int index) {
     return msgIds_.getInt(index);
   }
   private int msgIdsMemoizedSerializedSize = -1;
@@ -235,7 +235,7 @@ private static final long serialVersionUID = 0L;
       output.writeUInt32NoTag(msgIdsMemoizedSerializedSize);
     }
     for (int i = 0; i < msgIds_.size(); i++) {
-      output.writeInt64NoTag(msgIds_.getInt(i));
+      output.writeInt32NoTag(msgIds_.getInt(i));
     }
     unknownFields.writeTo(output);
   }
@@ -258,7 +258,7 @@ private static final long serialVersionUID = 0L;
       int dataSize = 0;
       for (int i = 0; i < msgIds_.size(); i++) {
         dataSize += com.google.protobuf.CodedOutputStream
-          .computeInt64SizeNoTag(msgIds_.getInt(i));
+          .computeInt32SizeNoTag(msgIds_.getInt(i));
       }
       size += dataSize;
       if (!getMsgIdsList().isEmpty()) {
@@ -997,7 +997,7 @@ private static final long serialVersionUID = 0L;
        }
     }
     /**
-     * <code>repeated int64 msgIds = 3;</code>
+     * <code>repeated int32 msgIds = 3;</code>
      */
     public java.util.List<java.lang.Integer>
         getMsgIdsList() {
@@ -1005,19 +1005,19 @@ private static final long serialVersionUID = 0L;
                java.util.Collections.unmodifiableList(msgIds_) : msgIds_;
     }
     /**
-     * <code>repeated int64 msgIds = 3;</code>
+     * <code>repeated int32 msgIds = 3;</code>
      */
     public int getMsgIdsCount() {
       return msgIds_.size();
     }
     /**
-     * <code>repeated int64 msgIds = 3;</code>
+     * <code>repeated int32 msgIds = 3;</code>
      */
-    public long getMsgIds(int index) {
+    public int getMsgIds(int index) {
       return msgIds_.getInt(index);
     }
     /**
-     * <code>repeated int64 msgIds = 3;</code>
+     * <code>repeated int32 msgIds = 3;</code>
      */
     public Builder setMsgIds(
         int index, int value) {
@@ -1027,7 +1027,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated int64 msgIds = 3;</code>
+     * <code>repeated int32 msgIds = 3;</code>
      */
     public Builder addMsgIds(int value) {
       ensureMsgIdsIsMutable();
@@ -1036,7 +1036,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated int64 msgIds = 3;</code>
+     * <code>repeated int32 msgIds = 3;</code>
      */
     public Builder addAllMsgIds(
         java.lang.Iterable<? extends java.lang.Integer> values) {
@@ -1047,7 +1047,7 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated int64 msgIds = 3;</code>
+     * <code>repeated int32 msgIds = 3;</code>
      */
     public Builder clearMsgIds() {
       msgIds_ = emptyIntList();

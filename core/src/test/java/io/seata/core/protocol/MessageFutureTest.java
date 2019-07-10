@@ -36,13 +36,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class MessageFutureTest {
 
-    private final String BODY_FIELD = "test_body";
-    private final int ID_FIELD = 100;
-    private final byte CODEC_FIELD = 1;
-    private final byte COMPRESS_FIELD = 2;
-    private final byte MSG_TYPE_FIELD = 3;
-    private final HashMap<String, String> HEAD_FIELD = new HashMap<>();
-    private final long TIME_OUT_FIELD = 100L;
+    private static final String BODY_FIELD = "test_body";
+    private static final int ID_FIELD = 100;
+    private static final byte CODEC_FIELD = 1;
+    private static final byte COMPRESS_FIELD = 2;
+    private static final byte MSG_TYPE_FIELD = 3;
+    private static final HashMap<String, String> HEAD_FIELD = new HashMap<>();
+    private static final long TIME_OUT_FIELD = 100L;
 
     /**
      * Test field set get.
