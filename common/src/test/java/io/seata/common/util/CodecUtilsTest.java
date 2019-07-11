@@ -13,23 +13,27 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc;
+package io.seata.common.util;
 
-import io.seata.core.protocol.RpcMessage;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
- * The interface Client message listener.
- *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/10
+ * @author Geng Zhang
  */
-public interface ClientMessageListener {
-    /**
-     * On message.
-     *
-     * @param request       the msg id
-     * @param serverAddress the server address
-     * @param sender        the sender
-     */
-    void onMessage(RpcMessage request, String serverAddress, ClientMessageSender sender);
+class CodecUtilsTest {
+
+    @Test
+    public void parseHigh4Low4Bytes() throws Exception {
+        byte b = 117; // = 7*16+5
+        byte[] bs = CodecUtils.parseHigh4Low4Bytes(b);
+        Assertions.assertEquals(bs[0], 7);
+        Assertions.assertEquals(bs[1], 5);
+    }
+
+    @Test
+    public void buildHigh4Low4Bytes() throws Exception {
+        byte bs = CodecUtils.buildHigh4Low4Bytes((byte) 7, (byte) 5);
+        Assertions.assertEquals(bs, (byte) 117);
+    }
 }

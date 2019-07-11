@@ -181,18 +181,18 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
      * Send response.
      * rm reg,rpc reg,inner response
      *
-     * @param msgId   the msg id
+     * @param request the request
      * @param channel the channel
      * @param msg     the msg
      */
     @Override
-    public void sendResponse(long msgId, Channel channel, Object msg) {
+    public void sendResponse(RpcMessage request, Channel channel, Object msg) {
         Channel clientChannel = channel;
         if (!(msg instanceof HeartbeatMessage)) {
             clientChannel = ChannelManager.getSameClientChannel(channel);
         }
         if (clientChannel != null) {
-            super.sendResponse(msgId, clientChannel, msg);
+            super.sendResponse(request, clientChannel, msg);
         } else {
             throw new RuntimeException("channel is error. channel:" + clientChannel);
         }
@@ -252,18 +252,18 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
     /**
      * Dispatch.
      *
-     * @param msgId the msg id
+     * @param request the request
      * @param ctx   the ctx
-     * @param msg   the msg
      */
     @Override
-    public void dispatch(long msgId, ChannelHandlerContext ctx, Object msg) {
+    public void dispatch(RpcMessage request, ChannelHandlerContext ctx) {
+        Object msg = request.getBody();
         if (msg instanceof RegisterRMRequest) {
-            serverMessageListener.onRegRmMessage(msgId, ctx, (RegisterRMRequest)msg, this,
+            serverMessageListener.onRegRmMessage(request, ctx, this,
                 checkAuthHandler);
         } else {
             if (ChannelManager.isRegistered(ctx.channel())) {
-                serverMessageListener.onTrxMessage(msgId, ctx, msg, this);
+                serverMessageListener.onTrxMessage(request, ctx, this);
             } else {
                 try {
                     closeChannelHandlerContext(ctx);
@@ -321,17 +321,14 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof RpcMessage) {
-            RpcMessage rpcMessage = (RpcMessage)msg;
+            RpcMessage rpcMessage = (RpcMessage) msg;
             debugLog("read:" + rpcMessage.getBody().toString());
             if (rpcMessage.getBody() instanceof RegisterTMRequest) {
-                RegisterTMRequest request
-                    = (RegisterTMRequest)rpcMessage
-                    .getBody();
-                serverMessageListener.onRegTmMessage(rpcMessage.getId(), ctx, request, this, checkAuthHandler);
+                serverMessageListener.onRegTmMessage(rpcMessage, ctx, this, checkAuthHandler);
                 return;
             }
             if (rpcMessage.getBody() == HeartbeatMessage.PING) {
-                serverMessageListener.onCheckMessage(rpcMessage.getId(), ctx, this);
+                serverMessageListener.onCheckMessage(rpcMessage, ctx, this);
                 return;
             }
         }
