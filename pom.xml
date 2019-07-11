@@ -412,6 +412,8 @@
                     </includes>
                     <excludes>
                         <exclude>**/generated/**</exclude>
+                        <exclude>**/UnsafeByteArrayInputStream.java</exclude>
+                        <exclude>**/UnsafeByteArrayOutputStream.java</exclude>
                     </excludes>
                     <strictCheck>true</strictCheck>
                     <mapping>
