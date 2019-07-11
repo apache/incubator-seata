@@ -43,4 +43,10 @@ recovery.rollbacking-retry-delay=30
 recovery.timeout-retry-delay=30
 transaction.undo.data.validation=true
 transaction.undo.log.serialization=jackson
+transport.serialization=seata
+transport.compressor=none
+metrics.enabled=false
+metrics.registry-type=compact
+metrics.exporter-list=prometheus
+metrics.exporter-prometheus-port=9898
 
