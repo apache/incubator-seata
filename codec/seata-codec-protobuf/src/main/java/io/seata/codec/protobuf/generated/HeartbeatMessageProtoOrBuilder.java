@@ -8,7 +8,7 @@ public interface HeartbeatMessageProtoOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>bool pingOrPong = 1;</code>
+   * <code>bool ping = 1;</code>
    */
-  boolean getPingOrPong();
+  boolean getPing();
 }

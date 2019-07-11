@@ -48,6 +48,16 @@ public class NamedThreadFactory implements ThreadFactory {
     /**
      * Instantiates a new Named thread factory.
      *
+     * @param prefix      the prefix
+     * @param makeDaemons the make daemons
+     */
+    public NamedThreadFactory(String prefix, boolean makeDaemons) {
+        this(prefix, 0, makeDaemons);
+    }
+
+    /**
+     * Instantiates a new Named thread factory.
+     *
      * @param prefix    the prefix
      * @param totalSize the total size
      */

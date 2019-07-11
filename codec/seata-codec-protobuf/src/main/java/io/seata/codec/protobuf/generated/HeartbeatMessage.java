@@ -29,10 +29,9 @@ public final class HeartbeatMessage {
   static {
     java.lang.String[] descriptorData = {
       "\n\026heartbeatMessage.proto\022\032io.seata.proto" +
-      "col.protobuf\"+\n\025HeartbeatMessageProto\022\022\n" +
-      "\npingOrPong\030\001 \001(\010B7\n!io.seata.codec.prot" +
-      "obuf.generatedB\020HeartbeatMessageP\001b\006prot" +
-      "o3"
+      "col.protobuf\"%\n\025HeartbeatMessageProto\022\014\n" +
+      "\004ping\030\001 \001(\010B7\n!io.seata.codec.protobuf.g" +
+      "eneratedB\020HeartbeatMessageP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -51,7 +50,7 @@ public final class HeartbeatMessage {
     internal_static_io_seata_protocol_protobuf_HeartbeatMessageProto_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_io_seata_protocol_protobuf_HeartbeatMessageProto_descriptor,
-        new java.lang.String[] { "PingOrPong", });
+        new java.lang.String[] { "Ping", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

@@ -105,6 +105,13 @@ public class ConfigurationKeys {
     public static final String SERIALIZE_FOR_RPC = TRANSPORT_PREFIX + "serialization";
 
     /**
+     * The constant COMPRESSOR_FOR_RPC.
+     * 
+     * @since 0.7.0
+     */
+    public static final String COMPRESSOR_FOR_RPC = TRANSPORT_PREFIX + "compressor";
+
+    /**
      * The constant STORE_DB_GLOBAL_TABLE.
      */
     public static final String STORE_DB_GLOBAL_TABLE  = "store.db.global.table";

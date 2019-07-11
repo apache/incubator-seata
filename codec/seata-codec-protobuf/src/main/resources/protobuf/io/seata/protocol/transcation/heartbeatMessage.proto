@@ -8,5 +8,5 @@ option java_package = "io.seata.codec.protobuf.generated";
 
 // PublishRequest is a publish request.
 message HeartbeatMessageProto {
-    bool pingOrPong = 1;
+    bool ping = 1;
 }

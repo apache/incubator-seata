@@ -17,6 +17,7 @@ package io.seata.core.rpc.netty;
 
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.core.protocol.ResultCode;
+import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
@@ -58,18 +59,19 @@ public class RmMessageListener implements ClientMessageListener {
     }
 
     @Override
-    public void onMessage(long msgId, String serverAddress, Object msg, ClientMessageSender sender) {
+    public void onMessage(RpcMessage request, String serverAddress, ClientMessageSender sender) {
+        Object msg = request.getBody();
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("onMessage:" + msg);
         }
         if (msg instanceof BranchCommitRequest) {
-            handleBranchCommit(msgId, serverAddress, (BranchCommitRequest)msg, sender);
+            handleBranchCommit(request, serverAddress, (BranchCommitRequest)msg, sender);
         } else if (msg instanceof BranchRollbackRequest) {
-            handleBranchRollback(msgId, serverAddress, (BranchRollbackRequest)msg, sender);
+            handleBranchRollback(request, serverAddress, (BranchRollbackRequest)msg, sender);
         }
     }
 
-    private void handleBranchRollback(long msgId, String serverAddress,
+    private void handleBranchRollback(RpcMessage request, String serverAddress,
                                       BranchRollbackRequest branchRollbackRequest,
                                       ClientMessageSender sender) {
         BranchRollbackResponse resultMessage = null;
@@ -78,20 +80,20 @@ public class RmMessageListener implements ClientMessageListener {
             LOGGER.debug("branch rollback result:" + resultMessage);
         }
         try {
-            sender.sendResponse(msgId, serverAddress, resultMessage);
+            sender.sendResponse(request, serverAddress, resultMessage);
         } catch (Throwable throwable) {
             LOGGER.error("", "send response error", throwable);
         }
     }
 
-    private void handleBranchCommit(long msgId, String serverAddress,
+    private void handleBranchCommit(RpcMessage request, String serverAddress,
                                     BranchCommitRequest branchCommitRequest,
                                     ClientMessageSender sender) {
 
         BranchCommitResponse resultMessage = null;
         try {
             resultMessage = (BranchCommitResponse)handler.onRequest(branchCommitRequest, null);
-            sender.sendResponse(msgId, serverAddress, resultMessage);
+            sender.sendResponse(request, serverAddress, resultMessage);
         } catch (Exception e) {
             LOGGER.error(FrameworkErrorCode.NetOnMessage.getErrCode(), e.getMessage(), e);
             if (resultMessage == null) {
@@ -99,7 +101,7 @@ public class RmMessageListener implements ClientMessageListener {
             }
             resultMessage.setResultCode(ResultCode.Failed);
             resultMessage.setMsg(e.getMessage());
-            sender.sendResponse(msgId, serverAddress, resultMessage);
+            sender.sendResponse(request, serverAddress, resultMessage);
         }
     }
 }

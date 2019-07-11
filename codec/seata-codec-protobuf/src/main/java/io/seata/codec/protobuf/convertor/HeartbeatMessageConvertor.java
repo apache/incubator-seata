@@ -15,8 +15,8 @@
  */
 package io.seata.codec.protobuf.convertor;
 
-import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.codec.protobuf.generated.HeartbeatMessageProto;
+import io.seata.core.protocol.HeartbeatMessage;
 
 /**
  * @author leizhiyuan
@@ -24,17 +24,13 @@ import io.seata.codec.protobuf.generated.HeartbeatMessageProto;
 public class HeartbeatMessageConvertor implements PbConvertor<HeartbeatMessage, HeartbeatMessageProto> {
     @Override
     public HeartbeatMessageProto convert2Proto(HeartbeatMessage heartbeatMessage) {
-        HeartbeatMessageProto result = HeartbeatMessageProto.newBuilder().setPingOrPong(heartbeatMessage.isPingOrPong())
+        HeartbeatMessageProto result = HeartbeatMessageProto.newBuilder().setPing(heartbeatMessage.isPing())
             .build();
         return result;
     }
 
     @Override
     public HeartbeatMessage convert2Model(HeartbeatMessageProto heartbeatMessageProto) {
-        if (heartbeatMessageProto.getPingOrPong()) {
-            return HeartbeatMessage.PING;
-        } else {
-            return HeartbeatMessage.PONG;
-        }
+        return heartbeatMessageProto.getPing() ? HeartbeatMessage.PING : HeartbeatMessage.PONG;
     }
 }

@@ -13,5 +13,5 @@ option java_package = "io.seata.codec.protobuf.generated";
 message MergedWarpMessageProto {
     AbstractMessageProto abstractMessage=1;
     repeated google.protobuf.Any msgs = 2;
-    repeated int64 msgIds=3;
+    repeated int32 msgIds=3;
 }

@@ -25,9 +25,11 @@ import io.netty.channel.ChannelPromise;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.thread.PositiveAtomicCounter;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeMessage;
 import io.seata.core.protocol.MessageFuture;
+import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.Disposable;
 import org.slf4j.Logger;
@@ -68,10 +70,14 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
      * The Message executor.
      */
     protected final ThreadPoolExecutor messageExecutor;
+
+    /** Id generator of this remoting */
+    protected final PositiveAtomicCounter idGenerator = new PositiveAtomicCounter();
+
     /**
      * The Futures.
      */
-    protected final ConcurrentHashMap<Long, MessageFuture> futures = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<Integer, MessageFuture> futures = new ConcurrentHashMap<>();
     /**
      * The Basket map.
      */
@@ -96,7 +102,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     /**
      * The Merge msg map.
      */
-    protected final Map<Long, MergeMessage> mergeMsgMap = new ConcurrentHashMap<>();
+    protected final Map<Integer, MergeMessage> mergeMsgMap = new ConcurrentHashMap<>();
     /**
      * The Channel handlers.
      */
@@ -109,6 +115,15 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
      */
     public AbstractRpcRemoting(ThreadPoolExecutor messageExecutor) {
         this.messageExecutor = messageExecutor;
+    }
+
+    /**
+     * Gets next message id.
+     *
+     * @return the next message id
+     */
+    public int getNextMessageId() {
+        return idGenerator.incrementAndGet();
     }
 
     /**
@@ -206,10 +221,10 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
             return null;
         }
         final RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setId(RpcMessage.getNextMessageId());
-        rpcMessage.setAsync(false);
-        rpcMessage.setHeartbeat(false);
-        rpcMessage.setRequest(true);
+        rpcMessage.setId(getNextMessageId());
+        rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY);
+        rpcMessage.setCodec(ProtocolConstants.CONFIGURED_CODEC);
+        rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
         rpcMessage.setBody(msg);
 
         final MessageFuture messageFuture = new MessageFuture();
@@ -274,11 +289,13 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
      */
     protected void sendRequest(Channel channel, Object msg) {
         RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setAsync(true);
-        rpcMessage.setHeartbeat(msg instanceof HeartbeatMessage);
-        rpcMessage.setRequest(true);
+        rpcMessage.setMessageType(msg instanceof HeartbeatMessage ?
+                ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
+                : ProtocolConstants.MSGTYPE_RESQUEST);
+        rpcMessage.setCodec(ProtocolConstants.CONFIGURED_CODEC);
+        rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
         rpcMessage.setBody(msg);
-        rpcMessage.setId(RpcMessage.getNextMessageId());
+        rpcMessage.setId(getNextMessageId());
         if (msg instanceof MergeMessage) {
             mergeMsgMap.put(rpcMessage.getId(), (MergeMessage)msg);
         }
@@ -293,17 +310,19 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     /**
      * Send response.
      *
-     * @param msgId   the msg id
+     * @param request  the msg id
      * @param channel the channel
      * @param msg     the msg
      */
-    protected void sendResponse(long msgId, Channel channel, Object msg) {
+    protected void sendResponse(RpcMessage request, Channel channel, Object msg) {
         RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setAsync(true);
-        rpcMessage.setHeartbeat(msg instanceof HeartbeatMessage);
-        rpcMessage.setRequest(false);
+        rpcMessage.setMessageType(msg instanceof HeartbeatMessage ?
+                ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE :
+                ProtocolConstants.MSGTYPE_RESPONSE);
+        rpcMessage.setCodec(request.getCodec()); // same with request
+        rpcMessage.setCompressor(request.getCompressor());
         rpcMessage.setBody(msg);
-        rpcMessage.setId(msgId);
+        rpcMessage.setId(request.getId());
         channelWriteableCheck(channel, msg);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("send response:" + rpcMessage.getBody() + ",channel:" + channel);
@@ -339,7 +358,8 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof RpcMessage) {
             final RpcMessage rpcMessage = (RpcMessage)msg;
-            if (rpcMessage.isRequest()) {
+            if (rpcMessage.getMessageType() == ProtocolConstants.MSGTYPE_RESQUEST
+                    || rpcMessage.getMessageType() == ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY) {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug(String.format("%s msgId:%s, body:%s", this, rpcMessage.getId(), rpcMessage.getBody()));
                 }
@@ -348,7 +368,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                         @Override
                         public void run() {
                             try {
-                                dispatch(rpcMessage.getId(), ctx, rpcMessage.getBody());
+                                dispatch(rpcMessage, ctx);
                             } catch (Throwable th) {
                                 LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                             }
@@ -384,7 +404,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                             @Override
                             public void run() {
                                 try {
-                                    dispatch(rpcMessage.getId(), ctx, rpcMessage.getBody());
+                                    dispatch(rpcMessage, ctx);
                                 } catch (Throwable th) {
                                     LOGGER.error(FrameworkErrorCode.NetDispatch.getErrCode(), th.getMessage(), th);
                                 }
@@ -414,11 +434,10 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     /**
      * Dispatch.
      *
-     * @param msgId the msg id
-     * @param ctx   the ctx
-     * @param msg   the msg
+     * @param request the request
+     * @param ctx     the ctx
      */
-    public abstract void dispatch(long msgId, ChannelHandlerContext ctx, Object msg);
+    public abstract void dispatch(RpcMessage request, ChannelHandlerContext ctx);
 
     @Override
     public void close(ChannelHandlerContext ctx, ChannelPromise future) throws Exception {

@@ -37,6 +37,8 @@ import io.netty.util.internal.PlatformDependent;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.rpc.RemotingClient;
+import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
+import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -143,7 +145,8 @@ public class RpcClientBootstrap implements RemotingClient {
                             new IdleStateHandler(nettyClientConfig.getChannelMaxReadIdleSeconds(),
                                 nettyClientConfig.getChannelMaxWriteIdleSeconds(),
                                 nettyClientConfig.getChannelMaxAllIdleSeconds()))
-                            .addLast(new MessageCodecHandler());
+                                .addLast(new ProtocolV1Decoder())
+                                .addLast(new ProtocolV1Encoder());
                         if (null != channelHandler) {
                             ch.pipeline().addLast(channelHandler);
                         }

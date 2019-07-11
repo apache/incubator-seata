@@ -45,15 +45,15 @@ public interface MergedWarpMessageProtoOrBuilder extends
       int index);
 
   /**
-   * <code>repeated int64 msgIds = 3;</code>
+   * <code>repeated int32 msgIds = 3;</code>
    */
-  java.util.List<java.lang.Long> getMsgIdsList();
+  java.util.List<java.lang.Integer> getMsgIdsList();
   /**
-   * <code>repeated int64 msgIds = 3;</code>
+   * <code>repeated int32 msgIds = 3;</code>
    */
   int getMsgIdsCount();
   /**
-   * <code>repeated int64 msgIds = 3;</code>
+   * <code>repeated int32 msgIds = 3;</code>
    */
-  long getMsgIds(int index);
+  int getMsgIds(int index);
 }

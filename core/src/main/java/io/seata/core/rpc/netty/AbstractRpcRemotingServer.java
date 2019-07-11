@@ -31,6 +31,8 @@ import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.core.rpc.RemotingServer;
+import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
+import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -159,7 +161,8 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
                 @Override
                 public void initChannel(SocketChannel ch) {
                     ch.pipeline().addLast(new IdleStateHandler(nettyServerConfig.getChannelMaxReadIdleSeconds(), 0, 0))
-                        .addLast(new MessageCodecHandler());
+                            .addLast(new ProtocolV1Decoder())
+                            .addLast(new ProtocolV1Encoder());
                     if (null != channelHandlers) {
                         addChannelPipelineLast(ch, channelHandlers);
                     }
