@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+import "resultCode.proto";
+import "abstractMessage.proto";
+option java_multiple_files = true;
+option java_outer_classname = "AbstractResultMessage";
+option java_package = "io.seata.codec.protobuf.generated";
+
+// PublishRequest is a publish request.
+message AbstractResultMessageProto {
+    AbstractMessageProto AbstractMessage=1;
+    ResultCodeProto resultCode = 2;
+    string msg = 3;
+}

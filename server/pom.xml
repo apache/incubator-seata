@@ -44,6 +44,17 @@
             <artifactId>seata-discovery-all</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-codec-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-metrics-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- for database -->
         <dependency>
@@ -61,6 +72,10 @@
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
         </dependency>
 
     </dependencies>

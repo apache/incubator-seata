@@ -41,6 +41,8 @@
         <module>tcc</module>
         <module>test</module>
         <module>tm</module>
+        <module>metrics</module>
+        <module>codec</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -83,7 +85,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>0.6.1</revision>
+        <revision>0.7.0</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -105,7 +107,7 @@
 
         <!-- for test -->
         <junit-jupiter.version>5.4.2</junit-jupiter.version>
-        <mockito-core.version>2.23.4</mockito-core.version>
+        <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <junit-platform-launcher.version>1.4.2</junit-platform-launcher.version>
 
@@ -134,7 +136,13 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>${mockito-core.version}</version>
+            <version>${mockito.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mockito.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -224,6 +232,41 @@
             </distributionManagement>
 
         </profile>
+        <profile>
+            <id>licenseCheck</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>license-maven-plugin</artifactId>
+                        <version>1.20</version>
+                        <executions>
+                            <execution>
+                                <id>license-check</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>add-third-party</goal>
+                                </goals>
+                                <configuration>
+                                    <includeOptional>false</includeOptional>
+                                    <useMissingFile>false</useMissingFile>
+                                    <failOnMissing>false</failOnMissing>
+                                    <licenseMerges>
+                                        <licenseMerge>Apache License, Version 2.0|The Apache Software License, Version
+                                            2.0|ASF 2.0|Apache 2|Apache-2.0|Apache 2.0 License|Apache 2.0|Apache License v2.0|Apache License 2.0|The Apache License, Version 2.0|The Apache Software License, Version 2.0
+                                        </licenseMerge>
+                                        <licenseMerge>The MIT License|MIT License</licenseMerge>
+                                        <licenseMerge>The 3-Clause BSD License|New BSD License|3-Clause BSD
+                                            License|BSD|3-Clause BSD License|The New BSD License
+                                        </licenseMerge>
+                                    </licenseMerges>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
     <build>
@@ -269,6 +312,9 @@
                         <ruleset>rulesets/java/ali-other.xml</ruleset>
                         <ruleset>rulesets/java/ali-set.xml</ruleset>
                     </rulesets>
+                    <excludes>
+                        <exclude>**/generated/*.java</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -364,6 +410,9 @@
                         <include>**/src/main/java/**</include>
                         <include>**/src/test/java/**</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/generated/**</exclude>
+                    </excludes>
                     <strictCheck>true</strictCheck>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
@@ -384,6 +433,7 @@
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>false</failsOnError>
                             <failOnViolation>false</failOnViolation>
+                            <excludes>**/generated/**</excludes>
                         </configuration>
                         <goals>
                             <goal>check</goal>

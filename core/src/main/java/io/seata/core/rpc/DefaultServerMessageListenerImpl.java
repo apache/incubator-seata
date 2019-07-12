@@ -32,6 +32,7 @@ import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
+import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.Version;
 import io.seata.core.rpc.netty.RegisterCheckAuthHandler;
 
@@ -66,7 +67,8 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     }
 
     @Override
-    public void onTrxMessage(long msgId, ChannelHandlerContext ctx, Object message, ServerMessageSender sender) {
+    public void onTrxMessage(RpcMessage request, ChannelHandlerContext ctx, ServerMessageSender sender) {
+        Object message = request.getBody();
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(
@@ -86,16 +88,16 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
             }
             MergeResultMessage resultMessage = new MergeResultMessage();
             resultMessage.setMsgs(results);
-            sender.sendResponse(msgId, ctx.channel(), resultMessage);
+            sender.sendResponse(request, ctx.channel(), resultMessage);
         } else if (message instanceof AbstractResultMessage) {
             transactionMessageHandler.onResponse((AbstractResultMessage)message, rpcContext);
         }
     }
 
     @Override
-    public void onRegRmMessage(long msgId, ChannelHandlerContext ctx, RegisterRMRequest message,
+    public void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx,
                                ServerMessageSender sender, RegisterCheckAuthHandler checkAuthHandler) {
-
+        RegisterRMRequest message = (RegisterRMRequest) request.getBody();
         boolean isSuccess = false;
         try {
             if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
@@ -107,15 +109,16 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
             isSuccess = false;
             LOGGER.error(exx.getMessage());
         }
-        sender.sendResponse(msgId, ctx.channel(), new RegisterRMResponse(isSuccess));
+        sender.sendResponse(request, ctx.channel(), new RegisterRMResponse(isSuccess));
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("rm register success,message:" + message + ",channel:" + ctx.channel());
         }
     }
 
     @Override
-    public void onRegTmMessage(long msgId, ChannelHandlerContext ctx, RegisterTMRequest message,
+    public void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx,
                                ServerMessageSender sender, RegisterCheckAuthHandler checkAuthHandler) {
+        RegisterTMRequest message = (RegisterTMRequest) request.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         Version.putChannelVersion(ctx.channel(), message.getVersion());
         boolean isSuccess = false;
@@ -134,14 +137,15 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
             isSuccess = false;
             LOGGER.error(exx.getMessage());
         }
-        sender.sendResponse(msgId, ctx.channel(),
+        //FIXME please add success or fail
+        sender.sendResponse(request, ctx.channel(),
             new RegisterTMResponse(isSuccess));
     }
 
     @Override
-    public void onCheckMessage(long msgId, ChannelHandlerContext ctx, ServerMessageSender sender) {
+    public void onCheckMessage(RpcMessage request, ChannelHandlerContext ctx, ServerMessageSender sender) {
         try {
-            sender.sendResponse(msgId, ctx.channel(), HeartbeatMessage.PONG);
+            sender.sendResponse(request, ctx.channel(), HeartbeatMessage.PONG);
         } catch (Throwable throwable) {
             LOGGER.error("", "send response error", throwable);
         }
