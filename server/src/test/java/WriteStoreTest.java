@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,48 +20,60 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.alibaba.fescar.core.exception.TransactionException;
-import com.alibaba.fescar.core.model.BranchStatus;
-import com.alibaba.fescar.core.model.GlobalStatus;
-import com.alibaba.fescar.server.session.BranchSession;
-import com.alibaba.fescar.server.session.GlobalSession;
-import com.alibaba.fescar.server.session.SessionCondition;
-import com.alibaba.fescar.server.session.SessionManager;
-import com.alibaba.fescar.server.store.FileTransactionStoreManager;
-import com.alibaba.fescar.server.store.SessionStorable;
-import com.alibaba.fescar.server.store.TransactionStoreManager;
-import com.alibaba.fescar.server.store.TransactionStoreManager.LogOperation;
-import com.alibaba.fescar.server.store.TransactionWriteStore;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchStatus;
+import io.seata.core.model.GlobalStatus;
+import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
+import io.seata.server.session.SessionManager;
+import io.seata.server.store.ReloadableStore;
+import io.seata.server.store.SessionStorable;
+import io.seata.server.store.TransactionStoreManager;
+import io.seata.server.store.TransactionStoreManager.LogOperation;
+import io.seata.server.store.TransactionWriteStore;
+import io.seata.server.store.file.FileTransactionStoreManager;
+
 
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/12/13 10:21
- * @FileName: WriteStoreTest
- * @Description:c
- * write cost:87281,read cost:158922   65535*5  1000 per open  init 1024
- * write cost:86454,read cost:160541   65535*5  2000 per open  init 1024
- * write cost:82953,read cost:157736   65535*5  2000 per open  init 65535*5*9
- * write cost:115079,read cost:163664   65535*5  2000 per open  init 65535*5*9  schedule flush 10||2s
+ * The type Write store test.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /12/13
+ * write  cost:87281,read cost:158922   65535*5  1000 per open  init 1024 write cost:86454,read
+ * cost:160541   65535*5  2000 per open  init 1024 write cost:82953,read cost:157736   65535*5  2000 per open  init
+ * 65535*5*9 write cost:115079,read cost:163664   65535*5  2000 per open  init 65535*5*9  schedule flush 10||2s
  */
 public class WriteStoreTest {
     private static String vgroup = "vgroupMock";
     private static String appname = "appnameMock";
-    private static String instname = "fescarMocK";
+    private static String instname = "seataMocK";
     private static int trx_num = 65535 * 5;
     private static int trx_begin = 0;
 
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     * @throws InterruptedException the interrupted exception
+     * @throws IOException the io exception
+     */
     public static void main(String[] args) throws InterruptedException, IOException {
         TransactionStoreManager transactionStoreManager = new FileTransactionStoreManager(
-            "/Users/min.ji/Documents/test/data",
+        "~/Documents/test/data",
             new SessionManager() {
+                @Override
+                public void destroy() {
+
+                }
+
                 @Override
                 public void addGlobalSession(GlobalSession session) throws TransactionException {
 
                 }
 
                 @Override
-                public GlobalSession findGlobalSession(Long transactionId) throws TransactionException {
+                public GlobalSession findGlobalSession(String xid)  {
                     return null;
                 }
 
@@ -211,8 +222,8 @@ public class WriteStoreTest {
 
     private static Map<SessionStorable, LogOperation> readAll(TransactionStoreManager transactionStoreManager) {
         Map<SessionStorable, LogOperation> resultMap = new HashMap<>(65535 * 5 * 9);
-        while (transactionStoreManager.hasRemaining(true)) {
-            List<TransactionWriteStore> transactionWriteStores = transactionStoreManager.readWriteStoreFromFile(2000,
+        while (((ReloadableStore)transactionStoreManager).hasRemaining(true)) {
+            List<TransactionWriteStore> transactionWriteStores = ((ReloadableStore)transactionStoreManager).readWriteStore(2000,
                 true);
             if (null != transactionWriteStores) {
                 for (TransactionWriteStore transactionWriteStore : transactionWriteStores) {
@@ -221,8 +232,8 @@ public class WriteStoreTest {
                 }
             }
         }
-        while (transactionStoreManager.hasRemaining(false)) {
-            List<TransactionWriteStore> transactionWriteStores = transactionStoreManager.readWriteStoreFromFile(2000,
+        while (((ReloadableStore)transactionStoreManager).hasRemaining(false)) {
+            List<TransactionWriteStore> transactionWriteStores = ((ReloadableStore)transactionStoreManager).readWriteStore(2000,
                 false);
             if (null != transactionWriteStores) {
                 for (TransactionWriteStore transactionWriteStore : transactionWriteStores) {

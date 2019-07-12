@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~  Copyright 1999-2018 Alibaba Group Holding Ltd.
+  ~  Copyright 1999-2019 Seata.io Group.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~  you may not use this file except in compliance with the License.
@@ -18,27 +18,66 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>fescar-all</artifactId>
-        <groupId>com.alibaba.fescar</groupId>
-        <version>0.1.2-SNAPSHOT</version>
+        <groupId>io.seata</groupId>
+        <artifactId>seata-parent</artifactId>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>fescar-server</artifactId>
+    <artifactId>seata-server</artifactId>
     <packaging>jar</packaging>
-    <name>fescar-server ${project.version}</name>
-    <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-    </properties>
+    <name>seata-server ${project.version}</name>
+
     <dependencies>
+
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>fescar-core</artifactId>
+            <artifactId>seata-core</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-config-all</artifactId>
+            <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-discovery-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-codec-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-metrics-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- for database -->
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.beust</groupId>
+            <artifactId>jcommander</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -46,7 +85,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>appassembler-maven-plugin</artifactId>
-                <version>1.1.1</version>
+                <version>1.10</version>
                 <executions>
                     <execution>
                         <id>make-assembly</id>
@@ -63,14 +102,27 @@
                     <includeConfigurationDirectoryInClasspath>true</includeConfigurationDirectoryInClasspath>
                     <repositoryLayout>flat</repositoryLayout>
                     <repositoryName>lib</repositoryName>
+                    <encoding>UTF-8</encoding>
+                    <useWildcardClassPath>true</useWildcardClassPath>
                     <binFileExtensions>
                         <unix>.sh</unix>
+                        <windows>.bat</windows>
                     </binFileExtensions>
                     <assembleDirectory>../distribution</assembleDirectory>
                     <programs>
                         <program>
-                            <mainClass>com.alibaba.fescar.server.Server</mainClass>
-                            <name>fescar-server</name>
+                            <mainClass>io.seata.server.Server</mainClass>
+                            <name>seata-server</name>
+                            <jvmSettings>
+                                <extraArguments>
+                                    <extraArgument>-server</extraArgument>
+                                    <extraArgument>-XX:MaxDirectMemorySize=1024M</extraArgument>
+                                </extraArguments>
+                            </jvmSettings>
+                            <platforms>
+                                <platform>windows</platform>
+                                <platform>unix</platform>
+                            </platforms>
                         </program>
                     </programs>
                 </configuration>

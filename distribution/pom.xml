@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~  Copyright 1999-2018 Alibaba Group Holding Ltd.
+  ~  Copyright 1999-2019 Seata.io Group.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~  you may not use this file except in compliance with the License.
@@ -18,32 +18,30 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>fescar-all</artifactId>
-        <groupId>com.alibaba.fescar</groupId>
-        <version>0.1.2-SNAPSHOT</version>
+        <groupId>io.seata</groupId>
+        <artifactId>seata-parent</artifactId>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>fescar-distribution</artifactId>
+    <artifactId>seata-distribution</artifactId>
     <packaging>pom</packaging>
-    <name>fescar-distribution ${project.version}</name>
-    <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-    </properties>
+    <name>seata-distribution ${project.version}</name>
 
     <dependencies>
         <dependency>
-            <groupId>com.alibaba.fescar</groupId>
-            <artifactId>fescar-server</artifactId>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-server</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
     <profiles>
         <profile>
-            <id>release-fescar</id>
+            <id>release-seata</id>
             <dependencies>
                 <dependency>
-                    <groupId>com.alibaba.fescar</groupId>
-                    <artifactId>fescar-server</artifactId>
+                    <groupId>io.seata</groupId>
+                    <artifactId>seata-server</artifactId>
+                    <version>${project.version}</version>
                 </dependency>
             </dependencies>
             <build>
@@ -53,7 +51,7 @@
                         <version>3.0.0</version>
                         <configuration>
                             <descriptors>
-                                <descriptor>release-fescar.xml</descriptor>
+                                <descriptor>release-seata.xml</descriptor>
                             </descriptors>
                         </configuration>
                         <executions>
@@ -67,8 +65,20 @@
                         </executions>
                     </plugin>
                 </plugins>
-                <finalName>fescar</finalName>
+                <finalName>seata</finalName>
             </build>
         </profile>
     </profiles>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.8.2</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

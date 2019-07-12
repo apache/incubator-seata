@@ -2,7 +2,8 @@ language: java
 sudo: false # faster builds
 
 jdk:
-  - openjdk7
+  - openjdk11
+  - openjdk8
 
 cache:
   directories:
@@ -11,8 +12,7 @@ cache:
 install: true
 
 script:
-  - mvn clean package
-  - mvn cobertura:cobertura
+  - travis_wait 30 ./mvnw clean install -DskipTests=false
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)

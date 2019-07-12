@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~  Copyright 1999-2018 Alibaba Group Holding Ltd.
+  ~  Copyright 1999-2019 Seata.io Group.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~  you may not use this file except in compliance with the License.
@@ -28,12 +28,12 @@
 
     <!-- header -->
     <module name="RegexpHeader">
-        <property name="header" value="[\s]Copyright 1999-2018 Alibaba Group Holding Ltd."/>
+        <property name="header" value="^.*$\n[\*\s]Copyright 1999-2019 Seata.io Group."/>
         <property name="fileExtensions" value="java"/>
     </module>
 
     <module name="RegexpHeader">
-        <property name="header" value="#[\s]*Copyright 1999-2018 Alibaba Group Holding Ltd.*"/>
+        <property name="header" value="^.*$\n[#\s]Copyright 1999-2019 Seata.io Group."/>
         <property name="fileExtensions" value="properties"/>
     </module>
 
@@ -53,16 +53,8 @@
     </module>
 
     <module name="RegexpSingleline">
-        <property name="format" value="@alibaba"/>
-        <property name="message" value="Recommended remove @alibaba keyword!"/>
-    </module>
-    <module name="RegexpSingleline">
         <property name="format" value="@taobao"/>
         <property name="message" value="Recommended remove @taobao keyword!"/>
-    </module>
-    <module name="RegexpSingleline">
-        <property name="format" value="@author"/>
-        <property name="message" value="Recommended remove @author tag in javadoc!"/>
     </module>
 
     <module name="RegexpSingleline">

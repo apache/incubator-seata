@@ -1,5 +1,5 @@
 /*
- *  Copyright 1999-2018 Alibaba Group Holding Ltd.
+ *  Copyright 1999-2019 Seata.io Group.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -13,34 +13,41 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+import io.seata.common.XID;
+import io.seata.common.util.NetUtil;
+import io.seata.core.rpc.netty.RpcServer;
+import io.seata.server.UUIDGenerator;
+import io.seata.server.coordinator.DefaultCoordinator;
 
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import com.alibaba.fescar.core.rpc.netty.RpcServer;
-import com.alibaba.fescar.server.UUIDGenerator;
-import com.alibaba.fescar.server.coordinator.DefaultCoordinator;
-
 /**
- * @Author: jimin.jm@alibaba-inc.com
- * @Project: fescar-all
- * @DateTime: 2018/12/4 19:34
- * @FileName: ServerTest
- * @Description:
+ * The type Server test.
+ *
+ * @author jimin.jm @alibaba-inc.com
+ * @date 2018 /12/4
  */
 public class ServerTest {
 
     private static final ThreadPoolExecutor workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
             new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
+
+    /**
+     * The entry point of application.
+     *
+     * @param args the input arguments
+     */
     public static void main(String[] args) {
 
         RpcServer rpcServer = new RpcServer(workingThreads);
         rpcServer.setHandler(new DefaultCoordinator(rpcServer));
         UUIDGenerator.init(1);
+        XID.setIpAddress(NetUtil.getLocalIp());
+        XID.setPort(rpcServer.getListenPort());
         rpcServer.init();
-
         System.exit(0);
     }
 

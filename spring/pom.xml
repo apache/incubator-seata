@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~  Copyright 1999-2018 Alibaba Group Holding Ltd.
+  ~  Copyright 1999-2019 Seata.io Group.
   ~
   ~  Licensed under the Apache License, Version 2.0 (the "License");
   ~  you may not use this file except in compliance with the License.
@@ -18,40 +18,57 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>fescar-all</artifactId>
-        <groupId>com.alibaba.fescar</groupId>
-        <version>0.1.2-SNAPSHOT</version>
+        <groupId>io.seata</groupId>
+        <artifactId>seata-parent</artifactId>
+        <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>fescar-spring</artifactId>
+    <artifactId>seata-spring</artifactId>
     <packaging>jar</packaging>
-    <name>fescar-spring ${project.version}</name>
-    <properties>
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-    </properties>
+    <name>seata-spring ${project.version}</name>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>fescar-tm</artifactId>
+            <artifactId>seata-tm</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>fescar-rm-datasource</artifactId>
+            <artifactId>seata-rm-datasource</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring</artifactId>
-            <scope>provided</scope>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-tcc</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring</artifactId>
-            <scope>provided</scope>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-rm</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>cglib</groupId>
             <artifactId>cglib</artifactId>
+        </dependency>
+
+        <!-- spring  -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-beans</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aop</artifactId>
         </dependency>
 
     </dependencies>
