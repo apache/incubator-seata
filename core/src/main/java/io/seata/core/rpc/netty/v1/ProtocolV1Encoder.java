@@ -46,7 +46,7 @@ import java.util.Map;
  * <p>
  * <li>Full Length: include all data </li>
  * <li>Head Length: include head data from magic code to head map. </li>
- * <li>Body Length: Full Length - Body Length</li>
+ * <li>Body Length: Full Length - Head Length</li>
  * </p>
  * https://github.com/seata/seata/issues/893
  *
