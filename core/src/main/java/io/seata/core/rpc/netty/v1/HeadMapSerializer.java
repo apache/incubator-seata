@@ -41,10 +41,11 @@ public class HeadMapSerializer {
     }
 
     /**
-     * 简单 map 的序列化过程, 用来序列化 bolt 的 header
+     * encode head map
      *
-     * @param map bolt header
-     * @return 序列化后的 byte 数组
+     * @param map header map
+     * @param out ByteBuf
+     * @return length of head map bytes
      */
     public int encode(Map<String, String> map, ByteBuf out) {
         if (map == null || map.isEmpty() || out == null) {
@@ -63,11 +64,11 @@ public class HeadMapSerializer {
     }
 
     /**
-     * 简单 map 的反序列化过程, 用来反序列化 bolt 的 header
-     * <p>
+     * decode head map
      *
-     * @param in bolt header
-     * @return 反序列化后的 Map 对象
+     * @param in ByteBuf
+     * @param length of head map bytes
+     * @return header map
      */
     public Map<String, String> decode(ByteBuf in, int length) {
         Map<String, String> map = new HashMap<String, String>();
@@ -85,31 +86,30 @@ public class HeadMapSerializer {
     }
 
     /**
-     * 写一个String
+     * Write string
      *
-     * @param out 输出流
-     * @param str 字符串
+     * @param out ByteBuf
+     * @param str String
      */
     protected void writeString(ByteBuf out, String str) {
         if (str == null) {
-            out.writeInt(-1);
+            out.writeShort(-1);
         } else if (str.isEmpty()) {
-            out.writeInt(0);
+            out.writeShort(0);
         } else {
             byte[] bs = str.getBytes(Constants.DEFAULT_CHARSET);
-            out.writeInt(bs.length);
+            out.writeShort(bs.length);
             out.writeBytes(bs);
         }
     }
-
     /**
-     * 读取一个字符串
+     * Read string
      *
-     * @param in 输入流程
-     * @return 字符串
+     * @param in ByteBuf
+     * @return String
      */
     protected String readString(ByteBuf in) {
-        int length = in.readInt();
+        int length = in.readShort();
         if (length < 0) {
             return null;
         } else if (length == 0) {
