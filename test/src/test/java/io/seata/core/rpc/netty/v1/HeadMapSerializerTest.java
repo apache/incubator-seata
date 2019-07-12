@@ -48,9 +48,9 @@ class HeadMapSerializerTest {
         map.put("a", "");
         map.put("b", null);
         bs = simpleMapSerializer.encode(map, byteBuf);
-        Assertions.assertEquals(37, bs);
+        Assertions.assertEquals(21, bs);
 
-        Map<String, String> map1 = simpleMapSerializer.decode(byteBuf, 37);
+        Map<String, String> map1 = simpleMapSerializer.decode(byteBuf, 21);
         Assertions.assertNotNull(map1);
         Assertions.assertEquals(4, map1.size());
         Assertions.assertEquals("2", map1.get("1"));
@@ -58,11 +58,11 @@ class HeadMapSerializerTest {
         Assertions.assertEquals("", map1.get("a"));
         Assertions.assertEquals(null, map1.get("b"));
 
-        map1 = simpleMapSerializer.decode(byteBuf, 37);
+        map1 = simpleMapSerializer.decode(byteBuf, 21);
         Assertions.assertNotNull(map1);
         Assertions.assertEquals(0, map1.size());
 
-        map1 = simpleMapSerializer.decode(null, 37);
+        map1 = simpleMapSerializer.decode(null, 21);
         Assertions.assertNotNull(map1);
         Assertions.assertEquals(0, map1.size());
 
