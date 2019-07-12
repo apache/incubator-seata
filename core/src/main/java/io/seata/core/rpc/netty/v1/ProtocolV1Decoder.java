@@ -17,20 +17,20 @@ package io.seata.core.rpc.netty.v1;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.seata.core.codec.Codec;
 import io.seata.core.codec.CodecFactory;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 
-import java.io.IOException;
 import java.util.Map;
 
 /**
- * <p>
+ * <pre>
  * 0     1     2     3     4     5     6     7     8     9    10     11    12    13    14    15    16
  * +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
- * |   magic   |Proto|     Full length       |  HeadMap  | Msg |Seria|Compr|     RequestId         |
+ * |   magic   |Proto|     Full length       |    Head   | Msg |Seria|Compr|     RequestId         |
  * |   code    |colVer|    （head+body)      |   Length  |Type |lizer|ess  |                       |
  * +-----------+-----------+-----------+-----------+-----------+-----------+-----------+-----------+
  * |                                                                                               |
@@ -41,17 +41,23 @@ import java.util.Map;
  * |                                                                                               |
  * |                                        ... ...                                                |
  * +-----------------------------------------------------------------------------------------------+
+ * </pre>
  * <p>
+ * <li>Full Length: include all data </li>
+ * <li>Head Length: include head data from magic code to head map. </li>
+ * <li>Body Length: Full Length - Head Length</li>
+ * </p>
  * https://github.com/seata/seata/issues/893
  *
  * @author Geng Zhang
+ * @see ProtocolV1Encoder
  * @since 0.7.0
  */
-public class ProtocolV1Decoder extends io.netty.handler.codec.LengthFieldBasedFrameDecoder {
+public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
 
     public ProtocolV1Decoder() {
         // default is 8M
-        this(8 * 1024 * 1024);
+        this(ProtocolConstants.MAX_FRAME_LENGTH);
     }
 
     public ProtocolV1Decoder(int maxFrameLength) {
@@ -59,10 +65,10 @@ public class ProtocolV1Decoder extends io.netty.handler.codec.LengthFieldBasedFr
         int maxFrameLength,      
         int lengthFieldOffset,  magic code is 2B, and version is 1B, and then FullLength. so value is 3
         int lengthFieldLength,  FullLength is int(4B). so values is 4
-        int lengthAdjustment,   FullLength include 4 bytes self, so the left length is (FullLength-4). so values is -4
-        int initialBytesToStrip we will check magic code and version self, so do not strip any bytes. so values is                                                                                                          0
+        int lengthAdjustment,   FullLength include all data and read 7 bytes before, so the left length is (FullLength-7). so values is -7
+        int initialBytesToStrip we will check magic code and version self, so do not strip any bytes. so values is 0
         */
-        super(maxFrameLength, 3, 4, -4, 0);
+        super(maxFrameLength, 3, 4, -7, 0);
     }
 
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
@@ -74,7 +80,7 @@ public class ProtocolV1Decoder extends io.netty.handler.codec.LengthFieldBasedFr
         return decoded;
     }
 
-    public Object decodeFrame(ByteBuf frame) throws IOException {
+    public Object decodeFrame(ByteBuf frame) {
         byte b0 = frame.readByte();
         byte b1 = frame.readByte();
         if (ProtocolConstants.MAGIC_CODE_BYTES[0] != b0
@@ -98,18 +104,20 @@ public class ProtocolV1Decoder extends io.netty.handler.codec.LengthFieldBasedFr
         rpcMessage.setCompressor(compressor);
         rpcMessage.setMessageType(messageType);
 
-        if (headLength > 0) {
-            byte[] bs = new byte[headLength];
-            frame.readBytes(bs);
-            Map<String, String> map = HeadMapSerializer.getInstance().decode(bs);
+        // direct read head with zero-copy
+        int headMapLength = headLength - ProtocolConstants.V1_HEAD_LENGTH;
+        if (headMapLength > 0) {
+            Map<String, String> map = HeadMapSerializer.getInstance().decode(frame, headMapLength);
             rpcMessage.getHeadMap().putAll(map);
         }
+
+        // read body
         if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST) {
             rpcMessage.setBody(HeartbeatMessage.PING);
         } else if (messageType == ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
             rpcMessage.setBody(HeartbeatMessage.PONG);
         } else {
-            int bodyLength = fullLength - headLength - 13;
+            int bodyLength = fullLength - headLength;
             if (bodyLength > 0) {
                 byte[] bs = new byte[bodyLength];
                 frame.readBytes(bs);
