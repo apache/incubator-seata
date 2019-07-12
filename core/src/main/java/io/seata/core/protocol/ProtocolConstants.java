@@ -37,6 +37,16 @@ public class ProtocolConstants {
     public static final byte VERSION = 1;
 
     /**
+     * Max frame length
+     */
+    public static final int MAX_FRAME_LENGTH = 8 * 1024 * 1024;
+
+    /**
+     * HEAD_LENGTH of protocol v1
+     */
+    public static final int V1_HEAD_LENGTH = 16;
+    
+    /**
      * Message type: Request
      */
     public static final byte MSGTYPE_RESQUEST = 0;

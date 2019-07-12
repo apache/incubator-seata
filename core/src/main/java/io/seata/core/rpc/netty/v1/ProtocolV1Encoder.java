@@ -28,10 +28,10 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 /**
- * <p>
+ * <pre>
  * 0     1     2     3     4     5     6     7     8     9    10     11    12    13    14    15    16
  * +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
- * |   magic   |Proto|     Full length       |  HeadMap  | Msg |Seria|Compr|     RequestId         |
+ * |   magic   |Proto|     Full length       |    Head   | Msg |Seria|Compr|     RequestId         |
  * |   code    |colVer|    （head+body)      |   Length  |Type |lizer|ess  |                       |
  * +-----------+-----------+-----------+-----------+-----------+-----------+-----------+-----------+
  * |                                                                                               |
@@ -42,11 +42,16 @@ import java.util.Map;
  * |                                                                                               |
  * |                                        ... ...                                                |
  * +-----------------------------------------------------------------------------------------------+
- * </p>
+ * </pre>
  * <p>
+ * <li>Full Length: include all data </li>
+ * <li>Head Length: include head data from magic code to head map. </li>
+ * <li>Body Length: Full Length - Head Length</li>
+ * </p>
  * https://github.com/seata/seata/issues/893
  *
  * @author Geng Zhang
+ * @see ProtocolV1Decoder
  * @since 0.7.0
  */
 public class ProtocolV1Encoder extends MessageToByteEncoder {
@@ -59,20 +64,28 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
             if (msg instanceof RpcMessage) {
                 RpcMessage rpcMessage = (RpcMessage) msg;
 
-                int fullLength = 13;
-                int headLength = 0;
+                int fullLength = ProtocolConstants.V1_HEAD_LENGTH;
+                int headLength = ProtocolConstants.V1_HEAD_LENGTH;
 
-                // count head
-                byte[] headBytes = null;
+                byte messageType = rpcMessage.getMessageType();
+                out.writeBytes(ProtocolConstants.MAGIC_CODE_BYTES);
+                out.writeByte(ProtocolConstants.VERSION);
+                // full Length(4B) and head length(2B) will fix in the end. 
+                out.writerIndex(out.writerIndex() + 6);
+                out.writeByte(messageType);
+                out.writeByte(rpcMessage.getCodec());
+                out.writeByte(rpcMessage.getCompressor());
+                out.writeInt(rpcMessage.getId());
+
+                // direct write head with zero-copy
                 Map<String, String> headMap = rpcMessage.getHeadMap();
                 if (headMap != null && !headMap.isEmpty()) {
-                    headBytes = HeadMapSerializer.getInstance().encode(headMap);
-                    headLength = headBytes.length;
-                    fullLength += headLength;
+                    int headMapBytesLength = HeadMapSerializer.getInstance().encode(headMap, out);
+                    headLength += headMapBytesLength;
+                    fullLength += headMapBytesLength;
                 }
 
                 byte[] bodyBytes = null;
-                byte messageType = rpcMessage.getMessageType();
                 if (messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
                         && messageType != ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE) {
                     // heartbeat has no body
@@ -81,27 +94,22 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
                     fullLength += bodyBytes.length;
                 }
 
-                out.writeBytes(ProtocolConstants.MAGIC_CODE_BYTES);
-                out.writeByte(ProtocolConstants.VERSION);
-                out.writeInt(fullLength);
-                out.writeShort(headLength);
-                out.writeByte(messageType);
-                out.writeByte(rpcMessage.getCodec());
-                out.writeByte(rpcMessage.getCompressor());
-                out.writeInt(rpcMessage.getId());
-
-                if (headBytes != null) {
-                    out.writeBytes(headBytes);
-                }
-
                 if (bodyBytes != null) {
                     out.writeBytes(bodyBytes);
                 }
+
+                // fix fullLength and headLength
+                int writeIndex = out.writerIndex();
+                // skip magic code(2B) + version(1B)
+                out.writerIndex(writeIndex - fullLength + 3);
+                out.writeInt(fullLength);
+                out.writeShort(headLength);
+                out.writerIndex(writeIndex);
             } else {
                 throw new UnsupportedOperationException("Not support this class:" + msg.getClass());
             }
         } catch (Throwable e) {
             LOGGER.error("Encode request error!", e);
-        } 
+        }
     }
 }

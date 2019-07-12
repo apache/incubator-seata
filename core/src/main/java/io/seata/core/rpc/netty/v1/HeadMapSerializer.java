@@ -15,14 +15,10 @@
  */
 package io.seata.core.rpc.netty.v1;
 
+import io.netty.buffer.ByteBuf;
 import io.seata.common.Constants;
-import io.seata.common.io.UnsafeByteArrayInputStream;
-import io.seata.common.io.UnsafeByteArrayOutputStream;
 import io.seata.common.util.StringUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,28 +29,29 @@ import java.util.Map;
  * @since 0.7.0
  */
 public class HeadMapSerializer {
-    
+
     private static final HeadMapSerializer INSTANCE = new HeadMapSerializer();
 
     private HeadMapSerializer() {
-        
+
     }
-    
-    public static HeadMapSerializer getInstance(){
+
+    public static HeadMapSerializer getInstance() {
         return INSTANCE;
     }
-    
+
     /**
-     * 简单 map 的序列化过程, 用来序列化 bolt 的 header
+     * encode head map
      *
-     * @param map bolt header
-     * @return 序列化后的 byte 数组
+     * @param map header map
+     * @param out ByteBuf
+     * @return length of head map bytes
      */
-    public byte[] encode(Map<String, String> map) throws IOException {
-        if (map == null || map.isEmpty()) {
-            return null;
+    public int encode(Map<String, String> map, ByteBuf out) {
+        if (map == null || map.isEmpty() || out == null) {
+            return 0;
         }
-        UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(64);
+        int start = out.writerIndex();
         for (Map.Entry<String, String> entry : map.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
@@ -63,24 +60,23 @@ public class HeadMapSerializer {
                 writeString(out, value);
             }
         }
-        return out.toByteArray();
+        return out.writerIndex() - start;
     }
 
     /**
-     * 简单 map 的反序列化过程, 用来反序列化 bolt 的 header
-     * <p>
+     * decode head map
      *
-     * @param bytes bolt header
-     * @return 反序列化后的 Map 对象
+     * @param in ByteBuf
+     * @param length of head map bytes
+     * @return header map
      */
-    public Map<String, String> decode(byte[] bytes) throws IOException {
+    public Map<String, String> decode(ByteBuf in, int length) {
         Map<String, String> map = new HashMap<String, String>();
-        if (bytes == null || bytes.length == 0) {
+        if (in == null || in.readableBytes() == 0 || length == 0) {
             return map;
         }
-
-        UnsafeByteArrayInputStream in = new UnsafeByteArrayInputStream(bytes);
-        while (in.available() > 0) {
+        int tick = in.readerIndex();
+        while (in.readerIndex() - tick < length) {
             String key = readString(in);
             String value = readString(in);
             map.put(key, value);
@@ -90,69 +86,38 @@ public class HeadMapSerializer {
     }
 
     /**
-     * 写一个String
+     * Write string
      *
-     * @param out 输出流
-     * @param str 字符串
-     * @throws IOException 写入异常
+     * @param out ByteBuf
+     * @param str String
      */
-    protected void writeString(OutputStream out, String str) throws IOException {
+    protected void writeString(ByteBuf out, String str) {
         if (str == null) {
-            writeInt(out, -1);
+            out.writeShort(-1);
         } else if (str.isEmpty()) {
-            writeInt(out, 0);
+            out.writeShort(0);
         } else {
             byte[] bs = str.getBytes(Constants.DEFAULT_CHARSET);
-            writeInt(out, bs.length);
-            out.write(bs);
+            out.writeShort(bs.length);
+            out.writeBytes(bs);
         }
     }
-
     /**
-     * 读取一个字符串
+     * Read string
      *
-     * @param in 输入流程
-     * @return 字符串
-     * @throws IOException 读取异常
+     * @param in ByteBuf
+     * @return String
      */
-    protected String readString(InputStream in) throws IOException {
-        int length = readInt(in);
+    protected String readString(ByteBuf in) {
+        int length = in.readShort();
         if (length < 0) {
             return null;
         } else if (length == 0) {
             return StringUtils.EMPTY;
         } else {
             byte[] value = new byte[length];
-            in.read(value);
+            in.readBytes(value);
             return new String(value, Constants.DEFAULT_CHARSET);
         }
-    }
-
-    /**
-     * OutputStream.write(int) 仅 write 第一个 byte, 而不是整个 int
-     *
-     * @param out OutputStream
-     * @param i   int value
-     * @throws IOException if an I/O error occurs.
-     */
-    private void writeInt(OutputStream out, int i) throws IOException {
-        out.write((byte) (i >> 24));
-        out.write((byte) (i >> 16));
-        out.write((byte) (i >> 8));
-        out.write(i);
-    }
-
-    /**
-     * InputStream.read 仅 read 一个 byte
-     *
-     * @param in InputStream
-     * @return int value
-     * @throws IOException if an I/O error occurs.
-     */
-    public int readInt(InputStream in) throws IOException {
-        return ((byte) in.read() & 0xff) << 24
-                | ((byte) in.read() & 0xff) << 16
-                | ((byte) in.read() & 0xff) << 8
-                | (byte) in.read() & 0xff;
     }
 }
