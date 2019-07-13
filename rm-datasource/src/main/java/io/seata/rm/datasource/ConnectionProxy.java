@@ -23,6 +23,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
+import io.seata.rm.datasource.exec.LockRetryController;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoLogManager;
 import org.slf4j.Logger;
@@ -153,9 +154,27 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     @Override
     public void commit() throws SQLException {
         if (context.inGlobalTransaction()) {
-            processGlobalTransactionCommit();
+            LockRetryController lockRetryController = new LockRetryController();
+            while (true) {
+                try {
+                    processGlobalTransactionCommit();
+                    break;
+                } catch (LockConflictException lockConflict) {
+                    this.getTargetConnection().rollback();
+                    lockRetryController.sleep(lockConflict);
+                }
+            }
         } else if (context.isGlobalLockRequire()) {
-            processLocalCommitWithGlobalLocks();
+            LockRetryController lockRetryController = new LockRetryController();
+            while (true) {
+                try {
+                    processLocalCommitWithGlobalLocks();
+                    break;
+                } catch (LockConflictException lockConflict) {
+                    this.getTargetConnection().rollback();
+                    lockRetryController.sleep(lockConflict);
+                }
+            }
         } else {
             targetConnection.commit();
         }
