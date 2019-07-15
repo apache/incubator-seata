@@ -39,6 +39,7 @@
         <groupId>co.faao</groupId>
         <artifactId>speed-seata-starter</artifactId>
         <version>${co.faao.speed.version}</version>
+            <scope>provided</scope>
         <exclusions>
             <exclusion>
                 <groupId>*</groupId>
@@ -51,6 +52,7 @@
             <groupId>co.faao</groupId>
             <artifactId>speed-abase</artifactId>
             <version>${co.faao.speed.version}</version>
+            <scope>provided</scope>
             <exclusions>
                 <exclusion>
                     <groupId>*</groupId>

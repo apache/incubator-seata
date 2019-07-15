@@ -15,10 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-
 import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.core.context.RootContext;
@@ -239,8 +235,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         sqlUndoLog.setTableName(tableName);
         sqlUndoLog.setBeforeImage(beforeImage);
         sqlUndoLog.setAfterImage(afterImage);
-        sqlUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(),"yyyy-MM-dd HH:mm:ss"));
 
+        sqlUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(),"yyyy-MM-dd HH:mm:ss"));
+        sqlUndoLog.setUserName("");
         return sqlUndoLog;
     }
 

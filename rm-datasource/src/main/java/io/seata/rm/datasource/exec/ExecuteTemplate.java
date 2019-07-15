@@ -180,6 +180,7 @@ public class ExecuteTemplate {
         sqlUndoLog.setBeforeImage(beforeImage);
         sqlUndoLog.setAfterImage(afterImage);
         sqlUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(),"yyyy-MM-dd HH:mm:ss"));
+        sqlUndoLog.setUserName("");
         return sqlUndoLog;
     }
 }

@@ -33,8 +33,18 @@ public class SQLUndoLog {
     private TableRecords beforeImage;
 
     private TableRecords afterImage;
-
+//    add by ccg  功能扩展用
     private String executeDate;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    private String userName;
 
     public String getExecuteDate() {
         return executeDate;
