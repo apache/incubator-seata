@@ -13,23 +13,33 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.rpc;
+package io.seata.common.thread;
 
-import io.seata.core.protocol.RpcMessage;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * The interface Client message listener.
+ * 计数器，从0开始，保证正数。
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/10
+ * @author Geng Zhang
  */
-public interface ClientMessageListener {
-    /**
-     * On message.
-     *
-     * @param request       the msg id
-     * @param serverAddress the server address
-     * @param sender        the sender
-     */
-    void onMessage(RpcMessage request, String serverAddress, ClientMessageSender sender);
+public class PositiveAtomicCounter {
+    private static final int    MASK = 0x7FFFFFFF;
+    private final AtomicInteger atom;
+
+    public PositiveAtomicCounter() {
+        atom = new AtomicInteger(0);
+    }
+
+    public final int incrementAndGet() {
+        return atom.incrementAndGet() & MASK;
+    }
+
+    public final int getAndIncrement() {
+        return atom.getAndIncrement() & MASK;
+    }
+
+    public int get() {
+        return atom.get() & MASK;
+    }
+
 }
