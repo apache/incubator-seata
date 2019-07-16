@@ -38,7 +38,7 @@ public class TableRecords {
 
     private String tableName;
 
-    private List<Row> rows = new ArrayList<Row>();
+    private List<Row> rows = new ArrayList<>();
 
     /**
      * Instantiates a new Table records.
@@ -93,7 +93,7 @@ public class TableRecords {
                 Object object = resultSet.getObject(i);
                 if (col.getDataType() == Types.TIMESTAMP) {
                     TIMESTAMP timestamp = (TIMESTAMP) object;
-                    field.setValue(timestamp.timestampValue());
+                    field.setValue(timestamp == null ? null : timestamp.timestampValue());
                 } else {
                     field.setValue(object);
                 }
@@ -145,20 +145,6 @@ public class TableRecords {
         this.rows = rows;
     }
 
-
-    /**
-     * Sets table meta.
-     *
-     * @param tableMeta the table meta
-     */
-    public void setTableMeta(TableMeta tableMeta) {
-        if (this.tableMeta != null) {
-            throw new ShouldNeverHappenException();
-        }
-        this.tableMeta = tableMeta;
-        this.tableName = tableMeta.getTableName();
-    }
-
     /**
      * Size int.
      *
@@ -206,9 +192,23 @@ public class TableRecords {
         return tableMeta;
     }
 
+    /**
+     * Sets table meta.
+     *
+     * @param tableMeta the table meta
+     */
+    public void setTableMeta(TableMeta tableMeta) {
+        if (this.tableMeta != null) {
+            throw new ShouldNeverHappenException();
+        }
+        this.tableMeta = tableMeta;
+        this.tableName = tableMeta.getTableName();
+    }
+
     public static class EmptyTableRecords extends TableRecords {
 
-        public EmptyTableRecords() {}
+        public EmptyTableRecords() {
+        }
 
         public EmptyTableRecords(TableMeta tableMeta) {
             this.setTableMeta(tableMeta);
