@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 /**
  * The type Insert executor.
@@ -82,7 +83,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     protected boolean containsPK() {
-        SQLInsertRecognizer recogizier = (SQLInsertRecognizer)sqlRecognizer;
+        SQLInsertRecognizer recogizier = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recogizier.getInsertColumns();
         TableMeta tmeta = getTableMeta();
         return tmeta.containsPK(insertColumns);
@@ -90,22 +91,37 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     protected List<Object> getPkValuesByColumn() throws SQLException {
         // insert values including PK
-        SQLInsertRecognizer recogizier = (SQLInsertRecognizer)sqlRecognizer;
+        SQLInsertRecognizer recogizier = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recogizier.getInsertColumns();
         String pk = getTableMeta().getPkName();
         List<Object> pkValues = null;
-        for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
-            if (insertColumns.get(paramIdx).equalsIgnoreCase(pk)) {
-                if (statementProxy instanceof PreparedStatementProxy) {
-                    pkValues = ((PreparedStatementProxy)statementProxy).getParamsByIndex(paramIdx);
-                } else {
+        if (statementProxy instanceof PreparedStatementProxy) {
+            PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
+            ArrayList<Object>[] paramters = preparedStatementProxy.getParameters();
+            int insertColumnsSize = insertColumns.size();
+            int cycleNums = paramters.length / insertColumnsSize;
+            List<Integer> pkIndexs = new ArrayList<>(cycleNums);
+            int firstPkIndex = 0;
+            for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
+                if (insertColumns.get(paramIdx).equalsIgnoreCase(pk)) {
+                    firstPkIndex = paramIdx;
+                    break;
+                }
+            }
+            for (int i = 0; i < cycleNums; i++) {
+                pkIndexs.add(insertColumnsSize * i + firstPkIndex);
+            }
+            pkValues = pkIndexs.stream().map(pkIndex -> paramters[pkIndex].get(0)).collect(Collectors.toList());
+        } else {
+            for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
+                if (insertColumns.get(paramIdx).equalsIgnoreCase(pk)) {
                     List<List<Object>> insertRows = recogizier.getInsertRows();
                     pkValues = new ArrayList<>(insertRows.size());
                     for (List<Object> row : insertRows) {
                         pkValues.add(row.get(paramIdx));
                     }
+                    break;
                 }
-                break;
             }
         }
         if (pkValues == null) {
@@ -158,7 +174,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         StringBuffer selectSQLAppender = new StringBuffer("SELECT * FROM " + getTableMeta().getTableName() + " WHERE ");
 
         StringJoiner pkValuesJoiner = new StringJoiner(" OR ");
-        for (Object pkValue:pkValues) {
+        for (Object pkValue : pkValues) {
             pkValuesJoiner.add(pk + "=?");
         }
         selectSQLAppender.append(pkValuesJoiner.toString());
