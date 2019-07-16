@@ -1,0 +1,6 @@
+06-20 14:18:11 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "GLOBAL_TABLE" not found; SQL statement:
+drop table global_table [42102-181]
+06-20 14:18:11 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLException: Table "BRANCH_TABLE" not found; SQL statement:
+drop table branch_table [42102-181]

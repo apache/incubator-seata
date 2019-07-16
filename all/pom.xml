@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>0.6.1.3</version>
+    <version>0.7.1-SNAPSHOT</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -228,6 +228,16 @@
             <artifactId>seata-tm</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-codec-seata</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-codec-protobuf</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- spring  -->
         <dependency>
@@ -284,6 +294,10 @@
         <dependency>
             <groupId>commons-pool</groupId>
             <artifactId>commons-pool</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.dubbo</groupId>
@@ -583,7 +597,7 @@
                             </execution>
                         </executions>
                     </plugin>
-                  <!--  <plugin>
+                    <plugin>
                         <groupId>org.sonatype.plugins</groupId>
                         <artifactId>nexus-staging-maven-plugin</artifactId>
                         <version>1.6.7</version>
@@ -610,7 +624,7 @@
                                 </configuration>
                             </execution>
                         </executions>
-                    </plugin>-->
+                    </plugin>
                 </plugins>
             </build>
             <distributionManagement>

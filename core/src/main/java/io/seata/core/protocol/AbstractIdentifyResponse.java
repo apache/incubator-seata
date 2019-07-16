@@ -15,8 +15,6 @@
  */
 package io.seata.core.protocol;
 
-import io.netty.buffer.ByteBuf;
-
 /**
  * The type Abstract identify response.
  *
@@ -84,41 +82,6 @@ public abstract class AbstractIdentifyResponse extends AbstractResultMessage {
         this.identified = identified;
     }
 
-    @Override
-    public void doEncode() {
-        //        super.doEncode();
-        byteBuffer.put(this.identified ? (byte)1 : (byte)0);
-        if (this.version != null) {
-            byte[] bs = version.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
-            if (bs.length > 0) {
-                byteBuffer.put(bs);
-            }
-        } else {
-            byteBuffer.putShort((short)0);
-        }
-
-    }
-
-    @Override
-    public boolean decode(ByteBuf in) {
-        if (in.readableBytes() < 3) {
-            return false;
-        }
-        this.identified = in.readByte() == 1;
-        short len = in.readShort();
-        if (len <= 0) {
-            return false;
-        }
-        if (in.readableBytes() < len) {
-            return false;
-        }
-        byte[] bs = new byte[len];
-        in.readBytes(bs);
-        this.setVersion(new String(bs, UTF8));
-        return true;
-
-    }
 
     @Override
     public String toString() {

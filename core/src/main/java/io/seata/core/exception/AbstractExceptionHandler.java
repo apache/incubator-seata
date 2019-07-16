@@ -20,6 +20,8 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.AbstractTransactionRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Abstract exception handler.
@@ -27,6 +29,8 @@ import io.seata.core.protocol.transaction.AbstractTransactionResponse;
  * @author sharajava
  */
 public abstract class AbstractExceptionHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractExceptionHandler.class);
 
     /**
      * The constant CONFIG.
@@ -113,8 +117,10 @@ public abstract class AbstractExceptionHandler {
             callback.execute(request, response);
             callback.onSuccess(request, response);
         } catch (TransactionException tex) {
+            LOGGER.error("Catch TransactionException while do RPC, request: {}", request, tex);
             callback.onTransactionException(request, response, tex);
         } catch (RuntimeException rex) {
+            LOGGER.error("Catch RuntimeException while do RPC, request: {}", request, rex);
             callback.onException(request, response, rex);
         }
     }

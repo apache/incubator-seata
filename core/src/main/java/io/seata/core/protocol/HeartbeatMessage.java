@@ -25,7 +25,7 @@ import java.io.Serializable;
  */
 public class HeartbeatMessage implements Serializable {
     private static final long serialVersionUID = -985316399527884899L;
-    private boolean pingOrPong = true;
+    private boolean ping = true;
     /**
      * The constant PING.
      */
@@ -35,12 +35,20 @@ public class HeartbeatMessage implements Serializable {
      */
     public static final HeartbeatMessage PONG = new HeartbeatMessage(false);
 
-    private HeartbeatMessage(boolean pingOrPong) {
-        this.pingOrPong = pingOrPong;
+    private HeartbeatMessage(boolean ping) {
+        this.ping = ping;
     }
 
     @Override
     public String toString() {
-        return this.pingOrPong ? "services ping" : "services pong";
+        return this.ping ? "services ping" : "services pong";
+    }
+
+    public boolean isPing() {
+        return ping;
+    }
+
+    public void setPing(boolean ping) {
+        this.ping = ping;
     }
 }

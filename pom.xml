@@ -41,6 +41,8 @@
         <module>tcc</module>
         <module>test</module>
         <module>tm</module>
+        <module>metrics</module>
+        <module>codec</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -99,7 +101,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>0.6.1.3</revision>
+        <revision>0.7.1-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -118,7 +120,7 @@
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
         <license-maven-plugin.version>3.0</license-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
-
+        <protobuf.version>3.7.1</protobuf.version>
         <!-- for test -->
         <junit-jupiter.version>5.4.2</junit-jupiter.version>
         <mockito.version>2.23.4</mockito.version>
@@ -236,13 +238,12 @@
 
             <distributionManagement>
                 <snapshotRepository>
-                    <id>nexus-snapshots</id>
-                    <url>http://192.168.8.21:8081/repository/maven-snapshots/</url>
+                    <id>oss_seata</id>
+                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
                 </snapshotRepository>
                 <repository>
-                    <id>nexus-releases</id>
-                    <name>Nexus Release Repository</name>
-                    <url>http://192.168.8.21:8081/repository/maven-releases/</url>
+                    <id>oss_seata</id>
+                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
                 </repository>
             </distributionManagement>
 
@@ -327,6 +328,9 @@
                         <ruleset>rulesets/java/ali-other.xml</ruleset>
                         <ruleset>rulesets/java/ali-set.xml</ruleset>
                     </rulesets>
+                    <excludes>
+                        <exclude>**/generated/*.java</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>
@@ -442,6 +446,7 @@
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>false</failsOnError>
                             <failOnViolation>false</failOnViolation>
+                            <excludes>**/generated/**</excludes>
                         </configuration>
                         <goals>
                             <goal>check</goal>

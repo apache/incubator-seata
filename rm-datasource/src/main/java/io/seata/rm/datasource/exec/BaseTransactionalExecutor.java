@@ -28,6 +28,11 @@ import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.struct.*;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.List;
+import java.util.StringJoiner;
+
 /**
  * The type Base transactional executor.
  *
@@ -101,15 +106,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @throws SQLException the sql exception
      */
     protected String buildWhereConditionByPKs(List<Field> pkRows) throws SQLException {
-        StringBuffer whereConditionAppender = new StringBuffer();
-        for (int i = 0; i < pkRows.size(); i++) {
-            Field field = pkRows.get(i);
-            whereConditionAppender.append(getColumnNameInSQL(field.getName()) + " = ?");
-            if (i < (pkRows.size() - 1)) {
-                whereConditionAppender.append(" OR ");
-            }
+        StringJoiner whereConditionAppender = new StringJoiner(" OR ");
+        for (Field field : pkRows) {
+            whereConditionAppender.add(getColumnNameInSQL(field.getName()) + " = ?");
         }
         return whereConditionAppender.toString();
+
     }
 
     /**
@@ -120,11 +122,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected String getColumnNameInSQL(String columnName) {
         String tableAlias = sqlRecognizer.getTableAlias();
-        if (tableAlias == null) {
-            return columnName;
-        } else {
-            return tableAlias + "." + columnName;
-        }
+        return tableAlias == null ? columnName : tableAlias + "." + columnName;
     }
 
     /**
@@ -135,11 +133,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected String getFromTableInSQL() {
         String tableName = sqlRecognizer.getTableName();
         String tableAlias = sqlRecognizer.getTableAlias();
-        if (tableAlias == null) {
-            return tableName;
-        } else {
-            return tableName + " " + tableAlias;
-        }
+        return tableAlias == null ? tableName : tableName + " " + tableAlias;
     }
 
     /**
