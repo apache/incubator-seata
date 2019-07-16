@@ -111,7 +111,12 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             for (int i = 0; i < cycleNums; i++) {
                 pkIndexs.add(insertColumnsSize * i + firstPkIndex);
             }
-            pkValues = pkIndexs.stream().map(pkIndex -> paramters[pkIndex].get(0)).collect(Collectors.toList());
+            if (pkIndexs.size() == 1) {
+                //adapter test case
+                pkValues = preparedStatementProxy.getParamsByIndex(pkIndexs.get(0));
+            } else {
+                pkValues = pkIndexs.stream().map(pkIndex -> paramters[pkIndex].get(0)).collect(Collectors.toList());
+            }
         } else {
             for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
                 if (insertColumns.get(paramIdx).equalsIgnoreCase(pk)) {
