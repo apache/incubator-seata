@@ -20,7 +20,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-bom</artifactId>
-    <version>0.7.1-SNAPSHOT</version>
+    <version>0.7.1.1</version>
 
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
@@ -373,6 +373,11 @@
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.oracle.jdbc</groupId>
+                <artifactId>ojdbc8</artifactId>
+                <version>${oracle-jdbc.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.weibo</groupId>

@@ -146,6 +146,28 @@ public class TableRecords {
     }
 
     /**
+     * Gets table meta.
+     *
+     * @return the table meta
+     */
+    public TableMeta getTableMeta() {
+        return tableMeta;
+    }
+
+    /**
+     * Sets table meta.
+     *
+     * @param tableMeta the table meta
+     */
+    public void setTableMeta(TableMeta tableMeta) {
+        if (this.tableMeta != null) {
+            throw new ShouldNeverHappenException();
+        }
+        this.tableMeta = tableMeta;
+        this.tableName = tableMeta.getTableName();
+    }
+
+    /**
      * Size int.
      *
      * @return the int
@@ -181,28 +203,6 @@ public class TableRecords {
             }
         }
         return pkRows;
-    }
-
-    /**
-     * Gets table meta.
-     *
-     * @return the table meta
-     */
-    public TableMeta getTableMeta() {
-        return tableMeta;
-    }
-
-    /**
-     * Sets table meta.
-     *
-     * @param tableMeta the table meta
-     */
-    public void setTableMeta(TableMeta tableMeta) {
-        if (this.tableMeta != null) {
-            throw new ShouldNeverHappenException();
-        }
-        this.tableMeta = tableMeta;
-        this.tableName = tableMeta.getTableName();
     }
 
     public static class EmptyTableRecords extends TableRecords {
