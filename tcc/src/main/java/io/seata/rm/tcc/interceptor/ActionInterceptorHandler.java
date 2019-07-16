@@ -15,19 +15,11 @@
  */
 package io.seata.rm.tcc.interceptor;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.alibaba.fastjson.JSON;
-
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.executor.Callback;
 import io.seata.common.util.NetUtil;
-import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.tcc.api.BusinessActionContext;
@@ -35,6 +27,12 @@ import io.seata.rm.tcc.api.BusinessActionContextParameter;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Handler the TCC Participant Aspect : Setting Context, Creating Branch Record
@@ -55,13 +53,12 @@ public class ActionInterceptorHandler {
      * @return map map
      * @throws Throwable the throwable
      */
-    public Map<String, Object> proceed(Method method, Object[] arguments, TwoPhaseBusinessAction businessAction,
+    public Map<String, Object> proceed(Method method, Object[] arguments, String xid, TwoPhaseBusinessAction businessAction,
                                        Callback<Object> targetCallback) throws Throwable {
         Map<String, Object> ret = new HashMap<String, Object>(16);
 
         //TCC name
         String actionName = businessAction.name();
-        String xid = RootContext.getXID();
         BusinessActionContext actionContext = new BusinessActionContext();
         actionContext.setXid(xid);
         //set action anme

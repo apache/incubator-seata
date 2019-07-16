@@ -34,7 +34,7 @@ public final class MergedWarpMessage {
       "ssageProto\022I\n\017abstractMessage\030\001 \001(\01320.io" +
       ".seata.protocol.protobuf.AbstractMessage" +
       "Proto\022\"\n\004msgs\030\002 \003(\0132\024.google.protobuf.An" +
-      "y\022\016\n\006msgIds\030\003 \003(\003B8\n!io.seata.codec.prot" +
+      "y\022\016\n\006msgIds\030\003 \003(\005B8\n!io.seata.codec.prot" +
       "obuf.generatedB\021MergedWarpMessageP\001b\006pro" +
       "to3"
     };

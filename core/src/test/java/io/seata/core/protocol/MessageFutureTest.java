@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSON;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,12 +36,13 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class MessageFutureTest {
 
-    private final boolean ASYNC_FIELD = false;
-    private final String BODY_FIELD = "test_body";
-    private final boolean HEART_BEAT_FIELD = true;
-    private final boolean REQUEST_FIELD = false;
-    private final long ID_FIELD = 100L;
-    private final long TIME_OUT_FIELD = 100L;
+    private static final String BODY_FIELD = "test_body";
+    private static final int ID_FIELD = 100;
+    private static final byte CODEC_FIELD = 1;
+    private static final byte COMPRESS_FIELD = 2;
+    private static final byte MSG_TYPE_FIELD = 3;
+    private static final HashMap<String, String> HEAD_FIELD = new HashMap<>();
+    private static final long TIME_OUT_FIELD = 100L;
 
     /**
      * Test field set get.
@@ -49,11 +51,12 @@ public class MessageFutureTest {
     public void testFieldSetGet() {
         String fromJson = "{\n" +
                 "\t\"requestMessage\":{\n" +
-                "\t\t\"async\":" + ASYNC_FIELD + ",\n" +
                 "\t\t\"body\":\"" + BODY_FIELD + "\",\n" +
-                "\t\t\"heartbeat\":" + HEART_BEAT_FIELD + ",\n" +
+                "\t\t\"codec\":" + CODEC_FIELD + ",\n" +
+                "\t\t\"compressor\":" + COMPRESS_FIELD + ",\n" +
+                "\t\t\"headMap\":" + HEAD_FIELD + ",\n" +
                 "\t\t\"id\":" + ID_FIELD + ",\n" +
-                "\t\t\"request\":" + REQUEST_FIELD + "\n" +
+                "\t\t\"messageType\":" + MSG_TYPE_FIELD + "\n" +
                 "\t},\n" +
                 "\t\"timeout\":" + TIME_OUT_FIELD + "\n" +
                 "}";
@@ -187,9 +190,9 @@ public class MessageFutureTest {
     private RpcMessage buildRepcMessage() {
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setId(ID_FIELD);
-        rpcMessage.setAsync(ASYNC_FIELD);
-        rpcMessage.setRequest(REQUEST_FIELD);
-        rpcMessage.setHeartbeat(HEART_BEAT_FIELD);
+        rpcMessage.setMessageType(MSG_TYPE_FIELD);
+        rpcMessage.setCodec(CODEC_FIELD);
+        rpcMessage.setCompressor(COMPRESS_FIELD);
         rpcMessage.setBody(BODY_FIELD);
         return rpcMessage;
     }

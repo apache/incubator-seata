@@ -105,6 +105,13 @@ public class ConfigurationKeys {
     public static final String SERIALIZE_FOR_RPC = TRANSPORT_PREFIX + "serialization";
 
     /**
+     * The constant COMPRESSOR_FOR_RPC.
+     * 
+     * @since 0.7.0
+     */
+    public static final String COMPRESSOR_FOR_RPC = TRANSPORT_PREFIX + "compressor";
+
+    /**
      * The constant STORE_DB_GLOBAL_TABLE.
      */
     public static final String STORE_DB_GLOBAL_TABLE  = "store.db.global.table";
@@ -213,4 +220,24 @@ public class ConfigurationKeys {
      * The constant TRANSACTION_UNDO_LOG_SERIALIZATION.
      */
     public static final String TRANSACTION_UNDO_LOG_SERIALIZATION = TRANSACTION_PREFIX + "undo.log.serialization";
+
+    /**
+     * The constant METRICS_PREFIX.
+     */
+    public static final String METRICS_PREFIX = "metrics.";
+
+    /**
+     * The constant METRICS_ENABLED.
+     */
+    public static final String METRICS_ENABLED = "enabled";
+
+    /**
+     * The constant METRICS_REGISTRY_TYPE.
+     */
+    public static final String METRICS_REGISTRY_TYPE = "registry-type";
+
+    /**
+     * The constant METRICS_EXPORTER_LIST.
+     */
+    public static final String METRICS_EXPORTER_LIST = "exporter-list";
 }
