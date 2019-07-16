@@ -83,16 +83,16 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     protected boolean containsPK() {
-        SQLInsertRecognizer recogizier = (SQLInsertRecognizer) sqlRecognizer;
-        List<String> insertColumns = recogizier.getInsertColumns();
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
+        List<String> insertColumns = recognizer.getInsertColumns();
         TableMeta tmeta = getTableMeta();
         return tmeta.containsPK(insertColumns);
     }
 
     protected List<Object> getPkValuesByColumn() throws SQLException {
         // insert values including PK
-        SQLInsertRecognizer recogizier = (SQLInsertRecognizer) sqlRecognizer;
-        List<String> insertColumns = recogizier.getInsertColumns();
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
+        List<String> insertColumns = recognizer.getInsertColumns();
         String pk = getTableMeta().getPkName();
         List<Object> pkValues = null;
         if (statementProxy instanceof PreparedStatementProxy) {
@@ -120,7 +120,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         } else {
             for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
                 if (insertColumns.get(paramIdx).equalsIgnoreCase(pk)) {
-                    List<List<Object>> insertRows = recogizier.getInsertRows();
+                    List<List<Object>> insertRows = recognizer.getInsertRows();
                     pkValues = new ArrayList<>(insertRows.size());
                     for (List<Object> row : insertRows) {
                         pkValues.add(row.get(paramIdx));
