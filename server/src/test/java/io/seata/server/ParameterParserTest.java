@@ -42,8 +42,8 @@ public class ParameterParserTest {
     public void testEmptyMode(){
         String[] args = new String[]{"-h", "127.0.0.1", "-p", "8088"};
         parameterParser = new ParameterParser(args);
-        //always set store.mode=db in test/resource/file.conf
-        Assertions.assertEquals("db", parameterParser.getStoreMode());
+        //always set store.mode=db in test/resource/file.conf, if not will cause SessionStoreTest's case fail.
+        Assertions.assertEquals("file", parameterParser.getStoreMode());
     }
 
     /**
