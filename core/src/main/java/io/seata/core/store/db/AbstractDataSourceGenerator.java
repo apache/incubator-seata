@@ -43,7 +43,17 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     protected DBType getDBType() {
         return DBType.valueof(CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
     }
-
+    /**
+     * get db driver class name
+     * @return the db driver class name
+     */
+    protected String getDriverClassName() {
+		String driverClassName = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME);
+		if (StringUtils.isBlank(driverClassName)) {
+	            throw new StoreException("the {store.db.driver-class-name} can't empty.");
+	        }
+	    return driverClassName;
+	}
     /**
      * Get url string.
      *
