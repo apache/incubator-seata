@@ -33,16 +33,9 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
+                <groupId>com.nickwongdev</groupId>
                 <artifactId>aspectj-maven-plugin</artifactId>
-                <version>1.11</version>
-                <dependencies>
-                    <dependency>
-                        <groupId>com.nickwongdev</groupId>
-                        <artifactId>aspectj-maven-plugin</artifactId>
-                        <version>1.12.1</version>
-                    </dependency>
-                </dependencies>
+                <version>1.12.1</version>
                 <configuration>
                     <complianceLevel>1.8</complianceLevel>
                     <source>1.8</source>
