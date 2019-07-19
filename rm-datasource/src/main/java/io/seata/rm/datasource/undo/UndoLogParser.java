@@ -52,4 +52,6 @@ public interface UndoLogParser {
      * @return the branch undo log
      */
     BranchUndoLog decode(byte[] bytes);
+
+    String writeValueAsString(BranchUndoLog branchUndoLog);
 }

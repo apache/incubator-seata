@@ -17,9 +17,13 @@ package io.seata.rm.datasource.exec;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 
+import co.faao.plugin.starter.dubbo.util.ThreadLocalTools;
 import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
 import co.faao.plugin.starter.seata.util.SeataXidWorker;
+import io.seata.core.constants.Seata;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.StatementProxy;
@@ -28,6 +32,7 @@ import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import org.apache.commons.lang.time.DateFormatUtils;
 
@@ -76,7 +81,7 @@ public class ExecuteTemplate {
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
 
-        if (!RootContext.inGlobalTransaction() && !RootContext.requireGlobalLock()) {
+        if (!Seata.EWELL_SEATA_STATE_IS_ON||(!RootContext.inGlobalTransaction() && !RootContext.requireGlobalLock())) {
             if (sqlRecognizer == null) {
                 try {
                     sqlRecognizer = SQLVisitorFactory.get(statementProxy.getTargetSQL(), statementProxy.getConnectionProxy().getDbType());
@@ -115,7 +120,13 @@ public class ExecuteTemplate {
                         SQLUndoLog sQLUndoLog = buildUndoItem(sqlRecognizer, beforeImage, afterImage);
                         //业务数据操作前后插入到es数据库
                         String xid = String.valueOf(SeataXidWorker.xidWorker.getId());
-                        ElasticsearchUtil.addData(xid,sQLUndoLog);
+                        BranchUndoLog branchUndoLog = new BranchUndoLog();
+                        branchUndoLog.setXid(xid);
+                        branchUndoLog.setSqlUndoLogs(new ArrayList<SQLUndoLog>(Arrays.asList(sQLUndoLog)));
+                        branchUndoLog.setUserName(ThreadLocalTools.stringThreadLocal.get());
+                        branchUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(),"yyyy-MM-dd HH:mm:ss"));
+                        ElasticsearchUtil.addData(branchUndoLog);
+
                         if(statementProxy.getConnection().getAutoCommit()) {// 如果不是事务直接提交
                             ElasticsearchUtil.commitData();
                         }
@@ -179,8 +190,6 @@ public class ExecuteTemplate {
         sqlUndoLog.setTableName(tableName);
         sqlUndoLog.setBeforeImage(beforeImage);
         sqlUndoLog.setAfterImage(afterImage);
-        sqlUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(),"yyyy-MM-dd HH:mm:ss"));
-        sqlUndoLog.setUserName("");
         return sqlUndoLog;
     }
 }

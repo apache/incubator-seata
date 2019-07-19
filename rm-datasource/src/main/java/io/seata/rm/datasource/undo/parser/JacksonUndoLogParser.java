@@ -16,9 +16,11 @@
 package io.seata.rm.datasource.undo.parser;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
@@ -27,6 +29,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * The type Json based undo log parser.
@@ -77,5 +83,34 @@ public class JacksonUndoLogParser implements UndoLogParser {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public String writeValueAsString(BranchUndoLog branchUndoLog) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            //类为空时，不要抛异常
+            objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+//            objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
+            objectMapper.getSerializerProvider().setNullValueSerializer(new JsonSerializer<Object>() {
+                @Override
+                public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
+                     jgen.writeObject("");// 输出孔字符串
+                }
+            });
+
+            objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+            SimpleModule simpleModule = new SimpleModule();
+            simpleModule.addSerializer(Number.class, ToStringSerializer.instance);
+            simpleModule.addSerializer(Date.class, ToStringSerializer.instance);
+            objectMapper.registerModule(simpleModule);
+
+            String context = objectMapper.writeValueAsString(branchUndoLog);
+            return context;
+        } catch (JsonProcessingException e) {
+            LOGGER.error("json encode exception, {}", e.getMessage(), e);
+            throw new RuntimeException(e);
+        }
+    }
+
 
 }

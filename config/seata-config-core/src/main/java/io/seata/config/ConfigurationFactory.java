@@ -17,6 +17,7 @@ package io.seata.config;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import org.apache.commons.lang.StringUtils;
 
 import java.util.Objects;
 
@@ -75,6 +76,10 @@ public final class ConfigurationFactory {
         try {
             configTypeName = CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + ConfigurationKeys.FILE_ROOT_TYPE);
+            //没有则默认为file
+            if(StringUtils.isEmpty(configTypeName)) {
+                configTypeName = ConfigType.File.name();
+            }
             configType = ConfigType.getType(configTypeName);
         } catch (Exception e) {
             throw new NotSupportYetException("not support register type: " + configTypeName, e);

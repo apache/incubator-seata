@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.exec;
 
+import co.faao.plugin.starter.dubbo.util.ThreadLocalTools;
 import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.core.context.RootContext;
@@ -28,7 +29,9 @@ import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.sql.struct.Field;
+import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.rm.datasource.undo.UndoLogParserFactory;
 import org.apache.commons.lang.time.DateFormatUtils;
 
 import java.sql.SQLException;
@@ -187,12 +190,17 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         SQLUndoLog sqlUndoLog = buildUndoItem(beforeImage, afterImage);
         connectionProxy.appendUndoLog(sqlUndoLog);
 
-        //业务数据操作前后插入到es数据库
-       if("true".equals(System.getProperty("dataTrace"))) {
-           ConnectionContext connectionContext = connectionProxy.getContext();
-           String xid = connectionContext.getXid();
-           ElasticsearchUtil.addData(xid, sqlUndoLog);
-       }
+//        //业务数据操作前后插入到es数据库
+//       if("true".equals(System.getProperty("dataTrace"))) {
+//           ConnectionContext connectionContext = connectionProxy.getContext();
+//           String xid = connectionContext.getXid();
+//           BranchUndoLog branchUndoLog = new BranchUndoLog();
+//           branchUndoLog.setXid(xid);
+//           branchUndoLog.setSqlUndoLogs(connectionContext.getUndoItems());
+//           branchUndoLog.setUserName(ThreadLocalTools.stringThreadLocal.get());
+//           branchUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(),"yyyy-MM-dd HH:mm:ss"));
+//           ElasticsearchUtil.addData(branchUndoLog);
+//       }
     }
 
     /**
@@ -235,9 +243,6 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         sqlUndoLog.setTableName(tableName);
         sqlUndoLog.setBeforeImage(beforeImage);
         sqlUndoLog.setAfterImage(afterImage);
-
-        sqlUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(),"yyyy-MM-dd HH:mm:ss"));
-        sqlUndoLog.setUserName("");
         return sqlUndoLog;
     }
 

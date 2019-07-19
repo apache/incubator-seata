@@ -30,6 +30,26 @@ public class BranchUndoLog {
 
     private List<SQLUndoLog> sqlUndoLogs;
 
+    //    add by ccg  功能扩展用
+    private String executeDate;
+    private String userName;
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getExecuteDate() {
+        return executeDate;
+    }
+
+    public void setExecuteDate(String executeDate) {
+        this.executeDate = executeDate;
+    }
+
     /**
      * Gets xid.
      *

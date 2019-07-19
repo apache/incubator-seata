@@ -15,6 +15,8 @@
  */
 package io.seata.rm.datasource.undo.parser;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import io.protostuff.Input;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.Output;
@@ -83,6 +85,17 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
         BranchUndoLog fooParsed = SCHEMA.newMessage();
         ProtostuffIOUtil.mergeFrom(bytes, fooParsed, SCHEMA);
         return fooParsed;
+    }
+
+
+    @Override
+    public String writeValueAsString(BranchUndoLog branchUndoLog) {
+        try {
+            String context =  JSON.toJSONString(branchUndoLog, SerializerFeature.WriteDateUseDateFormat);
+            return context;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**

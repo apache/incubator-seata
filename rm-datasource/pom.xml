@@ -96,6 +96,18 @@
             </exclusions>
         </dependency>
         <dependency>
+            <groupId>co.faao</groupId>
+            <artifactId>speed-dubbo-starter</artifactId>
+            <version>${co.faao.speed.version.new}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>

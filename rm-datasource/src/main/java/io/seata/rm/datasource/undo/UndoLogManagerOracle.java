@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Set;
 
+import co.faao.plugin.starter.dubbo.util.ThreadLocalTools;
 import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.Constants;
@@ -37,6 +38,7 @@ import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 
 import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -103,7 +105,8 @@ public final class UndoLogManagerOracle {
         branchUndoLog.setXid(xid);
         branchUndoLog.setBranchId(branchID);
         branchUndoLog.setSqlUndoLogs(connectionContext.getUndoItems());
-
+        branchUndoLog.setUserName(ThreadLocalTools.stringThreadLocal.get());
+        branchUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(),"yyyy-MM-dd HH:mm:ss"));
         byte[] undoLogContent = UndoLogParserFactory.getInstance().encode(branchUndoLog);
 
         if (LOGGER.isDebugEnabled()) {
@@ -146,16 +149,20 @@ public final class UndoLogManagerOracle {
                 selectPST.setLong(1, branchId);
                 selectPST.setString(2, xid);
                 rs = selectPST.executeQuery();
+
                 boolean exists = false;
                 while (rs.next()) {
                     exists = true;
+
                     // It is possible that the server repeatedly sends a rollback request to roll back
                     // the same branch transaction to multiple processes,
                     // ensuring that only the undo_log in the normal state is processed.
                     int state = rs.getInt("log_status");
                     if (!canUndo(state)) {
-                        LOGGER.info("xid {} branch {}, ignore {} undo_log",
+                        if (LOGGER.isInfoEnabled()) {
+                            LOGGER.info("xid {} branch {}, ignore {} undo_log",
                                 xid, branchId, state);
+                        }
                         return;
                     }
 
@@ -294,7 +301,7 @@ public final class UndoLogManagerOracle {
                 Blob b = rs.getBlob("rollback_info");
                 byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
                 BranchUndoLog branchUndoLog = UndoLogParserFactory.getInstance().decode(rollbackInfo);
-                ElasticsearchUtil.addData(branchUndoLog.getXid(), branchUndoLog.getSqlUndoLogs().get(0));
+                ElasticsearchUtil.addData(branchUndoLog);
             }
             ElasticsearchUtil.commitData();
         }catch (Exception e) {
