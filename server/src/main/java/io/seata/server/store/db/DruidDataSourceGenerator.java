@@ -33,7 +33,7 @@ public class DruidDataSourceGenerator extends AbstractDataSourceGenerator {
     @Override
     public DataSource generateDataSource() {
         DruidDataSource ds = new DruidDataSource();
-        ds.setDriverClassName(getDriverName(getDBType()));
+        ds.setDriverClassName(getDriverClassName());
         ds.setUrl(getUrl());
         ds.setUsername(getUser());
         ds.setPassword(getPassword());

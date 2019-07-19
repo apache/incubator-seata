@@ -33,7 +33,7 @@ public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {
     @Override
     public DataSource generateDataSource() {
         BasicDataSource ds = new BasicDataSource();
-        ds.setDriverClassName(getDriverName(getDBType()));
+        ds.setDriverClassName(getDriverClassName());
         ds.setUrl(getUrl());
         ds.setUsername(getUser());
         ds.setPassword(getPassword());
