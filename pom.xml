@@ -85,8 +85,7 @@
 
     <properties>
         <!-- seata version -->
-        <co.faao.speed.version>6.1.4-SNAPSHOT</co.faao.speed.version>
-        <co.faao.speed.version.new>6.1.5-SNAPSHOT</co.faao.speed.version.new>
+        <co.faao.speed.version>6.2.0-SNAPSHOT</co.faao.speed.version>
         <revision>0.7.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
@@ -95,7 +94,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- Maven plugins -->
-        <maven.test.skip>false</maven.test.skip>
+        <maven.test.skip>true</maven.test.skip>
         <jacoco-maven-plugin.version>0.8.3</jacoco-maven-plugin.version>
         <flatten-maven-plugin.version>1.1.0</flatten-maven-plugin.version>
         <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
@@ -221,16 +220,16 @@
                     </plugin>
                 </plugins>
             </build>
-
             <distributionManagement>
-                <snapshotRepository>
-                    <id>oss_seata</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-                </snapshotRepository>
                 <repository>
-                    <id>oss_seata</id>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                    <id>releases</id>
+                    <name>Nexus Release Repository</name>
+                    <url>http://192.168.150.59:8081/repository/maven-releases/</url>
                 </repository>
+                <snapshotRepository>
+                    <id>snapshots</id>
+                    <url>http://192.168.150.59:8081/repository/maven-snapshots/</url>
+                </snapshotRepository>
             </distributionManagement>
 
         </profile>
@@ -270,7 +269,17 @@
             </build>
         </profile>
     </profiles>
-
+    <distributionManagement>
+        <repository>
+            <id>releases</id>
+            <name>Nexus Release Repository</name>
+            <url>http://192.168.150.59:8081/repository/maven-releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>snapshots</id>
+            <url>http://192.168.150.59:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
     <build>
         <extensions>
             <extension>

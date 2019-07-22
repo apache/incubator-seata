@@ -98,7 +98,7 @@
         <dependency>
             <groupId>co.faao</groupId>
             <artifactId>speed-dubbo-starter</artifactId>
-            <version>${co.faao.speed.version.new}</version>
+            <version>${co.faao.speed.version}</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
