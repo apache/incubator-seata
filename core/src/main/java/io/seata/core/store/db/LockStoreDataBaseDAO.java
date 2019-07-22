@@ -18,6 +18,7 @@ package io.seata.core.store.db;
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -30,8 +31,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The type Data base lock store.
@@ -93,6 +96,8 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
+        List<LockDO> unrepeatedLockDOs = null;
+        List<String> dbExistedRowKeys = new ArrayList<>();
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(false);
@@ -105,7 +110,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
                     sb.append(", ");
                 }
             }
-            boolean canLock = true, isReLock = false;
+            boolean canLock = true;
             //query
             String checkLockSQL = LockStoreSqls.getCheckLockableSql(lockTable, sb.toString(), dbType);
             ps = conn.prepareStatement(checkLockSQL);
@@ -114,25 +119,29 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             }
             rs = ps.executeQuery();
             while (rs.next()) {
-                if (StringUtils.equals(rs.getString("xid"), lockDOs.get(0).getXid())) {
-                    isReLock = true;
-                } else {
+                if (!StringUtils.equals(rs.getString("xid"), lockDOs.get(0).getXid())) {
                     canLock &= false;
+                    break;
                 }
+                dbExistedRowKeys.add(rs.getString("row_key"));
             }
 
             if (!canLock) {
                 conn.rollback();
                 return false;
             }
-
-            if (isReLock) {
+            if (CollectionUtils.isNotEmpty(dbExistedRowKeys)) {
+                unrepeatedLockDOs = lockDOs.stream().filter(lockDO -> !dbExistedRowKeys.contains(lockDO.getRowKey())).collect(Collectors.toList());
+            } else {
+                unrepeatedLockDOs = lockDOs;
+            }
+            if (CollectionUtils.isEmpty(unrepeatedLockDOs)) {
                 conn.rollback();
                 return true;
             }
 
             //lock
-            for (LockDO lockDO : lockDOs) {
+            for (LockDO lockDO : unrepeatedLockDOs) {
                 if (!doAcquireLock(conn, lockDO)) {
                     conn.rollback();
                     return false;
