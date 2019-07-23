@@ -31,9 +31,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -97,7 +98,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         PreparedStatement ps = null;
         ResultSet rs = null;
         List<LockDO> unrepeatedLockDOs = null;
-        List<String> dbExistedRowKeys = new ArrayList<>();
+        Set<String> dbExistedRowKeys = new HashSet<>();
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(false);
