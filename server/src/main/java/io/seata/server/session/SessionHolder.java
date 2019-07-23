@@ -68,6 +68,11 @@ public class SessionHolder {
      */
     public static final String RETRY_ROLLBACKING_SESSION_MANAGER_NAME = "retry.rollback.data";
 
+    /**
+     * The default session store dir
+     */
+    public static final String DEFAULT_SESSION_STORE_FILE_DIR = "sessionStore";
+
     private static SessionManager ROOT_SESSION_MANAGER;
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_COMMITTING_SESSION_MANAGER;
@@ -97,7 +102,7 @@ public class SessionHolder {
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
         } else if (StoreMode.FILE.equals(storeMode)) {
             //file store
-            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
+            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR);
             if (sessionStorePath == null) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }

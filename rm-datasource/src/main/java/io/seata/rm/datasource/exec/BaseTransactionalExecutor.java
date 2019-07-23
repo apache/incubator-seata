@@ -15,10 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.List;
-
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;

@@ -81,7 +81,7 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ## Maven dependency
 ```xml
-<seata.version>0.6.1</seata.version>
+<seata.version>0.7.1</seata.version>
 
 <dependency>
     <groupId>io.seata</groupId>
@@ -127,7 +127,7 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 * [Seata Docker](https://github.com/seata/seata-docker) - Seata integration with docker
 * [Seata K8s](https://github.com/seata/seata-k8s) - Seata integration with k8s
 * [Awesome Seata](https://github.com/seata/awesome-seata) - Description of Seata related projects 
-* [Seata Website](https://github.com/seata/seata.github.io) - Seata official website （***In the process of design***）
+* [Seata Website](https://github.com/seata/seata.github.io) - Seata official website
 
 ## Contributors
 

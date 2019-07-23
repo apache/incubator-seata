@@ -21,7 +21,7 @@ private static final long serialVersionUID = 0L;
   }
   private MergedWarpMessageProto() {
     msgs_ = java.util.Collections.emptyList();
-    msgIds_ = emptyLongList();
+    msgIds_ = emptyIntList();
   }
 
   @java.lang.Override
@@ -72,21 +72,21 @@ private static final long serialVersionUID = 0L;
           }
           case 24: {
             if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-              msgIds_ = newLongList();
+              msgIds_ = newIntList();
               mutable_bitField0_ |= 0x00000004;
             }
-            msgIds_.addLong(input.readInt64());
+            msgIds_.addInt(input.readInt32());
             break;
           }
           case 26: {
             int length = input.readRawVarint32();
             int limit = input.pushLimit(length);
             if (!((mutable_bitField0_ & 0x00000004) != 0) && input.getBytesUntilLimit() > 0) {
-              msgIds_ = newLongList();
+              msgIds_ = newIntList();
               mutable_bitField0_ |= 0x00000004;
             }
             while (input.getBytesUntilLimit() > 0) {
-              msgIds_.addLong(input.readInt64());
+              msgIds_.addInt(input.readInt32());
             }
             input.popLimit(limit);
             break;
@@ -187,25 +187,25 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int MSGIDS_FIELD_NUMBER = 3;
-  private com.google.protobuf.Internal.LongList msgIds_;
+  private com.google.protobuf.Internal.IntList msgIds_;
   /**
-   * <code>repeated int64 msgIds = 3;</code>
+   * <code>repeated int32 msgIds = 3;</code>
    */
-  public java.util.List<java.lang.Long>
+  public java.util.List<java.lang.Integer>
       getMsgIdsList() {
     return msgIds_;
   }
   /**
-   * <code>repeated int64 msgIds = 3;</code>
+   * <code>repeated int32 msgIds = 3;</code>
    */
   public int getMsgIdsCount() {
     return msgIds_.size();
   }
   /**
-   * <code>repeated int64 msgIds = 3;</code>
+   * <code>repeated int32 msgIds = 3;</code>
    */
-  public long getMsgIds(int index) {
-    return msgIds_.getLong(index);
+  public int getMsgIds(int index) {
+    return msgIds_.getInt(index);
   }
   private int msgIdsMemoizedSerializedSize = -1;
 
@@ -235,7 +235,7 @@ private static final long serialVersionUID = 0L;
       output.writeUInt32NoTag(msgIdsMemoizedSerializedSize);
     }
     for (int i = 0; i < msgIds_.size(); i++) {
-      output.writeInt64NoTag(msgIds_.getLong(i));
+      output.writeInt32NoTag(msgIds_.getInt(i));
     }
     unknownFields.writeTo(output);
   }
@@ -258,7 +258,7 @@ private static final long serialVersionUID = 0L;
       int dataSize = 0;
       for (int i = 0; i < msgIds_.size(); i++) {
         dataSize += com.google.protobuf.CodedOutputStream
-          .computeInt64SizeNoTag(msgIds_.getLong(i));
+          .computeInt32SizeNoTag(msgIds_.getInt(i));
       }
       size += dataSize;
       if (!getMsgIdsList().isEmpty()) {
@@ -465,7 +465,7 @@ private static final long serialVersionUID = 0L;
       } else {
         msgsBuilder_.clear();
       }
-      msgIds_ = emptyLongList();
+      msgIds_ = emptyIntList();
       bitField0_ = (bitField0_ & ~0x00000004);
       return this;
     }
@@ -989,7 +989,7 @@ private static final long serialVersionUID = 0L;
       return msgsBuilder_;
     }
 
-    private com.google.protobuf.Internal.LongList msgIds_ = emptyLongList();
+    private com.google.protobuf.Internal.IntList msgIds_ = emptyIntList();
     private void ensureMsgIdsIsMutable() {
       if (!((bitField0_ & 0x00000004) != 0)) {
         msgIds_ = mutableCopy(msgIds_);
@@ -997,49 +997,49 @@ private static final long serialVersionUID = 0L;
        }
     }
     /**
-     * <code>repeated int64 msgIds = 3;</code>
+     * <code>repeated int32 msgIds = 3;</code>
      */
-    public java.util.List<java.lang.Long>
+    public java.util.List<java.lang.Integer>
         getMsgIdsList() {
       return ((bitField0_ & 0x00000004) != 0) ?
                java.util.Collections.unmodifiableList(msgIds_) : msgIds_;
     }
     /**
-     * <code>repeated int64 msgIds = 3;</code>
+     * <code>repeated int32 msgIds = 3;</code>
      */
     public int getMsgIdsCount() {
       return msgIds_.size();
     }
     /**
-     * <code>repeated int64 msgIds = 3;</code>
+     * <code>repeated int32 msgIds = 3;</code>
      */
-    public long getMsgIds(int index) {
-      return msgIds_.getLong(index);
+    public int getMsgIds(int index) {
+      return msgIds_.getInt(index);
     }
     /**
-     * <code>repeated int64 msgIds = 3;</code>
+     * <code>repeated int32 msgIds = 3;</code>
      */
     public Builder setMsgIds(
-        int index, long value) {
+        int index, int value) {
       ensureMsgIdsIsMutable();
-      msgIds_.setLong(index, value);
+      msgIds_.setInt(index, value);
       onChanged();
       return this;
     }
     /**
-     * <code>repeated int64 msgIds = 3;</code>
+     * <code>repeated int32 msgIds = 3;</code>
      */
-    public Builder addMsgIds(long value) {
+    public Builder addMsgIds(int value) {
       ensureMsgIdsIsMutable();
-      msgIds_.addLong(value);
+      msgIds_.addInt(value);
       onChanged();
       return this;
     }
     /**
-     * <code>repeated int64 msgIds = 3;</code>
+     * <code>repeated int32 msgIds = 3;</code>
      */
     public Builder addAllMsgIds(
-        java.lang.Iterable<? extends java.lang.Long> values) {
+        java.lang.Iterable<? extends java.lang.Integer> values) {
       ensureMsgIdsIsMutable();
       com.google.protobuf.AbstractMessageLite.Builder.addAll(
           values, msgIds_);
@@ -1047,10 +1047,10 @@ private static final long serialVersionUID = 0L;
       return this;
     }
     /**
-     * <code>repeated int64 msgIds = 3;</code>
+     * <code>repeated int32 msgIds = 3;</code>
      */
     public Builder clearMsgIds() {
-      msgIds_ = emptyLongList();
+      msgIds_ = emptyIntList();
       bitField0_ = (bitField0_ & ~0x00000004);
       onChanged();
       return this;
