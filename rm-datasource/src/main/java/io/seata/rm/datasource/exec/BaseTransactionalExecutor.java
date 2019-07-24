@@ -31,9 +31,9 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.StringJoiner;
 
+
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
-
 /**
  * The type Base transactional executor.
  *

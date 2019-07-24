@@ -48,7 +48,7 @@ private static final long serialVersionUID = 0L;
             break;
           case 8: {
 
-            pingOrPong_ = input.readBool();
+            ping_ = input.readBool();
             break;
           }
           default: {
@@ -83,13 +83,13 @@ private static final long serialVersionUID = 0L;
             io.seata.codec.protobuf.generated.HeartbeatMessageProto.class, io.seata.codec.protobuf.generated.HeartbeatMessageProto.Builder.class);
   }
 
-  public static final int PINGORPONG_FIELD_NUMBER = 1;
-  private boolean pingOrPong_;
+  public static final int PING_FIELD_NUMBER = 1;
+  private boolean ping_;
   /**
-   * <code>bool pingOrPong = 1;</code>
+   * <code>bool ping = 1;</code>
    */
-  public boolean getPingOrPong() {
-    return pingOrPong_;
+  public boolean getPing() {
+    return ping_;
   }
 
   private byte memoizedIsInitialized = -1;
@@ -106,8 +106,8 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (pingOrPong_ != false) {
-      output.writeBool(1, pingOrPong_);
+    if (ping_ != false) {
+      output.writeBool(1, ping_);
     }
     unknownFields.writeTo(output);
   }
@@ -118,9 +118,9 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (pingOrPong_ != false) {
+    if (ping_ != false) {
       size += com.google.protobuf.CodedOutputStream
-        .computeBoolSize(1, pingOrPong_);
+        .computeBoolSize(1, ping_);
     }
     size += unknownFields.getSerializedSize();
     memoizedSize = size;
@@ -137,8 +137,8 @@ private static final long serialVersionUID = 0L;
     }
     io.seata.codec.protobuf.generated.HeartbeatMessageProto other = (io.seata.codec.protobuf.generated.HeartbeatMessageProto) obj;
 
-    if (getPingOrPong()
-        != other.getPingOrPong()) return false;
+    if (getPing()
+        != other.getPing()) return false;
     if (!unknownFields.equals(other.unknownFields)) return false;
     return true;
   }
@@ -150,9 +150,9 @@ private static final long serialVersionUID = 0L;
     }
     int hash = 41;
     hash = (19 * hash) + getDescriptor().hashCode();
-    hash = (37 * hash) + PINGORPONG_FIELD_NUMBER;
+    hash = (37 * hash) + PING_FIELD_NUMBER;
     hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-        getPingOrPong());
+        getPing());
     hash = (29 * hash) + unknownFields.hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -290,7 +290,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public Builder clear() {
       super.clear();
-      pingOrPong_ = false;
+      ping_ = false;
 
       return this;
     }
@@ -318,7 +318,7 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public io.seata.codec.protobuf.generated.HeartbeatMessageProto buildPartial() {
       io.seata.codec.protobuf.generated.HeartbeatMessageProto result = new io.seata.codec.protobuf.generated.HeartbeatMessageProto(this);
-      result.pingOrPong_ = pingOrPong_;
+      result.ping_ = ping_;
       onBuilt();
       return result;
     }
@@ -367,8 +367,8 @@ private static final long serialVersionUID = 0L;
 
     public Builder mergeFrom(io.seata.codec.protobuf.generated.HeartbeatMessageProto other) {
       if (other == io.seata.codec.protobuf.generated.HeartbeatMessageProto.getDefaultInstance()) return this;
-      if (other.getPingOrPong() != false) {
-        setPingOrPong(other.getPingOrPong());
+      if (other.getPing() != false) {
+        setPing(other.getPing());
       }
       this.mergeUnknownFields(other.unknownFields);
       onChanged();
@@ -399,28 +399,28 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private boolean pingOrPong_ ;
+    private boolean ping_ ;
     /**
-     * <code>bool pingOrPong = 1;</code>
+     * <code>bool ping = 1;</code>
      */
-    public boolean getPingOrPong() {
-      return pingOrPong_;
+    public boolean getPing() {
+      return ping_;
     }
     /**
-     * <code>bool pingOrPong = 1;</code>
+     * <code>bool ping = 1;</code>
      */
-    public Builder setPingOrPong(boolean value) {
+    public Builder setPing(boolean value) {
       
-      pingOrPong_ = value;
+      ping_ = value;
       onChanged();
       return this;
     }
     /**
-     * <code>bool pingOrPong = 1;</code>
+     * <code>bool ping = 1;</code>
      */
-    public Builder clearPingOrPong() {
+    public Builder clearPing() {
       
-      pingOrPong_ = false;
+      ping_ = false;
       onChanged();
       return this;
     }
