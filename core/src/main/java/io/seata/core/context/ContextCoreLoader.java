@@ -25,7 +25,7 @@ import io.seata.common.loader.EnhancedServiceLoader;
 public class ContextCoreLoader {
 
     private static class ContextCoreHolder {
-        private static ContextCore INSTANCE;
+        private static ContextCore instance;
 
         static {
             ContextCore contextCore = EnhancedServiceLoader.load(ContextCore.class);
@@ -33,7 +33,7 @@ public class ContextCoreLoader {
                 // Default
                 contextCore = new ThreadLocalContextCore();
             }
-            INSTANCE = contextCore;
+            instance = contextCore;
         }
     }
 
@@ -43,7 +43,7 @@ public class ContextCoreLoader {
      * @return the context core
      */
     public static ContextCore load() {
-        return ContextCoreHolder.INSTANCE;
+        return ContextCoreHolder.instance;
     }
 
 }

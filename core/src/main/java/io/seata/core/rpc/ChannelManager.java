@@ -353,8 +353,8 @@ public class ChannelManager {
                     Channel channel = exactRpcContext.getChannel();
                     if (channel.isActive()) {
                         resultChannel = channel;
-                        if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("Just got exactly the one " + channel + " for " + clientId);
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("Just got exactly the one " + channel + " for " + clientId);
                         }
                     } else {
                         if (portMapOnTargetIP.remove(targetPort, exactRpcContext)) {

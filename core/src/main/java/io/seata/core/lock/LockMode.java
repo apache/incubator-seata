@@ -15,8 +15,6 @@
  */
 package io.seata.core.lock;
 
-import io.seata.core.store.StoreMode;
-
 /**
  * lock mode
  *
