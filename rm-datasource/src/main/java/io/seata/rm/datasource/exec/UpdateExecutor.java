@@ -74,7 +74,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             }
         }
         String whereCondition = null;
-        ArrayList<Object> paramAppender = new ArrayList<>();
+        ArrayList<List<Object>> paramAppender = new ArrayList<>();
         if (statementProxy instanceof ParametersHolder) {
             whereCondition = recognizer.getWhereCondition((ParametersHolder)statementProxy, paramAppender);
         } else {
@@ -97,9 +97,21 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 st = statementProxy.getConnection().createStatement();
                 rs = st.executeQuery(selectSQL);
             } else {
-                ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                for (int i = 0; i < paramAppender.size(); i++) {
-                    ps.setObject(i + 1, paramAppender.get(i));
+                if (paramAppender.size() == 1) {
+                    ps = statementProxy.getConnection().prepareStatement(selectSQL);
+                    for (int i = 0; i < paramAppender.get(0).size(); i++) {
+                        ps.setObject(i + 1, paramAppender.get(0).get(i));
+                    }
+                } else {
+                    for (int i = 1; i < paramAppender.size(); i++) {
+                        selectSQLAppender.append(" UNION ").append(selectSQL);
+                    }
+                    ps = statementProxy.getConnection().prepareStatement(selectSQLAppender.toString());
+                    for (int i = 0; i < paramAppender.size(); i++) {
+                        for (int j = 0; j < paramAppender.get(i).size(); j++) {
+                            ps.setObject(i * paramAppender.get(i).size() + j + 1, paramAppender.get(i).get(j));
+                        }
+                    }
                 }
                 rs = ps.executeQuery();
             }

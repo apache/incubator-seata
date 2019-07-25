@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.sql.druid;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -76,7 +77,7 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<Object> paramAppender) {
+    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppender) {
         SQLExpr where = ast.getWhere();
         if (where == null) {
             return "";
@@ -88,7 +89,13 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
             public boolean visit(SQLVariantRefExpr x) {
                 if ("?".equals(x.getName())) {
                     ArrayList<Object> params = parametersHolder.getParameters()[x.getIndex()];
-                    paramAppender.add(params.get(0));
+                    if (paramAppender.size() == 0) {
+                        params.stream().forEach(t -> paramAppender.add(new ArrayList<Object>()));
+                    }
+                    for (int i = 0; i < params.size(); i++) {
+                        paramAppender.get(i).add(params.get(i));
+                    }
+
                 }
                 return super.visit(x);
             }

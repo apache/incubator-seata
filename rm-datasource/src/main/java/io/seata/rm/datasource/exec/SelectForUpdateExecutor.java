@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
@@ -65,7 +66,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
         selectSQLAppender.append(" FROM " + getFromTableInSQL());
         String whereCondition = null;
-        ArrayList<Object> paramAppender = new ArrayList<>();
+        ArrayList<List<Object>> paramAppender = new ArrayList<>();
         if (statementProxy instanceof ParametersHolder) {
             whereCondition = recognizer.getWhereCondition((ParametersHolder)statementProxy, paramAppender);
         } else {

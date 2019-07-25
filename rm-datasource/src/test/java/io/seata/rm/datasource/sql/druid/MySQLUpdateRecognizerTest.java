@@ -18,6 +18,7 @@ package io.seata.rm.datasource.sql.druid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.rm.datasource.ParametersHolder;
@@ -92,7 +93,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
 
-        ArrayList<Object> paramAppender = new ArrayList<>();
+        ArrayList<List<Object>> paramAppender = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public ArrayList<Object>[] getParameters() {
@@ -127,7 +128,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
 
-        ArrayList<Object> paramAppender = new ArrayList<>();
+        ArrayList<List<Object>> paramAppender = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public ArrayList<Object>[] getParameters() {
@@ -164,7 +165,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
 
-        ArrayList<Object> paramAppender = new ArrayList<>();
+        ArrayList<List<Object>> paramAppender = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public ArrayList<Object>[] getParameters() {
@@ -203,7 +204,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
 
-        ArrayList<Object> paramAppender = new ArrayList<>();
+        ArrayList<List<Object>> paramAppender = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public ArrayList<Object>[] getParameters() {

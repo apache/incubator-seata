@@ -100,7 +100,7 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<Object> paramAppender) {
+    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppender) {
         SQLExpr where = ast.getWhere();
         if (where == null) {
             return "";
@@ -112,13 +112,19 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
             public boolean visit(SQLVariantRefExpr x) {
                 if ("?".equals(x.getName())) {
                     ArrayList<Object> params = parametersHolder.getParameters()[x.getIndex()];
-                    paramAppender.add(params.get(0));
+                    if (paramAppender.size() == 0) {
+                        params.stream().forEach(t -> paramAppender.add(new ArrayList<Object>()));
+                    }
+                    for (int i = 0; i < params.size(); i++) {
+                        paramAppender.get(i).add(params.get(i));
+                    }
+
                 }
                 return super.visit(x);
             }
         };
         if (where instanceof SQLBinaryOpExpr) {
-            visitor.visit((SQLBinaryOpExpr)where);
+            visitor.visit((SQLBinaryOpExpr) where);
         } else if (where instanceof SQLInListExpr) {
             visitor.visit((SQLInListExpr) where);
         } else if (where instanceof SQLBetweenExpr) {

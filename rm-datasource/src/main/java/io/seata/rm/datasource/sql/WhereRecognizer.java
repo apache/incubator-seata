@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.sql;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import io.seata.rm.datasource.ParametersHolder;
 
@@ -33,7 +34,7 @@ public interface WhereRecognizer extends SQLRecognizer {
      * @param paramAppender    the param appender
      * @return the where condition
      */
-    String getWhereCondition(ParametersHolder parametersHolder, ArrayList<Object> paramAppender);
+    String getWhereCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppender);
 
     /**
      * Gets where condition.
