@@ -35,26 +35,39 @@ import io.seata.core.model.BranchType;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author Geng Zhang
  */
 public class ProtocolV1Client {
 
+    /**
+     * Logger for ProtocolV1Client
+     **/
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProtocolV1Client.class);
+
     Channel channel;
 
     PositiveAtomicCounter idGenerator = new PositiveAtomicCounter();
 
-    Map<Integer, Future> futureMap = new HashMap<>();
+    Map<Integer, Future> futureMap = new ConcurrentHashMap<>();
 
     private EventLoopGroup eventLoopGroup = createWorkerGroup();
+
+    private DefaultEventExecutor defaultEventExecutor = new DefaultEventExecutor(eventLoopGroup);
 
     public void connect(String host, int port, int connectTimeout) {
 
@@ -100,6 +113,38 @@ public class ProtocolV1Client {
         return new NioEventLoopGroup(10, threadName);
     }
 
+    public void close() {
+        if (channel != null) {
+            channel.close();
+        }
+        if (eventLoopGroup != null) {
+            eventLoopGroup.shutdownGracefully();
+        }
+        channel = null;
+    }
+
+    public Future sendRpc(Map<String, String> head, Object body) {
+        int msgId = idGenerator.incrementAndGet();
+
+        RpcMessage rpcMessage = new RpcMessage();
+        rpcMessage.setId(msgId);
+        rpcMessage.setCodec(CodecType.SEATA.getCode());
+        rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
+        rpcMessage.setHeadMap(head);
+        rpcMessage.setBody(body);
+        rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST);
+
+        if (channel != null) {
+            DefaultPromise promise = new DefaultPromise(defaultEventExecutor);
+            futureMap.put(msgId, promise);
+            channel.writeAndFlush(rpcMessage);
+            return promise;
+        } else {
+            LOGGER.warn("channel is null");
+        }
+        return null;
+    }
+
     public static void main(String[] args) throws InterruptedException, TimeoutException, ExecutionException {
         ProtocolV1Client client = new ProtocolV1Client();
         client.connect("127.0.0.1", 8811, 500);
@@ -115,28 +160,48 @@ public class ProtocolV1Client {
         body.setResourceId("resource-1234");
         body.setXid("xid-1234");
 
-        RpcMessage rpcMessage = new RpcMessage();
-        rpcMessage.setId(client.idGenerator.incrementAndGet());
-        rpcMessage.setCodec(CodecType.SEATA.getCode());
-        rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
-        rpcMessage.setHeadMap(head);
-        rpcMessage.setBody(body);
-        rpcMessage.setMessageType(ProtocolConstants.MSGTYPE_RESQUEST);
-
-        Future future = client.send(rpcMessage.getId(), rpcMessage);
-        RpcMessage resp = (RpcMessage) future.get(200, TimeUnit.SECONDS);
-
-        System.out.println(resp.getId() + " " + resp.getBody());
-    }
-
-
-    private Future send(int msgId, Object msg) {
-        if (channel != null) {
-            DefaultPromise promise = new DefaultPromise(new DefaultEventExecutor(eventLoopGroup));
-            futureMap.put(msgId, promise);
-            channel.writeAndFlush(msg);
-            return promise;
+        final int threads = 50;
+        final AtomicLong cnt = new AtomicLong(0);
+        final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
+                new SynchronousQueue<Runnable>(), new NamedThreadFactory("client-", false));// 无队列
+        for (int i = 0; i < threads; i++) {
+            service1.execute(new Runnable() {
+                @Override
+                public void run() {
+                    int n = 0;
+                    while (true) {
+                        try {
+                            Future future = client.sendRpc(head, body);
+                            RpcMessage resp = (RpcMessage) future.get(200, TimeUnit.MILLISECONDS);
+                            cnt.incrementAndGet();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            });
         }
-        return null;
+
+        Thread thread = new Thread(new Runnable() {
+            private long last = 0;
+
+            @Override
+            public void run() {
+                while (true) {
+                    long count = cnt.get();
+                    long tps = count - last;
+                    LOGGER.error("last 1s invoke: {}, queue: {}", tps, service1.getQueue().size());
+                    last = count;
+
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                    }
+                }
+            }
+        }, "Print-tps-THREAD");
+        thread.start();
     }
+
+
 }
