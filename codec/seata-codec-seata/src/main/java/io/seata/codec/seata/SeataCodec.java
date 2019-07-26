@@ -50,7 +50,7 @@ public class SeataCodec implements Codec {
         out.readBytes(body);
 
         //typecode + body
-        ByteBuffer byteBuffer = ByteBuffer.allocate(4 + body.length);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(2 + body.length);
         byteBuffer.putShort(typecode);
         byteBuffer.put(body);
 
