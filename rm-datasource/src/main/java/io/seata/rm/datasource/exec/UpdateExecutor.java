@@ -21,7 +21,6 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
 
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
@@ -60,19 +59,8 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
 
         TableMeta tmeta = getTableMeta();
-        List<String> updateColumns = recognizer.getUpdateColumns();
 
-        StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
-        if (!tmeta.containsPK(updateColumns)) {
-            // PK should be included.
-            selectSQLAppender.append(getColumnNameInSQL(tmeta.getPkName()) + ", ");
-        }
-        for (int i = 0; i < updateColumns.size(); i++) {
-            selectSQLAppender.append(updateColumns.get(i));
-            if (i < (updateColumns.size() - 1)) {
-                selectSQLAppender.append(", ");
-            }
-        }
+        StringBuffer selectSQLAppender = new StringBuffer("SELECT * ");
         String whereCondition = null;
         ArrayList<Object> paramAppender = new ArrayList<>();
         if (statementProxy instanceof ParametersHolder) {
@@ -121,25 +109,16 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
 
         TableMeta tmeta = getTableMeta();
         if (beforeImage == null || beforeImage.size() == 0) {
             return TableRecords.empty(getTableMeta());
         }
-        List<String> updateColumns = recognizer.getUpdateColumns();
 
-        StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
-        if (!tmeta.containsPK(updateColumns)) {
-            // PK should be included.
-            selectSQLAppender.append(getColumnNameInSQL(tmeta.getPkName()) + ", ");
-        }
-        StringJoiner columnsSQL = new StringJoiner(", ");
-        for (String column:updateColumns) {
-            columnsSQL.add(column);
-        }
-        selectSQLAppender.append(columnsSQL.toString());
+        StringBuffer selectSQLAppender = new StringBuffer("SELECT * ");
+        
         List<Field> pkRows = beforeImage.pkRows();
+        
         selectSQLAppender.append(
             " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(pkRows));
         String selectSQL = selectSQLAppender.toString();
