@@ -77,7 +77,7 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppender) {
+    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenders) {
         SQLExpr where = ast.getWhere();
         if (where == null) {
             return "";
@@ -88,12 +88,12 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
             @Override
             public boolean visit(SQLVariantRefExpr x) {
                 if ("?".equals(x.getName())) {
-                    ArrayList<Object> params = parametersHolder.getParameters()[x.getIndex()];
-                    if (paramAppender.size() == 0) {
-                        params.stream().forEach(t -> paramAppender.add(new ArrayList<Object>()));
+                    ArrayList<Object> paramAppender = parametersHolder.getParameters()[x.getIndex()];
+                    if (paramAppenders.size() == 0) {
+                        paramAppender.stream().forEach(t -> paramAppenders.add(new ArrayList<Object>()));
                     }
-                    for (int i = 0; i < params.size(); i++) {
-                        paramAppender.get(i).add(params.get(i));
+                    for (int i = 0; i < paramAppender.size(); i++) {
+                        paramAppenders.get(i).add(paramAppender.get(i));
                     }
 
                 }

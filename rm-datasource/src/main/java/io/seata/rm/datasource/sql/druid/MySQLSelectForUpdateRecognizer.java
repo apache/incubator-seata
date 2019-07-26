@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.sql.druid;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -60,7 +61,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<Object> paramAppender) {
+    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenders) {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
         if (where == null) {
@@ -72,8 +73,14 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
             @Override
             public boolean visit(SQLVariantRefExpr x) {
                 if ("?".equals(x.getName())) {
-                    ArrayList<Object> params = parametersHolder.getParameters()[x.getIndex()];
-                    paramAppender.add(params.get(0));
+                    ArrayList<Object> paramAppender = parametersHolder.getParameters()[x.getIndex()];
+                    if (paramAppenders.size() == 0) {
+                        paramAppender.stream().forEach(t -> paramAppenders.add(new ArrayList<Object>()));
+                    }
+                    for (int i = 0; i < paramAppender.size(); i++) {
+                        paramAppenders.get(i).add(paramAppender.get(i));
+                    }
+
                 }
                 return super.visit(x);
             }

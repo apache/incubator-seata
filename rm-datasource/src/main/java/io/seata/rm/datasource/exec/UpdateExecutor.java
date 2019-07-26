@@ -57,7 +57,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     @Override
     protected TableRecords beforeImage() throws SQLException {
-        SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
+        SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
 
         TableMeta tmeta = getTableMeta();
         List<String> updateColumns = recognizer.getUpdateColumns();
@@ -74,9 +74,9 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             }
         }
         String whereCondition = null;
-        ArrayList<List<Object>> paramAppender = new ArrayList<>();
+        ArrayList<List<Object>> paramAppenders = new ArrayList<>();
         if (statementProxy instanceof ParametersHolder) {
-            whereCondition = recognizer.getWhereCondition((ParametersHolder)statementProxy, paramAppender);
+            whereCondition = recognizer.getWhereCondition((ParametersHolder) statementProxy, paramAppenders);
         } else {
             whereCondition = recognizer.getWhereCondition();
         }
@@ -93,23 +93,23 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         Statement st = null;
         ResultSet rs = null;
         try {
-            if (paramAppender.isEmpty()) {
+            if (paramAppenders.isEmpty()) {
                 st = statementProxy.getConnection().createStatement();
                 rs = st.executeQuery(selectSQL);
             } else {
-                if (paramAppender.size() == 1) {
+                if (paramAppenders.size() == 1) {
                     ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                    for (int i = 0; i < paramAppender.get(0).size(); i++) {
-                        ps.setObject(i + 1, paramAppender.get(0).get(i));
+                    for (int i = 0; i < paramAppenders.get(0).size(); i++) {
+                        ps.setObject(i + 1, paramAppenders.get(0).get(i));
                     }
                 } else {
-                    for (int i = 1; i < paramAppender.size(); i++) {
-                        selectSQLAppender.append(" UNION ").append(selectSQL);
-                    }
+                    paramAppenders.stream().forEach(t -> selectSQLAppender.append(" UNION ").append(selectSQL));
                     ps = statementProxy.getConnection().prepareStatement(selectSQLAppender.toString());
-                    for (int i = 0; i < paramAppender.size(); i++) {
-                        for (int j = 0; j < paramAppender.get(i).size(); j++) {
-                            ps.setObject(i * paramAppender.get(i).size() + j + 1, paramAppender.get(i).get(j));
+                    List<Object> paramAppender = null;
+                    for (int i = 0; i < paramAppenders.size(); i++) {
+                        paramAppender = paramAppenders.get(i);
+                        for (int j = 0; j < paramAppender.size(); j++) {
+                            ps.setObject(i * paramAppender.size() + j + 1, paramAppender.get(j));
                         }
                     }
                 }
@@ -133,7 +133,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
+        SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
 
         TableMeta tmeta = getTableMeta();
         if (beforeImage == null || beforeImage.size() == 0) {
@@ -147,13 +147,13 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             selectSQLAppender.append(getColumnNameInSQL(tmeta.getPkName()) + ", ");
         }
         StringJoiner columnsSQL = new StringJoiner(", ");
-        for (String column:updateColumns) {
+        for (String column : updateColumns) {
             columnsSQL.add(column);
         }
         selectSQLAppender.append(columnsSQL.toString());
         List<Field> pkRows = beforeImage.pkRows();
         selectSQLAppender.append(
-            " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(pkRows));
+                " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(pkRows));
         String selectSQL = selectSQLAppender.toString();
 
         TableRecords afterImage = null;

@@ -31,10 +31,10 @@ public interface WhereRecognizer extends SQLRecognizer {
      * Gets where condition.
      *
      * @param parametersHolder the parameters holder
-     * @param paramAppender    the param appender
+     * @param paramAppenders    the param appender list
      * @return the where condition
      */
-    String getWhereCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppender);
+    String getWhereCondition(ParametersHolder parametersHolder, ArrayList<List<Object>> paramAppenders);
 
     /**
      * Gets where condition.

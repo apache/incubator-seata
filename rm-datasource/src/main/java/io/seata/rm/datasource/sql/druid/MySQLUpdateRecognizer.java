@@ -53,7 +53,7 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
      */
     public MySQLUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (MySqlUpdateStatement)ast;
+        this.ast = (MySqlUpdateStatement) ast;
     }
 
     @Override
@@ -68,12 +68,12 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
         for (SQLUpdateSetItem updateSetItem : updateSetItems) {
             SQLExpr expr = updateSetItem.getColumn();
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr)expr).getName());
+                list.add(((SQLIdentifierExpr) expr).getName());
             } else if (expr instanceof SQLPropertyExpr) {
                 // This is alias case, like UPDATE xxx_tbl a SET a.name = ? WHERE a.id = ?
-                SQLExpr owner = ((SQLPropertyExpr)expr).getOwner();
+                SQLExpr owner = ((SQLPropertyExpr) expr).getOwner();
                 if (owner instanceof SQLIdentifierExpr) {
-                    list.add((((SQLIdentifierExpr)owner).getName() + "." + ((SQLPropertyExpr)expr).getName()));
+                    list.add((((SQLIdentifierExpr) owner).getName() + "." + ((SQLPropertyExpr) expr).getName()));
                 }
             } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
@@ -89,7 +89,7 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
         for (SQLUpdateSetItem updateSetItem : updateSetItems) {
             SQLExpr expr = updateSetItem.getValue();
             if (expr instanceof SQLValuableExpr) {
-                list.add(((SQLValuableExpr)expr).getValue());
+                list.add(((SQLValuableExpr) expr).getValue());
             } else if (expr instanceof SQLVariantRefExpr) {
                 list.add(new VMarker());
             } else {
@@ -100,7 +100,7 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppender) {
+    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenders) {
         SQLExpr where = ast.getWhere();
         if (where == null) {
             return "";
@@ -111,12 +111,12 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
             @Override
             public boolean visit(SQLVariantRefExpr x) {
                 if ("?".equals(x.getName())) {
-                    ArrayList<Object> params = parametersHolder.getParameters()[x.getIndex()];
-                    if (paramAppender.size() == 0) {
-                        params.stream().forEach(t -> paramAppender.add(new ArrayList<Object>()));
+                    ArrayList<Object> paramAppender = parametersHolder.getParameters()[x.getIndex()];
+                    if (paramAppenders.size() == 0) {
+                        paramAppender.stream().forEach(t -> paramAppenders.add(new ArrayList<Object>()));
                     }
-                    for (int i = 0; i < params.size(); i++) {
-                        paramAppender.get(i).add(params.get(i));
+                    for (int i = 0; i < paramAppender.size(); i++) {
+                        paramAppenders.get(i).add(paramAppender.get(i));
                     }
 
                 }
@@ -146,11 +146,11 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
 
         if (where instanceof SQLBetweenExpr) {
-            visitor.visit((SQLBetweenExpr)where);
+            visitor.visit((SQLBetweenExpr) where);
         } else if (where instanceof SQLInListExpr) {
-            visitor.visit((SQLInListExpr)where);
+            visitor.visit((SQLInListExpr) where);
         } else {
-            visitor.visit((SQLBinaryOpExpr)where);
+            visitor.visit((SQLBinaryOpExpr) where);
         }
 
         return sb.toString();
@@ -172,7 +172,7 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
                 return false;
             }
         };
-        SQLExprTableSource tableSource = (SQLExprTableSource)ast.getTableSource();
+        SQLExprTableSource tableSource = (SQLExprTableSource) ast.getTableSource();
         visitor.visit(tableSource);
         return sb.toString();
     }
