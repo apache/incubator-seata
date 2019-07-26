@@ -13,7 +13,7 @@ for line in $(cat nacos-config.txt)
 do
 
 key=${line%%=*}
-value=${line##*=}
+value=${line#*=}
 echo "\r\n set "${key}" = "${value}
 
 result=`curl -X POST "http://$nacosIp:8848/nacos/v1/cs/configs?dataId=$key&group=SEATA_GROUP&content=$value"`
