@@ -155,17 +155,14 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected TableRecords getTableRecords(List<Object> pkValues) throws SQLException {
         TableRecords afterImage;
         String pk = getTableMeta().getPkName();
-        StringBuffer selectSQLAppender = new StringBuffer("SELECT * FROM " + getTableMeta().getTableName() + " WHERE ");
-
-        StringJoiner pkValuesJoiner = new StringJoiner(" OR ");
+        StringJoiner pkValuesJoiner = new StringJoiner(" OR ","SELECT * FROM " + getTableMeta().getTableName() + " WHERE ","");
         for (Object pkValue:pkValues) {
             pkValuesJoiner.add(pk + "=?");
         }
-        selectSQLAppender.append(pkValuesJoiner.toString());
         PreparedStatement ps = null;
         ResultSet rs = null;
         try {
-            ps = statementProxy.getConnection().prepareStatement(selectSQLAppender.toString());
+            ps = statementProxy.getConnection().prepareStatement(pkValuesJoiner.toString());
 
             for (int i = 1; i <= pkValues.size(); i++) {
                 ps.setObject(i, pkValues.get(i - 1));

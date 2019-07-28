@@ -20,7 +20,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.StringJoiner;
 
 import com.alibaba.druid.util.JdbcConstants;
@@ -60,33 +59,9 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     @Override
     protected TableRecords beforeImage() throws SQLException {
         SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) sqlRecognizer;
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-
         TableMeta tmeta = getTableMeta(visitor.getTableName());
-        List<String> columns = new ArrayList<>();
-        for (String column : tmeta.getAllColumns().keySet()) {
-            columns.add(keywordChecker.checkAndReplace(column));
-        }
-        StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
-        StringJoiner columnSQL = new StringJoiner(", ");
-        for (String column:columns) {
-            columnSQL.add(getColumnNameInSQL(column));
-        }
-        selectSQLAppender.append(columnSQL.toString());
-        String whereCondition = null;
         ArrayList<Object> paramAppender = new ArrayList<>();
-        if (statementProxy instanceof ParametersHolder) {
-            whereCondition = visitor.getWhereCondition((ParametersHolder) statementProxy, paramAppender);
-        } else {
-            whereCondition = visitor.getWhereCondition();
-        }
-        selectSQLAppender.append(" FROM " + keywordChecker.checkAndReplace(getFromTableInSQL()));
-        if (StringUtils.isNotBlank(whereCondition)) {
-            selectSQLAppender.append(" WHERE " + whereCondition);
-        }
-        selectSQLAppender.append(" FOR UPDATE");
-        String selectSQL = selectSQLAppender.toString();
-
+        String selectSQL = beforeImageSQL(visitor,tmeta,paramAppender);
         TableRecords beforeImage = null;
         PreparedStatement ps = null;
         Statement st = null;
@@ -116,6 +91,27 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             }
         }
         return beforeImage;
+    }
+
+    private String beforeImageSQL(SQLDeleteRecognizer visitor,TableMeta tableMeta,ArrayList<Object> paramAppender){
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+        String whereCondition = null;
+        if (statementProxy instanceof ParametersHolder) {
+            whereCondition = visitor.getWhereCondition((ParametersHolder) statementProxy, paramAppender);
+        } else {
+            whereCondition = visitor.getWhereCondition();
+        }
+        StringBuffer sqlSuffix = new StringBuffer(" FROM " + keywordChecker.checkAndReplace(getFromTableInSQL()));
+        if (StringUtils.isNotBlank(whereCondition)) {
+            sqlSuffix.append(" WHERE " + whereCondition);
+        }
+        sqlSuffix.append(" FOR UPDATE");
+        String suffix = sqlSuffix.toString();
+        StringJoiner selectSQLAppender = new StringJoiner(", ","SELECT ",suffix);
+        for (String column:tableMeta.getAllColumns().keySet()) {
+            selectSQLAppender.add(getColumnNameInSQL(keywordChecker.checkAndReplace(column)));
+        }
+        return selectSQLAppender.toString();
     }
 
     @Override

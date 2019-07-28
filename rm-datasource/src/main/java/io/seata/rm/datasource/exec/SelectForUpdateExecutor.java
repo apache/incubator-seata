@@ -53,30 +53,13 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
 
     @Override
     public T doExecute(Object... args) throws Throwable {
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
-
         Connection conn = statementProxy.getConnection();
         T rs = null;
         Savepoint sp = null;
         LockRetryController lockRetryController = new LockRetryController();
         boolean originalAutoCommit = conn.getAutoCommit();
-
-        StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
-        selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
-        selectSQLAppender.append(" FROM " + getFromTableInSQL());
-        String whereCondition = null;
         ArrayList<Object> paramAppender = new ArrayList<>();
-        if (statementProxy instanceof ParametersHolder) {
-            whereCondition = recognizer.getWhereCondition((ParametersHolder)statementProxy, paramAppender);
-        } else {
-            whereCondition = recognizer.getWhereCondition();
-        }
-        if (!StringUtils.isNullOrEmpty(whereCondition)) {
-            selectSQLAppender.append(" WHERE " + whereCondition);
-        }
-        selectSQLAppender.append(" FOR UPDATE");
-        String selectPKSQL = selectSQLAppender.toString();
-
+        String selectPKSQL = buildSelectSQL(paramAppender);
         try {
             if (originalAutoCommit) {
                 conn.setAutoCommit(false);
@@ -149,5 +132,23 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
             }
         }
         return rs;
+    }
+
+    private String buildSelectSQL(ArrayList<Object> paramAppender){
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
+        StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
+        selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
+        selectSQLAppender.append(" FROM " + getFromTableInSQL());
+        String whereCondition = null;
+        if (statementProxy instanceof ParametersHolder) {
+            whereCondition = recognizer.getWhereCondition((ParametersHolder)statementProxy, paramAppender);
+        } else {
+            whereCondition = recognizer.getWhereCondition();
+        }
+        if (!StringUtils.isNullOrEmpty(whereCondition)) {
+            selectSQLAppender.append(" WHERE " + whereCondition);
+        }
+        selectSQLAppender.append(" FOR UPDATE");
+        return selectSQLAppender.toString();
     }
 }
