@@ -67,7 +67,7 @@ public class ProtocolV1CodecTest {
 
             // test run times
             int runTimes = 100000;
-            
+
             final int threads = 50;
             final CountDownLatch cnt = new CountDownLatch(runTimes);
             final AtomicInteger tag = new AtomicInteger(0);
@@ -84,7 +84,7 @@ public class ProtocolV1CodecTest {
                                 success.incrementAndGet();
                             }
                         } catch (Exception e) {
-                            LOGGER.error("", e);
+                            LOGGER.error("Client send error", e);
                         } finally {
                             cnt.countDown();
                         }
@@ -96,7 +96,7 @@ public class ProtocolV1CodecTest {
             LOGGER.info("success {}/{}", success.get(), runTimes);
             Assertions.assertEquals(success.get(), runTimes);
         } catch (InterruptedException e) {
-            LOGGER.error("", e);
+            LOGGER.error("Thread interrupted", e);
         } finally {
             client.close();
             server.stop();

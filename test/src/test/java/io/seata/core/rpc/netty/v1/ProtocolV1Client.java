@@ -41,12 +41,10 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
@@ -88,18 +86,10 @@ public class ProtocolV1Client {
             }
         });
         // Bind and start to accept incoming connections.
-
         ChannelFuture channelFuture = bootstrap.connect(host, port);
         channelFuture.awaitUninterruptibly(connectTimeout, TimeUnit.MILLISECONDS);
         if (channelFuture.isSuccess()) {
             channel = channelFuture.channel();
-//            if (NetUtils.toAddressString((InetSocketAddress) channel.remoteAddress())
-//                    .equals(NetUtils.toAddressString((InetSocketAddress) channel.localAddress()))) {
-//                // 服务端不存活时，连接左右两侧地址一样的情况
-//                channel.close(); // 关掉重连
-//                throw new InitErrorException("Failed to connect " + host + ":" + port
-//                        + ". Cause by: Remote and local address are the same");
-//            }
         } else {
             Throwable cause = channelFuture.cause();
             throw new RuntimeException("Failed to connect " + host + ":" + port +
@@ -145,7 +135,8 @@ public class ProtocolV1Client {
         return null;
     }
 
-    public static void main(String[] args) throws InterruptedException, TimeoutException, ExecutionException {
+    // can test tps
+    public static void main(String[] args) {
         ProtocolV1Client client = new ProtocolV1Client();
         client.connect("127.0.0.1", 8811, 500);
 
@@ -165,18 +156,16 @@ public class ProtocolV1Client {
         final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
                 new SynchronousQueue<Runnable>(), new NamedThreadFactory("client-", false));// 无队列
         for (int i = 0; i < threads; i++) {
-            service1.execute(new Runnable() {
-                @Override
-                public void run() {
-                    int n = 0;
-                    while (true) {
-                        try {
-                            Future future = client.sendRpc(head, body);
-                            RpcMessage resp = (RpcMessage) future.get(200, TimeUnit.MILLISECONDS);
+            service1.execute(() -> {
+                while (true) {
+                    try {
+                        Future future = client.sendRpc(head, body);
+                        RpcMessage resp = (RpcMessage) future.get(200, TimeUnit.MILLISECONDS);
+                        if (resp != null) {
                             cnt.incrementAndGet();
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
+                    } catch (Exception e) {
+                        // ignore
                     }
                 }
             });
