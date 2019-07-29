@@ -100,8 +100,8 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     } else {
                         if (paramAppenders.size() == 1) {
                             pstPK = statementProxy.getConnection().prepareStatement(selectPKSQL);
-                            for (int i = 0; i < paramAppenders.size(); i++) {
-                                pstPK.setObject(i + 1, paramAppenders.get(i));
+                            for (int i = 0; i < paramAppenders.get(0).size(); i++) {
+                                pstPK.setObject(i + 1, paramAppenders.get(0).get(i));
                             }
                         } else {
                             paramAppenders.stream().forEach(t -> selectSQLAppender.append(" UNION ").append(selectPKSQL));
