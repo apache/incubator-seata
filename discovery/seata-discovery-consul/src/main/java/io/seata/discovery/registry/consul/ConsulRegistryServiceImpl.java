@@ -15,24 +15,23 @@
  */
 package io.seata.discovery.registry.consul;
 
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.NetUtil;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.discovery.registry.RegistryService;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.QueryParams;
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.agent.model.NewService;
 import com.ecwid.consul.v1.health.HealthServicesRequest;
 import com.ecwid.consul.v1.health.model.HealthService;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.common.util.NetUtil;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.registry.RegistryService;
 
 import java.net.InetSocketAddress;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -87,6 +86,13 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
 
 
     private ConsulRegistryServiceImpl() {
+        //initial the capacity with 8
+        clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        notifiers = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        notifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
+            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+            new NamedThreadFactory("services-consul-notifier", THREAD_POOL_NUM));
     }
 
     /**
@@ -98,15 +104,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         if (null == instance) {
             synchronized (ConsulRegistryServiceImpl.class) {
                 if (null == instance) {
-                    //initial the capacity with 8
-                    clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    notifiers = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    notifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-                        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-                        new NamedThreadFactory("services-consul-notifier", THREAD_POOL_NUM));
                     instance = new ConsulRegistryServiceImpl();
-
                 }
             }
         }

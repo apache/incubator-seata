@@ -99,6 +99,9 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
 
 
     private EtcdRegistryServiceImpl() {
+        clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        watcherMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
     }
 
     /**
@@ -110,9 +113,6 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         if (null == instance) {
             synchronized (EtcdRegistryServiceImpl.class) {
                 if (null == instance) {
-                    clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    watcherMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
                     instance = new EtcdRegistryServiceImpl();
                 }
             }

@@ -54,7 +54,6 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static ExecutorService consulConfigExecutor = null;
-    private static ExecutorService consulNotifierExecutor = null;
     private static ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = null;
     private static ConcurrentMap<String, List<ConfigChangeNotifier>> configChangeNotifiersMap = null;
 
@@ -66,6 +65,10 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
 
 
     private ConsulConfiguration() {
+        consulConfigExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
+            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("consul-config-executor", THREAD_POOL_NUM));
+        configListenersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        configChangeNotifiersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
     }
 
     /**
@@ -77,16 +80,9 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
         if (null == instance) {
             synchronized (ConsulConfiguration.class) {
                 if (null == instance) {
-                    consulConfigExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-                        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("consul-config-executor", THREAD_POOL_NUM));
-                    consulNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-                        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("consul-notifier-executor", THREAD_POOL_NUM));
-                    configListenersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    configChangeNotifiersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
                     instance = new ConsulConfiguration();
                 }
             }
-
         }
         return instance;
     }
