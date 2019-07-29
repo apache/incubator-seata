@@ -177,8 +177,11 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
         try {
             if(JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
                 UndoLogManagerOracle.undo(dataSourceProxy, xid, branchId);
-            } else {
+            }
+            else if(JdbcConstants.MYSQL.equalsIgnoreCase(dataSourceProxy.getDbType())){
                 UndoLogManager.undo(dataSourceProxy, xid, branchId);
+            } else {
+                throw new NotSupportYetException("DbType[" + dataSourceProxy.getDbType() + "] is not support yet!");
             }
         } catch (TransactionException te) {
             if (LOGGER.isInfoEnabled()){
