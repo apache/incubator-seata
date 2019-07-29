@@ -21,7 +21,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -184,8 +186,11 @@ public final class UndoLogManager {
                     try {
                         // put serializer name to local
                         SERIALIZER_LOCAL.set(parser.getName());
-
-                        for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
+                        List<SQLUndoLog> sqlUndoLogs = branchUndoLog.getSqlUndoLogs();
+                        if (sqlUndoLogs.size() > 1) {
+                            Collections.reverse(sqlUndoLogs);
+                        }
+                        for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
                             TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
@@ -239,8 +244,8 @@ public final class UndoLogManager {
                         LOGGER.warn("Failed to close JDBC resource while undo ... ", rollbackEx);
                     }
                 }
-                throw new TransactionException(BranchRollbackFailed_Retriable, String.format("%s/%s", branchId, xid),
-                    e);
+                throw new TransactionException(BranchRollbackFailed_Retriable, String.format("%s/%s %s", branchId, xid, e.getMessage()),
+                        e);
 
             } finally {
                 try {

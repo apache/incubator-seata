@@ -42,7 +42,7 @@ public class DataCompareUtils {
      * Is field equals.
      *
      * @param f0 the f0
-     * @param f1  the f1
+     * @param f1 the f1
      * @return the boolean
      */
     public static boolean isFieldEquals(Field f0, Field f1) {
@@ -104,13 +104,16 @@ public class DataCompareUtils {
         } else {
             if (afterImage == null) {
                 return false;
-            } else {
-                if (beforeImage.getTableName().equalsIgnoreCase(afterImage.getTableName())
-                        && CollectionUtils.isSizeEquals(beforeImage.getRows(), afterImage.getRows())) {
-                    return compareRows(beforeImage.getTableMeta(), beforeImage.getRows(), afterImage.getRows());
-                } else {
-                    return false;
+            }
+            if (beforeImage.getTableName().equalsIgnoreCase(afterImage.getTableName())
+                    && CollectionUtils.isSizeEquals(beforeImage.getRows(), afterImage.getRows())) {
+                //when image is EmptyTableRecords, getTableMeta will throw an exception
+                if (CollectionUtils.isEmpty(beforeImage.getRows())) {
+                    return true;
                 }
+                return compareRows(beforeImage.getTableMeta(), beforeImage.getRows(), afterImage.getRows());
+            } else {
+                return false;
             }
         }
     }

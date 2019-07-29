@@ -141,6 +141,10 @@ public class ConfigurationKeys {
      * The constant STORE_DB_TYPE.
      */
     public static final String STORE_DB_TYPE  = "store.db.db-type";
+    /**
+     * The constant STORE_DB_DRIVER_CLASS_NAME.
+     */
+    public static final String STORE_DB_DRIVER_CLASS_NAME  =  "store.db.driver-class-name";
 
     /**
      * The constant STORE_DB_URL.
