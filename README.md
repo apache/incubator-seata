@@ -12,39 +12,6 @@
 ## What is Seata?
 
 A **distributed transaction solution** with high performance and ease of use for **microservices** architecture.
-## oracle  sql
-```
--- Create table
-create table UNDO_LOG
-(
-  id            NUMBER(20) not null,
-  branch_id     NUMBER(20) not null,
-  xid           VARCHAR2(100) not null,
-  rollback_info BLOB,
-  log_status    INTEGER,
-  log_created   DATE,
-  log_modified  DATE,
-  ext           VARCHAR2(100)
-);
-
--- Create/Recreate indexes 
-create index IDX_XRID on UNDO_LOG (BRANCH_ID, XID);
-
--- Create/Recreate primary, unique and foreign key constraints 
-alter table UNDO_LOG
-  add constraint PK_UNDO primary key (ID);
-
-
-
-
-create sequence UNDO_LOG_SEQ
-minvalue 1
-maxvalue 9999999999999999999999999
-start with 1
-increment by 1
-cache 20;
-
-```
 ### Distributed Transaction Problem in Microservices
 
 Let's imagine a traditional monolithic application. Its business is built up with 3 modules. They use a single local data source.
