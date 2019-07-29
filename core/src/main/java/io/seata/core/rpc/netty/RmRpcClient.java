@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -233,7 +234,9 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("register resource, resourceId:" + resourceId);
                 }
-                sendRegisterMessage(serverAddress, rmChannel, resourceId);
+                if(Objects.nonNull(resourceId)){
+                    sendRegisterMessage(serverAddress, rmChannel, resourceId);
+                }
             }
         }
     }
