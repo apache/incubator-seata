@@ -15,6 +15,8 @@
  */
 package io.seata.core.rpc.netty.v1;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -30,21 +32,25 @@ class HeadMapSerializerTest {
     public void encode() throws Exception {
         HeadMapSerializer simpleMapSerializer = HeadMapSerializer.getInstance();
         Map<String, String> map = null;
-        byte[] bs = simpleMapSerializer.encode(map);
-        Assertions.assertEquals(bs, null);
+        int bs = simpleMapSerializer.encode(map, null);
+        Assertions.assertEquals(bs, 0);
+
+        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.heapBuffer();
+        bs = simpleMapSerializer.encode(map, byteBuf);
+        Assertions.assertEquals(bs, 0);
 
         map = new HashMap<String, String>();
-        bs = simpleMapSerializer.encode(map);
-        Assertions.assertEquals(bs, null);
+        bs = simpleMapSerializer.encode(map, byteBuf);
+        Assertions.assertEquals(bs, 0);
 
         map.put("1", "2");
         map.put("", "x");
         map.put("a", "");
         map.put("b", null);
-        bs = simpleMapSerializer.encode(map);
-        Assertions.assertEquals(37, bs.length);
+        bs = simpleMapSerializer.encode(map, byteBuf);
+        Assertions.assertEquals(21, bs);
 
-        Map<String, String> map1 = simpleMapSerializer.decode(bs);
+        Map<String, String> map1 = simpleMapSerializer.decode(byteBuf, 21);
         Assertions.assertNotNull(map1);
         Assertions.assertEquals(4, map1.size());
         Assertions.assertEquals("2", map1.get("1"));
@@ -52,15 +58,16 @@ class HeadMapSerializerTest {
         Assertions.assertEquals("", map1.get("a"));
         Assertions.assertEquals(null, map1.get("b"));
 
-        map1 = simpleMapSerializer.decode(null);
+        map1 = simpleMapSerializer.decode(byteBuf, 21);
         Assertions.assertNotNull(map1);
         Assertions.assertEquals(0, map1.size());
 
-        map1 = simpleMapSerializer.decode(new byte[0]);
+        map1 = simpleMapSerializer.decode(null, 21);
         Assertions.assertNotNull(map1);
         Assertions.assertEquals(0, map1.size());
+
+        byteBuf.release();
     }
-
 
     @Test
     public void testUTF8() throws Exception {
@@ -72,14 +79,17 @@ class HeadMapSerializerTest {
         Map<String, String> map = new HashMap<String, String>();
         map.put("11", "22");
         map.put("222", "333");
-        byte[] bs = mapSerializer.encode(map);
-        Map newmap = mapSerializer.decode(bs);
+        ByteBuf byteBuf = ByteBufAllocator.DEFAULT.heapBuffer();
+        int bs = mapSerializer.encode(map, byteBuf);
+        Map newmap = mapSerializer.decode(byteBuf, bs);
         Assertions.assertEquals(map, newmap);
 
         // 支持中文
         map.put("弄啥呢", "咋弄呢？");
-        bs = mapSerializer.encode(map);
-        newmap = mapSerializer.decode(bs);
+        bs = mapSerializer.encode(map, byteBuf);
+        newmap = mapSerializer.decode(byteBuf, bs);
         Assertions.assertEquals(map, newmap);
+
+        byteBuf.release();
     }
 }

@@ -35,8 +35,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -187,8 +189,11 @@ public final class UndoLogManager {
                     try {
                         // put serializer name to local
                         SERIALIZER_LOCAL.set(parser.getName());
-
-                        for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
+                        List<SQLUndoLog> sqlUndoLogs = branchUndoLog.getSqlUndoLogs();
+                        if (sqlUndoLogs.size() > 1) {
+                            Collections.reverse(sqlUndoLogs);
+                        }
+                        for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
                             TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
@@ -242,8 +247,8 @@ public final class UndoLogManager {
                         LOGGER.warn("Failed to close JDBC resource while undo ... ", rollbackEx);
                     }
                 }
-                throw new TransactionException(BranchRollbackFailed_Retriable, String.format("%s/%s", branchId, xid),
-                    e);
+                throw new TransactionException(BranchRollbackFailed_Retriable, String.format("%s/%s %s", branchId, xid, e.getMessage()),
+                        e);
 
             } finally {
                 try {
@@ -301,11 +306,12 @@ public final class UndoLogManager {
 
     }
 
-    public static int deleteUndoLogByLogCreated(Date logCreated,int limitRows, Connection conn) throws SQLException {
+    public static int deleteUndoLogByLogCreated(Date logCreated, String dbType, int limitRows, Connection conn) throws SQLException {
+        assertDbSupport(dbType);
         PreparedStatement deletePST = null;
         try {
             deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL);
-            deletePST.setDate(1,new java.sql.Date(logCreated.getTime()));
+            deletePST.setDate(1, new java.sql.Date(logCreated.getTime()));
             deletePST.setInt(2, limitRows);
             int deleteRows = deletePST.executeUpdate();
             if (LOGGER.isDebugEnabled()) {
@@ -316,7 +322,7 @@ public final class UndoLogManager {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
             }
-            throw (SQLException)e;
+            throw (SQLException) e;
         } finally {
             if (deletePST != null) {
                 deletePST.close();

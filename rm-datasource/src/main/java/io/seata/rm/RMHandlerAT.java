@@ -54,9 +54,9 @@ public class RMHandlerAT extends AbstractRMHandler {
             conn = dataSourceProxy.getPlainConnection();
             int deleteRows;
             do {
-                deleteRows = UndoLogManager.deleteUndoLogByLogCreated(logCreatedSave, LIMIT_ROWS, conn);
+                deleteRows = UndoLogManager.deleteUndoLogByLogCreated(logCreatedSave, dataSourceProxy.getDbType(), LIMIT_ROWS, conn);
             } while (deleteRows == LIMIT_ROWS);
-        } catch (SQLException e) {
+        }  catch (Exception e) {
             LOGGER.warn("Failed to get connection for delete undolog ", e);
         } finally {
             if (conn != null) {
