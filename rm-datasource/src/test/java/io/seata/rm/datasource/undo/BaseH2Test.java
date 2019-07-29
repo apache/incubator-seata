@@ -27,6 +27,10 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mockito;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -70,6 +74,24 @@ public abstract class BaseH2Test {
             try {
                 dataSource.close();
             } catch (SQLException e) {
+            }
+        }
+
+        Path path = Paths.get("db_store");
+
+        boolean isDirectory = Files.isDirectory(path);
+
+        if(isDirectory){
+
+            try {
+                Files.list(path).forEach(subPath -> {
+                    try {
+                        Files.delete(subPath);
+                    } catch (IOException e) {
+                    }
+                });
+                Files.delete(path);
+            } catch (IOException e) {
             }
         }
     }
