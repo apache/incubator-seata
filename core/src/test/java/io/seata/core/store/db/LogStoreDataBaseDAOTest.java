@@ -20,6 +20,7 @@ import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import org.apache.commons.dbcp.BasicDataSource;
 
+import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -659,7 +660,7 @@ public class LogStoreDataBaseDAOTest {
 
     @AfterAll
     public static void clearStoreDB(){
-        ClearLogStore.clearTempLogStore("db_store");
+        FileUtils.deleteRecursive("db_store", true);
     }
 
 }

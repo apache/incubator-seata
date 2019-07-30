@@ -22,6 +22,7 @@ import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -77,23 +78,7 @@ public abstract class BaseH2Test {
             }
         }
 
-        Path path = Paths.get("db_store");
-
-        boolean isDirectory = Files.isDirectory(path);
-
-        if(isDirectory){
-
-            try {
-                Files.list(path).forEach(subPath -> {
-                    try {
-                        Files.delete(subPath);
-                    } catch (IOException e) {
-                    }
-                });
-                Files.delete(path);
-            } catch (IOException e) {
-            }
-        }
+        FileUtils.deleteRecursive("db_store", true);
     }
 
     @BeforeEach
