@@ -21,6 +21,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Geng Zhang
@@ -28,27 +30,31 @@ import io.seata.core.protocol.RpcMessage;
 @ChannelHandler.Sharable
 public class ServerChannelHandler extends ChannelInboundHandlerAdapter {
 
+    /**
+     * Logger for ServerChannelHandler
+     **/
+    private static final Logger LOGGER = LoggerFactory.getLogger(ServerChannelHandler.class);
+
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) {
         Channel channel = ctx.channel();
-        System.out.println(msg.getClass() + "" + msg);
 
         if (msg instanceof RpcMessage) {
             ((RpcMessage) msg).setMessageType(ProtocolConstants.MSGTYPE_RESPONSE);
         }
-        
+
         channel.writeAndFlush(msg);
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println(ctx.channel().remoteAddress() + " connected!");
+        LOGGER.info(ctx.channel().remoteAddress() + " connected!");
         ctx.fireChannelActive();
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        System.out.println(ctx.channel().remoteAddress() + " disconnected!");
+        LOGGER.info(ctx.channel().remoteAddress() + " disconnected!");
         ctx.fireChannelInactive();
     }
 }

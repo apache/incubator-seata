@@ -81,10 +81,10 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
             ByteBuf frame = (ByteBuf) decoded;
             try {
                 return decodeFrame(frame);
-            }catch(Exception e){
-                LOGGER.error("Decode error!", e);
+            } catch (Exception e) {
+                LOGGER.error("Decode frame error!", e);
                 throw e;
-            }finally {
+            } finally {
                 frame.release();
             }
         }
