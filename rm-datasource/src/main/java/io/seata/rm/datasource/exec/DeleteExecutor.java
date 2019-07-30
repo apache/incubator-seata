@@ -61,7 +61,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) sqlRecognizer;
         TableMeta tmeta = getTableMeta(visitor.getTableName());
         ArrayList<Object> paramAppender = new ArrayList<>();
-        String selectSQL = beforeImageSQL(visitor,tmeta,paramAppender);
+        String selectSQL = buildBeforeImageSQL(visitor, tmeta, paramAppender);
         TableRecords beforeImage = null;
         PreparedStatement ps = null;
         Statement st = null;
@@ -78,7 +78,6 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 rs = ps.executeQuery();
             }
             beforeImage = TableRecords.buildRecords(tmeta, rs);
-
         } finally {
             if (rs != null) {
                 rs.close();
@@ -93,7 +92,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return beforeImage;
     }
 
-    private String beforeImageSQL(SQLDeleteRecognizer visitor,TableMeta tableMeta,ArrayList<Object> paramAppender){
+    private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<Object> paramAppender) {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
         String whereCondition = null;
         if (statementProxy instanceof ParametersHolder) {
@@ -107,8 +106,8 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         sqlSuffix.append(" FOR UPDATE");
         String suffix = sqlSuffix.toString();
-        StringJoiner selectSQLAppender = new StringJoiner(", ","SELECT ",suffix);
-        for (String column:tableMeta.getAllColumns().keySet()) {
+        StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix);
+        for (String column : tableMeta.getAllColumns().keySet()) {
             selectSQLAppender.add(getColumnNameInSQL(keywordChecker.checkAndReplace(column)));
         }
         return selectSQLAppender.toString();
