@@ -18,6 +18,8 @@ package io.seata.core.store.db;
 import io.seata.core.store.LockDO;
 import org.apache.commons.dbcp.BasicDataSource;
 
+import org.h2.store.fs.FileUtils;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
@@ -295,6 +297,9 @@ public class DataBaseLockStoreDAOTest {
 
     }
 
-
+    @AfterAll
+    public static void clearStoreDB(){
+        FileUtils.deleteRecursive("db_store", true);
+    }
 
 }
