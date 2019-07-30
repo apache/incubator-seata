@@ -15,8 +15,8 @@
  */
 package io.seata.core.protocol;
 
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The type Rpc message.
@@ -30,7 +30,7 @@ public class RpcMessage {
     private byte messageType;
     private byte codec;
     private byte compressor;
-    private Map<String, String> headMap = new ConcurrentHashMap<>();
+    private Map<String, String> headMap = new HashMap<>();
     private Object body;
 
     /**
