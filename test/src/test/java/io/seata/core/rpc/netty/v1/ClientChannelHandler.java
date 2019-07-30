@@ -15,7 +15,6 @@
  */
 package io.seata.core.rpc.netty.v1;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.util.concurrent.DefaultPromise;
@@ -50,13 +49,15 @@ public class ClientChannelHandler extends ChannelInboundHandlerAdapter {
 
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-        LOGGER.info("response {} ", msg);
-        
         if (msg instanceof RpcMessage) {
             RpcMessage rpcMessage = (RpcMessage) msg;
             int msgId = rpcMessage.getId();
             DefaultPromise future = (DefaultPromise) client.futureMap.remove(msgId);
-            future.setSuccess(msg);
+            if (future != null) {
+                future.setSuccess(msg);
+            } else {
+                LOGGER.warn("miss msg id:{}", msgId);
+            }
         }
     }
 
