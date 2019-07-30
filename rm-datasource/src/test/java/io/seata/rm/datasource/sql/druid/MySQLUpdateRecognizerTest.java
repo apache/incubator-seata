@@ -93,7 +93,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
 
-        ArrayList<List<Object>> paramAppender = new ArrayList<>();
+        ArrayList<List<Object>> paramAppenders = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public ArrayList<Object>[] getParameters() {
@@ -101,9 +101,9 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
                 idParam.add("id1");
                 return new ArrayList[]{idParam};
             }
-        }, paramAppender);
+        }, paramAppenders);
 
-        Assertions.assertEquals(Collections.singletonList("id1"), paramAppender);
+        Assertions.assertEquals(Collections.singletonList(Arrays.asList("id1")), paramAppenders);
 
         Assertions.assertEquals("id = ?", whereCondition);
     }
@@ -128,7 +128,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
 
-        ArrayList<List<Object>> paramAppender = new ArrayList<>();
+        ArrayList<List<Object>> paramAppenders = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public ArrayList<Object>[] getParameters() {
@@ -138,9 +138,9 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
                 id2Param.add("id2");
                 return new ArrayList[]{id1Param, id2Param};
             }
-        }, paramAppender);
+        }, paramAppenders);
 
-        Assertions.assertEquals(Arrays.asList("id1", "id2"), paramAppender);
+        Assertions.assertEquals(Arrays.asList(Arrays.asList("id1", "id2")), paramAppenders);
 
         Assertions.assertEquals("id IN (?, ?)", whereCondition);
     }
@@ -165,7 +165,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
 
-        ArrayList<List<Object>> paramAppender = new ArrayList<>();
+        ArrayList<List<Object>> paramAppenders = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public ArrayList<Object>[] getParameters() {
@@ -177,9 +177,9 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
                 name1Param.add("name");
                 return new ArrayList[]{id1Param, id2Param, name1Param};
             }
-        }, paramAppender);
+        }, paramAppenders);
 
-        Assertions.assertEquals(Arrays.asList("id1", "id2", "name"), paramAppender);
+        Assertions.assertEquals(Arrays.asList(Arrays.asList("id1", "id2", "name")), paramAppenders);
 
         Assertions.assertEquals("id IN (?, ?)\nAND name1 = ?", whereCondition);
     }
@@ -204,7 +204,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateColumns().get(1));
         Assertions.assertEquals("name2", mySQLUpdateRecognizer.getUpdateValues().get(1));
 
-        ArrayList<List<Object>> paramAppender = new ArrayList<>();
+        ArrayList<List<Object>> paramAppenders = new ArrayList<>();
         String whereCondition = mySQLUpdateRecognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public ArrayList<Object>[] getParameters() {
@@ -214,9 +214,9 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
                 id2Param.add("id2");
                 return new ArrayList[]{id1Param, id2Param};
             }
-        }, paramAppender);
+        }, paramAppenders);
 
-        Assertions.assertEquals(Arrays.asList("id1", "id2"), paramAppender);
+        Assertions.assertEquals(Arrays.asList(Arrays.asList("id1", "id2")), paramAppenders);
         Assertions.assertEquals("id BETWEEN ? AND ?", whereCondition);
     }
 }
