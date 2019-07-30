@@ -155,8 +155,8 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected TableRecords getTableRecords(List<Object> pkValues) throws SQLException {
         TableRecords afterImage;
         String pk = getTableMeta().getPkName();
-        StringJoiner pkValuesJoiner = new StringJoiner(" OR ","SELECT * FROM " + getTableMeta().getTableName() + " WHERE ","");
-        for (Object pkValue:pkValues) {
+        StringJoiner pkValuesJoiner = new StringJoiner(" OR ", "SELECT * FROM " + getTableMeta().getTableName() + " WHERE ", "");
+        for (Object pkValue : pkValues) {
             pkValuesJoiner.add(pk + "=?");
         }
         PreparedStatement ps = null;

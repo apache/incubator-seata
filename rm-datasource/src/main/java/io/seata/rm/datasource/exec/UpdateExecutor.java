@@ -60,7 +60,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
         ArrayList<Object> paramAppender = new ArrayList<>();
         TableMeta tmeta = getTableMeta();
-        String selectSQL = buildBeforeImageSQL(tmeta,paramAppender);
+        String selectSQL = buildBeforeImageSQL(tmeta, paramAppender);
         TableRecords beforeImage = null;
         PreparedStatement ps = null;
         Statement st = null;
@@ -92,7 +92,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return beforeImage;
     }
 
-    private String buildBeforeImageSQL(TableMeta tableMeta,ArrayList<Object> paramAppender){
+    private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<Object> paramAppender) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
         StringBuffer selectSQLPrefix = new StringBuffer("SELECT ");
@@ -112,7 +112,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         selectSQLSuffix.append(" FOR UPDATE");
         String suffix = selectSQLSuffix.toString();
-        StringJoiner selectSQLJoin = new StringJoiner(", ",prefix,suffix);
+        StringJoiner selectSQLJoin = new StringJoiner(", ", prefix, suffix);
         for (String updateColumn : updateColumns) {
             selectSQLJoin.add(updateColumn);
         }
@@ -126,7 +126,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (beforeImage == null || beforeImage.size() == 0) {
             return TableRecords.empty(getTableMeta());
         }
-        String selectSQL = buildAfterImageSQL(tmeta,beforeImage);
+        String selectSQL = buildAfterImageSQL(tmeta, beforeImage);
         TableRecords afterImage = null;
         PreparedStatement pst = null;
         ResultSet rs = null;
@@ -151,7 +151,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return afterImage;
     }
 
-    private String buildAfterImageSQL(TableMeta tableMeta,TableRecords beforeImage) throws SQLException {
+    private String buildAfterImageSQL(TableMeta tableMeta, TableRecords beforeImage) throws SQLException {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
         StringBuffer selectSQLPrefix = new StringBuffer("SELECT ");
@@ -161,7 +161,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         String prefix = selectSQLPrefix.toString();
         String suffix = " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(beforeImage.pkRows());
-        StringJoiner selectSQLJoiner = new StringJoiner(", ",prefix,suffix);
+        StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix, suffix);
         for (String column : updateColumns) {
             selectSQLJoiner.add(column);
         }
