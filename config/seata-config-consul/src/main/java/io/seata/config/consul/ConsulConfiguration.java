@@ -53,9 +53,9 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private static ExecutorService consulConfigExecutor = null;
-    private static ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = null;
-    private static ConcurrentMap<String, List<ConfigChangeNotifier>> configChangeNotifiersMap = null;
+    private ExecutorService consulConfigExecutor;
+    private ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap;
+    private ConcurrentMap<String, List<ConfigChangeNotifier>> configChangeNotifiersMap;
 
     /**
      * default watch timeout in second
@@ -216,7 +216,7 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
     /**
      * the type config change notifier
      */
-    private static class ConfigChangeNotifier implements Runnable {
+    private class ConfigChangeNotifier implements Runnable {
         private final String dataId;
         private final ConfigChangeListener listener;
         private long consulIndex;

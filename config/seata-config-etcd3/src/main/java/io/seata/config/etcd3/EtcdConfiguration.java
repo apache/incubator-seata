@@ -68,10 +68,10 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private static ExecutorService etcdConfigExecutor;
-    private static ExecutorService etcdNotifierExecutor;
-    private static ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap;
-    private static ConcurrentHashMap<String, List<ConfigChangeNotifier>> configChangeNotifiersMap;
+    private ExecutorService etcdConfigExecutor;
+    private ExecutorService etcdNotifierExecutor;
+    private ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap;
+    private ConcurrentHashMap<String, List<ConfigChangeNotifier>> configChangeNotifiersMap;
 
     private static final long VERSION_NOT_EXIST = 0;
 
@@ -246,7 +246,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
     /**
      * the type config change notifier
      */
-    private static class ConfigChangeNotifier implements Runnable {
+    private class ConfigChangeNotifier implements Runnable {
         private final String dataId;
         private final ConfigChangeListener listener;
         private Watch.Watcher watcher;

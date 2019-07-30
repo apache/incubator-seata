@@ -59,10 +59,10 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static final String SERVICE_TAG = "services";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
 
-    private static ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap = null;
-    private static ConcurrentMap<String, Set<ConsulListener>> listenerMap = null;
-    private static ExecutorService notifierExecutor = null;
-    private static ConcurrentMap<String, ConsulNotifier> notifiers = null;
+    private ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap;
+    private ConcurrentMap<String, Set<ConsulListener>> listenerMap;
+    private ExecutorService notifierExecutor;
+    private ConcurrentMap<String, ConsulNotifier> notifiers;
 
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;

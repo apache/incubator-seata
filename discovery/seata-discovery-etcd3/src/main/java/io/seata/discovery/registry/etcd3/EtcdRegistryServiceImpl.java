@@ -70,8 +70,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final int THREAD_POOL_SIZE = 2;
-    private final static ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE,
-        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("registry-etcd3", THREAD_POOL_SIZE));
+    private ExecutorService executorService;
     /**
      * TTL for lease
      */
@@ -86,9 +85,9 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     private final static long LIFE_KEEP_CRITICAL = 6;
     private static volatile EtcdRegistryServiceImpl instance;
     private static volatile Client client;
-    private static ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap = null;
-    private static ConcurrentMap<String, Set<Watch.Listener>> listenerMap = null;
-    private static ConcurrentMap<String, EtcdWatcher> watcherMap = null;
+    private ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap;
+    private ConcurrentMap<String, Set<Watch.Listener>> listenerMap;
+    private ConcurrentMap<String, EtcdWatcher> watcherMap;
     private static long leaseId = 0;
     private EtcdLifeKeeper lifeKeeper = null;
     private Future<Boolean> lifeKeeperFuture = null;
@@ -102,6 +101,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
         listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
         watcherMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        executorService = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("registry-etcd3", THREAD_POOL_SIZE));
     }
 
     /**
@@ -159,7 +159,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         listenerMap.putIfAbsent(cluster, new HashSet<>());
         listenerMap.get(cluster).add(listener);
         EtcdWatcher watcher = watcherMap.computeIfAbsent(cluster, w -> new EtcdWatcher(listener));
-        EXECUTOR_SERVICE.submit(watcher);
+        executorService.submit(watcher);
     }
 
     @Override
@@ -298,7 +298,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             //create a new lease
             leaseId = getClient().getLeaseClient().grant(TTL).get().getID();
             lifeKeeper = new EtcdLifeKeeper(leaseId);
-            lifeKeeperFuture = EXECUTOR_SERVICE.submit(lifeKeeper);
+            lifeKeeperFuture = executorService.submit(lifeKeeper);
         }
         return leaseId;
     }
