@@ -77,7 +77,7 @@ public class UndoLogDeleteRequestCodec extends AbstractTransactionRequestToRMCod
         in.get(bs);
         undoLogDeleteRequest.setResourceId(new String(bs, UTF8));
 
-        if (in.remaining() < 4) {
+        if (in.remaining() < 2) {
             return ;
         }
         undoLogDeleteRequest.setSaveDays(in.getShort());
