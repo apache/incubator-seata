@@ -23,6 +23,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
 import org.slf4j.Logger;
@@ -125,18 +126,18 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             rs = ps.executeQuery();
             String currentXID = lockDOs.get(0).getXid();
             while (rs.next()) {
-                String dbXID = rs.getString("xid");
+                String dbXID = rs.getString(ServerTableColumnsName.LOCK_TABLE_XID);
                 if (!StringUtils.equals(dbXID, currentXID)) {
                     if (LOGGER.isInfoEnabled()) {
-                        String dbPk = rs.getString("pk");
-                        String dbTableName = rs.getString("table_name");
-                        Long dbBranchId = rs.getLong("branch_id");
+                        String dbPk = rs.getString(ServerTableColumnsName.LOCK_TABLE_PK);
+                        String dbTableName = rs.getString(ServerTableColumnsName.LOCK_TABLE_TABLE_NAME);
+                        Long dbBranchId = rs.getLong(ServerTableColumnsName.LOCK_TABLE_BRANCH_ID);
                         LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", dbTableName, dbPk, dbXID, dbBranchId);
                     }
                     canLock &= false;
                     break;
                 }
-                dbExistedRowKeys.add(rs.getString("row_key"));
+                dbExistedRowKeys.add(rs.getString(ServerTableColumnsName.LOCK_TABLE_ROW_KEY));
             }
 
             if (!canLock) {
