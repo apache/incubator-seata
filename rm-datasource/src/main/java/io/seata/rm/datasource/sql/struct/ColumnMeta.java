@@ -51,25 +51,25 @@ public class ColumnMeta {
     @Override
     public String toString() {
         return "ColumnMeta{" +
-            "tableCat='" + tableCat + '\'' +
-            ", tableSchemaName='" + tableSchemaName + '\'' +
-            ", tableName='" + tableName + '\'' +
-            ", columnName='" + columnName + '\'' +
-            ", dataType=" + dataType +
-            ", dataTypeName='" + dataTypeName + '\'' +
-            ", columnSize=" + columnSize +
-            ", decimalDigits=" + decimalDigits +
-            ", numPrecRadix=" + numPrecRadix +
-            ", nullAble=" + nullAble +
-            ", remarks='" + remarks + '\'' +
-            ", columnDef='" + columnDef + '\'' +
-            ", sqlDataType=" + sqlDataType +
-            ", sqlDatetimeSub=" + sqlDatetimeSub +
-            ", charOctetLength=" + charOctetLength +
-            ", ordinalPosition=" + ordinalPosition +
-            ", isNullAble='" + isNullAble + '\'' +
-            ", isAutoincrement='" + isAutoincrement + '\'' +
-            '}';
+                "tableCat='" + tableCat + '\'' +
+                ", tableSchemaName='" + tableSchemaName + '\'' +
+                ", tableName='" + tableName + '\'' +
+                ", columnName='" + columnName + '\'' +
+                ", dataType=" + dataType +
+                ", dataTypeName='" + dataTypeName + '\'' +
+                ", columnSize=" + columnSize +
+                ", decimalDigits=" + decimalDigits +
+                ", numPrecRadix=" + numPrecRadix +
+                ", nullAble=" + nullAble +
+                ", remarks='" + remarks + '\'' +
+                ", columnDef='" + columnDef + '\'' +
+                ", sqlDataType=" + sqlDataType +
+                ", sqlDatetimeSub=" + sqlDatetimeSub +
+                ", charOctetLength=" + charOctetLength +
+                ", ordinalPosition=" + ordinalPosition +
+                ", isNullAble='" + isNullAble + '\'' +
+                ", isAutoincrement='" + isAutoincrement + '\'' +
+                '}';
     }
 
     /**
@@ -389,65 +389,65 @@ public class ColumnMeta {
 
     @Override
     public boolean equals(Object o) {
-        if(this == o){
+        if (this == o) {
             return true;
         }
-        if(!(o instanceof ColumnMeta)){
+        if (!(o instanceof ColumnMeta)) {
             return false;
         }
-        ColumnMeta columnMeta = (ColumnMeta)o;
-        if(!Objects.equals(columnMeta.tableCat,this.tableCat)){
+        ColumnMeta columnMeta = (ColumnMeta) o;
+        if (!Objects.equals(columnMeta.tableCat, this.tableCat)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.tableSchemaName,this.tableSchemaName)){
+        if (!Objects.equals(columnMeta.tableSchemaName, this.tableSchemaName)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.tableName,this.tableName)){
+        if (!Objects.equals(columnMeta.tableName, this.tableName)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.columnName,this.columnName)){
+        if (!Objects.equals(columnMeta.columnName, this.columnName)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.dataType, this.dataType)){
+        if (!Objects.equals(columnMeta.dataType, this.dataType)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.dataTypeName,this.dataTypeName)){
+        if (!Objects.equals(columnMeta.dataTypeName, this.dataTypeName)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.columnSize, this.columnSize)){
+        if (!Objects.equals(columnMeta.columnSize, this.columnSize)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.decimalDigits, this.decimalDigits)){
+        if (!Objects.equals(columnMeta.decimalDigits, this.decimalDigits)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.numPrecRadix, this.numPrecRadix)){
+        if (!Objects.equals(columnMeta.numPrecRadix, this.numPrecRadix)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.nullAble, this.nullAble)){
+        if (!Objects.equals(columnMeta.nullAble, this.nullAble)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.remarks, this.remarks)){
+        if (!Objects.equals(columnMeta.remarks, this.remarks)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.columnDef, this.columnDef)){
+        if (!Objects.equals(columnMeta.columnDef, this.columnDef)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.sqlDataType, this.sqlDataType)){
+        if (!Objects.equals(columnMeta.sqlDataType, this.sqlDataType)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.sqlDatetimeSub, this.sqlDatetimeSub)){
+        if (!Objects.equals(columnMeta.sqlDatetimeSub, this.sqlDatetimeSub)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.charOctetLength, this.charOctetLength)){
+        if (!Objects.equals(columnMeta.charOctetLength, this.charOctetLength)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.ordinalPosition, this.ordinalPosition)){
+        if (!Objects.equals(columnMeta.ordinalPosition, this.ordinalPosition)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.isNullAble, this.isNullAble)){
+        if (!Objects.equals(columnMeta.isNullAble, this.isNullAble)) {
             return false;
         }
-        if(!Objects.equals(columnMeta.isAutoincrement, this.isAutoincrement)){
+        if (!Objects.equals(columnMeta.isAutoincrement, this.isAutoincrement)) {
             return false;
         }
         return true;

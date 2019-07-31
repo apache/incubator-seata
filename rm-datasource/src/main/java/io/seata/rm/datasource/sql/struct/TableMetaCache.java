@@ -103,10 +103,10 @@ public class TableMetaCache {
         for (Entry<String, TableMeta> entry : tableMetaMap.entrySet()) {
             try {
                 TableMeta tableMeta = fetchSchema(dataSourceProxy, entry.getValue().getTableName());
-                if(tableMeta == null){
+                if (tableMeta == null){
                     LOGGER.error("get table meta error");
                 }
-                if(!tableMeta.equals(entry.getValue())){
+                if (!tableMeta.equals(entry.getValue())){
                     TABLE_META_CACHE.put(entry.getKey(), tableMeta);
                     LOGGER.info("table meta change was fond, update table meta cache automatically.");
                 }

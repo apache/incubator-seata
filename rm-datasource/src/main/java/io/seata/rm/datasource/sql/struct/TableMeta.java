@@ -65,7 +65,9 @@ public class TableMeta {
         if (col == null) {
             if (colName.charAt(0) == '`') {
                 col = allColumns.get(colName.substring(1, colName.length() - 1));
-            } else { col = allColumns.get("`" + colName + "`"); }
+            } else {
+                col = allColumns.get("`" + colName + "`");
+            }
         }
         return col;
     }
@@ -250,20 +252,20 @@ public class TableMeta {
 
     @Override
     public boolean equals(Object o) {
-        if(this == o){
+        if (this == o) {
             return true;
         }
-        if(!(o instanceof TableMeta)){
+        if (!(o instanceof TableMeta)) {
             return false;
         }
-        TableMeta tableMeta = (TableMeta)o;
-        if(!Objects.equals(tableMeta.tableName, this.tableName)){
+        TableMeta tableMeta = (TableMeta) o;
+        if (!Objects.equals(tableMeta.tableName, this.tableName)) {
             return false;
         }
-        if(!Objects.equals(tableMeta.allColumns, this.allColumns)){
+        if (!Objects.equals(tableMeta.allColumns, this.allColumns)) {
             return false;
         }
-        if(!Objects.equals(tableMeta.allIndexes, this.allIndexes)){
+        if (!Objects.equals(tableMeta.allIndexes, this.allIndexes)) {
             return false;
         }
         return true;

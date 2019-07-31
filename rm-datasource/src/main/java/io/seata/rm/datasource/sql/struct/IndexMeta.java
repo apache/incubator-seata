@@ -217,38 +217,38 @@ public class IndexMeta {
 
     @Override
     public boolean equals(Object o) {
-        if(this == o){
+        if (this == o) {
             return true;
         }
-        if(!(o instanceof IndexMeta)){
+        if (!(o instanceof IndexMeta)) {
             return false;
         }
-        IndexMeta indexMeta = (IndexMeta)o;
-        if(!ArrayUtils.isEquals(indexMeta.values, this.values)){
+        IndexMeta indexMeta = (IndexMeta) o;
+        if (!ArrayUtils.isEquals(indexMeta.values, this.values)) {
             return false;
         }
-        if(!Objects.equals(indexMeta.nonUnique, this.nonUnique)){
+        if (!Objects.equals(indexMeta.nonUnique, this.nonUnique)) {
             return false;
         }
-        if(!Objects.equals(indexMeta.indexQualifier, this.indexQualifier)){
+        if (!Objects.equals(indexMeta.indexQualifier, this.indexQualifier)) {
             return false;
         }
-        if(!Objects.equals(indexMeta.indexName, this.indexName)){
+        if (!Objects.equals(indexMeta.indexName, this.indexName)) {
             return false;
         }
-        if(!Objects.equals(indexMeta.type, this.type)){
+        if (!Objects.equals(indexMeta.type, this.type)) {
             return false;
         }
-        if(!Objects.equals(indexMeta.indextype.value(), this.indextype.value())){
+        if (!Objects.equals(indexMeta.indextype.value(), this.indextype.value())) {
             return false;
         }
-        if(!Objects.equals(indexMeta.ascOrDesc, this.ascOrDesc)){
+        if (!Objects.equals(indexMeta.ascOrDesc, this.ascOrDesc)) {
             return false;
         }
-        if(!Objects.equals(indexMeta.cardinality, this.cardinality)){
+        if (!Objects.equals(indexMeta.cardinality, this.cardinality)) {
             return false;
         }
-        if(!Objects.equals(indexMeta.ordinalPosition, this.ordinalPosition)){
+        if (!Objects.equals(indexMeta.ordinalPosition, this.ordinalPosition)) {
             return false;
         }
         return true;
