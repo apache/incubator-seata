@@ -75,7 +75,7 @@ public class TableMetaCache {
             try {
                 return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
-                LOGGER.error("get cache error !", e);
+                LOGGER.error("get cache error:{}", e.getMessage(), e);
                 return null;
             }
         });
@@ -84,7 +84,7 @@ public class TableMetaCache {
             try {
                 tmeta = fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
-                LOGGER.error("get table meta error !", e);
+                LOGGER.error("get table meta error:{}", e.getMessage(), e);
             }
         }
 
@@ -106,9 +106,12 @@ public class TableMetaCache {
                 if(tableMeta == null){
                     LOGGER.error("get table meta error");
                 }
-                TABLE_META_CACHE.put(entry.getKey(), tableMeta);
+                if(!tableMeta.equals(entry.getValue())){
+                    TABLE_META_CACHE.put(entry.getKey(), tableMeta);
+                    LOGGER.info("table meta change was fond, update table meta cache automatically.");
+                }
             } catch (SQLException e) {
-                LOGGER.error("get table meta error", e);
+                LOGGER.error("get table meta error:{}", e.getMessage(), e);
             }
         }
     }

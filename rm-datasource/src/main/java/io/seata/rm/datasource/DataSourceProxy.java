@@ -52,7 +52,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     /**
      * Table meta checker internal
      */
-    private static final Integer TABLE_MATA_CHECKER_INTERNAL = 60000;
+    private static final Long TABLE_MATA_CHECKER_INTERVAL = 60000L;
 
     private final ScheduledExecutorService tableMetaExcutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("tableMetaChecker", 1, true));
 
@@ -90,7 +90,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             public void run() {
                 TableMetaCache.refresh(DataSourceProxy.this);
             }
-        }, 0, TABLE_MATA_CHECKER_INTERNAL, TimeUnit.MILLISECONDS );
+        }, 0, TABLE_MATA_CHECKER_INTERVAL, TimeUnit.MILLISECONDS );
     }
 
     /**
