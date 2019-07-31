@@ -195,14 +195,8 @@ public class TableMetaCacheOracle {
             col.setTableSchemaName(rs1.getString("TABLE_SCHEM"));
             col.setTableName(rs1.getString("TABLE_NAME"));
             col.setColumnName(rs1.getString("COLUMN_NAME"));
-            int dataType = rs1.getInt("DATA_TYPE");
-            String typeName = rs1.getString("TYPE_NAME");
-            if (dataType == Types.TIMESTAMP) {
-                logger.debug("dateType:{}", dataType);
-                logger.debug("data_type_name:{}", typeName);
-            }
-            col.setDataType(dataType);
-            col.setDataTypeName(typeName);
+            col.setDataType(rs1.getInt("DATA_TYPE"));
+            col.setDataTypeName(rs1.getString("TYPE_NAME"));
             col.setColumnSize(rs1.getInt("COLUMN_SIZE"));
             col.setDecimalDigits(rs1.getInt("DECIMAL_DIGITS"));
             col.setNumPrecRadix(rs1.getInt("NUM_PREC_RADIX"));
@@ -282,28 +276,6 @@ public class TableMetaCacheOracle {
                 tm.getAllIndexes().put(indexName, index);
             }
         }
- /*       ResultSet pk = dbmd.getPrimaryKeys(null, dbmd.getUserName(), tableName);
-        while (pk.next()) {
-            String pkIndexName = pk.getObject(6).toString();
-            if (tm.getAllIndexes().containsKey(pkIndexName)) {
-                IndexMeta index = tm.getAllIndexes().get(pkIndexName);
-                index.setIndextype(IndexType.PRIMARY);
-            } else {
-                IndexMeta index = new IndexMeta();
-                index.setIndexName(pkIndexName);
-                index.setNonUnique(true);
-                String columnName = pk.getString("COLUMN_NAME");
-                index.setOrdinalPosition(pk.getShort("key_seq"));
-                index.setAscOrDesc(null);
-                index.setType((short) 1);
-                index.setIndexQualifier(null);
-                index.setCardinality(0);
-                ColumnMeta col = tm.getAllColumns().get(columnName);
-                index.getValues().add(col);
-                index.setIndextype(IndexType.PRIMARY);
-                tm.getAllIndexes().put(indexName, index);
-            }
-        }*/
         return tm;
     }
 }
