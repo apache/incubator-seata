@@ -31,6 +31,9 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.StringJoiner;
 
+
+import com.alibaba.druid.util.JdbcConstants;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
 /**
  * The type Base transactional executor.
  *
@@ -150,8 +153,13 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @return the table meta
      */
     protected TableMeta getTableMeta(String tableName) {
-        if (tableMeta == null) {
-             tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
+        if (tableMeta != null) {
+            return tableMeta;
+        }
+        if(JdbcConstants.ORACLE.equalsIgnoreCase(statementProxy.getConnectionProxy().getDbType())) {
+            tableMeta = TableMetaCacheOracle.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
+        } else {
+            tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
         }
         return tableMeta;
     }
