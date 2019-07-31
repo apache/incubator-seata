@@ -122,4 +122,8 @@ public class MessageType {
      * The constant TYPE_REG_RM_RESULT.
      */
     public static final short TYPE_REG_RM_RESULT = 104;
+    /**
+     * The constant TYPE_RM_DELETE_UNDOLOG.
+     */
+    public static final short TYPE_RM_DELETE_UNDOLOG = 111;
 }

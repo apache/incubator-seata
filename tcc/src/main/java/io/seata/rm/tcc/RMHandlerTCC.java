@@ -17,6 +17,7 @@ package io.seata.rm.tcc;
 
 import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManager;
+import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.rm.AbstractRMHandler;
 import io.seata.rm.DefaultResourceManager;
 
@@ -26,6 +27,11 @@ import io.seata.rm.DefaultResourceManager;
  * @author zhangsen
  */
 public class RMHandlerTCC extends AbstractRMHandler {
+
+    @Override
+    public void handle(UndoLogDeleteRequest request) {
+        //DO nothing
+    }
 
     /**
      * get TCC resource manager

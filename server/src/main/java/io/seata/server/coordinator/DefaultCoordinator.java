@@ -15,13 +15,7 @@
  */
 package io.seata.server.coordinator;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
+import io.netty.channel.Channel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
@@ -55,6 +49,8 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
+import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
+import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.ServerMessageSender;
@@ -68,6 +64,14 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchCommitRequest;
 import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchRollbackRequest;
@@ -104,6 +108,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
      */
     protected int timeoutRetryDelay = CONFIG.getInt(ConfigurationKeys.TIMEOUT_RETRY_DELAY, 5);
 
+    /**
+     * The Timeout retry delay.
+     */
+    protected int transactionUndologDeleteDelay = CONFIG.getInt(ConfigurationKeys.TRANSACTION_UNDO_LOG_DELETE_DELAY, 24 * 60 * 60);
+
     private static final int ALWAYS_RETRY_BOUNDARY = 0;
 
     private static final Duration MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(
@@ -123,6 +132,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
     private ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("TxTimeoutCheck", 1));
+
+    private ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
+        new NamedThreadFactory("UndoLogDelete", 1));
 
     private ServerMessageSender messageSender;
 
@@ -383,6 +395,29 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     }
 
     /**
+     * undoLog Delete
+     */
+    protected void undoLogDelete() {
+        Map<String,Channel> rmChannels = ChannelManager.getRmChannels();
+        if (rmChannels == null || rmChannels.isEmpty()) {
+            LOGGER.info("no active rm channels to delete undo log");
+            return;
+        }
+        short saveDays = CONFIG.getShort(ConfigurationKeys.TRANSACTION_UNDO_LOG_SAVE_DAYS, UndoLogDeleteRequest.DEFAULT_SAVE_DAYS);
+        for (Map.Entry<String, Channel> channelEntry : rmChannels.entrySet()) {
+            String resourceId = channelEntry.getKey();
+            UndoLogDeleteRequest deleteRequest = new UndoLogDeleteRequest();
+            deleteRequest.setResourceId(resourceId);
+            deleteRequest.setSaveDays(saveDays > 0 ? saveDays : UndoLogDeleteRequest.DEFAULT_SAVE_DAYS);
+            try {
+                messageSender.sendASyncRequest(channelEntry.getValue(), deleteRequest);
+            } catch (Exception e) {
+                LOGGER.error("Failed to async delete undo log resourceId = " + resourceId);
+            }
+        }
+    }
+
+    /**
      * Init.
      */
     public void init() {
@@ -417,6 +452,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 LOGGER.info("Exception timeout checking ... ", e);
             }
         }, 0, timeoutRetryDelay, TimeUnit.SECONDS);
+
+        undoLogDelete.scheduleAtFixedRate(() -> {
+            try {
+                undoLogDelete();
+            } catch (Exception e) {
+                LOGGER.info("Exception undoLog deleting ... ", e);
+            }
+        },0,transactionUndologDeleteDelay,TimeUnit.SECONDS);
     }
 
     @Override

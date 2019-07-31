@@ -28,6 +28,33 @@ import java.util.List;
 public interface Configuration<T> {
 
     /**
+     * Gets short.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return the short
+     */
+    short getShort(String dataId, int defaultValue, long timeoutMills);
+
+    /**
+     * Gets short.
+     *
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @return the int
+     */
+    short getShort(String dataId, short defaultValue);
+
+    /**
+     * Gets short.
+     *
+     * @param dataId the data id
+     * @return the int
+     */
+    short getShort(String dataId);
+
+    /**
      * Gets int.
      *
      * @param dataId       the data id

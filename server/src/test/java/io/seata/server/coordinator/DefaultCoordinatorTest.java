@@ -187,5 +187,10 @@ public class DefaultCoordinatorTest {
             return sendSyncRequest(resourceId, clientId, message, 3000);
 
         }
+
+        @Override
+        public Object sendASyncRequest(Channel channel, Object message) throws IOException, TimeoutException {
+            return null;
+        }
     }
 }

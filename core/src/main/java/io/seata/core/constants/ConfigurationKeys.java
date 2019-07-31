@@ -244,4 +244,14 @@ public class ConfigurationKeys {
      * The constant METRICS_EXPORTER_LIST.
      */
     public static final String METRICS_EXPORTER_LIST = "exporter-list";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_SAVE_DAYS.
+     */
+    public static final String TRANSACTION_UNDO_LOG_SAVE_DAYS = TRANSACTION_PREFIX + "undo.log.save.days";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_DELETE_DELAY
+     */
+    public static final String TRANSACTION_UNDO_LOG_DELETE_DELAY = TRANSACTION_PREFIX + "undo.log.delete.delay";
 }

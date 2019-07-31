@@ -34,6 +34,7 @@ import io.seata.core.rpc.TransactionMessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
@@ -233,6 +234,19 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
     public Object sendSyncRequest(String resourceId, String clientId, Object message)
         throws TimeoutException {
         return sendSyncRequest(resourceId, clientId, message, NettyServerConfig.getRpcRequestTimeout());
+    }
+
+    /**
+     * Send request with response object.
+     *
+     * @param channel   the channel
+     * @param message    the msg
+     * @return the object
+     * @throws TimeoutException the timeout exception
+     */
+    @Override
+    public Object sendASyncRequest(Channel channel, Object message) throws IOException, TimeoutException {
+       return sendAsyncRequestWithoutResponse(channel, message);
     }
 
     /**

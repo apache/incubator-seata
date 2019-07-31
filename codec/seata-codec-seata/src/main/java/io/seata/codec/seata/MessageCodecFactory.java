@@ -39,6 +39,7 @@ import io.seata.codec.seata.protocol.transaction.GlobalRollbackRequestCodec;
 import io.seata.codec.seata.protocol.transaction.GlobalRollbackResponseCodec;
 import io.seata.codec.seata.protocol.transaction.GlobalStatusRequestCodec;
 import io.seata.codec.seata.protocol.transaction.GlobalStatusResponseCodec;
+import io.seata.codec.seata.protocol.transaction.UndoLogDeleteRequestCodec;
 import io.seata.core.protocol.AbstractIdentifyRequest;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
@@ -69,6 +70,7 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
+import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
@@ -202,6 +204,8 @@ public class MessageCodecFactory {
                 return new BranchCommitResponseCodec();
             case MessageType.TYPE_BRANCH_ROLLBACK_RESULT:
                 return new BranchRollbackResponseCodec();
+            case MessageType.TYPE_RM_DELETE_UNDOLOG:
+                return new UndoLogDeleteRequestCodec();
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
@@ -240,6 +244,9 @@ public class MessageCodecFactory {
                 break;
             case MessageType.TYPE_BRANCH_ROLLBACK:
                 abstractMessage = new BranchRollbackRequest();
+                break;
+            case MessageType.TYPE_RM_DELETE_UNDOLOG:
+                abstractMessage = new UndoLogDeleteRequest();
                 break;
             default:
                 break;
