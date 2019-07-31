@@ -106,23 +106,7 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
-
-            @Override
-            public boolean visit(SQLVariantRefExpr x) {
-                if ("?".equals(x.getName())) {
-                    ArrayList<Object> paramAppender = parametersHolder.getParameters()[x.getIndex()];
-                    if (paramAppenders.size() == 0) {
-                        paramAppender.stream().forEach(t -> paramAppenders.add(new ArrayList<Object>()));
-                    }
-                    for (int i = 0; i < paramAppender.size(); i++) {
-                        paramAppenders.get(i).add(paramAppender.get(i));
-                    }
-
-                }
-                return super.visit(x);
-            }
-        };
+        MySqlOutputVisitor visitor = super.createMySqlOutputVisitor(parametersHolder, paramAppenders, sb);
         if (where instanceof SQLBinaryOpExpr) {
             visitor.visit((SQLBinaryOpExpr) where);
         } else if (where instanceof SQLInListExpr) {

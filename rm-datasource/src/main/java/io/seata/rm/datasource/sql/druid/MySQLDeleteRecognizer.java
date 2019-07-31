@@ -48,7 +48,7 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
      */
     public MySQLDeleteRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (MySqlDeleteStatement)ast;
+        this.ast = (MySqlDeleteStatement) ast;
     }
 
     @Override
@@ -72,7 +72,7 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource)ast.getTableSource());
+        visitor.visit((SQLExprTableSource) ast.getTableSource());
         return sb.toString();
     }
 
@@ -83,25 +83,9 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
-
-            @Override
-            public boolean visit(SQLVariantRefExpr x) {
-                if ("?".equals(x.getName())) {
-                    ArrayList<Object> paramAppender = parametersHolder.getParameters()[x.getIndex()];
-                    if (paramAppenders.size() == 0) {
-                        paramAppender.stream().forEach(t -> paramAppenders.add(new ArrayList<Object>()));
-                    }
-                    for (int i = 0; i < paramAppender.size(); i++) {
-                        paramAppenders.get(i).add(paramAppender.get(i));
-                    }
-
-                }
-                return super.visit(x);
-            }
-        };
+        MySqlOutputVisitor visitor = super.createMySqlOutputVisitor(parametersHolder, paramAppenders, sb);
         if (where instanceof SQLBinaryOpExpr) {
-            visitor.visit((SQLBinaryOpExpr)where);
+            visitor.visit((SQLBinaryOpExpr) where);
         } else if (where instanceof SQLInListExpr) {
             visitor.visit((SQLInListExpr) where);
         } else if (where instanceof SQLBetweenExpr) {
@@ -120,7 +104,7 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
         }
         StringBuffer sb = new StringBuffer();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        visitor.visit((SQLBinaryOpExpr)where);
+        visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
     }
 
