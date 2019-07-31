@@ -85,18 +85,14 @@ public class TableMetaCacheOracle {
         return fetchSchemeInDefaultWay(dataSource, tableName);
     }
 
-    private static TableMeta fetchSchemeInDefaultWay(DataSource dataSource, String tableName)
-            throws SQLException {
-        Connection conn = null;
-        java.sql.Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            conn = dataSource.getConnection();
-            stmt = conn.createStatement();
-            StringBuffer sb = new StringBuffer("SELECT * FROM " + tableName + " where rownum=1");
-            rs = stmt.executeQuery(sb.toString());
+    private static TableMeta fetchSchemeInDefaultWay(DataSource dataSource, String tableName) throws SQLException {
+        try (Connection conn = dataSource.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName + " where rownum=1")) {
+
             ResultSetMetaData rsmd = rs.getMetaData();
             DatabaseMetaData dbmd = conn.getMetaData();
+
             return resultSetMetaToSchema(rsmd, dbmd, conn, tableName);
         } catch (Exception e) {
             if (e instanceof SQLException) {
@@ -104,22 +100,12 @@ public class TableMetaCacheOracle {
             }
             throw new SQLException("Failed to fetch schema of " + tableName, e);
 
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
         }
     }
 
     private static TableMeta resultSetMetaToSchema(ResultSet rs2, AbstractConnectionProxy conn,
-                                                   String tablename) throws SQLException {
-        String tableName = tablename;
+                                                   String tableName) throws SQLException {
+
 
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
@@ -143,12 +129,11 @@ public class TableMetaCacheOracle {
             tm.getAllColumns().put(col.getColumnName(), col);
         }
 
-        java.sql.Statement stmt = null;
-        ResultSet rs1 = null;
-        try {
-            stmt = conn.getTargetConnection().createStatement();
-            rs1 = stmt.executeQuery(
-                    String.format("select a.constraint_name, a.column_name from user_cons_columns a, user_constraints b  where a.constraint_name = b.constraint_name and b.constraint_type = 'P' and a.table_name ='%s'", tableName));
+        try (Statement stmt = conn.getTargetConnection().createStatement();
+             ResultSet rs1 = stmt.executeQuery(
+                     String.format("select a.constraint_name, a.column_name from user_cons_columns a, user_constraints b  " +
+                                     "where a.constraint_name = b.constraint_name and b.constraint_type = 'P' and a.table_name ='%s'",
+                             tableName))) {
             while (rs1.next()) {
                 String indexName = rs1.getString(1);
                 String colName = rs1.getString(2);
@@ -165,13 +150,6 @@ public class TableMetaCacheOracle {
                     tm.getAllIndexes().put(indexName, index);
 
                 }
-            }
-        } finally {
-            if (rs1 != null) {
-                rs1.close();
-            }
-            if (stmt != null) {
-                stmt.close();
             }
         }
 

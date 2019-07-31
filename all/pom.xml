@@ -82,6 +82,8 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <mysql.client.version>5.1.30</mysql.client.version>
+        <oracle-jdbc.version>18.3.0.0</oracle-jdbc.version>
     </properties>
 
     <dependencyManagement>
@@ -122,11 +124,6 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-config-zk</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.oracle.jdbc</groupId>
-            <artifactId>ojdbc8</artifactId>
-            <version>18.3.0.0</version>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
@@ -402,6 +399,16 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.oracle.jdbc</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>${oracle-jdbc.version}</version>
+        </dependency>
+        <dependency>
             <groupId>com.weibo</groupId>
             <artifactId>motan-core</artifactId>
             <scope>provided</scope>
@@ -521,6 +528,8 @@
                                     <include>io.seata:seata-spring</include>
                                     <include>io.seata:seata-tcc</include>
                                     <include>io.seata:seata-tm</include>
+                                    <include>io.seata:seata-codec-seata</include>
+                                    <include>io.seata:seata-codec-protobuf</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
@@ -597,34 +606,34 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.7</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>oss_seata</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.6</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                                <configuration>
-                                    <keyname>F72AF874ECA9BBA7751C2DFD553EBAF7AC17F320</keyname>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
+                    <!--  <plugin>
+                          <groupId>org.sonatype.plugins</groupId>
+                          <artifactId>nexus-staging-maven-plugin</artifactId>
+                          <version>1.6.7</version>
+                          <extensions>true</extensions>
+                          <configuration>
+                              <serverId>oss_seata</serverId>
+                              <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                              <autoReleaseAfterClose>false</autoReleaseAfterClose>
+                          </configuration>
+                      </plugin>
+                      <plugin>
+                          <groupId>org.apache.maven.plugins</groupId>
+                          <artifactId>maven-gpg-plugin</artifactId>
+                          <version>1.6</version>
+                          <executions>
+                              <execution>
+                                  <id>sign-artifacts</id>
+                                  <phase>verify</phase>
+                                  <goals>
+                                      <goal>sign</goal>
+                                  </goals>
+                                  <configuration>
+                                      <keyname>F72AF874ECA9BBA7751C2DFD553EBAF7AC17F320</keyname>
+                                  </configuration>
+                              </execution>
+                          </executions>
+                      </plugin>-->
                 </plugins>
             </build>
             <distributionManagement>

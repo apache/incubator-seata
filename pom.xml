@@ -236,14 +236,16 @@
 
             <distributionManagement>
                 <snapshotRepository>
-                    <id>oss_seata</id>
-                    <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+                    <id>nexus-snapshots</id>
+                    <url>http://192.168.8.21:8081/repository/maven-snapshots/</url>
                 </snapshotRepository>
                 <repository>
-                    <id>oss_seata</id>
-                    <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+                    <id>nexus-releases</id>
+                    <name>Nexus Release Repository</name>
+                    <url>http://192.168.8.21:8081/repository/maven-releases/</url>
                 </repository>
             </distributionManagement>
+
 
         </profile>
         <profile>
