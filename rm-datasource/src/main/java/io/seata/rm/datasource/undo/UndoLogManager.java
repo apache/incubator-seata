@@ -15,20 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
-import java.sql.Blob;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.alibaba.druid.util.JdbcConstants;
-
 import io.seata.common.Constants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
@@ -42,6 +29,19 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Retriable;
 
@@ -91,6 +91,9 @@ public final class UndoLogManager {
 
     private static String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
             " WHERE " + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + " = ? AND " + ClientTableColumnsName.UNDO_LOG_XID + " = ?";
+
+    private static String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
+        " WHERE log_created <= ? LIMIT ?";
 
     private static String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME +
             " WHERE " + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + " = ? AND " + ClientTableColumnsName.UNDO_LOG_XID + " = ? FOR UPDATE";
@@ -308,6 +311,30 @@ public final class UndoLogManager {
             }
         }
 
+    }
+
+    public static int deleteUndoLogByLogCreated(Date logCreated, String dbType, int limitRows, Connection conn) throws SQLException {
+        assertDbSupport(dbType);
+        PreparedStatement deletePST = null;
+        try {
+            deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL);
+            deletePST.setDate(1, new java.sql.Date(logCreated.getTime()));
+            deletePST.setInt(2, limitRows);
+            int deleteRows = deletePST.executeUpdate();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("batch delete undo log size " + deleteRows);
+            }
+            return deleteRows;
+        } catch (Exception e) {
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
+            }
+            throw (SQLException) e;
+        } finally {
+            if (deletePST != null) {
+                deletePST.close();
+            }
+        }
     }
 
     protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize) {
