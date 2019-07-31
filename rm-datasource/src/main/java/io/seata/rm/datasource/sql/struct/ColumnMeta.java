@@ -432,22 +432,22 @@ public class ColumnMeta {
         if(!Objects.equals(columnMeta.columnDef, this.columnDef)){
             return false;
         }
-        if(!Objects.equals(columnMeta.sqlDataType, columnMeta.sqlDataType)){
+        if(!Objects.equals(columnMeta.sqlDataType, this.sqlDataType)){
             return false;
         }
-        if(!Objects.equals(columnMeta.sqlDatetimeSub, columnMeta.sqlDatetimeSub)){
+        if(!Objects.equals(columnMeta.sqlDatetimeSub, this.sqlDatetimeSub)){
             return false;
         }
-        if(!Objects.equals(columnMeta.charOctetLength, columnMeta.charOctetLength)){
+        if(!Objects.equals(columnMeta.charOctetLength, this.charOctetLength)){
             return false;
         }
-        if(!Objects.equals(columnMeta.ordinalPosition, columnMeta.ordinalPosition)){
+        if(!Objects.equals(columnMeta.ordinalPosition, this.ordinalPosition)){
             return false;
         }
-        if(!Objects.equals(columnMeta.isNullAble, columnMeta.isNullAble)){
+        if(!Objects.equals(columnMeta.isNullAble, this.isNullAble)){
             return false;
         }
-        if(!Objects.equals(columnMeta.isAutoincrement, columnMeta.isAutoincrement)){
+        if(!Objects.equals(columnMeta.isAutoincrement, this.isAutoincrement)){
             return false;
         }
         return true;
