@@ -60,7 +60,6 @@
         </license>
     </licenses>
     <repositories>
-        <!-- more information at https://blogs.oracle.com/dev2dev/entry/how_to_get_oracle_jdbc -->
         <repository>
             <id>maven-public</id>
             <name>maven-public</name>
@@ -73,7 +72,6 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-        <!-- jhipster-needle-maven-repository -->
     </repositories>
     <developers>
         <developer>
@@ -101,7 +99,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>0.7.1</revision>
+        <revision>0.7.1.2</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -426,6 +424,9 @@
                         <include>**/src/main/java/**</include>
                         <include>**/src/test/java/**</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/generated/**</exclude>
+                    </excludes>
                     <strictCheck>true</strictCheck>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
