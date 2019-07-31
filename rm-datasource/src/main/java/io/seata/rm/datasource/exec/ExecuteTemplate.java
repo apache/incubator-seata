@@ -15,13 +15,13 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
+
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * The type Execute template.
