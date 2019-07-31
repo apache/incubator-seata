@@ -8,10 +8,10 @@
 [![maven](https://img.shields.io/maven-central/v/io.seata/seata-parent.svg)](https://search.maven.org/search?q=io.seata)
 [![](https://img.shields.io/twitter/follow/seataio.svg?label=Follow&style=social&logoWidth=0)](https://twitter.com/intent/follow?screen_name=seataio)
 
+
 ## What is Seata?
 
 A **distributed transaction solution** with high performance and ease of use for **microservices** architecture.
-
 ### Distributed Transaction Problem in Microservices
 
 Let's imagine a traditional monolithic application. Its business is built up with 3 modules. They use a single local data source.
