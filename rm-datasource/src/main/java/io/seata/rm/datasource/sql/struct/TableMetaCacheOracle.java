@@ -17,34 +17,31 @@ package io.seata.rm.datasource.sql.struct;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
+import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import javax.sql.DataSource;
-
+import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.StringUtils;
-
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
-import org.checkerframework.checker.nullness.qual.NonNull;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.DataSource;
+
 /**
  * The type Table meta cache.
- *
- * @author sharajava
  */
-public class TableMetaCache {
+public class TableMetaCacheOracle {
 
     private static final long CACHE_SIZE = 100000;
 
@@ -53,12 +50,12 @@ public class TableMetaCache {
     private static final Cache<String, TableMeta> TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
         .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TableMetaCache.class);
+    private static Logger logger = LoggerFactory.getLogger(TableMetaCacheOracle.class);
 
     /**
      * Gets table meta.
      *
-     * @param dataSourceProxy the data source proxy
+     * @param dataSourceProxy the druid data source
      * @param tableName       the table name
      * @return the table meta
      */
@@ -67,24 +64,22 @@ public class TableMetaCache {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
-        String dataSourceKey = dataSourceProxy.getResourceId();
+        String dataSourceKey =  dataSourceProxy.getResourceId();
 
-        TableMeta tmeta;
+        TableMeta tmeta = null;
         final String key = dataSourceKey + "." + tableName;
         tmeta = TABLE_META_CACHE.get(key, mappingFunction -> {
             try {
                 return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
-                LOGGER.error("get cache error:{}", e.getMessage(), e);
+                logger.error("get cache error !", e);
                 return null;
             }
         });
-
         if (tmeta == null) {
             try {
                 tmeta = fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
-                LOGGER.error("get table meta error:{}", e.getMessage(), e);
             }
         }
 
@@ -94,28 +89,6 @@ public class TableMetaCache {
         return tmeta;
     }
 
-    /**
-     * Clear the table meta cache
-     * @param dataSourceProxy
-     */
-    public static void refresh(final DataSourceProxy dataSourceProxy){
-        ConcurrentMap<String, TableMeta> tableMetaMap = TABLE_META_CACHE.asMap();
-        for (Entry<String, TableMeta> entry : tableMetaMap.entrySet()) {
-            try {
-                TableMeta tableMeta = fetchSchema(dataSourceProxy, entry.getValue().getTableName());
-                if (tableMeta == null){
-                    LOGGER.error("get table meta error");
-                }
-                if (!tableMeta.equals(entry.getValue())){
-                    TABLE_META_CACHE.put(entry.getKey(), tableMeta);
-                    LOGGER.info("table meta change was found, update table meta cache automatically.");
-                }
-            } catch (SQLException e) {
-                LOGGER.error("get table meta error:{}", e.getMessage(), e);
-            }
-        }
-    }
-
     private static TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
         return fetchSchemeInDefaultWay(dataSource, tableName);
     }
@@ -123,106 +96,35 @@ public class TableMetaCache {
     private static TableMeta fetchSchemeInDefaultWay(DataSource dataSource, String tableName)
         throws SQLException {
         Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
+        java.sql.Statement stmt = null;
         try {
             conn = dataSource.getConnection();
             stmt = conn.createStatement();
-            StringBuffer sb = new StringBuffer("SELECT * FROM " + tableName + " LIMIT 1");
-            rs = stmt.executeQuery(sb.toString());
-            ResultSetMetaData rsmd = rs.getMetaData();
             DatabaseMetaData dbmd = conn.getMetaData();
-
-            return resultSetMetaToSchema(rsmd, dbmd, tableName);
+            return resultSetMetaToSchema(null, dbmd, tableName);
         } catch (Exception e) {
             if (e instanceof SQLException) {
-                throw e;
+                throw ((SQLException)e);
             }
             throw new SQLException("Failed to fetch schema of " + tableName, e);
 
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
-        }
-    }
-
-    private static TableMeta resultSetMetaToSchema(java.sql.ResultSet rs2, AbstractConnectionProxy conn,
-                                                   String tableName) throws SQLException {
-        TableMeta tm = new TableMeta();
-        tm.setTableName(tableName);
-        while (rs2.next()) {
-            ColumnMeta col = new ColumnMeta();
-            col.setTableName(tableName);
-            col.setColumnName(rs2.getString("COLUMN_NAME"));
-            String datatype = rs2.getString("DATA_TYPE");
-            if (com.alibaba.druid.util.StringUtils.equalsIgnoreCase(datatype, "NUMBER")) {
-                col.setDataType(java.sql.Types.BIGINT);
-            } else if (StringUtils.equalsIgnoreCase(datatype, "VARCHAR2")) {
-                col.setDataType(java.sql.Types.VARCHAR);
-            } else if (StringUtils.equalsIgnoreCase(datatype, "CHAR")) {
-                col.setDataType(java.sql.Types.CHAR);
-            } else if (StringUtils.equalsIgnoreCase(datatype, "DATE")) {
-                col.setDataType(java.sql.Types.DATE);
-            }
-
-            col.setColumnSize(rs2.getInt("DATA_LENGTH"));
-
-            tm.getAllColumns().put(col.getColumnName(), col);
-        }
-
-        java.sql.Statement stmt = null;
-        java.sql.ResultSet rs1 = null;
-        try {
-            stmt = conn.getTargetConnection().createStatement();
-            rs1 = stmt.executeQuery(
-                "select a.constraint_name,  a.column_name from user_cons_columns a, user_constraints b  where a"
-                    + ".constraint_name = b.constraint_name and b.constraint_type = 'P' and a.table_name ='"
-                    + tableName + "'");
-            while (rs1.next()) {
-                String indexName = rs1.getString(1);
-                String colName = rs1.getString(2);
-                ColumnMeta col = tm.getAllColumns().get(colName);
-
-                if (tm.getAllIndexes().containsKey(indexName)) {
-                    IndexMeta index = tm.getAllIndexes().get(indexName);
-                    index.getValues().add(col);
-                } else {
-                    IndexMeta index = new IndexMeta();
-                    index.setIndexName(indexName);
-                    index.getValues().add(col);
-                    index.setIndextype(IndexType.PRIMARY);
-                    tm.getAllIndexes().put(indexName, index);
-
-                }
-            }
-        } finally {
-            if (rs1 != null) {
-                rs1.close();
-            }
             if (stmt != null) {
                 stmt.close();
             }
         }
-
-        return tm;
     }
 
     private static TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
         throws SQLException {
-        String schemaName = rsmd.getSchemaName(1);
-        String catalogName = rsmd.getCatalogName(1);
-
+        tableName = tableName.toUpperCase();//转换大写，oracle表名要大写才能取元数据
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
+        String[] schemaTable = tableName.split("\\.");
+        String schemaName = schemaTable.length>1?schemaTable[0]:dbmd.getUserName();
+        tableName = schemaTable.length>1?schemaTable[1]:tableName;
 
-        ResultSet rs1 = dbmd.getColumns(catalogName, schemaName, tableName, "%");
+        ResultSet rs1 = dbmd.getColumns("", schemaName, tableName, "%");
         while (rs1.next()) {
             ColumnMeta col = new ColumnMeta();
             col.setTableCat(rs1.getString("TABLE_CAT"));
@@ -242,16 +144,21 @@ public class TableMetaCache {
             col.setCharOctetLength(rs1.getInt("CHAR_OCTET_LENGTH"));
             col.setOrdinalPosition(rs1.getInt("ORDINAL_POSITION"));
             col.setIsNullAble(rs1.getString("IS_NULLABLE"));
-            col.setIsAutoincrement(rs1.getString("IS_AUTOINCREMENT"));
+//            col.setIsAutoincrement(rs1.getString("IS_AUTOINCREMENT"));
 
             tm.getAllColumns().put(col.getColumnName(), col);
         }
 
-        ResultSet rs2 = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
+
+        java.sql.ResultSet rs2 = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
+
         String indexName = "";
         while (rs2.next()) {
             indexName = rs2.getString("INDEX_NAME");
-            String colName = rs2.getString("COLUMN_NAME");
+            if( StringUtils.isEmpty(indexName) ){
+                continue;
+            }
+            String colName = rs2.getString("COLUMN_NAME").toUpperCase();
             ColumnMeta col = tm.getAllColumns().get(colName);
 
             if (tm.getAllIndexes().containsKey(indexName)) {
@@ -268,16 +175,24 @@ public class TableMetaCache {
                 index.setAscOrDesc(rs2.getString("ASC_OR_DESC"));
                 index.setCardinality(rs2.getInt("CARDINALITY"));
                 index.getValues().add(col);
-                if ("PRIMARY".equalsIgnoreCase(indexName) || indexName.equalsIgnoreCase(
-                    rsmd.getTableName(1) + "_pkey")) {
+                if ("PRIMARY".equalsIgnoreCase(indexName) || (
+                        tableName+ "_pkey").equalsIgnoreCase(indexName)) {
                     index.setIndextype(IndexType.PRIMARY);
-                } else if (!index.isNonUnique()) {
+                } else if (index.isNonUnique() == false) {
                     index.setIndextype(IndexType.Unique);
                 } else {
                     index.setIndextype(IndexType.Normal);
                 }
                 tm.getAllIndexes().put(indexName, index);
 
+            }
+        }
+        ResultSet pk = dbmd.getPrimaryKeys(null, schemaName, tableName);
+        while (pk.next()) {
+            String pkIndexName = pk.getObject(6).toString();
+            if (tm.getAllIndexes().containsKey(pkIndexName)) {
+                IndexMeta index = tm.getAllIndexes().get(pkIndexName);
+                index.setIndextype(IndexType.PRIMARY);
             }
         }
         IndexMeta index = tm.getAllIndexes().get(indexName);
