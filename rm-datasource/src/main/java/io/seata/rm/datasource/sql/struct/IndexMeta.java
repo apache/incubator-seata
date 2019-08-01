@@ -245,9 +245,6 @@ public class IndexMeta {
         if(!Objects.equals(indexMeta.ascOrDesc, this.ascOrDesc)){
             return false;
         }
-        if(!Objects.equals(indexMeta.cardinality, this.cardinality)){
-            return false;
-        }
         if(!Objects.equals(indexMeta.ordinalPosition, this.ordinalPosition)){
             return false;
         }
@@ -262,7 +259,6 @@ public class IndexMeta {
         hash += Objects.hashCode(type);
         hash += Objects.hashCode(indextype);
         hash += Objects.hashCode(ascOrDesc);
-        hash += Objects.hashCode(cardinality);
         hash += Objects.hashCode(ordinalPosition);
         return hash;
     }

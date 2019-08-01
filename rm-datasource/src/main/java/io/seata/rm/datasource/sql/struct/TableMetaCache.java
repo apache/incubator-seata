@@ -108,7 +108,7 @@ public class TableMetaCache {
                 }
                 if(!tableMeta.equals(entry.getValue())){
                     TABLE_META_CACHE.put(entry.getKey(), tableMeta);
-                    LOGGER.info("table meta change was fond, update table meta cache automatically.");
+                    LOGGER.info("table meta change was found, update table meta cache automatically.");
                 }
             } catch (SQLException e) {
                 LOGGER.error("get table meta error:{}", e.getMessage(), e);
