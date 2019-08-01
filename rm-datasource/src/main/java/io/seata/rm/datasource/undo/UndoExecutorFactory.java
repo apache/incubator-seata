@@ -40,7 +40,7 @@ public class UndoExecutorFactory {
      * @return the undo executor
      */
     public static AbstractUndoExecutor getUndoExecutor(String dbType, SQLUndoLog sqlUndoLog) {
-        if (!dbType.equalsIgnoreCase(JdbcConstants.MYSQL)&&!dbType.equalsIgnoreCase(JdbcConstants.ORACLE)) {
+        if (!dbType.equalsIgnoreCase(JdbcConstants.MYSQL) && !dbType.equalsIgnoreCase(JdbcConstants.ORACLE)) {
             throw new NotSupportYetException(dbType);
         }
         if(dbType.equalsIgnoreCase(JdbcConstants.ORACLE)) {

@@ -15,27 +15,12 @@
  */
 package io.seata.rm.datasource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.ConfigurationFactory;
-import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManagerInbound;
@@ -44,6 +29,11 @@ import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogManagerOracle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.concurrent.*;
 
 import static io.seata.core.constants.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 
@@ -59,64 +49,15 @@ public class AsyncWorker implements ResourceManagerInbound {
     private static final int DEFAULT_RESOURCE_SIZE = 16;
 
     private static final int UNDOLOG_DELETE_LIMIT_SIZE = 1000;
-
-    private static class Phase2Context {
-
-        /**
-         * Instantiates a new Phase 2 context.
-         *
-         * @param branchType      the branchType
-         * @param xid             the xid
-         * @param branchId        the branch id
-         * @param resourceId      the resource id
-         * @param applicationData the application data
-         */
-        public Phase2Context(BranchType branchType, String xid, long branchId, String resourceId,
-                             String applicationData) {
-            this.xid = xid;
-            this.branchId = branchId;
-            this.resourceId = resourceId;
-            this.applicationData = applicationData;
-            this.branchType = branchType;
-        }
-
-        /**
-         * The Xid.
-         */
-        String xid;
-        /**
-         * The Branch id.
-         */
-        long branchId;
-        /**
-         * The Resource id.
-         */
-        String resourceId;
-        /**
-         * The Application data.
-         */
-        String applicationData;
-
-        /**
-         * the branch Type
-         */
-        BranchType branchType;
-    }
-
     private static int ASYNC_COMMIT_BUFFER_LIMIT = ConfigurationFactory.getInstance().getInt(
-        CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, 10000);
-
-    private static final BlockingQueue<Phase2Context> ASYNC_COMMIT_BUFFER = new LinkedBlockingQueue<>(
-        ASYNC_COMMIT_BUFFER_LIMIT);
-
+            CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, 10000);
+    private static final BlockingQueue<Phase2Context> ASYNC_COMMIT_BUFFER = new LinkedBlockingQueue<>(ASYNC_COMMIT_BUFFER_LIMIT);
     private static ScheduledExecutorService timerExecutor;
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
-                                     String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) {
         if (!ASYNC_COMMIT_BUFFER.offer(new Phase2Context(branchType, xid, branchId, resourceId, applicationData))) {
-            LOGGER.warn("Async commit buffer is FULL. Rejected branch [" + branchId + "/" + xid
-                + "] will be handled by housekeeping later.");
+            LOGGER.warn("Async commit buffer is FULL. Rejected branch [" + branchId + "/" + xid + "] will be handled by housekeeping later.");
         }
         return BranchStatus.PhaseTwo_Committed;
     }
@@ -127,18 +68,12 @@ public class AsyncWorker implements ResourceManagerInbound {
     public synchronized void init() {
         LOGGER.info("Async Commit Buffer Limit: " + ASYNC_COMMIT_BUFFER_LIMIT);
         timerExecutor = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory("AsyncWorker", 1, true));
-        timerExecutor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                try {
-
-                    doBranchCommits();
-
-                } catch (Throwable e) {
-                    LOGGER.info("Failed at async committing ... " + e.getMessage());
-
-                }
+                new NamedThreadFactory("AsyncWorker", 1, true));
+        timerExecutor.scheduleAtFixedRate(() -> {
+            try {
+                doBranchCommits();
+            } catch (Throwable e) {
+                LOGGER.info("Failed at async committing ... " + e.getMessage());
             }
         }, 10, 1000 * 1, TimeUnit.MILLISECONDS);
     }
@@ -151,28 +86,24 @@ public class AsyncWorker implements ResourceManagerInbound {
         Map<String, List<Phase2Context>> mappedContexts = new HashMap<>(DEFAULT_RESOURCE_SIZE);
         while (!ASYNC_COMMIT_BUFFER.isEmpty()) {
             Phase2Context commitContext = ASYNC_COMMIT_BUFFER.poll();
-            List<Phase2Context> contextsGroupedByResourceId = mappedContexts.get(commitContext.resourceId);
-            if (contextsGroupedByResourceId == null) {
-                contextsGroupedByResourceId = new ArrayList<>();
-                mappedContexts.put(commitContext.resourceId, contextsGroupedByResourceId);
-            }
+            List<Phase2Context> contextsGroupedByResourceId = mappedContexts.computeIfAbsent(
+                    commitContext.resourceId, k -> new ArrayList<>());
             contextsGroupedByResourceId.add(commitContext);
 
         }
 
         for (Map.Entry<String, List<Phase2Context>> entry : mappedContexts.entrySet()) {
             Connection conn = null;
-            String dbType = null;
+            DataSourceProxy dataSourceProxy;
+
             try {
                 try {
-                    DataSourceManager resourceManager = (DataSourceManager)DefaultResourceManager.get()
-                        .getResourceManager(BranchType.AT);
-                    DataSourceProxy dataSourceProxy = resourceManager.get(entry.getKey());
+                    DataSourceManager resourceManager = (DataSourceManager) DefaultResourceManager.get().getResourceManager(BranchType.AT);
+                    dataSourceProxy = resourceManager.get(entry.getKey());
                     if (dataSourceProxy == null) {
                         throw new ShouldNeverHappenException("Failed to find resource on " + entry.getKey());
                     }
                     conn = dataSourceProxy.getPlainConnection();
-                    dbType = dataSourceProxy.getDbType();
                 } catch (SQLException sqle) {
                     LOGGER.warn("Failed to get connection for async committing on " + entry.getKey(), sqle);
                     continue;
@@ -183,10 +114,10 @@ public class AsyncWorker implements ResourceManagerInbound {
                 for (Phase2Context commitContext : contextsGroupedByResourceId) {
                     xids.add(commitContext.xid);
                     branchIds.add(commitContext.branchId);
-                    int maxSize = xids.size() > branchIds.size() ? xids.size() : branchIds.size();
+                    int maxSize = Math.max(xids.size(), branchIds.size());
                     if (maxSize == UNDOLOG_DELETE_LIMIT_SIZE) {
                         try {
-                            if(JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
+                            if (JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
                                 UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, conn);
                             } else {
                                 UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
@@ -204,7 +135,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                 }
 
                 try {
-                    if(JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
+                    if (JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
                         UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, conn);
                     } else {
                         UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
@@ -226,9 +157,49 @@ public class AsyncWorker implements ResourceManagerInbound {
     }
 
     @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
-                                       String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) {
         throw new NotSupportYetException();
 
+    }
+
+    private static class Phase2Context {
+
+        /**
+         * The Xid.
+         */
+        String xid;
+        /**
+         * The Branch id.
+         */
+        long branchId;
+        /**
+         * The Resource id.
+         */
+        String resourceId;
+        /**
+         * The Application data.
+         */
+        String applicationData;
+        /**
+         * the branch Type
+         */
+        BranchType branchType;
+
+        /**
+         * Instantiates a new Phase 2 context.
+         *
+         * @param branchType      the branchType
+         * @param xid             the xid
+         * @param branchId        the branch id
+         * @param resourceId      the resource id
+         * @param applicationData the application data
+         */
+        public Phase2Context(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) {
+            this.xid = xid;
+            this.branchId = branchId;
+            this.resourceId = resourceId;
+            this.applicationData = applicationData;
+            this.branchType = branchType;
+        }
     }
 }

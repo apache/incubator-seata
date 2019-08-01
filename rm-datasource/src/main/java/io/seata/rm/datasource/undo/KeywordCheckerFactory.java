@@ -37,9 +37,9 @@ public class KeywordCheckerFactory {
     public static KeywordChecker getKeywordChecker(String dbType) {
         if (dbType.equals(JdbcConstants.MYSQL)) {
             return MySQLKeywordChecker.getInstance();
-        }else if(dbType.equals(JdbcConstants.ORACLE)) {
+        } else  if (dbType.equals(JdbcConstants.ORACLE)) {
             return OracleKeywordChecker.getInstance();
-        }else {
+        } else {
             throw new NotSupportYetException(dbType);
         }
 

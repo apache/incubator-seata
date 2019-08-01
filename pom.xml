@@ -101,7 +101,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>0.7.1.1</revision>
+        <revision>0.7.1.2</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -247,6 +247,7 @@
                     <url>http://192.168.8.21:8081/repository/maven-releases/</url>
                 </repository>
             </distributionManagement>
+
         </profile>
         <profile>
             <id>licenseCheck</id>
@@ -426,9 +427,6 @@
                         <include>**/src/main/java/**</include>
                         <include>**/src/test/java/**</include>
                     </includes>
-                    <excludes>
-                        <exclude>**/generated/**</exclude>
-                    </excludes>
                     <strictCheck>true</strictCheck>
                     <mapping>
                         <java>SLASHSTAR_STYLE</java>
