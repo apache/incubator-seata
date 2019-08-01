@@ -114,22 +114,22 @@
         <protobuf.version>3.7.1</protobuf.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <repositories>
-        <!-- more information at https://blogs.oracle.com/dev2dev/entry/how_to_get_oracle_jdbc -->
-        <repository>
-            <id>maven-public</id>
-            <name>maven-public</name>
-            <url>http://192.168.8.21:8081/repository/maven-public/</url>
-            <releases>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <!-- jhipster-needle-maven-repository -->
-    </repositories>
+    <!--    <repositories>-->
+    <!--        &lt;!&ndash; more information at https://blogs.oracle.com/dev2dev/entry/how_to_get_oracle_jdbc &ndash;&gt;-->
+    <!--        <repository>-->
+    <!--            <id>maven-public</id>-->
+    <!--            <name>maven-public</name>-->
+    <!--            <url>http://192.168.8.21:8081/repository/maven-public/</url>-->
+    <!--            <releases>-->
+    <!--                <enabled>true</enabled>-->
+    <!--                <updatePolicy>always</updatePolicy>-->
+    <!--            </releases>-->
+    <!--            <snapshots>-->
+    <!--                <enabled>true</enabled>-->
+    <!--            </snapshots>-->
+    <!--        </repository>-->
+    <!--        &lt;!&ndash; jhipster-needle-maven-repository &ndash;&gt;-->
+    <!--    </repositories>-->
     <dependencyManagement>
         <dependencies>
             <!-- spring  -->
