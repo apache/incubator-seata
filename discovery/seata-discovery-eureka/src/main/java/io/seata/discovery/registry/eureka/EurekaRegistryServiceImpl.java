@@ -19,7 +19,11 @@ import com.netflix.appinfo.ApplicationInfoManager;
 import com.netflix.appinfo.InstanceInfo;
 import com.netflix.appinfo.providers.EurekaConfigBasedInstanceInfoProvider;
 import com.netflix.config.ConfigurationManager;
-import com.netflix.discovery.*;
+import com.netflix.discovery.DefaultEurekaClientConfig;
+import com.netflix.discovery.DiscoveryClient;
+import com.netflix.discovery.EurekaClient;
+import com.netflix.discovery.EurekaEvent;
+import com.netflix.discovery.EurekaEventListener;
 import com.netflix.discovery.shared.Application;
 import io.seata.common.exception.EurekaRegistryException;
 import io.seata.common.util.CollectionUtils;
@@ -32,7 +36,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -131,7 +139,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
                     try {
                         refreshCluster();
                     } catch (Exception e) {
-                        LOGGER.error("Eureka event listener refreshCluster error!", e);
+                        LOGGER.error("Eureka event listener refreshCluster error:{}", e.getMessage(), e);
                     }
                 }
             });
@@ -160,13 +168,11 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             return;
         }
 
-        int expectedSize = applications.size();
-        int initialCapacity = expectedSize < 3? expectedSize + 1: (int) ((float) expectedSize / 0.75F + 1.0F);
-        ConcurrentMap<String, Set<InetSocketAddress>> collect = new ConcurrentHashMap<>(initialCapacity);
+        ConcurrentMap<String, Set<InetSocketAddress>> collect = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
 
         for (Application application : applications) {
             List<InstanceInfo> instances = application.getInstances();
-            Set<InetSocketAddress> addressSet = new HashSet<>(instances.size());
+            Set<InetSocketAddress> addressSet = new HashSet<>();
             for (InstanceInfo instance : instances) {
                 addressSet.add(new InetSocketAddress(instance.getIPAddr(), instance.getPort()));
             }
