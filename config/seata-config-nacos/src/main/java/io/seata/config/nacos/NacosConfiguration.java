@@ -18,16 +18,16 @@ package io.seata.config.nacos;
 import java.util.List;
 import java.util.Properties;
 
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.config.AbstractConfiguration;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationKeys;
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.config.listener.Listener;
 import com.alibaba.nacos.api.exception.NacosException;
 
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.config.AbstractConfiguration;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +59,10 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+        String sysProValue = System.getProperty(dataId);
+        if (null != sysProValue) {
+            return sysProValue;
+        }
         String value;
         try {
             value = configService.getConfig(dataId, SEATA_GROUP, timeoutMills);
