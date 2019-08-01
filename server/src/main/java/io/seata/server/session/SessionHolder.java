@@ -81,10 +81,9 @@ public class SessionHolder {
     /**
      * Init.
      *
-     * @param mode the store mode: file、db
-     * @throws IOException the io exception
      */
-    public static void init(String mode) throws IOException {
+    public static void init() {
+        String mode = System.getProperty(ConfigurationKeys.STORE_MODE);
         if (StringUtils.isBlank(mode)) {
             //use default
             mode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
