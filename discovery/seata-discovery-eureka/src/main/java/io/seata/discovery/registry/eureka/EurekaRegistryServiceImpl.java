@@ -172,11 +172,14 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
 
         for (Application application : applications) {
             List<InstanceInfo> instances = application.getInstances();
-            Set<InetSocketAddress> addressSet = new HashSet<>();
-            for (InstanceInfo instance : instances) {
-                addressSet.add(new InetSocketAddress(instance.getIPAddr(), instance.getPort()));
+
+            if (CollectionUtils.isNotEmpty(instances)) {
+                Set<InetSocketAddress> addressSet = new HashSet<>();
+                for (InstanceInfo instance : instances) {
+                    addressSet.add(new InetSocketAddress(instance.getIPAddr(), instance.getPort()));
+                }
+                collect.put(application.getName(), addressSet);
             }
-            collect.put(application.getName(), addressSet);
         }
 
         if (LOGGER.isDebugEnabled()) {
