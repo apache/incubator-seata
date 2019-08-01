@@ -23,6 +23,8 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -37,6 +39,8 @@ import java.util.Map;
  * @author Geng Zhang
  */
 public class DataCompareUtils {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataCompareUtils.class);
 
     /**
      * Is field equals.
@@ -58,16 +62,28 @@ public class DataCompareUtils {
                         return f1.getValue() == null;
                     } else {
                         if (f1.getValue() == null) {
+                            if (LOGGER.isInfoEnabled()) {
+                                LOGGER.info("Field not equals, name {}, new value is null", f0.getName());
+                            }
                             return false;
                         } else {
                             String currentSerializer = UndoLogManager.getCurrentSerializer();
                             if (StringUtils.equals(currentSerializer, FastjsonUndoLogParser.NAME)) {
                                 convertType(f0, f1);
                             }
-                            return f0.getValue().equals(f1.getValue());
+                            boolean result = f0.getValue().equals(f1.getValue());
+                            if (!result) {
+                                if (LOGGER.isInfoEnabled()) {
+                                    LOGGER.info("Field not equals, name {}, old value {}, new value {}", f0.getName(), f0.getValue(), f1.getValue());
+                                }
+                            }
+                            return result;
                         }
                     }
                 } else {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("Field not equals, old name {} type {}, new name {} type {}", f0.getName(), f0.getType(), f1.getName(), f1.getType());
+                    }
                     return false;
                 }
             }
@@ -141,15 +157,24 @@ public class DataCompareUtils {
             Map<String, Field> oldRow = oldRowsMap.get(rowKey);
             Map<String, Field> newRow = newRowsMap.get(rowKey);
             if (newRow == null) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("compare row failed, rowKey {}, reason [newRow is null]", rowKey);
+                }
                 return false;
             }
             for (String fieldName : oldRow.keySet()) {
                 Field oldField = oldRow.get(fieldName);
                 Field newField = newRow.get(fieldName);
                 if (newField == null) {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("compare row failed, rowKey {}, fieldName {}, reason [newField is null]", rowKey, fieldName);
+                    }
                     return false;
                 }
                 if (!isFieldEquals(oldField, newField)) {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("compare row failed, rowKey {}, reason [Field not equals]", rowKey);
+                    }
                     return false;
                 }
             }
