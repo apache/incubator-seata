@@ -15,16 +15,6 @@
  */
 package io.seata.config.etcd3;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KeyValue;
@@ -49,6 +39,16 @@ import io.seata.config.ConfigurationFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import static io.netty.util.CharsetUtil.UTF_8;
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
@@ -65,8 +65,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
     private static final Configuration FILE_CONFIG = ConfigurationFactory.getInstance();
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String CONFIG_TYPE = "etcd3";
-    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
-        + FILE_CONFIG_SPLIT_CHAR;
+    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private ExecutorService etcdConfigExecutor;
@@ -78,11 +77,9 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
 
     private EtcdConfiguration() {
         etcdConfigExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-            new NamedThreadFactory("etcd-config-executor", THREAD_POOL_NUM));
+            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("etcd-config-executor", THREAD_POOL_NUM));
         etcdNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
-            new NamedThreadFactory("etcd-config-notifier-executor", THREAD_POOL_NUM));
+            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("etcd-config-notifier-executor", THREAD_POOL_NUM));
         configListenersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
         configChangeNotifiersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
     }
@@ -103,6 +100,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         return instance;
     }
 
+
     @Override
     public String getTypeName() {
         return CONFIG_TYPE;
@@ -110,30 +108,21 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
-        String sysProValue = System.getProperty(dataId);
-        if (null != sysProValue) {
-            return sysProValue;
-        }
-        ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
-            timeoutMills);
-        etcdConfigExecutor.execute(
-            () -> complete(getClient().getKVClient().get(ByteSequence.from(dataId, UTF_8)), configFuture));
-        return (String)configFuture.get();
+        ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET, timeoutMills);
+        etcdConfigExecutor.execute(() -> complete(getClient().getKVClient().get(ByteSequence.from(dataId, UTF_8)), configFuture));
+        return (String) configFuture.get();
     }
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUT, timeoutMills);
-        etcdConfigExecutor.execute(() -> complete(
-            getClient().getKVClient().put(ByteSequence.from(dataId, UTF_8), ByteSequence.from(content, UTF_8)),
-            configFuture));
-        return (Boolean)configFuture.get();
+        etcdConfigExecutor.execute(() -> complete(getClient().getKVClient().put(ByteSequence.from(dataId, UTF_8), ByteSequence.from(content, UTF_8)), configFuture));
+        return (Boolean) configFuture.get();
     }
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
-        ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUTIFABSENT,
-            timeoutMills);
+        ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUTIFABSENT, timeoutMills);
         etcdConfigExecutor.execute(() -> {
             //use etcd transaction to ensure the atomic operation
             complete(client.getKVClient().txn()
@@ -143,7 +132,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
                 .Then(Op.put(ByteSequence.from(dataId, UTF_8), ByteSequence.from(content, UTF_8), PutOption.DEFAULT))
                 .commit(), configFuture);
         });
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override
@@ -152,7 +141,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         etcdConfigExecutor.execute(() -> {
             complete(getClient().getKVClient().delete(ByteSequence.from(dataId, UTF_8)), configFuture);
         });
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override
@@ -211,8 +200,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         if (null == client) {
             synchronized (EtcdConfiguration.class) {
                 if (null == client) {
-                    client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY))
-                        .build();
+                    client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY)).build();
                 }
             }
         }
@@ -230,7 +218,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         try {
             T response = completableFuture.get();
             if (response instanceof GetResponse) {
-                List<KeyValue> keyValues = ((GetResponse)response).getKvs();
+                List<KeyValue> keyValues = ((GetResponse) response).getKvs();
                 if (CollectionUtils.isNotEmpty(keyValues)) {
                     ByteSequence value = keyValues.get(0).getValue();
                     if (null != value) {
@@ -240,7 +228,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
             } else if (response instanceof PutResponse) {
                 configFuture.setResult(Boolean.TRUE);
             } else if (response instanceof TxnResponse) {
-                boolean result = ((TxnResponse)response).isSucceeded();
+                boolean result = ((TxnResponse) response).isSucceeded();
                 //create key if file does not exist)
                 if (result) {
                     configFuture.setResult(Boolean.TRUE);
@@ -314,6 +302,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
                 LOGGER.error("error occurred while getting value{}", e.getMessage());
             }
         }
+
 
         /**
          * stop the notifier
