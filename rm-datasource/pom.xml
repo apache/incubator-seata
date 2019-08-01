@@ -70,7 +70,13 @@
             <artifactId>h2</artifactId>
             <scope>test</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.oracle</groupId>
+            <artifactId>ojdbc8</artifactId>
+            <version>18.3.0.0</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/lib/ojdbc8-18.3.0.0.jar</systemPath>
+        </dependency>
     </dependencies>
 
 

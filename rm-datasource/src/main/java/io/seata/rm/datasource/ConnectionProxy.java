@@ -16,9 +16,6 @@
 package io.seata.rm.datasource;
 
 import com.alibaba.druid.util.JdbcConstants;
-import java.sql.Connection;
-import java.sql.SQLException;
-
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
@@ -32,6 +29,9 @@ import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogManagerOracle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.SQLException;
 
 /**
  * The type Connection proxy.

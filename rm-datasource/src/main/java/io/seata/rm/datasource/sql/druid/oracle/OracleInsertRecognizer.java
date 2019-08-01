@@ -76,7 +76,7 @@ public class OracleInsertRecognizer extends BaseRecognizer implements SQLInsertR
             }
         };
         visitor.visit(ast.getTableSource());
-        return sb.toString();
+        return sb.toString().toUpperCase();
     }
 
     @Override

@@ -30,6 +30,7 @@
     <prerequisites>
         <maven>3.6.0</maven>
     </prerequisites>
+
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>

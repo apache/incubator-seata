@@ -30,6 +30,7 @@ import io.seata.rm.datasource.sql.druid.oracle.OracleDeleteRecognizer;
 import io.seata.rm.datasource.sql.druid.oracle.OracleInsertRecognizer;
 import io.seata.rm.datasource.sql.druid.oracle.OracleSelectForUpdateRecognizer;
 import io.seata.rm.datasource.sql.druid.oracle.OracleUpdateRecognizer;
+
 import java.util.List;
 
 /**
@@ -65,7 +66,7 @@ public class SQLVisitorFactory {
                     recognizer = new MySQLSelectForUpdateRecognizer(sql, ast);
                 }
             }
-        }  else if (JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
+        }else if (JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
             if (ast instanceof SQLInsertStatement) {
                 recognizer = new OracleInsertRecognizer(sql, ast);
             } else if (ast instanceof SQLUpdateStatement) {
@@ -77,7 +78,7 @@ public class SQLVisitorFactory {
                     recognizer = new OracleSelectForUpdateRecognizer(sql, ast);
                 }
             }
-        }else {
+        } else {
             throw new UnsupportedOperationException("Just support MySQL by now!");
         }
         return recognizer;

@@ -73,7 +73,7 @@ public class OracleDeleteRecognizer extends BaseRecognizer implements SQLDeleteR
             }
         };
         visitor.visit((SQLExprTableSource)ast.getTableSource());
-        return sb.toString();
+        return sb.toString().toUpperCase();
     }
 
     @Override

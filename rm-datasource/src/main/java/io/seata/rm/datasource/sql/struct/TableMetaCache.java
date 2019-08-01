@@ -195,9 +195,11 @@ public class TableMetaCache {
 
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
-
+        tableName = tableName.toUpperCase();
         ResultSet rs1 = dbmd.getColumns(catalogName, schemaName, tableName, "%");
         while (rs1.next()) {
+
+
             ColumnMeta col = new ColumnMeta();
             col.setTableCat(rs1.getString("TABLE_CAT"));
             col.setTableSchemaName(rs1.getString("TABLE_SCHEM"));
