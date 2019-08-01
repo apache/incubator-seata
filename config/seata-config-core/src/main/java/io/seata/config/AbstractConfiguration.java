@@ -35,6 +35,22 @@ public abstract class AbstractConfiguration<T> implements Configuration<T> {
     protected static final long DEFAULT_CONFIG_TIMEOUT = 5 * 1000;
 
     @Override
+    public short getShort(String dataId, int defaultValue, long timeoutMills) {
+        String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
+        return Short.parseShort(result);
+    }
+
+    @Override
+    public short getShort(String dataId, short defaultValue) {
+        return getShort(dataId, defaultValue, DEFAULT_CONFIG_TIMEOUT);
+    }
+
+    @Override
+    public short getShort(String dataId) {
+        return getShort(dataId, (short) 0);
+    }
+
+    @Override
     public int getInt(String dataId, int defaultValue, long timeoutMills) {
         String result = getConfig(dataId, String.valueOf(defaultValue), timeoutMills);
         return Integer.parseInt(result);
