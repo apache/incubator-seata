@@ -132,7 +132,6 @@ public class ServerTableColumnsName {
      */
     public static final String BRANCH_TABLE_APPLICATION_DATA = "application_data";
 
-
     /**
      * The constant branch_table column name client_id
      */
