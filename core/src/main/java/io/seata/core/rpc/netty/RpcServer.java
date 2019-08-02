@@ -15,9 +15,11 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeoutException;
-
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.RegisterRMRequest;
@@ -29,14 +31,12 @@ import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.ServerMessageListener;
 import io.seata.core.rpc.ServerMessageSender;
 import io.seata.core.rpc.TransactionMessageHandler;
-
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandler.Sharable;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.timeout.IdleState;
-import io.netty.handler.timeout.IdleStateEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeoutException;
 
 /**
  * The type Abstract rpc server.
@@ -181,18 +181,18 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
      * Send response.
      * rm reg,rpc reg,inner response
      *
-     * @param msgId   the msg id
+     * @param request the request
      * @param channel the channel
      * @param msg     the msg
      */
     @Override
-    public void sendResponse(long msgId, Channel channel, Object msg) {
+    public void sendResponse(RpcMessage request, Channel channel, Object msg) {
         Channel clientChannel = channel;
         if (!(msg instanceof HeartbeatMessage)) {
             clientChannel = ChannelManager.getSameClientChannel(channel);
         }
         if (clientChannel != null) {
-            super.sendResponse(msgId, clientChannel, msg);
+            super.sendResponse(request, clientChannel, msg);
         } else {
             throw new RuntimeException("channel is error. channel:" + clientChannel);
         }
@@ -237,20 +237,33 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
     }
 
     /**
-     * Dispatch.
+     * Send request with response object.
      *
-     * @param msgId the msg id
-     * @param ctx   the ctx
-     * @param msg   the msg
+     * @param channel   the channel
+     * @param message    the msg
+     * @return the object
+     * @throws TimeoutException the timeout exception
      */
     @Override
-    public void dispatch(long msgId, ChannelHandlerContext ctx, Object msg) {
+    public Object sendASyncRequest(Channel channel, Object message) throws IOException, TimeoutException {
+       return sendAsyncRequestWithoutResponse(channel, message);
+    }
+
+    /**
+     * Dispatch.
+     *
+     * @param request the request
+     * @param ctx   the ctx
+     */
+    @Override
+    public void dispatch(RpcMessage request, ChannelHandlerContext ctx) {
+        Object msg = request.getBody();
         if (msg instanceof RegisterRMRequest) {
-            serverMessageListener.onRegRmMessage(msgId, ctx, (RegisterRMRequest)msg, this,
+            serverMessageListener.onRegRmMessage(request, ctx, this,
                 checkAuthHandler);
         } else {
             if (ChannelManager.isRegistered(ctx.channel())) {
-                serverMessageListener.onTrxMessage(msgId, ctx, msg, this);
+                serverMessageListener.onTrxMessage(request, ctx, this);
             } else {
                 try {
                     closeChannelHandlerContext(ctx);
@@ -308,17 +321,14 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof RpcMessage) {
-            RpcMessage rpcMessage = (RpcMessage)msg;
+            RpcMessage rpcMessage = (RpcMessage) msg;
             debugLog("read:" + rpcMessage.getBody().toString());
             if (rpcMessage.getBody() instanceof RegisterTMRequest) {
-                RegisterTMRequest request
-                    = (RegisterTMRequest)rpcMessage
-                    .getBody();
-                serverMessageListener.onRegTmMessage(rpcMessage.getId(), ctx, request, this, checkAuthHandler);
+                serverMessageListener.onRegTmMessage(rpcMessage, ctx, this, checkAuthHandler);
                 return;
             }
             if (rpcMessage.getBody() == HeartbeatMessage.PING) {
-                serverMessageListener.onCheckMessage(rpcMessage.getId(), ctx, this);
+                serverMessageListener.onCheckMessage(rpcMessage, ctx, this);
                 return;
             }
         }

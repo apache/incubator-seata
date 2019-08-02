@@ -21,6 +21,7 @@ import io.seata.common.util.NetUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
+import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
@@ -161,7 +162,7 @@ public class DefaultCoordinatorTest {
     private static class MockServerMessageSender implements ServerMessageSender {
 
         @Override
-        public void sendResponse(long msgId, Channel channel, Object msg) {
+        public void sendResponse(RpcMessage request, Channel channel, Object msg) {
 
         }
 
@@ -185,6 +186,11 @@ public class DefaultCoordinatorTest {
 
             return sendSyncRequest(resourceId, clientId, message, 3000);
 
+        }
+
+        @Override
+        public Object sendASyncRequest(Channel channel, Object message) throws IOException, TimeoutException {
+            return null;
         }
     }
 }
