@@ -50,7 +50,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
 
     private String dbType;
     /**
-     * Table meta checker internal
+     * Table meta checker interval
      */
     private static final long TABLE_MATA_CHECKER_INTERVAL = 60000L;
 
