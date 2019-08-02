@@ -42,48 +42,48 @@ public class LockStoreSqls {
      * xid, transaction_id, branch_id, resource_id, table_name, pk, row_key, gmt_create, gmt_modified
      */
     public static final String ALL_COLUMNS
-            = ServerTableColumnsName.LOCK_TABLE_XID + ", " + ServerTableColumnsName.LOCK_TABLE_TRANSACTION_ID + ", "
-            + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID + ", " + ServerTableColumnsName.LOCK_TABLE_RESOURCE_ID + ", "
-            + ServerTableColumnsName.LOCK_TABLE_TABLE_NAME + ", " + ServerTableColumnsName.LOCK_TABLE_PK + ", "
-            + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + ", " + ServerTableColumnsName.LOCK_TABLE_GMT_CREATE + ", "
-            + ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED;
+        = ServerTableColumnsName.LOCK_TABLE_XID + ", " + ServerTableColumnsName.LOCK_TABLE_TRANSACTION_ID + ", "
+        + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID + ", " + ServerTableColumnsName.LOCK_TABLE_RESOURCE_ID + ", "
+        + ServerTableColumnsName.LOCK_TABLE_TABLE_NAME + ", " + ServerTableColumnsName.LOCK_TABLE_PK + ", "
+        + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + ", " + ServerTableColumnsName.LOCK_TABLE_GMT_CREATE + ", "
+        + ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED;
 
     /**
      * The constant INSERT_LOCK_SQL_MYSQL.
      */
     public static final String INSERT_LOCK_SQL_MYSQL = "insert into " + LOCK_TABLE_PLACEHOLD + "(" + ALL_COLUMNS + ")" +
-            "values (?, ?, ?, ?, ?, ?, ?, now(), now())";
+        "values (?, ?, ?, ?, ?, ?, ?, now(), now())";
 
     /**
      * The constant INSERT_LOCK_SQL_ORACLE.
      */
     public static final String INSERT_LOCK_SQL_ORACLE = "insert into " + LOCK_TABLE_PLACEHOLD + "(" + ALL_COLUMNS + ")"
-            +
-            "values (?, ?, ?, ?, ?, ?, ?, sysdate, sysdate)";
+        +
+        "values (?, ?, ?, ?, ?, ?, ?, sysdate, sysdate)";
 
     /**
      * The constant DELETE_LOCK_SQL.
      */
     public static final String DELETE_LOCK_SQL = "delete from " + LOCK_TABLE_PLACEHOLD
-            + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " = ? and " + ServerTableColumnsName.LOCK_TABLE_XID + " = ?";
+        + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " = ? and " + ServerTableColumnsName.LOCK_TABLE_XID + " = ?";
 
     /**
      * The constant BATCH_DELETE_LOCK_SQL.
      */
     public static final String BATCH_DELETE_LOCK_SQL = "delete from " + LOCK_TABLE_PLACEHOLD
-            + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " in (" + IN_PARAMS_PLACEHOLD + ") ";
+        + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " in (" + IN_PARAMS_PLACEHOLD + ") ";
 
     /**
      * The constant QUERY_LOCK_SQL.
      */
     public static final String QUERY_LOCK_SQL = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACEHOLD
-            + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " = ? ";
+        + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " = ? ";
 
     /**
      * The constant CHECK_LOCK_SQL.
      */
     public static final String CHECK_LOCK_SQL = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACEHOLD
-            + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " in (" + IN_PARAMS_PLACEHOLD + ")";
+        + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " in (" + IN_PARAMS_PLACEHOLD + ")";
 
     /**
      * Get insert lock sql string.
@@ -94,8 +94,8 @@ public class LockStoreSqls {
      */
     public static String getInsertLockSQL(String lockTable, String dbType) {
         if (DBType.MYSQL.name().equalsIgnoreCase(dbType)
-                || DBType.OCEANBASE.name().equalsIgnoreCase(dbType)
-                || DBType.H2.name().equalsIgnoreCase(dbType)) {
+            || DBType.OCEANBASE.name().equalsIgnoreCase(dbType)
+            || DBType.H2.name().equalsIgnoreCase(dbType)) {
             return INSERT_LOCK_SQL_MYSQL.replace(LOCK_TABLE_PLACEHOLD, lockTable);
         } else if (DBType.ORACLE.name().equalsIgnoreCase(dbType)) {
             return INSERT_LOCK_SQL_ORACLE.replace(LOCK_TABLE_PLACEHOLD, lockTable);
@@ -125,7 +125,7 @@ public class LockStoreSqls {
      */
     public static String getBatchDeleteLockSql(String lockTable, String paramPlaceHold, String dbType) {
         return BATCH_DELETE_LOCK_SQL.replace(LOCK_TABLE_PLACEHOLD, lockTable).replace(IN_PARAMS_PLACEHOLD,
-                paramPlaceHold);
+            paramPlaceHold);
     }
 
     /**

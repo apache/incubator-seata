@@ -85,9 +85,9 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
     @Override
     public void init() {
         globalTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_GLOBAL_TABLE,
-                ConfigurationKeys.STORE_DB_GLOBAL_DEFAULT_TABLE);
+            ConfigurationKeys.STORE_DB_GLOBAL_DEFAULT_TABLE);
         brachTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE,
-                ConfigurationKeys.STORE_DB_BRANCH_DEFAULT_TABLE);
+            ConfigurationKeys.STORE_DB_BRANCH_DEFAULT_TABLE);
         dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
         if (StringUtils.isBlank(dbType)) {
             throw new StoreException("there must be db type.");
