@@ -78,7 +78,7 @@ public class SQLVisitorFactory {
                 }
             }
         }else {
-            throw new UnsupportedOperationException("Just support MySQL by now!");
+            throw new UnsupportedOperationException("Just support MySQL and Oracle by now!");
         }
         return recognizer;
     }
