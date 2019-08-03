@@ -104,14 +104,14 @@ public class TableMetaTest {
         Assertions.assertEquals(1, tableMeta.getPrimaryKeyMap().size());
         Assertions.assertEquals(Collections.singletonList("id"), tableMeta.getPrimaryKeyOnlyName());
 
-        Assertions.assertEquals(4, tableMeta.getAllColumns().size());
+        Assertions.assertEquals(columnMetas.length, tableMeta.getAllColumns().size());
 
         assertColumnMetaEquals(columnMetas[0], tableMeta.getAllColumns().get("id"));
         assertColumnMetaEquals(columnMetas[1], tableMeta.getAllColumns().get("name1"));
         assertColumnMetaEquals(columnMetas[2], tableMeta.getAllColumns().get("name2"));
         assertColumnMetaEquals(columnMetas[3], tableMeta.getAllColumns().get("name3"));
 
-        Assertions.assertEquals(2, tableMeta.getAllIndexes().size());
+        Assertions.assertEquals(indexMetas.length, tableMeta.getAllIndexes().size());
 
         assertIndexMetaEquals(indexMetas[0], tableMeta.getAllIndexes().get("PRIMARY"));
         Assertions.assertEquals(IndexType.PRIMARY, tableMeta.getAllIndexes().get("PRIMARY").getIndextype());
@@ -161,11 +161,26 @@ public class TableMetaTest {
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertEquals(cacheTableMeta, realTableMeta);
 
+        //add a new index
+        indexMetas =
+            new Object[][] {
+                new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
+                new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
+                new Object[] {"id_card", "id_card", false, "", 3, 1, "A", 34}
+            };
+        cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
+        realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
+        Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
+        TableMetaCache.refresh(dataSourceProxy);
+        cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
+        Assertions.assertEquals(cacheTableMeta, realTableMeta);
+
         //change the index sort type
         indexMetas =
             new Object[][] {
-                    new Object[] {"PRIMARY", "id", false, "", 3, 1, "D", 35},
-                    new Object[] {"name1", "name1", false, "", 3, 1, "D", 35}
+                new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
+                new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
+                new Object[] {"id_card", "id_card", false, "", 3, 1, "D", 34}
             };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
@@ -177,8 +192,9 @@ public class TableMetaTest {
         //change the index ordinal position
         indexMetas =
             new Object[][] {
-                    new Object[] {"PRIMARY", "id", false, "", 3, 2, "D", 35},
-                    new Object[] {"name1", "name1", false, "", 3, 2, "D", 35}
+                new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
+                new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
+                new Object[] {"id_card", "id_card", false, "", 3, 2, "D", 34}
             };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
@@ -190,8 +206,9 @@ public class TableMetaTest {
         //change the index type
         indexMetas =
             new Object[][] {
-                    new Object[] {"PRIMARY", "id", false, "", 3, 2, "D", 35},
-                    new Object[] {"name1", "name1", false, "", 1, 2, "D", 35}
+                new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
+                new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
+                new Object[] {"id_card", "id_card", false, "", 1, 1, "D", 34}
             };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
@@ -203,8 +220,9 @@ public class TableMetaTest {
         //change the index indexQualifier
         indexMetas =
             new Object[][] {
-                    new Object[] {"PRIMARY", "id", false, "t", 3, 2, "D", 35},
-                    new Object[] {"name1", "name1", false, "t", 1, 2, "D", 35}
+                new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
+                new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
+                new Object[] {"id_card", "id_card", false, "t", 1, 1, "D", 34}
             };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
@@ -216,8 +234,25 @@ public class TableMetaTest {
         //change the index name
         indexMetas =
             new Object[][] {
-                    new Object[] {"PRIMARY", "id", false, "", 3, 2, "D", 35},
-                    new Object[] {"name2", "name2", true, "", 1, 2, "D", 35}
+                new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
+                new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
+                new Object[] {"id_card_number", "id_card_number", false, "t", 1, 1, "D", 34}
+            };
+        cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
+        realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
+        Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
+        TableMetaCache.refresh(dataSourceProxy);
+        cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
+        Assertions.assertEquals(cacheTableMeta, realTableMeta);
+
+        //add a new column
+        columnMetas =
+            new Object[][] {
+                new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+                new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
+                new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"}
             };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
@@ -229,10 +264,11 @@ public class TableMetaTest {
         //change the column isAutoincrement
         columnMetas =
             new Object[][] {
-                    new Object[] {"", "", "t2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "NO"},
-                    new Object[] {"", "", "t2", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-                    new Object[] {"", "", "t2", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
-                    new Object[] {"", "", "t2", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"}
+                    new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                    new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                    new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+                    new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
+                new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "YES"}
             };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
@@ -244,10 +280,11 @@ public class TableMetaTest {
         //change the column isNullAble
         columnMetas =
             new Object[][] {
-                    new Object[] {"", "", "t2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "NO"},
-                    new Object[] {"", "", "t2", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-                    new Object[] {"", "", "t2", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
-                    new Object[] {"", "", "t2", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 1, "", "", 0, 0, 64, 4, "NO", "NO"}
+                new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+                new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
+                new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 64, 0, 10, 1, "", "", 0, 0, 64, 5, "NO", "YES"}
             };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
@@ -258,12 +295,13 @@ public class TableMetaTest {
 
         //change the column ordinary position
         columnMetas =
-                new Object[][] {
-                        new Object[] {"", "", "t2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "NO"},
-                        new Object[] {"", "", "t2", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-                        new Object[] {"", "", "t2", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
-                        new Object[] {"", "", "t2", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 1, "", "", 0, 0, 64, 3, "NO", "NO"}
-                };
+            new Object[][] {
+                new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+                new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
+                new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 64, 0, 10, 1, "", "", 0, 0, 64, 4, "NO", "YES"}
+            };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -273,12 +311,13 @@ public class TableMetaTest {
 
         //change the column charOctetLength
         columnMetas =
-                new Object[][] {
-                        new Object[] {"", "", "t2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "NO"},
-                        new Object[] {"", "", "t2", "name1", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-                        new Object[] {"", "", "t2", "name2", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
-                        new Object[] {"", "", "t2", "name3", Types.VARCHAR, "VARCHAR", 65, 0, 10, 1, "", "", 0, 0, 64, 3, "NO", "NO"}
-                };
+            new Object[][] {
+                new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+                new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
+                new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 20, 0, 10, 1, "", "", 0, 0, 64, 4, "NO", "YES"}
+            };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -292,12 +331,13 @@ public class TableMetaTest {
 
         //change the column columnDef
         columnMetas =
-                new Object[][] {
-                        new Object[] {"", "", "t2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "NO"},
-                        new Object[] {"", "", "t2", "name1", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-                        new Object[] {"", "", "t2", "name2", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
-                        new Object[] {"", "", "t2", "name3", Types.VARCHAR, "VARCHAR", 65, 0, 10, 1, "", "Jack", 0, 0, 64, 3, "NO", "NO"}
-                };
+            new Object[][] {
+                new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+                new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
+                new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 20, 0, 10, 1, "", "001", 0, 0, 64, 4, "NO", "YES"}
+            };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -307,12 +347,13 @@ public class TableMetaTest {
 
         //change the column remarks
         columnMetas =
-                new Object[][] {
-                        new Object[] {"", "", "t2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "NO"},
-                        new Object[] {"", "", "t2", "name1", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-                        new Object[] {"", "", "t2", "name2", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
-                        new Object[] {"", "", "t2", "name3", Types.VARCHAR, "VARCHAR", 65, 0, 10, 1, "The name", "Jack", 0, 0, 64, 3, "NO", "NO"}
-                };
+            new Object[][] {
+                new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+                new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
+                new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 20, 0, 10, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
+            };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -322,12 +363,13 @@ public class TableMetaTest {
 
         //change the column numPrecRadix
         columnMetas =
-                new Object[][] {
-                        new Object[] {"", "", "t2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "NO"},
-                        new Object[] {"", "", "t2", "name1", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-                        new Object[] {"", "", "t2", "name2", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
-                        new Object[] {"", "", "t2", "name3", Types.VARCHAR, "VARCHAR", 65, 0, 2, 1, "The name", "Jack", 0, 0, 64, 3, "NO", "NO"}
-                };
+            new Object[][] {
+                new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+                new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
+                new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
+            };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -337,12 +379,13 @@ public class TableMetaTest {
 
         //change the column date type and date type name
         columnMetas =
-                new Object[][] {
-                        new Object[] {"", "", "t2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "NO"},
-                        new Object[] {"", "", "t2", "name1", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-                        new Object[] {"", "", "t2", "name2", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
-                        new Object[] {"", "", "t2", "sex", Types.SMALLINT, "SMALLINT", 65, 5, 2, 1, "The name", "Jack", 0, 0, 64, 3, "NO", "NO"}
-                };
+            new Object[][] {
+                new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+                new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
+                new Object[] {"", "", "t1", "id_card", Types.VARCHAR, "VARCHAR", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
+            };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -352,12 +395,13 @@ public class TableMetaTest {
 
         //change the column name
         columnMetas =
-                new Object[][] {
-                        new Object[] {"", "", "t2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "NO"},
-                        new Object[] {"", "", "t2", "name1", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-                        new Object[] {"", "", "t2", "real_name", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
-                        new Object[] {"", "", "t2", "sex", Types.SMALLINT, "SMALLINT", 65, 5, 2, 1, "The name", "Jack", 0, 0, 64, 3, "NO", "NO"}
-                };
+            new Object[][] {
+                new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+                new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
+                new Object[] {"", "", "t1", "id_card_number", Types.VARCHAR, "VARCHAR", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
+            };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -367,12 +411,13 @@ public class TableMetaTest {
 
         //change the column tableSchemaName
         columnMetas =
-                new Object[][] {
-                        new Object[] {"", "user", "t2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "NO"},
-                        new Object[] {"", "user", "t2", "name1", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-                        new Object[] {"", "user", "t2", "real_name", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
-                        new Object[] {"", "user", "t2", "sex", Types.SMALLINT, "SMALLINT", 65, 5, 2, 1, "The name", "Jack", 0, 0, 64, 3, "NO", "NO"}
-                };
+            new Object[][] {
+                new Object[] {"", "user", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[] {"", "user", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[] {"", "user", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+                new Object[] {"", "user", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
+                new Object[] {"", "user", "t1", "id_card_number", Types.VARCHAR, "VARCHAR", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
+            };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -382,12 +427,13 @@ public class TableMetaTest {
 
         //change the column table cat
         columnMetas =
-                new Object[][] {
-                        new Object[] {"t", "user", "t2", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "NO"},
-                        new Object[] {"t", "user", "t2", "name1", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-                        new Object[] {"t", "user", "t2", "real_name", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
-                        new Object[] {"t", "user", "t2", "sex", Types.SMALLINT, "SMALLINT", 65, 5, 2, 1, "The name", "Jack", 0, 0, 64, 3, "NO", "NO"}
-                };
+            new Object[][] {
+                new Object[] {"t", "user", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[] {"t", "user", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[] {"t", "user", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+                new Object[] {"t", "user", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
+                new Object[] {"t", "user", "t1", "id_card_number", Types.VARCHAR, "VARCHAR", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
+            };
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
