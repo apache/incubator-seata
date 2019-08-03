@@ -19,6 +19,7 @@ import java.util.List;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import io.seata.rm.datasource.ParametersHolder;
 
 /**
  * The type Abstract my sql recognizer test.
@@ -35,6 +36,7 @@ public class AbstractMySQLRecognizerTest {
      */
     public SQLStatement getSQLStatement(String sql) {
         List<SQLStatement> stats = SQLUtils.parseStatements(sql, "mysql");
+        ParametersHolder a;
         return stats.get(0);
     }
 
