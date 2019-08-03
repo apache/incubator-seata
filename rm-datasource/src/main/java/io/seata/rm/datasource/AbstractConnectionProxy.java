@@ -99,7 +99,7 @@ public abstract class AbstractConnectionProxy implements Connection {
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        PreparedStatement targetPreparedStatement = getTargetConnection().prepareStatement(sql);
+        PreparedStatement targetPreparedStatement = getTargetConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         return new PreparedStatementProxy(this, targetPreparedStatement, sql);
     }
 

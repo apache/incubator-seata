@@ -322,7 +322,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                     /**
                      * Prevent thread safety issues
                      */
-                    SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(rollbackingSession);
+                    SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.error("GlobalSession rollback retry timeout [{}]", rollbackingSession.getXid());
                     continue;
                 }
