@@ -36,7 +36,6 @@ public class AbstractMySQLRecognizerTest {
      */
     public SQLStatement getSQLStatement(String sql) {
         List<SQLStatement> stats = SQLUtils.parseStatements(sql, "mysql");
-        ParametersHolder a;
         return stats.get(0);
     }
 
