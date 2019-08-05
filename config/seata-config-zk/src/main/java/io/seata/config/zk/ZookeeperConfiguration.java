@@ -84,9 +84,9 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
-        String sysProValue = System.getProperty(dataId);
-        if (null != sysProValue) {
-            return sysProValue;
+        String value;
+        if ((value = getConfigFromSysPro(dataId)) != null) {
+            return value;
         }
         FutureTask<String> future = new FutureTask<String>(new Callable<String>() {
             @Override

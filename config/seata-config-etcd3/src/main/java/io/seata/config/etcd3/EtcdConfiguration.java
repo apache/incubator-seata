@@ -108,9 +108,9 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
-        String sysProValue = System.getProperty(dataId);
-        if (null != sysProValue) {
-            return sysProValue;
+        String value;
+        if ((value = getConfigFromSysPro(dataId)) != null) {
+            return value;
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET, timeoutMills);
         etcdConfigExecutor.execute(() -> complete(getClient().getKVClient().get(ByteSequence.from(dataId, UTF_8)), configFuture));

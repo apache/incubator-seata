@@ -92,9 +92,9 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
-        String sysProValue = System.getProperty(dataId);
-        if (null != sysProValue) {
-            return sysProValue;
+        String value;
+        if ((value = getConfigFromSysPro(dataId)) != null) {
+            return value;
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigOperation.GET, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));

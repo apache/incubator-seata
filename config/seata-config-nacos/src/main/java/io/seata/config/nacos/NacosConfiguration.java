@@ -78,11 +78,10 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
-        String sysProValue = System.getProperty(dataId);
-        if (null != sysProValue) {
-            return sysProValue;
-        }
         String value;
+        if ((value = getConfigFromSysPro(dataId)) != null) {
+            return value;
+        }
         try {
             value = configService.getConfig(dataId, SEATA_GROUP, timeoutMills);
         } catch (NacosException exx) {
