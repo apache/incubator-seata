@@ -70,7 +70,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
             try {
                 configService = NacosFactory.createConfigService(getConfigProperties());
             } catch (NacosException e) {
-                throw new RuntimeException(e.getMessage());
+                throw new RuntimeException(e);
             }
         }
     }
