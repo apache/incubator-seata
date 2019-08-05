@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
-
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -85,6 +84,10 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+        String value;
+        if ((value = getConfigFromSysPro(dataId)) != null) {
+            return value;
+        }
         FutureTask<String> future = new FutureTask<String>(new Callable<String>() {
             @Override
             public String call() throws Exception {
