@@ -98,13 +98,17 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                         stPK = statementProxy.getConnection().createStatement();
                         rsPK = stPK.executeQuery(selectPKSQL);
                     } else {
+
                         if (paramAppenders.size() == 1) {
                             pstPK = statementProxy.getConnection().prepareStatement(selectPKSQL);
-                            for (int i = 0; i < paramAppenders.get(0).size(); i++) {
-                                pstPK.setObject(i + 1, paramAppenders.get(0).get(i));
+                            List<Object> paramAppender = paramAppenders.get(0);
+                            for (int i = 0; i < paramAppender.size(); i++) {
+                                pstPK.setObject(i + 1, paramAppender.get(i));
                             }
                         } else {
-                            paramAppenders.stream().forEach(t -> selectSQLAppender.append(" UNION ").append(selectPKSQL));
+                            for (int i = 1; i < paramAppenders.size(); i++) {
+                                selectSQLAppender.append(" UNION ").append(selectPKSQL);
+                            }
                             pstPK = statementProxy.getConnection().prepareStatement(selectSQLAppender.toString());
                             List<Object> paramAppender = null;
                             for (int i = 0; i < paramAppenders.size(); i++) {

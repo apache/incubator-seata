@@ -99,11 +99,14 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             } else {
                 if (paramAppenders.size() == 1) {
                     ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                    for (int i = 0; i < paramAppenders.get(0).size(); i++) {
-                        ps.setObject(i + 1, paramAppenders.get(0).get(i));
+                    List<Object> paramAppender = paramAppenders.get(0);
+                    for (int i = 0; i < paramAppender.size(); i++) {
+                        ps.setObject(i + 1, paramAppender.get(i));
                     }
                 } else {
-                    paramAppenders.stream().forEach(t -> selectSQLAppender.append(" UNION ").append(selectSQL));
+                    for (int i = 1; i < paramAppenders.size(); i++) {
+                        selectSQLAppender.append(" UNION ").append(selectSQL);
+                    }
                     ps = statementProxy.getConnection().prepareStatement(selectSQLAppender.toString());
                     List<Object> paramAppender = null;
                     for (int i = 0; i < paramAppenders.size(); i++) {
@@ -153,7 +156,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         selectSQLAppender.append(columnsSQL.toString());
         List<Field> pkRows = beforeImage.pkRows();
         selectSQLAppender.append(
-                " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(pkRows));
+            " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(pkRows));
         String selectSQL = selectSQLAppender.toString();
 
         TableRecords afterImage = null;
