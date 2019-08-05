@@ -43,15 +43,12 @@ public class SpringProxyUtils {
             if (AopUtils.isJdkDynamicProxy(proxy)) {
                 TargetSource targetSource = advised.getTargetSource();
                 return targetSource instanceof EmptyTargetSource ? getFirstInterfaceByAdvised(advised)
-                    : targetSource.getTarget().getClass();
+                    : targetSource.getTargetClass();
             }
             Object target = advised.getTargetSource().getTarget();
             return findTargetClass(target);
         } else {
-            if (proxy == null) {
-                return null;
-            }
-            return proxy.getClass();
+            return proxy == null ? null :proxy.getClass();
         }
     }
 

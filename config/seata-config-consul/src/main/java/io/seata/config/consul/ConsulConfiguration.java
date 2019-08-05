@@ -53,10 +53,9 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private static ExecutorService consulConfigExecutor = null;
-    private static ExecutorService consulNotifierExecutor = null;
-    private static ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = null;
-    private static ConcurrentMap<String, List<ConfigChangeNotifier>> configChangeNotifiersMap = null;
+    private ExecutorService consulNotifierExecutor;
+    private ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap;
+    private ConcurrentMap<String, List<ConfigChangeNotifier>> configChangeNotifiersMap;
 
     /**
      * default watch timeout in second
@@ -66,6 +65,10 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
 
 
     private ConsulConfiguration() {
+        consulNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
+            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("consul-config-executor", THREAD_POOL_NUM));
+        configListenersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        configChangeNotifiersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
     }
 
     /**
@@ -77,16 +80,9 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
         if (null == instance) {
             synchronized (ConsulConfiguration.class) {
                 if (null == instance) {
-                    consulConfigExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-                        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("consul-config-executor", THREAD_POOL_NUM));
-                    consulNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-                        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("consul-notifier-executor", THREAD_POOL_NUM));
-                    configListenersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    configChangeNotifiersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
                     instance = new ConsulConfiguration();
                 }
             }
-
         }
         return instance;
     }
@@ -94,8 +90,12 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+        String value;
+        if ((value = getConfigFromSysPro(dataId)) != null) {
+            return value;
+        }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET, timeoutMills);
-        consulConfigExecutor.execute(() -> {
+        consulNotifierExecutor.execute(() -> {
             complete(getConsulClient().getKVValue(dataId), configFuture);
         });
         return (String) configFuture.get();
@@ -104,7 +104,7 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUT, timeoutMills);
-        consulConfigExecutor.execute(() -> {
+        consulNotifierExecutor.execute(() -> {
             complete(getConsulClient().setKVValue(dataId, content), configFuture);
         });
         return (Boolean) configFuture.get();
@@ -113,7 +113,7 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUTIFABSENT, timeoutMills);
-        consulConfigExecutor.execute(() -> {
+        consulNotifierExecutor.execute(() -> {
             PutParams putParams = new PutParams();
             //Setting CAS to 0 means that this is an atomic operation, created when key does not exist.
             putParams.setCas(CAS);
@@ -125,7 +125,7 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigFuture.ConfigOperation.REMOVE, timeoutMills);
-        consulConfigExecutor.execute(() -> {
+        consulNotifierExecutor.execute(() -> {
             complete(getConsulClient().deleteKVValue(dataId), configFuture);
         });
         return (Boolean) configFuture.get();
@@ -140,7 +140,7 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
         if (null != listener.getExecutor()) {
             listener.getExecutor().submit(configChangeNotifier);
         } else {
-            consulConfigExecutor.submit(configChangeNotifier);
+            consulNotifierExecutor.submit(configChangeNotifier);
         }
     }
 
@@ -220,7 +220,7 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
     /**
      * the type config change notifier
      */
-    private static class ConfigChangeNotifier implements Runnable {
+    private class ConfigChangeNotifier implements Runnable {
         private final String dataId;
         private final ConfigChangeListener listener;
         private long consulIndex;

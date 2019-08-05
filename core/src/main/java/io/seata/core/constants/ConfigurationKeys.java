@@ -71,6 +71,11 @@ public class ConfigurationKeys {
     public static final String CLIENT_PREFIX = "client.";
 
     /**
+     * The constant TRANSPORT_PREFIX.
+     */
+    public static final String TRANSPORT_PREFIX = "transport.";
+
+    /**
      * The constant CLIENT_ASYNC_COMMIT_BUFFER_LIMIT.
      */
     public static final String CLIENT_ASYNC_COMMIT_BUFFER_LIMIT = CLIENT_PREFIX + "async.commit.buffer.limit";
@@ -92,6 +97,19 @@ public class ConfigurationKeys {
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_PREFIX + "report.retry.count";
+
+
+    /**
+     * The constant SERIALIZE_FOR_RPC.
+     */
+    public static final String SERIALIZE_FOR_RPC = TRANSPORT_PREFIX + "serialization";
+
+    /**
+     * The constant COMPRESSOR_FOR_RPC.
+     * 
+     * @since 0.7.0
+     */
+    public static final String COMPRESSOR_FOR_RPC = TRANSPORT_PREFIX + "compressor";
 
     /**
      * The constant STORE_DB_GLOBAL_TABLE.
@@ -123,6 +141,10 @@ public class ConfigurationKeys {
      * The constant STORE_DB_TYPE.
      */
     public static final String STORE_DB_TYPE  = "store.db.db-type";
+    /**
+     * The constant STORE_DB_DRIVER_CLASS_NAME.
+     */
+    public static final String STORE_DB_DRIVER_CLASS_NAME  =  "store.db.driver-class-name";
 
     /**
      * The constant STORE_DB_URL.
@@ -202,4 +224,34 @@ public class ConfigurationKeys {
      * The constant TRANSACTION_UNDO_LOG_SERIALIZATION.
      */
     public static final String TRANSACTION_UNDO_LOG_SERIALIZATION = TRANSACTION_PREFIX + "undo.log.serialization";
+
+    /**
+     * The constant METRICS_PREFIX.
+     */
+    public static final String METRICS_PREFIX = "metrics.";
+
+    /**
+     * The constant METRICS_ENABLED.
+     */
+    public static final String METRICS_ENABLED = "enabled";
+
+    /**
+     * The constant METRICS_REGISTRY_TYPE.
+     */
+    public static final String METRICS_REGISTRY_TYPE = "registry-type";
+
+    /**
+     * The constant METRICS_EXPORTER_LIST.
+     */
+    public static final String METRICS_EXPORTER_LIST = "exporter-list";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_SAVE_DAYS.
+     */
+    public static final String TRANSACTION_UNDO_LOG_SAVE_DAYS = TRANSACTION_PREFIX + "undo.log.save.days";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_DELETE_DELAY
+     */
+    public static final String TRANSACTION_UNDO_LOG_DELETE_DELAY = TRANSACTION_PREFIX + "undo.log.delete.delay";
 }

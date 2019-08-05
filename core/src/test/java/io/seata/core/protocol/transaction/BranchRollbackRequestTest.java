@@ -42,29 +42,4 @@ public class BranchRollbackRequestTest {
 
     }
 
-    @Test
-    public void testEncodeDecode() {
-        BranchRollbackRequest branchRollbackRequest = new BranchRollbackRequest();
-
-        branchRollbackRequest.setXid("127.0.0.1:9999:39875642");
-        branchRollbackRequest.setBranchId(1);
-        branchRollbackRequest.setBranchType(BranchType.TCC);
-        branchRollbackRequest.setResourceId("resource1");
-        branchRollbackRequest.setApplicationData("app1");
-
-        byte[] encodeResult = branchRollbackRequest.encode();
-
-        ByteBuf byteBuffer = UnpooledByteBufAllocator.DEFAULT.directBuffer(encodeResult.length);
-        byteBuffer.writeBytes(encodeResult);
-
-        BranchRollbackRequest decodeBranchRollbackRequest = new BranchRollbackRequest();
-        decodeBranchRollbackRequest.decode(byteBuffer);
-        Assertions.assertEquals(decodeBranchRollbackRequest.getXid(), branchRollbackRequest.getXid());
-        Assertions.assertEquals(decodeBranchRollbackRequest.getBranchId(), branchRollbackRequest.getBranchId());
-        Assertions.assertEquals(decodeBranchRollbackRequest.getResourceId(), branchRollbackRequest.getResourceId());
-        Assertions.assertEquals(decodeBranchRollbackRequest.getApplicationData(),
-            decodeBranchRollbackRequest.getApplicationData());
-        Assertions.assertEquals(decodeBranchRollbackRequest.getBranchType(), branchRollbackRequest.getBranchType());
-    }
-
 }

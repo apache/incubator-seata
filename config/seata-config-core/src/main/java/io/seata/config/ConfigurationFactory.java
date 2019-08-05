@@ -15,10 +15,10 @@
  */
 package io.seata.config;
 
+import java.util.Objects;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
-
-import java.util.Objects;
 
 /**
  * The type Configuration factory.
@@ -27,31 +27,34 @@ import java.util.Objects;
  * @author Geng Zhang
  */
 public final class ConfigurationFactory {
-    private static final String REGISTRY_CONF = "registry.conf";
     private static final String REGISTRY_CONF_PREFIX = "registry";
     private static final String REGISTRY_CONF_SUFFIX = ".conf";
     private static final String ENV_SYSTEM_KEY = "SEATA_CONFIG_ENV";
-    private static final String ENV_PROPERTY_KEY = "env";
+    private static final String ENV_PROPERTY_KEY = "seataConfigEnv";
     private static final String DEFAULT_ENV_VALUE = "default";
     /**
      * The constant FILE_INSTANCE.
      */
-    private static String ENV_VALUE;
+    private static String envValue;
+
     static {
         String env = System.getenv(ENV_SYSTEM_KEY);
-        if(env != null && System.getProperty(ENV_PROPERTY_KEY) == null){
+        if (env != null && System.getProperty(ENV_PROPERTY_KEY) == null) {
             //Help users get
             System.setProperty(ENV_PROPERTY_KEY, env);
         }
-        ENV_VALUE = System.getProperty(ENV_PROPERTY_KEY);
+        envValue = System.getProperty(ENV_PROPERTY_KEY);
     }
 
-    private static final Configuration DEFAULT_FILE_INSTANCE = new FileConfiguration(REGISTRY_CONF_PREFIX + REGISTRY_CONF_SUFFIX);
-    public static final Configuration CURRENT_FILE_INSTANCE = (ENV_VALUE == null || DEFAULT_ENV_VALUE.equals(ENV_VALUE)) ? DEFAULT_FILE_INSTANCE : new FileConfiguration(REGISTRY_CONF_PREFIX + "-" + ENV_VALUE + REGISTRY_CONF_SUFFIX);
+    private static final Configuration DEFAULT_FILE_INSTANCE = new FileConfiguration(
+        REGISTRY_CONF_PREFIX + REGISTRY_CONF_SUFFIX);
+    public static final Configuration CURRENT_FILE_INSTANCE = (envValue == null || DEFAULT_ENV_VALUE.equals(envValue))
+        ? DEFAULT_FILE_INSTANCE : new FileConfiguration(REGISTRY_CONF_PREFIX + "-" + envValue
+        + REGISTRY_CONF_SUFFIX);
     private static final String NAME_KEY = "name";
     private static final String FILE_TYPE = "file";
 
-    private static volatile Configuration CONFIG_INSTANCE = null;
+    private static volatile Configuration instance = null;
 
     /**
      * Gets instance.
@@ -59,22 +62,23 @@ public final class ConfigurationFactory {
      * @return the instance
      */
     public static Configuration getInstance() {
-        if (CONFIG_INSTANCE == null) {
+        if (instance == null) {
             synchronized (Configuration.class) {
-                if (CONFIG_INSTANCE == null) {
-                    CONFIG_INSTANCE = buildConfiguration();
+                if (instance == null) {
+                    instance = buildConfiguration();
                 }
             }
         }
-        return CONFIG_INSTANCE;
+        return instance;
     }
 
     private static Configuration buildConfiguration() {
         ConfigType configType = null;
         String configTypeName = null;
         try {
-            configTypeName = CURRENT_FILE_INSTANCE.getConfig(ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + ConfigurationKeys.FILE_ROOT_TYPE);
+            configTypeName = CURRENT_FILE_INSTANCE.getConfig(
+                ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                    + ConfigurationKeys.FILE_ROOT_TYPE);
             configType = ConfigType.getType(configTypeName);
         } catch (Exception e) {
             throw new NotSupportYetException("not support register type: " + configTypeName, e);
@@ -86,7 +90,8 @@ public final class ConfigurationFactory {
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             return new FileConfiguration(name);
         } else {
-            return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
+            return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
+                .provide();
         }
     }
 }

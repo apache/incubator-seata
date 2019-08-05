@@ -21,6 +21,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
+import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.AbstractTransactionRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
@@ -47,6 +48,9 @@ public class DefaultTransactionManager implements TransactionManager {
         request.setTransactionName(name);
         request.setTimeout(timeout);
         GlobalBeginResponse response = (GlobalBeginResponse)syncCall(request);
+        if (response.getResultCode() == ResultCode.Failed) {
+            throw new TransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());
+        }
         return response.getXid();
     }
 

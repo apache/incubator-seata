@@ -15,7 +15,7 @@
  */
 package io.seata.core.protocol.transaction;
 
-import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.RpcContext;
 
 /**
@@ -27,11 +27,13 @@ public class BranchCommitRequest extends AbstractBranchEndRequest {
 
     @Override
     public short getTypeCode() {
-        return AbstractMessage.TYPE_BRANCH_COMMIT;
+        return MessageType.TYPE_BRANCH_COMMIT;
     }
 
     @Override
     public AbstractTransactionResponse handle(RpcContext rpcContext) {
         return handler.handle(this);
     }
+
+
 }

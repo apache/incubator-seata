@@ -15,7 +15,8 @@
  */
 package io.seata.core.protocol;
 
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The type Rpc message.
@@ -25,21 +26,11 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class RpcMessage {
 
-    private static AtomicLong NEXT_ID = new AtomicLong(0);
-
-    /**
-     * Gets next message id.
-     *
-     * @return the next message id
-     */
-    public static long getNextMessageId() {
-        return NEXT_ID.incrementAndGet();
-    }
-
-    private long id;
-    private boolean isAsync;
-    private boolean isRequest;
-    private boolean isHeartbeat;
+    private int id;
+    private byte messageType;
+    private byte codec;
+    private byte compressor;
+    private Map<String, String> headMap = new HashMap<>();
     private Object body;
 
     /**
@@ -47,7 +38,7 @@ public class RpcMessage {
      *
      * @return the id
      */
-    public long getId() {
+    public int getId() {
         return id;
     }
 
@@ -56,62 +47,8 @@ public class RpcMessage {
      *
      * @param id the id
      */
-    public void setId(long id) {
+    public void setId(int id) {
         this.id = id;
-    }
-
-    /**
-     * Is async boolean.
-     *
-     * @return the boolean
-     */
-    public boolean isAsync() {
-        return isAsync;
-    }
-
-    /**
-     * Sets async.
-     *
-     * @param async the async
-     */
-    public void setAsync(boolean async) {
-        isAsync = async;
-    }
-
-    /**
-     * Is request boolean.
-     *
-     * @return the boolean
-     */
-    public boolean isRequest() {
-        return isRequest;
-    }
-
-    /**
-     * Sets request.
-     *
-     * @param request the request
-     */
-    public void setRequest(boolean request) {
-        isRequest = request;
-    }
-
-    /**
-     * Is heartbeat boolean.
-     *
-     * @return the boolean
-     */
-    public boolean isHeartbeat() {
-        return isHeartbeat;
-    }
-
-    /**
-     * Sets heartbeat.
-     *
-     * @param heartbeat the heartbeat
-     */
-    public void setHeartbeat(boolean heartbeat) {
-        isHeartbeat = heartbeat;
     }
 
     /**
@@ -130,5 +67,103 @@ public class RpcMessage {
      */
     public void setBody(Object body) {
         this.body = body;
+    }
+
+    /**
+     * Gets codec.
+     *
+     * @return the codec
+     */
+    public byte getCodec() {
+        return codec;
+    }
+
+    /**
+     * Sets codec.
+     *
+     * @param codec the codec
+     * @return the codec
+     */
+    public RpcMessage setCodec(byte codec) {
+        this.codec = codec;
+        return this;
+    }
+
+    /**
+     * Gets compressor.
+     *
+     * @return the compressor
+     */
+    public byte getCompressor() {
+        return compressor;
+    }
+
+    /**
+     * Sets compressor.
+     *
+     * @param compressor the compressor
+     * @return the compressor
+     */
+    public RpcMessage setCompressor(byte compressor) {
+        this.compressor = compressor;
+        return this;
+    }
+
+    /**
+     * Gets head map.
+     *
+     * @return the head map
+     */
+    public Map<String, String> getHeadMap() {
+        return headMap;
+    }
+
+    /**
+     * Sets head map.
+     *
+     * @param headMap the head map
+     * @return the head map
+     */
+    public RpcMessage setHeadMap(Map<String, String> headMap) {
+        this.headMap = headMap;
+        return this;
+    }
+
+    /**
+     * Gets head.
+     *
+     * @param headKey the head key
+     * @return the head
+     */
+    public String getHead(String headKey) {
+        return headMap.get(headKey);
+    }
+
+    /**
+     * Put head.
+     *
+     * @param headKey   the head key
+     * @param headValue the head value
+     */
+    public void putHead(String headKey, String headValue) {
+        headMap.put(headKey, headValue);
+    }
+
+    /**
+     * Gets message type.
+     *
+     * @return the message type
+     */
+    public byte getMessageType() {
+        return messageType;
+    }
+
+    /**
+     * Sets message type.
+     *
+     * @param messageType the message type
+     */
+    public void setMessageType(byte messageType) {
+        this.messageType = messageType;
     }
 }
