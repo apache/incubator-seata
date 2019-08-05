@@ -302,11 +302,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
-        return bean;
-    }
-
-    @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof DataSource) {
             Map beansOfTypeMaps = applicationContext.getBeansOfType(DataSourceProxy.class);
@@ -315,7 +310,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 //remove existing datasource
                 dbf.removeBeanDefinition(beanName);
                 //register the definition of DataSourceProxy
-                dbf.registerBeanDefinition(beanName, BeanDefinitionBuilder.genericBeanDefinition(DataSourceProxy.class).addConstructorArgValue(bean).getBeanDefinition());
+                dbf.registerBeanDefinition("dataSourceProxy", BeanDefinitionBuilder.genericBeanDefinition(DataSourceProxy.class).addConstructorArgValue(bean).getBeanDefinition());
                 bean = dbf.getBean(DataSourceProxy.class);
             }
         }
