@@ -32,6 +32,11 @@ public enum TransactionExceptionCode {
     Unknown,
 
     /**
+     * BeginFailed
+     */
+    BeginFailed,
+
+    /**
      * Lock key conflict transaction exception code.
      */
     //
@@ -115,7 +120,7 @@ public enum TransactionExceptionCode {
     //
     FailedToAddBranch,
     /**
-     *  Failed to lock global transaction exception code.
+     * Failed to lock global transaction exception code.
      */
     FailedLockGlobalTranscation,
 
