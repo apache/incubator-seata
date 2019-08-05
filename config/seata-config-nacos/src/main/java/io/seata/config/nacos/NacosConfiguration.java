@@ -15,14 +15,10 @@
  */
 package io.seata.config.nacos;
 
-import java.util.List;
-import java.util.Properties;
-
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.config.listener.Listener;
 import com.alibaba.nacos.api.exception.NacosException;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.Configuration;
@@ -31,6 +27,9 @@ import io.seata.config.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
+import java.util.Properties;
+
 /**
  * The type Nacos configuration.
  *
@@ -38,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * @date 2019 /2/1
  */
 public class NacosConfiguration extends AbstractConfiguration<Listener> {
+    private static volatile NacosConfiguration instance;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosConfiguration.class);
     private static final String SEATA_GROUP = "SEATA_GROUP";
@@ -47,22 +47,36 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     private static volatile ConfigService configService;
 
     /**
-     * Instantiates a new Nacos configuration.
+     * Get instance of NacosConfiguration
      *
-     * @throws NacosException the nacos exception
+     * @return
      */
-    public NacosConfiguration() throws NacosException {
+    public static NacosConfiguration getInstance() {
+        if (null == instance) {
+            synchronized (NacosConfiguration.class) {
+                if (null == instance) {
+                    instance = new NacosConfiguration();
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
+     * Instantiates a new Nacos configuration.
+     */
+    public NacosConfiguration() {
         if (null == configService) {
-            configService = NacosFactory.createConfigService(getConfigProperties());
+            try {
+                configService = NacosFactory.createConfigService(getConfigProperties());
+            } catch (NacosException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
-        String sysProValue = System.getProperty(dataId);
-        if (null != sysProValue) {
-            return sysProValue;
-        }
         String value;
         try {
             value = configService.getConfig(dataId, SEATA_GROUP, timeoutMills);
