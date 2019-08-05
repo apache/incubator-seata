@@ -16,7 +16,6 @@
 package io.seata.server.lock;
 
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
