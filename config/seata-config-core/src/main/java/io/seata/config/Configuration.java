@@ -111,7 +111,7 @@ public interface Configuration<T> {
     /**
      * Gets duration.
      *
-     * @param dataId
+     * @param dataId the data id
      * @return the duration
      */
     Duration getDuration(String dataId);
@@ -119,19 +119,19 @@ public interface Configuration<T> {
     /**
      * Gets duration.
      *
-     * @param   dataId
-     * @param   defaultValue
-     * @return  the duration
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @return the duration
      */
     Duration getDuration(String dataId, Duration defaultValue);
 
     /**
      * Gets duration.
      *
-     * @param   dataId
-     * @param   defaultValue
-     * @param   timeoutMills
-     * @return  he duration
+     * @param dataId       the data id
+     * @param defaultValue the default value
+     * @param timeoutMills the timeout mills
+     * @return he duration
      */
     Duration getDuration(String dataId, Duration defaultValue, long timeoutMills);
 
@@ -276,5 +276,15 @@ public interface Configuration<T> {
      * @return the config listeners
      */
     List<T> getConfigListeners(String dataId);
+
+    /**
+     * Gets config from sys pro.
+     *
+     * @param dataId the data id
+     * @return the config from sys pro
+     */
+    default String getConfigFromSysPro(String dataId) {
+        return System.getProperty(dataId);
+    }
 
 }
