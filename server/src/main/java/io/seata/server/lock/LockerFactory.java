@@ -79,11 +79,7 @@ public class LockerFactory {
      * @return the lock manager
      */
     public static synchronized final Locker get(BranchSession branchSession) {
-        String storeMode = System.getProperty(ConfigurationKeys.STORE_MODE);
-        if (StringUtils.isBlank(storeMode)) {
-            //use default
-            storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
-        }
+        String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         if (StoreMode.DB.name().equalsIgnoreCase(storeMode)) {
             if (lockerMap.get(storeMode) != null) {
                 return lockerMap.get(storeMode);

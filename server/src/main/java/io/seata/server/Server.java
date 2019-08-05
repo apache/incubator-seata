@@ -68,7 +68,7 @@ public class Server {
         rpcServer.setListenPort(parameterParser.getPort());
         UUIDGenerator.init(1);
         //log store mode : file、db
-        SessionHolder.init();
+        SessionHolder.init(parameterParser.getStoreMode());
 
         DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
         coordinator.init();
