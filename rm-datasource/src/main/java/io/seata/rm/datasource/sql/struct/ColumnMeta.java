@@ -15,6 +15,8 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
+import java.util.Objects;
+
 /**
  * The type Column meta.
  *
@@ -49,25 +51,25 @@ public class ColumnMeta {
     @Override
     public String toString() {
         return "ColumnMeta{" +
-            "tableCat='" + tableCat + '\'' +
-            ", tableSchemaName='" + tableSchemaName + '\'' +
-            ", tableName='" + tableName + '\'' +
-            ", columnName='" + columnName + '\'' +
-            ", dataType=" + dataType +
-            ", dataTypeName='" + dataTypeName + '\'' +
-            ", columnSize=" + columnSize +
-            ", decimalDigits=" + decimalDigits +
-            ", numPrecRadix=" + numPrecRadix +
-            ", nullAble=" + nullAble +
-            ", remarks='" + remarks + '\'' +
-            ", columnDef='" + columnDef + '\'' +
-            ", sqlDataType=" + sqlDataType +
-            ", sqlDatetimeSub=" + sqlDatetimeSub +
-            ", charOctetLength=" + charOctetLength +
-            ", ordinalPosition=" + ordinalPosition +
-            ", isNullAble='" + isNullAble + '\'' +
-            ", isAutoincrement='" + isAutoincrement + '\'' +
-            '}';
+                "tableCat='" + tableCat + '\'' +
+                ", tableSchemaName='" + tableSchemaName + '\'' +
+                ", tableName='" + tableName + '\'' +
+                ", columnName='" + columnName + '\'' +
+                ", dataType=" + dataType +
+                ", dataTypeName='" + dataTypeName + '\'' +
+                ", columnSize=" + columnSize +
+                ", decimalDigits=" + decimalDigits +
+                ", numPrecRadix=" + numPrecRadix +
+                ", nullAble=" + nullAble +
+                ", remarks='" + remarks + '\'' +
+                ", columnDef='" + columnDef + '\'' +
+                ", sqlDataType=" + sqlDataType +
+                ", sqlDatetimeSub=" + sqlDatetimeSub +
+                ", charOctetLength=" + charOctetLength +
+                ", ordinalPosition=" + ordinalPosition +
+                ", isNullAble='" + isNullAble + '\'' +
+                ", isAutoincrement='" + isAutoincrement + '\'' +
+                '}';
     }
 
     /**
@@ -383,5 +385,94 @@ public class ColumnMeta {
      */
     public void setIsAutoincrement(String isAutoincrement) {
         this.isAutoincrement = isAutoincrement;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ColumnMeta)) {
+            return false;
+        }
+        ColumnMeta columnMeta = (ColumnMeta) o;
+        if (!Objects.equals(columnMeta.tableCat, this.tableCat)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.tableSchemaName, this.tableSchemaName)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.tableName, this.tableName)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.columnName, this.columnName)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.dataType, this.dataType)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.dataTypeName, this.dataTypeName)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.columnSize, this.columnSize)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.decimalDigits, this.decimalDigits)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.numPrecRadix, this.numPrecRadix)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.nullAble, this.nullAble)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.remarks, this.remarks)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.columnDef, this.columnDef)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.sqlDataType, this.sqlDataType)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.sqlDatetimeSub, this.sqlDatetimeSub)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.charOctetLength, this.charOctetLength)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.ordinalPosition, this.ordinalPosition)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.isNullAble, this.isNullAble)) {
+            return false;
+        }
+        if (!Objects.equals(columnMeta.isAutoincrement, this.isAutoincrement)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = Objects.hashCode(tableCat);
+        hash += Objects.hashCode(tableSchemaName);
+        hash += Objects.hashCode(tableName);
+        hash += Objects.hashCode(columnName);
+        hash += Objects.hashCode(dataType);
+        hash += Objects.hashCode(dataTypeName);
+        hash += Objects.hashCode(columnSize);
+        hash += Objects.hashCode(decimalDigits);
+        hash += Objects.hashCode(numPrecRadix);
+        hash += Objects.hashCode(nullAble);
+        hash += Objects.hashCode(remarks);
+        hash += Objects.hashCode(columnDef);
+        hash += Objects.hashCode(sqlDataType);
+        hash += Objects.hashCode(sqlDatetimeSub);
+        hash += Objects.hashCode(charOctetLength);
+        hash += Objects.hashCode(ordinalPosition);
+        hash += Objects.hashCode(isNullAble);
+        hash += Objects.hashCode(isAutoincrement);
+        return hash;
     }
 }
