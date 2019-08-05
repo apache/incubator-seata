@@ -15,16 +15,13 @@
  */
 package io.seata.spring.annotation;
 
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Set;
-
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.netty.RmRpcClient;
 import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.core.rpc.netty.TmRpcClient;
 import io.seata.rm.RMClient;
+import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.spring.util.TCCBeanParserUtils;
@@ -42,9 +39,18 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.support.BeanDefinitionBuilder;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+
+import javax.sql.DataSource;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * The type Global transaction scanner.
@@ -53,8 +59,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  * @date 2018 /12/28
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
-    implements InitializingBean, ApplicationContextAware,
-    DisposableBean {
+    implements InitializingBean, ApplicationContextAware, DisposableBean, BeanPostProcessor {
 
     /**
      *
@@ -190,7 +195,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private void registerSpringShutdownHook() {
         if (applicationContext instanceof ConfigurableApplicationContext) {
-            ((ConfigurableApplicationContext)applicationContext).registerShutdownHook();
+            ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
         }
         ShutdownHook.getInstance().addDisposable(TmRpcClient.getInstance(applicationId, txServiceGroup));
@@ -216,7 +221,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
                     Class<?>[] interfacesIfJdk = SpringProxyUtils.findInterfaces(bean);
 
-                    if (!existsAnnotation(new Class[] {serviceInterface})
+                    if (!existsAnnotation(new Class[]{serviceInterface})
                         && !existsAnnotation(interfacesIfJdk)) {
                         return bean;
                     }
@@ -276,7 +281,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
         throws BeansException {
-        return new Object[] {interceptor};
+        return new Object[]{interceptor};
     }
 
     @Override
@@ -288,13 +293,33 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             return;
         }
         initClient();
-
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
         this.setBeanFactory(applicationContext);
+    }
+
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        return bean;
+    }
+
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
+        if (bean instanceof DataSource) {
+            Map beansOfTypeMaps = applicationContext.getBeansOfType(DataSourceProxy.class);
+            if (beansOfTypeMaps.size() < 1 && applicationContext instanceof ConfigurableApplicationContext) {
+                DefaultListableBeanFactory dbf = (DefaultListableBeanFactory) ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
+                //remove existing datasource
+                dbf.removeBeanDefinition(beanName);
+                //register the definition of DataSourceProxy
+                dbf.registerBeanDefinition(beanName, BeanDefinitionBuilder.genericBeanDefinition(DataSourceProxy.class).addConstructorArgValue(bean).getBeanDefinition());
+                bean = dbf.getBean(DataSourceProxy.class);
+            }
+        }
+        return bean;
     }
 
 }
