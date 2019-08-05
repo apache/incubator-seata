@@ -15,12 +15,13 @@
  */
 package io.seata.rm.datasource;
 
-import com.alibaba.druid.util.JdbcConstants;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
+
+import com.alibaba.druid.util.JdbcConstants;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
@@ -47,11 +48,6 @@ import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogManagerOracle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
 
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
@@ -151,6 +147,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     public void registerResource(Resource resource) {
         DataSourceProxy dataSourceProxy = (DataSourceProxy)resource;
         dataSourceCache.put(dataSourceProxy.getResourceId(), dataSourceProxy);
+        RESOURCE_LOCK.notifyAll();
         super.registerResource(dataSourceProxy);
     }
 
@@ -183,10 +180,9 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
             throw new ShouldNeverHappenException();
         }
         try {
-            if(JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
+            if (JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
                 UndoLogManagerOracle.undo(dataSourceProxy, xid, branchId);
-            }
-            else if(JdbcConstants.MYSQL.equalsIgnoreCase(dataSourceProxy.getDbType())){
+            } else if (JdbcConstants.MYSQL.equalsIgnoreCase(dataSourceProxy.getDbType())) {
                 UndoLogManager.undo(dataSourceProxy, xid, branchId);
             } else {
                 throw new NotSupportYetException("DbType[" + dataSourceProxy.getDbType() + "] is not support yet!");
