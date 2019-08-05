@@ -59,6 +59,8 @@ public class Server {
         //initialize the parameter parser
         ParameterParser parameterParser = new ParameterParser(args);
 
+        System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
+
         RpcServer rpcServer = new RpcServer(WORKING_THREADS);
         //server host
         rpcServer.setHost(parameterParser.getHost());
