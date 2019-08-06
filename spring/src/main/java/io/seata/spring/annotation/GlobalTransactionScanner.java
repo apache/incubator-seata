@@ -52,6 +52,8 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_AUTOPROXY;
+
 /**
  * The type Global transaction scanner.
  *
@@ -303,7 +305,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof DataSource) {
+        boolean autoProxy = ConfigurationFactory.getInstance().getBoolean(DATASOURCE_AUTOPROXY, false);
+        if (autoProxy && bean instanceof DataSource) {
             Map beansOfTypeMaps = applicationContext.getBeansOfType(DataSourceProxy.class);
             if (beansOfTypeMaps.size() < 1 && applicationContext instanceof ConfigurableApplicationContext) {
                 DefaultListableBeanFactory dbf = (DefaultListableBeanFactory) ((ConfigurableApplicationContext) applicationContext).getBeanFactory();

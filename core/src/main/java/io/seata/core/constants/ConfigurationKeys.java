@@ -35,7 +35,7 @@ public class ConfigurationKeys {
     /**
      * The constant STORE_MODE.
      */
-    public static final String STORE_MODE =  STORE_PREFIX + "mode";
+    public static final String STORE_MODE = STORE_PREFIX + "mode";
 
     /**
      * The constant STORE_FILE_PREFIX
@@ -106,7 +106,7 @@ public class ConfigurationKeys {
 
     /**
      * The constant COMPRESSOR_FOR_RPC.
-     * 
+     *
      * @since 0.7.0
      */
     public static final String COMPRESSOR_FOR_RPC = TRANSPORT_PREFIX + "compressor";
@@ -114,52 +114,52 @@ public class ConfigurationKeys {
     /**
      * The constant STORE_DB_GLOBAL_TABLE.
      */
-    public static final String STORE_DB_GLOBAL_TABLE  = "store.db.global.table";
+    public static final String STORE_DB_GLOBAL_TABLE = "store.db.global.table";
 
     /**
      * The constant STORE_DB_BRANCH_TABLE.
      */
-    public static final String STORE_DB_BRANCH_TABLE  = "store.db.branch.table";
+    public static final String STORE_DB_BRANCH_TABLE = "store.db.branch.table";
 
     /**
      * The constant STORE_DB_GLOBAL_DEFAULT_TABLE.
      */
-    public static final String STORE_DB_GLOBAL_DEFAULT_TABLE  = "global_table";
+    public static final String STORE_DB_GLOBAL_DEFAULT_TABLE = "global_table";
 
     /**
      * The constant STORE_DB_BRANCH_DEFAULT_TABLE.
      */
-    public static final String STORE_DB_BRANCH_DEFAULT_TABLE  = "branch_table";
+    public static final String STORE_DB_BRANCH_DEFAULT_TABLE = "branch_table";
 
     /**
      * The constant STORE_DB_DATASOURCE_TYPE.
      */
-    public static final String STORE_DB_DATASOURCE_TYPE  = "store.db.datasource";
+    public static final String STORE_DB_DATASOURCE_TYPE = "store.db.datasource";
 
 
     /**
      * The constant STORE_DB_TYPE.
      */
-    public static final String STORE_DB_TYPE  = "store.db.db-type";
+    public static final String STORE_DB_TYPE = "store.db.db-type";
     /**
      * The constant STORE_DB_DRIVER_CLASS_NAME.
      */
-    public static final String STORE_DB_DRIVER_CLASS_NAME  =  "store.db.driver-class-name";
+    public static final String STORE_DB_DRIVER_CLASS_NAME = "store.db.driver-class-name";
 
     /**
      * The constant STORE_DB_URL.
      */
-    public static final String STORE_DB_URL  = "store.db.url";
+    public static final String STORE_DB_URL = "store.db.url";
 
     /**
      * The constant STORE_DB_USER.
      */
-    public static final String STORE_DB_USER  = "store.db.user";
+    public static final String STORE_DB_USER = "store.db.user";
 
     /**
      * The constant STORE_DB_PASSWORD.
      */
-    public static final String STORE_DB_PASSWORD  = "store.db.password";
+    public static final String STORE_DB_PASSWORD = "store.db.password";
 
     /**
      * The constant STORE_DB_MIN_CONN.
@@ -169,47 +169,47 @@ public class ConfigurationKeys {
     /**
      * The constant STORE_DB_MAX_CONN.
      */
-    public static final String STORE_DB_MAX_CONN  = "store.db.max-conn";
+    public static final String STORE_DB_MAX_CONN = "store.db.max-conn";
 
     /**
      * The constant STORE_DB_LOG_QUERY_LIMIT.
      */
-    public static final String STORE_DB_LOG_QUERY_LIMIT  = "store.db.query-limit";
+    public static final String STORE_DB_LOG_QUERY_LIMIT = "store.db.query-limit";
 
     /**
      * The constant LOCK_MODE.
      */
-    public static final String LOCK_MODE =  "lock.mode";
+    public static final String LOCK_MODE = "lock.mode";
 
     /**
      * The constant LOCK_DB_TABLE.
      */
-    public static final String LOCK_DB_TABLE  = "store.db.lock-table";
+    public static final String LOCK_DB_TABLE = "store.db.lock-table";
 
     /**
      * The constant LOCK_DB_DEFAULT_TABLE.
      */
-    public static final String LOCK_DB_DEFAULT_TABLE  = "lock_table";
+    public static final String LOCK_DB_DEFAULT_TABLE = "lock_table";
 
     /**
      * The constant COMMITING_RETRY_DELAY.
      */
-    public static final String  COMMITING_RETRY_DELAY = "recovery.committing-retry-delay";
+    public static final String COMMITING_RETRY_DELAY = "recovery.committing-retry-delay";
 
     /**
      * The constant ASYN_COMMITING_RETRY_DELAY.
      */
-    public static final String  ASYN_COMMITING_RETRY_DELAY = "recovery.asyn-committing-retry-delay";
+    public static final String ASYN_COMMITING_RETRY_DELAY = "recovery.asyn-committing-retry-delay";
 
     /**
      * The constant ROLLBACKING_RETRY_DELAY.
      */
-    public static final String  ROLLBACKING_RETRY_DELAY = "recovery.rollbacking-retry-delay";
+    public static final String ROLLBACKING_RETRY_DELAY = "recovery.rollbacking-retry-delay";
 
     /**
      * The constant TIMEOUT_RETRY_DELAY.
      */
-    public static final String  TIMEOUT_RETRY_DELAY = "recovery.timeout-retry-delay";
+    public static final String TIMEOUT_RETRY_DELAY = "recovery.timeout-retry-delay";
 
     /**
      * The constant TRANSACTION_PREFIX.
@@ -254,4 +254,20 @@ public class ConfigurationKeys {
      * The constant TRANSACTION_UNDO_LOG_DELETE_DELAY
      */
     public static final String TRANSACTION_UNDO_LOG_DELETE_DELAY = TRANSACTION_PREFIX + "undo.log.delete.delay";
+    /**
+     * The constant SUPPORT_PREFIX.
+     */
+    public static final String SUPPORT_PREFIX = "support.";
+    /**
+     * The constant SPRING_PREFIX.
+     */
+    public static final String SPRING_PREFIX = "spring.";
+    /**
+     * The constant DATASOURCE_PREFIX.
+     */
+    public static final String DATASOURCE_PREFIX = "datasource.";
+    /**
+     * The constant DATASOURCE_AUTOPROXY.
+     */
+    public static final String DATASOURCE_AUTOPROXY = SUPPORT_PREFIX + SPRING_PREFIX + DATASOURCE_PREFIX + "autoproxy";
 }
