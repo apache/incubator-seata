@@ -15,13 +15,7 @@
  */
 package io.seata.core.rpc;
 
-import java.net.SocketAddress;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
+import io.netty.channel.Channel;
 import io.seata.common.Constants;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.StringUtils;
@@ -29,11 +23,17 @@ import io.seata.core.protocol.IncompatibleVersionException;
 import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.Version;
-
-import io.netty.channel.Channel;
 import io.seata.core.rpc.netty.NettyPoolKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.SocketAddress;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * The type channel manager.
@@ -353,8 +353,8 @@ public class ChannelManager {
                     Channel channel = exactRpcContext.getChannel();
                     if (channel.isActive()) {
                         resultChannel = channel;
-                        if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("Just got exactly the one " + channel + " for " + clientId);
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("Just got exactly the one " + channel + " for " + clientId);
                         }
                     } else {
                         if (portMapOnTargetIP.remove(targetPort, exactRpcContext)) {
@@ -454,7 +454,7 @@ public class ChannelManager {
         Channel chosenChannel = null;
         for (ConcurrentMap.Entry<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>> applicationIdMapEntry : applicationIdMap
             .entrySet()) {
-            if (applicationIdMapEntry.getKey().equals(myApplicationId)) {
+            if (!StringUtils.isNullOrEmpty(myApplicationId) && applicationIdMapEntry.getKey().equals(myApplicationId)) {
                 continue;
             }
 
@@ -489,5 +489,25 @@ public class ChannelManager {
         }
         return chosenChannel;
 
+    }
+
+    /**
+     * get rm channels
+     *
+     * @return
+     */
+    public static Map<String,Channel> getRmChannels() {
+        if (RM_CHANNELS.isEmpty()) {
+            return null;
+        }
+        Map<String,Channel> channels = new HashMap(RM_CHANNELS.size());
+        for (String resourceId : RM_CHANNELS.keySet()) {
+            Channel channel = tryOtherApp(RM_CHANNELS.get(resourceId), null);
+            if (channel == null) {
+                continue;
+            }
+            channels.put(resourceId, channel);
+        }
+        return channels;
     }
 }

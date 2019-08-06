@@ -15,12 +15,12 @@ headers = {
 hasError = False
 for line in open('nacos-config.txt'):
     pair = line.split('=')
-    if len(pair) != 2:
+    if len(pair) < 2:
         continue
     print (line),
     url_prefix = sys.argv[1] + ':8848'
     conn = http.client.HTTPConnection(url_prefix)
-    url_postfix = '/nacos/v1/cs/configs?dataId={}&group=SEATA_GROUP&content={}'.format(str(pair[0]),str(pair[1])).strip()
+    url_postfix = '/nacos/v1/cs/configs?dataId={}&group=SEATA_GROUP&content={}'.format(str(pair[0]),str(line[line.index('=')+1:])).strip()
     conn.request("POST", url_postfix, headers=headers)
     res = conn.getresponse()
     data = res.read()

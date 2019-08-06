@@ -22,6 +22,7 @@ import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -72,6 +73,8 @@ public abstract class BaseH2Test {
             } catch (SQLException e) {
             }
         }
+
+        FileUtils.deleteRecursive("db_store", true);
     }
 
     @BeforeEach

@@ -17,6 +17,9 @@ package io.seata.rm.datasource.sql.struct;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import org.apache.commons.lang.ArrayUtils;
 
 /**
  * The type Index meta.
@@ -210,6 +213,54 @@ public class IndexMeta {
      */
     public List<ColumnMeta> getIndexvalue() {
         return values;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof IndexMeta)) {
+            return false;
+        }
+        IndexMeta indexMeta = (IndexMeta) o;
+        if (!ArrayUtils.isEquals(indexMeta.values, this.values)) {
+            return false;
+        }
+        if (!Objects.equals(indexMeta.nonUnique, this.nonUnique)) {
+            return false;
+        }
+        if (!Objects.equals(indexMeta.indexQualifier, this.indexQualifier)) {
+            return false;
+        }
+        if (!Objects.equals(indexMeta.indexName, this.indexName)) {
+            return false;
+        }
+        if (!Objects.equals(indexMeta.type, this.type)) {
+            return false;
+        }
+        if (!Objects.equals(indexMeta.indextype.value(), this.indextype.value())) {
+            return false;
+        }
+        if (!Objects.equals(indexMeta.ascOrDesc, this.ascOrDesc)) {
+            return false;
+        }
+        if (!Objects.equals(indexMeta.ordinalPosition, this.ordinalPosition)){
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = Objects.hashCode(nonUnique);
+        hash += Objects.hashCode(indexQualifier);
+        hash += Objects.hashCode(indexName);
+        hash += Objects.hashCode(type);
+        hash += Objects.hashCode(indextype);
+        hash += Objects.hashCode(ascOrDesc);
+        hash += Objects.hashCode(ordinalPosition);
+        return hash;
     }
 
     @Override

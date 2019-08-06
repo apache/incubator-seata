@@ -15,6 +15,10 @@
  */
 package io.seata.rm.datasource;
 
+import com.alibaba.druid.util.JdbcConstants;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
@@ -25,11 +29,9 @@ import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoLogManager;
+import io.seata.rm.datasource.undo.UndoLogManagerOracle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.Connection;
-import java.sql.SQLException;
 
 /**
  * The type Connection proxy.
@@ -44,7 +46,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private static final int DEFAULT_REPORT_RETRY_COUNT = 5;
 
-    private static int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
+    private static int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
+        ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
 
     /**
      * Instantiates a new Connection proxy.
@@ -99,7 +102,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     public void checkLock(String lockKeys) throws SQLException {
         // Just check lock without requiring lock by now.
         try {
-            boolean lockable = DefaultResourceManager.get().lockQuery(BranchType.AT, getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
+            boolean lockable = DefaultResourceManager.get().lockQuery(BranchType.AT,
+                getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
             if (!lockable) {
                 throw new LockConflictException();
             }
@@ -117,7 +121,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     public void register(String lockKeys) throws SQLException {
         // Just check lock without requiring lock by now.
         try {
-            DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(), null, context.getXid(), null, lockKeys);
+            DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(), null,
+                context.getXid(), null, lockKeys);
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e);
         }
@@ -181,7 +186,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
         try {
             if (context.hasUndoLog()) {
-                UndoLogManager.flushUndoLogs(this);
+               if(JdbcConstants.ORACLE.equalsIgnoreCase(this.getDbType())) {
+                   UndoLogManagerOracle.flushUndoLogs(this);
+               } else {
+                   UndoLogManager.flushUndoLogs(this);
+               }
             }
             targetConnection.commit();
         } catch (Throwable ex) {
@@ -196,7 +205,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private void register() throws TransactionException {
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
-                null, context.getXid(), null, context.buildLockKeys());
+            null, context.getXid(), null, context.buildLockKeys());
         context.setBranchId(branchId);
     }
 
@@ -225,11 +234,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         while (retry > 0) {
             try {
                 DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),
-                        (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
+                    (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["
-                        + commitDone + "] Retry Countdown: " + retry);
+                    + commitDone + "] Retry Countdown: " + retry);
                 retry--;
 
                 if (retry == 0) {
