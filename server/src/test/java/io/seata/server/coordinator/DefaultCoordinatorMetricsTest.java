@@ -31,6 +31,7 @@ import io.seata.metrics.Measurement;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -39,6 +40,8 @@ import org.junit.jupiter.api.Test;
  * @author zhengyangyong
  */
 public class DefaultCoordinatorMetricsTest {
+
+    @Disabled("https://github.com/seata/seata/issues/1406")
     @Test
     public void test() throws IOException, TransactionException, InterruptedException {
         SessionHolder.init(null);
