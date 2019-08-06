@@ -305,8 +305,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        boolean autoProxy = ConfigurationFactory.getInstance().getBoolean(DATASOURCE_AUTOPROXY, false);
-        if (autoProxy && bean instanceof DataSource) {
+        if (bean instanceof DataSource && ConfigurationFactory.getInstance().getBoolean(DATASOURCE_AUTOPROXY, false)) {
             Map beansOfTypeMaps = applicationContext.getBeansOfType(DataSourceProxy.class);
             if (beansOfTypeMaps.size() < 1 && applicationContext instanceof ConfigurableApplicationContext) {
                 DefaultListableBeanFactory dbf = (DefaultListableBeanFactory) ((ConfigurableApplicationContext) applicationContext).getBeanFactory();
