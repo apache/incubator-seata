@@ -56,473 +56,1057 @@ public class MySQLKeywordChecker implements KeywordChecker {
      */
     private enum MySQLKeyword {
         /**
-         * Select my sql keyword.
+         * ACCESSIBLE is mysql keyword.
          */
-        SELECT("SELECT"),
+        ACCESSIBLE("ACCESSIBLE"),
         /**
-         * Delete my sql keyword.
+         * ADD is mysql keyword.
          */
-        DELETE("DELETE"),
+        ADD("ADD"),
         /**
-         * Insert my sql keyword.
-         */
-        INSERT("INSERT"),
-        /**
-         * Update my sql keyword.
-         */
-        UPDATE("UPDATE"),
-
-        /**
-         * From my sql keyword.
-         */
-        FROM("FROM"),
-        /**
-         * Having my sql keyword.
-         */
-        HAVING("HAVING"),
-        /**
-         * Where my sql keyword.
-         */
-        WHERE("WHERE"),
-        /**
-         * Order my sql keyword.
-         */
-        ORDER("ORDER"),
-        /**
-         * By my sql keyword.
-         */
-        BY("BY"),
-        /**
-         * Group my sql keyword.
-         */
-        GROUP("GROUP"),
-        /**
-         * Into my sql keyword.
-         */
-        INTO("INTO"),
-        /**
-         * As my sql keyword.
-         */
-        AS("AS"),
-
-        /**
-         * Create my sql keyword.
-         */
-        CREATE("CREATE"),
-        /**
-         * Alter my sql keyword.
-         */
-        ALTER("ALTER"),
-        /**
-         * Drop my sql keyword.
-         */
-        DROP("DROP"),
-        /**
-         * Set my sql keyword.
-         */
-        SET("SET"),
-
-        /**
-         * Null my sql keyword.
-         */
-        NULL("NULL"),
-        /**
-         * Not my sql keyword.
-         */
-        NOT("NOT"),
-        /**
-         * Distinct my sql keyword.
-         */
-        DISTINCT("DISTINCT"),
-
-        /**
-         * Table my sql keyword.
-         */
-        TABLE("TABLE"),
-        /**
-         * Tablespace my sql keyword.
-         */
-        TABLESPACE("TABLESPACE"),
-        /**
-         * View my sql keyword.
-         */
-        VIEW("VIEW"),
-        /**
-         * Sequence my sql keyword.
-         */
-        SEQUENCE("SEQUENCE"),
-        /**
-         * Trigger my sql keyword.
-         */
-        TRIGGER("TRIGGER"),
-        /**
-         * User my sql keyword.
-         */
-        USER("USER"),
-        /**
-         * Index my sql keyword.
-         */
-        INDEX("INDEX"),
-        /**
-         * Session my sql keyword.
-         */
-        SESSION("SESSION"),
-        /**
-         * Procedure my sql keyword.
-         */
-        PROCEDURE("PROCEDURE"),
-        /**
-         * Function my sql keyword.
-         */
-        FUNCTION("FUNCTION"),
-
-        /**
-         * Primary my sql keyword.
-         */
-        PRIMARY("PRIMARY"),
-        /**
-         * Key my sql keyword.
-         */
-        KEY("KEY"),
-        /**
-         * Default my sql keyword.
-         */
-        DEFAULT("DEFAULT"),
-        /**
-         * Constraint my sql keyword.
-         */
-        CONSTRAINT("CONSTRAINT"),
-        /**
-         * Check my sql keyword.
-         */
-        CHECK("CHECK"),
-        /**
-         * Unique my sql keyword.
-         */
-        UNIQUE("UNIQUE"),
-        /**
-         * Foreign my sql keyword.
-         */
-        FOREIGN("FOREIGN"),
-        /**
-         * References my sql keyword.
-         */
-        REFERENCES("REFERENCES"),
-
-        /**
-         * Explain my sql keyword.
-         */
-        EXPLAIN("EXPLAIN"),
-        /**
-         * For my sql keyword.
-         */
-        FOR("FOR"),
-        /**
-         * If my sql keyword.
-         */
-        IF("IF"),
-        /**
-         * Sort my sql keyword.
-         */
-        SORT("SORT"),
-
-        /**
-         * All my sql keyword.
+         * ALL is mysql keyword.
          */
         ALL("ALL"),
         /**
-         * Union my sql keyword.
+         * ALTER is mysql keyword.
          */
-        UNION("UNION"),
+        ALTER("ALTER"),
         /**
-         * Except my sql keyword.
+         * ANALYZE is mysql keyword.
          */
-        EXCEPT("EXCEPT"),
+        ANALYZE("ANALYZE"),
         /**
-         * Intersect my sql keyword.
-         */
-        INTERSECT("INTERSECT"),
-        /**
-         * Minus my sql keyword.
-         */
-        MINUS("MINUS"),
-        /**
-         * Inner my sql keyword.
-         */
-        INNER("INNER"),
-        /**
-         * Left my sql keyword.
-         */
-        LEFT("LEFT"),
-        /**
-         * Right my sql keyword.
-         */
-        RIGHT("RIGHT"),
-        /**
-         * Full my sql keyword.
-         */
-        FULL("FULL"),
-        /**
-         * Outer my sql keyword.
-         */
-        OUTER("OUTER"),
-        /**
-         * Join my sql keyword.
-         */
-        JOIN("JOIN"),
-        /**
-         * On my sql keyword.
-         */
-        ON("ON"),
-        /**
-         * Schema my sql keyword.
-         */
-        SCHEMA("SCHEMA"),
-        /**
-         * Cast my sql keyword.
-         */
-        CAST("CAST"),
-        /**
-         * Column my sql keyword.
-         */
-        COLUMN("COLUMN"),
-        /**
-         * Use my sql keyword.
-         */
-        USE("USE"),
-        /**
-         * Database my sql keyword.
-         */
-        DATABASE("DATABASE"),
-        /**
-         * To my sql keyword.
-         */
-        TO("TO"),
-
-        /**
-         * And my sql keyword.
+         * AND is mysql keyword.
          */
         AND("AND"),
         /**
-         * Or my sql keyword.
+         * ARRAY is mysql keyword.
          */
-        OR("OR"),
+        ARRAY("ARRAY"),
         /**
-         * Xor my sql keyword.
+         * AS is mysql keyword.
          */
-        XOR("XOR"),
+        AS("AS"),
         /**
-         * Case my sql keyword.
-         */
-        CASE("CASE"),
-        /**
-         * When my sql keyword.
-         */
-        WHEN("WHEN"),
-        /**
-         * Then my sql keyword.
-         */
-        THEN("THEN"),
-        /**
-         * Else my sql keyword.
-         */
-        ELSE("ELSE"),
-        /**
-         * Elsif my sql keyword.
-         */
-        ELSIF("ELSIF"),
-        /**
-         * End my sql keyword.
-         */
-        END("END"),
-        /**
-         * Exists my sql keyword.
-         */
-        EXISTS("EXISTS"),
-        /**
-         * In my sql keyword.
-         */
-        IN("IN"),
-        /**
-         * Contains my sql keyword.
-         */
-        CONTAINS("CONTAINS"),
-        /**
-         * Rlike my sql keyword.
-         */
-        RLIKE("RLIKE"),
-        /**
-         * Fulltext my sql keyword.
-         */
-        FULLTEXT("FULLTEXT"),
-
-        /**
-         * New my sql keyword.
-         */
-        NEW("NEW"),
-        /**
-         * Asc my sql keyword.
+         * ASC is mysql keyword.
          */
         ASC("ASC"),
         /**
-         * Desc my sql keyword.
+         * ASENSITIVE is mysql keyword.
          */
-        DESC("DESC"),
+        ASENSITIVE("ASENSITIVE"),
         /**
-         * Is my sql keyword.
+         * BEFORE is mysql keyword.
          */
-        IS("IS"),
+        BEFORE("BEFORE"),
         /**
-         * Like my sql keyword.
-         */
-        LIKE("LIKE"),
-        /**
-         * Escape my sql keyword.
-         */
-        ESCAPE("ESCAPE"),
-        /**
-         * Between my sql keyword.
+         * BETWEEN is mysql keyword.
          */
         BETWEEN("BETWEEN"),
         /**
-         * Values my sql keyword.
+         * BIGINT is mysql keyword.
          */
-        VALUES("VALUES"),
+        BIGINT("BIGINT"),
         /**
-         * Interval my sql keyword.
-         */
-        INTERVAL("INTERVAL"),
-
-        /**
-         * Lock my sql keyword.
-         */
-        LOCK("LOCK"),
-        /**
-         * Some my sql keyword.
-         */
-        SOME("SOME"),
-        /**
-         * Any my sql keyword.
-         */
-        ANY("ANY"),
-        /**
-         * Truncate my sql keyword.
-         */
-        TRUNCATE("TRUNCATE"),
-
-        /**
-         * Return my sql keyword.
-         */
-        RETURN("RETURN"),
-
-        /**
-         * True my sql keyword.
-         */
-        // mysql
-        TRUE("TRUE"),
-        /**
-         * False my sql keyword.
-         */
-        FALSE("FALSE"),
-        /**
-         * Limit my sql keyword.
-         */
-        LIMIT("LIMIT"),
-        /**
-         * Kill my sql keyword.
-         */
-        KILL("KILL"),
-        /**
-         * Identified my sql keyword.
-         */
-        IDENTIFIED("IDENTIFIED"),
-        /**
-         * Password my sql keyword.
-         */
-        PASSWORD("PASSWORD"),
-        /**
-         * Algorithm my sql keyword.
-         */
-        ALGORITHM("ALGORITHM"),
-        /**
-         * Dual my sql keyword.
-         */
-        DUAL("DUAL"),
-        /**
-         * Binary my sql keyword.
+         * BINARY is mysql keyword.
          */
         BINARY("BINARY"),
         /**
-         * Show my sql keyword.
+         * BLOB is mysql keyword.
          */
-        SHOW("SHOW"),
+        BLOB("BLOB"),
         /**
-         * Replace my sql keyword.
+         * BOTH is mysql keyword.
          */
-        REPLACE("REPLACE"),
-
+        BOTH("BOTH"),
         /**
-         * The While.
+         * BY is mysql keyword.
          */
-        // MySql procedure add by zz
-        WHILE("WHILE"),
+        BY("BY"),
         /**
-         * Do my sql keyword.
+         * CALL is mysql keyword.
          */
-        DO("DO"),
+        CALL("CALL"),
         /**
-         * Leave my sql keyword.
+         * CASCADE is mysql keyword.
          */
-        LEAVE("LEAVE"),
+        CASCADE("CASCADE"),
         /**
-         * Iterate my sql keyword.
+         * CASE is mysql keyword.
          */
-        ITERATE("ITERATE"),
+        CASE("CASE"),
         /**
-         * Repeat my sql keyword.
+         * CHANGE is mysql keyword.
          */
-        REPEAT("REPEAT"),
+        CHANGE("CHANGE"),
         /**
-         * Until my sql keyword.
+         * CHAR is mysql keyword.
          */
-        UNTIL("UNTIL"),
+        CHAR("CHAR"),
         /**
-         * Open my sql keyword.
+         * CHARACTER is mysql keyword.
          */
-        OPEN("OPEN"),
+        CHARACTER("CHARACTER"),
         /**
-         * Close my sql keyword.
+         * CHECK is mysql keyword.
          */
-        CLOSE("CLOSE"),
+        CHECK("CHECK"),
         /**
-         * Out my sql keyword.
+         * COLLATE is mysql keyword.
          */
-        OUT("OUT"),
+        COLLATE("COLLATE"),
         /**
-         * Inout my sql keyword.
+         * COLUMN is mysql keyword.
          */
-        INOUT("INOUT"),
+        COLUMN("COLUMN"),
         /**
-         * Exit my sql keyword.
-         */
-        EXIT("EXIT"),
-        /**
-         * Undo my sql keyword.
-         */
-        UNDO("UNDO"),
-        /**
-         * Sqlstate my sql keyword.
-         */
-        SQLSTATE("SQLSTATE"),
-        /**
-         * Condition my sql keyword.
+         * CONDITION is mysql keyword.
          */
         CONDITION("CONDITION"),
         /**
-         * Div my sql keyword.
+         * CONSTRAINT is mysql keyword.
          */
-        DIV("DIV");
-
+        CONSTRAINT("CONSTRAINT"),
+        /**
+         * CONTINUE is mysql keyword.
+         */
+        CONTINUE("CONTINUE"),
+        /**
+         * CONVERT is mysql keyword.
+         */
+        CONVERT("CONVERT"),
+        /**
+         * CREATE is mysql keyword.
+         */
+        CREATE("CREATE"),
+        /**
+         * CROSS is mysql keyword.
+         */
+        CROSS("CROSS"),
+        /**
+         * CUBE is mysql keyword.
+         */
+        CUBE("CUBE"),
+        /**
+         * CUME_DIST is mysql keyword.
+         */
+        CUME_DIST("CUME_DIST"),
+        /**
+         * CURRENT_DATE is mysql keyword.
+         */
+        CURRENT_DATE("CURRENT_DATE"),
+        /**
+         * CURRENT_TIME is mysql keyword.
+         */
+        CURRENT_TIME("CURRENT_TIME"),
+        /**
+         * CURRENT_TIMESTAMP is mysql keyword.
+         */
+        CURRENT_TIMESTAMP("CURRENT_TIMESTAMP"),
+        /**
+         * CURRENT_USER is mysql keyword.
+         */
+        CURRENT_USER("CURRENT_USER"),
+        /**
+         * CURSOR is mysql keyword.
+         */
+        CURSOR("CURSOR"),
+        /**
+         * DATABASE is mysql keyword.
+         */
+        DATABASE("DATABASE"),
+        /**
+         * DATABASES is mysql keyword.
+         */
+        DATABASES("DATABASES"),
+        /**
+         * DAY_HOUR is mysql keyword.
+         */
+        DAY_HOUR("DAY_HOUR"),
+        /**
+         * DAY_MICROSECOND is mysql keyword.
+         */
+        DAY_MICROSECOND("DAY_MICROSECOND"),
+        /**
+         * DAY_MINUTE is mysql keyword.
+         */
+        DAY_MINUTE("DAY_MINUTE"),
+        /**
+         * DAY_SECOND is mysql keyword.
+         */
+        DAY_SECOND("DAY_SECOND"),
+        /**
+         * DEC is mysql keyword.
+         */
+        DEC("DEC"),
+        /**
+         * DECIMAL is mysql keyword.
+         */
+        DECIMAL("DECIMAL"),
+        /**
+         * DECLARE is mysql keyword.
+         */
+        DECLARE("DECLARE"),
+        /**
+         * DEFAULT is mysql keyword.
+         */
+        DEFAULT("DEFAULT"),
+        /**
+         * DELAYED is mysql keyword.
+         */
+        DELAYED("DELAYED"),
+        /**
+         * DELETE is mysql keyword.
+         */
+        DELETE("DELETE"),
+        /**
+         * DENSE_RANK is mysql keyword.
+         */
+        DENSE_RANK("DENSE_RANK"),
+        /**
+         * DESC is mysql keyword.
+         */
+        DESC("DESC"),
+        /**
+         * DESCRIBE is mysql keyword.
+         */
+        DESCRIBE("DESCRIBE"),
+        /**
+         * DETERMINISTIC is mysql keyword.
+         */
+        DETERMINISTIC("DETERMINISTIC"),
+        /**
+         * DISTINCT is mysql keyword.
+         */
+        DISTINCT("DISTINCT"),
+        /**
+         * DISTINCTROW is mysql keyword.
+         */
+        DISTINCTROW("DISTINCTROW"),
+        /**
+         * DIV is mysql keyword.
+         */
+        DIV("DIV"),
+        /**
+         * DOUBLE is mysql keyword.
+         */
+        DOUBLE("DOUBLE"),
+        /**
+         * DROP is mysql keyword.
+         */
+        DROP("DROP"),
+        /**
+         * DUAL is mysql keyword.
+         */
+        DUAL("DUAL"),
+        /**
+         * EACH is mysql keyword.
+         */
+        EACH("EACH"),
+        /**
+         * ELSE is mysql keyword.
+         */
+        ELSE("ELSE"),
+        /**
+         * ELSEIF is mysql keyword.
+         */
+        ELSEIF("ELSEIF"),
+        /**
+         * EMPTY is mysql keyword.
+         */
+        EMPTY("EMPTY"),
+        /**
+         * ENCLOSED is mysql keyword.
+         */
+        ENCLOSED("ENCLOSED"),
+        /**
+         * ESCAPED is mysql keyword.
+         */
+        ESCAPED("ESCAPED"),
+        /**
+         * EXCEPT is mysql keyword.
+         */
+        EXCEPT("EXCEPT"),
+        /**
+         * EXISTS is mysql keyword.
+         */
+        EXISTS("EXISTS"),
+        /**
+         * EXIT is mysql keyword.
+         */
+        EXIT("EXIT"),
+        /**
+         * EXPLAIN is mysql keyword.
+         */
+        EXPLAIN("EXPLAIN"),
+        /**
+         * FALSE is mysql keyword.
+         */
+        FALSE("FALSE"),
+        /**
+         * FETCH is mysql keyword.
+         */
+        FETCH("FETCH"),
+        /**
+         * FIRST_VALUE is mysql keyword.
+         */
+        FIRST_VALUE("FIRST_VALUE"),
+        /**
+         * FLOAT is mysql keyword.
+         */
+        FLOAT("FLOAT"),
+        /**
+         * FLOAT4 is mysql keyword.
+         */
+        FLOAT4("FLOAT4"),
+        /**
+         * FLOAT8 is mysql keyword.
+         */
+        FLOAT8("FLOAT8"),
+        /**
+         * FOR is mysql keyword.
+         */
+        FOR("FOR"),
+        /**
+         * FORCE is mysql keyword.
+         */
+        FORCE("FORCE"),
+        /**
+         * FOREIGN is mysql keyword.
+         */
+        FOREIGN("FOREIGN"),
+        /**
+         * FROM is mysql keyword.
+         */
+        FROM("FROM"),
+        /**
+         * FULLTEXT is mysql keyword.
+         */
+        FULLTEXT("FULLTEXT"),
+        /**
+         * FUNCTION is mysql keyword.
+         */
+        FUNCTION("FUNCTION"),
+        /**
+         * GENERATED is mysql keyword.
+         */
+        GENERATED("GENERATED"),
+        /**
+         * GET is mysql keyword.
+         */
+        GET("GET"),
+        /**
+         * GRANT is mysql keyword.
+         */
+        GRANT("GRANT"),
+        /**
+         * GROUP is mysql keyword.
+         */
+        GROUP("GROUP"),
+        /**
+         * GROUPING is mysql keyword.
+         */
+        GROUPING("GROUPING"),
+        /**
+         * GROUPS is mysql keyword.
+         */
+        GROUPS("GROUPS"),
+        /**
+         * HAVING is mysql keyword.
+         */
+        HAVING("HAVING"),
+        /**
+         * HIGH_PRIORITY is mysql keyword.
+         */
+        HIGH_PRIORITY("HIGH_PRIORITY"),
+        /**
+         * HOUR_MICROSECOND is mysql keyword.
+         */
+        HOUR_MICROSECOND("HOUR_MICROSECOND"),
+        /**
+         * HOUR_MINUTE is mysql keyword.
+         */
+        HOUR_MINUTE("HOUR_MINUTE"),
+        /**
+         * HOUR_SECOND is mysql keyword.
+         */
+        HOUR_SECOND("HOUR_SECOND"),
+        /**
+         * IF is mysql keyword.
+         */
+        IF("IF"),
+        /**
+         * IGNORE is mysql keyword.
+         */
+        IGNORE("IGNORE"),
+        /**
+         * IN is mysql keyword.
+         */
+        IN("IN"),
+        /**
+         * INDEX is mysql keyword.
+         */
+        INDEX("INDEX"),
+        /**
+         * INFILE is mysql keyword.
+         */
+        INFILE("INFILE"),
+        /**
+         * INNER is mysql keyword.
+         */
+        INNER("INNER"),
+        /**
+         * INOUT is mysql keyword.
+         */
+        INOUT("INOUT"),
+        /**
+         * INSENSITIVE is mysql keyword.
+         */
+        INSENSITIVE("INSENSITIVE"),
+        /**
+         * INSERT is mysql keyword.
+         */
+        INSERT("INSERT"),
+        /**
+         * INT is mysql keyword.
+         */
+        INT("INT"),
+        /**
+         * INT1 is mysql keyword.
+         */
+        INT1("INT1"),
+        /**
+         * INT2 is mysql keyword.
+         */
+        INT2("INT2"),
+        /**
+         * INT3 is mysql keyword.
+         */
+        INT3("INT3"),
+        /**
+         * INT4 is mysql keyword.
+         */
+        INT4("INT4"),
+        /**
+         * INT8 is mysql keyword.
+         */
+        INT8("INT8"),
+        /**
+         * INTEGER is mysql keyword.
+         */
+        INTEGER("INTEGER"),
+        /**
+         * INTERVAL is mysql keyword.
+         */
+        INTERVAL("INTERVAL"),
+        /**
+         * INTO is mysql keyword.
+         */
+        INTO("INTO"),
+        /**
+         * IO_AFTER_GTIDS is mysql keyword.
+         */
+        IO_AFTER_GTIDS("IO_AFTER_GTIDS"),
+        /**
+         * IO_BEFORE_GTIDS is mysql keyword.
+         */
+        IO_BEFORE_GTIDS("IO_BEFORE_GTIDS"),
+        /**
+         * IS is mysql keyword.
+         */
+        IS("IS"),
+        /**
+         * ITERATE is mysql keyword.
+         */
+        ITERATE("ITERATE"),
+        /**
+         * JOIN is mysql keyword.
+         */
+        JOIN("JOIN"),
+        /**
+         * JSON_TABLE is mysql keyword.
+         */
+        JSON_TABLE("JSON_TABLE"),
+        /**
+         * KEY is mysql keyword.
+         */
+        KEY("KEY"),
+        /**
+         * KEYS is mysql keyword.
+         */
+        KEYS("KEYS"),
+        /**
+         * KILL is mysql keyword.
+         */
+        KILL("KILL"),
+        /**
+         * LAG is mysql keyword.
+         */
+        LAG("LAG"),
+        /**
+         * LAST_VALUE is mysql keyword.
+         */
+        LAST_VALUE("LAST_VALUE"),
+        /**
+         * LATERAL is mysql keyword.
+         */
+        LATERAL("LATERAL"),
+        /**
+         * LEAD is mysql keyword.
+         */
+        LEAD("LEAD"),
+        /**
+         * LEADING is mysql keyword.
+         */
+        LEADING("LEADING"),
+        /**
+         * LEAVE is mysql keyword.
+         */
+        LEAVE("LEAVE"),
+        /**
+         * LEFT is mysql keyword.
+         */
+        LEFT("LEFT"),
+        /**
+         * LIKE is mysql keyword.
+         */
+        LIKE("LIKE"),
+        /**
+         * LIMIT is mysql keyword.
+         */
+        LIMIT("LIMIT"),
+        /**
+         * LINEAR is mysql keyword.
+         */
+        LINEAR("LINEAR"),
+        /**
+         * LINES is mysql keyword.
+         */
+        LINES("LINES"),
+        /**
+         * LOAD is mysql keyword.
+         */
+        LOAD("LOAD"),
+        /**
+         * LOCALTIME is mysql keyword.
+         */
+        LOCALTIME("LOCALTIME"),
+        /**
+         * LOCALTIMESTAMP is mysql keyword.
+         */
+        LOCALTIMESTAMP("LOCALTIMESTAMP"),
+        /**
+         * LOCK is mysql keyword.
+         */
+        LOCK("LOCK"),
+        /**
+         * LONG is mysql keyword.
+         */
+        LONG("LONG"),
+        /**
+         * LONGBLOB is mysql keyword.
+         */
+        LONGBLOB("LONGBLOB"),
+        /**
+         * LONGTEXT is mysql keyword.
+         */
+        LONGTEXT("LONGTEXT"),
+        /**
+         * LOOP is mysql keyword.
+         */
+        LOOP("LOOP"),
+        /**
+         * LOW_PRIORITY is mysql keyword.
+         */
+        LOW_PRIORITY("LOW_PRIORITY"),
+        /**
+         * MASTER_BIND is mysql keyword.
+         */
+        MASTER_BIND("MASTER_BIND"),
+        /**
+         * MASTER_SSL_VERIFY_SERVER_CERT is mysql keyword.
+         */
+        MASTER_SSL_VERIFY_SERVER_CERT("MASTER_SSL_VERIFY_SERVER_CERT"),
+        /**
+         * MATCH is mysql keyword.
+         */
+        MATCH("MATCH"),
+        /**
+         * MAXVALUE is mysql keyword.
+         */
+        MAXVALUE("MAXVALUE"),
+        /**
+         * MEDIUMBLOB is mysql keyword.
+         */
+        MEDIUMBLOB("MEDIUMBLOB"),
+        /**
+         * MEDIUMINT is mysql keyword.
+         */
+        MEDIUMINT("MEDIUMINT"),
+        /**
+         * MEDIUMTEXT is mysql keyword.
+         */
+        MEDIUMTEXT("MEDIUMTEXT"),
+        /**
+         * MEMBER is mysql keyword.
+         */
+        MEMBER("MEMBER"),
+        /**
+         * MIDDLEINT is mysql keyword.
+         */
+        MIDDLEINT("MIDDLEINT"),
+        /**
+         * MINUTE_MICROSECOND is mysql keyword.
+         */
+        MINUTE_MICROSECOND("MINUTE_MICROSECOND"),
+        /**
+         * MINUTE_SECOND is mysql keyword.
+         */
+        MINUTE_SECOND("MINUTE_SECOND"),
+        /**
+         * MOD is mysql keyword.
+         */
+        MOD("MOD"),
+        /**
+         * MODIFIES is mysql keyword.
+         */
+        MODIFIES("MODIFIES"),
+        /**
+         * NATURAL is mysql keyword.
+         */
+        NATURAL("NATURAL"),
+        /**
+         * NOT is mysql keyword.
+         */
+        NOT("NOT"),
+        /**
+         * NO_WRITE_TO_BINLOG is mysql keyword.
+         */
+        NO_WRITE_TO_BINLOG("NO_WRITE_TO_BINLOG"),
+        /**
+         * NTH_VALUE is mysql keyword.
+         */
+        NTH_VALUE("NTH_VALUE"),
+        /**
+         * NTILE is mysql keyword.
+         */
+        NTILE("NTILE"),
+        /**
+         * NULL is mysql keyword.
+         */
+        NULL("NULL"),
+        /**
+         * NUMERIC is mysql keyword.
+         */
+        NUMERIC("NUMERIC"),
+        /**
+         * OF is mysql keyword.
+         */
+        OF("OF"),
+        /**
+         * ON is mysql keyword.
+         */
+        ON("ON"),
+        /**
+         * OPTIMIZE is mysql keyword.
+         */
+        OPTIMIZE("OPTIMIZE"),
+        /**
+         * OPTIMIZER_COSTS is mysql keyword.
+         */
+        OPTIMIZER_COSTS("OPTIMIZER_COSTS"),
+        /**
+         * OPTION is mysql keyword.
+         */
+        OPTION("OPTION"),
+        /**
+         * OPTIONALLY is mysql keyword.
+         */
+        OPTIONALLY("OPTIONALLY"),
+        /**
+         * OR is mysql keyword.
+         */
+        OR("OR"),
+        /**
+         * ORDER is mysql keyword.
+         */
+        ORDER("ORDER"),
+        /**
+         * OUT is mysql keyword.
+         */
+        OUT("OUT"),
+        /**
+         * OUTER is mysql keyword.
+         */
+        OUTER("OUTER"),
+        /**
+         * OUTFILE is mysql keyword.
+         */
+        OUTFILE("OUTFILE"),
+        /**
+         * OVER is mysql keyword.
+         */
+        OVER("OVER"),
+        /**
+         * PARTITION is mysql keyword.
+         */
+        PARTITION("PARTITION"),
+        /**
+         * PERCENT_RANK is mysql keyword.
+         */
+        PERCENT_RANK("PERCENT_RANK"),
+        /**
+         * PRECISION is mysql keyword.
+         */
+        PRECISION("PRECISION"),
+        /**
+         * PRIMARY is mysql keyword.
+         */
+        PRIMARY("PRIMARY"),
+        /**
+         * PROCEDURE is mysql keyword.
+         */
+        PROCEDURE("PROCEDURE"),
+        /**
+         * PURGE is mysql keyword.
+         */
+        PURGE("PURGE"),
+        /**
+         * RANGE is mysql keyword.
+         */
+        RANGE("RANGE"),
+        /**
+         * RANK is mysql keyword.
+         */
+        RANK("RANK"),
+        /**
+         * READ is mysql keyword.
+         */
+        READ("READ"),
+        /**
+         * READS is mysql keyword.
+         */
+        READS("READS"),
+        /**
+         * READ_WRITE is mysql keyword.
+         */
+        READ_WRITE("READ_WRITE"),
+        /**
+         * REAL is mysql keyword.
+         */
+        REAL("REAL"),
+        /**
+         * RECURSIVE is mysql keyword.
+         */
+        RECURSIVE("RECURSIVE"),
+        /**
+         * REFERENCES is mysql keyword.
+         */
+        REFERENCES("REFERENCES"),
+        /**
+         * REGEXP is mysql keyword.
+         */
+        REGEXP("REGEXP"),
+        /**
+         * RELEASE is mysql keyword.
+         */
+        RELEASE("RELEASE"),
+        /**
+         * RENAME is mysql keyword.
+         */
+        RENAME("RENAME"),
+        /**
+         * REPEAT is mysql keyword.
+         */
+        REPEAT("REPEAT"),
+        /**
+         * REPLACE is mysql keyword.
+         */
+        REPLACE("REPLACE"),
+        /**
+         * REQUIRE is mysql keyword.
+         */
+        REQUIRE("REQUIRE"),
+        /**
+         * RESIGNAL is mysql keyword.
+         */
+        RESIGNAL("RESIGNAL"),
+        /**
+         * RESTRICT is mysql keyword.
+         */
+        RESTRICT("RESTRICT"),
+        /**
+         * RETURN is mysql keyword.
+         */
+        RETURN("RETURN"),
+        /**
+         * REVOKE is mysql keyword.
+         */
+        REVOKE("REVOKE"),
+        /**
+         * RIGHT is mysql keyword.
+         */
+        RIGHT("RIGHT"),
+        /**
+         * RLIKE is mysql keyword.
+         */
+        RLIKE("RLIKE"),
+        /**
+         * ROW is mysql keyword.
+         */
+        ROW("ROW"),
+        /**
+         * ROWS is mysql keyword.
+         */
+        ROWS("ROWS"),
+        /**
+         * ROW_NUMBER is mysql keyword.
+         */
+        ROW_NUMBER("ROW_NUMBER"),
+        /**
+         * SCHEMA is mysql keyword.
+         */
+        SCHEMA("SCHEMA"),
+        /**
+         * SCHEMAS is mysql keyword.
+         */
+        SCHEMAS("SCHEMAS"),
+        /**
+         * SECOND_MICROSECOND is mysql keyword.
+         */
+        SECOND_MICROSECOND("SECOND_MICROSECOND"),
+        /**
+         * SELECT is mysql keyword.
+         */
+        SELECT("SELECT"),
+        /**
+         * SENSITIVE is mysql keyword.
+         */
+        SENSITIVE("SENSITIVE"),
+        /**
+         * SEPARATOR is mysql keyword.
+         */
+        SEPARATOR("SEPARATOR"),
+        /**
+         * SET is mysql keyword.
+         */
+        SET("SET"),
+        /**
+         * SHOW is mysql keyword.
+         */
+        SHOW("SHOW"),
+        /**
+         * SIGNAL is mysql keyword.
+         */
+        SIGNAL("SIGNAL"),
+        /**
+         * SMALLINT is mysql keyword.
+         */
+        SMALLINT("SMALLINT"),
+        /**
+         * SPATIAL is mysql keyword.
+         */
+        SPATIAL("SPATIAL"),
+        /**
+         * SPECIFIC is mysql keyword.
+         */
+        SPECIFIC("SPECIFIC"),
+        /**
+         * SQL is mysql keyword.
+         */
+        SQL("SQL"),
+        /**
+         * SQLEXCEPTION is mysql keyword.
+         */
+        SQLEXCEPTION("SQLEXCEPTION"),
+        /**
+         * SQLSTATE is mysql keyword.
+         */
+        SQLSTATE("SQLSTATE"),
+        /**
+         * SQLWARNING is mysql keyword.
+         */
+        SQLWARNING("SQLWARNING"),
+        /**
+         * SQL_BIG_RESULT is mysql keyword.
+         */
+        SQL_BIG_RESULT("SQL_BIG_RESULT"),
+        /**
+         * SQL_CALC_FOUND_ROWS is mysql keyword.
+         */
+        SQL_CALC_FOUND_ROWS("SQL_CALC_FOUND_ROWS"),
+        /**
+         * SQL_SMALL_RESULT is mysql keyword.
+         */
+        SQL_SMALL_RESULT("SQL_SMALL_RESULT"),
+        /**
+         * SSL is mysql keyword.
+         */
+        SSL("SSL"),
+        /**
+         * STARTING is mysql keyword.
+         */
+        STARTING("STARTING"),
+        /**
+         * STORED is mysql keyword.
+         */
+        STORED("STORED"),
+        /**
+         * STRAIGHT_JOIN is mysql keyword.
+         */
+        STRAIGHT_JOIN("STRAIGHT_JOIN"),
+        /**
+         * SYSTEM is mysql keyword.
+         */
+        SYSTEM("SYSTEM"),
+        /**
+         * TABLE is mysql keyword.
+         */
+        TABLE("TABLE"),
+        /**
+         * TERMINATED is mysql keyword.
+         */
+        TERMINATED("TERMINATED"),
+        /**
+         * THEN is mysql keyword.
+         */
+        THEN("THEN"),
+        /**
+         * TINYBLOB is mysql keyword.
+         */
+        TINYBLOB("TINYBLOB"),
+        /**
+         * TINYINT is mysql keyword.
+         */
+        TINYINT("TINYINT"),
+        /**
+         * TINYTEXT is mysql keyword.
+         */
+        TINYTEXT("TINYTEXT"),
+        /**
+         * TO is mysql keyword.
+         */
+        TO("TO"),
+        /**
+         * TRAILING is mysql keyword.
+         */
+        TRAILING("TRAILING"),
+        /**
+         * TRIGGER is mysql keyword.
+         */
+        TRIGGER("TRIGGER"),
+        /**
+         * TRUE is mysql keyword.
+         */
+        TRUE("TRUE"),
+        /**
+         * UNDO is mysql keyword.
+         */
+        UNDO("UNDO"),
+        /**
+         * UNION is mysql keyword.
+         */
+        UNION("UNION"),
+        /**
+         * UNIQUE is mysql keyword.
+         */
+        UNIQUE("UNIQUE"),
+        /**
+         * UNLOCK is mysql keyword.
+         */
+        UNLOCK("UNLOCK"),
+        /**
+         * UNSIGNED is mysql keyword.
+         */
+        UNSIGNED("UNSIGNED"),
+        /**
+         * UPDATE is mysql keyword.
+         */
+        UPDATE("UPDATE"),
+        /**
+         * USAGE is mysql keyword.
+         */
+        USAGE("USAGE"),
+        /**
+         * USE is mysql keyword.
+         */
+        USE("USE"),
+        /**
+         * USING is mysql keyword.
+         */
+        USING("USING"),
+        /**
+         * UTC_DATE is mysql keyword.
+         */
+        UTC_DATE("UTC_DATE"),
+        /**
+         * UTC_TIME is mysql keyword.
+         */
+        UTC_TIME("UTC_TIME"),
+        /**
+         * UTC_TIMESTAMP is mysql keyword.
+         */
+        UTC_TIMESTAMP("UTC_TIMESTAMP"),
+        /**
+         * VALUES is mysql keyword.
+         */
+        VALUES("VALUES"),
+        /**
+         * VARBINARY is mysql keyword.
+         */
+        VARBINARY("VARBINARY"),
+        /**
+         * VARCHAR is mysql keyword.
+         */
+        VARCHAR("VARCHAR"),
+        /**
+         * VARCHARACTER is mysql keyword.
+         */
+        VARCHARACTER("VARCHARACTER"),
+        /**
+         * VARYING is mysql keyword.
+         */
+        VARYING("VARYING"),
+        /**
+         * VIRTUAL is mysql keyword.
+         */
+        VIRTUAL("VIRTUAL"),
+        /**
+         * WHEN is mysql keyword.
+         */
+        WHEN("WHEN"),
+        /**
+         * WHERE is mysql keyword.
+         */
+        WHERE("WHERE"),
+        /**
+         * WHILE is mysql keyword.
+         */
+        WHILE("WHILE"),
+        /**
+         * WINDOW is mysql keyword.
+         */
+        WINDOW("WINDOW"),
+        /**
+         * WITH is mysql keyword.
+         */
+        WITH("WITH"),
+        /**
+         * WRITE is mysql keyword.
+         */
+        WRITE("WRITE"),
+        /**
+         * XOR is mysql keyword.
+         */
+        XOR("XOR"),
+        /**
+         * YEAR_MONTH is mysql keyword.
+         */
+        YEAR_MONTH("YEAR_MONTH"),
+        /**
+         * ZEROFILL is mysql keyword.
+         */
+        ZEROFILL("ZEROFILL");
         /**
          * The Name.
          */
