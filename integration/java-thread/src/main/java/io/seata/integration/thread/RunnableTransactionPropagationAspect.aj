@@ -40,7 +40,9 @@ public aspect RunnableTransactionPropagationAspect {
 
     before(RunnableTransactionPropagation m): cut() && this(m) {
         String xid = m.xid();
-        if (null != xid) {
+        if (NonPropagateRunnable.class.isAssignableFrom(m.getClass())) {
+            RootContext.unbind();
+        } else if (null != xid) {
             RootContext.bind(xid);
         }
     }

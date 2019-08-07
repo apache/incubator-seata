@@ -40,7 +40,9 @@ public aspect CallableTransactionPropagationAspect {
 
     before(CallableTransactionPropagation m): cut() && this(m) {
         String xid = m.xid();
-        if (null != xid) {
+        if (NonPropagateCallable.class.isAssignableFrom(m.getClass())) {
+            RootContext.unbind();
+        } else if (null != xid) {
             RootContext.bind(xid);
         }
     }

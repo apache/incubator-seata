@@ -37,7 +37,7 @@ public class ContextTest {
     }
 
     @Test
-    public void threadTest() {
+    public void threadTest() throws InterruptedException {
         RootContext.bind("test-context");
         executorService.submit(new Runnable() {
             @Override
@@ -49,6 +49,25 @@ public class ContextTest {
             @Override
             public Object call() throws Exception {
                 Assertions.assertEquals(RootContext.getXID(), "test-context");
+                return null;
+            }
+        });
+    }
+
+    @Test
+    public void nonPropagateRunnable() throws InterruptedException {
+
+        RootContext.bind("none-context");
+        executorService.submit(new NonPropagateRunnable() {
+            @Override
+            public void run() {
+                Assertions.assertEquals(RootContext.getXID(), "none-context");
+            }
+        });
+        executorService.submit(new NonPropagateCallable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                Assertions.assertEquals(RootContext.getXID(), "none-context");
                 return null;
             }
         });
