@@ -29,6 +29,7 @@ import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.protocol.transaction.RMInboundHandler;
+import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.TransactionMessageHandler;
 import org.slf4j.Logger;
@@ -69,6 +70,13 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         }, request, response);
         return response;
     }
+
+    /**
+     * delete undo log
+     * @param request the request
+     */
+    @Override
+    public abstract void handle(UndoLogDeleteRequest request);
 
     /**
      * Do branch commit.

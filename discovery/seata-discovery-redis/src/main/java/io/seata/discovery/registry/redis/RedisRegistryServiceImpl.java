@@ -33,7 +33,6 @@ import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
-
 import io.seata.discovery.registry.RegistryService;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
@@ -96,7 +95,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             redisConfig.setMaxTotal(maxTotal);
         }
         int maxWait = seataConfig.getInt(REDIS_FILEKEY_PREFIX + "max.wait",
-                seataConfig.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0));
+            seataConfig.getInt(REDIS_FILEKEY_PREFIX + "timeout", 0));
         if (maxWait > 0) {
             redisConfig.setMaxWaitMillis(maxWait);
         }
@@ -204,13 +203,13 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             } finally {
                 jedis.close();
             }
-            if (null != instances) {
-                Set<InetSocketAddress> newAddressList = new HashSet<>();
+            if (null != instances && !instances.isEmpty()) {
+                Set<InetSocketAddress> newAddressSet = new HashSet<>();
                 for (Map.Entry<String, String> instance : instances.entrySet()) {
                     String serverAddr = instance.getKey();
-                    newAddressList.add(NetUtil.toInetSocketAddress(serverAddr));
+                    newAddressSet.add(NetUtil.toInetSocketAddress(serverAddr));
                 }
-                CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+                CLUSTER_ADDRESS_MAP.put(clusterName, newAddressSet);
             }
             subscribe(clusterName, new RedisListener() {
                 @Override
@@ -226,7 +225,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                             CLUSTER_ADDRESS_MAP.get(clusterName).remove(NetUtil.toInetSocketAddress(serverAddr));
                             break;
                         default:
-                            throw new ShouldNeverHappenException("unknow redis msg:" + msg);
+                            throw new ShouldNeverHappenException("unknown redis msg:" + msg);
                     }
                 }
             });
