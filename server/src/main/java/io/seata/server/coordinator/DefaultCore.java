@@ -82,6 +82,7 @@ public class DefaultCore implements Core {
                 globalSession.addBranch(branchSession);
             } catch (RuntimeException ex) {
                 branchSession.unlock();
+                LOGGER.error("Failed to add branchSession to globalSession:{}",ex.getMessage(),ex);
                 throw new TransactionException(FailedToAddBranch);
             }
             return branchSession.getBranchId();
