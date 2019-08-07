@@ -15,6 +15,11 @@
  */
 package io.seata.rm;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Calendar;
+import java.util.Date;
+
 import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
@@ -23,11 +28,6 @@ import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.undo.UndoLogManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Calendar;
-import java.util.Date;
 
 /**
  * The type Rm handler at.
@@ -42,7 +42,7 @@ public class RMHandlerAT extends AbstractRMHandler {
 
     @Override
     public void handle(UndoLogDeleteRequest request) {
-        DataSourceManager dataSourceManager = (DataSourceManager) getResourceManager();
+        DataSourceManager dataSourceManager = (DataSourceManager)getResourceManager();
         DataSourceProxy dataSourceProxy = dataSourceManager.get(request.getResourceId());
         if (dataSourceProxy == null) {
             LOGGER.warn("Failed to get dataSourceProxy for delete undolog on " + request.getResourceId());
@@ -54,10 +54,21 @@ public class RMHandlerAT extends AbstractRMHandler {
             conn = dataSourceProxy.getPlainConnection();
             int deleteRows;
             do {
-                deleteRows = UndoLogManager.deleteUndoLogByLogCreated(logCreatedSave, dataSourceProxy.getDbType(), LIMIT_ROWS, conn);
+                deleteRows = UndoLogManager.deleteUndoLogByLogCreated(logCreatedSave, dataSourceProxy.getDbType(),
+                    LIMIT_ROWS, conn);
             } while (deleteRows == LIMIT_ROWS);
-        }  catch (Exception e) {
-            LOGGER.warn("Failed to get connection for delete undolog ", e);
+            if (!conn.getAutoCommit()) {
+                conn.commit();
+            }
+        } catch (Exception e) {
+            try {
+                if (!conn.getAutoCommit()) {
+                    conn.rollback();
+                }
+            } catch (SQLException exx) {
+                LOGGER.error("Failed to rollback delete expired undo_log，error:{}", e.getMessage(), exx);
+            }
+            LOGGER.error("Failed to delete expired undo_log，error:{}", e.getMessage(), e);
         } finally {
             if (conn != null) {
                 try {
