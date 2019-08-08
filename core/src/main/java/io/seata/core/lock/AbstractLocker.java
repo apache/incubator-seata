@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * The type Abstract locker.
  *
  * @author zhangsen
- * @data 2019 -05-15
+ * @date 2019 -05-15
  */
 public abstract class AbstractLocker implements Locker {
 
