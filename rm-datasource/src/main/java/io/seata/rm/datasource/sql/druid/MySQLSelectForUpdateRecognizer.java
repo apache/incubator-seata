@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.sql.druid;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -51,7 +52,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
      */
     public MySQLSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (SQLSelectStatement)ast;
+        this.ast = (SQLSelectStatement) ast;
     }
 
     @Override
@@ -60,26 +61,16 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<Object> paramAppender) {
+    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenders) {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
         if (where == null) {
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
-
-            @Override
-            public boolean visit(SQLVariantRefExpr x) {
-                if ("?".equals(x.getName())) {
-                    ArrayList<Object> params = parametersHolder.getParameters()[x.getIndex()];
-                    paramAppender.add(params.get(0));
-                }
-                return super.visit(x);
-            }
-        };
+        MySqlOutputVisitor visitor = super.createMySqlOutputVisitor(parametersHolder, paramAppenders, sb);
         if (where instanceof SQLBinaryOpExpr) {
-            visitor.visit((SQLBinaryOpExpr)where);
+            visitor.visit((SQLBinaryOpExpr) where);
         } else if (where instanceof SQLInListExpr) {
             visitor.visit((SQLInListExpr) where);
         } else if (where instanceof SQLBetweenExpr) {
@@ -99,7 +90,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
         }
         StringBuffer sb = new StringBuffer();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        visitor.visit((SQLBinaryOpExpr)where);
+        visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
     }
 
@@ -135,7 +126,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource)tableSource);
+        visitor.visit((SQLExprTableSource) tableSource);
         return sb.toString();
     }
 

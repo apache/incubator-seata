@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
@@ -56,7 +57,6 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         Connection conn = statementProxy.getConnection();
         T rs = null;
         Savepoint sp = null;
-        LockRetryController lockRetryController = new LockRetryController();
         boolean originalAutoCommit = conn.getAutoCommit();
         ArrayList<Object> paramAppender = new ArrayList<>();
         String selectPKSQL = buildSelectSQL(paramAppender);
@@ -76,13 +76,29 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                 PreparedStatement pstPK = null;
                 ResultSet rsPK = null;
                 try {
-                    if (paramAppender.isEmpty()) {
+                    if (paramAppenders.isEmpty()) {
                         stPK = statementProxy.getConnection().createStatement();
                         rsPK = stPK.executeQuery(selectPKSQL);
                     } else {
-                        pstPK = statementProxy.getConnection().prepareStatement(selectPKSQL);
-                        for (int i = 0; i < paramAppender.size(); i++) {
-                            pstPK.setObject(i + 1, paramAppender.get(i));
+
+                        if (paramAppenders.size() == 1) {
+                            pstPK = statementProxy.getConnection().prepareStatement(selectPKSQL);
+                            List<Object> paramAppender = paramAppenders.get(0);
+                            for (int i = 0; i < paramAppender.size(); i++) {
+                                pstPK.setObject(i + 1, paramAppender.get(i));
+                            }
+                        } else {
+                            for (int i = 1; i < paramAppenders.size(); i++) {
+                                selectSQLAppender.append(" UNION ").append(selectPKSQL);
+                            }
+                            pstPK = statementProxy.getConnection().prepareStatement(selectSQLAppender.toString());
+                            List<Object> paramAppender = null;
+                            for (int i = 0; i < paramAppenders.size(); i++) {
+                                paramAppender = paramAppenders.get(i);
+                                for (int j = 0; j < paramAppender.size(); j++) {
+                                    pstPK.setObject(i * paramAppender.size() + j + 1, paramAppender.get(j));
+                                }
+                            }
                         }
                         rsPK = pstPK.executeQuery();
                     }
@@ -103,7 +119,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     } else {
                         throw new RuntimeException("Unknown situation!");
                     }
-                    
+
                     break;
 
                 } catch (LockConflictException lce) {
