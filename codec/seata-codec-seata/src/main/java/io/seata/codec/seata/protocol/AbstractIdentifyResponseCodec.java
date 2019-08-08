@@ -15,9 +15,10 @@
  */
 package io.seata.codec.seata.protocol;
 
-import io.seata.core.protocol.AbstractIdentifyResponse;
-
 import java.nio.ByteBuffer;
+
+import io.netty.buffer.ByteBuf;
+import io.seata.core.protocol.AbstractIdentifyResponse;
 
 /**
  * The type Abstract identify response.
@@ -32,34 +33,34 @@ public abstract class AbstractIdentifyResponseCodec extends AbstractResultMessag
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer out){
-        AbstractIdentifyResponse abstractIdentifyResponse = (AbstractIdentifyResponse) t;
+    public <T> void encode(T t, ByteBuf out) {
+        AbstractIdentifyResponse abstractIdentifyResponse = (AbstractIdentifyResponse)t;
         boolean identified = abstractIdentifyResponse.isIdentified();
         String version = abstractIdentifyResponse.getVersion();
 
-        out.put(identified ? (byte)1 : (byte)0);
+        out.writeByte(identified ? (byte)1 : (byte)0);
         if (version != null) {
             byte[] bs = version.getBytes(UTF8);
-            out.putShort((short)bs.length);
+            out.writeShort((short)bs.length);
             if (bs.length > 0) {
-                out.put(bs);
+                out.writeBytes(bs);
             }
         } else {
-            out.putShort((short)0);
+            out.writeShort((short)0);
         }
     }
 
     @Override
-    public <T> void decode(T t, ByteBuffer in){
-        AbstractIdentifyResponse abstractIdentifyResponse = (AbstractIdentifyResponse) t;
+    public <T> void decode(T t, ByteBuffer in) {
+        AbstractIdentifyResponse abstractIdentifyResponse = (AbstractIdentifyResponse)t;
 
         abstractIdentifyResponse.setIdentified(in.get() == 1);
         short len = in.getShort();
         if (len <= 0) {
-            return ;
+            return;
         }
         if (in.remaining() < len) {
-            return ;
+            return;
         }
         byte[] bs = new byte[len];
         in.get(bs);

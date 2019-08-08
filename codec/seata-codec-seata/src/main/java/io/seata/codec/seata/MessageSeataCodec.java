@@ -18,6 +18,8 @@ package io.seata.codec.seata;
 
 import java.nio.ByteBuffer;
 
+import io.netty.buffer.ByteBuf;
+
 /**
  * The interface Message seata codec.
  *
@@ -30,7 +32,7 @@ public interface MessageSeataCodec {
      *
      * @return the message type
      */
-    public Class<?> getMessageClassType();
+    Class<?> getMessageClassType();
 
     /**
      * Encode byte [ ].
@@ -40,7 +42,7 @@ public interface MessageSeataCodec {
      * @param out the out
      * @return the byte [ ]
      */
-    <T> void encode(T t, ByteBuffer out);
+    <T> void encode(T t, ByteBuf out);
 
     /**
      * Decode.

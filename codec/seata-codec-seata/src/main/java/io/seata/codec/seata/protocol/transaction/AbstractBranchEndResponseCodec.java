@@ -15,14 +15,11 @@
  */
 package io.seata.codec.seata.protocol.transaction;
 
+import java.nio.ByteBuffer;
+
 import io.netty.buffer.ByteBuf;
 import io.seata.core.model.BranchStatus;
-import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.AbstractResultMessage;
-import io.seata.core.protocol.transaction.AbstractBranchEndRequest;
 import io.seata.core.protocol.transaction.AbstractBranchEndResponse;
-
-import java.nio.ByteBuffer;
 
 /**
  * The type Abstract branch end response codec.
@@ -37,32 +34,32 @@ public abstract class AbstractBranchEndResponseCodec extends AbstractTransaction
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer out) {
+    public <T> void encode(T t, ByteBuf out) {
         super.encode(t, out);
 
-        AbstractBranchEndResponse abstractBranchEndResponse = (AbstractBranchEndResponse) t;
+        AbstractBranchEndResponse abstractBranchEndResponse = (AbstractBranchEndResponse)t;
         String xid = abstractBranchEndResponse.getXid();
         long branchId = abstractBranchEndResponse.getBranchId();
         BranchStatus branchStatus = abstractBranchEndResponse.getBranchStatus();
 
         if (xid != null) {
             byte[] bs = xid.getBytes(UTF8);
-            out.putShort((short)bs.length);
+            out.writeShort((short)bs.length);
             if (bs.length > 0) {
-                out.put(bs);
+                out.writeBytes(bs);
             }
         } else {
-            out.putShort((short)0);
+            out.writeShort((short)0);
         }
-        out.putLong(branchId);
-        out.put((byte)branchStatus.getCode());
+        out.writeLong(branchId);
+        out.writeByte(branchStatus.getCode());
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
         super.decode(t, in);
 
-        AbstractBranchEndResponse abstractBranchEndResponse = (AbstractBranchEndResponse) t;
+        AbstractBranchEndResponse abstractBranchEndResponse = (AbstractBranchEndResponse)t;
         short xidLen = in.getShort();
         if (xidLen > 0) {
             byte[] bs = new byte[xidLen];

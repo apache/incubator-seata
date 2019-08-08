@@ -15,9 +15,10 @@
  */
 package io.seata.codec.seata.protocol.transaction;
 
-import io.seata.core.protocol.transaction.GlobalBeginResponse;
-
 import java.nio.ByteBuffer;
+
+import io.netty.buffer.ByteBuf;
+import io.seata.core.protocol.transaction.GlobalBeginResponse;
 
 /**
  * The type Global begin response codec.
@@ -32,31 +33,31 @@ public class GlobalBeginResponseCodec extends AbstractTransactionResponseCodec {
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer out) {
+    public <T> void encode(T t, ByteBuf out) {
         super.encode(t, out);
 
-        GlobalBeginResponse globalBeginResponse = (GlobalBeginResponse) t;
+        GlobalBeginResponse globalBeginResponse = (GlobalBeginResponse)t;
         String xid = globalBeginResponse.getXid();
         String extraData = globalBeginResponse.getExtraData();
 
         if (xid != null) {
             byte[] bs = xid.getBytes(UTF8);
-            out.putShort((short)bs.length);
+            out.writeShort((short)bs.length);
             if (bs.length > 0) {
-                out.put(bs);
+                out.writeBytes(bs);
             }
         } else {
-            out.putShort((short)0);
+            out.writeShort((short)0);
         }
 
         if (extraData != null) {
             byte[] bs = extraData.getBytes(UTF8);
-            out.putShort((short)bs.length);
+            out.writeShort((short)bs.length);
             if (bs.length > 0) {
-                out.put(bs);
+                out.writeBytes(bs);
             }
         } else {
-            out.putShort((short)0);
+            out.writeShort((short)0);
         }
     }
 
@@ -64,7 +65,7 @@ public class GlobalBeginResponseCodec extends AbstractTransactionResponseCodec {
     public <T> void decode(T t, ByteBuffer in) {
         super.decode(t, in);
 
-        GlobalBeginResponse globalBeginResponse = (GlobalBeginResponse) t;
+        GlobalBeginResponse globalBeginResponse = (GlobalBeginResponse)t;
 
         short len = in.getShort();
         if (len > 0) {

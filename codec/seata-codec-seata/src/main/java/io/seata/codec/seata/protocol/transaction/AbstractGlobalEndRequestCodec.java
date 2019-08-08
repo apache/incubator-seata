@@ -15,16 +15,17 @@
  */
 package io.seata.codec.seata.protocol.transaction;
 
-import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
-
 import java.nio.ByteBuffer;
+
+import io.netty.buffer.ByteBuf;
+import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 
 /**
  * The type Abstract global end request codec.
  *
  * @author zhangsen
  */
-public abstract class AbstractGlobalEndRequestCodec extends AbstractTransactionRequestToTCCodec  {
+public abstract class AbstractGlobalEndRequestCodec extends AbstractTransactionRequestToTCCodec {
 
     @Override
     public Class<?> getMessageClassType() {
@@ -32,35 +33,35 @@ public abstract class AbstractGlobalEndRequestCodec extends AbstractTransactionR
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer out) {
-        AbstractGlobalEndRequest abstractGlobalEndRequest = (AbstractGlobalEndRequest) t;
+    public <T> void encode(T t, ByteBuf out) {
+        AbstractGlobalEndRequest abstractGlobalEndRequest = (AbstractGlobalEndRequest)t;
         String xid = abstractGlobalEndRequest.getXid();
         String extraData = abstractGlobalEndRequest.getExtraData();
 
         // 1. xid
         if (xid != null) {
             byte[] bs = xid.getBytes(UTF8);
-            out.putShort((short)bs.length);
+            out.writeShort((short)bs.length);
             if (bs.length > 0) {
-                out.put(bs);
+                out.writeBytes(bs);
             }
         } else {
-            out.putShort((short)0);
+            out.writeShort((short)0);
         }
         if (extraData != null) {
             byte[] bs = extraData.getBytes(UTF8);
-            out.putShort((short)bs.length);
+            out.writeShort((short)bs.length);
             if (bs.length > 0) {
-                out.put(bs);
+                out.writeBytes(bs);
             }
         } else {
-            out.putShort((short)0);
+            out.writeShort((short)0);
         }
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        AbstractGlobalEndRequest abstractGlobalEndRequest = (AbstractGlobalEndRequest) t;
+        AbstractGlobalEndRequest abstractGlobalEndRequest = (AbstractGlobalEndRequest)t;
 
         short xidLen = in.getShort();
         if (xidLen > 0) {
