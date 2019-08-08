@@ -15,17 +15,16 @@
  */
 package io.seata.codec.seata.protocol;
 
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.seata.codec.seata.MessageCodecFactory;
 import io.seata.codec.seata.MessageSeataCodec;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergedWarpMessage;
-
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-
 
 /**
  * The type Merged warp message codec.
@@ -40,22 +39,21 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer out){
-        MergedWarpMessage mergedWarpMessage = (MergedWarpMessage) t;
+    public <T> void encode(T t, ByteBuf out) {
+        MergedWarpMessage mergedWarpMessage = (MergedWarpMessage)t;
         List<AbstractMessage> msgs = mergedWarpMessage.msgs;
 
         final ByteBuf buffer = Unpooled.buffer(1024);
         buffer.writeInt(0); // write placeholder for content length
 
-        buffer.writeShort((short) msgs.size());
+        buffer.writeShort((short)msgs.size());
         for (final AbstractMessage msg : msgs) {
-            ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
+            final ByteBuf subBuffer = Unpooled.buffer(1024);
             short typeCode = msg.getTypeCode();
             MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
-            messageCodec.encode(msg, byteBuffer);
-            byteBuffer.flip();
+            messageCodec.encode(msg, subBuffer);
             buffer.writeShort(msg.getTypeCode());
-            buffer.writeBytes(byteBuffer);
+            buffer.writeBytes(subBuffer);
         }
 
         final int length = buffer.readableBytes();
@@ -68,19 +66,19 @@ public class MergedWarpMessageCodec extends AbstractMessageCodec {
                 LOGGER.debug("msg in one packet:" + msgs.size() + ",buffer size:" + content.length);
             }
         }
-        out.put(content);
+        out.writeBytes(content);
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        MergedWarpMessage mergedWarpMessage = (MergedWarpMessage) t;
+        MergedWarpMessage mergedWarpMessage = (MergedWarpMessage)t;
 
         if (in.remaining() < 4) {
-            return ;
+            return;
         }
         int length = in.getInt();
         if (in.remaining() < length) {
-            return ;
+            return;
         }
         byte[] buffer = new byte[length];
         in.get(buffer);
