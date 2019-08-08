@@ -32,9 +32,11 @@ import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.druid.BaseRecognizer;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The type oralceselect for update recognizer.
+ *
  * @author ccg
  * @date 2019/3/25
  */
@@ -60,24 +62,14 @@ public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements S
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<Object> paramAppender) {
+    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenders) {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
         if (where == null) {
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
-
-            @Override
-            public boolean visit(SQLVariantRefExpr x) {
-                if ("?".equals(x.getName())) {
-                    ArrayList<Object> params = parametersHolder.getParameters()[x.getIndex()];
-                    paramAppender.add(params.get(0));
-                }
-                return super.visit(x);
-            }
-        };
+        MySqlOutputVisitor visitor = super.createMySqlOutputVisitor(parametersHolder, paramAppenders, sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
     }
@@ -127,7 +119,7 @@ public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements S
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource)tableSource);
+        visitor.visit((SQLExprTableSource) tableSource);
         return sb.toString();
     }
 

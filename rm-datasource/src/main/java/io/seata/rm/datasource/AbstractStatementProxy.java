@@ -230,9 +230,6 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
 
     @Override
     public int[] executeBatch() throws SQLException {
-        if (RootContext.inGlobalTransaction()) {
-            throw new NotSupportYetException();
-        }
         return targetStatement.executeBatch();
     }
 

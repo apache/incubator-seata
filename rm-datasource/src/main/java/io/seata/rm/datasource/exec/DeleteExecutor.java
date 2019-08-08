@@ -69,14 +69,14 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
         StringJoiner columnSQL = new StringJoiner(", ");
-        for (String column:columns) {
+        for (String column : columns) {
             columnSQL.add(getColumnNameInSQL(column));
         }
         selectSQLAppender.append(columnSQL.toString());
         String whereCondition = null;
-        ArrayList<Object> paramAppender = new ArrayList<>();
+        ArrayList<List<Object>> paramAppenders = new ArrayList<>();
         if (statementProxy instanceof ParametersHolder) {
-            whereCondition = visitor.getWhereCondition((ParametersHolder) statementProxy, paramAppender);
+            whereCondition = visitor.getWhereCondition((ParametersHolder) statementProxy, paramAppenders);
         } else {
             whereCondition = visitor.getWhereCondition();
         }
@@ -92,13 +92,28 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         Statement st = null;
         ResultSet rs = null;
         try {
-            if (paramAppender.isEmpty()) {
+            if (paramAppenders.isEmpty()) {
                 st = statementProxy.getConnection().createStatement();
                 rs = st.executeQuery(selectSQL);
             } else {
-                ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                for (int i = 0; i < paramAppender.size(); i++) {
-                    ps.setObject(i + 1, paramAppender.get(i));
+                if (paramAppenders.size() == 1) {
+                    ps = statementProxy.getConnection().prepareStatement(selectSQL);
+                    List<Object> paramAppender = paramAppenders.get(0);
+                    for (int i = 0; i < paramAppender.size(); i++) {
+                        ps.setObject(i + 1, paramAppender.get(i));
+                    }
+                } else {
+                    for (int i = 1; i < paramAppenders.size(); i++) {
+                        selectSQLAppender.append(" UNION ").append(selectSQL);
+                    }
+                    ps = statementProxy.getConnection().prepareStatement(selectSQLAppender.toString());
+                    List<Object> paramAppender = null;
+                    for (int i = 0; i < paramAppenders.size(); i++) {
+                        paramAppender = paramAppenders.get(i);
+                        for (int j = 0; j < paramAppender.size(); j++) {
+                            ps.setObject(i * paramAppender.size() + j + 1, paramAppender.get(j));
+                        }
+                    }
                 }
                 rs = ps.executeQuery();
             }
