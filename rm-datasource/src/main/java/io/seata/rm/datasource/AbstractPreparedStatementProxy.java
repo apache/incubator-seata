@@ -248,9 +248,6 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
 
     @Override
     public void addBatch() throws SQLException {
-        if (RootContext.inGlobalTransaction()) {
-            throw new NotSupportYetException();
-        }
         targetStatement.addBatch();
     }
 
