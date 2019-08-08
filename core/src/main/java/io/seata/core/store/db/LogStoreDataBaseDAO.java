@@ -40,7 +40,7 @@ import io.seata.core.store.LogStore;
  * The type Log store data base dao.
  *
  * @author zhangsen
- * @data 2019 /4/2
+ * @date 2019 /4/2
  */
 @LoadLevel(name = "db")
 public class LogStoreDataBaseDAO implements LogStore, Initialize {

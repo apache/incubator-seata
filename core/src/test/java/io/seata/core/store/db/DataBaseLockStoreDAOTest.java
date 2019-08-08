@@ -33,7 +33,7 @@ import java.util.List;
 
 /**
  * @author zhangsen
- * @data 2019/4/26
+ * @date 2019/4/26
  */
 public class DataBaseLockStoreDAOTest {
 

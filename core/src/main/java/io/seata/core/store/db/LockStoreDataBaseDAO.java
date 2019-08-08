@@ -44,7 +44,7 @@ import java.util.stream.Collectors;
  * The type Data base lock store.
  *
  * @author zhangsen
- * @data 2019 /4/25
+ * @date 2019 /4/25
  */
 @LoadLevel(name = "db")
 public class LockStoreDataBaseDAO implements LockStore, Initialize {

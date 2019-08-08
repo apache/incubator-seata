@@ -24,7 +24,7 @@ import io.seata.common.loader.EnhancedServiceLoader;
  * The type Codec factory.
  *
  * @author zhangsen
- * @data 2019 /5/6
+ * @date 2019 /5/6
  */
 public class CodecFactory {
 

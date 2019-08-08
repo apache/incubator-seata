@@ -19,7 +19,7 @@ package io.seata.core.protocol;
  * The type Message codec type.
  *
  * @author zhangsen
- * @data 2019 /5/6
+ * @date 2019 /5/6
  */
 public class MessageType {
 
