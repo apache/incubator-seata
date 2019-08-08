@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.StringJoiner;
 
 import com.alibaba.druid.util.JdbcConstants;
@@ -60,8 +61,8 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected TableRecords beforeImage() throws SQLException {
         SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) sqlRecognizer;
         TableMeta tmeta = getTableMeta(visitor.getTableName());
-        ArrayList<Object> paramAppender = new ArrayList<>();
-        String selectSQL = buildBeforeImageSQL(visitor, tmeta, paramAppender);
+        ArrayList<List<Object>> paramAppenders = new ArrayList<>();
+        String selectSQL = buildBeforeImageSQL(visitor, tmeta, paramAppenders);
         TableRecords beforeImage = null;
         PreparedStatement ps = null;
         Statement st = null;
@@ -78,10 +79,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                         ps.setObject(i + 1, paramAppender.get(i));
                     }
                 } else {
-                    for (int i = 1; i < paramAppenders.size(); i++) {
-                        selectSQLAppender.append(" UNION ").append(selectSQL);
-                    }
-                    ps = statementProxy.getConnection().prepareStatement(selectSQLAppender.toString());
+                    ps = statementProxy.getConnection().prepareStatement(selectSQL);
                     List<Object> paramAppender = null;
                     for (int i = 0; i < paramAppenders.size(); i++) {
                         paramAppender = paramAppenders.get(i);
@@ -107,11 +105,11 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return beforeImage;
     }
 
-    private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<Object> paramAppender) {
+    private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenders) {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
         String whereCondition = null;
         if (statementProxy instanceof ParametersHolder) {
-            whereCondition = visitor.getWhereCondition((ParametersHolder) statementProxy, paramAppender);
+            whereCondition = visitor.getWhereCondition((ParametersHolder) statementProxy, paramAppenders);
         } else {
             whereCondition = visitor.getWhereCondition();
         }
@@ -125,7 +123,15 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         for (String column : tableMeta.getAllColumns().keySet()) {
             selectSQLAppender.add(getColumnNameInSQL(keywordChecker.checkAndReplace(column)));
         }
-        return selectSQLAppender.toString();
+        String selectSQL = selectSQLAppender.toString();
+        if(!paramAppenders.isEmpty() && paramAppenders.size() > 1) {
+            StringBuffer stringBuffer = new StringBuffer(selectSQL);
+            for (int i = 1; i < paramAppenders.size(); i++) {
+                stringBuffer.append(" UNION ").append(selectSQL);
+            }
+            selectSQL = stringBuffer.toString();
+        }
+        return selectSQL;
     }
 
     @Override

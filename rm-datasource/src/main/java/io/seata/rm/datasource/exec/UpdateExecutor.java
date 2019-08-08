@@ -58,9 +58,9 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     @Override
     protected TableRecords beforeImage() throws SQLException {
 
-        ArrayList<Object> paramAppender = new ArrayList<>();
+        ArrayList<List<Object>> paramAppenders = new ArrayList<>();
         TableMeta tmeta = getTableMeta();
-        String selectSQL = buildBeforeImageSQL(tmeta, paramAppender);
+        String selectSQL = buildBeforeImageSQL(tmeta, paramAppenders);
         TableRecords beforeImage = null;
         PreparedStatement ps = null;
         Statement st = null;
@@ -77,10 +77,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                         ps.setObject(i + 1, paramAppender.get(i));
                     }
                 } else {
-                    for (int i = 1; i < paramAppenders.size(); i++) {
-                        selectSQLAppender.append(" UNION ").append(selectSQL);
-                    }
-                    ps = statementProxy.getConnection().prepareStatement(selectSQLAppender.toString());
+                    ps = statementProxy.getConnection().prepareStatement(selectSQL);
                     List<Object> paramAppender = null;
                     for (int i = 0; i < paramAppenders.size(); i++) {
                         paramAppender = paramAppenders.get(i);
@@ -107,7 +104,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return beforeImage;
     }
 
-    private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<Object> paramAppender) {
+    private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenders) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
         StringBuffer selectSQLPrefix = new StringBuffer("SELECT ");
@@ -117,7 +114,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         String prefix = selectSQLPrefix.toString();
         String whereCondition = null;
         if (statementProxy instanceof ParametersHolder) {
-            whereCondition = recognizer.getWhereCondition((ParametersHolder)statementProxy, paramAppender);
+            whereCondition = recognizer.getWhereCondition((ParametersHolder)statementProxy, paramAppenders);
         } else {
             whereCondition = recognizer.getWhereCondition();
         }
@@ -131,13 +128,16 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         for (String updateColumn : updateColumns) {
             selectSQLJoin.add(updateColumn);
         }
-        return selectSQLJoin.toString();
+        String selectSQL = selectSQLJoin.toString();
+        if(!paramAppenders.isEmpty() && paramAppenders.size() > 1) {
+            StringBuffer stringBuffer = new StringBuffer(selectSQL);
+            for (int i = 1; i < paramAppenders.size(); i++) {
+                stringBuffer.append(" UNION ").append(selectSQL);
+            }
+            selectSQL = stringBuffer.toString();
+        }
+        return selectSQL;
     }
-  
-    @Override
-    protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
-        SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer) sqlRecognizer;
-
 
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
