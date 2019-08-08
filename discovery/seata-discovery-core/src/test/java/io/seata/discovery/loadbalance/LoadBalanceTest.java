@@ -35,15 +35,15 @@ public class LoadBalanceTest {
     /**
      * Test random load balance select.
      *
-     * @param addresses the addresses
+     * @param serverRegistrations the serverRegistrations
      */
     @ParameterizedTest
     @MethodSource("addressProvider")
-    public void testRandomLoadBalance_select(List<InetSocketAddress> addresses) {
+    public void testRandomLoadBalance_select(List<ServerRegistration> serverRegistrations) {
         int runs = 10000;
-        Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new RandomLoadBalance());
-        for (InetSocketAddress address : counter.keySet()) {
-            Long count = counter.get(address).get();
+        Map<ServerRegistration, AtomicLong> counter = getSelectedCounter(runs, serverRegistrations, new RandomLoadBalance());
+        for (ServerRegistration serverRegistration : counter.keySet()) {
+            Long count = counter.get(serverRegistration).get();
             Assertions.assertTrue(count > 0, "selecte one time at last");
         }
     }
@@ -51,16 +51,16 @@ public class LoadBalanceTest {
     /**
      * Test round robin load balance select.
      *
-     * @param addresses the addresses
+     * @param serverRegistrations the serverRegistrations
      */
     @ParameterizedTest
     @MethodSource("addressProvider")
-    public void testRoundRobinLoadBalance_select(List<InetSocketAddress> addresses) {
+    public void testRoundRobinLoadBalance_select(List<ServerRegistration> serverRegistrations) {
         int runs = 10000;
-        Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new RoundRobinLoadBalance());
-        for (InetSocketAddress address : counter.keySet()) {
-            Long count = counter.get(address).get();
-            Assertions.assertTrue(Math.abs(count - runs / (0f + addresses.size())) < 1f, "abs diff shoud < 1");
+        Map<ServerRegistration, AtomicLong> counter = getSelectedCounter(runs, serverRegistrations, new RoundRobinLoadBalance());
+        for (ServerRegistration serverRegistration : counter.keySet()) {
+            Long count = counter.get(serverRegistration).get();
+            Assertions.assertTrue(Math.abs(count - runs / (0f + serverRegistrations.size())) < 1f, "abs diff shoud < 1");
         }
     }
 
@@ -68,21 +68,21 @@ public class LoadBalanceTest {
      * Gets selected counter.
      *
      * @param runs        the runs
-     * @param addresses   the addresses
+     * @param serverRegistrations   the serverRegistrations
      * @param loadBalance the load balance
      * @return the selected counter
      */
-    public Map<InetSocketAddress, AtomicLong> getSelectedCounter(int runs, List<InetSocketAddress> addresses,
-                                                                 LoadBalance loadBalance) {
+    public Map<ServerRegistration, AtomicLong> getSelectedCounter(int runs, List<ServerRegistration> serverRegistrations,
+                                                                  LoadBalance loadBalance) {
         Assertions.assertNotNull(loadBalance);
-        Map<InetSocketAddress, AtomicLong> counter = new ConcurrentHashMap<>();
-        for (InetSocketAddress address : addresses) {
-            counter.put(address, new AtomicLong(0));
+        Map<ServerRegistration, AtomicLong> counter = new ConcurrentHashMap<>();
+        for (ServerRegistration serverRegistration : serverRegistrations) {
+            counter.put(serverRegistration, new AtomicLong(0));
         }
         try {
             for (int i = 0; i < runs; i++) {
-                InetSocketAddress selectAddress = loadBalance.select(addresses);
-                counter.get(selectAddress).incrementAndGet();
+                ServerRegistration selectServerRegistration = loadBalance.select(serverRegistrations);
+                counter.get(selectServerRegistration).incrementAndGet();
             }
         } catch (Exception e) {
             //do nothing
@@ -91,17 +91,17 @@ public class LoadBalanceTest {
     }
 
     /**
-     * Address provider object [ ] [ ].
+     * ServerRegistration provider object [ ] [ ].
      *
      * @return Stream<List < InetSocketAddress>>
      */
-    static Stream<List<InetSocketAddress>> addressProvider() {
+    static Stream<List<ServerRegistration>> addressProvider() {
         return Stream.of(
-                Arrays.asList(new InetSocketAddress("127.0.0.1", 8091),
-                        new InetSocketAddress("127.0.0.1", 8092),
-                        new InetSocketAddress("127.0.0.1", 8093),
-                        new InetSocketAddress("127.0.0.1", 8094),
-                        new InetSocketAddress("127.0.0.1", 8095))
-        );
+                Arrays.asList(new ServerRegistration(new InetSocketAddress("127.0.0.1", 8091),0),
+                        new ServerRegistration(new InetSocketAddress("127.0.0.1", 8092),0),
+                        new ServerRegistration(new InetSocketAddress("127.0.0.1", 8093),0),
+                        new ServerRegistration(new InetSocketAddress("127.0.0.1", 8094),0),
+                        new ServerRegistration(new InetSocketAddress("127.0.0.1", 8095),0)
+        ));
     }
 }

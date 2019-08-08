@@ -49,13 +49,13 @@ public class LoadBalanceFactoryTest {
     public void testGetRegistry(LoadBalance loadBalance) throws Exception {
         Assertions.assertNotNull(loadBalance);
         RegistryService registryService = RegistryFactory.getInstance();
-        InetSocketAddress address1 = new InetSocketAddress("127.0.0.1", 8091);
-        InetSocketAddress address2 = new InetSocketAddress("127.0.0.1", 8092);
-        registryService.register(address1);
-        registryService.register(address2);
-        List<InetSocketAddress> addressList = registryService.lookup("my_test_tx_group");
-        InetSocketAddress balanceAddress = loadBalance.select(addressList);
-        Assertions.assertNotNull(balanceAddress);
+        ServerRegistration serverRegistration1 = new ServerRegistration(new InetSocketAddress("127.0.0.1", 8091),0);
+        ServerRegistration serverRegistration2 = new ServerRegistration(new InetSocketAddress("127.0.0.1", 8092),0);
+        registryService.register(serverRegistration1);
+        registryService.register(serverRegistration2);
+        List<ServerRegistration> serverRegistrationList = registryService.lookup("my_test_tx_group");
+        ServerRegistration balanceServerRegistration = loadBalance.select(serverRegistrationList);
+        Assertions.assertNotNull(balanceServerRegistration);
     }
 
     /**
@@ -70,7 +70,8 @@ public class LoadBalanceFactoryTest {
     public void testUnRegistry(LoadBalance loadBalance) throws Exception {
         RegistryService registryService = RegistryFactory.getInstance();
         InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
-        registryService.unregister(address);
+
+        registryService.unregister(        new ServerRegistration(address, 0));
     }
 
     /**
@@ -86,12 +87,15 @@ public class LoadBalanceFactoryTest {
         Assertions.assertNotNull(loadBalance);
         RegistryService registryService = RegistryFactory.getInstance();
         InetSocketAddress address1 = new InetSocketAddress("127.0.0.1", 8091);
+        ServerRegistration serverRegistration = new ServerRegistration(address1, 0);
+
         InetSocketAddress address2 = new InetSocketAddress("127.0.0.1", 8092);
-        registryService.register(address1);
-        registryService.register(address2);
-        List<InetSocketAddress> addressList = registryService.lookup("my_test_tx_group");
-        InetSocketAddress balanceAddress = loadBalance.select(addressList);
-        Assertions.assertNotNull(balanceAddress);
+        ServerRegistration invoker1 = new ServerRegistration(address2, 0);
+        registryService.register(serverRegistration);
+        registryService.register(invoker1);
+        List<ServerRegistration> serverRegistrationList = registryService.lookup("my_test_tx_group");
+        ServerRegistration balanceServerRegistration = loadBalance.select(serverRegistrationList);
+        Assertions.assertNotNull(balanceServerRegistration);
         TimeUnit.SECONDS.sleep(30);//等待testUnRegistry事件触发
         List<InetSocketAddress> addressList1 = registryService.lookup("my_test_tx_group");
         Assertions.assertEquals(1, addressList1.size());
@@ -108,10 +112,11 @@ public class LoadBalanceFactoryTest {
     public void testGetAddress(LoadBalance loadBalance) throws Exception {
         Assertions.assertNotNull(loadBalance);
         InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
-        List<InetSocketAddress> addressList = new ArrayList<>();
-        addressList.add(address);
-        InetSocketAddress balanceAddress = loadBalance.select(addressList);
-        Assertions.assertEquals(address, balanceAddress);
+        ServerRegistration invoker = new ServerRegistration(address, 0);
+        List<ServerRegistration> serverRegistrationList = new ArrayList<>();
+        serverRegistrationList.add(invoker);
+        ServerRegistration balanceServerRegistration = loadBalance.select(serverRegistrationList);
+        Assertions.assertEquals(address, balanceServerRegistration);
     }
 
     /**

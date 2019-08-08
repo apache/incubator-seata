@@ -32,7 +32,7 @@ public class RandomLoadBalance extends AbstractLoadBalance {
     private final Random random = new Random();
 
     @Override
-    protected <T> T doSelect(List<T> invokers) {
+    protected <T extends ServerRegistration> T doSelect(List<T> invokers) {
         int length = invokers.size();
         return invokers.get(random.nextInt(length));
     }

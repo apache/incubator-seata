@@ -26,7 +26,7 @@
 @REM MAVEN_BATCH_PAUSE - set to 'on' to wait for a key stroke before ending
 @REM MAVEN_OPTS - parameters passed to the Java VM when running Maven
 @REM     e.g. to debug Maven itself, use
-@REM set MAVEN_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=8000
+@REM set MAVEN_OPTS=-Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,serverRegistration=8000
 @REM MAVEN_SKIP_RC - flag to disable loading of mavenrc files
 @REM ----------------------------------------------------------------------------
 

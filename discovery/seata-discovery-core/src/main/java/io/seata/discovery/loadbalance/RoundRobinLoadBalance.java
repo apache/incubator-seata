@@ -32,7 +32,7 @@ public class RoundRobinLoadBalance extends AbstractLoadBalance {
     private final AtomicInteger sequence = new AtomicInteger();
 
     @Override
-    protected <T> T doSelect(List<T> invokers) {
+    protected <T extends ServerRegistration> T doSelect(List<T> invokers) {
         int length = invokers.size();
         return invokers.get(getPositiveSequence() % length);
     }

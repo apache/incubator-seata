@@ -20,6 +20,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigChangeListener;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.loadbalance.ServerRegistration;
 
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
     private static final String ENDPOINT_SPLIT_CHAR = ";";
     private static final String IP_PORT_SPLIT_CHAR = ":";
 
-    private FileRegistryServiceImpl() {
+    protected FileRegistryServiceImpl() {
     }
 
     /**
@@ -58,12 +59,12 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     @Override
-    public void register(InetSocketAddress address) throws Exception {
+    public void register(ServerRegistration serverRegistration) throws Exception {
 
     }
 
     @Override
-    public void unregister(InetSocketAddress address) throws Exception {
+    public void unregister(ServerRegistration serverRegistration) throws Exception {
 
     }
 
@@ -78,7 +79,7 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
     }
 
     @Override
-    public List<InetSocketAddress> lookup(String key) throws Exception {
+    public List<ServerRegistration> lookup(String key) throws Exception {
         String clusterName = CONFIG.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
         if (null == clusterName) {
             return null;
@@ -90,14 +91,16 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
         }
         String[] endpoints = endpointStr.split(ENDPOINT_SPLIT_CHAR);
         List<InetSocketAddress> inetSocketAddresses = new ArrayList<>();
+        List<ServerRegistration> serverRegistrations = new ArrayList<>();
         for (String endpoint : endpoints) {
             String[] ipAndPort = endpoint.split(IP_PORT_SPLIT_CHAR);
             if (ipAndPort.length != 2) {
                 throw new IllegalArgumentException("endpoint format should like ip:port");
             }
-            inetSocketAddresses.add(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])));
+//            inetSocketAddresses.add(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])));
+            serverRegistrations.add(new ServerRegistration(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])),0));
         }
-        return inetSocketAddresses;
+        return serverRegistrations;
     }
 
     @Override

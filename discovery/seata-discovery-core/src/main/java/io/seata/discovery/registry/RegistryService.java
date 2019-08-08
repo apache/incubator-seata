@@ -15,7 +15,8 @@
  */
 package io.seata.discovery.registry;
 
-import java.net.InetSocketAddress;
+import io.seata.discovery.loadbalance.ServerRegistration;
+
 import java.util.List;
 
 /**
@@ -43,18 +44,18 @@ public interface RegistryService<T> {
     /**
      * Register.
      *
-     * @param address the address
+     * @param serverRegistration the  serverRegistration
      * @throws Exception the exception
      */
-    void register(InetSocketAddress address) throws Exception;
+    void register(ServerRegistration serverRegistration) throws Exception;
 
     /**
      * Unregister.
      *
-     * @param address the address
+     * @param serverRegistration the serverRegistration
      * @throws Exception the exception
      */
-    void unregister(InetSocketAddress address) throws Exception;
+    void unregister(ServerRegistration serverRegistration) throws Exception;
 
     /**
      * Subscribe.
@@ -81,7 +82,7 @@ public interface RegistryService<T> {
      * @return the list
      * @throws Exception the exception
      */
-    List<InetSocketAddress> lookup(String key) throws Exception;
+    List<ServerRegistration> lookup(String key) throws Exception;
 
     /**
      * Close.

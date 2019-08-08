@@ -15,7 +15,6 @@
  */
 package io.seata.core.rpc.netty;
 
-import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
@@ -42,6 +41,7 @@ import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.ClientMessageListener;
 import io.seata.core.rpc.ClientMessageSender;
+import io.seata.discovery.loadbalance.ServerRegistration;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
@@ -268,17 +268,17 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     }
     
     private String loadBalance(String transactionServiceGroup) {
-        InetSocketAddress address = null;
+        ServerRegistration serverRegistration = null;
         try {
-            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(transactionServiceGroup);
-            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
+            List<ServerRegistration> inetSocketServerRegistrationList = RegistryFactory.getInstance().lookup(transactionServiceGroup);
+            serverRegistration = LoadBalanceFactory.getInstance().select(inetSocketServerRegistrationList);
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
         }
-        if (address == null) {
+        if (serverRegistration == null || serverRegistration.getAddress() == null) {
             throw new FrameworkException(NoAvailableService);
         }
-        return NetUtil.toStringAddress(address);
+        return NetUtil.toStringAddress(serverRegistration.getAddress());
     }
     
     private String getThreadPrefix() {

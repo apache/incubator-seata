@@ -28,7 +28,7 @@ import io.seata.common.util.CollectionUtils;
 public abstract class AbstractLoadBalance implements LoadBalance {
 
     @Override
-    public <T> T select(List<T> invokers) {
+    public <T extends ServerRegistration> T select(List<T> invokers) {
         if (CollectionUtils.isEmpty(invokers)) {
             return null;
         }
@@ -45,5 +45,5 @@ public abstract class AbstractLoadBalance implements LoadBalance {
      * @param invokers the invokers
      * @return the t
      */
-    protected abstract <T> T doSelect(List<T> invokers);
+    protected abstract <T extends ServerRegistration> T doSelect(List<T> invokers);
 }

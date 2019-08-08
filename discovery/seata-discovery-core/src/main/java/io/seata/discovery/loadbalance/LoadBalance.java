@@ -33,5 +33,5 @@ public interface LoadBalance {
      * @return the t
      * @throws Exception the exception
      */
-    <T> T select(List<T> invokers) throws Exception;
+    <T extends ServerRegistration> T select(List<T> invokers) throws Exception;
 }
