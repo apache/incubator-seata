@@ -45,6 +45,7 @@ transaction.undo.data.validation=true
 transaction.undo.log.serialization=jackson
 transaction.undo.log.save.days=7
 transaction.undo.log.delete.delay=86400
+transaction.undo.log.table=undo_log
 transport.serialization=seata
 transport.compressor=none
 metrics.enabled=false

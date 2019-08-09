@@ -254,4 +254,14 @@ public class ConfigurationKeys {
      * The constant TRANSACTION_UNDO_LOG_DELETE_DELAY
      */
     public static final String TRANSACTION_UNDO_LOG_DELETE_DELAY = TRANSACTION_PREFIX + "undo.log.delete.delay";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_TABLE
+     */
+    public static final String TRANSACTION_UNDO_LOG_TABLE = TRANSACTION_PREFIX + "undo.log.table";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_DEFAULT_TABLE.
+     */
+    public static final String TRANSACTION_UNDO_LOG_DEFAULT_TABLE  = "undo_log";
 }
