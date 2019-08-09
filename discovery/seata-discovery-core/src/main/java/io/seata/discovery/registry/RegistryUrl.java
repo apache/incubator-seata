@@ -1,3 +1,18 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.discovery.registry;
 
 
@@ -12,23 +27,23 @@ public class RegistryUrl {
 
     private final String schema;
 
-    private final HashMap<String,String> parameters;
+    private final HashMap<String, String> parameters;
 
     public RegistryUrl() {
         this(null, null, 0, null);
     }
 
-    public RegistryUrl(String host,int port){
-        this(null,host, port, null);
+    public RegistryUrl(String host, int port) {
+        this(null, host, port, null);
     }
 
-    public RegistryUrl(String schema,String host, int port, Map<String,String> parameters){
+    public RegistryUrl(String schema, String host, int port, Map<String, String> parameters) {
         this.schema = schema;
         this.host = host;
         this.port = port;
         if (parameters == null) {
             this.parameters = new HashMap<>();
-        }else{
+        } else {
             this.parameters = new HashMap<>(parameters);
         }
     }
@@ -45,63 +60,54 @@ public class RegistryUrl {
         int idxOfPort;
         int idxOfPara = url.indexOf("?");
         int idxOfHost;
-
+        Map<String, String> paramters = null;
         if (idxOfSchema < 0) {
             schema = null;
             idxOfHost = 0;
             idxOfPort = url.indexOf(":");
-        }else{
+        } else {
             schema = url.substring(0, idxOfSchema);
             idxOfHost = idxOfSchema + 3;
             idxOfPort = url.indexOf(":", idxOfSchema + 3);
         }
         if (idxOfPara > 0) {
             param = url.substring(idxOfPara + 1);
+            paramters = parseParamter(param);
         }
         if (idxOfPort < 0) {
             port = 0;
             if (idxOfPara < 0) {
                 host = url.substring(idxOfHost);
-            }else{
+            } else {
                 host = url.substring(idxOfHost, idxOfPara);
             }
         } else if (idxOfPort > 0 && idxOfPara > 0) {
             port = Integer.valueOf(url.substring(idxOfPort + 1, idxOfPara));
             host = url.substring(idxOfHost, idxOfPort);
-        }else {
+        } else {
             port = Integer.valueOf(url.substring(idxOfPort + 1));
             host = url.substring(idxOfHost, idxOfPort);
         }
-        return new RegistryUrl(schema, host, port, null);
+        return new RegistryUrl(schema, host, port, paramters);
     }
 
     public static Map<String, String> parseParamter(String paraStr) {
 
         HashMap<String, String> parameters = new HashMap<>();
 
-        int idxOfSeg = 0;
-
-        do {
-            int idxOfeql = paraStr.indexOf("=",idxOfSeg + 1);
-
-            if (idxOfeql < 0) {
-                idxOfSeg = paraStr.indexOf("&", idxOfSeg + 1);
-                break;
-            }else{
-                String val;
-
-                String key = paraStr.substring(idxOfSeg == 0 ? 0 : idxOfSeg + 1, idxOfeql).trim();
-                idxOfSeg = paraStr.indexOf("&", idxOfSeg + 1);
-                if (idxOfSeg > 0) {
-                    val = paraStr.substring(idxOfeql + 1,idxOfSeg).trim();
-                    parameters.put(key, val);
-                }else{
-                    val = paraStr.substring(idxOfeql + 1).trim();
-                    parameters.put(key, val);
-                    return parameters;
+        String[] pair = paraStr.split("&");
+        for (int i = 0; i < pair.length; i++) {
+            String str = pair[i];
+            int idxOfeql = str.indexOf("=");
+            if (idxOfeql > 0) {
+                String val = null;
+                String key = str.substring(0, idxOfeql);
+                if ((idxOfeql + 1) < str.length()) {
+                    val = str.substring(idxOfeql + 1);
                 }
+                parameters.put(key, val);
             }
-        } while (idxOfSeg > 0);
+        }
 
         return parameters;
     }
@@ -119,6 +125,9 @@ public class RegistryUrl {
         return schema;
     }
 
+    public String getStringParam(String key) {
+        return this.parameters.get(key);
+    }
 
     @Override
     public String toString() {

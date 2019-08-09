@@ -19,6 +19,9 @@ import io.seata.common.util.StringUtils;
 import com.netflix.appinfo.EurekaInstanceConfig;
 import com.netflix.appinfo.MyDataCenterInstanceConfig;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * @author: rui_849217@163.com
  * @date: 2018/2/18
@@ -26,10 +29,17 @@ import com.netflix.appinfo.MyDataCenterInstanceConfig;
  * eg: instanceId \ipAddress \ applicationName...
  */
 public class CustomEurekaInstanceConfig extends MyDataCenterInstanceConfig implements EurekaInstanceConfig {
+
+    protected static final String METAINFO_WEIGHT_KEY = "weight";
+
     private String applicationName;
     private String instanceId;
     private String ipAddress;
     private int port = -1;
+    private int weight = 0;
+
+    private Map<String,String> metaMap;
+
 
     @Override
     public String getInstanceId() {
@@ -63,6 +73,11 @@ public class CustomEurekaInstanceConfig extends MyDataCenterInstanceConfig imple
         return applicationName;
     }
 
+    @Override
+    public Map<String, String> getMetadataMap() {
+       return metaMap;
+    }
+
     public void setInstanceId(String instanceId) {
         this.instanceId = instanceId;
     }
@@ -78,4 +93,10 @@ public class CustomEurekaInstanceConfig extends MyDataCenterInstanceConfig imple
     public void setApplicationName(String applicationName) {
         this.applicationName = applicationName;
     }
+
+    public void setInstanceWeight(int weight) {
+        this.weight = weight;
+        metaMap.put(METAINFO_WEIGHT_KEY,String.valueOf(weight));
+    }
+
 }

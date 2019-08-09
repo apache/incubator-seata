@@ -25,6 +25,7 @@ import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.loadbalance.ServerRegistration;
 import io.seata.discovery.registry.RegistryService;
 
 import java.net.InetSocketAddress;
@@ -112,14 +113,12 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     }
 
     @Override
-    public void register(InetSocketAddress address) throws Exception {
-        NetUtil.validAddress(address);
+    public void register(ServerRegistration registration) throws Exception {
         getConsulClient().agentServiceRegister(createService(address));
     }
 
     @Override
-    public void unregister(InetSocketAddress address) throws Exception {
-        NetUtil.validAddress(address);
+    public void unregister(ServerRegistration registration) throws Exception {
         getConsulClient().agentServiceDeregister(createServiceId(address));
     }
 

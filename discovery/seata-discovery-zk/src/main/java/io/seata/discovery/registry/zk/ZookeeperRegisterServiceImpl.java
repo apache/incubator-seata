@@ -19,6 +19,7 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.NetUtil;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.loadbalance.ServerRegistration;
 import io.seata.discovery.registry.RegistryService;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.IZkStateListener;
@@ -62,16 +63,19 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private static final String SESSION_TIME_OUT_KEY = "session.timeout";
     private static final String CONNECT_TIME_OUT_KEY = "connect.timeout";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-        + FILE_CONFIG_SPLIT_CHAR;
+            + FILE_CONFIG_SPLIT_CHAR;
     private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY + ZK_PATH_SPLIT_CHAR + REGISTRY_TYPE
-        + ZK_PATH_SPLIT_CHAR;
+            + ZK_PATH_SPLIT_CHAR;
     private static final String ROOT_PATH_WITHOUT_SUFFIX = ZK_PATH_SPLIT_CHAR + FILE_ROOT_REGISTRY + ZK_PATH_SPLIT_CHAR
-        + REGISTRY_TYPE;
+            + REGISTRY_TYPE;
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, List<ServerRegistration>> REGISTRATION_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<IZkChildListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
 
     private static final int REGISTERED_PATH_SET_SIZE = 1;
-    private static final Set<String> REGISTERED_PATH_SET = Collections.synchronizedSet(new HashSet<>(REGISTERED_PATH_SET_SIZE));
+//    private static final Set<String> REGISTERED_PATH_SET = Collections.synchronizedSet(new HashSet<>(REGISTERED_PATH_SET_SIZE));
+    private static final Set<ServerRegistration> ServerRegistration_SET = Collections.synchronizedSet(new HashSet<>(REGISTERED_PATH_SET_SIZE));
+
 
     private ZookeeperRegisterServiceImpl() {
     }
@@ -88,20 +92,18 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     }
 
     @Override
-    public void register(InetSocketAddress address) throws Exception {
-        NetUtil.validAddress(address);
-
-        String path = getRegisterPathByPath(address);
-        doRegister(path);
+    public void register(ServerRegistration registration) throws Exception {
+        doRegister(registration);
     }
 
-    private boolean doRegister(String path) {
+    private boolean doRegister(ServerRegistration serverRegistration) {
+        String path = getRegisterPathByPath(serverRegistration.getAddress());
         if (checkExists(path)) {
             return false;
         }
         createParentIfNotPresent(path);
-        getClientInstance().createEphemeral(path, true);
-        REGISTERED_PATH_SET.add(path);
+        getClientInstance().createEphemeral(path, serverRegistration);
+        ServerRegistration_SET.add(serverRegistration);
         return true;
     }
 
@@ -120,12 +122,10 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     }
 
     @Override
-    public void unregister(InetSocketAddress address) throws Exception {
-        NetUtil.validAddress(address);
-
-        String path = getRegisterPathByPath(address);
+    public void unregister(ServerRegistration registration) throws Exception {
+        String path = getRegisterPathByPath(registration.getAddress());
         getClientInstance().delete(path);
-        REGISTERED_PATH_SET.remove(path);
+        ServerRegistration_SET.remove(registration);
     }
 
     @Override
@@ -172,7 +172,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
      * @throws Exception
      */
     @Override
-    public List<InetSocketAddress> lookup(String key) throws Exception {
+    public List<ServerRegistration> lookup(String key) throws Exception {
         String clusterName = getServiceGroup(key);
 
         if (null == clusterName) {
@@ -183,7 +183,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     }
 
     // visible for test.
-    List<InetSocketAddress> doLookup(String clusterName) throws Exception {
+    List<ServerRegistration> doLookup(String clusterName) throws Exception {
         boolean exist = getClientInstance().exists(ROOT_PATH + clusterName);
         if (!exist) {
             return null;
@@ -195,7 +195,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
             subscribeCluster(clusterName);
         }
 
-        return CLUSTER_ADDRESS_MAP.get(clusterName);
+        return REGISTRATION_MAP.get(clusterName);
     }
 
     @Override
@@ -208,8 +208,8 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
             synchronized (ZookeeperRegisterServiceImpl.class) {
                 if (null == zkClient) {
                     zkClient = buildZkClient(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY),
-                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY),
-                        FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY));
+                            FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + SESSION_TIME_OUT_KEY),
+                            FILE_CONFIG.getInt(FILE_CONFIG_KEY_PREFIX + CONNECT_TIME_OUT_KEY));
                 }
             }
         }
@@ -244,8 +244,10 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
     private void recover() throws Exception {
         // recover Server
-        if (!REGISTERED_PATH_SET.isEmpty()) {
-            REGISTERED_PATH_SET.forEach(path -> doRegister(path));
+        if (!ServerRegistration_SET.isEmpty()) {
+            for (ServerRegistration registration : ServerRegistration_SET) {
+                doRegister(registration);
+            }
         }
         // recover client
         if (!LISTENER_SERVICE_MAP.isEmpty()) {
@@ -278,24 +280,29 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
     private void refreshClusterAddressMap(String clusterName, List<String> instances) {
         List<InetSocketAddress> newAddressList = new ArrayList<>();
+        List<ServerRegistration> registrations = new ArrayList<>();
         if (instances == null) {
             CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
             return;
         }
         for (String path : instances) {
             try {
+                ServerRegistration registration = getClientInstance().readData(ROOT_PATH + getClusterName() + ZK_PATH_SPLIT_CHAR + path);
+                registrations.add(registration);
+
                 String[] ipAndPort = path.split(IP_PORT_SPLIT_CHAR);
                 newAddressList.add(new InetSocketAddress(ipAndPort[0], Integer.parseInt(ipAndPort[1])));
             } catch (Exception e) {
                 LOGGER.warn("The cluster instance info is error, instance info:{}", path);
             }
         }
+        REGISTRATION_MAP.put(clusterName, registrations);
         CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
     }
 
     private String getClusterName() {
         String clusterConfigName = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-            + REGISTRY_CLUSTER;
+                + REGISTRY_CLUSTER;
         return FILE_CONFIG.getConfig(clusterConfigName);
     }
 

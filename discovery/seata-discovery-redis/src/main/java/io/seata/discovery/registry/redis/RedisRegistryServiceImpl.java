@@ -140,13 +140,10 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
 
     @Override
     public void register(ServerRegistration registration) {
-        NetUtil.validAddress(registration.getAddress());
-        String serverAddr = NetUtil.toStringAddress(registration.getAddress());
         Jedis jedis = jedisPool.getResource();
         try {
-            String s = JSON.toJSONString(registration);
-            jedis.hset(getRedisRegistryKey(), serverAddr,JSON.toJSONString(registration));
-            jedis.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.REGISTER);
+            jedis.hset(getRedisRegistryKey(), registration.getStringAddress(),registration.serialize());
+            jedis.publish(getRedisRegistryKey(), registration.serialize() + "-" + RedisListener.REGISTER);
         } finally {
             jedis.close();
         }
@@ -154,12 +151,10 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
 
     @Override
     public void unregister(ServerRegistration registration) {
-        NetUtil.validAddress(registration.getAddress());
-        String serverAddr = NetUtil.toStringAddress(registration.getAddress());
         Jedis jedis = jedisPool.getResource();
         try {
-            jedis.hdel(getRedisRegistryKey(), serverAddr);
-            jedis.publish(getRedisRegistryKey(), serverAddr + "-" + RedisListener.UN_REGISTER);
+            jedis.hdel(getRedisRegistryKey(), registration.getStringAddress());
+            jedis.publish(getRedisRegistryKey(), registration.serialize() + "-" + RedisListener.UN_REGISTER);
         } finally {
             jedis.close();
         }
@@ -209,10 +204,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
             if (null != instances && !instances.isEmpty()) {
                 Set<ServerRegistration> registrations = new HashSet<>();
                 for (Map.Entry<String, String> instance : instances.entrySet()) {
-                    String serverAddr = instance.getKey();
-                    String registrationJson = instance.getValue();
-                    ServerRegistration serverRegistration = JSON.parseObject(registrationJson, ServerRegistration.class);
-                    registrations.add(serverRegistration);
+                    registrations.add(ServerRegistration.valueOf(instance.getValue()));
                 }
                 CLUSTER_ADDRESS_MAP.put(clusterName, registrations);
             }
@@ -220,15 +212,14 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 @Override
                 public void onEvent(String msg) {
                     String[] msgr = msg.split("-");
-                    String serverAddr = msgr[0];
+                    String registrationJson = msgr[0];
                     String eventType = msgr[1];
                     switch (eventType) {
                         case RedisListener.REGISTER:
-                            ServerRegistration registration = new ServerRegistration(NetUtil.toInetSocketAddress(serverAddr), 0);
-                            CLUSTER_ADDRESS_MAP.get(clusterName).add(registration);
+                            CLUSTER_ADDRESS_MAP.get(clusterName).add(ServerRegistration.valueOf(registrationJson));
                             break;
                         case RedisListener.UN_REGISTER:
-                            CLUSTER_ADDRESS_MAP.get(clusterName).remove(new ServerRegistration(NetUtil.toInetSocketAddress(serverAddr), 0));
+                            CLUSTER_ADDRESS_MAP.get(clusterName).remove(ServerRegistration.valueOf(registrationJson));
                             break;
                         default:
                             throw new ShouldNeverHappenException("unknown redis msg:" + msg);

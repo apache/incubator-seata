@@ -29,10 +29,10 @@ import io.etcd.jetcd.options.WatchOption;
 import io.etcd.jetcd.watch.WatchResponse;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.loadbalance.ServerRegistration;
 import io.seata.discovery.registry.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,7 +85,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     private final static long LIFE_KEEP_CRITICAL = 6;
     private static volatile EtcdRegistryServiceImpl instance;
     private static volatile Client client;
-    private ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap;
+    private ConcurrentMap<String, List<ServerRegistration>> registrationMap;
     private ConcurrentMap<String, Set<Watch.Listener>> listenerMap;
     private ConcurrentMap<String, EtcdWatcher> watcherMap;
     private static long leaseId = 0;
@@ -98,7 +98,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
 
 
     private EtcdRegistryServiceImpl() {
-        clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        registrationMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
         listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
         watcherMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
         executorService = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("registry-etcd3", THREAD_POOL_SIZE));
@@ -122,36 +122,34 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
 
 
     @Override
-    public void register(InetSocketAddress address) throws Exception {
-        NetUtil.validAddress(address);
-        doRegister(address);
+    public void register(ServerRegistration registration) throws Exception {
+        doRegister(registration);
     }
 
     /**
      * do registry
      *
-     * @param address
+     * @param registration
      */
-    private void doRegister(InetSocketAddress address) throws Exception {
+    private void doRegister(ServerRegistration registration) throws Exception {
         PutOption putOption = PutOption.newBuilder().withLeaseId(getLeaseId()).build();
-        getClient().getKVClient().put(buildRegestryKey(address), buildRegistryValue(address), putOption).get();
+        getClient().getKVClient().put(buildRegestryKey(registration), buildRegistryValue(registration), putOption).get();
     }
 
 
     @Override
-    public void unregister(InetSocketAddress address) throws Exception {
-        NetUtil.validAddress(address);
-        doUnregister(address);
+    public void unregister(ServerRegistration registration) throws Exception {
+        doUnregister(registration);
     }
 
     /**
      * do unregister
      *
-     * @param address
+     * @param registration
      * @throws Exception
      */
-    private void doUnregister(InetSocketAddress address) throws Exception {
-        getClient().getKVClient().delete(buildRegestryKey(address)).get();
+    private void doUnregister(ServerRegistration registration) throws Exception {
+        getClient().getKVClient().delete(buildRegestryKey(registration)).get();
     }
 
     @Override
@@ -175,12 +173,10 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             listenerMap.put(cluster, newSubscribeSet);
         }
         watcherMap.remove(cluster).stop();
-
-
     }
 
     @Override
-    public List<InetSocketAddress> lookup(String key) throws Exception {
+    public List<ServerRegistration> lookup(String key) throws Exception {
         final String cluster = getServiceGroup(key);
         if (null == cluster) {
             return null;
@@ -212,7 +208,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             });
 
         }
-        return clusterAddressMap.get(cluster);
+        return registrationMap.get(cluster);
     }
 
     @Override
@@ -223,7 +219,6 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
                 lifeKeeperFuture.get(3, TimeUnit.SECONDS);
             }
         }
-
     }
 
     /**
@@ -240,11 +235,10 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         GetOption getOption = GetOption.newBuilder().withPrefix(buildRegestryKeyPrefix()).build();
         GetResponse getResponse = getClient().getKVClient().get(buildRegestryKeyPrefix(), getOption).get();
         //2.add to list
-        List<InetSocketAddress> instanceList = getResponse.getKvs().stream().map(keyValue -> {
-            String[] instanceInfo = keyValue.getValue().toString(UTF_8).split(":");
-            return new InetSocketAddress(instanceInfo[0], Integer.parseInt(instanceInfo[1]));
-        }).collect(Collectors.toList());
-        clusterAddressMap.put(cluster, instanceList);
+        List<ServerRegistration> instanceList = getResponse.getKvs().stream().map(
+                keyValue -> ServerRegistration.valueOf(keyValue.getValue().toString(UTF_8))
+        ).collect(Collectors.toList());
+        registrationMap.put(cluster, instanceList);
     }
 
     /**
@@ -308,8 +302,8 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      *
      * @return registry key
      */
-    private ByteSequence buildRegestryKey(InetSocketAddress address) {
-        return ByteSequence.from(REGISTRY_KEY_PREFIX + getClusterName() + "-" + NetUtil.toStringAddress(address), UTF_8);
+    private ByteSequence buildRegestryKey(ServerRegistration registration) {
+        return ByteSequence.from(REGISTRY_KEY_PREFIX + getClusterName() + "-" + registration.getStringAddress(), UTF_8);
     }
 
     /**
@@ -324,11 +318,11 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     /**
      * build registry value
      *
-     * @param address
+     * @param registration
      * @return registry value
      */
-    private ByteSequence buildRegistryValue(InetSocketAddress address) {
-        return ByteSequence.from(NetUtil.toStringAddress(address), UTF_8);
+    private ByteSequence buildRegistryValue(ServerRegistration registration) {
+        return ByteSequence.from(registration.serialize(), UTF_8);
     }
 
     /**

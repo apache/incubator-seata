@@ -27,10 +27,10 @@ import com.netflix.discovery.EurekaEventListener;
 import com.netflix.discovery.shared.Application;
 import io.seata.common.exception.EurekaRegistryException;
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.NetUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.discovery.loadbalance.ServerRegistration;
 import io.seata.discovery.registry.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +68,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final String DEFAULT_WEIGHT = "1";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
-    private static ConcurrentMap<String, Set<InetSocketAddress>> clusterAddressMap;
+    private static ConcurrentMap<String, Set<ServerRegistration>> registrationMap;
 
     private static volatile boolean subscribeListener = false;
     private static volatile ApplicationInfoManager applicationInfoManager;
@@ -84,7 +84,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         if (null == instance) {
             synchronized (EurekaRegistryServiceImpl.class) {
                 if (null == instance) {
-                    clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+                    registrationMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
                     instanceConfig = new CustomEurekaInstanceConfig();
                     instance = new EurekaRegistryServiceImpl();
                 }
@@ -94,18 +94,18 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     }
 
     @Override
-    public void register(InetSocketAddress address) throws Exception {
-        NetUtil.validAddress(address);
-        instanceConfig.setIpAddress(address.getAddress().getHostAddress());
-        instanceConfig.setPort(address.getPort());
+    public void register(ServerRegistration registration) throws Exception {
+        instanceConfig.setIpAddress(registration.getAddress().getAddress().getHostAddress());
+        instanceConfig.setPort(registration.getAddress().getPort());
         instanceConfig.setApplicationName(getApplicationName());
         instanceConfig.setInstanceId(getInstanceId());
+        instanceConfig.setInstanceWeight(registration.getWeight());
         getEurekaClient(true);
         applicationInfoManager.setInstanceStatus(InstanceInfo.InstanceStatus.UP);
     }
 
     @Override
-    public void unregister(InetSocketAddress address) throws Exception {
+    public void unregister(ServerRegistration registration) throws Exception {
         if (eurekaClient == null) {
             return;
         }
@@ -125,7 +125,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     }
 
     @Override
-    public List<InetSocketAddress> lookup(String key) throws Exception {
+    public List<ServerRegistration> lookup(String key) throws Exception {
         Configuration config = ConfigurationFactory.getInstance();
         String clusterName = config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
         if (null == clusterName) {
@@ -145,7 +145,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             });
         }
 
-        return new ArrayList<>(clusterAddressMap.get(clusterName.toUpperCase()));
+        return new ArrayList<>(registrationMap.get(clusterName.toUpperCase()));
     }
 
     @Override
@@ -160,7 +160,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
         List<Application> applications = getEurekaClient(false).getApplications().getRegisteredApplications();
 
         if (CollectionUtils.isEmpty(applications)){
-            clusterAddressMap.clear();
+            registrationMap.clear();
 
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("refreshCluster success, cluster empty!");
@@ -168,17 +168,19 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             return;
         }
 
-        ConcurrentMap<String, Set<InetSocketAddress>> collect = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        ConcurrentMap<String, Set<ServerRegistration>> collect = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
 
         for (Application application : applications) {
             List<InstanceInfo> instances = application.getInstances();
 
             if (CollectionUtils.isNotEmpty(instances)) {
-                Set<InetSocketAddress> addressSet = new HashSet<>();
+                Set<ServerRegistration> registrations = new HashSet<>();
                 for (InstanceInfo instance : instances) {
-                    addressSet.add(new InetSocketAddress(instance.getIPAddr(), instance.getPort()));
+                    registrations.add(
+                    new ServerRegistration(
+                            new InetSocketAddress(instance.getIPAddr(), instance.getPort()),Integer.valueOf(instance.getMetadata().getOrDefault(CustomEurekaInstanceConfig.METAINFO_WEIGHT_KEY, "0"))));
                 }
-                collect.put(application.getName(), addressSet);
+                collect.put(application.getName(), registrations);
             }
         }
 
@@ -186,7 +188,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
             LOGGER.debug("refreshCluster success, cluster: " + collect);
         }
 
-        clusterAddressMap = collect;
+        registrationMap = collect;
     }
 
     private Properties getEurekaProperties(boolean needRegister) {

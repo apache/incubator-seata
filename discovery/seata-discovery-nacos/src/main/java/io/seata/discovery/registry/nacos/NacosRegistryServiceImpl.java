@@ -22,9 +22,11 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.alibaba.nacos.api.common.Constants;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
+import io.seata.discovery.loadbalance.ServerRegistration;
 import io.seata.discovery.registry.RegistryService;
 import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
@@ -50,7 +52,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile NamingService naming;
     private static final ConcurrentMap<String, List<EventListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
-    private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, List<ServerRegistration>> REGISTRATION_MAP = new ConcurrentHashMap<>();
     private static volatile NacosRegistryServiceImpl instance;
 
     private NacosRegistryServiceImpl() {
@@ -73,15 +75,23 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     }
 
     @Override
-    public void register(InetSocketAddress address) throws Exception {
-        validAddress(address);
-        getNamingInstance().registerInstance(PRO_SERVER_ADDR_KEY, address.getAddress().getHostAddress(), address.getPort(), getClusterName());
+    public void register(ServerRegistration registration) throws Exception {
+        getNamingInstance().registerInstance(PRO_SERVER_ADDR_KEY, buildNacosInstance(registration));
     }
 
+    private Instance buildNacosInstance(ServerRegistration registration) throws Exception{
+        Instance instance = new Instance();
+        instance.setClusterName(getClusterName());
+        instance.setWeight(registration.getWeight());
+        instance.setIp(registration.getAddress().getAddress().getHostAddress());
+        instance.setPort(registration.getAddress().getPort());
+        return instance;
+    }
+
+
     @Override
-    public void unregister(InetSocketAddress address) throws Exception {
-        validAddress(address);
-        getNamingInstance().deregisterInstance(PRO_SERVER_ADDR_KEY, address.getAddress().getHostAddress(), address.getPort(), getClusterName());
+    public void unregister(ServerRegistration registration) throws Exception {
+        getNamingInstance().deregisterInstance(PRO_SERVER_ADDR_KEY, Constants.DEFAULT_GROUP, buildNacosInstance(registration));
     }
 
     @Override
@@ -111,7 +121,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     }
 
     @Override
-    public List<InetSocketAddress> lookup(String key) throws Exception {
+    public List<ServerRegistration> lookup(String key) throws Exception {
         Configuration config = ConfigurationFactory.getInstance();
         String clusterName = config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
         if (null == clusterName) {
@@ -122,33 +132,33 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
             clusters.add(clusterName);
             List<Instance> firstAllInstances = getNamingInstance().getAllInstances(PRO_SERVER_ADDR_KEY, clusters);
             if (null != firstAllInstances) {
-                List<InetSocketAddress> newAddressList = new ArrayList<>();
+                List<ServerRegistration> registrations = new ArrayList<>();
                 for (Instance instance : firstAllInstances) {
                     if (instance.isEnabled() && instance.isHealthy()) {
-                        newAddressList.add(new InetSocketAddress(instance.getIp(), instance.getPort()));
+                        registrations.add(new ServerRegistration(new InetSocketAddress(instance.getIp(), instance.getPort()), (int)instance.getWeight()));
                     }
                 }
-                CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+                REGISTRATION_MAP.put(clusterName, registrations);
             }
             subscribe(clusterName, new EventListener() {
                 @Override
                 public void onEvent(Event event) {
                     List<Instance> instances = ((NamingEvent) event).getInstances();
-                    if (null == instances && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
-                        CLUSTER_ADDRESS_MAP.remove(clusterName);
+                    if (null == instances && null != REGISTRATION_MAP.get(clusterName)) {
+                        REGISTRATION_MAP.remove(clusterName);
                     } else if (!CollectionUtils.isEmpty(instances)) {
-                        List<InetSocketAddress> newAddressList = new ArrayList<>();
+                        List<ServerRegistration> registrations = new ArrayList<>();
                         for (Instance instance : instances) {
                             if (instance.isEnabled() && instance.isHealthy()) {
-                                newAddressList.add(new InetSocketAddress(instance.getIp(), instance.getPort()));
+                                registrations.add(new ServerRegistration(new InetSocketAddress(instance.getIp(), instance.getPort()), (int)instance.getWeight()));
                             }
                         }
-                        CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+                        REGISTRATION_MAP.put(clusterName, registrations);
                     }
                 }
             });
         }
-        return CLUSTER_ADDRESS_MAP.get(clusterName);
+        return REGISTRATION_MAP.get(clusterName);
     }
 
     @Override

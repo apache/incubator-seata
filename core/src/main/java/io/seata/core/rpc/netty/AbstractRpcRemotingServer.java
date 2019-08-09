@@ -33,6 +33,7 @@ import io.seata.common.util.NetUtil;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
+import io.seata.discovery.loadbalance.ServerRegistration;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,7 +178,8 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         try {
             ChannelFuture future = this.serverBootstrap.bind(host, listenPort).sync();
             LOGGER.info("Server started ... ");
-            RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+            ServerRegistration registration = new ServerRegistration(new InetSocketAddress(XID.getIpAddress(), XID.getPort()), 0);
+            RegistryFactory.getInstance().register(registration);
             initialized.set(true);
             future.channel().closeFuture().sync();
         } catch (Exception exx) {
@@ -193,7 +195,8 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
                 LOGGER.debug("Shuting server down. ");
             }
             if (initialized.get()) {
-                RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
+                ServerRegistration registration = new ServerRegistration(new InetSocketAddress(XID.getIpAddress(), XID.getPort()), 0);
+                RegistryFactory.getInstance().unregister(registration);
                 RegistryFactory.getInstance().close();
                 //wait a few seconds for server transport
                 TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());

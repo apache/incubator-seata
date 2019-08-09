@@ -16,6 +16,7 @@
 package io.seata.discovery.registry.zk;
 
 import io.seata.common.util.NetUtil;
+import io.seata.discovery.loadbalance.ServerRegistration;
 import org.I0Itec.zkclient.IZkChildListener;
 import org.I0Itec.zkclient.ZkClient;
 import org.apache.curator.test.TestingServer;
@@ -65,11 +66,13 @@ public class ZookeeperRegisterServiceImplTest {
 
     @Test
     public void testAll() throws Exception {
-        service.register(new InetSocketAddress(NetUtil.getLocalAddress(), 33333));
+        ServerRegistration registration = new ServerRegistration(new InetSocketAddress(NetUtil.getLocalAddress(), 33333), 10);
+
+        service.register(registration);
 
         Assertions.assertNull(service.lookup("xxx"));
-        List<InetSocketAddress> lookup2 = service.doLookup("default");
-        Assertions.assertTrue(lookup2.size() == 1);
+        List<ServerRegistration> lookup2 = service.doLookup("default");
+        Assertions.assertTrue(registration.equals(lookup2.get(0)));
 
         final List<String> data = new ArrayList<>();
         final CountDownLatch latch = new CountDownLatch(1);
@@ -88,7 +91,7 @@ public class ZookeeperRegisterServiceImplTest {
         };
         service.subscribe("default", listener2);
 
-        service.unregister(new InetSocketAddress(NetUtil.getLocalAddress(), 33333));
+        service.unregister(new ServerRegistration(new InetSocketAddress(NetUtil.getLocalAddress(), 33333),0));
         latch2.await(1000, TimeUnit.MILLISECONDS);
         Assertions.assertTrue(data2.size() == 0);
 
