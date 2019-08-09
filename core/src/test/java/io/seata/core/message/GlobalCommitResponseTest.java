@@ -15,14 +15,10 @@
  */
 package io.seata.core.message;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.GlobalCommitResponse;
 
-import org.apache.commons.lang.StringUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

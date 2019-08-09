@@ -15,8 +15,6 @@
  */
 package io.seata.core.message;
 
-import java.nio.ByteBuffer;
-
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 
 import org.junit.jupiter.api.Assertions;
