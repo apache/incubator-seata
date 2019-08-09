@@ -130,18 +130,10 @@ public class TableMetaTest {
                 com.alibaba.druid.mock.MockResultSet resultSet = new com.alibaba.druid.mock.MockResultSet(statement);
 
                 List<ResultSetMetaDataBase.ColumnMetaData> columns = resultSet.getMockMetaData().getColumns();
-                ResultSetMetaDataBase.ColumnMetaData column1 = new ResultSetMetaDataBase.ColumnMetaData();
-                column1.setCatalogName("lookup");
-                ResultSetMetaDataBase.ColumnMetaData column2 = new ResultSetMetaDataBase.ColumnMetaData();
-                column2.setCatalogName("lookup");
-                ResultSetMetaDataBase.ColumnMetaData column3 = new ResultSetMetaDataBase.ColumnMetaData();
-                column3.setCatalogName("lookup");
-                ResultSetMetaDataBase.ColumnMetaData column4 = new ResultSetMetaDataBase.ColumnMetaData();
-                column4.setCatalogName("lookup");
-                columns.add(column1);
-                columns.add(column2);
-                columns.add(column3);
-                columns.add(column4);
+                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
+                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
+                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
+                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
                 return resultSet;
             }
         });
@@ -256,17 +248,17 @@ public class TableMetaTest {
         //add a new column
         columnMetas =
             new Object[][] {
-                new Object[] {"lookup", "", "lookup.user", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-                new Object[] {"lookup", "", "lookup.user", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
-                new Object[] {"lookup", "", "lookup.user", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
-                new Object[] {"lookup", "", "lookup.user", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
-                new Object[] {"lookup", "", "lookup.user", "id_card", Types.DECIMAL, "DECIMAL", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"}
+                new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+                new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES", "NO"},
+                new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
+                new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"}
             };
-        cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "lookup.user");
-        realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "lookup.user");
-        //Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
+        cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
+        realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
+        Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
         TableMetaCache.refresh(dataSourceProxy);
-        cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "lookup.user");
+        cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         Assertions.assertEquals(cacheTableMeta, realTableMeta);
 
         //change the column isAutoincrement
