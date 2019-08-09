@@ -20,7 +20,9 @@ import io.seata.common.Constants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
 import io.seata.common.util.CollectionUtils;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ClientTableColumnsName;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
@@ -77,7 +79,8 @@ public final class UndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UndoLogManager.class);
 
-    private static final String UNDO_LOG_TABLE_NAME = "undo_log";
+    private static final String UNDO_LOG_TABLE_NAME = ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, ConfigurationKeys.TRANSACTION_UNDO_LOG_DEFAULT_TABLE);
 
     /**
      * branch_id, xid, context, rollback_info, log_status, log_created, log_modified
