@@ -24,7 +24,7 @@ import java.util.Date;
  * Global Transaction data object
  *
  * @author zhangsen
- * @data 2019 /3/26
+ * @date 2019 /3/26
  */
 public class GlobalTransactionDO {
 
