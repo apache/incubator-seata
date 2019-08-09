@@ -54,30 +54,13 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
 
     @Override
     public T doExecute(Object... args) throws Throwable {
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) sqlRecognizer;
-
         Connection conn = statementProxy.getConnection();
         T rs = null;
         Savepoint sp = null;
         LockRetryController lockRetryController = new LockRetryController();
         boolean originalAutoCommit = conn.getAutoCommit();
-
-        StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
-        selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
-        selectSQLAppender.append(" FROM " + getFromTableInSQL());
-        String whereCondition = null;
         ArrayList<List<Object>> paramAppenders = new ArrayList<>();
-        if (statementProxy instanceof ParametersHolder) {
-            whereCondition = recognizer.getWhereCondition((ParametersHolder) statementProxy, paramAppenders);
-        } else {
-            whereCondition = recognizer.getWhereCondition();
-        }
-        if (!StringUtils.isNullOrEmpty(whereCondition)) {
-            selectSQLAppender.append(" WHERE " + whereCondition);
-        }
-        selectSQLAppender.append(" FOR UPDATE");
-        String selectPKSQL = selectSQLAppender.toString();
-
+        String selectPKSQL = buildSelectSQL(paramAppenders);
         try {
             if (originalAutoCommit) {
                 conn.setAutoCommit(false);
@@ -106,10 +89,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                                 pstPK.setObject(i + 1, paramAppender.get(i));
                             }
                         } else {
-                            for (int i = 1; i < paramAppenders.size(); i++) {
-                                selectSQLAppender.append(" UNION ").append(selectPKSQL);
-                            }
-                            pstPK = statementProxy.getConnection().prepareStatement(selectSQLAppender.toString());
+                            pstPK = statementProxy.getConnection().prepareStatement(selectPKSQL);
                             List<Object> paramAppender = null;
                             for (int i = 0; i < paramAppenders.size(); i++) {
                                 paramAppender = paramAppenders.get(i);
@@ -166,5 +146,31 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
             }
         }
         return rs;
+    }
+
+    private String buildSelectSQL(ArrayList<List<Object>> paramAppenders){
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
+        StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
+        selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
+        selectSQLAppender.append(" FROM " + getFromTableInSQL());
+        String whereCondition = null;
+        if (statementProxy instanceof ParametersHolder) {
+            whereCondition = recognizer.getWhereCondition((ParametersHolder)statementProxy, paramAppenders);
+        } else {
+            whereCondition = recognizer.getWhereCondition();
+        }
+        if (!StringUtils.isNullOrEmpty(whereCondition)) {
+            selectSQLAppender.append(" WHERE " + whereCondition);
+        }
+        selectSQLAppender.append(" FOR UPDATE");
+        String selectSQL = selectSQLAppender.toString();
+        if(!paramAppenders.isEmpty() && paramAppenders.size() > 1) {
+            StringBuffer stringBuffer = new StringBuffer(selectSQL);
+            for (int i = 1; i < paramAppenders.size(); i++) {
+                stringBuffer.append(" UNION ").append(selectSQL);
+            }
+            selectSQL = stringBuffer.toString();
+        }
+        return selectSQL;
     }
 }
