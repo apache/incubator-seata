@@ -22,6 +22,7 @@ import io.etcd.jetcd.launcher.junit.EtcdClusterResource;
 import io.etcd.jetcd.options.DeleteOption;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.watch.WatchResponse;
+import io.seata.discovery.loadbalance.ServerRegistration;
 import io.seata.discovery.registry.etcd3.EtcdRegistryProvider;
 import io.seata.discovery.registry.etcd3.EtcdRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryService;
@@ -68,7 +69,7 @@ public class EtcdRegistryServiceImplTest {
         RegistryService registryService = new EtcdRegistryProvider().provide();
         InetSocketAddress inetSocketAddress = new InetSocketAddress(HOST, PORT);
         //1.register
-        registryService.register(inetSocketAddress);
+        registryService.register(new ServerRegistration(inetSocketAddress,1));
         //2.get instance information
         GetOption getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
         long count = client.getKVClient().get(buildRegistryKeyPrefix(), getOption).get().getKvs().stream().filter(keyValue -> {
@@ -84,7 +85,7 @@ public class EtcdRegistryServiceImplTest {
         RegistryService registryService = new EtcdRegistryProvider().provide();
         InetSocketAddress inetSocketAddress = new InetSocketAddress(HOST, PORT);
         //1.register
-        registryService.register(inetSocketAddress);
+        registryService.register(new ServerRegistration(inetSocketAddress,1));
         //2.get instance information
         GetOption getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
         long count = client.getKVClient().get(buildRegistryKeyPrefix(), getOption).get().getKvs().stream().filter(keyValue -> {
@@ -93,7 +94,7 @@ public class EtcdRegistryServiceImplTest {
         }).count();
         assertThat(count).isEqualTo(1);
         //3.unregister
-        registryService.unregister(inetSocketAddress);
+        registryService.unregister(new ServerRegistration(inetSocketAddress,1));
         //4.again get instance information
         getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
         count = client.getKVClient().get(buildRegistryKeyPrefix(), getOption).get().getKvs().stream().filter(keyValue -> {
@@ -110,7 +111,7 @@ public class EtcdRegistryServiceImplTest {
         RegistryService registryService = new EtcdRegistryProvider().provide();
         InetSocketAddress inetSocketAddress = new InetSocketAddress(HOST, PORT);
         //1.register
-        registryService.register(inetSocketAddress);
+        registryService.register(new ServerRegistration(inetSocketAddress,1));
         //2.subscribe
         EtcdListener etcdListener = new EtcdListener();
         registryService.subscribe(CLUSTER_NAME, etcdListener);
@@ -125,7 +126,7 @@ public class EtcdRegistryServiceImplTest {
         RegistryService registryService = new EtcdRegistryProvider().provide();
         InetSocketAddress inetSocketAddress = new InetSocketAddress(HOST, PORT);
         //1.register
-        registryService.register(inetSocketAddress);
+        registryService.register(new ServerRegistration(inetSocketAddress,1));
         //2.subscribe
         EtcdListener etcdListener = new EtcdListener();
         registryService.subscribe(CLUSTER_NAME, etcdListener);
@@ -147,7 +148,7 @@ public class EtcdRegistryServiceImplTest {
         RegistryService registryService = new EtcdRegistryProvider().provide();
         InetSocketAddress inetSocketAddress = new InetSocketAddress(HOST, PORT);
         //1.register
-        registryService.register(inetSocketAddress);
+        registryService.register(new ServerRegistration(inetSocketAddress,1));
         //2.lookup
         List<InetSocketAddress> inetSocketAddresses = registryService.lookup("my_test_tx_group");
         assertThat(inetSocketAddresses).size().isEqualTo(1);

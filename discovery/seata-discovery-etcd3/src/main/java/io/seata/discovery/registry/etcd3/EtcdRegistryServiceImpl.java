@@ -37,7 +37,6 @@ import io.seata.discovery.registry.RegistryService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -133,7 +132,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      */
     private void doRegister(ServerRegistration registration) throws Exception {
         PutOption putOption = PutOption.newBuilder().withLeaseId(getLeaseId()).build();
-        getClient().getKVClient().put(buildRegestryKey(registration), buildRegistryValue(registration), putOption).get();
+        getClient().getKVClient().put(buildRegistryKey(registration), buildRegistryValue(registration), putOption).get();
     }
 
 
@@ -149,7 +148,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      * @throws Exception
      */
     private void doUnregister(ServerRegistration registration) throws Exception {
-        getClient().getKVClient().delete(buildRegestryKey(registration)).get();
+        getClient().getKVClient().delete(buildRegistryKey(registration)).get();
     }
 
     @Override
@@ -232,8 +231,8 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             return;
         }
         //1.get all available registries
-        GetOption getOption = GetOption.newBuilder().withPrefix(buildRegestryKeyPrefix()).build();
-        GetResponse getResponse = getClient().getKVClient().get(buildRegestryKeyPrefix(), getOption).get();
+        GetOption getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
+        GetResponse getResponse = getClient().getKVClient().get(buildRegistryKeyPrefix(), getOption).get();
         //2.add to list
         List<ServerRegistration> instanceList = getResponse.getKvs().stream().map(
                 keyValue -> ServerRegistration.valueOf(keyValue.getValue().toString(UTF_8))
@@ -302,7 +301,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      *
      * @return registry key
      */
-    private ByteSequence buildRegestryKey(ServerRegistration registration) {
+    private ByteSequence buildRegistryKey(ServerRegistration registration) {
         return ByteSequence.from(REGISTRY_KEY_PREFIX + getClusterName() + "-" + registration.getStringAddress(), UTF_8);
     }
 
@@ -311,7 +310,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      *
      * @return registry key prefix
      */
-    private ByteSequence buildRegestryKeyPrefix() {
+    private ByteSequence buildRegistryKeyPrefix() {
         return ByteSequence.from(REGISTRY_KEY_PREFIX + getClusterName(), UTF_8);
     }
 
@@ -392,8 +391,8 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         @Override
         public void run() {
             Watch watchClient = getClient().getWatchClient();
-            WatchOption watchOption = WatchOption.newBuilder().withPrefix(buildRegestryKeyPrefix()).build();
-            this.watcher = watchClient.watch(buildRegestryKeyPrefix(), watchOption, this.listener);
+            WatchOption watchOption = WatchOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
+            this.watcher = watchClient.watch(buildRegistryKeyPrefix(), watchOption, this.listener);
         }
 
         /**
