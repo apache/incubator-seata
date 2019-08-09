@@ -60,33 +60,9 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     @Override
     protected TableRecords beforeImage() throws SQLException {
         SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) sqlRecognizer;
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-
         TableMeta tmeta = getTableMeta(visitor.getTableName());
-        List<String> columns = new ArrayList<>();
-        for (String column : tmeta.getAllColumns().keySet()) {
-            columns.add(keywordChecker.checkAndReplace(column));
-        }
-        StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
-        StringJoiner columnSQL = new StringJoiner(", ");
-        for (String column : columns) {
-            columnSQL.add(getColumnNameInSQL(column));
-        }
-        selectSQLAppender.append(columnSQL.toString());
-        String whereCondition = null;
         ArrayList<List<Object>> paramAppenders = new ArrayList<>();
-        if (statementProxy instanceof ParametersHolder) {
-            whereCondition = visitor.getWhereCondition((ParametersHolder) statementProxy, paramAppenders);
-        } else {
-            whereCondition = visitor.getWhereCondition();
-        }
-        selectSQLAppender.append(" FROM " + keywordChecker.checkAndReplace(getFromTableInSQL()));
-        if (StringUtils.isNotBlank(whereCondition)) {
-            selectSQLAppender.append(" WHERE " + whereCondition);
-        }
-        selectSQLAppender.append(" FOR UPDATE");
-        String selectSQL = selectSQLAppender.toString();
-
+        String selectSQL = buildBeforeImageSQL(visitor, tmeta, paramAppenders);
         TableRecords beforeImage = null;
         PreparedStatement ps = null;
         Statement st = null;
@@ -103,10 +79,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                         ps.setObject(i + 1, paramAppender.get(i));
                     }
                 } else {
-                    for (int i = 1; i < paramAppenders.size(); i++) {
-                        selectSQLAppender.append(" UNION ").append(selectSQL);
-                    }
-                    ps = statementProxy.getConnection().prepareStatement(selectSQLAppender.toString());
+                    ps = statementProxy.getConnection().prepareStatement(selectSQL);
                     List<Object> paramAppender = null;
                     for (int i = 0; i < paramAppenders.size(); i++) {
                         paramAppender = paramAppenders.get(i);
@@ -118,7 +91,6 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 rs = ps.executeQuery();
             }
             beforeImage = TableRecords.buildRecords(tmeta, rs);
-
         } finally {
             if (rs != null) {
                 rs.close();
@@ -131,6 +103,35 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             }
         }
         return beforeImage;
+    }
+
+    private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenders) {
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+        String whereCondition = null;
+        if (statementProxy instanceof ParametersHolder) {
+            whereCondition = visitor.getWhereCondition((ParametersHolder) statementProxy, paramAppenders);
+        } else {
+            whereCondition = visitor.getWhereCondition();
+        }
+        StringBuffer sqlSuffix = new StringBuffer(" FROM " + keywordChecker.checkAndReplace(getFromTableInSQL()));
+        if (StringUtils.isNotBlank(whereCondition)) {
+            sqlSuffix.append(" WHERE " + whereCondition);
+        }
+        sqlSuffix.append(" FOR UPDATE");
+        String suffix = sqlSuffix.toString();
+        StringJoiner selectSQLAppender = new StringJoiner(", ", "SELECT ", suffix);
+        for (String column : tableMeta.getAllColumns().keySet()) {
+            selectSQLAppender.add(getColumnNameInSQL(keywordChecker.checkAndReplace(column)));
+        }
+        String selectSQL = selectSQLAppender.toString();
+        if(!paramAppenders.isEmpty() && paramAppenders.size() > 1) {
+            StringBuffer stringBuffer = new StringBuffer(selectSQL);
+            for (int i = 1; i < paramAppenders.size(); i++) {
+                stringBuffer.append(" UNION ").append(selectSQL);
+            }
+            selectSQL = stringBuffer.toString();
+        }
+        return selectSQL;
     }
 
     @Override
