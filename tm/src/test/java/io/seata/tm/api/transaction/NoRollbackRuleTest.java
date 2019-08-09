@@ -27,10 +27,10 @@ public class NoRollbackRuleTest {
     @Test
     public void equalsTest(){
         RollbackRule rollbackRuleByClass = new NoRollbackRule(Exception.class);
-        RollbackRule rollbackRuleByClass2 = new NoRollbackRule(Exception.class);
-        Assertions.assertEquals(rollbackRuleByClass, rollbackRuleByClass2);
+        RollbackRule otherRollbackRuleByClass = new NoRollbackRule(Exception.class);
+        Assertions.assertEquals(rollbackRuleByClass, otherRollbackRuleByClass);
         RollbackRule rollbackRuleByName = new NoRollbackRule(Exception.class.getName());
-        RollbackRule rollbackRuleByName2 = new NoRollbackRule(Exception.class.getName());
-        Assertions.assertEquals(rollbackRuleByName, rollbackRuleByName2);
+        RollbackRule otherRollbackRuleByName = new NoRollbackRule(Exception.class.getName());
+        Assertions.assertEquals(rollbackRuleByName, otherRollbackRuleByName);
     }
 }

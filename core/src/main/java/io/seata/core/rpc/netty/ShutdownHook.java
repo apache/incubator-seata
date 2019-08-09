@@ -121,7 +121,7 @@ public class ShutdownHook extends Thread {
                 return false;
             }
             DisposablePriorityWrapper dpw = (DisposablePriorityWrapper)other;
-            return this.priority == dpw.priority;
+            return this.priority == dpw.priority && this.disposable == dpw.disposable;
         }
 
         @Override
