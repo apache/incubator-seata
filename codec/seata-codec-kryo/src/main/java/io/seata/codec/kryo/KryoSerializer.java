@@ -22,6 +22,9 @@ import com.esotericsoftware.kryo.io.Output;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+/**
+ * @author jsbxyyx
+ */
 public class KryoSerializer {
 
     private final Kryo kryo;

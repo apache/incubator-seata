@@ -16,8 +16,6 @@
 package io.seata.codec.kryo;
 
 import com.esotericsoftware.kryo.Kryo;
-import com.esotericsoftware.kryo.io.Input;
-import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers;
 import de.javakaffee.kryoserializers.ArraysAsListSerializer;
 import de.javakaffee.kryoserializers.BitSetSerializer;
@@ -27,8 +25,6 @@ import de.javakaffee.kryoserializers.RegexSerializer;
 import de.javakaffee.kryoserializers.URISerializer;
 import de.javakaffee.kryoserializers.UUIDSerializer;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.lang.reflect.InvocationHandler;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -66,7 +62,9 @@ public class KryoSerializerFactory {
         return new KryoSerializer(HOLDER.get());
     }
 
-    public static void returnKryo() {}
+    public static void returnKryo(KryoSerializer kryoSerializer) {
+        // do nothing
+    }
 
     private static Kryo create() {
         Kryo kryo = new Kryo();

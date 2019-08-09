@@ -31,8 +31,12 @@ public class KryoCodec implements Codec {
             throw new IllegalArgumentException("message is null");
         }
         KryoSerializer kryoSerializer = KryoSerializerFactory.get();
-        byte[] bytes = kryoSerializer.serialize(t);
-        return bytes;
+        try {
+            byte[] bytes = kryoSerializer.serialize(t);
+            return bytes;
+        } finally {
+            KryoSerializerFactory.returnKryo(kryoSerializer);
+        }
     }
 
     @Override
@@ -41,8 +45,13 @@ public class KryoCodec implements Codec {
             throw new IllegalArgumentException("bytes is null");
         }
         KryoSerializer kryoSerializer = KryoSerializerFactory.get();
-        T t = kryoSerializer.deserialize(bytes);
-        return t;
+        try {
+            T t = kryoSerializer.deserialize(bytes);
+            return t;
+        } finally {
+            KryoSerializerFactory.returnKryo(kryoSerializer);
+        }
+
     }
 
 }
