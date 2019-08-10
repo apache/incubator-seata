@@ -21,6 +21,7 @@ import com.esotericsoftware.kryo.io.Output;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Objects;
 
 /**
  * @author jsbxyyx
@@ -30,7 +31,11 @@ public class KryoSerializer {
     private final Kryo kryo;
 
     public KryoSerializer(Kryo kryo) {
-        this.kryo = kryo;
+        this.kryo = Objects.requireNonNull(kryo);
+    }
+
+    public Kryo getKryo() {
+        return kryo;
     }
 
     public <T> byte[] serialize(T t) {

@@ -16,6 +16,8 @@
 package io.seata.codec.kryo;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.pool.KryoFactory;
+import com.esotericsoftware.kryo.pool.KryoPool;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers;
 import de.javakaffee.kryoserializers.ArraysAsListSerializer;
 import de.javakaffee.kryoserializers.BitSetSerializer;
@@ -74,24 +76,31 @@ import java.util.regex.Pattern;
 /**
  * @author jsbxyyx
  */
-public class KryoSerializerFactory {
+public class KryoSerializerFactory implements KryoFactory {
 
-    private static final ThreadLocal<Kryo> HOLDER = new ThreadLocal<Kryo>() {
-        @Override
-        protected Kryo initialValue () {
-            return create();
+    private static final KryoSerializerFactory factory = new KryoSerializerFactory();
+
+    private KryoPool pool = new KryoPool.Builder(this).softReferences().build();
+
+    private KryoSerializerFactory() {}
+
+    public static KryoSerializerFactory getInstance() {
+        return factory;
+    }
+
+    public KryoSerializer get() {
+        return new KryoSerializer(pool.borrow());
+    }
+
+    public void returnKryo(KryoSerializer kryoSerializer) {
+        if (kryoSerializer == null) {
+            throw new IllegalArgumentException("kryoSerializer is null");
         }
-    };
-
-    public static KryoSerializer get() {
-        return new KryoSerializer(HOLDER.get());
+        pool.release(kryoSerializer.getKryo());
     }
 
-    public static void returnKryo(KryoSerializer kryoSerializer) {
-        // do nothing
-    }
-
-    private static Kryo create() {
+    @Override
+    public Kryo create() {
         Kryo kryo = new Kryo();
         kryo.setRegistrationRequired(false);
 

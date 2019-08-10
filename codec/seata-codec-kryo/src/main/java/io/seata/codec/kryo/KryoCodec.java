@@ -30,12 +30,12 @@ public class KryoCodec implements Codec {
         if (t == null || !(t instanceof AbstractMessage)) {
             throw new IllegalArgumentException("message is null");
         }
-        KryoSerializer kryoSerializer = KryoSerializerFactory.get();
+        KryoSerializer kryoSerializer = KryoSerializerFactory.getInstance().get();
         try {
             byte[] bytes = kryoSerializer.serialize(t);
             return bytes;
         } finally {
-            KryoSerializerFactory.returnKryo(kryoSerializer);
+            KryoSerializerFactory.getInstance().returnKryo(kryoSerializer);
         }
     }
 
@@ -44,12 +44,12 @@ public class KryoCodec implements Codec {
         if (bytes == null || bytes.length == 0) {
             throw new IllegalArgumentException("bytes is null");
         }
-        KryoSerializer kryoSerializer = KryoSerializerFactory.get();
+        KryoSerializer kryoSerializer = KryoSerializerFactory.getInstance().get();
         try {
             T t = kryoSerializer.deserialize(bytes);
             return t;
         } finally {
-            KryoSerializerFactory.returnKryo(kryoSerializer);
+            KryoSerializerFactory.getInstance().returnKryo(kryoSerializer);
         }
 
     }
