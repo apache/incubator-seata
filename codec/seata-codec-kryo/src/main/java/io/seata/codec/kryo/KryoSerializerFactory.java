@@ -24,6 +24,31 @@ import de.javakaffee.kryoserializers.JdkProxySerializer;
 import de.javakaffee.kryoserializers.RegexSerializer;
 import de.javakaffee.kryoserializers.URISerializer;
 import de.javakaffee.kryoserializers.UUIDSerializer;
+import io.seata.core.protocol.MergeResultMessage;
+import io.seata.core.protocol.MergedWarpMessage;
+import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.core.protocol.RegisterRMResponse;
+import io.seata.core.protocol.RegisterTMRequest;
+import io.seata.core.protocol.RegisterTMResponse;
+import io.seata.core.protocol.transaction.BranchCommitRequest;
+import io.seata.core.protocol.transaction.BranchCommitResponse;
+import io.seata.core.protocol.transaction.BranchRegisterRequest;
+import io.seata.core.protocol.transaction.BranchRegisterResponse;
+import io.seata.core.protocol.transaction.BranchReportRequest;
+import io.seata.core.protocol.transaction.BranchReportResponse;
+import io.seata.core.protocol.transaction.BranchRollbackRequest;
+import io.seata.core.protocol.transaction.BranchRollbackResponse;
+import io.seata.core.protocol.transaction.GlobalBeginRequest;
+import io.seata.core.protocol.transaction.GlobalBeginResponse;
+import io.seata.core.protocol.transaction.GlobalCommitRequest;
+import io.seata.core.protocol.transaction.GlobalCommitResponse;
+import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
+import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
+import io.seata.core.protocol.transaction.GlobalRollbackRequest;
+import io.seata.core.protocol.transaction.GlobalRollbackResponse;
+import io.seata.core.protocol.transaction.GlobalStatusRequest;
+import io.seata.core.protocol.transaction.GlobalStatusResponse;
+import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 
 import java.lang.reflect.InvocationHandler;
 import java.math.BigDecimal;
@@ -105,6 +130,35 @@ public class KryoSerializerFactory {
         kryo.register(int[].class);
         kryo.register(float[].class);
         kryo.register(double[].class);
+
+        // register seata protocol relation class
+        kryo.register(BranchCommitRequest.class);
+        kryo.register(BranchCommitResponse.class);
+        kryo.register(BranchRegisterRequest.class);
+        kryo.register(BranchRegisterResponse.class);
+        kryo.register(BranchReportRequest.class);
+        kryo.register(BranchReportResponse.class);
+        kryo.register(BranchRollbackRequest.class);
+        kryo.register(BranchRollbackResponse.class);
+        kryo.register(GlobalBeginRequest.class);
+        kryo.register(GlobalBeginResponse.class);
+        kryo.register(GlobalCommitRequest.class);
+        kryo.register(GlobalCommitResponse.class);
+        kryo.register(GlobalLockQueryRequest.class);
+        kryo.register(GlobalLockQueryResponse.class);
+        kryo.register(GlobalRollbackRequest.class);
+        kryo.register(GlobalRollbackResponse.class);
+        kryo.register(GlobalStatusRequest.class);
+        kryo.register(GlobalStatusResponse.class);
+        kryo.register(UndoLogDeleteRequest.class);
+
+        kryo.register(MergedWarpMessage.class);
+        kryo.register(MergeResultMessage.class);
+        kryo.register(RegisterRMRequest.class);
+        kryo.register(RegisterRMResponse.class);
+        kryo.register(RegisterTMRequest.class);
+        kryo.register(RegisterTMResponse.class);
+
         return kryo;
     }
 
