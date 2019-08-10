@@ -78,14 +78,14 @@ import java.util.regex.Pattern;
  */
 public class KryoSerializerFactory implements KryoFactory {
 
-    private static final KryoSerializerFactory factory = new KryoSerializerFactory();
+    private static final KryoSerializerFactory FACTORY = new KryoSerializerFactory();
 
     private KryoPool pool = new KryoPool.Builder(this).softReferences().build();
 
     private KryoSerializerFactory() {}
 
     public static KryoSerializerFactory getInstance() {
-        return factory;
+        return FACTORY;
     }
 
     public KryoSerializer get() {
