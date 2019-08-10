@@ -35,7 +35,6 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
