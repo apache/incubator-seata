@@ -16,17 +16,28 @@
 package io.seata.rm.datasource.undo.parser;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.core.type.WritableTypeId;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
+import java.sql.Timestamp;
 
 /**
  * The type Json based undo log parser.
@@ -41,7 +52,23 @@ public class JacksonUndoLogParser implements UndoLogParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(JacksonUndoLogParser.class);
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    private static final SimpleModule module = new SimpleModule();
+
+    /**
+     * customize serializer for java.sql.Timestamp
+     */
+    private static final JsonSerializer timestampSerializer = new TimestampSerializer();
+
+    /**
+     * customize deserializer for java.sql.Timestamp
+     */
+    private static final JsonDeserializer timestampDeserializer = new TimestampDeserializer();
+
     static {
+        module.addSerializer(Timestamp.class, timestampSerializer);
+        module.addDeserializer(Timestamp.class, timestampDeserializer);
+        MAPPER.registerModule(module);
         MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         MAPPER.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
     }
@@ -75,6 +102,48 @@ public class JacksonUndoLogParser implements UndoLogParser {
         } catch (IOException e) {
             LOGGER.error("json decode exception, {}", e.getMessage(), e);
             throw new RuntimeException(e);
+        }
+    }
+
+    private static class TimestampSerializer extends JsonSerializer<Timestamp> {
+
+        @Override
+        public void serializeWithType(Timestamp timestamp, JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSerializer) throws IOException {
+            gen.setCurrentValue(timestamp);
+            WritableTypeId typeId = typeSerializer.writeTypePrefix(gen, typeSerializer.typeId(timestamp, JsonToken.START_ARRAY));
+            serialize(timestamp, gen, serializers);
+            gen.writeTypeSuffix(typeId);
+        }
+
+        @Override
+        public void serialize(Timestamp timestamp, JsonGenerator gen, SerializerProvider serializers) {
+            try {
+                gen.writeNumber(timestamp.getTime());
+                gen.writeNumber(timestamp.getNanos());
+            } catch (IOException e) {
+                LOGGER.error("serialize java.sql.Timestamp error : {}", e.getMessage(), e);
+            }
+
+        }
+    }
+
+    private static class TimestampDeserializer extends JsonDeserializer<Timestamp> {
+
+        @Override
+        public Timestamp deserialize(JsonParser p, DeserializationContext ctxt) {
+            if(p.isExpectedStartArrayToken()){
+                ArrayNode arrayNode = null;
+                try {
+                    arrayNode = p.getCodec().readTree(p);
+                } catch (IOException e) {
+                    LOGGER.error("deserialize java.sql.Timestamp error : {}", e.getMessage(), e);
+                }
+                Timestamp timestamp = new Timestamp(arrayNode.get(0).asLong());
+                timestamp.setNanos(arrayNode.get(1).asInt());
+                return timestamp;
+            }
+            LOGGER.error("deserializer timestamp type error.");
+            return null;
         }
     }
 

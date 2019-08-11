@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.JDBCType;
 import java.sql.Timestamp;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.sql.struct.Field;
@@ -44,25 +44,25 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
         ObjectMapper mapper = (ObjectMapper)reflectField.get(null);
 
         //bigint type
-        Field field = new Field("big_int", JDBCType.BIGINT.getVendorTypeNumber(), new Long(9223372036854775807L));
+        Field field = new Field("bigint_type", JDBCType.BIGINT.getVendorTypeNumber(), new Long(9223372036854775807L));
         byte[] bytes = mapper.writeValueAsBytes(field);
         Field sameField = mapper.readValue(bytes, Field.class);
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField));
 
         //big decimal type
-        field = new Field("create_date", JDBCType.DECIMAL.getVendorTypeNumber(), new BigDecimal("55555555555555555555.55555555555555555555"));
+        field = new Field("decimal_type", JDBCType.DECIMAL.getVendorTypeNumber(), new BigDecimal("55555555555555555555.55555555555555555555"));
         bytes = mapper.writeValueAsBytes(field);
         sameField = mapper.readValue(bytes, Field.class);
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField));
 
         //double type
-        field = new Field("create_date", JDBCType.DOUBLE.getVendorTypeNumber(), 999999.999999999);
+        field = new Field("double_type", JDBCType.DOUBLE.getVendorTypeNumber(), 999999.999999999);
         bytes = mapper.writeValueAsBytes(field);
         sameField = mapper.readValue(bytes, Field.class);
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField));
 
         //timestamp type
-        field = new Field("create_date", JDBCType.TIMESTAMP.getVendorTypeNumber(), Timestamp.valueOf("2019-08-10 10:49:26.926554"));
+        field = new Field("timestamp_type", JDBCType.TIMESTAMP.getVendorTypeNumber(), Timestamp.valueOf("2019-08-10 10:49:26.926554"));
         bytes = mapper.writeValueAsBytes(field);
         sameField = mapper.readValue(bytes, Field.class);
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField));
