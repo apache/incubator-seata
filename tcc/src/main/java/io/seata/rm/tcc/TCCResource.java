@@ -27,7 +27,7 @@ import io.seata.core.model.Resource;
  */
 public class TCCResource implements Resource {
 
-    private String resourceGroupId = "DEFAULT";
+    private String resourceGroupId = "TCC";
 
     private String appName;
 
