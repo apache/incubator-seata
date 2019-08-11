@@ -29,12 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * The type Data compare utils.
@@ -192,15 +187,14 @@ public class DataCompareUtils {
             // {uppercase fieldName : field}
             Map<String, Field> colsMap = new HashMap<>(16);
             Map<String,Object> rowKeys = new HashMap<>(16);
-            for (int j = 0; j < row.getFields().size(); j++) {
-                Field field = row.getFields().get(j);
+            for (Field field : row.getFields()) {
                 String fieldName = field.getName();
                 if (primaryKeysNames.contains(fieldName.toUpperCase()) || primaryKeysNames.contains(fieldName)) {
-                    rowKeys.put(fieldName,field.getValue());
+                    rowKeys.put(fieldName, field.getValue());
                 }
                 colsMap.put(fieldName.trim().toUpperCase(), field);
             }
-            String rowKey = getRowKey(rowKeys.keySet(),rowKeys);
+            String rowKey = getRowKey(rowKeys.keySet(), rowKeys);
             rowMap.put(rowKey, colsMap);
         }
         return rowMap;
@@ -210,12 +204,12 @@ public class DataCompareUtils {
      * get RowKey
      * @return rowKey
      */
-    private static String getRowKey(Set<String> fields, Map<String,Object> rowsKeysMap){
+    private static String getRowKey(Set<String> fields, Map<String,Object> rowsKeysMap) {
         List<String> list = new ArrayList<>(fields);
         Collections.sort(list);
-        StringBuilder rowKey = new StringBuilder();
-        for(String item:list){
-            rowKey.append(rowsKeysMap.get(item));
+        StringJoiner rowKey = new StringJoiner("-", "", "");
+        for (String item : list) {
+            rowKey.add(String.valueOf(rowsKeysMap.get(item)));
         }
         return rowKey.toString();
     }

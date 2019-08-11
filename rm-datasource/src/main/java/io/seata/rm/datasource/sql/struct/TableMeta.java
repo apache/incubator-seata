@@ -15,9 +15,13 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import java.util.*;
-import java.util.Map.Entry;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
+import java.util.Map.Entry;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
