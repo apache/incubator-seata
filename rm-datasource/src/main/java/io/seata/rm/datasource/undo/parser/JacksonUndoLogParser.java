@@ -142,7 +142,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
                 timestamp.setNanos(arrayNode.get(1).asInt());
                 return timestamp;
             }
-            LOGGER.error("deserializer timestamp type error.");
+            LOGGER.error("deserialize timestamp type error.");
             return null;
         }
     }
