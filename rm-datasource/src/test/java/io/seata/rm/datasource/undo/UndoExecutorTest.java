@@ -43,6 +43,8 @@ import java.sql.Struct;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Map;
 import java.util.Properties;
@@ -106,6 +108,7 @@ public class UndoExecutorTest {
         beforeRow.add(pkField);
 
         Field name = new Field();
+        name.setKeyType(KeyType.PrimaryKey);
         name.setName("name");
         name.setType(Types.VARCHAR);
         name.setValue("SEATA");
@@ -178,6 +181,7 @@ public class UndoExecutorTest {
         afterRow1.add(pkField);
 
         Field name = new Field();
+        name.setKeyType(KeyType.PrimaryKey);
         name.setName("name");
         name.setType(Types.VARCHAR);
         name.setValue("SEATA");
@@ -224,6 +228,39 @@ public class UndoExecutorTest {
         spy.executeOn(connection);
     }
 
+
+    @Test
+    public void testBuildPkFields(){
+        List<Field> fields = new ArrayList<>();
+        Field pkField = new Field();
+        pkField.setKeyType(KeyType.PrimaryKey);
+        pkField.setName("id");
+        pkField.setType(Types.INTEGER);
+        pkField.setValue(213);
+
+
+        Field name = new Field();
+        name.setKeyType(KeyType.PrimaryKey);
+        name.setName("name");
+        name.setType(Types.VARCHAR);
+        name.setValue("SEATA");
+        fields.add(name);
+        System.out.println(buildPkFields(fields));
+
+    }
+
+    private String buildPkFields(List<Field> fields){
+        StringBuilder builder = new StringBuilder();
+        for(int i=0; i < fields.size(); i++){
+            builder.append(fields.get(i).getName()).append(" = ?");
+            if(i != fields.size()-1){
+                builder.append(" AND ");
+            }
+        }
+        return builder.toString();
+    }
+
+
     /**
      * Test delete.
      */
@@ -247,6 +284,7 @@ public class UndoExecutorTest {
         afterRow1.add(pkField);
 
         Field name = new Field();
+        name.setKeyType(KeyType.PrimaryKey);
         name.setName("name");
         name.setType(Types.VARCHAR);
         name.setValue("SEATA");

@@ -127,12 +127,11 @@ public class TableRecords {
      * @return the list
      */
     public List<Field> pkRows() {
-        final String pkName = getTableMeta().getPkName();
         List<Field> pkRows = new ArrayList<>();
         for (Row row : rows) {
             List<Field> fields = row.getFields();
             for (Field field : fields) {
-                if (field.getName().equalsIgnoreCase(pkName)) {
+                if (getTableMeta().containsPK(field.getName())) {
                     pkRows.add(field);
                     break;
                 }
@@ -140,6 +139,7 @@ public class TableRecords {
         }
         return pkRows;
     }
+
 
     /**
      * Gets table meta.
@@ -180,7 +180,7 @@ public class TableRecords {
                 ColumnMeta col = tmeta.getColumnMeta(colName);
                 Field field = new Field();
                 field.setName(col.getColumnName());
-                if (tmeta.getPkName().equalsIgnoreCase(field.getName())) {
+                if (tmeta.containsPK(field.getName())) {
                     field.setKeyType(KeyType.PrimaryKey);
                 }
                 field.setType(col.getDataType());

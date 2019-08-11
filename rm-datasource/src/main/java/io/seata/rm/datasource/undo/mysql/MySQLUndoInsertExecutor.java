@@ -38,9 +38,11 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
 public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
 
     /**
-     * DELETE FROM a WHERE pk = ?
+     * single PK: DELETE FROM a WHERE pk = ?
+     * multi  PK: DELETE FROM a WHERE pk1 = ? AND pk2 = ? ...
      */
-    private static final String DELETE_SQL_TEMPLATE = "DELETE FROM %s WHERE %s = ?";
+    private static final String DELETE_SQL_TEMPLATE = "DELETE FROM %s WHERE %s";
+
 
     /**
      * Undo Inset.
@@ -56,16 +58,23 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = afterImageRows.get(0);
-        Field pkField = row.primaryKeys().get(0);
+        String pkFields = buildPkFields(keywordChecker,row.primaryKeys());
         return String.format(DELETE_SQL_TEMPLATE,
-                             keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
-                             keywordChecker.checkAndReplace(pkField.getName()));
+                keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
+                keywordChecker.checkAndReplace(pkFields));
+
     }
 
+
+
     @Override
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue)
+    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, List<Field> pkValues)
         throws SQLException {
-        undoPST.setObject(1, pkValue.getValue(), pkValue.getType());
+        int parameterIndex = 0;
+        for (Field field : pkValues) {
+            parameterIndex++;
+            undoPST.setObject(parameterIndex, field.getValue(), field.getType());
+        }
     }
 
     /**

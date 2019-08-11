@@ -15,15 +15,12 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.Objects;
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 
 /**
  * The type Table meta.
@@ -121,11 +118,6 @@ public class TableMeta {
                 }
             }
         }
-
-        if (pk.size() > 1) {
-            throw new NotSupportYetException("Multi PK");
-        }
-
         return pk;
     }
 
@@ -143,6 +135,19 @@ public class TableMeta {
         return list;
     }
 
+
+    /**
+     * Gets primary key uniquePkName.
+     * @return UniquePk Name
+     */
+    public String getUniquePkName(){
+        List<String> pkNames = getPrimaryKeyOnlyName();
+        Collections.sort(pkNames);
+        return String.join("",pkNames);
+    }
+
+
+
     /**
      * Gets pk name.
      *
@@ -152,9 +157,26 @@ public class TableMeta {
         return getPrimaryKeyOnlyName().get(0);
     }
 
+
+    /**
+     * Contains pk boolean .
+     * @param columnName the colName
+     * @return the boolean
+     */
+    public boolean containsPK(String columnName) {
+        if (StringUtils.isBlank(columnName)) {
+            return false;
+        }
+        List<String> pkColumns = getPrimaryKeyOnlyName();
+        if (pkColumns.contains(columnName)) {
+            return true;
+        }
+        return CollectionUtils.toUpperList(pkColumns).contains(columnName.toUpperCase());
+    }
+
+
     /**
      * Contains pk boolean.
-     *
      * @param cols the cols
      * @return the boolean
      */
