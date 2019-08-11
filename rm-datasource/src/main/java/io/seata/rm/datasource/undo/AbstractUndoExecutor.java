@@ -19,7 +19,11 @@ import com.alibaba.fastjson.JSON;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.rm.datasource.DataCompareUtils;
-import io.seata.rm.datasource.sql.struct.*;
+import io.seata.rm.datasource.sql.struct.Field;
+import io.seata.rm.datasource.sql.struct.KeyType;
+import io.seata.rm.datasource.sql.struct.Row;
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.sql.struct.TableMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -336,10 +340,10 @@ public abstract class AbstractUndoExecutor {
      * @param fields PK fields
      * @return SQL
      */
-    protected String buildPkFields (KeywordChecker keywordChecker,List<Field> fields) {
+    protected String buildPkFields (KeywordChecker keywordChecker, List<Field> fields) {
         StringJoiner stringJoiner = new StringJoiner(" AND ");
-        for(Field field: fields){
-            stringJoiner.add(keywordChecker.checkAndReplace(field.getName())+" = ?");
+        for (Field field : fields) {
+            stringJoiner.add(keywordChecker.checkAndReplace(field.getName()) + " = ?");
         }
         return stringJoiner.toString();
     }

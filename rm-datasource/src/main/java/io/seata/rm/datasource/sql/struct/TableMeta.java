@@ -144,7 +144,7 @@ public class TableMeta {
      * Gets primary key uniquePkName.
      * @return UniquePk Name
      */
-    public String getUniquePkName(){
+    public String getUniquePkName() {
         List<String> pkNames = getPrimaryKeyOnlyName();
         Collections.sort(pkNames);
         return String.join("",pkNames);

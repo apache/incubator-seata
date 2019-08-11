@@ -77,7 +77,7 @@ public class SQLVisitorFactory {
                     recognizer = new OracleSelectForUpdateRecognizer(sql, ast);
                 }
             }
-        }else {
+        } else {
             throw new UnsupportedOperationException("Just support MySQL and Oracle by now!");
         }
         return recognizer;

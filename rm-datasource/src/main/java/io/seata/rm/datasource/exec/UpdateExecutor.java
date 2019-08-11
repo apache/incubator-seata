@@ -129,7 +129,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             selectSQLJoin.add(updateColumn);
         }
         String selectSQL = selectSQLJoin.toString();
-        if(!paramAppenders.isEmpty() && paramAppenders.size() > 1) {
+        if (!paramAppenders.isEmpty() && paramAppenders.size() > 1) {
             StringBuffer stringBuffer = new StringBuffer(selectSQL);
             for (int i = 1; i < paramAppenders.size(); i++) {
                 stringBuffer.append(" UNION ").append(selectSQL);

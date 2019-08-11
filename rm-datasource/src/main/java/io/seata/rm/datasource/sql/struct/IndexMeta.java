@@ -245,7 +245,7 @@ public class IndexMeta {
         if (!Objects.equals(indexMeta.ascOrDesc, this.ascOrDesc)) {
             return false;
         }
-        if (!Objects.equals(indexMeta.ordinalPosition, this.ordinalPosition)){
+        if (!Objects.equals(indexMeta.ordinalPosition, this.ordinalPosition)) {
             return false;
         }
         return true;

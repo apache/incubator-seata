@@ -18,7 +18,6 @@ package io.seata.rm.datasource.sql.druid.oracle;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;

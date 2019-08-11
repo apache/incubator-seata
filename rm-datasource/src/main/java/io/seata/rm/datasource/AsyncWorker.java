@@ -179,9 +179,9 @@ public class AsyncWorker implements ResourceManagerInbound {
                     xids.add(commitContext.xid);
                     branchIds.add(commitContext.branchId);
                     int maxSize = xids.size() > branchIds.size() ? xids.size() : branchIds.size();
-                    if(maxSize == UNDOLOG_DELETE_LIMIT_SIZE){
+                    if (maxSize == UNDOLOG_DELETE_LIMIT_SIZE) {
                         try {
-                            if(JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
+                            if (JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
                                 UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, conn);
                             } else {
                                 UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
@@ -199,12 +199,12 @@ public class AsyncWorker implements ResourceManagerInbound {
                 }
 
                 try {
-                    if(JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
+                    if (JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
                         UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, conn);
                     } else {
                         UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
                     }
-                }catch (Exception ex) {
+                } catch (Exception ex) {
                     LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                 }
 

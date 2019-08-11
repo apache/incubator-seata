@@ -156,7 +156,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (tableMeta != null) {
             return tableMeta;
         }
-        if(JdbcConstants.ORACLE.equalsIgnoreCase(statementProxy.getConnectionProxy().getDbType())) {
+        if (JdbcConstants.ORACLE.equalsIgnoreCase(statementProxy.getConnectionProxy().getDbType())) {
             tableMeta = TableMetaCacheOracle.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
         } else {
             tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);

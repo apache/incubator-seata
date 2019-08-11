@@ -274,14 +274,14 @@ public final class UndoLogManagerOracle {
             for (Long branchId : branchIds) {
                 deletePST.setLong(paramsIndex++,branchId);
             }
-            for (String xid: xids){
+            for (String xid : xids) {
                 deletePST.setString(paramsIndex++, xid);
             }
             int deleteRows = deletePST.executeUpdate();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("batch delete undo log size " + deleteRows);
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
             }
@@ -331,7 +331,7 @@ public final class UndoLogManagerOracle {
             deletePST.setLong(1, branchId);
             deletePST.setString(2, xid);
             deletePST.executeUpdate();
-        }catch (Exception e){
+        } catch (Exception e) {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
             }

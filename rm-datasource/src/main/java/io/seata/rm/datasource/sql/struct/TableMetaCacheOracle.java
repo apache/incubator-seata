@@ -15,28 +15,18 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSetMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
-import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.StringUtils;
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.AbstractConnectionProxy;
-import io.seata.rm.datasource.DataSourceProxy;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.DataSourceProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
+import java.sql.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Table meta cache.
@@ -178,7 +168,7 @@ public class TableMetaCacheOracle {
                 if ("PRIMARY".equalsIgnoreCase(indexName) || (
                         tableName+ "_pkey").equalsIgnoreCase(indexName)) {
                     index.setIndextype(IndexType.PRIMARY);
-                } else if (index.isNonUnique() == false) {
+                } else if (!index.isNonUnique()) {
                     index.setIndextype(IndexType.Unique);
                 } else {
                     index.setIndextype(IndexType.Normal);

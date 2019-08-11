@@ -186,7 +186,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
         try {
             if (context.hasUndoLog()) {
-               if(JdbcConstants.ORACLE.equalsIgnoreCase(this.getDbType())) {
+               if (JdbcConstants.ORACLE.equalsIgnoreCase(this.getDbType())) {
                    UndoLogManagerOracle.flushUndoLogs(this);
                } else {
                    UndoLogManager.flushUndoLogs(this);

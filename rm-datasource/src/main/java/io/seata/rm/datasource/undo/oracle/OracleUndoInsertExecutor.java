@@ -40,7 +40,7 @@ public class OracleUndoInsertExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
         TableRecords afterImage = sqlUndoLog.getAfterImage();
         List<Row> afterImageRows = afterImage.getRows();
         if (afterImageRows == null || afterImageRows.size() == 0) {
@@ -52,14 +52,14 @@ public class OracleUndoInsertExecutor extends AbstractUndoExecutor {
         boolean first = true;
         for (Field field : row.getFields()) {
             if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(keywordChecker.checkAndReplace(field.getName()) +" = ?");
+                where.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
             }
 
         }
         return mainSQL.append(where).toString();
     }
 
-    @Override
+   // @Override
     protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue) throws SQLException {
         undoPST.setObject(1, pkValue.getValue(), pkValue.getType());
     }

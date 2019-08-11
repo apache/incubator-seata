@@ -46,7 +46,7 @@ public class OracleUndoDeleteExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (beforeImageRows == null || beforeImageRows.size() == 0) {

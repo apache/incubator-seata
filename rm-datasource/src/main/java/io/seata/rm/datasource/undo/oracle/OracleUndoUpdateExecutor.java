@@ -56,7 +56,7 @@ public class OracleUndoUpdateExecutor extends AbstractUndoExecutor {
                 } else {
                     mainSQL.append(", ");
                 }
-                mainSQL.append(keywordChecker.checkAndReplace(field.getName()) +" = ?");
+                mainSQL.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
             }
 
         }

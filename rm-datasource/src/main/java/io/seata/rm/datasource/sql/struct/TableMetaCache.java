@@ -15,29 +15,21 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
-
-import javax.sql.DataSource;
-
 import com.alibaba.druid.util.StringUtils;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.sql.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Table meta cache.
@@ -98,7 +90,7 @@ public class TableMetaCache {
      * Clear the table meta cache
      * @param dataSourceProxy
      */
-    public static void refresh(final DataSourceProxy dataSourceProxy){
+    public static void refresh(final DataSourceProxy dataSourceProxy) {
         ConcurrentMap<String, TableMeta> tableMetaMap = TABLE_META_CACHE.asMap();
         for (Entry<String, TableMeta> entry : tableMetaMap.entrySet()) {
             try {
@@ -106,7 +98,7 @@ public class TableMetaCache {
                 if (tableMeta == null){
                     LOGGER.error("get table meta error");
                 }
-                if (!tableMeta.equals(entry.getValue())){
+                if (!tableMeta.equals(entry.getValue())) {
                     TABLE_META_CACHE.put(entry.getKey(), tableMeta);
                     LOGGER.info("table meta change was found, update table meta cache automatically.");
                 }
