@@ -15,9 +15,10 @@
  */
 package io.seata.codec.seata.protocol.transaction;
 
-import io.seata.core.protocol.transaction.GlobalBeginRequest;
-
 import java.nio.ByteBuffer;
+
+import io.netty.buffer.ByteBuf;
+import io.seata.core.protocol.transaction.GlobalBeginRequest;
 
 /**
  * The type Global begin request codec.
@@ -32,26 +33,26 @@ public class GlobalBeginRequestCodec extends AbstractTransactionRequestToTCCodec
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer out) {
-        GlobalBeginRequest globalBeginRequest = (GlobalBeginRequest) t;
+    public <T> void encode(T t, ByteBuf out) {
+        GlobalBeginRequest globalBeginRequest = (GlobalBeginRequest)t;
         int timeout = globalBeginRequest.getTimeout();
         String transactionName = globalBeginRequest.getTransactionName();
 
-        out.putInt(timeout);
+        out.writeInt(timeout);
         if (transactionName != null) {
             byte[] bs = transactionName.getBytes(UTF8);
-            out.putShort((short)bs.length);
+            out.writeShort((short)bs.length);
             if (bs.length > 0) {
-                out.put(bs);
+                out.writeBytes(bs);
             }
         } else {
-            out.putShort((short)0);
+            out.writeShort((short)0);
         }
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        GlobalBeginRequest globalBeginRequest = (GlobalBeginRequest) t;
+        GlobalBeginRequest globalBeginRequest = (GlobalBeginRequest)t;
 
         globalBeginRequest.setTimeout(in.getInt());
         short len = in.getShort();

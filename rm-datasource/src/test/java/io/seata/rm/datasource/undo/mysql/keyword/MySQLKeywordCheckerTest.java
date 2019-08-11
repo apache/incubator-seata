@@ -49,7 +49,6 @@ public class MySQLKeywordCheckerTest {
     public void testCheck() {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
         Assertions.assertTrue(keywordChecker.check("desc"));
-
     }
 
     /**
