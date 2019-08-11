@@ -19,8 +19,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.JDBCType;
 import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.sql.struct.Field;
