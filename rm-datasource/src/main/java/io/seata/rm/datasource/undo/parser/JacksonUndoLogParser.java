@@ -53,22 +53,22 @@ public class JacksonUndoLogParser implements UndoLogParser {
 
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
-    private static final SimpleModule module = new SimpleModule();
+    private static final SimpleModule MODULE = new SimpleModule();
 
     /**
      * customize serializer for java.sql.Timestamp
      */
-    private static final JsonSerializer timestampSerializer = new TimestampSerializer();
+    private static final JsonSerializer TIMESTAMP_SERIALIZER = new TimestampSerializer();
 
     /**
      * customize deserializer for java.sql.Timestamp
      */
-    private static final JsonDeserializer timestampDeserializer = new TimestampDeserializer();
+    private static final JsonDeserializer TIMESTAMP_DESERIALIZER = new TimestampDeserializer();
 
     static {
-        module.addSerializer(Timestamp.class, timestampSerializer);
-        module.addDeserializer(Timestamp.class, timestampDeserializer);
-        MAPPER.registerModule(module);
+        MODULE.addSerializer(Timestamp.class, TIMESTAMP_SERIALIZER);
+        MODULE.addDeserializer(Timestamp.class, TIMESTAMP_DESERIALIZER);
+        MAPPER.registerModule(MODULE);
         MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         MAPPER.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
     }
