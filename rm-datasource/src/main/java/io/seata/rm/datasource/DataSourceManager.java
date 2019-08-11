@@ -16,11 +16,6 @@
 package io.seata.rm.datasource;
 
 import com.alibaba.druid.util.JdbcConstants;
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
