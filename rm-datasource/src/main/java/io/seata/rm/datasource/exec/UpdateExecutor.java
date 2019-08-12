@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
@@ -107,20 +108,27 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenders) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
-        StringBuffer selectSQLPrefix = new StringBuffer("SELECT ");
+        StringBuilder selectSQLPrefix = new StringBuilder("SELECT ");
         if (!tableMeta.containsPK(updateColumns)) {
             selectSQLPrefix.append(getColumnNameInSQL(tableMeta.getPkName()) + ", ");
         }
         String prefix = selectSQLPrefix.toString();
         String whereCondition = null;
         if (statementProxy instanceof ParametersHolder) {
-            whereCondition = recognizer.getWhereCondition((ParametersHolder)statementProxy, paramAppenders);
+            whereCondition = recognizer.getWhereCondition((ParametersHolder) statementProxy, paramAppenders);
         } else {
             whereCondition = recognizer.getWhereCondition();
         }
-        StringBuffer selectSQLSuffix = new StringBuffer(" FROM " + getFromTableInSQL());
+        StringBuilder selectSQLSuffix = new StringBuilder(" FROM " + getFromTableInSQL());
         if (StringUtils.isNotBlank(whereCondition)) {
-            selectSQLSuffix.append(" WHERE " + whereCondition);
+            if (CollectionUtils.isNotEmpty(paramAppenders) && paramAppenders.size() > 1) {
+                selectSQLSuffix.append(" WHERE ").append(" ( ").append(whereCondition).append(" ) ");
+                for (int i = 1; i < paramAppenders.size(); i++) {
+                    selectSQLSuffix.append(" or ( ").append(whereCondition).append(" ) ");
+                }
+            } else {
+                selectSQLSuffix.append(" WHERE " + whereCondition);
+            }
         }
         selectSQLSuffix.append(" FOR UPDATE");
         String suffix = selectSQLSuffix.toString();
@@ -128,15 +136,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         for (String updateColumn : updateColumns) {
             selectSQLJoin.add(updateColumn);
         }
-        String selectSQL = selectSQLJoin.toString();
-        if(!paramAppenders.isEmpty() && paramAppenders.size() > 1) {
-            StringBuffer stringBuffer = new StringBuffer(selectSQL);
-            for (int i = 1; i < paramAppenders.size(); i++) {
-                stringBuffer.append(" UNION ").append(selectSQL);
-            }
-            selectSQL = stringBuffer.toString();
-        }
-        return selectSQL;
+        return selectSQLJoin.toString();
     }
 
     @Override
@@ -173,7 +173,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     private String buildAfterImageSQL(TableMeta tableMeta, TableRecords beforeImage) throws SQLException {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
-        StringBuffer selectSQLPrefix = new StringBuffer("SELECT ");
+        StringBuilder selectSQLPrefix = new StringBuilder("SELECT ");
         if (!tableMeta.containsPK(updateColumns)) {
             // PK should be included.
             selectSQLPrefix.append(getColumnNameInSQL(tableMeta.getPkName()) + ", ");

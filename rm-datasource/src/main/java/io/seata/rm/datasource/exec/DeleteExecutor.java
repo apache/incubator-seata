@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import com.alibaba.druid.util.JdbcConstants;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLDeleteRecognizer;
@@ -113,9 +114,16 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         } else {
             whereCondition = visitor.getWhereCondition();
         }
-        StringBuffer sqlSuffix = new StringBuffer(" FROM " + keywordChecker.checkAndReplace(getFromTableInSQL()));
+        StringBuilder sqlSuffix = new StringBuilder(" FROM " + keywordChecker.checkAndReplace(getFromTableInSQL()));
         if (StringUtils.isNotBlank(whereCondition)) {
-            sqlSuffix.append(" WHERE " + whereCondition);
+            if (CollectionUtils.isNotEmpty(paramAppenders) && paramAppenders.size() > 1) {
+                sqlSuffix.append(" WHERE ").append(" ( ").append(whereCondition).append(" ) ");
+                for (int i = 1; i < paramAppenders.size(); i++) {
+                    sqlSuffix.append(" or ( ").append(whereCondition).append(" ) ");
+                }
+            } else {
+                sqlSuffix.append(" WHERE " + whereCondition);
+            }
         }
         sqlSuffix.append(" FOR UPDATE");
         String suffix = sqlSuffix.toString();
@@ -123,15 +131,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         for (String column : tableMeta.getAllColumns().keySet()) {
             selectSQLAppender.add(getColumnNameInSQL(keywordChecker.checkAndReplace(column)));
         }
-        String selectSQL = selectSQLAppender.toString();
-        if(!paramAppenders.isEmpty() && paramAppenders.size() > 1) {
-            StringBuffer stringBuffer = new StringBuffer(selectSQL);
-            for (int i = 1; i < paramAppenders.size(); i++) {
-                stringBuffer.append(" UNION ").append(selectSQL);
-            }
-            selectSQL = stringBuffer.toString();
-        }
-        return selectSQL;
+        return selectSQLAppender.toString();
     }
 
     @Override

@@ -23,6 +23,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ParametersHolder;
@@ -150,7 +151,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
 
     private String buildSelectSQL(ArrayList<List<Object>> paramAppenders){
         SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
-        StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
+        StringBuilder selectSQLAppender = new StringBuilder("SELECT ");
         selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
         selectSQLAppender.append(" FROM " + getFromTableInSQL());
         String whereCondition = null;
@@ -159,18 +160,17 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         } else {
             whereCondition = recognizer.getWhereCondition();
         }
-        if (!StringUtils.isNullOrEmpty(whereCondition)) {
-            selectSQLAppender.append(" WHERE " + whereCondition);
+        if (StringUtils.isNotBlank(whereCondition)) {
+            if (CollectionUtils.isNotEmpty(paramAppenders) && paramAppenders.size() > 1) {
+                selectSQLAppender.append(" WHERE ").append(" ( ").append(whereCondition).append(" ) ");
+                for (int i = 1; i < paramAppenders.size(); i++) {
+                    selectSQLAppender.append(" or ( ").append(whereCondition).append(" ) ");
+                }
+            } else {
+                selectSQLAppender.append(" WHERE " + whereCondition);
+            }
         }
         selectSQLAppender.append(" FOR UPDATE");
-        String selectSQL = selectSQLAppender.toString();
-        if(!paramAppenders.isEmpty() && paramAppenders.size() > 1) {
-            StringBuffer stringBuffer = new StringBuffer(selectSQL);
-            for (int i = 1; i < paramAppenders.size(); i++) {
-                stringBuffer.append(" UNION ").append(selectSQL);
-            }
-            selectSQL = stringBuffer.toString();
-        }
-        return selectSQL;
+        return selectSQLAppender.toString();
     }
 }
