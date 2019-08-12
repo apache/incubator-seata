@@ -27,9 +27,11 @@ import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.ser.std.ArraySerializerBase;
 import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
@@ -105,11 +107,14 @@ public class JacksonUndoLogParser implements UndoLogParser {
         }
     }
 
+    /**
+     * if necessary
+     * extend {@link ArraySerializerBase}
+     */
     private static class TimestampSerializer extends JsonSerializer<Timestamp> {
 
         @Override
         public void serializeWithType(Timestamp timestamp, JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSerializer) throws IOException {
-            gen.setCurrentValue(timestamp);
             WritableTypeId typeId = typeSerializer.writeTypePrefix(gen, typeSerializer.typeId(timestamp, JsonToken.START_ARRAY));
             serialize(timestamp, gen, serializers);
             gen.writeTypeSuffix(typeId);
@@ -127,20 +132,24 @@ public class JacksonUndoLogParser implements UndoLogParser {
         }
     }
 
+    /**
+     * if necessary
+     * extend {@link JsonNodeDeserializer}
+     */
     private static class TimestampDeserializer extends JsonDeserializer<Timestamp> {
 
         @Override
         public Timestamp deserialize(JsonParser p, DeserializationContext ctxt) {
             if(p.isExpectedStartArrayToken()){
-                ArrayNode arrayNode = null;
+                ArrayNode arrayNode;
                 try {
                     arrayNode = p.getCodec().readTree(p);
+                    Timestamp timestamp = new Timestamp(arrayNode.get(0).asLong());
+                    timestamp.setNanos(arrayNode.get(1).asInt());
+                    return timestamp;
                 } catch (IOException e) {
                     LOGGER.error("deserialize java.sql.Timestamp error : {}", e.getMessage(), e);
                 }
-                Timestamp timestamp = new Timestamp(arrayNode.get(0).asLong());
-                timestamp.setNanos(arrayNode.get(1).asInt());
-                return timestamp;
             }
             LOGGER.error("deserialize java.sql.Timestamp type error.");
             return null;
