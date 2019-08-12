@@ -28,14 +28,12 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
@@ -73,7 +71,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         //Pk column exists or PK is just auto generated
         List<Object> pkValues = containsPK() ? getPkValuesByColumn() : getPkValuesByAuto();
 
-        TableRecords afterImage = getTableRecords(pkValues);
+        TableRecords afterImage = buildTableRecords(pkValues);
 
         if (afterImage == null) {
             throw new SQLException("Failed to build after-image for insert");
@@ -171,35 +169,5 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             pkValues.add(v);
         }
         return pkValues;
-    }
-
-    protected TableRecords getTableRecords(List<Object> pkValues) throws SQLException {
-        TableRecords afterImage;
-        String pk = getTableMeta().getPkName();
-        StringJoiner pkValuesJoiner = new StringJoiner(" OR ", "SELECT * FROM " + getTableMeta().getTableName() + " WHERE ", "");
-        for (Object pkValue : pkValues) {
-            pkValuesJoiner.add(pk + "=?");
-        }
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            ps = statementProxy.getConnection().prepareStatement(pkValuesJoiner.toString());
-
-            for (int i = 1; i <= pkValues.size(); i++) {
-                ps.setObject(i, pkValues.get(i - 1));
-            }
-
-            rs = ps.executeQuery();
-            afterImage = TableRecords.buildRecords(getTableMeta(), rs);
-
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (ps != null) {
-                ps.close();
-            }
-        }
-        return afterImage;
     }
 }

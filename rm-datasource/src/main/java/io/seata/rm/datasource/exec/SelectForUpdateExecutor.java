@@ -15,21 +15,18 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Savepoint;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLSelectRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+
+import java.sql.Connection;
+import java.sql.Savepoint;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The type Select for update executor.
@@ -59,8 +56,8 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         Savepoint sp = null;
         LockRetryController lockRetryController = new LockRetryController();
         boolean originalAutoCommit = conn.getAutoCommit();
-        ArrayList<List<Object>> paramAppenders = new ArrayList<>();
-        String selectPKSQL = buildSelectSQL(paramAppenders);
+        ArrayList<List<Object>> paramAppender = new ArrayList<>();
+        String selectPKSQL = buildSelectSQL(paramAppender);
         try {
             if (originalAutoCommit) {
                 conn.setAutoCommit(false);
@@ -73,70 +70,28 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
 
             while (true) {
                 // Try to get global lock of those rows selected
-                Statement stPK = null;
-                PreparedStatement pstPK = null;
-                ResultSet rsPK = null;
-                try {
-                    if (paramAppenders.isEmpty()) {
-                        stPK = statementProxy.getConnection().createStatement();
-                        rsPK = stPK.executeQuery(selectPKSQL);
-                    } else {
-
-                        if (paramAppenders.size() == 1) {
-                            pstPK = statementProxy.getConnection().prepareStatement(selectPKSQL);
-                            List<Object> paramAppender = paramAppenders.get(0);
-                            for (int i = 0; i < paramAppender.size(); i++) {
-                                pstPK.setObject(i + 1, paramAppender.get(i));
-                            }
-                        } else {
-                            pstPK = statementProxy.getConnection().prepareStatement(selectPKSQL);
-                            List<Object> paramAppender = null;
-                            for (int i = 0; i < paramAppenders.size(); i++) {
-                                paramAppender = paramAppenders.get(i);
-                                for (int j = 0; j < paramAppender.size(); j++) {
-                                    pstPK.setObject(i * paramAppender.size() + j + 1, paramAppender.get(j));
-                                }
-                            }
-                        }
-                        rsPK = pstPK.executeQuery();
-                    }
-
-                    TableRecords selectPKRows = TableRecords.buildRecords(getTableMeta(), rsPK);
-                    String lockKeys = buildLockKey(selectPKRows);
-                    if (StringUtils.isNullOrEmpty(lockKeys)) {
-                        break;
-                    }
-
-                    if (RootContext.inGlobalTransaction()) {
-                        //do as usual
-                        statementProxy.getConnectionProxy().checkLock(lockKeys);
-                    } else if (RootContext.requireGlobalLock()) {
-                        //check lock key before commit just like DML to avoid reentrant lock problem(no xid thus can
-                        // not reentrant)
-                        statementProxy.getConnectionProxy().appendLockKey(lockKeys);
-                    } else {
-                        throw new RuntimeException("Unknown situation!");
-                    }
-
+                TableRecords selectPKRows = buildTableRecords(getTableMeta(), selectPKSQL, paramAppender);
+                String lockKeys = buildLockKey(selectPKRows);
+                if (StringUtils.isNullOrEmpty(lockKeys)) {
                     break;
-
-                } catch (LockConflictException lce) {
-                    conn.rollback(sp);
-                    lockRetryController.sleep(lce);
-
-                } finally {
-                    if (rsPK != null) {
-                        rsPK.close();
-                    }
-                    if (stPK != null) {
-                        stPK.close();
-                    }
-                    if (pstPK != null) {
-                        pstPK.close();
-                    }
                 }
-            }
 
+                if (RootContext.inGlobalTransaction()) {
+                    //do as usual
+                    statementProxy.getConnectionProxy().checkLock(lockKeys);
+                } else if (RootContext.requireGlobalLock()) {
+                    //check lock key before commit just like DML to avoid reentrant lock problem(no xid thus can
+                    // not reentrant)
+                    statementProxy.getConnectionProxy().appendLockKey(lockKeys);
+                } else {
+                    throw new RuntimeException("Unknown situation!");
+                }
+
+                break;
+            }
+        } catch (LockConflictException lce) {
+            conn.rollback(sp);
+            lockRetryController.sleep(lce);
         } finally {
             if (sp != null) {
                 conn.releaseSavepoint(sp);
@@ -148,29 +103,16 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         return rs;
     }
 
-    private String buildSelectSQL(ArrayList<List<Object>> paramAppenders){
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
+    private String buildSelectSQL(ArrayList<List<Object>> paramAppender){
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) sqlRecognizer;
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
         selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
         selectSQLAppender.append(" FROM " + getFromTableInSQL());
-        String whereCondition = null;
-        if (statementProxy instanceof ParametersHolder) {
-            whereCondition = recognizer.getWhereCondition((ParametersHolder)statementProxy, paramAppenders);
-        } else {
-            whereCondition = recognizer.getWhereCondition();
-        }
+        String whereCondition = buildWhereCondition(recognizer, paramAppender);
         if (!StringUtils.isNullOrEmpty(whereCondition)) {
             selectSQLAppender.append(" WHERE " + whereCondition);
         }
         selectSQLAppender.append(" FOR UPDATE");
-        String selectSQL = selectSQLAppender.toString();
-        if(!paramAppenders.isEmpty() && paramAppenders.size() > 1) {
-            StringBuffer stringBuffer = new StringBuffer(selectSQL);
-            for (int i = 1; i < paramAppenders.size(); i++) {
-                stringBuffer.append(" UNION ").append(selectSQL);
-            }
-            selectSQL = stringBuffer.toString();
-        }
-        return selectSQL;
+        return buildParamsAppenderSQL(selectSQLAppender.toString(), paramAppender);
     }
 }

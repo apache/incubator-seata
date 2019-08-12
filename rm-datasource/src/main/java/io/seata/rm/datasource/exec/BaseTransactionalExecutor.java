@@ -15,25 +15,28 @@
  */
 package io.seata.rm.datasource.exec;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLType;
+import io.seata.rm.datasource.sql.WhereRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
-
-
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
 /**
  * The type Base transactional executor.
  *
@@ -113,6 +116,22 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         }
         return whereConditionAppender.toString();
 
+    }
+
+    /**
+     *  build buildWhereCondition
+     * @param recognizer the recognizer
+     * @param paramAppender the param paramAppender
+     * @return the string
+     */
+    protected String buildWhereCondition(WhereRecognizer recognizer, ArrayList<List<Object>> paramAppender) {
+        String whereCondition = null;
+        if (statementProxy instanceof ParametersHolder) {
+            whereCondition = recognizer.getWhereCondition((ParametersHolder) statementProxy, paramAppender);
+        } else {
+            whereCondition = recognizer.getWhereCondition();
+        }
+        return whereCondition;
     }
 
     /**
@@ -229,4 +248,108 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         return sqlUndoLog;
     }
 
+
+    /**
+     * build a BeforeImage
+     * @param tableMeta the tableMeta
+     * @param selectSQL the selectSQL
+     * @param paramAppenders the paramAppenders
+     * @return a tableRecords
+     * @throws SQLException the sql exception
+     */
+    protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenders) throws SQLException {
+        TableRecords tableRecords = null;
+        PreparedStatement ps = null;
+        Statement st = null;
+        ResultSet rs = null;
+        try {
+            if (paramAppenders.isEmpty()) {
+                st = statementProxy.getConnection().createStatement();
+                rs = st.executeQuery(selectSQL);
+            } else {
+                if (paramAppenders.size() == 1) {
+                    ps = statementProxy.getConnection().prepareStatement(selectSQL);
+                    List<Object> paramAppender = paramAppenders.get(0);
+                    for (int i = 0; i < paramAppender.size(); i++) {
+                        ps.setObject(i + 1, paramAppender.get(i));
+                    }
+                } else {
+                    ps = statementProxy.getConnection().prepareStatement(selectSQL);
+                    List<Object> paramAppender = null;
+                    for (int i = 0; i < paramAppenders.size(); i++) {
+                        paramAppender = paramAppenders.get(i);
+                        for (int j = 0; j < paramAppender.size(); j++) {
+                            ps.setObject(i * paramAppender.size() + j + 1, paramAppender.get(j));
+                        }
+                    }
+                }
+                rs = ps.executeQuery();
+            }
+            tableRecords = TableRecords.buildRecords(tableMeta, rs);
+            } finally {
+                if (rs != null) {
+                    rs.close();
+                }
+                if (st != null) {
+                    st.close();
+                }
+                if (ps != null) {
+                    ps.close();
+                }
+            }
+            return tableRecords;
+        }
+
+    /**
+     * build TableRecords
+     * @param pkValues the pkValues
+     * @return return TableRecords;
+     * @throws SQLException
+     */
+    protected TableRecords buildTableRecords(List<Object> pkValues) throws SQLException {
+        TableRecords afterImage;
+        String pk = getTableMeta().getPkName();
+        StringJoiner pkValuesJoiner = new StringJoiner(" OR ", "SELECT * FROM " + getTableMeta().getTableName() + " WHERE ", "");
+        for (Object pkValue : pkValues) {
+            pkValuesJoiner.add(pk + "=?");
+        }
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            ps = statementProxy.getConnection().prepareStatement(pkValuesJoiner.toString());
+
+            for (int i = 1; i <= pkValues.size(); i++) {
+                ps.setObject(i, pkValues.get(i - 1));
+            }
+
+            rs = ps.executeQuery();
+            afterImage = TableRecords.buildRecords(getTableMeta(), rs);
+
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
+        }
+        return afterImage;
+    }
+
+    /**
+     * build buildParamsAppenderSQL
+     * @param selectSQL         the selectSQL
+     * @param paramAppender     the paramAppender
+     * @return select SQL
+     */
+    protected String buildParamsAppenderSQL(String selectSQL, ArrayList<List<Object>> paramAppender) {
+        if(!paramAppender.isEmpty() && paramAppender.size() > 1) {
+            StringBuffer stringBuffer = new StringBuffer(selectSQL);
+            for (int i = 1; i < paramAppender.size(); i++) {
+                stringBuffer.append(" UNION ").append(selectSQL);
+            }
+            return stringBuffer.toString();
+        }
+        return selectSQL;
+    }
 }
