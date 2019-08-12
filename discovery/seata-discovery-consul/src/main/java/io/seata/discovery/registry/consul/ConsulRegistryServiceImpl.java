@@ -30,6 +30,7 @@ import io.seata.discovery.registry.RegistryService;
 
 import java.net.InetSocketAddress;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,8 +60,9 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     private static final String DEFAULT_CLUSTER_NAME = "default";
     private static final String SERVICE_TAG = "services";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
+    private static final String WEIGHT_META_KEY = "weight";
 
-    private ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap;
+    private ConcurrentMap<String, List<ServerRegistration>> clusterAddressMap;
     private ConcurrentMap<String, Set<ConsulListener>> listenerMap;
     private ExecutorService notifierExecutor;
     private ConcurrentMap<String, ConsulNotifier> notifiers;
@@ -114,12 +116,12 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
 
     @Override
     public void register(ServerRegistration registration) throws Exception {
-        getConsulClient().agentServiceRegister(createService(address));
+        getConsulClient().agentServiceRegister(createService(registration));
     }
 
     @Override
     public void unregister(ServerRegistration registration) throws Exception {
-        getConsulClient().agentServiceDeregister(createServiceId(address));
+        getConsulClient().agentServiceDeregister(createServiceId(registration.getAddress()));
     }
 
     @Override
@@ -145,7 +147,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     }
 
     @Override
-    public List<InetSocketAddress> lookup(String key) throws Exception {
+    public List<ServerRegistration> lookup(String key) throws Exception {
         final String cluster = getServiceGroup(key);
         if (null == cluster) {
             return null;
@@ -201,17 +203,21 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
     /**
      * create a new service
      *
-     * @param address
+     * @param registration
      * @return newService
      */
-    private NewService createService(InetSocketAddress address) {
+    private NewService createService(ServerRegistration registration) {
         NewService newService = new NewService();
+        InetSocketAddress address = registration.getAddress();
         newService.setId(createServiceId(address));
         newService.setName(getClusterName());
         newService.setTags(Collections.singletonList(SERVICE_TAG));
         newService.setPort(address.getPort());
         newService.setAddress(NetUtil.toIpAddress(address));
         newService.setCheck(createCheck(address));
+        HashMap<String, String> metaMap = new HashMap<>();
+        metaMap.put(WEIGHT_META_KEY, String.valueOf(registration.getWeight()));
+        newService.setMeta(metaMap);
         return newService;
     }
 
@@ -283,7 +289,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
         }
         clusterAddressMap.put(cluster, services.stream()
             .map(HealthService::getService)
-            .map(service -> new InetSocketAddress(service.getAddress(), service.getPort()))
+            .map(service -> new ServerRegistration(new InetSocketAddress(service.getAddress(), service.getPort()),Integer.valueOf(service.getMeta().getOrDefault(WEIGHT_META_KEY,"0"))))
             .collect(Collectors.toList()));
     }
 

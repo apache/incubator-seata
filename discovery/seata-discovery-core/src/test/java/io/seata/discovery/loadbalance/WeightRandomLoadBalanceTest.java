@@ -31,33 +31,32 @@ public class WeightRandomLoadBalanceTest extends LoadBalanceTest{
     public void testWeightLoadBalance(){
         int runNum = 1000;
         ArrayList list = new ArrayList<ServerRegistration>();
-        ServerRegistration serverRegistration = new ServerRegistration(new InetSocketAddress("",2), 20);
-        ServerRegistration serverRegistration1 = new ServerRegistration(new InetSocketAddress("",2), 30);
-        ServerRegistration serverRegistration2 = new ServerRegistration(new InetSocketAddress("",2), 50);
+        ServerRegistration serverRegistration = new ServerRegistration(new InetSocketAddress("127.0.0.1",8081), 20);
+        ServerRegistration serverRegistration1 = new ServerRegistration(new InetSocketAddress("127.0.0.1",8082), 30);
+        ServerRegistration serverRegistration2 = new ServerRegistration(new InetSocketAddress("127.0.0.1",8083), 50);
         list.add(serverRegistration);
         list.add(serverRegistration1);
         list.add(serverRegistration2);
 
         WeightRandomLoadBalance weightRandomLoadBalance = new WeightRandomLoadBalance();
         Map<ServerRegistration, AtomicLong> selectedCounter = getSelectedCounter(runNum, list, weightRandomLoadBalance);
-        for (int i = 0; i < 100; i++) {
-            ServerRegistration s = weightRandomLoadBalance.doSelect(list);
-            AtomicLong count = selectedCounter.get(s);
-            count.incrementAndGet();
-        }
 
         Iterator<Map.Entry<ServerRegistration, AtomicLong>> iterator = selectedCounter.entrySet().iterator();
+        int totalRunNum = 0;
         while (iterator.hasNext()) {
             Map.Entry<ServerRegistration, AtomicLong> en = iterator.next();
             ServerRegistration key = en.getKey();
             Long count = selectedCounter.get(key).get();
             Integer weight = key.getWeight();
-
+            System.out.println("count:" + count + "  Weight :" + weight);
             // 允许误差在10%以内
             float percert = (float)count / (float)runNum;
             float weightPer = (float)weight / 100f;
-            Assertions.assertTrue(percert > (weightPer - 0.2 )&& percert < (weightPer + 0.2));
+            totalRunNum += count;
+
+//            Assertions.assertTrue(percert > (weightPer - 0.2 )&& percert < (weightPer + 0.2));
         }
+        Assertions.assertEquals(totalRunNum,runNum);
     }
 
 }

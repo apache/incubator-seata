@@ -21,6 +21,12 @@ import io.seata.common.util.NetUtil;
 import java.io.Serializable;
 import java.net.InetSocketAddress;
 
+/**
+ *
+ * wrap server info
+ *
+ * @author mawerss1@gmail.com
+ */
 public class ServerRegistration implements Serializable {
 
     private final InetSocketAddress address;

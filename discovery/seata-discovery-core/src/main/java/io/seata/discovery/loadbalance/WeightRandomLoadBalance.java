@@ -15,10 +15,15 @@
  */
 package io.seata.discovery.loadbalance;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+/**
+ *
+ * random load balance with weight
+ *
+ * @author mawerss1@gmail.com
+ */
 public class WeightRandomLoadBalance extends AbstractLoadBalance{
 
     @Override
@@ -26,18 +31,10 @@ public class WeightRandomLoadBalance extends AbstractLoadBalance{
 
         boolean sameWeight = true;
         int totalWeight = 0;
-        List<T> s = invokers;
-
-        s.sort(new Comparator<ServerRegistration>() {
-            @Override
-            public int compare(ServerRegistration o1, ServerRegistration o2) {
-                return o2.getWeight() - o1.getWeight();
-            }
-        });
-
         int firstWeight = 0;
-        for (int i = 0; i < s.size(); i++) {
-            ServerRegistration serverRegistration = s.get(i);
+
+        for (int i = 0; i < invokers.size(); i++) {
+            ServerRegistration serverRegistration = invokers.get(i);
             int curWeight = serverRegistration.getWeight();
             if (i == 0) {
                 firstWeight = curWeight;
@@ -51,13 +48,14 @@ public class WeightRandomLoadBalance extends AbstractLoadBalance{
 
         if (totalWeight > 0 && !sameWeight) {
             int random = ThreadLocalRandom.current().nextInt(totalWeight);
-            for (int i = 0; i < s.size(); i++) {
-                if (random >= s.get(i).getWeight()) {
-                    return s.get(i);
+            for (int i = 0; i < invokers.size(); i++) {
+                random -= invokers.get(i).getWeight();
+                if (random < 0) {
+                    return invokers.get(i);
                 }
             }
         }
 
-        return invokers.get(ThreadLocalRandom.current().nextInt(s.size()));
+        return invokers.get(ThreadLocalRandom.current().nextInt(invokers.size()));
     }
 }

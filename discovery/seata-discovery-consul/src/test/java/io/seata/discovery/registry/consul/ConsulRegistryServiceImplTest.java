@@ -15,6 +15,7 @@
  */
 package io.seata.discovery.registry.consul;
 
+import io.seata.discovery.loadbalance.ServerRegistration;
 import io.seata.discovery.registry.RegistryService;
 import org.junit.jupiter.api.Test;
 
@@ -35,16 +36,18 @@ public class ConsulRegistryServiceImplTest {
     public void testRegister() throws Exception {
         RegistryService registryService = mock(ConsulRegistryServiceImpl.class);
         InetSocketAddress inetSocketAddress = new InetSocketAddress("127.0.0.1", 8091);
-        registryService.register(inetSocketAddress);
-        verify(registryService).register(inetSocketAddress);
+        ServerRegistration registration = new ServerRegistration(inetSocketAddress, 10);
+        registryService.register(registration);
+        verify(registryService).register(registration);
     }
 
     @Test
     public void testUnregister() throws Exception {
         RegistryService registryService = mock(ConsulRegistryServiceImpl.class);
         InetSocketAddress inetSocketAddress = new InetSocketAddress("127.0.0.1", 8091);
-        registryService.unregister(inetSocketAddress);
-        verify(registryService).unregister(inetSocketAddress);
+        ServerRegistration registration = new ServerRegistration(inetSocketAddress, 10);
+        registryService.unregister(registration);
+        verify(registryService).unregister(registration);
     }
 
     @Test

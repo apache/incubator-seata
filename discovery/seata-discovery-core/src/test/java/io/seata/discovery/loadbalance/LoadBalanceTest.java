@@ -21,6 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -104,4 +105,20 @@ public class LoadBalanceTest {
                         new ServerRegistration(new InetSocketAddress("127.0.0.1", 8095),0)
         ));
     }
+
+    /**
+     *
+     * @return Map<ServerRegistration, Integer>
+     */
+    static Map<ServerRegistration, Integer> registrationProvider() {
+        return new HashMap<ServerRegistration,Integer>(){
+            {
+                put(new ServerRegistration(new InetSocketAddress("127.0.0.1", 8091), 10), 10);
+                put(new ServerRegistration(new InetSocketAddress("127.0.0.1", 8092), 20), 20);
+                put(new ServerRegistration(new InetSocketAddress("127.0.0.1", 8093), 30), 30);
+                put(new ServerRegistration(new InetSocketAddress("127.0.0.1", 8094), 40), 40);
+            }
+        };
+    }
+
 }
