@@ -43,6 +43,7 @@
         <module>tm</module>
         <module>metrics</module>
         <module>codec</module>
+        <module>compressor</module>
     </modules>
     <packaging>pom</packaging>
 
