@@ -222,6 +222,15 @@ public enum MessageTypeProto
    * <code>TYPE_REG_RM_RESULT = 104;</code>
    */
   TYPE_REG_RM_RESULT(104),
+  /**
+   *  * <pre>
+   *    **
+   *    * The constant TYPE_UNDO_LOG_DELETE.
+   *    * </pre>
+   *    *
+   *    * <code>TYPE_UNDO_LOG_DELETE = 111;</code>
+   */
+  TYPE_UNDO_LOG_DELETE(111),
   UNRECOGNIZED(-1),
   ;
 
@@ -480,6 +489,7 @@ public enum MessageTypeProto
       case 102: return TYPE_REG_CLT_RESULT;
       case 103: return TYPE_REG_RM;
       case 104: return TYPE_REG_RM_RESULT;
+      case 111: return TYPE_UNDO_LOG_DELETE;
       default: return null;
     }
   }
