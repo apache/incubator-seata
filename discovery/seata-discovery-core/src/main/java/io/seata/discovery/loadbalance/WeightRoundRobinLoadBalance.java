@@ -15,6 +15,8 @@
  */
 package io.seata.discovery.loadbalance;
 
+import io.seata.common.loader.LoadLevel;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -25,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author mawerss1@gmail.com
  * @Date 2019.08.12
  */
+@LoadLevel(name = "WeightRoundRobinLoadBalance", order = 4)
 public class WeightRoundRobinLoadBalance extends AbstractLoadBalance {
 
     AtomicInteger selectCount = new AtomicInteger();

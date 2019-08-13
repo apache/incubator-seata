@@ -15,6 +15,8 @@
  */
 package io.seata.discovery.loadbalance;
 
+import io.seata.common.loader.LoadLevel;
+
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -24,6 +26,7 @@ import java.util.concurrent.ThreadLocalRandom;
  *
  * @author mawerss1@gmail.com
  */
+@LoadLevel(name = "WeightRandomLoadBalance", order = 3)
 public class WeightRandomLoadBalance extends AbstractLoadBalance{
 
     @Override
