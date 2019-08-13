@@ -30,6 +30,7 @@ import io.netty.handler.timeout.IdleStateHandler;
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
+import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.RemotingServer;
 import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
 import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
@@ -60,6 +61,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     private String host;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
+    private static final String BALANCE_WEIGHT_CONFIG_ID = "balance.weight";
     /**
      * Sets listen port.
      *
@@ -178,7 +180,8 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         try {
             ChannelFuture future = this.serverBootstrap.bind(host, listenPort).sync();
             LOGGER.info("Server started ... ");
-            ServerRegistration registration = new ServerRegistration(new InetSocketAddress(XID.getIpAddress(), XID.getPort()), 0);
+            int weight = ConfigurationFactory.getInstance().getInt(BALANCE_WEIGHT_CONFIG_ID, 1);
+            ServerRegistration registration = new ServerRegistration(new InetSocketAddress(XID.getIpAddress(), XID.getPort()), weight);
             RegistryFactory.getInstance().register(registration);
             initialized.set(true);
             future.channel().closeFuture().sync();
