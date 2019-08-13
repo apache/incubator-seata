@@ -32,6 +32,7 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * The type Data compare utils.
@@ -73,8 +74,11 @@ public class DataCompareUtils {
                             }
                             boolean result = f0.getValue().equals(f1.getValue());
                             if (!result) {
-                                if (LOGGER.isInfoEnabled()) {
-                                    LOGGER.info("Field not equals, name {}, old value {}, new value {}", f0.getName(), f0.getValue(), f1.getValue());
+                                result = Objects.deepEquals(f0.getValue(), f1.getValue());
+                                if(!result){
+                                    if (LOGGER.isInfoEnabled()) {
+                                        LOGGER.info("Field not equals, name {}, old value {}, new value {}", f0.getName(), f0.getValue(), f1.getValue());
+                                    }
                                 }
                             }
                             return result;
