@@ -36,8 +36,7 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
 import io.seata.rm.datasource.DataSourceProxy;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 
 import javax.sql.DataSource;
 
@@ -46,6 +45,7 @@ import javax.sql.DataSource;
  *
  * @author hanwen created at 2019-02-01
  */
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class TableMetaTest {
 
     private static Object[][] columnMetas =
@@ -64,16 +64,12 @@ public class TableMetaTest {
             new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
             new Object[] {"name1", "name1", false, "", 3, 1, "A", 34}
         };
-    private static Object[][] indexMetas1 =
-            new Object[][] {
-                    new Object[] {"PRIMARY", "`id`", false, "", 3, 1, "A", 34},
-                    new Object[] {"name1", "name1", false, "", 3, 1, "A", 34}
-            };
 
     /**
      * The table meta fetch test.
      */
     @Test
+    @Order(1)
     public void getTableMetaTest_0() {
 
         MockDriver mockDriver = new MockDriver();
@@ -125,6 +121,7 @@ public class TableMetaTest {
 
     }
     @Test
+    @Order(2)
     public void getTableMetaTest_1() {
 
         MockDriver mockDriver = new MockDriver();
@@ -150,6 +147,10 @@ public class TableMetaTest {
 
         DataSourceProxy proxy = new DataSourceProxy(dataSource);
 
+        indexMetas =   new Object[][] {
+                new Object[] {"PRIMARY", "`id`", false, "", 3, 1, "A", 34},
+                new Object[] {"name1", "name1", false, "", 3, 1, "A", 34}
+        };
         TableMeta tableMeta = TableMetaCache.getTableMeta(proxy, "t1");
 
         Assertions.assertEquals("t1", tableMeta.getTableName());
@@ -167,15 +168,16 @@ public class TableMetaTest {
         assertColumnMetaEquals(columnMetas[2], tableMeta.getAllColumns().get("name2"));
         assertColumnMetaEquals(columnMetas[3], tableMeta.getAllColumns().get("name3"));
 
-        Assertions.assertEquals(indexMetas1.length, tableMeta.getAllIndexes().size());
+        Assertions.assertEquals(indexMetas.length, tableMeta.getAllIndexes().size());
 
-        assertIndexMetaEquals(indexMetas1[0], tableMeta.getAllIndexes().get("PRIMARY"));
+        assertIndexMetaEquals(indexMetas[0], tableMeta.getAllIndexes().get("PRIMARY"));
         Assertions.assertEquals(IndexType.PRIMARY, tableMeta.getAllIndexes().get("PRIMARY").getIndextype());
-        assertIndexMetaEquals(indexMetas1[1], tableMeta.getAllIndexes().get("name1"));
+        assertIndexMetaEquals(indexMetas[1], tableMeta.getAllIndexes().get("name1"));
         Assertions.assertEquals(IndexType.Unique, tableMeta.getAllIndexes().get("name1").getIndextype());
 
     }
     @Test
+    @Order(3)
     public void refreshTest_0() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         MockDriver mockDriver = new MockDriver();
         mockDriver.setExecuteHandler(new MockExecuteHandler() {
