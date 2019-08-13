@@ -27,6 +27,7 @@ import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -64,7 +65,11 @@ public class DataCompareUtils {
                             if (StringUtils.equals(currentSerializer, FastjsonUndoLogParser.NAME)) {
                                 convertType(f0, f1);
                             }
-                            return f0.getValue().equals(f1.getValue());
+                            if(f0.getType() == -3) {//byte[]
+                                return Arrays.toString((byte[])f0.getValue()).equals(Arrays.toString((byte[])f1.getValue()));
+                            } else {
+                                return f0.getValue().equals(f1.getValue());
+                            }
                         }
                     }
                 } else {
@@ -164,7 +169,11 @@ public class DataCompareUtils {
             for (int j = 0; j < row.getFields().size(); j++) {
                 Field field = row.getFields().get(j);
                 if (field.getName().equalsIgnoreCase(primaryKey)) {
-                    rowKey = String.valueOf(field.getValue());
+                    if(field.getType() == -3) {//byte[[]
+                        rowKey = Arrays.toString((byte[]) field.getValue());
+                    } else {
+                        rowKey = String.valueOf(field.getValue());
+                    }
                 }
                 colsMap.put(field.getName().trim().toUpperCase(), field);
             }

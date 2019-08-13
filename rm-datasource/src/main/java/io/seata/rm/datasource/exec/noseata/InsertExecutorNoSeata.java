@@ -46,7 +46,7 @@ import java.util.Map;
  */
 public class InsertExecutorNoSeata<T, S extends Statement> extends InsertExecutor<T, S> implements NoSeata{
 
-
+    private StatementProxy statementProxy;
     /**
      * Instantiates a new Insert executor.
      *
@@ -57,6 +57,7 @@ public class InsertExecutorNoSeata<T, S extends Statement> extends InsertExecuto
     public InsertExecutorNoSeata(StatementProxy statementProxy, StatementCallback statementCallback,
                           SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
+        this.statementProxy = statementProxy;
     }
 
     @Override
@@ -74,14 +75,14 @@ public class InsertExecutorNoSeata<T, S extends Statement> extends InsertExecuto
         return super.containsPK();
     }
 
-    public List<Object> getPkValuesByColumn() throws SQLException {
-        return  super.getPkValuesByColumn();
-    }
-
-
-    public List<Object> getPkValuesByAuto() throws SQLException {
-       return super.getPkValuesByAuto();
-    }
+//    public List<Object> getPkValuesByColumn() throws SQLException {
+//        return  super.getPkValuesByColumn( this.statementProxy.getConnectionProxy().getDbType());
+//    }
+//
+//
+//    public List<Object> getPkValuesByAuto() throws SQLException {
+//       return super.getPkValuesByAuto(this.statementProxy.getConnectionProxy().getDbType());
+//    }
 
     public TableRecords getTableRecords(List<Object> pkValues) throws SQLException {
         return super.getTableRecords(pkValues);

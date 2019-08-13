@@ -21,6 +21,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.*;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.fasterxml.jackson.databind.ser.std.UUIDSerializer;
 import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
@@ -97,7 +98,6 @@ public class JacksonUndoLogParser implements UndoLogParser {
                      jgen.writeObject("");// 输出孔字符串
                 }
             });
-
             objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
             SimpleModule simpleModule = new SimpleModule();
             simpleModule.addSerializer(Number.class, ToStringSerializer.instance);
@@ -112,5 +112,8 @@ public class JacksonUndoLogParser implements UndoLogParser {
         }
     }
 
+    public static void main(String[] args) {
+
+    }
 
 }

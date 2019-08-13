@@ -20,8 +20,6 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
-import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDeleteStatement;
-import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleDeleteStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.rm.datasource.ParametersHolder;
@@ -83,7 +81,7 @@ public class OracleDeleteRecognizer extends BaseRecognizer implements SQLDeleteR
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
+        OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
             @Override
             public boolean visit(SQLVariantRefExpr x) {
@@ -105,7 +103,7 @@ public class OracleDeleteRecognizer extends BaseRecognizer implements SQLDeleteR
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
+        OracleOutputVisitor visitor = new OracleOutputVisitor(sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
     }

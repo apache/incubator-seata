@@ -15,12 +15,20 @@
  */
 package io.seata.rm.datasource.exec;
 
+import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.expr.SQLSequenceExpr;
+import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
+import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
+import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleInsertStatement;
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
+import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLRecognizer;
+import io.seata.rm.datasource.sql.druid.oracle.OracleInsertRecognizer;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Null;
 import io.seata.rm.datasource.sql.struct.TableMeta;
@@ -49,6 +57,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InsertExecutor.class);
     protected static final String ERR_SQL_STATE = "S1009";
+    protected  StatementProxy statementProxy;
 
     /**
      * Instantiates a new Insert executor.
@@ -60,6 +69,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     public InsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
                           SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
+        this.statementProxy = statementProxy;
     }
 
     @Override
@@ -89,6 +99,20 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     protected List<Object> getPkValuesByColumn() throws SQLException {
+        //Oracle contains nextval for automatic growth
+        String dbType = this.statementProxy.getConnectionProxy().getDbType();
+        if(JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
+            List<SQLInsertStatement.ValuesClause> list = ((OracleInsertRecognizer)sqlRecognizer).getAst().getValuesList();
+            for(SQLInsertStatement.ValuesClause vs : list) {
+                List<SQLExpr> sqlExprs = vs.getValues();
+                for(SQLExpr expr:sqlExprs ) {
+                    if (expr instanceof SQLSequenceExpr) {
+                        //There's a sequence in value
+                        return getPkValuesByAuto();
+                    }
+                }
+            }
+        }
         // insert values including PK
         SQLInsertRecognizer recogizier = (SQLInsertRecognizer)sqlRecognizer;
         List<String> insertColumns = recogizier.getInsertColumns();
@@ -120,6 +144,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
 
     protected List<Object> getPkValuesByAuto() throws SQLException {
+        String dbType = this.statementProxy.getConnectionProxy().getDbType();
         // PK is just auto generated
         Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
         if (pkMetaMap.size() != 1) {
