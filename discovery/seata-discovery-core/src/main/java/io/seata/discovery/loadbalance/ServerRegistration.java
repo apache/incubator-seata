@@ -23,7 +23,7 @@ import java.net.InetSocketAddress;
 
 /**
  *
- * wrap server info
+ * wrap balance info
  *
  * @author mawerss1@gmail.com
  */
@@ -56,7 +56,7 @@ public class ServerRegistration implements Serializable {
     }
 
     //cache
-    private String json;
+    private transient String json;
 
     public String serialize() {
         if (json != null) {
@@ -70,17 +70,15 @@ public class ServerRegistration implements Serializable {
         return JSON.parseObject(json, ServerRegistration.class);
     }
 
+
     @Override
     public int hashCode() {
-        if (weight != 0) {
-            return address.hashCode() + weight;
-        }else {
-            return address.hashCode();
-        }
+        return address.hashCode() + weight;
     }
 
     @Override
     public boolean equals(Object obj) {
+        if (this == obj) return true;
         if (obj == null || !(obj instanceof ServerRegistration)) {
             return false;
         }
