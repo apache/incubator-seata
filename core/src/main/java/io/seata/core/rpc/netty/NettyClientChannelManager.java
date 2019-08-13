@@ -19,14 +19,13 @@ import io.netty.channel.Channel;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.discovery.loadbalance.ServerRegistration;
 import io.seata.discovery.registry.RegistryFactory;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -211,11 +210,11 @@ class NettyClientChannelManager {
     
     private List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
         List<String> availList = new ArrayList<>();
-        List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance().lookup(
+        List<ServerRegistration> registrationList = RegistryFactory.getInstance().lookup(
             transactionServiceGroup);
-        if (!CollectionUtils.isEmpty(availInetSocketAddressList)) {
-            for (InetSocketAddress address : availInetSocketAddressList) {
-                availList.add(NetUtil.toStringAddress(address));
+        if (!CollectionUtils.isEmpty(registrationList)) {
+            for (ServerRegistration registration : registrationList) {
+                availList.add(registration.getStringAddress());
             }
         }
         return availList;

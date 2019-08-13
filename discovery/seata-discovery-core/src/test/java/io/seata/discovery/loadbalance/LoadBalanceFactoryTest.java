@@ -112,11 +112,11 @@ public class LoadBalanceFactoryTest {
     public void testGetAddress(LoadBalance loadBalance) throws Exception {
         Assertions.assertNotNull(loadBalance);
         InetSocketAddress address = new InetSocketAddress("127.0.0.1", 8091);
-        ServerRegistration invoker = new ServerRegistration(address, 0);
+        ServerRegistration registration = new ServerRegistration(address, 0);
         List<ServerRegistration> serverRegistrationList = new ArrayList<>();
-        serverRegistrationList.add(invoker);
+        serverRegistrationList.add(registration);
         ServerRegistration balanceServerRegistration = loadBalance.select(serverRegistrationList);
-        Assertions.assertEquals(address, balanceServerRegistration);
+        Assertions.assertEquals(registration, balanceServerRegistration);
     }
 
     /**

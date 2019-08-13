@@ -21,7 +21,6 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.executor.Initialize;
-import io.seata.common.util.NetUtil;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -36,13 +35,13 @@ import io.seata.core.rpc.netty.NettyClientConfig;
 import io.seata.core.rpc.netty.RmRpcClient;
 import io.seata.core.rpc.netty.TmRpcClient;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
+import io.seata.discovery.loadbalance.ServerRegistration;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogManagerOracle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -106,18 +105,18 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
 
     @SuppressWarnings("unchecked")
     private String loadBalance() {
-        InetSocketAddress address = null;
+        ServerRegistration registration = null;
         try {
-            List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(
+            List<ServerRegistration> inetSocketAddressList = RegistryFactory.getInstance().lookup(
                 TmRpcClient.getInstance().getTransactionServiceGroup());
-            address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
+            registration = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
         } catch (Exception ignore) {
             LOGGER.error(ignore.getMessage());
         }
-        if (address == null) {
+        if (registration == null) {
             throw new FrameworkException(NoAvailableService);
         }
-        return NetUtil.toStringAddress(address);
+        return registration.getStringAddress();
     }
 
     /**
