@@ -15,6 +15,7 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -104,6 +105,23 @@ public class ShutdownHook extends Thread {
         @Override
         public int compareTo(DisposablePriorityWrapper disposablePriorityWrapper) {
             return priority - disposablePriorityWrapper.priority;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.priority);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if(this == other){
+                return true;
+            }
+            if(!(other instanceof DisposablePriorityWrapper)){
+                return false;
+            }
+            DisposablePriorityWrapper dpw = (DisposablePriorityWrapper)other;
+            return this.priority == dpw.priority && this.disposable.equals(dpw.disposable);
         }
 
         @Override

@@ -210,6 +210,7 @@ public class StringUtils {
                 sb.deleteCharAt(sb.length() - 1);
             }
             sb.append("}");
+            return sb.toString();
         }
         StringBuilder sb = new StringBuilder();
         Field[] fields = obj.getClass().getDeclaredFields();
