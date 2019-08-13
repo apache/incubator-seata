@@ -61,6 +61,10 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     private String host;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
+    /**
+     * use for unregister
+     */
+    private ServerRegistration serverRegistration;
     private static final String BALANCE_WEIGHT_CONFIG_ID = "balance.weight";
     /**
      * Sets listen port.
@@ -181,8 +185,8 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
             ChannelFuture future = this.serverBootstrap.bind(host, listenPort).sync();
             LOGGER.info("Server started ... ");
             int weight = ConfigurationFactory.getInstance().getInt(BALANCE_WEIGHT_CONFIG_ID, 1);
-            ServerRegistration registration = new ServerRegistration(new InetSocketAddress(XID.getIpAddress(), XID.getPort()), weight);
-            RegistryFactory.getInstance().register(registration);
+            serverRegistration = new ServerRegistration(new InetSocketAddress(XID.getIpAddress(), XID.getPort()), weight);
+            RegistryFactory.getInstance().register(serverRegistration);
             initialized.set(true);
             future.channel().closeFuture().sync();
         } catch (Exception exx) {
@@ -198,9 +202,10 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
                 LOGGER.debug("Shuting server down. ");
             }
             if (initialized.get()) {
-                ServerRegistration registration = new ServerRegistration(new InetSocketAddress(XID.getIpAddress(), XID.getPort()), 0);
-                RegistryFactory.getInstance().unregister(registration);
-                RegistryFactory.getInstance().close();
+                if (serverRegistration != null) {
+                    RegistryFactory.getInstance().unregister(serverRegistration);
+                    RegistryFactory.getInstance().close();
+                }
                 //wait a few seconds for server transport
                 TimeUnit.SECONDS.sleep(nettyServerConfig.getServerShutdownWaitTime());
             }

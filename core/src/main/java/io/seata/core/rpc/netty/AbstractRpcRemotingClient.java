@@ -270,8 +270,8 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     private String loadBalance(String transactionServiceGroup) {
         ServerRegistration serverRegistration = null;
         try {
-            List<ServerRegistration> inetSocketServerRegistrationList = RegistryFactory.getInstance().lookup(transactionServiceGroup);
-            serverRegistration = LoadBalanceFactory.getInstance().select(inetSocketServerRegistrationList);
+            List<ServerRegistration> registrations = RegistryFactory.getInstance().lookup(transactionServiceGroup);
+            serverRegistration = LoadBalanceFactory.getInstance().select(registrations);
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage());
         }

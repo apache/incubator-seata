@@ -27,7 +27,7 @@ Examples of unacceptable behavior by participants include:
 * Trolling, insulting/derogatory comments, and personal or political attacks
 * Public or private harassment
 * Publishing others' private information, such as a physical or electronic
- serverRegistration, without explicit permission
+ address, without explicit permission
 * Other conduct which could reasonably be considered inappropriate in a
  professional setting
 
@@ -48,7 +48,7 @@ threatening, offensive, or harmful.
 This Code of Conduct applies both within project spaces and in public spaces
 when an individual is representing the project or its community. Examples of
 representing a project or community include using an official project e-mail
-serverRegistration, posting via an official social media account, or acting as an appointed
+address, posting via an official social media account, or acting as an appointed
 representative at an online or offline event. Representation of a project may be
 further defined and clarified by project maintainers.
 
