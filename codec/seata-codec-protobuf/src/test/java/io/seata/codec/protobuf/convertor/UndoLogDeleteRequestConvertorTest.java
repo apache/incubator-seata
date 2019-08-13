@@ -25,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * @author yuanguoyao
  */
-public class UndoLogDeleteRequestRequestConvertorTest {
+public class UndoLogDeleteRequestConvertorTest {
 
     private static final String RESOURCE_ID = "resourceId";
     private static final short SAVE_DAYS = 3;
