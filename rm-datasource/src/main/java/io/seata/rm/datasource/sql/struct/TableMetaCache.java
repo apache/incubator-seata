@@ -251,7 +251,7 @@ public class TableMetaCache {
         while (rs2.next()) {
             indexName = rs2.getString("INDEX_NAME");
             String colName = rs2.getString("COLUMN_NAME");
-            ColumnMeta col = tm.getAllColumns().get(colName);
+            ColumnMeta col = tm.getAllColumns().get(quoteIdentifier(colName));
 
             if (tm.getAllIndexes().containsKey(indexName)) {
                 IndexMeta index = tm.getAllIndexes().get(indexName);
@@ -292,5 +292,15 @@ public class TableMetaCache {
             }
         }
         return tm;
+    }
+    public static String quoteIdentifier(String identifier) {
+        return quoteIdentifier(identifier, "`");
+    }
+    public static String quoteIdentifier(String identifier, String quoteChar) {
+        if (identifier == null) {
+            return null;
+        } else {
+            return identifier.startsWith(quoteChar) && identifier.endsWith(quoteChar) ? identifier.replaceAll(quoteChar, ""): identifier;
+        }
     }
 }
