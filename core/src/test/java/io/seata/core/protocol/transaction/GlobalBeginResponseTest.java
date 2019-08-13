@@ -20,10 +20,6 @@ import io.seata.core.protocol.ResultCode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.nio.ByteBuffer;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
  * A unit test for {@link GlobalBeginResponse}
  *

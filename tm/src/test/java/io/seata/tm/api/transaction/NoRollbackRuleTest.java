@@ -13,33 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.message;
-
-import io.seata.core.protocol.transaction.GlobalBeginRequest;
+package io.seata.tm.api.transaction;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * The type Global begin request test.
- *
- * @author xiajun.0706 @163.com
- * @since 2019 /1/24
- */
-public class GlobalBeginRequestTest {
+  * @author l81893521
+  * @date 2019/8/9
+  */
+public class NoRollbackRuleTest {
 
-    /**
-     * Test to string.
-     *
-     * @throws Exception the exception
-     */
     @Test
-    public void testToString() throws Exception {
-        GlobalBeginRequest globalBeginRequest = new GlobalBeginRequest();
-        globalBeginRequest.setTransactionName("tran 1");
-        System.out.println(globalBeginRequest.toString());
-
-        Assertions.assertEquals("timeout=60000,transactionName=tran 1", globalBeginRequest.toString());
+    public void equalsTest(){
+        RollbackRule rollbackRuleByClass = new NoRollbackRule(Exception.class);
+        RollbackRule otherRollbackRuleByClass = new NoRollbackRule(Exception.class);
+        Assertions.assertEquals(rollbackRuleByClass, otherRollbackRuleByClass);
+        RollbackRule rollbackRuleByName = new NoRollbackRule(Exception.class.getName());
+        RollbackRule otherRollbackRuleByName = new NoRollbackRule(Exception.class.getName());
+        Assertions.assertEquals(rollbackRuleByName, otherRollbackRuleByName);
     }
-
 }

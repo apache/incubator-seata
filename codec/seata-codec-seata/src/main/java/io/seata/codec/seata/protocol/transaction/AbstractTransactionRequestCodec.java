@@ -16,12 +16,7 @@
 package io.seata.codec.seata.protocol.transaction;
 
 import io.seata.codec.seata.protocol.AbstractMessageCodec;
-import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.transaction.AbstractBranchEndRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionRequest;
-import io.seata.core.rpc.RpcContext;
-
-import java.nio.ByteBuffer;
 
 /**
  * The type Abstract transaction request codec.
