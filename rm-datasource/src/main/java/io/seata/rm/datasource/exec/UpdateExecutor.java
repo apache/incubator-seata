@@ -56,13 +56,13 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     @Override
     protected TableRecords beforeImage() throws SQLException {
 
-        ArrayList<List<Object>> paramAppenders = new ArrayList<>();
+        ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         TableMeta tmeta = getTableMeta();
-        String selectSQL = buildBeforeImageSQL(tmeta, paramAppenders);
-        return buildTableRecords(tmeta, selectSQL, paramAppenders);
+        String selectSQL = buildBeforeImageSQL(tmeta, paramAppenderList);
+        return buildTableRecords(tmeta, selectSQL, paramAppenderList);
     }
 
-    private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenders) {
+    private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
         StringBuffer prefix = new StringBuffer("SELECT ");
@@ -70,7 +70,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             prefix.append(getColumnNameInSQL(tableMeta.getPkName()) + ", ");
         }
         StringBuffer suffix = new StringBuffer(" FROM " + getFromTableInSQL());
-        String whereCondition = buildWhereCondition(recognizer, paramAppenders);
+        String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(" WHERE " + whereCondition);
         }
@@ -80,7 +80,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             selectSQLJoin.add(updateColumn);
         }
         String selectSQL = selectSQLJoin.toString();
-        return buildParamsAppenderSQL(selectSQL, paramAppenders);
+        return buildParamsAppenderSQL(selectSQL, paramAppenderList);
     }
 
     @Override

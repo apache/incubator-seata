@@ -56,8 +56,8 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         Savepoint sp = null;
         LockRetryController lockRetryController = new LockRetryController();
         boolean originalAutoCommit = conn.getAutoCommit();
-        ArrayList<List<Object>> paramAppender = new ArrayList<>();
-        String selectPKSQL = buildSelectSQL(paramAppender);
+        ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
+        String selectPKSQL = buildSelectSQL(paramAppenderList);
         try {
             if (originalAutoCommit) {
                 conn.setAutoCommit(false);
@@ -70,7 +70,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
 
             while (true) {
                 // Try to get global lock of those rows selected
-                TableRecords selectPKRows = buildTableRecords(getTableMeta(), selectPKSQL, paramAppender);
+                TableRecords selectPKRows = buildTableRecords(getTableMeta(), selectPKSQL, paramAppenderList);
                 String lockKeys = buildLockKey(selectPKRows);
                 if (StringUtils.isNullOrEmpty(lockKeys)) {
                     break;
@@ -103,16 +103,16 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         return rs;
     }
 
-    private String buildSelectSQL(ArrayList<List<Object>> paramAppender){
+    private String buildSelectSQL(ArrayList<List<Object>> paramAppenderList){
         SQLSelectRecognizer recognizer = (SQLSelectRecognizer) sqlRecognizer;
         StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
         selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
         selectSQLAppender.append(" FROM " + getFromTableInSQL());
-        String whereCondition = buildWhereCondition(recognizer, paramAppender);
+        String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
         if (!StringUtils.isNullOrEmpty(whereCondition)) {
             selectSQLAppender.append(" WHERE " + whereCondition);
         }
         selectSQLAppender.append(" FOR UPDATE");
-        return buildParamsAppenderSQL(selectSQLAppender.toString(), paramAppender);
+        return buildParamsAppenderSQL(selectSQLAppender.toString(), paramAppenderList);
     }
 }

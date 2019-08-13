@@ -57,14 +57,14 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected TableRecords beforeImage() throws SQLException {
         SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) sqlRecognizer;
         TableMeta tmeta = getTableMeta(visitor.getTableName());
-        ArrayList<List<Object>> paramAppenders = new ArrayList<>();
-        String selectSQL = buildBeforeImageSQL(visitor, tmeta, paramAppenders);
-        return buildTableRecords(tmeta, selectSQL, paramAppenders);
+        ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
+        String selectSQL = buildBeforeImageSQL(visitor, tmeta, paramAppenderList);
+        return buildTableRecords(tmeta, selectSQL, paramAppenderList);
     }
 
-    private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenders) {
+    private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-        String whereCondition = buildWhereCondition(visitor, paramAppenders);
+        String whereCondition = buildWhereCondition(visitor, paramAppenderList);
         StringBuffer suffix = new StringBuffer(" FROM " + keywordChecker.checkAndReplace(getFromTableInSQL()));
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(" WHERE " + whereCondition);
@@ -75,7 +75,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             selectSQLAppender.add(getColumnNameInSQL(keywordChecker.checkAndReplace(column)));
         }
         String selectSQL = selectSQLAppender.toString();
-        return buildParamsAppenderSQL(selectSQL, paramAppenders);
+        return buildParamsAppenderSQL(selectSQL, paramAppenderList);
     }
 
     @Override

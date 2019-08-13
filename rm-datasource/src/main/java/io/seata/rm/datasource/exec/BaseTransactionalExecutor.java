@@ -253,31 +253,31 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * build a BeforeImage
      * @param tableMeta the tableMeta
      * @param selectSQL the selectSQL
-     * @param paramAppenders the paramAppenders
+     * @param paramAppenderList the paramAppenderList
      * @return a tableRecords
      * @throws SQLException the sql exception
      */
-    protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenders) throws SQLException {
+    protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
         TableRecords tableRecords = null;
         PreparedStatement ps = null;
         Statement st = null;
         ResultSet rs = null;
         try {
-            if (paramAppenders.isEmpty()) {
+            if (paramAppenderList.isEmpty()) {
                 st = statementProxy.getConnection().createStatement();
                 rs = st.executeQuery(selectSQL);
             } else {
-                if (paramAppenders.size() == 1) {
+                if (paramAppenderList.size() == 1) {
                     ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                    List<Object> paramAppender = paramAppenders.get(0);
+                    List<Object> paramAppender = paramAppenderList.get(0);
                     for (int i = 0; i < paramAppender.size(); i++) {
                         ps.setObject(i + 1, paramAppender.get(i));
                     }
                 } else {
                     ps = statementProxy.getConnection().prepareStatement(selectSQL);
                     List<Object> paramAppender = null;
-                    for (int i = 0; i < paramAppenders.size(); i++) {
-                        paramAppender = paramAppenders.get(i);
+                    for (int i = 0; i < paramAppenderList.size(); i++) {
+                        paramAppender = paramAppenderList.get(i);
                         for (int j = 0; j < paramAppender.size(); j++) {
                             ps.setObject(i * paramAppender.size() + j + 1, paramAppender.get(j));
                         }
@@ -339,13 +339,13 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * build buildParamsAppenderSQL
      * @param selectSQL         the selectSQL
-     * @param paramAppender     the paramAppender
+     * @param paramAppenderList     the paramAppender
      * @return select SQL
      */
-    protected String buildParamsAppenderSQL(String selectSQL, ArrayList<List<Object>> paramAppender) {
-        if(!paramAppender.isEmpty() && paramAppender.size() > 1) {
+    protected String buildParamsAppenderSQL(String selectSQL, ArrayList<List<Object>> paramAppenderList) {
+        if(!paramAppenderList.isEmpty() && paramAppenderList.size() > 1) {
             StringBuffer stringBuffer = new StringBuffer(selectSQL);
-            for (int i = 1; i < paramAppender.size(); i++) {
+            for (int i = 1; i < paramAppenderList.size(); i++) {
                 stringBuffer.append(" UNION ").append(selectSQL);
             }
             return stringBuffer.toString();
