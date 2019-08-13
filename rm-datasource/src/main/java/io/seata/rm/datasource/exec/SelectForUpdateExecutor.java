@@ -15,18 +15,19 @@
  */
 package io.seata.rm.datasource.exec;
 
-import io.seata.common.util.StringUtils;
-import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.SQLSelectRecognizer;
-import io.seata.rm.datasource.sql.struct.TableRecords;
 
 import java.sql.Connection;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.seata.common.util.StringUtils;
+import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.SQLRecognizer;
+import io.seata.rm.datasource.sql.SQLSelectRecognizer;
+import io.seata.rm.datasource.sql.struct.TableRecords;
 
 /**
  * The type Select for update executor.
@@ -69,29 +70,30 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
             rs = statementCallback.execute(statementProxy.getTargetStatement(), args);
 
             while (true) {
-                // Try to get global lock of those rows selected
-                TableRecords selectPKRows = buildTableRecords(getTableMeta(), selectPKSQL, paramAppenderList);
-                String lockKeys = buildLockKey(selectPKRows);
-                if (StringUtils.isNullOrEmpty(lockKeys)) {
+                try {
+                    // Try to get global lock of those rows selected
+                    TableRecords selectPKRows = buildTableRecords(getTableMeta(), selectPKSQL, paramAppenderList);
+                    String lockKeys = buildLockKey(selectPKRows);
+                    if (StringUtils.isNullOrEmpty(lockKeys)) {
+                        break;
+                    }
+
+                    if (RootContext.inGlobalTransaction()) {
+                        //do as usual
+                        statementProxy.getConnectionProxy().checkLock(lockKeys);
+                    } else if (RootContext.requireGlobalLock()) {
+                        //check lock key before commit just like DML to avoid reentrant lock problem(no xid thus can
+                        // not reentrant)
+                        statementProxy.getConnectionProxy().appendLockKey(lockKeys);
+                    } else {
+                        throw new RuntimeException("Unknown situation!");
+                    }
                     break;
+                } catch (LockConflictException lce) {
+                    conn.rollback(sp);
+                    lockRetryController.sleep(lce);
                 }
-
-                if (RootContext.inGlobalTransaction()) {
-                    //do as usual
-                    statementProxy.getConnectionProxy().checkLock(lockKeys);
-                } else if (RootContext.requireGlobalLock()) {
-                    //check lock key before commit just like DML to avoid reentrant lock problem(no xid thus can
-                    // not reentrant)
-                    statementProxy.getConnectionProxy().appendLockKey(lockKeys);
-                } else {
-                    throw new RuntimeException("Unknown situation!");
-                }
-
-                break;
             }
-        } catch (LockConflictException lce) {
-            conn.rollback(sp);
-            lockRetryController.sleep(lce);
         } finally {
             if (sp != null) {
                 conn.releaseSavepoint(sp);
