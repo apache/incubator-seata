@@ -73,8 +73,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private static final ConcurrentMap<String, List<IZkChildListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
 
     private static final int REGISTERED_PATH_SET_SIZE = 1;
-//    private static final Set<String> REGISTERED_PATH_SET = Collections.synchronizedSet(new HashSet<>(REGISTERED_PATH_SET_SIZE));
-    private static final Set<ServerRegistration> ServerRegistration_SET = Collections.synchronizedSet(new HashSet<>(REGISTERED_PATH_SET_SIZE));
+    private static final Set<ServerRegistration> SERVER_REGISTRATION_SET = Collections.synchronizedSet(new HashSet<>(REGISTERED_PATH_SET_SIZE));
 
 
     private ZookeeperRegisterServiceImpl() {
@@ -103,7 +102,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         }
         createParentIfNotPresent(path);
         getClientInstance().createEphemeral(path, serverRegistration);
-        ServerRegistration_SET.add(serverRegistration);
+        SERVER_REGISTRATION_SET.add(serverRegistration);
         return true;
     }
 
@@ -125,7 +124,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     public void unregister(ServerRegistration registration) throws Exception {
         String path = getRegisterPathByPath(registration.getAddress());
         getClientInstance().delete(path);
-        ServerRegistration_SET.remove(registration);
+        SERVER_REGISTRATION_SET.remove(registration);
     }
 
     @Override
@@ -244,8 +243,8 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
     private void recover() throws Exception {
         // recover Server
-        if (!ServerRegistration_SET.isEmpty()) {
-            for (ServerRegistration registration : ServerRegistration_SET) {
+        if (!SERVER_REGISTRATION_SET.isEmpty()) {
+            for (ServerRegistration registration : SERVER_REGISTRATION_SET) {
                 doRegister(registration);
             }
         }

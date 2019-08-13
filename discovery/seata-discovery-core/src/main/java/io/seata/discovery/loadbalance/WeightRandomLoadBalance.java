@@ -27,7 +27,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * @author mawerss1@gmail.com
  */
 @LoadLevel(name = "WeightRandomLoadBalance", order = 3)
-public class WeightRandomLoadBalance extends AbstractLoadBalance{
+public class WeightRandomLoadBalance extends AbstractLoadBalance {
 
     @Override
     protected <T extends ServerRegistration> T doSelect(List<T> invokers) {

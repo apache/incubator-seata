@@ -51,7 +51,7 @@ public class WeightRoundRobinLoadBalance extends AbstractLoadBalance {
                     pools.add((T)registration);
                 }
             }
-        }else{
+        } else {
             for (int i = 0; i < invokers.size(); i++) {
                 for (int j = 0; j < invokers.get(i).getWeight(); j++) {
                     pools.add(invokers.get(i));
