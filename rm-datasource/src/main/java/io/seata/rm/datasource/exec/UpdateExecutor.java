@@ -23,15 +23,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-import io.seata.common.util.CollectionUtils;
-import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLUpdateRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -59,84 +56,31 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     @Override
     protected TableRecords beforeImage() throws SQLException {
 
-        ArrayList<List<Object>> paramAppenders = new ArrayList<>();
+        ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         TableMeta tmeta = getTableMeta();
-        String selectSQL = buildBeforeImageSQL(tmeta, paramAppenders);
-        TableRecords beforeImage = null;
-        PreparedStatement ps = null;
-        Statement st = null;
-        ResultSet rs = null;
-        try {
-            if (paramAppenders.isEmpty()) {
-                st = statementProxy.getConnection().createStatement();
-                rs = st.executeQuery(selectSQL);
-            } else {
-                if (paramAppenders.size() == 1) {
-                    ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                    List<Object> paramAppender = paramAppenders.get(0);
-                    for (int i = 0; i < paramAppender.size(); i++) {
-                        ps.setObject(i + 1, paramAppender.get(i));
-                    }
-                } else {
-                    ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                    List<Object> paramAppender = null;
-                    for (int i = 0; i < paramAppenders.size(); i++) {
-                        paramAppender = paramAppenders.get(i);
-                        for (int j = 0; j < paramAppender.size(); j++) {
-                            ps.setObject(i * paramAppender.size() + j + 1, paramAppender.get(j));
-                        }
-                    }
-                }
-                rs = ps.executeQuery();
-            }
-            beforeImage = TableRecords.buildRecords(tmeta, rs);
-
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (st != null) {
-                st.close();
-            }
-            if (ps != null) {
-                ps.close();
-            }
-        }
-        return beforeImage;
+        String selectSQL = buildBeforeImageSQL(tmeta, paramAppenderList);
+        return buildTableRecords(tmeta, selectSQL, paramAppenderList);
     }
 
-    private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenders) {
+    private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
-        StringBuilder selectSQLPrefix = new StringBuilder("SELECT ");
+        StringBuffer prefix = new StringBuffer("SELECT ");
         if (!tableMeta.containsPK(updateColumns)) {
-            selectSQLPrefix.append(getColumnNameInSQL(tableMeta.getPkName()) + ", ");
+            prefix.append(getColumnNameInSQL(tableMeta.getPkName()) + ", ");
         }
-        String prefix = selectSQLPrefix.toString();
-        String whereCondition = null;
-        if (statementProxy instanceof ParametersHolder) {
-            whereCondition = recognizer.getWhereCondition((ParametersHolder) statementProxy, paramAppenders);
-        } else {
-            whereCondition = recognizer.getWhereCondition();
-        }
-        StringBuilder selectSQLSuffix = new StringBuilder(" FROM " + getFromTableInSQL());
+        StringBuffer suffix = new StringBuffer(" FROM " + getFromTableInSQL());
+        String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
         if (StringUtils.isNotBlank(whereCondition)) {
-            if (CollectionUtils.isNotEmpty(paramAppenders) && paramAppenders.size() > 1) {
-                selectSQLSuffix.append(" WHERE ").append(" ( ").append(whereCondition).append(" ) ");
-                for (int i = 1; i < paramAppenders.size(); i++) {
-                    selectSQLSuffix.append(" or ( ").append(whereCondition).append(" ) ");
-                }
-            } else {
-                selectSQLSuffix.append(" WHERE " + whereCondition);
-            }
+            suffix.append(" WHERE " + whereCondition);
         }
-        selectSQLSuffix.append(" FOR UPDATE");
-        String suffix = selectSQLSuffix.toString();
-        StringJoiner selectSQLJoin = new StringJoiner(", ", prefix, suffix);
+        suffix.append(" FOR UPDATE");
+        StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
         for (String updateColumn : updateColumns) {
             selectSQLJoin.add(updateColumn);
         }
-        return selectSQLJoin.toString();
+        String selectSQL = selectSQLJoin.toString();
+        return buildParamsAppenderSQL(selectSQL, paramAppenderList);
     }
 
     @Override
@@ -173,17 +117,17 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     private String buildAfterImageSQL(TableMeta tableMeta, TableRecords beforeImage) throws SQLException {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
-        StringBuilder selectSQLPrefix = new StringBuilder("SELECT ");
+        StringBuffer prefix = new StringBuffer("SELECT ");
         if (!tableMeta.containsPK(updateColumns)) {
             // PK should be included.
-            selectSQLPrefix.append(getColumnNameInSQL(tableMeta.getPkName()) + ", ");
+            prefix.append(getColumnNameInSQL(tableMeta.getPkName()) + ", ");
         }
-        String prefix = selectSQLPrefix.toString();
         String suffix = " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(beforeImage.pkRows());
-        StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix, suffix);
+        StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);
         for (String column : updateColumns) {
             selectSQLJoiner.add(column);
         }
         return selectSQLJoiner.toString();
     }
+
 }
