@@ -47,14 +47,7 @@ public class WeightRandomLoadBalanceTest extends LoadBalanceTest{
             Map.Entry<ServerRegistration, AtomicLong> en = iterator.next();
             ServerRegistration key = en.getKey();
             Long count = selectedCounter.get(key).get();
-            Integer weight = key.getWeight();
-            System.out.println("count:" + count + "  Weight :" + weight);
-            // 允许误差在10%以内
-            float percert = (float)count / (float)runNum;
-            float weightPer = (float)weight / 100f;
             totalRunNum += count;
-
-//            Assertions.assertTrue(percert > (weightPer - 0.2 )&& percert < (weightPer + 0.2));
         }
         Assertions.assertEquals(totalRunNum,runNum);
     }
