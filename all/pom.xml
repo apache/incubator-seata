@@ -217,6 +217,11 @@
             <artifactId>seata-codec-protobuf</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-codec-kryo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- spring  -->
         <dependency>
