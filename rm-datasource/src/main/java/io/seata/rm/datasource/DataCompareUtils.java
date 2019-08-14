@@ -72,13 +72,10 @@ public class DataCompareUtils {
                             if (StringUtils.equals(currentSerializer, FastjsonUndoLogParser.NAME)) {
                                 convertType(f0, f1);
                             }
-                            boolean result = f0.getValue().equals(f1.getValue());
-                            if (!result) {
-                                result = Objects.deepEquals(f0.getValue(), f1.getValue());
-                                if(!result){
-                                    if (LOGGER.isInfoEnabled()) {
-                                        LOGGER.info("Field not equals, name {}, old value {}, new value {}", f0.getName(), f0.getValue(), f1.getValue());
-                                    }
+                            boolean result = Objects.deepEquals(f0.getValue(), f1.getValue());
+                            if(!result){
+                                if (LOGGER.isInfoEnabled()) {
+                                    LOGGER.info("Field not equals, name {}, old value {}, new value {}", f0.getName(), f0.getValue(), f1.getValue());
                                 }
                             }
                             return result;
