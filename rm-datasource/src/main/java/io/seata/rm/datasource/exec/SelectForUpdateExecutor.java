@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-
 import java.sql.Connection;
 import java.sql.Savepoint;
 import java.sql.Statement;
@@ -64,13 +63,14 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                 conn.setAutoCommit(false);
             }
             sp = conn.setSavepoint();
-            // #870
-            // execute return Boolean
-            // executeQuery return ResultSet
-            rs = statementCallback.execute(statementProxy.getTargetStatement(), args);
 
             while (true) {
                 try {
+                    // #870
+                    // execute return Boolean
+                    // executeQuery return ResultSet
+                    rs = statementCallback.execute(statementProxy.getTargetStatement(), args);
+
                     // Try to get global lock of those rows selected
                     TableRecords selectPKRows = buildTableRecords(getTableMeta(), selectPKSQL, paramAppenderList);
                     String lockKeys = buildLockKey(selectPKRows);
@@ -106,15 +106,15 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
     }
 
     private String buildSelectSQL(ArrayList<List<Object>> paramAppenderList){
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) sqlRecognizer;
-        StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
+        StringBuilder selectSQLAppender = new StringBuilder("SELECT ");
         selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
         selectSQLAppender.append(" FROM " + getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
-        if (!StringUtils.isNullOrEmpty(whereCondition)) {
+        if (StringUtils.isNotBlank(whereCondition)) {
             selectSQLAppender.append(" WHERE " + whereCondition);
         }
         selectSQLAppender.append(" FOR UPDATE");
-        return buildParamsAppenderSQL(selectSQLAppender.toString(), paramAppenderList);
+        return selectSQLAppender.toString();
     }
 }
