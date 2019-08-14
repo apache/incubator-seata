@@ -18,13 +18,12 @@ package io.seata.rm.datasource.sql.druid.oracle;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
-import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
+import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLSelectRecognizer;
@@ -69,7 +68,7 @@ public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements S
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = super.createMySqlOutputVisitor(parametersHolder, paramAppenderList, sb);
+        OracleOutputVisitor visitor = super.createOracleOutputVisitor(parametersHolder, paramAppenderList, sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
     }
@@ -82,7 +81,7 @@ public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements S
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
+        OracleOutputVisitor visitor = new OracleOutputVisitor(sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
     }
@@ -111,7 +110,7 @@ public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements S
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLTableSource tableSource = selectQueryBlock.getFrom();
         StringBuffer sb = new StringBuffer();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
+        OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
             @Override
             public boolean visit(SQLExprTableSource x) {
