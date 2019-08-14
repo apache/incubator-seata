@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.sql.JDBCType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,6 +51,10 @@ public class DataCompareUtilsTest {
         Field field11 = new Field("Name", 0, null);
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field0, field10));
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field4, field11));
+
+        Field field12 = new Field("information", JDBCType.BLOB.getVendorTypeNumber(), new String("hello world").getBytes());
+        Field field13 = new Field("information", JDBCType.BLOB.getVendorTypeNumber(), new String("hello world").getBytes());
+        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field12, field13));
     }
 
     @Test
