@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-
 import java.sql.Connection;
 import java.sql.Savepoint;
 import java.sql.Statement;
@@ -107,15 +106,15 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
     }
 
     private String buildSelectSQL(ArrayList<List<Object>> paramAppenderList){
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) sqlRecognizer;
-        StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
+        StringBuilder selectSQLAppender = new StringBuilder("SELECT ");
         selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
         selectSQLAppender.append(" FROM " + getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
-        if (!StringUtils.isNullOrEmpty(whereCondition)) {
+        if (StringUtils.isNotBlank(whereCondition)) {
             selectSQLAppender.append(" WHERE " + whereCondition);
         }
         selectSQLAppender.append(" FOR UPDATE");
-        return buildParamsAppenderSQL(selectSQLAppender.toString(), paramAppenderList);
+        return selectSQLAppender.toString();
     }
 }
