@@ -13,25 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.compressor;
+package io.seata.compressor.gzip;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 /**
  * @author jsbxyyx
  */
-public interface Compressor {
+public class GzipCompressorTest {
 
-    /**
-     * compress byte[] to byte[].
-     * @param bytes the bytes
-     * @return the byte[]
-     */
-    byte[] compress(byte[] bytes);
-
-    /**
-     * decompress byte[] to byte[].
-     * @param bytes the bytes
-     * @return the byte[]
-     */
-    byte[] decompress(byte[] bytes);
-
+    @Test
+    public void testCompressAndDecompress() {
+        GzipCompressor compressor = new GzipCompressor();
+        byte[] bytes = "aa".getBytes();
+        bytes = compressor.compress(bytes);
+        bytes = compressor.decompress(bytes);
+        Assertions.assertEquals(new String(bytes), "aa");
+    }
 }
