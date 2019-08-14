@@ -15,10 +15,11 @@
  */
 package io.seata.codec.seata.protocol.transaction;
 
+import java.nio.ByteBuffer;
+
+import io.netty.buffer.ByteBuf;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
-
-import java.nio.ByteBuffer;
 
 /**
  * The type Branch register request codec.
@@ -33,8 +34,8 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer out) {
-        BranchRegisterRequest branchRegisterRequest = (BranchRegisterRequest) t;
+    public <T> void encode(T t, ByteBuf out) {
+        BranchRegisterRequest branchRegisterRequest = (BranchRegisterRequest)t;
 
         String xid = branchRegisterRequest.getXid();
         BranchType branchType = branchRegisterRequest.getBranchType();
@@ -54,51 +55,51 @@ public class BranchRegisterRequestCodec extends AbstractTransactionRequestToTCCo
         // 1. xid
         if (xid != null) {
             byte[] bs = xid.getBytes(UTF8);
-            out.putShort((short)bs.length);
+            out.writeShort((short)bs.length);
             if (bs.length > 0) {
-                out.put(bs);
+                out.writeBytes(bs);
             }
         } else {
-            out.putShort((short)0);
+            out.writeShort((short)0);
         }
         // 2. Branch Type
-        out.put((byte)branchType.ordinal());
+        out.writeByte(branchType.ordinal());
 
         // 3. Resource Id
         if (resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
-            out.putShort((short)bs.length);
+            out.writeShort((short)bs.length);
             if (bs.length > 0) {
-                out.put(bs);
+                out.writeBytes(bs);
             }
         } else {
-            out.putShort((short)0);
+            out.writeShort((short)0);
         }
 
         // 4. Lock Key
         if (lockKey != null) {
-            out.putInt(lockKeyBytes.length);
+            out.writeInt(lockKeyBytes.length);
             if (lockKeyBytes.length > 0) {
-                out.put(lockKeyBytes);
+                out.writeBytes(lockKeyBytes);
             }
         } else {
-            out.putInt(0);
+            out.writeInt(0);
         }
 
         //5. applicationData
         if (applicationData != null) {
-            out.putInt(applicationDataBytes.length);
+            out.writeInt(applicationDataBytes.length);
             if (applicationDataBytes.length > 0) {
-                out.put(applicationDataBytes);
+                out.writeBytes(applicationDataBytes);
             }
         } else {
-            out.putInt(0);
+            out.writeInt(0);
         }
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        BranchRegisterRequest branchRegisterRequest = (BranchRegisterRequest) t;
+        BranchRegisterRequest branchRegisterRequest = (BranchRegisterRequest)t;
 
         short xidLen = in.getShort();
         if (xidLen > 0) {
