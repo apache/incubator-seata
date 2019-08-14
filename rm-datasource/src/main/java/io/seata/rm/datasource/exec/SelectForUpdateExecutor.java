@@ -63,13 +63,14 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                 conn.setAutoCommit(false);
             }
             sp = conn.setSavepoint();
-            // #870
-            // execute return Boolean
-            // executeQuery return ResultSet
-            rs = statementCallback.execute(statementProxy.getTargetStatement(), args);
 
             while (true) {
                 try {
+                    // #870
+                    // execute return Boolean
+                    // executeQuery return ResultSet
+                    rs = statementCallback.execute(statementProxy.getTargetStatement(), args);
+
                     // Try to get global lock of those rows selected
                     TableRecords selectPKRows = buildTableRecords(getTableMeta(), selectPKSQL, paramAppenderList);
                     String lockKeys = buildLockKey(selectPKRows);
