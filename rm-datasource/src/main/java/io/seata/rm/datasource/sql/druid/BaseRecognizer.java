@@ -61,18 +61,18 @@ public abstract class BaseRecognizer implements SQLRecognizer {
         return originalSQL;
     }
 
-    public MySqlOutputVisitor createMySqlOutputVisitor(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenders, final StringBuffer sb) {
+    public MySqlOutputVisitor createMySqlOutputVisitor(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList, final StringBuffer sb) {
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
 
             @Override
             public boolean visit(SQLVariantRefExpr x) {
                 if ("?".equals(x.getName())) {
                     ArrayList<Object> oneParamValues = parametersHolder.getParameters()[x.getIndex()];
-                    if (paramAppenders.size() == 0) {
-                        oneParamValues.stream().forEach(t -> paramAppenders.add(new ArrayList<>()));
+                    if (paramAppenderList.size() == 0) {
+                        oneParamValues.stream().forEach(t -> paramAppenderList.add(new ArrayList<>()));
                     }
                     for (int i = 0; i < oneParamValues.size(); i++) {
-                        paramAppenders.get(i).add(oneParamValues.get(i));
+                        paramAppenderList.get(i).add(oneParamValues.get(i));
                     }
 
                 }
