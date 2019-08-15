@@ -15,8 +15,6 @@
  */
 package io.seata.core.protocol.transaction;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.UnpooledByteBufAllocator;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.protocol.ResultCode;
 import org.junit.jupiter.api.Assertions;

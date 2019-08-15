@@ -18,6 +18,7 @@ package io.seata.rm.datasource.undo;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
+import io.seata.rm.datasource.undo.oracle.keyword.OracleKeywordChecker;
 
 /**
  * The type Keyword checker factory.
@@ -36,6 +37,8 @@ public class KeywordCheckerFactory {
     public static KeywordChecker getKeywordChecker(String dbType) {
         if (dbType.equals(JdbcConstants.MYSQL)) {
             return MySQLKeywordChecker.getInstance();
+        } else  if (dbType.equals(JdbcConstants.ORACLE)) {
+            return OracleKeywordChecker.getInstance();
         } else {
             throw new NotSupportYetException(dbType);
         }

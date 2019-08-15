@@ -16,6 +16,7 @@
 package io.seata.server.coordinator;
 
 import io.seata.core.event.EventBus;
+import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -23,7 +24,6 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.ResourceManagerInbound;
 import io.seata.server.event.EventBusManager;
-import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.LockerFactory;
 import io.seata.server.session.BranchSession;
@@ -82,6 +82,7 @@ public class DefaultCore implements Core {
                 globalSession.addBranch(branchSession);
             } catch (RuntimeException ex) {
                 branchSession.unlock();
+                LOGGER.error("Failed to add branchSession to globalSession:{}",ex.getMessage(),ex);
                 throw new TransactionException(FailedToAddBranch);
             }
             return branchSession.getBranchId();
@@ -305,7 +306,7 @@ public class DefaultCore implements Core {
                 switch (branchStatus) {
                     case PhaseTwo_Rollbacked:
                         globalSession.removeBranch(branchSession);
-                        LOGGER.error("Successfully rollbacked branch " + branchSession);
+                        LOGGER.info("Successfully rollbacked branch " + branchSession);
                         continue;
                     case PhaseTwo_RollbackFailed_Unretryable:
                         SessionHelper.endRollbackFailed(globalSession);
@@ -340,6 +341,10 @@ public class DefaultCore implements Core {
     @Override
     public GlobalStatus getStatus(String xid) throws TransactionException {
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-        return globalSession.getStatus();
+        if (null == globalSession) {
+            return GlobalStatus.Finished;
+        } else {
+            return globalSession.getStatus();
+        }
     }
 }
