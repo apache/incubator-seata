@@ -222,6 +222,15 @@ public enum MessageTypeProto
    * <code>TYPE_REG_RM_RESULT = 104;</code>
    */
   TYPE_REG_RM_RESULT(104),
+  /**
+   * <pre>
+   **
+   * The constant TYPE_UNDO_LOG_DELETE.
+   * </pre>
+   *
+   * <code>TYPE_UNDO_LOG_DELETE = 111;</code>
+   */
+  TYPE_UNDO_LOG_DELETE(111),
   UNRECOGNIZED(-1),
   ;
 
@@ -435,11 +444,20 @@ public enum MessageTypeProto
    * <code>TYPE_REG_RM_RESULT = 104;</code>
    */
   public static final int TYPE_REG_RM_RESULT_VALUE = 104;
+  /**
+   * <pre>
+   **
+   * The constant TYPE_UNDO_LOG_DELETE.
+   * </pre>
+   *
+   * <code>TYPE_UNDO_LOG_DELETE = 111;</code>
+   */
+  public static final int TYPE_UNDO_LOG_DELETE_VALUE = 111;
 
 
   public final int getNumber() {
     if (this == UNRECOGNIZED) {
-      throw new java.lang.IllegalArgumentException(
+      throw new IllegalArgumentException(
           "Can't get the number of an unknown enum value.");
     }
     return value;
@@ -448,7 +466,7 @@ public enum MessageTypeProto
   /**
    * @deprecated Use {@link #forNumber(int)} instead.
    */
-  @java.lang.Deprecated
+  @Deprecated
   public static MessageTypeProto valueOf(int value) {
     return forNumber(value);
   }
@@ -480,6 +498,7 @@ public enum MessageTypeProto
       case 102: return TYPE_REG_CLT_RESULT;
       case 103: return TYPE_REG_RM;
       case 104: return TYPE_REG_RM_RESULT;
+      case 111: return TYPE_UNDO_LOG_DELETE;
       default: return null;
     }
   }
@@ -489,7 +508,7 @@ public enum MessageTypeProto
     return internalValueMap;
   }
   private static final com.google.protobuf.Internal.EnumLiteMap<
-      MessageTypeProto> internalValueMap =
+          MessageTypeProto> internalValueMap =
         new com.google.protobuf.Internal.EnumLiteMap<MessageTypeProto>() {
           public MessageTypeProto findValueByNumber(int number) {
             return MessageTypeProto.forNumber(number);
@@ -514,7 +533,7 @@ public enum MessageTypeProto
   public static MessageTypeProto valueOf(
       com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
     if (desc.getType() != getDescriptor()) {
-      throw new java.lang.IllegalArgumentException(
+      throw new IllegalArgumentException(
         "EnumValueDescriptor is not for this type.");
     }
     if (desc.getIndex() == -1) {
