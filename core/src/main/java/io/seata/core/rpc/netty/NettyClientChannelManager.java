@@ -233,7 +233,7 @@ class NettyClientChannelManager {
                     LOGGER.error(exx.getMessage());
                 }
                 rmChannel = channels.get(serverAddress);
-                if (null == rmChannel || rmChannel.isActive()) {
+                if (null != rmChannel && rmChannel.isActive()) {
                     return rmChannel;
                 }
             }

@@ -15,12 +15,12 @@
  */
 package io.seata.codec.seata.protocol.transaction;
 
+import java.nio.ByteBuffer;
 
+import io.netty.buffer.ByteBuf;
 import io.seata.codec.seata.protocol.AbstractResultMessageCodec;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
-
-import java.nio.ByteBuffer;
 
 /**
  * The type Abstract transaction response codec.
@@ -35,21 +35,20 @@ public abstract class AbstractTransactionResponseCodec extends AbstractResultMes
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer out) {
+    public <T> void encode(T t, ByteBuf out) {
         super.encode(t, out);
 
-        AbstractTransactionResponse abstractTransactionResponse = (AbstractTransactionResponse) t;
+        AbstractTransactionResponse abstractTransactionResponse = (AbstractTransactionResponse)t;
         TransactionExceptionCode transactionExceptionCode = abstractTransactionResponse.getTransactionExceptionCode();
-        out.put((byte)transactionExceptionCode.ordinal());
+        out.writeByte(transactionExceptionCode.ordinal());
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer out) {
         super.decode(t, out);
 
-        AbstractTransactionResponse abstractTransactionResponse = (AbstractTransactionResponse) t;
+        AbstractTransactionResponse abstractTransactionResponse = (AbstractTransactionResponse)t;
         abstractTransactionResponse.setTransactionExceptionCode(TransactionExceptionCode.get(out.get()));
     }
-
 
 }

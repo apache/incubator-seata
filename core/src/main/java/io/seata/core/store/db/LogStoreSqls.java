@@ -17,12 +17,13 @@ package io.seata.core.store.db;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.core.constants.DBType;
+import io.seata.core.constants.ServerTableColumnsName;
 
 /**
  * database log store SQLs
  *
  * @author zhangsen
- * @data 2019 /4/2
+ * @date 2019 /4/2
  */
 public class LogStoreSqls {
 
@@ -43,17 +44,28 @@ public class LogStoreSqls {
 
     /**
      * The constant ALL_GLOBAL_COLUMNS.
+     * xid, transaction_id, status, application_id, transaction_service_group, transaction_name, timeout, begin_time, application_data, gmt_create, gmt_modified
      */
     public static final String ALL_GLOBAL_COLUMNS
-        = "xid, transaction_id, status, application_id, transaction_service_group, transaction_name, timeout, "
-        + "begin_time, application_data, gmt_create, gmt_modified ";
+        = ServerTableColumnsName.GLOBAL_TABLE_XID + ", " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + ", "
+        + ServerTableColumnsName.GLOBAL_TABLE_STATUS + ", " + ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID + ", "
+        + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP + ", " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME + ", "
+        + ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT + ", " + ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME + ", "
+        + ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA + ", " + ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE + ", "
+        + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED;
+
 
     /**
      * The constant ALL_BRANCH_COLUMNS.
+     * xid, transaction_id, branch_id, resource_group_id, resource_id, lock_key, branch_type, status, client_id, application_data, gmt_create, gmt_modified
      */
     protected static final String ALL_BRANCH_COLUMNS
-        = "xid, transaction_id, branch_id, resource_group_id, resource_id, lock_key, branch_type, status, client_id, "
-        + "application_data, gmt_create, gmt_modified ";
+        = ServerTableColumnsName.BRANCH_TABLE_XID + ", " + ServerTableColumnsName.BRANCH_TABLE_TRANSACTION_ID + ", "
+        + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID + ", " + ServerTableColumnsName.BRANCH_TABLE_RESOURCE_GROUP_ID + ", "
+        + ServerTableColumnsName.BRANCH_TABLE_RESOURCE_ID + ", " + ServerTableColumnsName.BRANCH_TABLE_LOCK_KEY + ", "
+        + ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE + ", " + ServerTableColumnsName.BRANCH_TABLE_STATUS + ", "
+        + ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID + ", " + ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA + ", "
+        + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + ", " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED;
 
     /**
      * The constant INSERT_GLOBAL_TRANSACTION_MYSQL.
@@ -73,50 +85,50 @@ public class LogStoreSqls {
      * The constant UPDATE_GLOBAL_TRANSACTION_STATUS_MYSQL.
      */
     public static final String UPDATE_GLOBAL_TRANSACTION_STATUS_MYSQL = "update " + GLOBAL_TABLE_PLACEHOLD
-        + " set status = ?, gmt_modified = now() where xid = ?";
+        + " set " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " = ?, " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = now() where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
      * The constant UPDATE_GLOBAL_TRANSACTION_STATUS_ORACLE.
      */
     public static final String UPDATE_GLOBAL_TRANSACTION_STATUS_ORACLE = "update " + GLOBAL_TABLE_PLACEHOLD
-        + " set status = ?, gmt_modified = sysdate where xid = ?";
+        + " set " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " = ?, " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " = sysdate where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
      * The constant DELETE_GLOBAL_TRANSACTION.
      */
-    public static final String DELETE_GLOBAL_TRANSACTION = "delete from " + GLOBAL_TABLE_PLACEHOLD + " where xid = ?";
+    public static final String DELETE_GLOBAL_TRANSACTION = "delete from " + GLOBAL_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
      * The constant QUERY_GLOBAL_TRANSACTION.
      */
     public static final String QUERY_GLOBAL_TRANSACTION = "select " + ALL_GLOBAL_COLUMNS + " from "
-        + GLOBAL_TABLE_PLACEHOLD + " where xid = ?";
+        + GLOBAL_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.GLOBAL_TABLE_XID + " = ?";
 
     /**
      * The constant QUERY_GLOBAL_TRANSACTION_ID.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_BY_ID = "select " + ALL_GLOBAL_COLUMNS + " from "
-        + GLOBAL_TABLE_PLACEHOLD + " where transaction_id = ?";
+        + GLOBAL_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " = ?";
 
     /**
      * The constant QUERY_GLOBAL_TRANSACTION_BY_STATUS.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS = "select " + ALL_GLOBAL_COLUMNS + " from "
         + GLOBAL_TABLE_PLACEHOLD +
-        " where status in (" + PRAMETER_PLACEHOLD + ") order by gmt_modified limit ?";
+        " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ") order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
     /**
      * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_MYSQL.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_MYSQL = "select " + ALL_GLOBAL_COLUMNS + " from "
-        + GLOBAL_TABLE_PLACEHOLD + " where status in (" +
-        "0, 2, 3, 4, 5, 6, 7, 8, 10 ,12, 14) order by gmt_modified limit ?";
+        + GLOBAL_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" +
+        "0, 2, 3, 4, 5, 6, 7, 8, 10 ,12, 14) order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
 
     /**
      * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_ORACLE.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_ORACLE = "select A.* from ( select "
-        + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD + " where status in (" +
-        "0, 2, 3, 4, 5, 6, 7, 8, 10 ,12, 14) order by gmt_modified ) A where ROWNUM <= ?";
+        + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" +
+        "0, 2, 3, 4, 5, 6, 7, 8, 10 ,12, 14) order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " ) A where ROWNUM <= ?";
 
     /**
      * The constant INSERT_BRANCH_TRANSACTION_MYSQL.
@@ -136,31 +148,33 @@ public class LogStoreSqls {
      * The constant UPDATE_BRANCH_TRANSACTION_STATUS_MYSQL.
      */
     public static final String UPDATE_BRANCH_TRANSACTION_STATUS_MYSQL = "update " + BRANCH_TABLE_PLACEHOLD
-        + " set status = ?, gmt_modified = now() where xid = ? and branch_id = ?";
+        + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now() where "
+        + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID + " = ?";
 
     /**
      * The constant UPDATE_BRANCH_TRANSACTION_STATUS_ORACLE.
      */
     public static final String UPDATE_BRANCH_TRANSACTION_STATUS_ORACLE = "update " + BRANCH_TABLE_PLACEHOLD
-        + " set status = ?, gmt_modified = sysdate where xid = ? and branch_id = ?";
+        + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED
+        + " = sysdate where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID + " = ?";
 
     /**
      * The constant DELETE_BRANCH_TRANSACTION_BY_BRANCH_ID.
      */
     public static final String DELETE_BRANCH_TRANSACTION_BY_BRANCH_ID = "delete from " + BRANCH_TABLE_PLACEHOLD
-        + " where xid = ? and branch_id = ?";
+        + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID + " = ?";
 
     /**
      * The constant DELETE_BRANCH_TRANSACTION_BY_XID.
      */
     public static final String DELETE_BRANCH_TRANSACTION_BY_XID = "delete from " + BRANCH_TABLE_PLACEHOLD
-        + " where xid = ?";
+        + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?";
 
     /**
      * The constant QUREY_BRANCH_TRANSACTION.
      */
     public static final String QUREY_BRANCH_TRANSACTION = "select " + ALL_BRANCH_COLUMNS + " from "
-        + BRANCH_TABLE_PLACEHOLD + " where xid = ?";
+        + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?";
 
     /**
      * Get insert global transaction sql string.

@@ -18,6 +18,9 @@ package io.seata.server;
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
 import com.beust.jcommander.ParameterException;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 
 /**
  * The type parameter parser
@@ -30,7 +33,8 @@ public class ParameterParser {
     private static final int SERVER_DEFAULT_PORT = 8091;
     private static final String SERVER_DEFAULT_BIND_IP = "0.0.0.0";
     private static final String SERVER_DEFAULT_STORE_MODE = "file";
-
+    private static final int SERVER_DEFAULT_NODE = 1;
+    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     @Parameter(names = "--help", help = true)
     private boolean help;
@@ -39,8 +43,9 @@ public class ParameterParser {
     @Parameter(names = {"--port", "-p"}, description = "The port to listen.", order = 2)
     private int port = SERVER_DEFAULT_PORT;
     @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file、db", order = 3)
-    private String storeMode = SERVER_DEFAULT_STORE_MODE;
-
+    private String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE);
+    @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3. default is 1", order = 4)
+    private int serverNode = SERVER_DEFAULT_NODE;
 
     public ParameterParser(String[] args) {
         this.init(args);
@@ -112,5 +117,13 @@ public class ParameterParser {
      */
     public boolean isHelp() {
         return help;
+    }
+
+    /**
+     * Gets server node
+     * @return server node
+     */
+    public int getServerNode() {
+        return serverNode;
     }
 }

@@ -13,27 +13,24 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.common.util;
+package io.seata.tm.api.transaction;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author Geng Zhang
- */
-class CodecUtilsTest {
+  * @author l81893521
+  * @date 2019/8/9
+  */
+public class NoRollbackRuleTest {
 
     @Test
-    public void parseHigh4Low4Bytes() throws Exception {
-        byte b = 117; // = 7*16+5
-        byte[] bs = CodecUtils.parseHigh4Low4Bytes(b);
-        Assertions.assertEquals(bs[0], 7);
-        Assertions.assertEquals(bs[1], 5);
-    }
-
-    @Test
-    public void buildHigh4Low4Bytes() throws Exception {
-        byte bs = CodecUtils.buildHigh4Low4Bytes((byte) 7, (byte) 5);
-        Assertions.assertEquals(bs, (byte) 117);
+    public void equalsTest(){
+        RollbackRule rollbackRuleByClass = new NoRollbackRule(Exception.class);
+        RollbackRule otherRollbackRuleByClass = new NoRollbackRule(Exception.class);
+        Assertions.assertEquals(rollbackRuleByClass, otherRollbackRuleByClass);
+        RollbackRule rollbackRuleByName = new NoRollbackRule(Exception.class.getName());
+        RollbackRule otherRollbackRuleByName = new NoRollbackRule(Exception.class.getName());
+        Assertions.assertEquals(rollbackRuleByName, otherRollbackRuleByName);
     }
 }
