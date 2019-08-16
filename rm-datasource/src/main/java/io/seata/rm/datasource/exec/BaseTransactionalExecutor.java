@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import com.alibaba.druid.util.JdbcConstants;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.ParametersHolder;
@@ -37,6 +39,7 @@ import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+
 /**
  * The type Base transactional executor.
  *
@@ -119,17 +122,27 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     /**
-     *  build buildWhereCondition
-     * @param recognizer the recognizer
-     * @param paramAppender the param paramAppender
+     * build buildWhereCondition
+     *
+     * @param recognizer        the recognizer
+     * @param paramAppenderList the param paramAppender list
      * @return the string
      */
-    protected String buildWhereCondition(WhereRecognizer recognizer, ArrayList<List<Object>> paramAppender) {
+    protected String buildWhereCondition(WhereRecognizer recognizer, ArrayList<List<Object>> paramAppenderList) {
         String whereCondition = null;
         if (statementProxy instanceof ParametersHolder) {
-            whereCondition = recognizer.getWhereCondition((ParametersHolder) statementProxy, paramAppender);
+            whereCondition = recognizer.getWhereCondition((ParametersHolder) statementProxy, paramAppenderList);
         } else {
             whereCondition = recognizer.getWhereCondition();
+        }
+        //process batch operation
+        if (StringUtils.isNotBlank(whereCondition) && CollectionUtils.isNotEmpty(paramAppenderList) && paramAppenderList.size() > 1) {
+            StringBuilder whereConditionSb = new StringBuilder();
+            whereConditionSb.append(" ( ").append(whereCondition).append(" ) ");
+            for (int i = 1; i < paramAppenderList.size(); i++) {
+                whereConditionSb.append(" or ( ").append(whereCondition).append(" ) ");
+            }
+            whereCondition = whereConditionSb.toString();
         }
         return whereCondition;
     }
@@ -175,7 +188,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (tableMeta != null) {
             return tableMeta;
         }
-        if(JdbcConstants.ORACLE.equalsIgnoreCase(statementProxy.getConnectionProxy().getDbType())) {
+        if (JdbcConstants.ORACLE.equalsIgnoreCase(statementProxy.getConnectionProxy().getDbType())) {
             tableMeta = TableMetaCacheOracle.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
         } else {
             tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
@@ -251,9 +264,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     /**
      * build a BeforeImage
-     * @param tableMeta the tableMeta
-     * @param selectSQL the selectSQL
-     * @param paramAppenderList the paramAppenderList
+     *
+     * @param tableMeta         the tableMeta
+     * @param selectSQL         the selectSQL
+     * @param paramAppenderList the paramAppender list
      * @return a tableRecords
      * @throws SQLException the sql exception
      */
@@ -286,22 +300,23 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
                 rs = ps.executeQuery();
             }
             tableRecords = TableRecords.buildRecords(tableMeta, rs);
-            } finally {
-                if (rs != null) {
-                    rs.close();
-                }
-                if (st != null) {
-                    st.close();
-                }
-                if (ps != null) {
-                    ps.close();
-                }
+        } finally {
+            if (rs != null) {
+                rs.close();
             }
-            return tableRecords;
+            if (st != null) {
+                st.close();
+            }
+            if (ps != null) {
+                ps.close();
+            }
         }
+        return tableRecords;
+    }
 
     /**
      * build TableRecords
+     *
      * @param pkValues the pkValues
      * @return return TableRecords;
      * @throws SQLException
@@ -336,20 +351,4 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         return afterImage;
     }
 
-    /**
-     * build buildParamsAppenderSQL
-     * @param selectSQL         the selectSQL
-     * @param paramAppenderList     the paramAppender
-     * @return select SQL
-     */
-    protected String buildParamsAppenderSQL(String selectSQL, ArrayList<List<Object>> paramAppenderList) {
-        if(!paramAppenderList.isEmpty() && paramAppenderList.size() > 1) {
-            StringBuffer stringBuffer = new StringBuffer(selectSQL);
-            for (int i = 1; i < paramAppenderList.size(); i++) {
-                stringBuffer.append(" UNION ").append(selectSQL);
-            }
-            return stringBuffer.toString();
-        }
-        return selectSQL;
-    }
 }

@@ -29,6 +29,7 @@ import io.seata.rm.datasource.sql.SQLUpdateRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -65,11 +66,11 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     private String buildBeforeImageSQL(TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
-        StringBuffer prefix = new StringBuffer("SELECT ");
+        StringBuilder prefix = new StringBuilder("SELECT ");
         if (!tableMeta.containsPK(updateColumns)) {
             prefix.append(getColumnNameInSQL(tableMeta.getPkName()) + ", ");
         }
-        StringBuffer suffix = new StringBuffer(" FROM " + getFromTableInSQL());
+        StringBuilder suffix = new StringBuilder(" FROM " + getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(" WHERE " + whereCondition);
@@ -79,8 +80,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         for (String updateColumn : updateColumns) {
             selectSQLJoin.add(updateColumn);
         }
-        String selectSQL = selectSQLJoin.toString();
-        return buildParamsAppenderSQL(selectSQL, paramAppenderList);
+        return selectSQLJoin.toString();
     }
 
     @Override
@@ -117,7 +117,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     private String buildAfterImageSQL(TableMeta tableMeta, TableRecords beforeImage) throws SQLException {
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
-        StringBuffer prefix = new StringBuffer("SELECT ");
+        StringBuilder prefix = new StringBuilder("SELECT ");
         if (!tableMeta.containsPK(updateColumns)) {
             // PK should be included.
             prefix.append(getColumnNameInSQL(tableMeta.getPkName()) + ", ");

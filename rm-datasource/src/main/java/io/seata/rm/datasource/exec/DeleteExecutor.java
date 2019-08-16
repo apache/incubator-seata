@@ -65,7 +65,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
         String whereCondition = buildWhereCondition(visitor, paramAppenderList);
-        StringBuffer suffix = new StringBuffer(" FROM " + keywordChecker.checkAndReplace(getFromTableInSQL()));
+        StringBuilder suffix = new StringBuilder(" FROM " + keywordChecker.checkAndReplace(getFromTableInSQL()));
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(" WHERE " + whereCondition);
         }
@@ -74,8 +74,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         for (String column : tableMeta.getAllColumns().keySet()) {
             selectSQLAppender.add(getColumnNameInSQL(keywordChecker.checkAndReplace(column)));
         }
-        String selectSQL = selectSQLAppender.toString();
-        return buildParamsAppenderSQL(selectSQL, paramAppenderList);
+        return selectSQLAppender.toString();
     }
 
     @Override
