@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.mock;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
@@ -106,6 +107,13 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
 
         return resultSet;
     }
+
+    @Override
+    public ResultSet executeQuery(MockStatementBase stmt, String sql) throws SQLException {
+        return super.executeQuery(stmt, sql);
+    }
+
+
 
     /**
      * customize the column metas

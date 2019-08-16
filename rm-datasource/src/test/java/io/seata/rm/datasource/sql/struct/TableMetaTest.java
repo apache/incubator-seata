@@ -17,26 +17,12 @@ package io.seata.rm.datasource.sql.struct;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.RowIdLifetime;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-
-import com.alibaba.druid.mock.MockStatementBase;
-import com.alibaba.druid.mock.handler.MockExecuteHandler;
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
 import io.seata.rm.datasource.DataSourceProxy;
-
 import io.seata.rm.datasource.mock.MockDriver;
+import io.seata.rm.datasource.mock.MockExecuteHandlerImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -73,22 +59,7 @@ public class TableMetaTest {
     public void getTableMetaTest_0() {
 
         MockDriver mockDriver = new MockDriver(columnMetas, indexMetas);
-        mockDriver.setExecuteHandler(new MockExecuteHandler() {
-            @Override
-            public ResultSet executeQuery(MockStatementBase statement, String s) throws SQLException {
-
-                com.alibaba.druid.mock.MockResultSet resultSet = new com.alibaba.druid.mock.MockResultSet(statement);
-
-                // just fetch meta from select * from `table` limit 1
-                List<ResultSetMetaDataBase.ColumnMetaData> columns = resultSet.getMockMetaData().getColumns();
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-
-                return resultSet;
-            }
-        });
+        mockDriver.setExecuteHandler(new MockExecuteHandlerImpl(1));
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
@@ -124,20 +95,7 @@ public class TableMetaTest {
     @Test
     public void refreshTest_0() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         MockDriver mockDriver = new MockDriver(columnMetas, indexMetas);
-        mockDriver.setExecuteHandler(new MockExecuteHandler() {
-            @Override
-            public ResultSet executeQuery(MockStatementBase statement, String s) throws SQLException {
-
-                com.alibaba.druid.mock.MockResultSet resultSet = new com.alibaba.druid.mock.MockResultSet(statement);
-
-                List<ResultSetMetaDataBase.ColumnMetaData> columns = resultSet.getMockMetaData().getColumns();
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-                return resultSet;
-            }
-        });
+        mockDriver.setExecuteHandler(new MockExecuteHandlerImpl(1));
 
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setUrl("jdbc:mock:xxx");

@@ -23,10 +23,10 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-import com.alibaba.druid .mock.MockStatementBase;
+import com.alibaba.druid.mock.MockStatementBase;
 
 /**
-  * @author will.zjw
+  * @author will
   * @date 2019/8/14
   */
 public class MockDatabaseMetaData implements DatabaseMetaData {
@@ -699,21 +699,6 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
         throws SQLException {
         return this.connection.getDriver().mockColumnMetaResultSet((MockStatementBase)this.connection.createStatement(), columnMetaColumnLabels);
-
-        //MockResultSet resultSet = new MockResultSet(this.connection.createStatement(), columnMetaColumnLables);
-        //
-        //List<ResultSetMetaDataBase.ColumnMetaData> columns = resultSet.getMockMetaData().getColumns();
-        //for (String columnLabel : columnMetaColumnLables) {
-        //    ResultSetMetaDataBase.ColumnMetaData column = new ResultSetMetaDataBase.ColumnMetaData();
-        //    column.setColumnName(columnLabel);
-        //    columns.add(column);
-        //}
-        //
-        //for (Object[] columnMeta : columnMetas) {
-        //    resultSet.getRows().add(columnMeta);
-        //}
-        //
-        //return resultSet;
     }
 
     @Override
@@ -770,20 +755,6 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate)
         throws SQLException {
         return this.connection.getDriver().mockIndexMetaResultSet((MockStatementBase)this.connection.createStatement(), indexMetaColumnLabels);
-        //MockResultSet resultSet = new MockResultSet(this.connection.createStatement(), indexMetaColumnLables);
-        //
-        //List<ResultSetMetaDataBase.ColumnMetaData> columns = resultSet.getMockMetaData().getColumns();
-        //for (String columnLabel : indexMetaColumnLables) {
-        //    ResultSetMetaDataBase.ColumnMetaData column = new ResultSetMetaDataBase.ColumnMetaData();
-        //    column.setColumnName(columnLabel);
-        //    columns.add(column);
-        //}
-        //
-        //for (Object[] indexMeta : indexMetas) {
-        //    resultSet.getRows().add(indexMeta);
-        //}
-        //
-        //return resultSet;
     }
 
     @Override

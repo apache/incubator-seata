@@ -21,12 +21,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author will.zjw
+ * @author will
  * @date 2019/8/14
  */
 public class MockResultSet extends com.alibaba.druid.mock.MockResultSet {
 
     private List<String> columnLabels;
+
+    public MockResultSet(Statement statement) {
+        this(statement, null);
+    }
 
     /**
      * Instantiates a new Mock result set.
@@ -36,7 +40,7 @@ public class MockResultSet extends com.alibaba.druid.mock.MockResultSet {
      */
     public MockResultSet(Statement statement, List<String> columnLabels) {
         super(statement);
-        this.columnLabels = new ArrayList<>(columnLabels);
+        this.columnLabels = columnLabels;
     }
 
     @Override
