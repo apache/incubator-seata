@@ -45,25 +45,25 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
         Field field = new Field("bigint_type", JDBCType.BIGINT.getVendorTypeNumber(), new Long(9223372036854775807L));
         byte[] bytes = mapper.writeValueAsBytes(field);
         Field sameField = mapper.readValue(bytes, Field.class);
-        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField));
+        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
 
         //big decimal type
         field = new Field("decimal_type", JDBCType.DECIMAL.getVendorTypeNumber(), new BigDecimal("55555555555555555555.55555555555555555555"));
         bytes = mapper.writeValueAsBytes(field);
         sameField = mapper.readValue(bytes, Field.class);
-        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField));
+        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
 
         //double type
         field = new Field("double_type", JDBCType.DOUBLE.getVendorTypeNumber(), 999999.999999999);
         bytes = mapper.writeValueAsBytes(field);
         sameField = mapper.readValue(bytes, Field.class);
-        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField));
+        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
 
         //timestamp type
         field = new Field("timestamp_type", JDBCType.TIMESTAMP.getVendorTypeNumber(), Timestamp.valueOf("2019-08-10 10:49:26.926554"));
         bytes = mapper.writeValueAsBytes(field);
         sameField = mapper.readValue(bytes, Field.class);
-        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField));
+        Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());
 
     }
 

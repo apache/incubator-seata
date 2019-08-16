@@ -33,9 +33,9 @@ import java.util.List;
 public abstract class BaseUndoLogParserTest extends BaseH2Test{
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-    
+
     public abstract UndoLogParser getParser();
-    
+
     @Test
     void testEncodeAndDecode() throws SQLException {
 
@@ -72,7 +72,7 @@ public abstract class BaseUndoLogParserTest extends BaseH2Test{
         logList.add(sqlUndoLog00);
         logList.add(sqlUndoLog01);
         originLog.setSqlUndoLogs(logList);
-        
+
         // start test
         byte[] bs = getParser().encode(originLog);
 
@@ -90,12 +90,12 @@ public abstract class BaseUndoLogParserTest extends BaseH2Test{
         SQLUndoLog sqlUndoLog11 = logList2.get(1);
         Assertions.assertEquals(sqlUndoLog00.getSqlType(), sqlUndoLog10.getSqlType());
         Assertions.assertEquals(sqlUndoLog00.getTableName(), sqlUndoLog10.getTableName());
-        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(sqlUndoLog00.getBeforeImage(), sqlUndoLog10.getBeforeImage()));
-        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(sqlUndoLog00.getAfterImage(), sqlUndoLog10.getAfterImage()));
+        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(sqlUndoLog00.getBeforeImage(), sqlUndoLog10.getBeforeImage()).getResult());
+        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(sqlUndoLog00.getAfterImage(), sqlUndoLog10.getAfterImage()).getResult());
         Assertions.assertEquals(sqlUndoLog01.getSqlType(), sqlUndoLog11.getSqlType());
         Assertions.assertEquals(sqlUndoLog01.getTableName(), sqlUndoLog11.getTableName());
-        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(sqlUndoLog01.getBeforeImage(), sqlUndoLog11.getBeforeImage()));
-        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(sqlUndoLog01.getAfterImage(), sqlUndoLog11.getAfterImage()));
+        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(sqlUndoLog01.getBeforeImage(), sqlUndoLog11.getBeforeImage()).getResult());
+        Assertions.assertTrue(DataCompareUtils.isRecordsEquals(sqlUndoLog01.getAfterImage(), sqlUndoLog11.getAfterImage()).getResult());
     }
 
     @Test
@@ -145,5 +145,5 @@ public abstract class BaseUndoLogParserTest extends BaseH2Test{
         long end = System.currentTimeMillis();
         LOGGER.info("elapsed time {} ms.", (end - start));
     }
-    
+
 }
