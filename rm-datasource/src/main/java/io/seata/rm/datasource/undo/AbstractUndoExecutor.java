@@ -211,13 +211,8 @@ public abstract class AbstractUndoExecutor {
                 return false;
             } else {
                 if (LOGGER.isInfoEnabled()) {
-                    //insert、delete operation
                     if (StringUtils.isNotBlank(afterEqualsCurrentResult.getErrMsg())) {
                         LOGGER.info(afterEqualsCurrentResult.getErrMsg(), afterEqualsCurrentResult.getErrMsgParams());
-                    }
-                    //update operation
-                    else if (StringUtils.isNotBlank(beforeEqualsCurrentResult.getErrMsg())) {
-                        LOGGER.info(beforeEqualsCurrentResult.getErrMsg(), beforeEqualsCurrentResult.getErrMsgParams());
                     }
                 }
                 if (LOGGER.isDebugEnabled()) {
