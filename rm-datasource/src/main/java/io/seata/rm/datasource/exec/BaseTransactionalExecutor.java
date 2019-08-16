@@ -106,13 +106,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected abstract Object doExecute(Object... args) throws Throwable;
 
     /**
-     * Build where condition by p ks string.
+     * Build where condition by pks string.
      *
      * @param pkRows the pk rows
      * @return the string
-     * @throws SQLException the sql exception
      */
-    protected String buildWhereConditionByPKs(List<Field> pkRows) throws SQLException {
+    protected String buildWhereConditionByPKs(List<Field> pkRows) {
         StringJoiner whereConditionAppender = new StringJoiner(" OR ");
         for (Field field : pkRows) {
             whereConditionAppender.add(getColumnNameInSQL(field.getName()) + " = ?");
@@ -198,12 +197,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     /**
      * prepare undo log.
-     *
      * @param beforeImage the before image
      * @param afterImage  the after image
-     * @throws SQLException the sql exception
      */
-    protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
+    protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) {
         if (beforeImage.getRows().size() == 0 && afterImage.getRows().size() == 0) {
             return;
         }

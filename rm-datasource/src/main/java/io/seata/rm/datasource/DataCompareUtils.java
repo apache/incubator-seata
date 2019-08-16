@@ -15,6 +15,18 @@
  */
 package io.seata.rm.datasource;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
+
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.sql.struct.Field;
@@ -25,15 +37,6 @@ import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.sql.Types;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * The type Data compare utils.
@@ -139,6 +142,7 @@ public class DataCompareUtils {
 
     /**
      * Is rows equals.
+     *
      * @param tableMetaData the table meta data
      * @param oldRows       the old rows
      * @param newRows       the new rows
