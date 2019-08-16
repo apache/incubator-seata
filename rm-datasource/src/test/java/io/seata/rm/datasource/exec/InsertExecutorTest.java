@@ -99,7 +99,7 @@ public class InsertExecutorTest {
         pkValues.add(PK_VALUE1);
         doReturn(pkValues).when(insertExecutor).getPkValuesByColumn();
         TableRecords tableRecords = new TableRecords();
-        doReturn(tableRecords).when(insertExecutor).getTableRecords(pkValues);
+        doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValues);
         TableRecords resultTableRecords = insertExecutor.afterImage(new TableRecords());
         Assertions.assertEquals(resultTableRecords, tableRecords);
     }
@@ -111,7 +111,7 @@ public class InsertExecutorTest {
         pkValues.add(PK_VALUE);
         doReturn(pkValues).when(insertExecutor).getPkValuesByAuto();
         TableRecords tableRecords = new TableRecords();
-        doReturn(tableRecords).when(insertExecutor).getTableRecords(pkValues);
+        doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValues);
         TableRecords resultTableRecords = insertExecutor.afterImage(new TableRecords());
         Assertions.assertEquals(resultTableRecords, tableRecords);
     }
@@ -123,7 +123,7 @@ public class InsertExecutorTest {
             List<Object> pkValues = new ArrayList<>();
             pkValues.add(PK_VALUE);
             doReturn(pkValues).when(insertExecutor).getPkValuesByAuto();
-            doReturn(null).when(insertExecutor).getTableRecords(pkValues);
+            doReturn(null).when(insertExecutor).buildTableRecords(pkValues);
             insertExecutor.afterImage(new TableRecords());
         });
     }

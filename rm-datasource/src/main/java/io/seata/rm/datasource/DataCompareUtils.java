@@ -29,7 +29,11 @@ import org.slf4j.LoggerFactory;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * The type Data compare utils.
@@ -69,8 +73,8 @@ public class DataCompareUtils {
                             if (StringUtils.equals(currentSerializer, FastjsonUndoLogParser.NAME)) {
                                 convertType(f0, f1);
                             }
-                            boolean result = f0.getValue().equals(f1.getValue());
-                            if (!result) {
+                            boolean result = Objects.deepEquals(f0.getValue(), f1.getValue());
+                            if(!result){
                                 if (LOGGER.isInfoEnabled()) {
                                     LOGGER.info("Field not equals, name {}, old value {}, new value {}", f0.getName(), f0.getValue(), f1.getValue());
                                 }
