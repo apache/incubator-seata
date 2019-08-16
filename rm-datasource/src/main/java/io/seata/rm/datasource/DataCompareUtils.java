@@ -160,7 +160,7 @@ public class DataCompareUtils {
                     return Result.buildWithParams(false, "compare row failed, rowKey {}, fieldName {}, reason [newField is null]", rowKey, fieldName);
                 }
                 Result<Boolean> oldEqualsNewFieldResult = isFieldEquals(oldField, newField);
-                if (oldEqualsNewFieldResult.getResult().equals(false)) {
+                if (!oldEqualsNewFieldResult.getResult()) {
                     return oldEqualsNewFieldResult;
                 }
             }

@@ -183,8 +183,7 @@ public abstract class AbstractUndoExecutor {
         // Compare current data with before data
         // No need undo if the before data snapshot is equivalent to the after data snapshot.
         Result<Boolean> beforeEqualsAfterResult = DataCompareUtils.isRecordsEquals(beforeRecords, afterRecords);
-        //result can not be null, use equals can let test cases find problems in the first place
-        if (beforeEqualsAfterResult.getResult().equals(true)) {
+        if (beforeEqualsAfterResult.getResult()) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Stop rollback because there is no data change " +
                     "between the before data snapshot and the after data snapshot.");
@@ -197,12 +196,12 @@ public abstract class AbstractUndoExecutor {
         TableRecords currentRecords = queryCurrentRecords(conn);
         // compare with current data and after image.
         Result<Boolean> afterEqualsCurrentResult = DataCompareUtils.isRecordsEquals(afterRecords, currentRecords);
-        if (afterEqualsCurrentResult.getResult().equals(false)) {
+        if (!afterEqualsCurrentResult.getResult()) {
 
             // If current data is not equivalent to the after data, then compare the current data with the before 
             // data, too. No need continue to undo if current data is equivalent to the before data snapshot
             Result<Boolean> beforeEqualsCurrentResult = DataCompareUtils.isRecordsEquals(beforeRecords, currentRecords);
-            if (beforeEqualsCurrentResult.getResult().equals(true)) {
+            if (beforeEqualsCurrentResult.getResult()) {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Stop rollback because there is no data change " +
                         "between the before data snapshot and the current data snapshot.");
