@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 
 
 /**
- * only support getPkValuesByColumn(getPkValuesByColumn、getPkValuesByAuto)
+ *
  *
  * @author zjinlei
  * @date 2019/07/16
@@ -87,52 +87,31 @@ public class BatchInsertExecutorTest {
     }
 
     private void mockParameters() {
-        ArrayList<Object>[] paramters = new ArrayList[15];
+        int PK_INDEX = 1;
+        ArrayList<Object>[] paramters = new ArrayList[3];
+        ArrayList arrayList0 = new ArrayList<>();
+        arrayList0.add("userId1");
+        arrayList0.add("userId2");
+        arrayList0.add("userId3");
+        arrayList0.add("userId4");
+        arrayList0.add("userId5");
         ArrayList arrayList1 = new ArrayList<>();
-        arrayList1.add("userId1");
+        arrayList1.add(PK_VALUES.get(0));
+        arrayList1.add(PK_VALUES.get(1));
+        arrayList1.add(PK_VALUES.get(2));
+        arrayList1.add(PK_VALUES.get(3));
+        arrayList1.add(PK_VALUES.get(4));
         ArrayList arrayList2 = new ArrayList<>();
-        arrayList2.add(100000001);
-        ArrayList arrayList3 = new ArrayList<>();
-        arrayList3.add("userName1");
-        ArrayList arrayList4 = new ArrayList<>();
-        arrayList4.add("userId2");
-        ArrayList arrayList5 = new ArrayList<>();
-        arrayList5.add(100000002);
-        ArrayList arrayList6 = new ArrayList<>();
-        arrayList6.add("userName2");
-        ArrayList arrayList7 = new ArrayList<>();
-        arrayList7.add("userId3");
-        ArrayList arrayList8 = new ArrayList<>();
-        arrayList8.add(100000003);
-        ArrayList arrayList9 = new ArrayList<>();
-        arrayList9.add("userName3");
-        ArrayList arrayList10 = new ArrayList<>();
-        arrayList10.add("userId4");
-        ArrayList arrayList11 = new ArrayList<>();
-        arrayList11.add(100000004);
-        ArrayList arrayList12 = new ArrayList<>();
-        arrayList12.add("userName4");
-        ArrayList arrayList13 = new ArrayList<>();
-        arrayList13.add("userId5");
-        ArrayList arrayList14 = new ArrayList<>();
-        arrayList14.add(100000005);
-        ArrayList arrayList15 = new ArrayList<>();
-        arrayList15.add("userName5");
-        paramters[0] = arrayList1;
-        paramters[1] = arrayList2;
-        paramters[2] = arrayList3;
-        paramters[3] = arrayList4;
-        paramters[4] = arrayList5;
-        paramters[5] = arrayList6;
-        paramters[6] = arrayList7;
-        paramters[7] = arrayList8;
-        paramters[8] = arrayList9;
-        paramters[9] = arrayList10;
-        paramters[10] = arrayList11;
-        paramters[11] = arrayList12;
-        paramters[12] = arrayList13;
-        paramters[13] = arrayList14;
-        paramters[14] = arrayList15;
+        arrayList2.add("userName1");
+        arrayList2.add("userName2");
+        arrayList2.add("userName3");
+        arrayList2.add("userName4");
+        arrayList2.add("userName5");
+
+        paramters[0] = arrayList0;
+        paramters[1] = arrayList1;
+        paramters[2] = arrayList2;
         when(statementProxy.getParameters()).thenReturn(paramters);
+        when(statementProxy.getParamsByIndex(PK_INDEX)).thenReturn(arrayList1);
     }
 }
