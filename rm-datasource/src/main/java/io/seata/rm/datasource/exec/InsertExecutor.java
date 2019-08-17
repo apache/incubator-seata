@@ -95,25 +95,29 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         List<Object> pkValues = null;
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
-            ArrayList<Object>[] paramters = preparedStatementProxy.getParameters();
             int insertColumnsSize = insertColumns.size();
-            int cycleNums = paramters.length / insertColumnsSize;
-            List<Integer> pkIndexs = new ArrayList<>(cycleNums);
-            int firstPkIndex = 0;
-            for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
+            int pkIndex = 0;
+            for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
                 if (insertColumns.get(paramIdx).equalsIgnoreCase(pk)) {
-                    firstPkIndex = paramIdx;
+                    pkIndex = paramIdx;
                     break;
                 }
             }
-            for (int i = 0; i < cycleNums; i++) {
-                pkIndexs.add(insertColumnsSize * i + firstPkIndex);
-            }
-            if (pkIndexs.size() == 1) {
-                //adapter test case
-                pkValues = preparedStatementProxy.getParamsByIndex(pkIndexs.get(0));
+            int insertParamsSize = preparedStatementProxy.getParameters().length;
+            //all parameters are Prepared Statements
+            if (insertColumnsSize == insertParamsSize) {
+                pkValues = preparedStatementProxy.getParamsByIndex(pkIndex);
             } else {
-                pkValues = pkIndexs.stream().map(pkIndex -> paramters[pkIndex].get(0)).collect(Collectors.toList());
+                //some parameters are Prepared Statements: values (1, 100, ?)
+                // or all parameters are Immediate Statements
+                List<List<Object>> insertRows = recognizer.getInsertRows();
+                //pk is Prepared Statements
+                if (insertRows.get(0).get(pkIndex).equals("?")) {
+                    pkValues = preparedStatementProxy.getParamsByIndex(pkIndex);
+                } else {
+                    int finalPkIndex = pkIndex;
+                    pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
+                }
             }
         } else {
             for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
