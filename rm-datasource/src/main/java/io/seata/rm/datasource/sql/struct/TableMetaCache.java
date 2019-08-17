@@ -98,19 +98,17 @@ public class TableMetaCache {
     public static void refresh(final DataSourceProxy dataSourceProxy){
         ConcurrentMap<String, TableMeta> tableMetaMap = TABLE_META_CACHE.asMap();
         for (Entry<String, TableMeta> entry : tableMetaMap.entrySet()) {
-            try {
-                TableMeta tableMeta = fetchSchema(dataSourceProxy, entry.getValue().getTableName());
-                if (tableMeta == null){
-                    LOGGER.error("get table meta error");
+            String key = getCacheKey(dataSourceProxy, entry.getValue().getTableName());
+            if(entry.getKey().equals(key)){
+                try {
+                    TableMeta tableMeta = fetchSchema(dataSourceProxy, entry.getValue().getTableName());
+                    if (!tableMeta.equals(entry.getValue())){
+                        TABLE_META_CACHE.put(entry.getKey(), tableMeta);
+                        LOGGER.info("table meta change was found, update table meta cache automatically.");
+                    }
+                } catch (SQLException e) {
+                    LOGGER.error("get table meta error:{}", e.getMessage(), e);
                 }
-
-                String key = getCacheKey(dataSourceProxy, entry.getValue().getTableName());
-                if (entry.getKey().equals(key) && !tableMeta.equals(entry.getValue())){
-                    TABLE_META_CACHE.put(entry.getKey(), tableMeta);
-                    LOGGER.info("table meta change was found, update table meta cache automatically.");
-                }
-            } catch (SQLException e) {
-                LOGGER.error("get table meta error:{}", e.getMessage(), e);
             }
         }
     }
