@@ -66,10 +66,8 @@ public class TableMetaCache {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
-        String dataSourceKey = dataSourceProxy.getResourceId();
-
         TableMeta tmeta;
-        final String key = dataSourceKey + "." + tableName;
+        final String key = getCacheKey(dataSourceProxy, tableName);
         tmeta = TABLE_META_CACHE.get(key, mappingFunction -> {
             try {
                 return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
@@ -105,7 +103,9 @@ public class TableMetaCache {
                 if (tableMeta == null){
                     LOGGER.error("get table meta error");
                 }
-                if (!tableMeta.equals(entry.getValue())){
+
+                String key = getCacheKey(dataSourceProxy, entry.getValue().getTableName());
+                if (entry.getKey().equals(key) && !tableMeta.equals(entry.getValue())){
                     TABLE_META_CACHE.put(entry.getKey(), tableMeta);
                     LOGGER.info("table meta change was found, update table meta cache automatically.");
                 }
@@ -292,5 +292,15 @@ public class TableMetaCache {
             }
         }
         return tm;
+    }
+
+    /**
+     * generate cache key
+     * @param dataSourceProxy
+     * @param tableName
+     * @return
+     */
+    private static String getCacheKey(DataSourceProxy dataSourceProxy, String tableName){
+        return dataSourceProxy.getResourceId() + "." + tableName;
     }
 }
