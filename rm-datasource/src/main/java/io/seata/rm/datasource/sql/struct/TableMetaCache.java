@@ -125,8 +125,10 @@ public class TableMetaCache {
         try {
             conn = dataSource.getConnection();
             stmt = conn.createStatement();
-            StringBuffer sb = new StringBuffer("SELECT * FROM " + tableName + " LIMIT 1");
-            rs = stmt.executeQuery(sb.toString());
+            StringBuilder builder = new StringBuilder("SELECT * FROM ");
+            builder.append(tableName);
+            builder.append(" LIMIT 1");
+            rs = stmt.executeQuery(builder.toString());
             ResultSetMetaData rsmd = rs.getMetaData();
             DatabaseMetaData dbmd = conn.getMetaData();
 
