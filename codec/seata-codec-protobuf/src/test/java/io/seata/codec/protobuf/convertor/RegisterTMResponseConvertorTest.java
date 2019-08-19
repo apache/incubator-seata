@@ -17,7 +17,6 @@ package io.seata.codec.protobuf.convertor;
 
 import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.protocol.ResultCode;
-import io.seata.codec.protobuf.generated.RegisterTMResponseProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

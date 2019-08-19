@@ -16,7 +16,6 @@
 package io.seata.codec.protobuf.convertor;
 
 import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.codec.protobuf.generated.RegisterRMRequestProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

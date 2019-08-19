@@ -19,7 +19,6 @@ import java.util.ArrayList;
 
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergedWarpMessage;
-import io.seata.codec.protobuf.generated.MergedWarpMessageProto;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.junit.jupiter.api.Test;
 

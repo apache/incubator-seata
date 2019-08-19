@@ -15,7 +15,6 @@
  */
 package io.seata.codec.protobuf.convertor;
 
-import io.seata.codec.protobuf.generated.UndoLogDeleteRequestProto;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import org.junit.jupiter.api.Test;

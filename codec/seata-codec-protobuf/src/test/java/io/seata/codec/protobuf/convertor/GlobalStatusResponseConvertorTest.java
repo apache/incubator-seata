@@ -18,7 +18,6 @@ package io.seata.codec.protobuf.convertor;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.ResultCode;
-import io.seata.codec.protobuf.generated.GlobalStatusResponseProto;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
 import org.junit.jupiter.api.Test;
 

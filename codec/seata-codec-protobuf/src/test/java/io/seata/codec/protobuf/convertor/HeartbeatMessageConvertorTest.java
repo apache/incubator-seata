@@ -16,7 +16,6 @@
 package io.seata.codec.protobuf.convertor;
 
 import io.seata.core.protocol.HeartbeatMessage;
-import io.seata.codec.protobuf.generated.HeartbeatMessageProto;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
