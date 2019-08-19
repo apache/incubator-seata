@@ -85,7 +85,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>0.8.0-SNAPSHOT</revision>
+        <revision>0.8.1-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>

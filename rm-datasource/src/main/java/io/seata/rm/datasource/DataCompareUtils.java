@@ -17,14 +17,13 @@ package io.seata.rm.datasource;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.core.model.Result;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -32,6 +31,7 @@ import java.sql.Types;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * The type Data compare utils.
@@ -40,51 +40,42 @@ import java.util.Map;
  */
 public class DataCompareUtils {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataCompareUtils.class);
-
     /**
      * Is field equals.
      *
      * @param f0 the f0
      * @param f1 the f1
-     * @return the boolean
+     * @return the Result<Boolean>
      */
-    public static boolean isFieldEquals(Field f0, Field f1) {
+    public static Result<Boolean> isFieldEquals(Field f0, Field f1) {
         if (f0 == null) {
-            return f1 == null;
+            return Result.build(f1 == null);
         } else {
             if (f1 == null) {
-                return false;
+                return Result.build(false);
             } else {
                 if (StringUtils.equalsIgnoreCase(f0.getName(), f1.getName())
-                        && f0.getType() == f1.getType()) {
+                    && f0.getType() == f1.getType()) {
                     if (f0.getValue() == null) {
-                        return f1.getValue() == null;
+                        return Result.build(f1.getValue() == null);
                     } else {
                         if (f1.getValue() == null) {
-                            if (LOGGER.isInfoEnabled()) {
-                                LOGGER.info("Field not equals, name {}, new value is null", f0.getName());
-                            }
-                            return false;
+                            return Result.buildWithParams(false, "Field not equals, name {}, new value is null", f0.getName());
                         } else {
                             String currentSerializer = UndoLogManager.getCurrentSerializer();
                             if (StringUtils.equals(currentSerializer, FastjsonUndoLogParser.NAME)) {
                                 convertType(f0, f1);
                             }
-                            boolean result = f0.getValue().equals(f1.getValue());
-                            if (!result) {
-                                if (LOGGER.isInfoEnabled()) {
-                                    LOGGER.info("Field not equals, name {}, old value {}, new value {}", f0.getName(), f0.getValue(), f1.getValue());
-                                }
+                            boolean result = Objects.deepEquals(f0.getValue(), f1.getValue());
+                            if (result) {
+                                return Result.ok();
+                            } else {
+                                return Result.buildWithParams(false, "Field not equals, name {}, old value {}, new value {}", f0.getName(), f0.getValue(), f1.getValue());
                             }
-                            return result;
                         }
                     }
                 } else {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("Field not equals, old name {} type {}, new name {} type {}", f0.getName(), f0.getType(), f1.getName(), f1.getType());
-                    }
-                    return false;
+                    return Result.buildWithParams(false, "Field not equals, old name {} type {}, new name {} type {}", f0.getName(), f0.getType(), f1.getName(), f1.getType());
                 }
             }
         }
@@ -112,24 +103,24 @@ public class DataCompareUtils {
      *
      * @param beforeImage the before image
      * @param afterImage  the after image
-     * @return boolean
+     * @return Result<Boolean>
      */
-    public static boolean isRecordsEquals(TableRecords beforeImage, TableRecords afterImage) {
+    public static Result<Boolean> isRecordsEquals(TableRecords beforeImage, TableRecords afterImage) {
         if (beforeImage == null) {
-            return afterImage == null;
+            return Result.build(afterImage == null, null);
         } else {
             if (afterImage == null) {
-                return false;
+                return Result.build(false, null);
             }
             if (beforeImage.getTableName().equalsIgnoreCase(afterImage.getTableName())
-                    && CollectionUtils.isSizeEquals(beforeImage.getRows(), afterImage.getRows())) {
+                && CollectionUtils.isSizeEquals(beforeImage.getRows(), afterImage.getRows())) {
                 //when image is EmptyTableRecords, getTableMeta will throw an exception
                 if (CollectionUtils.isEmpty(beforeImage.getRows())) {
-                    return true;
+                    return Result.ok();
                 }
                 return compareRows(beforeImage.getTableMeta(), beforeImage.getRows(), afterImage.getRows());
             } else {
-                return false;
+                return Result.build(false, null);
             }
         }
     }
@@ -141,13 +132,16 @@ public class DataCompareUtils {
      * @param tableMetaData the table meta data
      * @param oldRows       the old rows
      * @param newRows       the new rows
-     * @return the boolean
+     * @return the Result<Boolean>
      */
-    public static boolean isRowsEquals(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows) {
-        return CollectionUtils.isSizeEquals(oldRows, newRows) && compareRows(tableMetaData, oldRows, newRows);
+    public static Result<Boolean> isRowsEquals(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows) {
+        if (!CollectionUtils.isSizeEquals(oldRows, newRows)) {
+            return Result.build(false, null);
+        }
+        return compareRows(tableMetaData, oldRows, newRows);
     }
 
-    private static boolean compareRows(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows) {
+    private static Result<Boolean> compareRows(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows) {
         // old row to map
         Map<String, Map<String, Field>> oldRowsMap = rowListToMap(oldRows, tableMetaData.getPkName());
         // new row to map
@@ -157,29 +151,21 @@ public class DataCompareUtils {
             Map<String, Field> oldRow = oldRowsMap.get(rowKey);
             Map<String, Field> newRow = newRowsMap.get(rowKey);
             if (newRow == null) {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("compare row failed, rowKey {}, reason [newRow is null]", rowKey);
-                }
-                return false;
+                return Result.buildWithParams(false, "compare row failed, rowKey {}, reason [newRow is null]", rowKey);
             }
             for (String fieldName : oldRow.keySet()) {
                 Field oldField = oldRow.get(fieldName);
                 Field newField = newRow.get(fieldName);
                 if (newField == null) {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("compare row failed, rowKey {}, fieldName {}, reason [newField is null]", rowKey, fieldName);
-                    }
-                    return false;
+                    return Result.buildWithParams(false, "compare row failed, rowKey {}, fieldName {}, reason [newField is null]", rowKey, fieldName);
                 }
-                if (!isFieldEquals(oldField, newField)) {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("compare row failed, rowKey {}, reason [Field not equals]", rowKey);
-                    }
-                    return false;
+                Result<Boolean> oldEqualsNewFieldResult = isFieldEquals(oldField, newField);
+                if (!oldEqualsNewFieldResult.getResult()) {
+                    return oldEqualsNewFieldResult;
                 }
             }
         }
-        return true;
+        return Result.ok();
     }
 
     private static Map<String, Map<String, Field>> rowListToMap(List<Row> rowList, String primaryKey) {
