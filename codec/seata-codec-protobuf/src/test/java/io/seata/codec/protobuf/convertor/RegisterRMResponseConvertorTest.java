@@ -15,6 +15,7 @@
  */
 package io.seata.codec.protobuf.convertor;
 
+import io.seata.codec.protobuf.generated.RegisterRMResponseProto;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.ResultCode;
 import org.junit.jupiter.api.Test;

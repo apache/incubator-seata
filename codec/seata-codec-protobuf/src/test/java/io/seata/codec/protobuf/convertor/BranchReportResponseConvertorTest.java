@@ -15,6 +15,7 @@
  */
 package io.seata.codec.protobuf.convertor;
 
+import io.seata.codec.protobuf.generated.BranchReportResponseProto;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.BranchReportResponse;

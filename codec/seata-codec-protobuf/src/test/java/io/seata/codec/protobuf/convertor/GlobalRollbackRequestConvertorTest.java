@@ -15,6 +15,7 @@
  */
 package io.seata.codec.protobuf.convertor;
 
+import io.seata.codec.protobuf.generated.GlobalRollbackRequestProto;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import org.junit.jupiter.api.Test;
 

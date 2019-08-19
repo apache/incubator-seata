@@ -15,6 +15,7 @@
  */
 package io.seata.codec.protobuf.convertor;
 
+import io.seata.codec.protobuf.generated.BranchRollbackRequestProto;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import org.junit.jupiter.api.Test;

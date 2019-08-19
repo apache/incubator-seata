@@ -15,6 +15,7 @@
  */
 package io.seata.codec.protobuf.convertor;
 
+import io.seata.codec.protobuf.generated.GlobalLockQueryRequestProto;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import org.junit.jupiter.api.Test;

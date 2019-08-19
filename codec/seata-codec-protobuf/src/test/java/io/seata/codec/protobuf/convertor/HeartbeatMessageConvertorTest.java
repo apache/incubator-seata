@@ -15,6 +15,7 @@
  */
 package io.seata.codec.protobuf.convertor;
 
+import io.seata.codec.protobuf.generated.HeartbeatMessageProto;
 import io.seata.core.protocol.HeartbeatMessage;
 import org.junit.jupiter.api.Test;
 
