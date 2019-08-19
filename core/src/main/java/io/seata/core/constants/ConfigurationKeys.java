@@ -264,4 +264,10 @@ public class ConfigurationKeys {
      * The constant TRANSACTION_UNDO_LOG_DEFAULT_TABLE.
      */
     public static final String TRANSACTION_UNDO_LOG_DEFAULT_TABLE  = "undo_log";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_DEFAULT_TABLE.
+     */
+    public static final String TRANSACTION_TABLE_META_CHECK_ENABLE  = TRANSACTION_PREFIX + "table.meta.check.enable";
+
 }
