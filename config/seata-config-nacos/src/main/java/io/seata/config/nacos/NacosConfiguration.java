@@ -86,7 +86,6 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
             value = configService.getConfig(dataId, SEATA_GROUP, timeoutMills);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
-            value = defaultValue;
         }
         return value == null ? defaultValue : value;
     }
