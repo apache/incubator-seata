@@ -285,6 +285,7 @@
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>${protobuf-maven-plugin.version}</version>
                 <configuration>
+                    <protoSourceRoot>${project.basedir}/src/main/resources/protobuf/io/seata/protocol/transcation/</protoSourceRoot>
                     <protocArtifact>
                         com.google.protobuf:protoc:3.3.0:exe:${os.detected.classifier}
                     </protocArtifact>
