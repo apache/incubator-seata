@@ -93,7 +93,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
             public String call() {
                 String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
                 String value = zkClient.readData(path);
-                return StringUtils.isNotBlank(value) ? value : defaultValue;
+                return StringUtils.isNullOrEmpty(value) ? defaultValue : value;
             }
         });
         CONFIG_EXECUTOR.execute(future);
