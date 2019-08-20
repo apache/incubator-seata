@@ -48,6 +48,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InsertExecutor.class);
     protected static final String ERR_SQL_STATE = "S1009";
+    private static final String QUESTION_MARK = "?";
 
     /**
      * Instantiates a new Insert executor.
@@ -96,25 +97,34 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
             int insertColumnsSize = insertColumns.size();
-            int pkIndex = 0;
+            int firstPkIndex = 0;
             for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
                 if (insertColumns.get(paramIdx).equalsIgnoreCase(pk)) {
-                    pkIndex = paramIdx;
+                    firstPkIndex = paramIdx;
                     break;
                 }
             }
-            //all parameters are Prepared Statements
-            if (insertColumnsSize == preparedStatementProxy.getParameters().length) {
-                pkValues = preparedStatementProxy.getParamsByIndex(pkIndex);
-            } else {
-                //some parameters are Prepared Statements: (1, 100, ?) or (?, 100, ?)
-                // or all parameters are Immediate Statements
-                List<List<Object>> insertRows = recognizer.getInsertRows();
-                //pk is Prepared Statements
-                if (insertRows.get(0).get(pkIndex).equals("?")) {
-                    pkValues = preparedStatementProxy.getParamsByIndex(pkIndex);
+            List<List<Object>> insertRows = recognizer.getInsertRows();
+            int insertRowsLength = insertRows.size();
+            Object firstPkValue = insertRows.get(0).get(firstPkIndex);
+            if (insertRowsLength == 1) {
+                if (firstPkValue.equals(QUESTION_MARK)) {
+                    pkValues = preparedStatementProxy.getParamsByIndex(firstPkIndex);
                 } else {
-                    int finalPkIndex = pkIndex;
+                    pkValues.add(firstPkValue);
+                }
+            } else {
+                if (firstPkValue.equals(QUESTION_MARK)) {
+                    Long questionMarkNumOfOneRow = insertRows.get(0).stream().filter(value -> value.equals(QUESTION_MARK)).count();
+                    List<Integer> pkIndexList = new ArrayList<>();
+                    ArrayList<Object>[] paramterList = preparedStatementProxy.getParameters();
+                    for (int i = 0; i < insertRowsLength; i++) {
+                        pkIndexList.add(questionMarkNumOfOneRow.intValue() * i + firstPkIndex);
+
+                    }
+                    pkValues = pkIndexList.stream().map(pkIndex -> paramterList[pkIndex].get(0)).collect(Collectors.toList());
+                } else {
+                    int finalPkIndex = firstPkIndex;
                     pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
                 }
             }

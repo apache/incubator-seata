@@ -15,6 +15,15 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.PreparedStatementProxy;
@@ -28,15 +37,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -318,6 +318,11 @@ public class InsertExecutorTest {
         paramters[0] = arrayList1;
         paramters[1] = arrayList2;
         paramters[2] = arrayList3;
+
+        List<List<Object>> insertRows = new ArrayList<>();
+        insertRows.add(Arrays.asList("?", "?", "?"));
+
         when(statementProxy.getParameters()).thenReturn(paramters);
+        when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
     }
 }
