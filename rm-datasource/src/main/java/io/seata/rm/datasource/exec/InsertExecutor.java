@@ -137,12 +137,10 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                         return pkValues;
                     }
                     pkValues = preparedStatementProxy.getParamsByIndex(pkIndex);
-                    return pkValues;
+                } else {
+                    int finalPkIndex = pkIndex;
+                    pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
                 }
-
-                int finalPkIndex = pkIndex;
-                pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
-                return pkValues;
             }
         } else {
             for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
