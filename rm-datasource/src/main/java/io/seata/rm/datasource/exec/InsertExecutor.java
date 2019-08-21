@@ -106,16 +106,43 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
             List<List<Object>> insertRows = recognizer.getInsertRows();
             if (insertRows != null && !insertRows.isEmpty()) {
-                Object pkValue = insertRows.get(0).get(pkIndex);
-                if (pkValue instanceof Null) {
-                    pkValues = getPkValuesByAuto();
-                } else if ("?".equals(pkValue)) {
-                    // pk is Prepared Statements
-                    pkValues = preparedStatementProxy.getParamsByIndex(pkIndex);
-                } else {
-                    int finalPkIndex = pkIndex;
-                    pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
+                int rowSize = insertRows.size();
+                boolean hasNull = false;
+                boolean hasPlaceholder = false;
+                for (List<Object> row : insertRows) {
+                    Object pkValue = row.get(pkIndex);
+                    if (pkValue instanceof Null) {
+                        hasNull = true;
+                        continue;
+                    }
+                    if ("?".equals(pkValue)) {
+                        hasPlaceholder = true;
+                        continue;
+                    }
                 }
+                if (hasNull) {
+                    pkValues = getPkValuesByAuto();
+                    return pkValues;
+                }
+
+                if (hasPlaceholder) {
+                    ArrayList<Object>[] parameters = preparedStatementProxy.getParameters();
+                    if (parameters.length % rowSize == 0 && rowSize != 1) {
+                        int placeholderNum = parameters.length / rowSize;
+                        pkValues = new ArrayList<>(rowSize);
+                        for (int i = 0; i < rowSize; i++) {
+                            List<Object> paramsByIndex = preparedStatementProxy.getParamsByIndex(placeholderNum * i + pkIndex);
+                            pkValues.add(paramsByIndex.get(0));
+                        }
+                        return pkValues;
+                    }
+                    pkValues = preparedStatementProxy.getParamsByIndex(pkIndex);
+                    return pkValues;
+                }
+
+                int finalPkIndex = pkIndex;
+                pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
+                return pkValues;
             }
         } else {
             for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
@@ -138,7 +165,6 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         return pkValues;
     }
-
 
     protected List<Object> getPkValuesByAuto() throws SQLException {
         // PK is just auto generated

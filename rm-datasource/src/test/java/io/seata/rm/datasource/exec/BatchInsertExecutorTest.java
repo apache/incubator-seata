@@ -69,7 +69,6 @@ public class BatchInsertExecutorTest {
     @Test
     public void testGetPkValuesByColumn() throws SQLException {
         mockInsertColumns();
-        mockInsertRows();
         mockParameters();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
@@ -88,7 +87,33 @@ public class BatchInsertExecutorTest {
         return columns;
     }
 
-    private void mockInsertRows() {
+    private void mockParameters() {
+        // jdbc batch mode
+        // 3 is column num
+        ArrayList<Object>[] paramters = new ArrayList[3];
+        ArrayList arrayList1 = new ArrayList<>();
+        arrayList1.add("userId1");
+        arrayList1.add("userId2");
+        arrayList1.add("userId3");
+        arrayList1.add("userId4");
+        arrayList1.add("userId5");
+        ArrayList arrayList2 = new ArrayList<>();
+        arrayList2.add(100000001);
+        arrayList2.add(100000002);
+        arrayList2.add(100000003);
+        arrayList2.add(100000004);
+        arrayList2.add(100000005);
+        ArrayList arrayList3 = new ArrayList<>();
+        arrayList3.add("userName1");
+        arrayList3.add("userName2");
+        arrayList3.add("userName3");
+        arrayList3.add("userName4");
+        arrayList3.add("userName5");
+        paramters[0] = arrayList1;
+        paramters[1] = arrayList2;
+        paramters[2] = arrayList3;
+        when(statementProxy.getParameters()).thenReturn(paramters);
+
         List<List<Object>> rows = new ArrayList<>();
         List<Object> row = new ArrayList<>();
         row.add("?");
@@ -116,35 +141,13 @@ public class BatchInsertExecutorTest {
         row.add("?");
         rows.add(row);
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
-    }
 
-    private void mockParameters() {
         int pkIndex = 1;
-        // jdbc batch mode
-        // 3 is column num
-        ArrayList<Object>[] paramters = new ArrayList[3];
-        ArrayList arrayList1 = new ArrayList<>();
-        arrayList1.add("userId1");
-        arrayList1.add("userId2");
-        arrayList1.add("userId3");
-        arrayList1.add("userId4");
-        arrayList1.add("userId5");
-        ArrayList arrayList2 = new ArrayList<>();
-        arrayList2.add(100000001);
-        arrayList2.add(100000002);
-        arrayList2.add(100000003);
-        arrayList2.add(100000004);
-        arrayList2.add(100000005);
-        ArrayList arrayList3 = new ArrayList<>();
-        arrayList3.add("userName1");
-        arrayList3.add("userName2");
-        arrayList3.add("userName3");
-        arrayList3.add("userName4");
-        arrayList3.add("userName5");
-        paramters[0] = arrayList1;
-        paramters[1] = arrayList2;
-        paramters[2] = arrayList3;
-        when(statementProxy.getParameters()).thenReturn(paramters);
-        when(statementProxy.getParamsByIndex(pkIndex)).thenReturn(paramters[pkIndex]);
+        int rowSize = rows.size();
+        int placeholderNum = paramters.length / rowSize;
+        for (int i = 0; i < rowSize; i++) {
+            int index = placeholderNum * i + pkIndex;
+            when(statementProxy.getParamsByIndex(index)).thenReturn(paramters[index]);
+        }
     }
 }
