@@ -160,17 +160,11 @@ public class ChannelManager {
         }
         if (null == dbkeySet || dbkeySet.isEmpty()) { return; }
         for (String resourceId : dbkeySet) {
-            RM_CHANNELS.putIfAbsent(resourceId,
-                new ConcurrentHashMap<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>>());
-            ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>> applicationIdMap
-                = RM_CHANNELS.get(resourceId);
-            applicationIdMap.putIfAbsent(resourceManagerRequest.getApplicationId(),
-                new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>());
-            ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> clientIpMap = applicationIdMap.get(
-                resourceManagerRequest.getApplicationId());
-            String clientIp = getClientIpFromChannel(channel);
-            clientIpMap.putIfAbsent(clientIp, new ConcurrentHashMap<Integer, RpcContext>());
-            ConcurrentMap<Integer, RpcContext> portMap = clientIpMap.get(clientIp);
+            String clientIp;
+            ConcurrentMap<Integer, RpcContext> portMap = RM_CHANNELS.computeIfAbsent(resourceId, resourceIdKey -> new ConcurrentHashMap<>())
+                    .computeIfAbsent(resourceManagerRequest.getApplicationId(), applicationId -> new ConcurrentHashMap<>())
+                    .computeIfAbsent(clientIp = getClientIpFromChannel(channel), clientIpKey -> new ConcurrentHashMap<>());
+
             rpcContext.holdInResourceManagerChannels(resourceId, portMap);
             updateChannelsResource(resourceId, clientIp, resourceManagerRequest.getApplicationId());
         }
