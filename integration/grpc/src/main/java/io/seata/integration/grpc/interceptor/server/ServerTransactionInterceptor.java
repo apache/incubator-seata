@@ -15,7 +15,10 @@
  */
 package io.seata.integration.grpc.interceptor.server;
 
-import io.grpc.*;
+import io.grpc.Metadata;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.ServerInterceptor;
 import io.seata.integration.grpc.interceptor.GrpcHeaderKey;
 
 public class ServerTransactionInterceptor implements ServerInterceptor {
