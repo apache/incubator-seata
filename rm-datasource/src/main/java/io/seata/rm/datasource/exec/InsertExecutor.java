@@ -111,6 +111,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 if (firstPkValue.equals(QUESTION_MARK)) {
                     pkValues = preparedStatementProxy.getParamsByIndex(firstPkIndex);
                 } else {
+                    pkValues = new ArrayList<>();
                     pkValues.add(firstPkValue);
                 }
             } else {
