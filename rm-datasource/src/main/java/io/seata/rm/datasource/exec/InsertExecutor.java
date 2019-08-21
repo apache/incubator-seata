@@ -108,15 +108,15 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             int insertRowsLength = insertRows.size();
             Object firstPkValue = insertRows.get(0).get(firstPkIndex);
             if (insertRowsLength == 1) {
-                if (firstPkValue.equals(QUESTION_MARK)) {
+                if (QUESTION_MARK.equals(firstPkValue)) {
                     pkValues = preparedStatementProxy.getParamsByIndex(firstPkIndex);
                 } else {
                     pkValues = new ArrayList<>();
                     pkValues.add(firstPkValue);
                 }
             } else {
-                if (firstPkValue.equals(QUESTION_MARK)) {
-                    Long questionMarkNumOfOneRow = insertRows.get(0).stream().filter(value -> value.equals(QUESTION_MARK)).count();
+                if (QUESTION_MARK.equals(firstPkValue)) {
+                    Long questionMarkNumOfOneRow = insertRows.get(0).stream().filter(value -> QUESTION_MARK.equals(value)).count();
                     List<Integer> pkIndexList = new ArrayList<>();
                     ArrayList<Object>[] paramterList = preparedStatementProxy.getParameters();
                     for (int i = 0; i < insertRowsLength; i++) {
