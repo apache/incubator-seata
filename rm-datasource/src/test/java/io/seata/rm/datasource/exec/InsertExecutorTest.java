@@ -129,6 +129,7 @@ public class InsertExecutorTest {
     @Test
     public void testContainsPK() {
         List<String> insertColumns = mockInsertColumns();
+        mockInsertRows();
         mockParameters();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.containsPK(insertColumns)).thenReturn(true);
@@ -140,6 +141,7 @@ public class InsertExecutorTest {
     @Test
     public void testGetPkValuesByColumn() throws SQLException {
         mockInsertColumns();
+        mockInsertRows();
         mockParameters();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
@@ -154,6 +156,7 @@ public class InsertExecutorTest {
     public void testGetPkValuesByColumn_Exception() {
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
             mockInsertColumns();
+            mockInsertRows();
             mockParameters();
             doReturn(tableMeta).when(insertExecutor).getTableMeta();
             when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
@@ -165,6 +168,7 @@ public class InsertExecutorTest {
     @Test
     public void testGetPkValuesByColumn_PkValue_Null() throws SQLException {
         mockInsertColumns();
+        mockInsertRows();
         mockParameters();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
@@ -308,16 +312,23 @@ public class InsertExecutorTest {
     }
 
     private void mockParameters() {
-        ArrayList<Object>[] paramters = new ArrayList[3];
+        // not jdbc batch mode
+        ArrayList<Object>[] paramters = new ArrayList[1];
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add(PK_VALUE);
-        ArrayList arrayList2 = new ArrayList<>();
-        arrayList2.add("userId1");
-        ArrayList arrayList3 = new ArrayList<>();
-        arrayList3.add("userName1");
+        arrayList1.add("userId1");
+        arrayList1.add("userName1");
         paramters[0] = arrayList1;
-        paramters[1] = arrayList2;
-        paramters[2] = arrayList3;
         when(statementProxy.getParameters()).thenReturn(paramters);
+    }
+
+    private void mockInsertRows() {
+        List<List<Object>> rows = new ArrayList<>();
+        List<Object> row = new ArrayList<>();
+        row.add("?");
+        row.add("?");
+        row.add("?");
+        rows.add(row);
+        when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
     }
 }
