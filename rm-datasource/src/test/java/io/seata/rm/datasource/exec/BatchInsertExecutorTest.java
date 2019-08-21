@@ -17,6 +17,7 @@ package io.seata.rm.datasource.exec;
 
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
+import io.seata.rm.datasource.sql.struct.Null;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,6 +69,7 @@ public class BatchInsertExecutorTest {
     @Test
     public void testGetPkValuesByColumn() throws SQLException {
         mockInsertColumns();
+        mockInsertRows();
         mockParameters();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
@@ -84,6 +86,26 @@ public class BatchInsertExecutorTest {
         columns.add(USER_NAME_COLUMN);
         when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
         return columns;
+    }
+
+    private void mockInsertRows() {
+        List<List<Object>> rows = new ArrayList<>();
+        List<Object> row = new ArrayList<>();
+        row.add(Null.get());
+        rows.add(row);
+        row = new ArrayList<>();
+        row.add(Null.get());
+        rows.add(row);
+        row = new ArrayList<>();
+        row.add(Null.get());
+        rows.add(row);
+        row = new ArrayList<>();
+        row.add(Null.get());
+        rows.add(row);
+        row = new ArrayList<>();
+        row.add(Null.get());
+        rows.add(row);
+        when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
     }
 
     private void mockParameters() {

@@ -95,25 +95,27 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         List<Object> pkValues = null;
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
-            ArrayList<Object>[] paramters = preparedStatementProxy.getParameters();
             int insertColumnsSize = insertColumns.size();
-            int cycleNums = paramters.length / insertColumnsSize;
-            List<Integer> pkIndexs = new ArrayList<>(cycleNums);
-            int firstPkIndex = 0;
-            for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
+            int pkIndex = 0;
+            for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
                 if (insertColumns.get(paramIdx).equalsIgnoreCase(pk)) {
-                    firstPkIndex = paramIdx;
+                    pkIndex = paramIdx;
                     break;
                 }
             }
-            for (int i = 0; i < cycleNums; i++) {
-                pkIndexs.add(insertColumnsSize * i + firstPkIndex);
-            }
-            if (pkIndexs.size() == 1) {
-                //adapter test case
-                pkValues = preparedStatementProxy.getParamsByIndex(pkIndexs.get(0));
-            } else {
-                pkValues = pkIndexs.stream().map(pkIndex -> paramters[pkIndex].get(0)).collect(Collectors.toList());
+
+            List<List<Object>> insertRows = recognizer.getInsertRows();
+            if (insertRows != null && !insertRows.isEmpty()) {
+                Object pkValue = insertRows.get(0).get(pkIndex);
+                if (pkValue instanceof Null) {
+                    pkValues = getPkValuesByAuto();
+                } else if ("?".equals(pkValue)) {
+                    // pk is Prepared Statements
+                    pkValues = preparedStatementProxy.getParamsByIndex(pkIndex);
+                } else {
+                    int finalPkIndex = pkIndex;
+                    pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
+                }
             }
         } else {
             for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
@@ -130,8 +132,8 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (pkValues == null) {
             throw new ShouldNeverHappenException();
         }
-        //pk auto generated while column exists and value is null
-        if (pkValues.size() == 1 && pkValues.get(0) instanceof Null) {
+        // pk auto generated while column exists and value is null
+        if (pkValues.get(0) instanceof Null) {
             pkValues = getPkValuesByAuto();
         }
         return pkValues;

@@ -18,7 +18,9 @@ package io.seata.rm.datasource.sql.druid.oracle;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
+import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
+import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleInsertStatement;
@@ -27,6 +29,7 @@ import io.seata.rm.datasource.sql.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.druid.BaseRecognizer;
+import io.seata.rm.datasource.sql.struct.Null;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,8 +106,12 @@ public class OracleInsertRecognizer extends BaseRecognizer implements SQLInsertR
             List<Object> row = new ArrayList<>(exprs.size());
             rows.add(row);
             for (SQLExpr expr : valuesClause.getValues()) {
-                if (expr instanceof SQLValuableExpr) {
+                if (expr instanceof SQLNullExpr) {
+                    row.add(Null.get());
+                } else if (expr instanceof SQLValuableExpr) {
                     row.add(((SQLValuableExpr)expr).getValue());
+                } else if (expr instanceof SQLVariantRefExpr) {
+                    row.add(((SQLVariantRefExpr)expr).getName());
                 } else {
                     throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                 }
