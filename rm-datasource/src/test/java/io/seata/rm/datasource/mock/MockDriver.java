@@ -93,7 +93,7 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
         try {
             columns = resultSet.getMockMetaData().getColumns();
         } catch (SQLException e) {
-            LOGGER.error(e.getMessage());
+            LOGGER.error("Could not get columns:{}", e.getMessage(), e);
         }
         for (String columnLabel : labels) {
             ResultSetMetaDataBase.ColumnMetaData column = new ResultSetMetaDataBase.ColumnMetaData();
