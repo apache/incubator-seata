@@ -369,16 +369,6 @@
                 <version>${caffeine.version}</version>
             </dependency>
             <dependency>
-                <groupId>commons-dbcp</groupId>
-                <artifactId>commons-dbcp</artifactId>
-                <version>${commons-dbcp.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.h2database</groupId>
-                <artifactId>h2</artifactId>
-                <version>${h2.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.client.version}</version>
@@ -410,6 +400,7 @@
                 <artifactId>jackson-databind</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
+            <!--only used for seata-server-->
             <dependency>
                 <groupId>com.beust</groupId>
                 <artifactId>jcommander</artifactId>
@@ -436,6 +427,15 @@
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-stub</artifactId>
                 <version>${grpc.version}</version>
+            <dependency>
+                <groupId>commons-dbcp</groupId>
+                <artifactId>commons-dbcp</artifactId>
+                <version>${commons-dbcp.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>${h2.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
