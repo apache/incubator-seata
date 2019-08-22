@@ -264,13 +264,6 @@ public class BatchInsertExecutorTest {
         when(statementProxy.getParameters()).thenReturn(paramters);
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
         when(statementProxy.getParameters()).thenReturn(paramters);
-        int pkIndex = 1;
-        int rowSize = insertRows.size();
-        int placeholderNum = paramters.length / rowSize;
-        for (int i = 0; i < rowSize; i++) {
-            int index = placeholderNum * i + pkIndex;
-            when(statementProxy.getParamsByIndex(index)).thenReturn(paramters[index]);
-        }
     }
 
     private void mockParametersWithPkRefOfMysql() {
@@ -315,13 +308,6 @@ public class BatchInsertExecutorTest {
         when(statementProxy.getParameters()).thenReturn(paramters);
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
         when(statementProxy.getParameters()).thenReturn(paramters);
-        int pkIndex = 1;
-        int rowSize = insertRows.size();
-        int placeholderNum = paramters.length / rowSize;
-        for (int i = 0; i < rowSize; i++) {
-            int index = placeholderNum * i + pkIndex;
-            when(statementProxy.getParamsByIndex(index)).thenReturn(paramters[index]);
-        }
     }
 
     private void mockParametersWithPkUnRefOfMysql() {
@@ -476,13 +462,5 @@ public class BatchInsertExecutorTest {
         rows.add(Arrays.asList("?", "?", "?"));
         rows.add(Arrays.asList("?", "?", "?"));
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
-
-        int pkIndex = 1;
-        int rowSize = rows.size();
-        int placeholderNum = paramters.length / rowSize;
-        for (int i = 0; i < rowSize; i++) {
-            int index = placeholderNum * i + pkIndex;
-            when(statementProxy.getParamsByIndex(index)).thenReturn(paramters[index]);
-        }
     }
 }

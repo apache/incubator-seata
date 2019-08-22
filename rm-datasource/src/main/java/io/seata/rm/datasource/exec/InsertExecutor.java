@@ -113,7 +113,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                     Object pkValue = row.get(pkIndex);
                     if (pkValue instanceof Null) {
                         hasNull = true;
-                        continue;
+                        break;
                     }
                     if ("?".equals(pkValue)) {
                         hasPlaceholder = true;
@@ -130,12 +130,12 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                         int placeholderNum = parameters.length / rowSize;
                         pkValues = new ArrayList<>(rowSize);
                         for (int i = 0; i < rowSize; i++) {
-                            List<Object> paramsByIndex = preparedStatementProxy.getParamsByIndex(placeholderNum * i + pkIndex);
+                            List<Object> paramsByIndex = parameters[placeholderNum * i + pkIndex];
                             pkValues.add(paramsByIndex.get(0));
                         }
                         return pkValues;
                     }
-                    pkValues = preparedStatementProxy.getParamsByIndex(pkIndex);
+                    pkValues = parameters[pkIndex];
                 } else {
                     int finalPkIndex = pkIndex;
                     pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
