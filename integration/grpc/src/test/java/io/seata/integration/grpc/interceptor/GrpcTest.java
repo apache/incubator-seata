@@ -15,6 +15,7 @@
  */
 package io.seata.integration.grpc.interceptor;
 
+import com.google.common.util.concurrent.ListenableFuture;
 import io.grpc.ClientInterceptors;
 import io.grpc.ManagedChannel;
 import io.grpc.Metadata;
@@ -87,7 +88,8 @@ public class GrpcTest {
         ContextRpcGrpc.ContextRpcFutureStub stub = ContextRpcGrpc.newFutureStub(
                 ClientInterceptors.intercept(channel, new ClientTransactionInterceptor()));
         RootContext.bind("test_context");
-        stub.contextRpc(Request.newBuilder().setName("seata").build());
+        ListenableFuture<Response> future = stub.contextRpc(Request.newBuilder().setName("seata").build());
+        assertEquals("hello! seata", future.get().getGreet());
 
         ArgumentCaptor<Metadata> metadataCaptor = ArgumentCaptor.forClass(Metadata.class);
         verify(mockServerInterceptor).interceptCall(ArgumentMatchers.any(), metadataCaptor.capture(), ArgumentMatchers.any());
