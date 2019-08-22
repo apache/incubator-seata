@@ -15,9 +15,6 @@
  */
 package io.seata.codec.protobuf.manager;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.seata.codec.protobuf.convertor.BranchCommitRequestConvertor;
 import io.seata.codec.protobuf.convertor.BranchCommitResponseConvertor;
 import io.seata.codec.protobuf.convertor.BranchRegisterRequestConvertor;
@@ -44,13 +41,7 @@ import io.seata.codec.protobuf.convertor.RegisterRMRequestConvertor;
 import io.seata.codec.protobuf.convertor.RegisterRMResponseConvertor;
 import io.seata.codec.protobuf.convertor.RegisterTMRequestConvertor;
 import io.seata.codec.protobuf.convertor.RegisterTMResponseConvertor;
-import io.seata.core.protocol.HeartbeatMessage;
-import io.seata.core.protocol.MergeResultMessage;
-import io.seata.core.protocol.MergedWarpMessage;
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterRMResponse;
-import io.seata.core.protocol.RegisterTMRequest;
-import io.seata.core.protocol.RegisterTMResponse;
+import io.seata.codec.protobuf.convertor.UndoLogDeleteRequestConvertor;
 import io.seata.codec.protobuf.generated.BranchCommitRequestProto;
 import io.seata.codec.protobuf.generated.BranchCommitResponseProto;
 import io.seata.codec.protobuf.generated.BranchRegisterRequestProto;
@@ -76,6 +67,14 @@ import io.seata.codec.protobuf.generated.RegisterRMRequestProto;
 import io.seata.codec.protobuf.generated.RegisterRMResponseProto;
 import io.seata.codec.protobuf.generated.RegisterTMRequestProto;
 import io.seata.codec.protobuf.generated.RegisterTMResponseProto;
+import io.seata.codec.protobuf.generated.UndoLogDeleteRequestProto;
+import io.seata.core.protocol.HeartbeatMessage;
+import io.seata.core.protocol.MergeResultMessage;
+import io.seata.core.protocol.MergedWarpMessage;
+import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.core.protocol.RegisterRMResponse;
+import io.seata.core.protocol.RegisterTMRequest;
+import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
@@ -94,6 +93,10 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
+import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author leizhiyuan
@@ -147,6 +150,8 @@ public class ProtobufConvertManager {
                 new GlobalStatusRequestConvertor());
             protobufConvertManager.convertorMap.put(GlobalStatusResponse.class.getName(),
                 new GlobalStatusResponseConvertor());
+            protobufConvertManager.convertorMap.put(UndoLogDeleteRequest.class.getName(),
+                    new UndoLogDeleteRequestConvertor());
 
             protobufConvertManager.convertorMap.put(MergedWarpMessage.class.getName(),
                 new MergedWarpMessageConvertor());
@@ -198,6 +203,8 @@ public class ProtobufConvertManager {
                 GlobalStatusRequestProto.class);
             protobufConvertManager.protoClazzMap.put(GlobalStatusResponseProto.getDescriptor().getFullName(),
                 GlobalStatusResponseProto.class);
+            protobufConvertManager.protoClazzMap.put(UndoLogDeleteRequestProto.getDescriptor().getFullName(),
+                    UndoLogDeleteRequestProto.class);
 
             protobufConvertManager.protoClazzMap.put(MergedWarpMessageProto.getDescriptor().getFullName(),
                 MergedWarpMessageProto.class);
@@ -250,6 +257,8 @@ public class ProtobufConvertManager {
                 new GlobalStatusRequestConvertor());
             protobufConvertManager.reverseConvertorMap.put(GlobalStatusResponseProto.class.getName(),
                 new GlobalStatusResponseConvertor());
+            protobufConvertManager.reverseConvertorMap.put(UndoLogDeleteRequestProto.class.getName(),
+                new UndoLogDeleteRequestConvertor());
 
             protobufConvertManager.reverseConvertorMap.put(MergedWarpMessageProto.class.getName(),
                 new MergedWarpMessageConvertor());

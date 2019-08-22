@@ -75,13 +75,13 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ##### Seata Community
 
-- **Seata** :Simple Extensible Autonomous Transaction Architecture. Ant Financial joins Fescar, which make it to be a more neutral and open community for distributed transaction，and Fescar be rename to Seata.
+- **Seata** :Simple Extensible Autonomous Transaction Architecture. Ant Financial joins Fescar, which make it to be a more neutral and open community for distributed transaction，and Fescar be renamed to Seata.
 
 
 
 ## Maven dependency
 ```xml
-<seata.version>0.7.1</seata.version>
+<seata.version>0.8.0</seata.version>
 
 <dependency>
     <groupId>io.seata</groupId>

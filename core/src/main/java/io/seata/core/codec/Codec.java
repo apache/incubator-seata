@@ -19,7 +19,7 @@ package io.seata.core.codec;
  * The interface Codec.
  *
  * @author zhangsen
- * @data 2019 /5/6
+ * @date 2019 /5/6
  */
 public interface Codec {
 

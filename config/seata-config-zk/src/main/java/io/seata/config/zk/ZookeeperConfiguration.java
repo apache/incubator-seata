@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.StringUtils;
-
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -85,15 +84,16 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+        String value;
+        if ((value = getConfigFromSysPro(dataId)) != null) {
+            return value;
+        }
         FutureTask<String> future = new FutureTask<String>(new Callable<String>() {
             @Override
-            public String call() throws Exception {
+            public String call() {
                 String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
                 String value = zkClient.readData(path);
-                if (StringUtils.isNullOrEmpty(value)) {
-                    return defaultValue;
-                }
-                return value;
+                return StringUtils.isNullOrEmpty(value) ? defaultValue : value;
             }
         });
         CONFIG_EXECUTOR.execute(future);
@@ -109,7 +109,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
             @Override
-            public Boolean call() throws Exception {
+            public Boolean call() {
                 String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
                 if (!zkClient.exists(path)) {
                     zkClient.create(path, content, CreateMode.PERSISTENT);
@@ -137,7 +137,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
     public boolean removeConfig(String dataId, long timeoutMills) {
         FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
             @Override
-            public Boolean call() throws Exception {
+            public Boolean call() {
                 String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
                 return zkClient.delete(path);
             }

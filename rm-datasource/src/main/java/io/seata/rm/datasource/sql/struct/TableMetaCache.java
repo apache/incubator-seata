@@ -21,6 +21,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
@@ -64,15 +66,13 @@ public class TableMetaCache {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
-        String dataSourceKey = dataSourceProxy.getResourceId();
-
         TableMeta tmeta;
-        final String key = dataSourceKey + "." + tableName;
+        final String key = getCacheKey(dataSourceProxy, tableName);
         tmeta = TABLE_META_CACHE.get(key, mappingFunction -> {
             try {
                 return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
-                LOGGER.error("get cache error !", e);
+                LOGGER.error("get cache error:{}", e.getMessage(), e);
                 return null;
             }
         });
@@ -81,6 +81,7 @@ public class TableMetaCache {
             try {
                 tmeta = fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
+                LOGGER.error("get table meta error:{}", e.getMessage(), e);
             }
         }
 
@@ -88,6 +89,28 @@ public class TableMetaCache {
             throw new ShouldNeverHappenException(String.format("[xid:%s]get tablemeta failed", RootContext.getXID()));
         }
         return tmeta;
+    }
+
+    /**
+     * Clear the table meta cache
+     * @param dataSourceProxy
+     */
+    public static void refresh(final DataSourceProxy dataSourceProxy){
+        ConcurrentMap<String, TableMeta> tableMetaMap = TABLE_META_CACHE.asMap();
+        for (Entry<String, TableMeta> entry : tableMetaMap.entrySet()) {
+            String key = getCacheKey(dataSourceProxy, entry.getValue().getTableName());
+            if(entry.getKey().equals(key)){
+                try {
+                    TableMeta tableMeta = fetchSchema(dataSourceProxy, entry.getValue().getTableName());
+                    if (!tableMeta.equals(entry.getValue())){
+                        TABLE_META_CACHE.put(entry.getKey(), tableMeta);
+                        LOGGER.info("table meta change was found, update table meta cache automatically.");
+                    }
+                } catch (SQLException e) {
+                    LOGGER.error("get table meta error:{}", e.getMessage(), e);
+                }
+            }
+        }
     }
 
     private static TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
@@ -102,8 +125,10 @@ public class TableMetaCache {
         try {
             conn = dataSource.getConnection();
             stmt = conn.createStatement();
-            StringBuffer sb = new StringBuffer("SELECT * FROM " + tableName + " LIMIT 1");
-            rs = stmt.executeQuery(sb.toString());
+            StringBuilder builder = new StringBuilder("SELECT * FROM ");
+            builder.append(tableName);
+            builder.append(" LIMIT 1");
+            rs = stmt.executeQuery(builder.toString());
             ResultSetMetaData rsmd = rs.getMetaData();
             DatabaseMetaData dbmd = conn.getMetaData();
 
@@ -267,5 +292,15 @@ public class TableMetaCache {
             }
         }
         return tm;
+    }
+
+    /**
+     * generate cache key
+     * @param dataSourceProxy
+     * @param tableName
+     * @return
+     */
+    private static String getCacheKey(DataSourceProxy dataSourceProxy, String tableName){
+        return dataSourceProxy.getResourceId() + "." + tableName;
     }
 }
