@@ -97,6 +97,10 @@ public class ConfigurationKeys {
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_PREFIX + "report.retry.count";
+    /**
+     * The constant CLIENT_TABLE_META_CHECK_ENABLE.
+     */
+    public static final String CLIENT_TABLE_META_CHECK_ENABLE  = CLIENT_PREFIX + "table.meta.check.enable";
 
 
     /**
@@ -264,10 +268,5 @@ public class ConfigurationKeys {
      * The constant TRANSACTION_UNDO_LOG_DEFAULT_TABLE.
      */
     public static final String TRANSACTION_UNDO_LOG_DEFAULT_TABLE  = "undo_log";
-
-    /**
-     * The constant TRANSACTION_UNDO_LOG_DEFAULT_TABLE.
-     */
-    public static final String TRANSACTION_TABLE_META_CHECK_ENABLE  = TRANSACTION_PREFIX + "table.meta.check.enable";
 
 }

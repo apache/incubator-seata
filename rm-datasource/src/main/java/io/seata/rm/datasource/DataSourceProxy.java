@@ -52,7 +52,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     /**
      * Enable the table meta checker
      */
-    private static boolean ENABLE_TABLE_META_CHECKER = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.TRANSACTION_TABLE_META_CHECK_ENABLE, true);
+    private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, true);
 
     /**
      * Table meta checker interval
@@ -90,7 +90,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             throw new IllegalStateException("can not init dataSource", e);
         }
         DefaultResourceManager.get().registerResource(this);
-        if(ENABLE_TABLE_META_CHECKER){
+        if(ENABLE_TABLE_META_CHECKER_ENABLE){
             tableMetaExcutor.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
