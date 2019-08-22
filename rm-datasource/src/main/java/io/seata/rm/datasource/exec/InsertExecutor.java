@@ -124,7 +124,6 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                     pkValues = getPkValuesByAuto();
                     return pkValues;
                 }
-
                 if (hasPlaceholder) {
                     ArrayList<Object>[] parameters = preparedStatementProxy.getParameters();
                     if (parameters.length % rowSize == 0 && rowSize != 1) {
@@ -158,7 +157,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             throw new ShouldNeverHappenException();
         }
         // pk auto generated while column exists and value is null
-        if (pkValues.get(0) instanceof Null) {
+        if (pkValues.size() > 0 && pkValues.get(0) instanceof Null) {
             pkValues = getPkValuesByAuto();
         }
         return pkValues;
