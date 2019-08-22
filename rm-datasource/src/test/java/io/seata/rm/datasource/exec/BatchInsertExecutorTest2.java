@@ -352,13 +352,6 @@ public class BatchInsertExecutorTest2 {
         when(statementProxy.getParameters()).thenReturn(paramters);
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
         when(statementProxy.getParameters()).thenReturn(paramters);
-        int pkIndex = 1;
-        int rowSize = insertRows.size();
-        int placeholderNum = paramters.length / rowSize;
-        for (int i = 0; i < rowSize; i++) {
-            int index = placeholderNum * i + pkIndex;
-            when(statementProxy.getParamsByIndex(index)).thenReturn(paramters[index]);
-        }
     }
 
 
