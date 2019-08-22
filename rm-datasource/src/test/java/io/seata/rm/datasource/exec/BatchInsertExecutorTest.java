@@ -66,18 +66,6 @@ public class BatchInsertExecutorTest {
     }
 
     @Test
-    public void testGetPkValuesByColumn() throws SQLException {
-        mockInsertColumns();
-        mockParametersOfJDBCBatch();
-        doReturn(tableMeta).when(insertExecutor).getTableMeta();
-        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
-        List<Object> pkValues = new ArrayList<>();
-        pkValues.addAll(PK_VALUES);
-        List<Integer> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
-        Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
-    }
-
-    @Test
     public void testGetPkValuesByColumnOfJDBC() throws SQLException {
         mockInsertColumns();
         mockParameters();
@@ -428,39 +416,4 @@ public class BatchInsertExecutorTest {
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
     }
 
-    private void mockParametersOfJDBCBatch() {
-        // jdbc batch mode
-        // 3 is column num
-        ArrayList<Object>[] paramters = new ArrayList[3];
-        ArrayList arrayList1 = new ArrayList<>();
-        arrayList1.add("userId1");
-        arrayList1.add("userId2");
-        arrayList1.add("userId3");
-        arrayList1.add("userId4");
-        arrayList1.add("userId5");
-        ArrayList arrayList2 = new ArrayList<>();
-        arrayList2.add(PK_VALUES.get(0));
-        arrayList2.add(PK_VALUES.get(1));
-        arrayList2.add(PK_VALUES.get(2));
-        arrayList2.add(PK_VALUES.get(3));
-        arrayList2.add(PK_VALUES.get(4));
-        ArrayList arrayList3 = new ArrayList<>();
-        arrayList3.add("userName1");
-        arrayList3.add("userName2");
-        arrayList3.add("userName3");
-        arrayList3.add("userName4");
-        arrayList3.add("userName5");
-        paramters[0] = arrayList1;
-        paramters[1] = arrayList2;
-        paramters[2] = arrayList3;
-        when(statementProxy.getParameters()).thenReturn(paramters);
-
-        List<List<Object>> rows = new ArrayList<>();
-        rows.add(Arrays.asList("?", "?", "?"));
-        rows.add(Arrays.asList("?", "?", "?"));
-        rows.add(Arrays.asList("?", "?", "?"));
-        rows.add(Arrays.asList("?", "?", "?"));
-        rows.add(Arrays.asList("?", "?", "?"));
-        when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
-    }
 }
