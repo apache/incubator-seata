@@ -313,10 +313,13 @@ public class EnhancedServiceLoader {
                         }
                         line = line.trim();
                         if (line.length() > 0) {
-                            extensions.add(Class.forName(line, true, classLoader));
+                            try {
+                                extensions.add(Class.forName(line, true, classLoader));
+                            } catch (LinkageError | ClassNotFoundException e) {
+                                LOGGER.warn("load [{}] class fail. {}", line, e.getMessage());
+                            }
                         }
                     }
-                } catch (ClassNotFoundException e) {
                 } catch (Throwable e) {
                     LOGGER.warn(e.getMessage());
                 } finally {
