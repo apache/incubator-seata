@@ -316,7 +316,7 @@ public class EnhancedServiceLoader {
                             try {
                                 extensions.add(Class.forName(line, true, classLoader));
                             } catch (LinkageError | ClassNotFoundException e) {
-                                LOGGER.warn(e.getMessage());
+                                LOGGER.warn("load [{}] class fail. {}", line, e.getMessage());
                             }
                         }
                     }
