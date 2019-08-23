@@ -35,7 +35,12 @@ public class KryoUndoLogParser implements UndoLogParser {
 
     @Override
     public byte[] getDefaultContent() {
-        return new byte[0];
+        KryoSerializer kryoSerializer = KryoSerializerFactory.getInstance().get();
+        try {
+            return kryoSerializer.serialize(new BranchUndoLog());
+        } finally {
+            KryoSerializerFactory.getInstance().returnKryo(kryoSerializer);
+        }
     }
 
     @Override
