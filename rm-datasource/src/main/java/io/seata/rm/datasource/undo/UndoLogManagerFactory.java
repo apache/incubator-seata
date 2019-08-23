@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * UndoLogManagerMySQL Factory
+ * UndoLogManager Factory
  *
  * @author: Zhibei Hao
  * @date: 2019/8/22 14:14
