@@ -35,7 +35,8 @@ import static org.mockito.Mockito.when;
  * @author guoyao
  * @date 2019/4/19
  */
-public class UndoLogManagerTest {
+public class UndoLogManagerMySQLTest
+{
 
 
     private static final int APPEND_IN_SIZE = 10;
@@ -58,7 +59,7 @@ public class UndoLogManagerTest {
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
-        UndoLogManager.batchDeleteUndoLog(xids, branchIds, connection);
+        UndoLogManagerFactory.getDefaultInstance().batchDeleteUndoLog(xids,branchIds,connection);
 
         //verify
         for (int i = 1;i <= APPEND_IN_SIZE;i++){
@@ -76,7 +77,7 @@ public class UndoLogManagerTest {
                 THE_APPEND_IN_SIZE_PARAM_STRING +
                 " AND xid IN " +
                 THE_DOUBLE_APPEND_IN_SIZE_PARAM_STRING;
-        String batchDeleteUndoLogSql = UndoLogManager.toBatchDeleteUndoLogSql(APPEND_IN_SIZE * 2, APPEND_IN_SIZE);
+        String batchDeleteUndoLogSql = UndoLogManagerFactory.getDefaultInstance().toBatchDeleteUndoLogSql(APPEND_IN_SIZE * 2, APPEND_IN_SIZE);
         System.out.println(batchDeleteUndoLogSql);
         assertThat(batchDeleteUndoLogSql).isEqualTo(expectedSqlString);
     }
@@ -84,7 +85,7 @@ public class UndoLogManagerTest {
     @Test
     public void testAppendInParam() {
         StringBuilder sqlBuilder = new StringBuilder();
-        UndoLogManager.appendInParam(APPEND_IN_SIZE, sqlBuilder);
+        UndoLogManagerFactory.getDefaultInstance().appendInParam(APPEND_IN_SIZE, sqlBuilder);
         assertThat(sqlBuilder.toString()).isEqualTo(THE_APPEND_IN_SIZE_PARAM_STRING);
     }
 
