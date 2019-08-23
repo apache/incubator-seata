@@ -113,16 +113,15 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                     Object pkValue = row.get(pkIndex);
                     if (pkValue instanceof Null) {
                         hasNull = true;
-                        break;
+                        continue;
                     }
                     if ("?".equals(pkValue)) {
                         hasPlaceholder = true;
                         continue;
                     }
                 }
-                if (hasNull) {
-                    pkValues = getPkValuesByAuto();
-                    return pkValues;
+                if (hasNull && hasPlaceholder) {
+                    throw new NotSupportYetException("not support sql [" + recognizer.getOriginalSQL() + "]");
                 }
                 if (hasPlaceholder) {
                     ArrayList<Object>[] parameters = preparedStatementProxy.getParameters();

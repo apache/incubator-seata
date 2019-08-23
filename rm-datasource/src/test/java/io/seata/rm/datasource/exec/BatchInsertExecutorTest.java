@@ -15,8 +15,10 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
+import io.seata.rm.datasource.sql.struct.Null;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -150,6 +152,42 @@ public class BatchInsertExecutorTest {
         pkValues.addAll(PK_VALUES);
         List<Integer> pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         Assertions.assertIterableEquals(pkValuesByColumn, pkValues);
+    }
+
+    @Test
+    public void testGetPkValues_NotSupportYetException() {
+        Assertions.assertThrows(NotSupportYetException.class, () -> {
+            mockInsertColumns();
+            mockParametersWithPlaceholderAndNull();
+            doReturn(tableMeta).when(insertExecutor).getTableMeta();
+            when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+            insertExecutor.getPkValuesByColumn();
+        });
+    }
+
+    private void mockParametersWithPlaceholderAndNull() {
+        ArrayList<Object>[] paramters = new ArrayList[5];
+        ArrayList arrayList0 = new ArrayList<>();
+        arrayList0.add("userId1");
+        ArrayList arrayList1 = new ArrayList<>();
+        arrayList1.add(PK_VALUES.get(0));
+        ArrayList arrayList2 = new ArrayList<>();
+        arrayList2.add("userName1");
+        ArrayList arrayList3 = new ArrayList<>();
+        arrayList3.add("userId2");
+        ArrayList arrayList4 = new ArrayList<>();
+        arrayList4.add("userName2");
+        paramters[0] = arrayList0;
+        paramters[1] = arrayList1;
+        paramters[2] = arrayList2;
+        paramters[3] = arrayList3;
+        paramters[4] = arrayList4;
+        when(statementProxy.getParameters()).thenReturn(paramters);
+
+        List<List<Object>> insertRows = new ArrayList<>();
+        insertRows.add(Arrays.asList("?", "?", "?"));
+        insertRows.add(Arrays.asList("?", Null.get(), "?"));
+        when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
     }
 
     private List<String> mockInsertColumns() {
@@ -339,7 +377,6 @@ public class BatchInsertExecutorTest {
         insertRows.add(Arrays.asList("?", 100000005, "?"));
         when(statementProxy.getParameters()).thenReturn(paramters);
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
-        when(statementProxy.getParameters()).thenReturn(paramters);
     }
 
 
