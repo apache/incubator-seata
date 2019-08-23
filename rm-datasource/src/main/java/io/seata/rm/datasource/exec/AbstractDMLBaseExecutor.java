@@ -106,7 +106,10 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
             LOGGER.error("exception occur", e);
             throw e;
         } finally {
-            if (!isTryError) {
+            if (isTryError) {
+                connectionProxy.getTargetConnection().rollback();
+                connectionProxy.getTargetConnection().setAutoCommit(true);
+            } else {
                 connectionProxy.setAutoCommit(true);
             }
         }
