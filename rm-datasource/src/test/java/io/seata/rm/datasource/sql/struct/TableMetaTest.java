@@ -35,8 +35,12 @@ import com.alibaba.druid.mock.handler.MockExecuteHandler;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
 import io.seata.rm.datasource.DataSourceProxy;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.Assertions;
 
-import org.junit.jupiter.api.*;
 
 import javax.sql.DataSource;
 
