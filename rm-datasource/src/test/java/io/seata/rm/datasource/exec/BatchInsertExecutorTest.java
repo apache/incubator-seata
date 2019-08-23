@@ -32,6 +32,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 
@@ -158,14 +159,50 @@ public class BatchInsertExecutorTest {
     public void testGetPkValues_NotSupportYetException() {
         Assertions.assertThrows(NotSupportYetException.class, () -> {
             mockInsertColumns();
-            mockParametersWithPlaceholderAndNull();
+            mockParameters_with_number_and_insertRows_with_placeholde_null();
             doReturn(tableMeta).when(insertExecutor).getTableMeta();
             when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
             insertExecutor.getPkValuesByColumn();
         });
     }
 
-    private void mockParametersWithPlaceholderAndNull() {
+    @Test
+    public void testGetPkValues_not_NotSupportYetException() throws SQLException {
+        mockInsertColumns();
+        mockParameters_with_null_and_insertRows_with_placeholder_null();
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+        doReturn(new ArrayList<>()).when(insertExecutor).getPkValuesByAuto();
+        insertExecutor.getPkValuesByColumn();
+        verify(insertExecutor).getPkValuesByAuto();
+    }
+
+    private void mockParameters_with_null_and_insertRows_with_placeholder_null() {
+        ArrayList<Object>[] paramters = new ArrayList[5];
+        ArrayList arrayList0 = new ArrayList<>();
+        arrayList0.add("userId1");
+        ArrayList arrayList1 = new ArrayList<>();
+        arrayList1.add(Null.get());
+        ArrayList arrayList2 = new ArrayList<>();
+        arrayList2.add("userName1");
+        ArrayList arrayList3 = new ArrayList<>();
+        arrayList3.add("userId2");
+        ArrayList arrayList4 = new ArrayList<>();
+        arrayList4.add("userName2");
+        paramters[0] = arrayList0;
+        paramters[1] = arrayList1;
+        paramters[2] = arrayList2;
+        paramters[3] = arrayList3;
+        paramters[4] = arrayList4;
+        when(statementProxy.getParameters()).thenReturn(paramters);
+
+        List<List<Object>> insertRows = new ArrayList<>();
+        insertRows.add(Arrays.asList("?", "?", "?"));
+        insertRows.add(Arrays.asList("?", Null.get(), "?"));
+        when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
+    }
+
+    private void mockParameters_with_number_and_insertRows_with_placeholde_null() {
         ArrayList<Object>[] paramters = new ArrayList[5];
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add("userId1");

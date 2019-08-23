@@ -307,24 +307,30 @@ public class InsertExecutorTest {
     }
 
     private void mockParameters() {
-        // not jdbc batch mode
-        ArrayList<Object>[] paramters = new ArrayList[1];
+        ArrayList<Object>[] paramters = new ArrayList[3];
+        ArrayList arrayList0 = new ArrayList<>();
+        arrayList0.add(PK_VALUE);
         ArrayList arrayList1 = new ArrayList<>();
-        arrayList1.add(PK_VALUE);
         arrayList1.add("userId1");
-        arrayList1.add("userName1");
-        paramters[0] = arrayList1;
+        ArrayList arrayList2 = new ArrayList<>();
+        arrayList2.add("userName1");
+        paramters[0] = arrayList0;
+        paramters[1] = arrayList1;
+        paramters[2] = arrayList2;
         when(statementProxy.getParameters()).thenReturn(paramters);
     }
 
     private void mockParametersPkWithNull() {
-        // not jdbc batch mode
-        ArrayList<Object>[] paramters = new ArrayList[1];
+        ArrayList<Object>[] paramters = new ArrayList[3];
+        ArrayList arrayList0 = new ArrayList<>();
+        arrayList0.add(Null.get());
         ArrayList arrayList1 = new ArrayList<>();
-        arrayList1.add(Null.get());
         arrayList1.add("userId1");
-        arrayList1.add("userName1");
-        paramters[0] = arrayList1;
+        ArrayList arrayList2 = new ArrayList<>();
+        arrayList2.add("userName1");
+        paramters[0] = arrayList0;
+        paramters[1] = arrayList1;
+        paramters[2] = arrayList2;
         when(statementProxy.getParameters()).thenReturn(paramters);
     }
 

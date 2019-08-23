@@ -107,24 +107,22 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             List<List<Object>> insertRows = recognizer.getInsertRows();
             if (insertRows != null && !insertRows.isEmpty()) {
                 int rowSize = insertRows.size();
-                boolean hasNull = false;
+
+                ArrayList<Object>[] parameters = preparedStatementProxy.getParameters();
+
                 boolean hasPlaceholder = false;
                 for (List<Object> row : insertRows) {
                     Object pkValue = row.get(pkIndex);
-                    if (pkValue instanceof Null) {
-                        hasNull = true;
-                        continue;
-                    }
                     if ("?".equals(pkValue)) {
                         hasPlaceholder = true;
-                        continue;
+                        break;
                     }
                 }
-                if (hasNull && hasPlaceholder) {
-                    throw new NotSupportYetException("not support sql [" + recognizer.getOriginalSQL() + "]");
-                }
+
+                this.checkBatchModeParameterAndInsertRow(hasPlaceholder, pkIndex, insertRows, parameters,
+                        recognizer.getOriginalSQL());
+
                 if (hasPlaceholder) {
-                    ArrayList<Object>[] parameters = preparedStatementProxy.getParameters();
                     if (parameters.length % rowSize == 0 && rowSize != 1) {
                         int placeholderNum = parameters.length / rowSize;
                         pkValues = new ArrayList<>(rowSize);
@@ -193,5 +191,50 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             pkValues.add(v);
         }
         return pkValues;
+    }
+
+    private void checkBatchModeParameterAndInsertRow(boolean hasPlaceholder, int pkIndex, List<List<Object>> insertRows,
+                                                     ArrayList<Object>[] parameters, String sql) {
+        final int rowSize = insertRows.size();
+        if (rowSize > 1) {
+            boolean pkParameterHasNull = false;
+            boolean pkParameterHasNotNull = false;
+            int totalPlaceholder = -1;
+            for (int i = 0; i < rowSize; i++) {
+                List<Object> row = insertRows.get(i);
+                Object pkValue = row.get(pkIndex);
+                int placeholderNum = -1;
+                for (Object r : row) {
+                    if ("?".equals(r)) {
+                        totalPlaceholder += 1;
+                        placeholderNum += 1;
+                    }
+                }
+                if ("?".equals(pkValue)) {
+                    int idx = pkIndex;
+                    if (i != 0) {
+                        idx = totalPlaceholder - (placeholderNum == pkIndex ? 0 : pkIndex);
+                    }
+                    ArrayList<Object> parameter = parameters[idx];
+                    for (Object obj : parameter) {
+                        if (!(obj instanceof Null)) {
+                            pkParameterHasNotNull = true;
+                            continue;
+                        }
+                        if (obj instanceof Null) {
+                            pkParameterHasNull = true;
+                            continue;
+                        }
+                    }
+                }
+                if (pkValue instanceof Null) {
+                    pkParameterHasNull = true;
+                    continue;
+                }
+            }
+            if (hasPlaceholder && pkParameterHasNull && pkParameterHasNotNull) {
+                throw new NotSupportYetException("not support sql [" + sql + "]");
+            }
+        }
     }
 }
