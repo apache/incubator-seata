@@ -106,19 +106,12 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
             List<List<Object>> insertRows = recognizer.getInsertRows();
             if (insertRows != null && !insertRows.isEmpty()) {
-                int rowSize = insertRows.size();
                 ArrayList<Object>[] parameters = preparedStatementProxy.getParameters();
+                final int rowSize = insertRows.size();
 
                 if (rowSize == 1) {
-                    boolean hasPlaceholder = false;
-                    for (List<Object> row : insertRows) {
-                        Object pkValue = row.get(pkIndex);
-                        if ("?".equals(pkValue)) {
-                            hasPlaceholder = true;
-                            break;
-                        }
-                    }
-                    if (hasPlaceholder) {
+                    Object pkValue = insertRows.get(0).get(pkIndex);
+                    if ("?".equals(pkValue)) {
                         pkValues = parameters[pkIndex];
                     } else {
                         int finalPkIndex = pkIndex;
