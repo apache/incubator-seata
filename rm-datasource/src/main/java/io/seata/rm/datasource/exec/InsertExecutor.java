@@ -107,35 +107,49 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             List<List<Object>> insertRows = recognizer.getInsertRows();
             if (insertRows != null && !insertRows.isEmpty()) {
                 int rowSize = insertRows.size();
-
                 ArrayList<Object>[] parameters = preparedStatementProxy.getParameters();
 
-                boolean hasPlaceholder = false;
-                for (List<Object> row : insertRows) {
-                    Object pkValue = row.get(pkIndex);
-                    if ("?".equals(pkValue)) {
-                        hasPlaceholder = true;
-                        break;
-                    }
-                }
-
-                this.checkBatchModeParameterAndInsertRow(hasPlaceholder, pkIndex, insertRows, parameters,
-                        recognizer.getOriginalSQL());
-
-                if (hasPlaceholder) {
-                    if (parameters.length % rowSize == 0 && rowSize != 1) {
-                        int placeholderNum = parameters.length / rowSize;
-                        pkValues = new ArrayList<>(rowSize);
-                        for (int i = 0; i < rowSize; i++) {
-                            List<Object> paramsByIndex = parameters[placeholderNum * i + pkIndex];
-                            pkValues.add(paramsByIndex.get(0));
+                if (rowSize == 1) {
+                    boolean hasPlaceholder = false;
+                    for (List<Object> row : insertRows) {
+                        Object pkValue = row.get(pkIndex);
+                        if ("?".equals(pkValue)) {
+                            hasPlaceholder = true;
+                            break;
                         }
-                        return pkValues;
                     }
-                    pkValues = parameters[pkIndex];
+                    if (hasPlaceholder) {
+                        pkValues = parameters[pkIndex];
+                    } else {
+                        int finalPkIndex = pkIndex;
+                        pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
+                    }
                 } else {
-                    int finalPkIndex = pkIndex;
-                    pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
+                    int totalPlaceholder = -1;
+                    pkValues = new ArrayList<>(rowSize);
+                    for (int i = 0; i < rowSize; i++) {
+                        List<Object> row = insertRows.get(i);
+                        Object pkValue = row.get(pkIndex);
+                        int placeholderNum = -1;
+                        for (Object r : row) {
+                            if ("?".equals(r)) {
+                                totalPlaceholder += 1;
+                                placeholderNum += 1;
+                            }
+                        }
+                        if ("?".equals(pkValue)) {
+                            int idx = pkIndex;
+                            if (i != 0) {
+                                idx = totalPlaceholder - (placeholderNum == pkIndex ? 0 : pkIndex);
+                            }
+                            ArrayList<Object> parameter = parameters[idx];
+                            for (Object obj : parameter) {
+                                pkValues.add(obj);
+                            }
+                        } else {
+                            pkValues.add(pkValue);
+                        }
+                    }
                 }
             }
         } else {
@@ -152,6 +166,10 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         if (pkValues == null) {
             throw new ShouldNeverHappenException();
+        }
+        int b = this.checkPkValues(pkValues);
+        if (b != 0) {
+            throw new NotSupportYetException("not support sql [" + recognizer.getOriginalSQL() + "]");
         }
         // pk auto generated while column exists and value is null
         if (pkValues.size() > 0 && pkValues.get(0) instanceof Null) {
@@ -193,48 +211,29 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return pkValues;
     }
 
-    private void checkBatchModeParameterAndInsertRow(boolean hasPlaceholder, int pkIndex, List<List<Object>> insertRows,
-                                                     ArrayList<Object>[] parameters, String sql) {
-        final int rowSize = insertRows.size();
-        if (rowSize > 1) {
-            boolean pkParameterHasNull = false;
-            boolean pkParameterHasNotNull = false;
-            int totalPlaceholder = -1;
-            for (int i = 0; i < rowSize; i++) {
-                List<Object> row = insertRows.get(i);
-                Object pkValue = row.get(pkIndex);
-                int placeholderNum = -1;
-                for (Object r : row) {
-                    if ("?".equals(r)) {
-                        totalPlaceholder += 1;
-                        placeholderNum += 1;
-                    }
-                }
-                if ("?".equals(pkValue)) {
-                    int idx = pkIndex;
-                    if (i != 0) {
-                        idx = totalPlaceholder - (placeholderNum == pkIndex ? 0 : pkIndex);
-                    }
-                    ArrayList<Object> parameter = parameters[idx];
-                    for (Object obj : parameter) {
-                        if (!(obj instanceof Null)) {
-                            pkParameterHasNotNull = true;
-                            continue;
-                        }
-                        if (obj instanceof Null) {
-                            pkParameterHasNull = true;
-                            continue;
-                        }
-                    }
-                }
-                if (pkValue instanceof Null) {
-                    pkParameterHasNull = true;
-                    continue;
-                }
+    /**
+     * check pk values
+     * @param pkValues
+     * @return 0 ok 1 exists null value and normal value
+     */
+    private int checkPkValues(List<Object> pkValues) {
+        boolean pkParameterHasNull = false;
+        boolean pkParameterHasNotNull = false;
+
+        for (Object pkValue : pkValues) {
+            if (pkValue instanceof Null) {
+                pkParameterHasNull = true;
+                continue;
             }
-            if (hasPlaceholder && pkParameterHasNull && pkParameterHasNotNull) {
-                throw new NotSupportYetException("not support sql [" + sql + "]");
+            if (!(pkValue instanceof Null)) {
+                pkParameterHasNotNull = true;
+                continue;
             }
         }
+
+        if (pkParameterHasNull && pkParameterHasNotNull) {
+            return 1;
+        }
+        return 0;
     }
 }
