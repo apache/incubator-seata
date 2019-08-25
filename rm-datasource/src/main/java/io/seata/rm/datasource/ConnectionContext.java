@@ -158,7 +158,7 @@ public class ConnectionContext {
     /**
      * Reset.
      */
-    void reset(){
+    public void reset() {
         this.reset(null);
     }
 
