@@ -49,6 +49,8 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     private static final Logger LOGGER = LoggerFactory.getLogger(InsertExecutor.class);
     protected static final String ERR_SQL_STATE = "S1009";
 
+    private static final String PLACEHOLDER = "?";
+
     /**
      * Instantiates a new Insert executor.
      *
@@ -111,7 +113,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
                 if (rowSize == 1) {
                     Object pkValue = insertRows.get(0).get(pkIndex);
-                    if ("?".equals(pkValue)) {
+                    if (PLACEHOLDER.equals(pkValue)) {
                         pkValues = parameters[pkIndex];
                     } else {
                         int finalPkIndex = pkIndex;
@@ -125,12 +127,12 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                         Object pkValue = row.get(pkIndex);
                         int placeholderNum = -1;
                         for (Object r : row) {
-                            if ("?".equals(r)) {
+                            if (PLACEHOLDER.equals(r)) {
                                 totalPlaceholder += 1;
                                 placeholderNum += 1;
                             }
                         }
-                        if ("?".equals(pkValue)) {
+                        if (PLACEHOLDER.equals(pkValue)) {
                             int idx = pkIndex;
                             if (i != 0) {
                                 idx = totalPlaceholder - (placeholderNum == pkIndex ? 0 : pkIndex);
