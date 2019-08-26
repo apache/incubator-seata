@@ -191,7 +191,7 @@ public class TableMetaCacheOracle {
                 index.setIndextype(IndexType.PRIMARY);
             }
         }
-        if(tm.getAllIndexes().size() == 0){
+        if(tm.getAllIndexes().isEmpty()){
             throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
         }
         IndexMeta index = tm.getAllIndexes().get(indexName);
