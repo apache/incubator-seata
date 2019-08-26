@@ -47,6 +47,7 @@ public class BatchInsertExecutorTest {
     private static final String ID_COLUMN = "id";
     private static final String USER_ID_COLUMN = "user_id";
     private static final String USER_NAME_COLUMN = "user_name";
+    private static final String USER_STATUS_COLUMN = "user_status";
     private static final List<Integer> PK_VALUES = Arrays.asList(100000001, 100000002, 100000003, 100000004, 100000005);
 
     private PreparedStatementProxy statementProxy;
@@ -232,13 +233,14 @@ public class BatchInsertExecutorTest {
         columns.add(USER_ID_COLUMN);
         columns.add(ID_COLUMN);
         columns.add(USER_NAME_COLUMN);
+        columns.add(USER_STATUS_COLUMN);
         when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
         return columns;
     }
 
     private void mockParameters() {
         int PK_INDEX = 1;
-        ArrayList<Object>[] paramters = new ArrayList[3];
+        ArrayList<Object>[] paramters = new ArrayList[4];
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add("userId1");
         arrayList0.add("userId2");
@@ -257,13 +259,20 @@ public class BatchInsertExecutorTest {
         arrayList2.add("userName3");
         arrayList2.add("userName4");
         arrayList2.add("userName5");
+        ArrayList arrayList3 = new ArrayList<>();
+        arrayList3.add("userStatus1");
+        arrayList3.add("userStatus2");
+        arrayList3.add("userStatus3");
+        arrayList3.add("userStatus4");
+        arrayList3.add("userStatus5");
 
         paramters[0] = arrayList0;
         paramters[1] = arrayList1;
         paramters[2] = arrayList2;
+        paramters[3] = arrayList3;
 
         List<List<Object>> insertRows = new ArrayList<>();
-        insertRows.add(Arrays.asList("?", "?", "?"));
+        insertRows.add(Arrays.asList("?", "?", "?", "?"));
 
         when(statementProxy.getParameters()).thenReturn(paramters);
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
@@ -272,7 +281,7 @@ public class BatchInsertExecutorTest {
 
     private void mockParametersAllRefOfMysql() {
 
-        ArrayList<Object>[] paramters = new ArrayList[15];
+        ArrayList<Object>[] paramters = new ArrayList[20];
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add("userId1");
         ArrayList arrayList2 = new ArrayList<>();
@@ -280,29 +289,45 @@ public class BatchInsertExecutorTest {
         ArrayList arrayList3 = new ArrayList<>();
         arrayList3.add("userName1");
         ArrayList arrayList4 = new ArrayList<>();
-        arrayList4.add("userId2");
+        arrayList4.add("userStatus1");
+
         ArrayList arrayList5 = new ArrayList<>();
-        arrayList5.add(100000002);
+        arrayList5.add("userId2");
         ArrayList arrayList6 = new ArrayList<>();
-        arrayList6.add("userName2");
+        arrayList6.add(100000002);
         ArrayList arrayList7 = new ArrayList<>();
-        arrayList7.add("userId3");
+        arrayList7.add("userName2");
         ArrayList arrayList8 = new ArrayList<>();
-        arrayList8.add(100000003);
+        arrayList8.add("userStatus2");
+
         ArrayList arrayList9 = new ArrayList<>();
-        arrayList9.add("userName3");
+        arrayList9.add("userId3");
         ArrayList arrayList10 = new ArrayList<>();
-        arrayList10.add("userId4");
+        arrayList10.add(100000003);
         ArrayList arrayList11 = new ArrayList<>();
-        arrayList11.add(100000004);
+        arrayList11.add("userName3");
         ArrayList arrayList12 = new ArrayList<>();
-        arrayList12.add("userName4");
+        arrayList12.add("userStatus3");
+
         ArrayList arrayList13 = new ArrayList<>();
-        arrayList13.add("userId5");
+        arrayList13.add("userId4");
         ArrayList arrayList14 = new ArrayList<>();
-        arrayList14.add(100000005);
+        arrayList14.add(100000004);
         ArrayList arrayList15 = new ArrayList<>();
-        arrayList15.add("userName5");
+        arrayList15.add("userName4");
+        ArrayList arrayList16 = new ArrayList<>();
+        arrayList16.add("userStatus4");
+
+        ArrayList arrayList17 = new ArrayList<>();
+        arrayList17.add("userId5");
+        ArrayList arrayList18 = new ArrayList<>();
+        arrayList18.add(100000005);
+        ArrayList arrayList19 = new ArrayList<>();
+        arrayList19.add("userName5");
+        ArrayList arrayList20 = new ArrayList<>();
+        arrayList20.add("userStatus5");
+
+
         paramters[0] = arrayList1;
         paramters[1] = arrayList2;
         paramters[2] = arrayList3;
@@ -318,12 +343,17 @@ public class BatchInsertExecutorTest {
         paramters[12] = arrayList13;
         paramters[13] = arrayList14;
         paramters[14] = arrayList15;
+        paramters[15] = arrayList16;
+        paramters[16] = arrayList17;
+        paramters[17] = arrayList18;
+        paramters[18] = arrayList19;
+        paramters[19] = arrayList20;
         List<List<Object>> insertRows = new ArrayList<>();
-        insertRows.add(Arrays.asList("?", "?", "?"));
-        insertRows.add(Arrays.asList("?", "?", "?"));
-        insertRows.add(Arrays.asList("?", "?", "?"));
-        insertRows.add(Arrays.asList("?", "?", "?"));
-        insertRows.add(Arrays.asList("?", "?", "?"));
+        insertRows.add(Arrays.asList("?", "?", "?", "?"));
+        insertRows.add(Arrays.asList("?", "?", "?", "?"));
+        insertRows.add(Arrays.asList("?", "?", "?", "?"));
+        insertRows.add(Arrays.asList("?", "?", "?", "?"));
+        insertRows.add(Arrays.asList("?", "?", "?", "?"));
         when(statementProxy.getParameters()).thenReturn(paramters);
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
         when(statementProxy.getParameters()).thenReturn(paramters);
@@ -363,11 +393,11 @@ public class BatchInsertExecutorTest {
         paramters[8] = arrayList9;
         paramters[9] = arrayList10;
         List<List<Object>> insertRows = new ArrayList<>();
-        insertRows.add(Arrays.asList("?", "?", "1"));
-        insertRows.add(Arrays.asList("?", "?", "2"));
-        insertRows.add(Arrays.asList("?", "?", "3"));
-        insertRows.add(Arrays.asList("?", "?", "4"));
-        insertRows.add(Arrays.asList("?", "?", "5"));
+        insertRows.add(Arrays.asList("?", "?", "1", "11"));
+        insertRows.add(Arrays.asList("?", "?", "2", "22"));
+        insertRows.add(Arrays.asList("?", "?", "3", "33"));
+        insertRows.add(Arrays.asList("?", "?", "4", "44"));
+        insertRows.add(Arrays.asList("?", "?", "5", "55"));
         when(statementProxy.getParameters()).thenReturn(paramters);
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
         when(statementProxy.getParameters()).thenReturn(paramters);
@@ -407,11 +437,11 @@ public class BatchInsertExecutorTest {
         paramters[8] = arrayList9;
         paramters[9] = arrayList10;
         List<List<Object>> insertRows = new ArrayList<>();
-        insertRows.add(Arrays.asList("?", 100000001, "?"));
-        insertRows.add(Arrays.asList("?", 100000002, "?"));
-        insertRows.add(Arrays.asList("?", 100000003, "?"));
-        insertRows.add(Arrays.asList("?", 100000004, "?"));
-        insertRows.add(Arrays.asList("?", 100000005, "?"));
+        insertRows.add(Arrays.asList("?", 100000001, "?", "1"));
+        insertRows.add(Arrays.asList("?", 100000002, "?", "2"));
+        insertRows.add(Arrays.asList("?", 100000003, "?", "3"));
+        insertRows.add(Arrays.asList("?", 100000004, "?", "4"));
+        insertRows.add(Arrays.asList("?", 100000005, "?", "5"));
         when(statementProxy.getParameters()).thenReturn(paramters);
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
     }
@@ -419,7 +449,7 @@ public class BatchInsertExecutorTest {
 
     private void mockParametersWithAllRefOfJDBC() {
         int PK_INDEX = 1;
-        ArrayList<Object>[] paramters = new ArrayList[3];
+        ArrayList<Object>[] paramters = new ArrayList[4];
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add("userId1");
         arrayList0.add("userId2");
@@ -438,12 +468,19 @@ public class BatchInsertExecutorTest {
         arrayList2.add("userName3");
         arrayList2.add("userName4");
         arrayList2.add("userName5");
+        ArrayList arrayList3 = new ArrayList<>();
+        arrayList3.add("userStatus1");
+        arrayList3.add("userStatus2");
+        arrayList3.add("userStatus3");
+        arrayList3.add("userStatus4");
+        arrayList3.add("userStatus5");
         paramters[0] = arrayList0;
         paramters[1] = arrayList1;
         paramters[2] = arrayList2;
+        paramters[3] = arrayList3;
 
         List<List<Object>> insertRows = new ArrayList<>();
-        insertRows.add(Arrays.asList("?", "?", "?"));
+        insertRows.add(Arrays.asList("?", "?", "?", "?"));
         when(statementProxy.getParameters()).thenReturn(paramters);
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
         when(statementProxy.getParamsByIndex(PK_INDEX)).thenReturn(paramters[PK_INDEX]);
@@ -468,7 +505,7 @@ public class BatchInsertExecutorTest {
         paramters[1] = arrayList1;
 
         List<List<Object>> insertRows = new ArrayList<>();
-        insertRows.add(Arrays.asList("?", "?", "userName1"));
+        insertRows.add(Arrays.asList("?", "?", "userName1", "userStatus1"));
         when(statementProxy.getParameters()).thenReturn(paramters);
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
         when(statementProxy.getParamsByIndex(PK_INDEX)).thenReturn(paramters[PK_INDEX]);
@@ -485,7 +522,7 @@ public class BatchInsertExecutorTest {
         paramters[1] = arrayList1;
 
         List<List<Object>> insertRows = new ArrayList<>();
-        insertRows.add(Arrays.asList("?", pkId, "?"));
+        insertRows.add(Arrays.asList("?", pkId, "?", "userStatus"));
         when(statementProxy.getParameters()).thenReturn(paramters);
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
     }

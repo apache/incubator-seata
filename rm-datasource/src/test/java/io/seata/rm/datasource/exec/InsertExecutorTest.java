@@ -53,6 +53,7 @@ public class InsertExecutorTest {
     private static final String ID_COLUMN = "id";
     private static final String USER_ID_COLUMN = "user_id";
     private static final String USER_NAME_COLUMN = "user_name";
+    private static final String USER_STATUS_COLUMN = "user_status";
     private static final Integer PK_VALUE = 100;
 
     private PreparedStatementProxy statementProxy;
@@ -302,35 +303,42 @@ public class InsertExecutorTest {
         columns.add(ID_COLUMN);
         columns.add(USER_ID_COLUMN);
         columns.add(USER_NAME_COLUMN);
+        columns.add(USER_STATUS_COLUMN);
         when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
         return columns;
     }
 
     private void mockParameters() {
-        ArrayList<Object>[] paramters = new ArrayList[3];
+        ArrayList<Object>[] paramters = new ArrayList[4];
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(PK_VALUE);
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add("userId1");
         ArrayList arrayList2 = new ArrayList<>();
         arrayList2.add("userName1");
+        ArrayList arrayList3 = new ArrayList<>();
+        arrayList3.add("userStatus1");
         paramters[0] = arrayList0;
         paramters[1] = arrayList1;
         paramters[2] = arrayList2;
+        paramters[3] = arrayList3;
         when(statementProxy.getParameters()).thenReturn(paramters);
     }
 
     private void mockParametersPkWithNull() {
-        ArrayList<Object>[] paramters = new ArrayList[3];
+        ArrayList<Object>[] paramters = new ArrayList[4];
         ArrayList arrayList0 = new ArrayList<>();
         arrayList0.add(Null.get());
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add("userId1");
         ArrayList arrayList2 = new ArrayList<>();
         arrayList2.add("userName1");
+        ArrayList arrayList3 = new ArrayList<>();
+        arrayList3.add("userStatus1");
         paramters[0] = arrayList0;
         paramters[1] = arrayList1;
         paramters[2] = arrayList2;
+        paramters[3] = arrayList3;
         when(statementProxy.getParameters()).thenReturn(paramters);
     }
 
@@ -344,7 +352,7 @@ public class InsertExecutorTest {
 
     private void mockInsertRows() {
         List<List<Object>> rows = new ArrayList<>();
-        rows.add(Arrays.asList("?", "?", "?"));
+        rows.add(Arrays.asList("?", "?", "?", "?"));
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(rows);
     }
 }
