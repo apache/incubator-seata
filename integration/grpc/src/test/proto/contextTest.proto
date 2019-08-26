@@ -20,7 +20,7 @@ option java_package = "io.seata.integration.grpc.interceptor.proto";
 option java_outer_classname = "ContextRpcTest";
 
 service ContextRpc {
-    rpc ContextRpc(Request) returns (Response) {
+    rpc ContextRpc (Request) returns (Response) {
     }
 }
 

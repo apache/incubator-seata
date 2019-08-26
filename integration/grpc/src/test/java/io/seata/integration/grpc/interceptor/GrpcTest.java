@@ -72,21 +72,21 @@ public class GrpcTest {
 
         //server
         grpcCleanup.register(InProcessServerBuilder.forName(serverName).executor(executorService)
-                .addService(ServerInterceptors.intercept(new ContextRpcGrpc.ContextRpcImplBase() {
-                    @Override
-                    public void contextRpc(Request request, StreamObserver<Response> responseObserver) {
-                        context[0] = RootContext.getXID();
-                        countDownLatch.countDown();
-                        responseObserver.onNext(Response.newBuilder().setGreet("hello! " + request.getName()).build());
-                        responseObserver.onCompleted();
-                    }
-                }, mockServerInterceptor))
-                .build().start());
+            .addService(ServerInterceptors.intercept(new ContextRpcGrpc.ContextRpcImplBase() {
+                @Override
+                public void contextRpc(Request request, StreamObserver<Response> responseObserver) {
+                    context[0] = RootContext.getXID();
+                    countDownLatch.countDown();
+                    responseObserver.onNext(Response.newBuilder().setGreet("hello! " + request.getName()).build());
+                    responseObserver.onCompleted();
+                }
+            }, mockServerInterceptor))
+            .build().start());
 
         //client
         ManagedChannel channel = grpcCleanup.register(InProcessChannelBuilder.forName(serverName).executor(executorService).build());
         ContextRpcGrpc.ContextRpcFutureStub stub = ContextRpcGrpc.newFutureStub(
-                ClientInterceptors.intercept(channel, new ClientTransactionInterceptor()));
+            ClientInterceptors.intercept(channel, new ClientTransactionInterceptor()));
         RootContext.bind("test_context");
         ListenableFuture<Response> future = stub.contextRpc(Request.newBuilder().setName("seata").build());
         assertEquals("hello! seata", future.get().getGreet());

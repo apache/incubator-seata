@@ -21,13 +21,16 @@ import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.seata.integration.grpc.interceptor.GrpcHeaderKey;
 
+/**
+ * @author eddyxu1213@126.com
+ */
 public class ServerTransactionInterceptor implements ServerInterceptor {
 
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
-            ServerCall<ReqT, RespT> serverCall,
-            Metadata metadata,
-            ServerCallHandler<ReqT, RespT> serverCallHandler) {
+        ServerCall<ReqT, RespT> serverCall,
+        Metadata metadata,
+        ServerCallHandler<ReqT, RespT> serverCallHandler) {
         String xid = metadata.get(GrpcHeaderKey.HEADER_KEY);
         return new ServerListenerProxy<>(xid, serverCallHandler.startCall(serverCall, metadata));
     }

@@ -27,13 +27,16 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.integration.grpc.interceptor.GrpcHeaderKey;
 
+/**
+ * @author eddyxu1213@126.com
+ */
 public class ClientTransactionInterceptor implements ClientInterceptor {
 
     @Override
     public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(
-            MethodDescriptor<ReqT, RespT> method,
-            CallOptions callOptions,
-            Channel next) {
+        MethodDescriptor<ReqT, RespT> method,
+        CallOptions callOptions,
+        Channel next) {
 
         String xid = RootContext.getXID();
         return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(next.newCall(method, callOptions)) {

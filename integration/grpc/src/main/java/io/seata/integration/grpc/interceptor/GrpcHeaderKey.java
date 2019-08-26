@@ -18,6 +18,9 @@ package io.seata.integration.grpc.interceptor;
 import io.grpc.Metadata;
 import io.seata.core.context.RootContext;
 
+/**
+ * @author eddyxu1213@126.com
+ */
 public class GrpcHeaderKey {
 
     public static final Metadata.Key<String> HEADER_KEY = Metadata.Key.of(RootContext.KEY_XID, Metadata.ASCII_STRING_MARSHALLER);
