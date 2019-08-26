@@ -120,22 +120,22 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                         pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
                     }
                 } else {
-                    int totalPlaceholder = -1;
+                    int totalPlaceholderNum = -1;
                     pkValues = new ArrayList<>(rowSize);
                     for (int i = 0; i < rowSize; i++) {
                         List<Object> row = insertRows.get(i);
                         Object pkValue = row.get(pkIndex);
-                        int placeholderNum = -1;
+                        int currentRowPlaceholderNum = -1;
                         for (Object r : row) {
                             if (PLACEHOLDER.equals(r)) {
-                                totalPlaceholder += 1;
-                                placeholderNum += 1;
+                                totalPlaceholderNum += 1;
+                                currentRowPlaceholderNum += 1;
                             }
                         }
                         if (PLACEHOLDER.equals(pkValue)) {
                             int idx = pkIndex;
                             if (i != 0) {
-                                idx = totalPlaceholder - (placeholderNum == pkIndex ? 0 : placeholderNum - pkIndex);
+                                idx = totalPlaceholderNum - currentRowPlaceholderNum + pkIndex;
                             }
                             ArrayList<Object> parameter = parameters[idx];
                             for (Object obj : parameter) {
