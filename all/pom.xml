@@ -507,6 +507,7 @@
                                     <include>io.seata:seata-tm</include>
                                     <include>io.seata:seata-codec-seata</include>
                                     <include>io.seata:seata-codec-protobuf</include>
+                                    <include>io.seata:seata-codec-kryo</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
