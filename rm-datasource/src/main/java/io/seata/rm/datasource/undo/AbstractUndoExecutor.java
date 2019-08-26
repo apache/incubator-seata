@@ -19,6 +19,7 @@ import com.alibaba.fastjson.JSON;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.model.Result;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -50,7 +51,7 @@ public abstract class AbstractUndoExecutor {
 
     /**
      * template of check sql
-     * 
+     *
      * TODO support multiple primary key
      */
     private static final String CHECK_SQL_TEMPLATE = "SELECT * FROM %s WHERE %s in (%s)";
@@ -102,7 +103,7 @@ public abstract class AbstractUndoExecutor {
         if (IS_UNDO_DATA_VALIDATION_ENABLE && !dataValidationAndGoOn(conn)) {
             return;
         }
-        
+
         try {
             String undoSQL = buildUndoSQL();
 
@@ -175,16 +176,17 @@ public abstract class AbstractUndoExecutor {
      * @throws SQLException the sql exception such as has dirty data
      */
     protected boolean dataValidationAndGoOn(Connection conn) throws SQLException {
-        
+
         TableRecords beforeRecords = sqlUndoLog.getBeforeImage();
         TableRecords afterRecords = sqlUndoLog.getAfterImage();
 
         // Compare current data with before data
         // No need undo if the before data snapshot is equivalent to the after data snapshot.
-        if (DataCompareUtils.isRecordsEquals(beforeRecords, afterRecords)) {
+        Result<Boolean> beforeEqualsAfterResult = DataCompareUtils.isRecordsEquals(beforeRecords, afterRecords);
+        if (beforeEqualsAfterResult.getResult()) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Stop rollback because there is no data change " +
-                        "between the before data snapshot and the after data snapshot.");
+                    "between the before data snapshot and the after data snapshot.");
             }
             // no need continue undo.
             return false;
@@ -193,23 +195,30 @@ public abstract class AbstractUndoExecutor {
         // Validate if data is dirty.
         TableRecords currentRecords = queryCurrentRecords(conn);
         // compare with current data and after image.
-        if (!DataCompareUtils.isRecordsEquals(afterRecords, currentRecords)) {
-            
+        Result<Boolean> afterEqualsCurrentResult = DataCompareUtils.isRecordsEquals(afterRecords, currentRecords);
+        if (!afterEqualsCurrentResult.getResult()) {
+
             // If current data is not equivalent to the after data, then compare the current data with the before 
             // data, too. No need continue to undo if current data is equivalent to the before data snapshot
-            if (DataCompareUtils.isRecordsEquals(beforeRecords, currentRecords)) {
+            Result<Boolean> beforeEqualsCurrentResult = DataCompareUtils.isRecordsEquals(beforeRecords, currentRecords);
+            if (beforeEqualsCurrentResult.getResult()) {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Stop rollback because there is no data change " +
-                            "between the before data snapshot and the current data snapshot.");
+                        "between the before data snapshot and the current data snapshot.");
                 }
                 // no need continue undo.
                 return false;
             } else {
+                if (LOGGER.isInfoEnabled()) {
+                    if (StringUtils.isNotBlank(afterEqualsCurrentResult.getErrMsg())) {
+                        LOGGER.info(afterEqualsCurrentResult.getErrMsg(), afterEqualsCurrentResult.getErrMsgParams());
+                    }
+                }
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("check dirty datas failed, old and new data are not equal," +
-                            "tableName:[" + sqlUndoLog.getTableName() + "]," +
-                            "oldRows:[" + JSON.toJSONString(afterRecords.getRows()) + "]," +
-                            "newRows:[" + JSON.toJSONString(currentRecords.getRows()) + "].");
+                        "tableName:[" + sqlUndoLog.getTableName() + "]," +
+                        "oldRows:[" + JSON.toJSONString(afterRecords.getRows()) + "]," +
+                        "newRows:[" + JSON.toJSONString(currentRecords.getRows()) + "].");
                 }
                 throw new SQLException("Has dirty records when undo.");
             }
@@ -241,8 +250,8 @@ public abstract class AbstractUndoExecutor {
         }
         // build check sql
         String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(), pkName,
-                replace.substring(0, replace.length() - 1));
-        
+            replace.substring(0, replace.length() - 1));
+
         PreparedStatement statement = null;
         ResultSet checkSet = null;
         TableRecords currentRecords;
