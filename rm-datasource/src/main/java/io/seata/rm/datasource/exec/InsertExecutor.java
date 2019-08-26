@@ -135,7 +135,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                         if (PLACEHOLDER.equals(pkValue)) {
                             int idx = pkIndex;
                             if (i != 0) {
-                                idx = totalPlaceholder - (placeholderNum == pkIndex ? 0 : pkIndex);
+                                idx = totalPlaceholder - (placeholderNum == pkIndex ? 0 : placeholderNum - pkIndex);
                             }
                             ArrayList<Object> parameter = parameters[idx];
                             for (Object obj : parameter) {
