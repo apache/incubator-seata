@@ -21,6 +21,7 @@ import java.util.List;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
+import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
@@ -32,6 +33,7 @@ import io.seata.rm.datasource.sql.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.struct.Null;
+import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
 
 /**
  * The type My sql insert recognizer.
@@ -111,6 +113,16 @@ public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRe
                     row.add(((SQLValuableExpr)expr).getValue());
                 } else if (expr instanceof SQLVariantRefExpr) {
                     row.add(((SQLVariantRefExpr)expr).getName());
+                } else if (expr instanceof SQLMethodInvokeExpr) {
+                    SQLMethodInvokeExpr methodInvokeExpr = ((SQLMethodInvokeExpr)expr);
+                    List<SQLExpr> parameters = methodInvokeExpr.getParameters();
+                    List<Object> list = new ArrayList<>(parameters.size());
+                    for (SQLExpr sqlExpr : parameters) {
+                        if (sqlExpr instanceof SQLValuableExpr) {
+                            list.add(((SQLValuableExpr) sqlExpr).getValue());
+                        }
+                    }
+                    row.add(new SqlMethodExpr(methodInvokeExpr.getMethodName(), list));
                 } else {
                     throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                 }
