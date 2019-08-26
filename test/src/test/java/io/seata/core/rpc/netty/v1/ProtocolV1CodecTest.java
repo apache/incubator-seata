@@ -92,7 +92,7 @@ public class ProtocolV1CodecTest {
                 });
             }
 
-            cnt.await(10, TimeUnit.SECONDS);
+            cnt.await();
             LOGGER.info("success {}/{}", success.get(), runTimes);
             Assertions.assertEquals(success.get(), runTimes);
         } catch (InterruptedException e) {

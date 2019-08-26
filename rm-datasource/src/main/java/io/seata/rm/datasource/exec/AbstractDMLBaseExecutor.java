@@ -19,10 +19,10 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 import io.seata.rm.datasource.AbstractConnectionProxy;
+import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,9 +65,9 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      *
      * @param args the args
      * @return the t
-     * @throws Throwable the throwable
+     * @throws Exception the exception
      */
-    protected T executeAutoCommitFalse(Object[] args) throws Throwable {
+    protected T executeAutoCommitFalse(Object[] args) throws Exception {
         TableRecords beforeImage = beforeImage();
         T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
         TableRecords afterImage = afterImage(beforeImage);
@@ -96,14 +96,18 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
                 } catch (LockConflictException lockConflict) {
                     connectionProxy.getTargetConnection().rollback();
                     lockRetryController.sleep(lockConflict);
+                } catch (Exception exx) {
+                    connectionProxy.getTargetConnection().rollback();
+                    throw exx;
                 }
             }
 
         } catch (Exception e) {
             // when exception occur in finally,this exception will lost, so just print it here
-            LOGGER.error("exception occur", e);
+            LOGGER.error("execute executeAutoCommitTrue error:{}", e.getMessage(), e);
             throw e;
         } finally {
+            ((ConnectionProxy)connectionProxy).getContext().reset();
             connectionProxy.setAutoCommit(true);
         }
         return result;
