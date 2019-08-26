@@ -198,8 +198,8 @@ public class BatchInsertExecutorTest {
         when(statementProxy.getParameters()).thenReturn(paramters);
 
         List<List<Object>> insertRows = new ArrayList<>();
-        insertRows.add(Arrays.asList("?", "?", "?"));
-        insertRows.add(Arrays.asList("?", Null.get(), "?"));
+        insertRows.add(Arrays.asList("?", "?", "?", "userStatus1"));
+        insertRows.add(Arrays.asList("?", Null.get(), "?", "userStatus2"));
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
     }
 
@@ -223,8 +223,8 @@ public class BatchInsertExecutorTest {
         when(statementProxy.getParameters()).thenReturn(paramters);
 
         List<List<Object>> insertRows = new ArrayList<>();
-        insertRows.add(Arrays.asList("?", "?", "?"));
-        insertRows.add(Arrays.asList("?", Null.get(), "?"));
+        insertRows.add(Arrays.asList("?", "?", "?", "userStatus1"));
+        insertRows.add(Arrays.asList("?", Null.get(), "?", "userStatus2"));
         when(sqlInsertRecognizer.getInsertRows()).thenReturn(insertRows);
     }
 
