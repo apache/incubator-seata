@@ -114,15 +114,7 @@ public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRe
                 } else if (expr instanceof SQLVariantRefExpr) {
                     row.add(((SQLVariantRefExpr)expr).getName());
                 } else if (expr instanceof SQLMethodInvokeExpr) {
-                    SQLMethodInvokeExpr methodInvokeExpr = ((SQLMethodInvokeExpr)expr);
-                    List<SQLExpr> parameters = methodInvokeExpr.getParameters();
-                    List<Object> list = new ArrayList<>(parameters.size());
-                    for (SQLExpr sqlExpr : parameters) {
-                        if (sqlExpr instanceof SQLValuableExpr) {
-                            list.add(((SQLValuableExpr) sqlExpr).getValue());
-                        }
-                    }
-                    row.add(new SqlMethodExpr(methodInvokeExpr.getMethodName(), list));
+                    row.add(new SqlMethodExpr());
                 } else {
                     throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                 }

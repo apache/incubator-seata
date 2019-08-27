@@ -15,9 +15,6 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * TODO
  * sql method invoke expression
@@ -25,53 +22,4 @@ import java.util.List;
  */
 public class SqlMethodExpr {
 
-    private String name;
-    private List<Object> parameters = new ArrayList<>();
-
-    public SqlMethodExpr() {}
-
-    public SqlMethodExpr(String name, List<Object> parameters) {
-        this.name = name;
-        this.parameters = parameters;
-    }
-
-    /**
-     * get name
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * set name
-     * @param name the name
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    /**
-     * get parameters
-     * @return the parameters
-     */
-    public List<Object> getParameters() {
-        return parameters;
-    }
-
-    /**
-     * set parameters
-     * @param parameters the parameters
-     */
-    public void setParameters(List<Object> parameters) {
-        this.parameters = parameters;
-    }
-
-    @Override
-    public String toString() {
-        return "SqlMethod{" +
-                "name='" + name + '\'' +
-                ", parameters=" + parameters +
-                '}';
-    }
 }
