@@ -31,6 +31,7 @@ import io.seata.rm.datasource.sql.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Null;
+import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.slf4j.Logger;
@@ -166,8 +167,12 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (b != 0) {
             throw new NotSupportYetException("not support sql [" + recognizer.getOriginalSQL() + "]");
         }
+        // pk auto generated while single insert primary key is expression
+        if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlMethodExpr) {
+            pkValues = getPkValuesByAuto();
+        }
         // pk auto generated while column exists and value is null
-        if (pkValues.size() > 0 && pkValues.get(0) instanceof Null) {
+        else if (pkValues.size() > 0 && pkValues.get(0) instanceof Null) {
             pkValues = getPkValuesByAuto();
         }
         return pkValues;
@@ -209,7 +214,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     /**
      * check pk values
      * @param pkValues
-     * @return 0 ok 1 exists null value and normal value
+     * @return 0 ok 1 exists null value and non-null value
      */
     private int checkPkValues(List<Object> pkValues) {
         boolean pkParameterHasNull = false;
