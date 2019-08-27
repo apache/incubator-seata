@@ -163,8 +163,8 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (pkValues == null) {
             throw new ShouldNeverHappenException();
         }
-        int b = this.checkPkValues(pkValues);
-        if (b != 0) {
+        boolean b = this.checkPkValues(pkValues);
+        if (!b) {
             throw new NotSupportYetException("not support sql [" + recognizer.getOriginalSQL() + "]");
         }
         // pk auto generated while single insert primary key is expression
@@ -214,26 +214,31 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     /**
      * check pk values
      * @param pkValues
-     * @return 0 ok 1 exists null value and non-null value
+     * @return true support false not support
      */
-    private int checkPkValues(List<Object> pkValues) {
+    private boolean checkPkValues(List<Object> pkValues) {
         boolean pkParameterHasNull = false;
         boolean pkParameterHasNotNull = false;
-
+        boolean pkParameterHasExpr = false;
+        if (pkValues.size() == 1) {
+            return true;
+        }
         for (Object pkValue : pkValues) {
             if (pkValue instanceof Null) {
                 pkParameterHasNull = true;
                 continue;
             }
-            if (!(pkValue instanceof Null)) {
-                pkParameterHasNotNull = true;
-                continue;
+            pkParameterHasNotNull = true;
+            if (pkValue instanceof SqlMethodExpr) {
+                pkParameterHasExpr = true;
             }
         }
-
-        if (pkParameterHasNull && pkParameterHasNotNull) {
-            return 1;
+        if (pkParameterHasExpr) {
+            return false;
         }
-        return 0;
+        if (pkParameterHasNull && pkParameterHasNotNull) {
+            return false;
+        }
+        return true;
     }
 }
