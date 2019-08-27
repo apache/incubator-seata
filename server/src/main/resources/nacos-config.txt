@@ -28,6 +28,7 @@ store.file.flush-disk-mode=async
 store.file.session.reload.read_size=100
 store.db.datasource=dbcp
 store.db.db-type=mysql
+store.db.driver-class-name=com.mysql.jdbc.Driver
 store.db.url=jdbc:mysql://127.0.0.1:3306/seata?useUnicode=true
 store.db.user=mysql
 store.db.password=mysql
