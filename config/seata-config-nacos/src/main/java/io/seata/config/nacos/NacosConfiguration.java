@@ -44,6 +44,8 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     private static final String SEATA_GROUP = "SEATA_GROUP";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String REGISTRY_TYPE = "nacos";
+    private static final String DEFAULT_NAMESPACE = "public";
+    private static final String PRO_NAMESPACE_KEY = "namespace";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
 
@@ -146,7 +148,23 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
                 properties.setProperty(PRO_SERVER_ADDR_KEY, address);
             }
         }
+
+        if (null != System.getProperty(PRO_NAMESPACE_KEY)) {
+            properties.setProperty(PRO_NAMESPACE_KEY, System.getProperty(PRO_NAMESPACE_KEY));
+        } else {
+            String namespace = FILE_CONFIG.getConfig(getNacosNameSpaceFileKey());
+            if (null == namespace) {
+                namespace = DEFAULT_NAMESPACE;
+            }
+            properties.setProperty(PRO_NAMESPACE_KEY, namespace);
+        }
         return properties;
+    }
+
+    private static String getNacosNameSpaceFileKey() {
+        return ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
+                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                + PRO_NAMESPACE_KEY;
     }
 
     private static String getNacosAddrFileKey() {
