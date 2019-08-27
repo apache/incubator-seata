@@ -191,6 +191,9 @@ public class TableMetaCacheOracle {
                 index.setIndextype(IndexType.PRIMARY);
             }
         }
+        if(tm.getAllIndexes().isEmpty()){
+            throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
+        }
         IndexMeta index = tm.getAllIndexes().get(indexName);
         if (index.getIndextype().value() != 0) {
             if ("H2 JDBC Driver".equals(dbmd.getDriverName())) {

@@ -38,6 +38,7 @@ import io.seata.rm.datasource.DataSourceProxy;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import javax.sql.DataSource;
 
@@ -244,6 +245,23 @@ public class TableMetaTest {
         TableMetaCache.refresh(dataSourceProxy);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         Assertions.assertEquals(cacheTableMeta, realTableMeta);
+
+        //clear the index
+        indexMetas = new Object[][]{};
+        Assertions.assertThrows(Exception.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                method.invoke(null, dataSourceProxy, "t1");
+            }
+        });
+
+        //reset index meta
+        indexMetas =
+            new Object[][] {
+                new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
+                new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
+                new Object[] {"id_card_number", "id_card_number", false, "t", 1, 1, "D", 34}
+            };
 
         //add a new column
         columnMetas =
