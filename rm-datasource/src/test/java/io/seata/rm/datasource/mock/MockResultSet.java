@@ -15,9 +15,12 @@
  */
 package io.seata.rm.datasource.mock;
 
+import com.alibaba.druid.mock.MockStatementBase;
+import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,6 +30,8 @@ import java.util.List;
 public class MockResultSet extends com.alibaba.druid.mock.MockResultSet {
 
     private List<String> columnLabels;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MockResultSet.class);
 
     public MockResultSet(Statement statement) {
         this(statement, null);
@@ -41,6 +46,38 @@ public class MockResultSet extends com.alibaba.druid.mock.MockResultSet {
     public MockResultSet(Statement statement, List<String> columnLabels) {
         super(statement);
         this.columnLabels = columnLabels;
+    }
+
+    /**
+     * mock result set
+     * @param stmt
+     * @param labels
+     * @return
+     */
+    public MockResultSet mockResultSet(MockStatementBase stmt, List<String> labels, Object[][] metas){
+        if(metas.length < 1){
+            LOGGER.error("please initialize the column meta and index meta");
+            throw new RuntimeException("please initialize the column meta and index meta");
+        }
+        MockResultSet resultSet = new MockResultSet(stmt, labels);
+
+        List<ResultSetMetaDataBase.ColumnMetaData> columns = null;
+        try {
+            columns = resultSet.getMockMetaData().getColumns();
+        } catch (SQLException e) {
+            LOGGER.error("Could not get columns:{}", e.getMessage(), e);
+        }
+        for (String columnLabel : columnLabels) {
+            ResultSetMetaDataBase.ColumnMetaData column = new ResultSetMetaDataBase.ColumnMetaData();
+            column.setColumnName(columnLabel);
+            columns.add(column);
+        }
+
+        for (Object[] columnMeta : metas) {
+            resultSet.getRows().add(columnMeta);
+        }
+
+        return resultSet;
     }
 
     @Override

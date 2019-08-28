@@ -36,13 +36,33 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockDriver.class);
 
-    private Object[][] columnMetas = null;
+    /**
+     * the mock value of return value
+     */
+    private Object[][] mockReturnValue = null;
 
-    private Object[][] indexMetas = null;
+    /**
+     * the mock value of columns meta return value
+     */
+    private Object[][] mockColumnsMetasReturnValue = null;
 
-    public MockDriver(Object[][] columnMetas, Object[][] indexMetas) {
-        this.columnMetas = columnMetas;
-        this.indexMetas = indexMetas;
+    /**
+     *  the mock value of index meta return value
+     */
+    private Object[][] mockIndexMetasReturnValue = null;
+
+
+
+    /**
+     * Instantiate a new MockDriver
+     */
+    public MockDriver() {
+    }
+
+    public MockDriver(Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue) {
+        this.mockReturnValue = mockReturnValue;
+        this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
+        this.mockIndexMetasReturnValue = mockIndexMetasReturnValue;
     }
 
     /**
@@ -58,76 +78,56 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
         return new MockConnection(this, url, connectProperties);
     }
 
-    /**
-     * mock column meta result set
-     * @param stmt
-     * @return
-     */
-    public MockResultSet mockColumnMetaResultSet(MockStatementBase stmt, List<String> labels){
-        return mockResultSet(stmt, labels, columnMetas);
-    }
-
-    /**
-     * mock index meta result set
-     * @param stmt
-     * @return
-     */
-    public MockResultSet mockIndexMetaResultSet(MockStatementBase stmt, List<String> labels){
-        return mockResultSet(stmt, labels, indexMetas);
-    }
-
-    /**
-     * mock result set
-     * @param stmt
-     * @param labels
-     * @return
-     */
-    public MockResultSet mockResultSet(MockStatementBase stmt, List<String> labels, Object[][] metas){
-        if(metas.length < 1){
-            LOGGER.error("please initialize the column meta and index meta");
-            throw new RuntimeException("please initialize the column meta and index meta");
-        }
-        MockResultSet resultSet = new MockResultSet(stmt, labels);
-
-        List<ResultSetMetaDataBase.ColumnMetaData> columns = null;
-        try {
-            columns = resultSet.getMockMetaData().getColumns();
-        } catch (SQLException e) {
-            LOGGER.error("Could not get columns:{}", e.getMessage(), e);
-        }
-        for (String columnLabel : labels) {
-            ResultSetMetaDataBase.ColumnMetaData column = new ResultSetMetaDataBase.ColumnMetaData();
-            column.setColumnName(columnLabel);
-            columns.add(column);
-        }
-
-        for (Object[] columnMeta : metas) {
-            resultSet.getRows().add(columnMeta);
-        }
-
-        return resultSet;
-    }
-
     @Override
     public ResultSet executeQuery(MockStatementBase stmt, String sql) throws SQLException {
         return super.executeQuery(stmt, sql);
     }
 
-
-
     /**
-     * customize the column metas
-     * @param columnMetas
+     * mock the return value
+     * @return
      */
-    public void setColumnMetas(Object[][] columnMetas) {
-        this.columnMetas = columnMetas;
+    public Object[][] getMockReturnValue() {
+        return mockReturnValue;
     }
 
     /**
-     * customize the index metas
-     * @param indexMetas
+     *  get the return value
+     * @param mockReturnValue
      */
-    public void setIndexMetas(Object[][] indexMetas) {
-        this.indexMetas = indexMetas;
+    public void setMockReturnValue(Object[][] mockReturnValue) {
+        this.mockReturnValue = mockReturnValue;
+    }
+
+    /**
+     * mock the return value of columns meta
+     * @param mockColumnsMetasReturnValue
+     */
+    public void setMockColumnsMetasReturnValue(Object[][] mockColumnsMetasReturnValue) {
+        this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
+    }
+
+    /**
+     * get the return value of columns meta
+     * @return
+     */
+    public Object[][] getMockColumnsMetasReturnValue() {
+        return mockColumnsMetasReturnValue;
+    }
+
+    /**
+     * mock the return value of index meta
+     * @param mockIndexMetasReturnValue
+     */
+    public void setMockIndexMetasReturnValue(Object[][] mockIndexMetasReturnValue) {
+        this.mockIndexMetasReturnValue = mockIndexMetasReturnValue;
+    }
+
+    /**
+     * get the return value of index meta
+     * @return
+     */
+    public Object[][] getMockIndexMetasReturnValue() {
+        return mockIndexMetasReturnValue;
     }
 }

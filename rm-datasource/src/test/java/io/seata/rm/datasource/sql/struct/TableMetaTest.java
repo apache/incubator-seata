@@ -59,7 +59,7 @@ public class TableMetaTest {
     @Test
     public void getTableMetaTest_0() {
 
-        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas);
+        MockDriver mockDriver = new MockDriver(null, columnMetas, indexMetas);
         mockDriver.setExecuteHandler(new MockExecuteHandlerImpl(1));
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
@@ -95,7 +95,7 @@ public class TableMetaTest {
 
     @Test
     public void refreshTest_0() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas);
+        MockDriver mockDriver = new MockDriver(null, columnMetas, indexMetas);
         mockDriver.setExecuteHandler(new MockExecuteHandlerImpl(1));
 
         DruidDataSource druidDataSource = new DruidDataSource();
@@ -117,7 +117,7 @@ public class TableMetaTest {
                     new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 35},
                     new Object[] {"name1", "name1", false, "", 3, 1, "A", 35}
             };
-        mockDriver.setIndexMetas(indexMetas);
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertEquals(cacheTableMeta, realTableMeta);
@@ -129,7 +129,7 @@ public class TableMetaTest {
                 new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
                 new Object[] {"id_card", "id_card", false, "", 3, 1, "A", 34}
             };
-        mockDriver.setIndexMetas(indexMetas);
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -144,7 +144,7 @@ public class TableMetaTest {
                 new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
                 new Object[] {"id_card", "id_card", false, "", 3, 1, "D", 34}
             };
-        mockDriver.setIndexMetas(indexMetas);
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -159,7 +159,7 @@ public class TableMetaTest {
                 new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
                 new Object[] {"id_card", "id_card", false, "", 3, 2, "D", 34}
             };
-        mockDriver.setIndexMetas(indexMetas);
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -174,7 +174,7 @@ public class TableMetaTest {
                 new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
                 new Object[] {"id_card", "id_card", false, "", 1, 1, "D", 34}
             };
-        mockDriver.setIndexMetas(indexMetas);
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -189,7 +189,7 @@ public class TableMetaTest {
                 new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
                 new Object[] {"id_card", "id_card", false, "t", 1, 1, "D", 34}
             };
-        mockDriver.setIndexMetas(indexMetas);
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -204,7 +204,7 @@ public class TableMetaTest {
                 new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
                 new Object[] {"id_card_number", "id_card_number", false, "t", 1, 1, "D", 34}
             };
-        mockDriver.setIndexMetas(indexMetas);
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -214,6 +214,7 @@ public class TableMetaTest {
 
         //clear the index
         indexMetas = new Object[][]{};
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         Assertions.assertThrows(Exception.class, new Executable() {
             @Override
             public void execute() throws Throwable {
@@ -228,6 +229,7 @@ public class TableMetaTest {
                 new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
                 new Object[] {"id_card_number", "id_card_number", false, "t", 1, 1, "D", 34}
             };
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
 
         //add a new column
         columnMetas =
@@ -238,7 +240,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"}
             };
-        mockDriver.setColumnMetas(columnMetas);
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -255,7 +257,7 @@ public class TableMetaTest {
                     new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "YES"}
             };
-        mockDriver.setColumnMetas(columnMetas);
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -272,7 +274,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 64, 0, 10, 1, "", "", 0, 0, 64, 5, "NO", "YES"}
             };
-        mockDriver.setColumnMetas(columnMetas);
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -289,7 +291,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 64, 0, 10, 1, "", "", 0, 0, 64, 4, "NO", "YES"}
             };
-        mockDriver.setColumnMetas(columnMetas);
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -306,7 +308,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 20, 0, 10, 1, "", "", 0, 0, 64, 4, "NO", "YES"}
             };
-        mockDriver.setColumnMetas(columnMetas);
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -327,7 +329,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 20, 0, 10, 1, "", "001", 0, 0, 64, 4, "NO", "YES"}
             };
-        mockDriver.setColumnMetas(columnMetas);
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -344,7 +346,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 20, 0, 10, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
             };
-        mockDriver.setColumnMetas(columnMetas);
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -361,7 +363,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
             };
-        mockDriver.setColumnMetas(columnMetas);
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -378,7 +380,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.VARCHAR, "VARCHAR", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
             };
-        mockDriver.setColumnMetas(columnMetas);
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -395,7 +397,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card_number", Types.VARCHAR, "VARCHAR", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
             };
-        mockDriver.setColumnMetas(columnMetas);
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -412,7 +414,7 @@ public class TableMetaTest {
                 new Object[] {"", "user", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "user", "t1", "id_card_number", Types.VARCHAR, "VARCHAR", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
             };
-        mockDriver.setColumnMetas(columnMetas);
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -429,7 +431,7 @@ public class TableMetaTest {
                 new Object[] {"t", "user", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"t", "user", "t1", "id_card_number", Types.VARCHAR, "VARCHAR", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
             };
-        mockDriver.setColumnMetas(columnMetas);
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);

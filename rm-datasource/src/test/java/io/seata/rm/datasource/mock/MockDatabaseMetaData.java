@@ -65,11 +65,17 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
         "CARDINALITY"
     );
 
+    private Object[][] columnsMetasReturnValue;
+
+    private Object[][] indexMetasReturnValue;
+
     /**
      * Instantiate a new MockDatabaseMetaData
      */
     public MockDatabaseMetaData(MockConnection connection) {
         this.connection = connection;
+        this.columnsMetasReturnValue = connection.getDriver().getMockColumnsMetasReturnValue();
+        this.indexMetasReturnValue = connection.getDriver().getMockIndexMetasReturnValue();
     }
 
     @Override
@@ -698,7 +704,8 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     @Override
     public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
         throws SQLException {
-        return this.connection.getDriver().mockColumnMetaResultSet((MockStatementBase)this.connection.createStatement(), columnMetaColumnLabels);
+        return new MockResultSet((MockStatementBase)this.connection.createStatement(), columnMetaColumnLabels)
+                .mockResultSet((MockStatementBase)this.connection.createStatement(), columnMetaColumnLabels, columnsMetasReturnValue);
     }
 
     @Override
@@ -754,7 +761,8 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     @Override
     public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate)
         throws SQLException {
-        return this.connection.getDriver().mockIndexMetaResultSet((MockStatementBase)this.connection.createStatement(), indexMetaColumnLabels);
+        return new MockResultSet((MockStatementBase)this.connection.createStatement(), indexMetaColumnLabels)
+                .mockResultSet((MockStatementBase)this.connection.createStatement(), indexMetaColumnLabels, indexMetasReturnValue);
     }
 
     @Override
@@ -965,5 +973,13 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     @Override
     public boolean isWrapperFor(Class<?> iface) throws SQLException {
         return false;
+    }
+
+    public void setColumnsMetasReturnValue(Object[][] columnsMetasReturnValue) {
+        this.columnsMetasReturnValue = columnsMetasReturnValue;
+    }
+
+    public void setIndexMetasReturnValue(Object[][] indexMetasReturnValue) {
+        this.indexMetasReturnValue = indexMetasReturnValue;
     }
 }
