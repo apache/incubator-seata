@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.annotation;
+package io.seata.spring.annotation.datasource;
 
 import io.seata.rm.datasource.DataSourceProxy;
 

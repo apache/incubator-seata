@@ -15,6 +15,11 @@
  */
 package io.seata.spring.annotation;
 
+import javax.sql.DataSource;
+import java.lang.reflect.Method;
+import java.util.HashSet;
+import java.util.Set;
+
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.netty.RmRpcClient;
@@ -22,6 +27,7 @@ import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.core.rpc.netty.TmRpcClient;
 import io.seata.rm.RMClient;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.spring.annotation.datasource.DataSourceProxyHolder;
 import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.spring.util.TCCBeanParserUtils;
@@ -45,11 +51,6 @@ import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
-
-import javax.sql.DataSource;
-import java.lang.reflect.Method;
-import java.util.HashSet;
-import java.util.Set;
 
 import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_AUTOPROXY;
 
