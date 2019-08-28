@@ -34,11 +34,14 @@ public class ParameterParser {
     private static final String SERVER_DEFAULT_BIND_IP = "0.0.0.0";
     private static final String SERVER_DEFAULT_STORE_MODE = "file";
     private static final int SERVER_DEFAULT_NODE = 1;
+    /**
+     * The constant CONFIG.
+     */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     @Parameter(names = "--help", help = true)
     private boolean help;
-    @Parameter(names = {"--host", "-h"}, description = "The host to bind.", order = 1)
+    @Parameter(names = {"--host", "-h"}, description = "The ip to register to registry center.", order = 1)
     private String host = SERVER_DEFAULT_BIND_IP;
     @Parameter(names = {"--port", "-p"}, description = "The port to listen.", order = 2)
     private int port = SERVER_DEFAULT_PORT;
@@ -47,6 +50,11 @@ public class ParameterParser {
     @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3. default is 1", order = 4)
     private int serverNode = SERVER_DEFAULT_NODE;
 
+    /**
+     * Instantiates a new Parameter parser.
+     *
+     * @param args the args
+     */
     public ParameterParser(String[] args) {
         this.init(args);
     }
@@ -86,7 +94,7 @@ public class ParameterParser {
     /**
      * Gets host
      *
-     * @return host
+     * @return host host
      */
     public String getHost() {
         return host;
@@ -95,7 +103,7 @@ public class ParameterParser {
     /**
      * Gets port
      *
-     * @return port
+     * @return port port
      */
     public int getPort() {
         return port;
@@ -104,7 +112,7 @@ public class ParameterParser {
     /**
      * Gets store mode
      *
-     * @return storeMode
+     * @return storeMode store mode
      */
     public String getStoreMode() {
         return storeMode;
@@ -113,7 +121,7 @@ public class ParameterParser {
     /**
      * is help
      *
-     * @return help
+     * @return help boolean
      */
     public boolean isHelp() {
         return help;
@@ -121,6 +129,7 @@ public class ParameterParser {
 
     /**
      * Gets server node
+     *
      * @return server node
      */
     public int getServerNode() {
