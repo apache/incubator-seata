@@ -158,7 +158,7 @@ public class NettyPoolKey {
         }
 
         /**
-         * 状态值
+         * value
          */
         private int value;
     }

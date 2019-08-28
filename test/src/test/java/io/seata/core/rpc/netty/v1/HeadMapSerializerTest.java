@@ -73,7 +73,7 @@ class HeadMapSerializerTest {
     public void testUTF8() throws Exception {
         HeadMapSerializer mapSerializer = HeadMapSerializer.getInstance();
         String s = "test";
-        // utf-8 和 gbk  英文是一样的
+        // utf-8 and gbk same in English
         Assertions.assertArrayEquals(s.getBytes("UTF-8"), s.getBytes("GBK"));
 
         Map<String, String> map = new HashMap<String, String>();
@@ -84,8 +84,8 @@ class HeadMapSerializerTest {
         Map newmap = mapSerializer.decode(byteBuf, bs);
         Assertions.assertEquals(map, newmap);
 
-        // 支持中文
-        map.put("弄啥呢", "咋弄呢？");
+        // support chinese
+        map.put("你好", "你好？");
         bs = mapSerializer.encode(map, byteBuf);
         newmap = mapSerializer.decode(byteBuf, bs);
         Assertions.assertEquals(map, newmap);
