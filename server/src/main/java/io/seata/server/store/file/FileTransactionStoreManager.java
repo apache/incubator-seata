@@ -416,9 +416,9 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         }
         ByteBuffer byteBuffer = null;
 
-        if (bs.length > MAX_WRITE_BUFFER_SIZE) {
+        if (bs.length + 4 > MAX_WRITE_BUFFER_SIZE) {
             //allocateNew
-            byteBuffer = ByteBuffer.allocateDirect(bs.length);
+            byteBuffer = ByteBuffer.allocateDirect(bs.length + 4);
         } else {
             byteBuffer = writeBuffer;
             //recycle
