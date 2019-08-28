@@ -18,7 +18,6 @@ package io.seata.rm.datasource.sql.struct;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.concurrent.TimeUnit;
 
@@ -96,10 +95,10 @@ public class TableMetaCacheOracle {
             conn = dataSource.getConnection();
             stmt = conn.createStatement();
             DatabaseMetaData dbmd = conn.getMetaData();
-            return resultSetMetaToSchema(null, dbmd, tableName);
+            return resultSetMetaToSchema(dbmd, tableName);
         } catch (Exception e) {
             if (e instanceof SQLException) {
-                throw ((SQLException)e);
+                throw e;
             }
             throw new SQLException("Failed to fetch schema of " + tableName, e);
 
@@ -107,11 +106,13 @@ public class TableMetaCacheOracle {
             if (stmt != null) {
                 stmt.close();
             }
+            if (conn != null) {
+                conn.close();
+            }
         }
     }
 
-    private static TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
-        throws SQLException {
+    private static TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
         //Need to convert uppercase, oracle table name needs to be capitalized in order to get metadata
         tableName = tableName.toUpperCase();
         TableMeta tm = new TableMeta();
