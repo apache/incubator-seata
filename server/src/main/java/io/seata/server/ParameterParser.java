@@ -23,7 +23,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 
 /**
- * The type parameter parser
+ * The type Parameter parser.
  *
  * @author xingfudeshi@gmail.com
  * @date 2019/05/30
@@ -58,11 +58,6 @@ public class ParameterParser {
         this.init(args);
     }
 
-    /**
-     * initialize the parameter parser
-     *
-     * @param args
-     */
     private void init(String[] args) {
         try {
             JCommander jCommander = JCommander.newBuilder().addObject(this).build();
@@ -78,11 +73,6 @@ public class ParameterParser {
 
     }
 
-    /**
-     * print the error
-     *
-     * @param e
-     */
     private void printError(ParameterException e) {
         System.err.println("Option error " + e.getMessage());
         e.getJCommander().setProgramName(PROGRAM_NAME);
@@ -91,45 +81,45 @@ public class ParameterParser {
     }
 
     /**
-     * Gets host
+     * Gets host.
      *
-     * @return host host
+     * @return the host
      */
     public String getHost() {
         return host;
     }
 
     /**
-     * Gets port
+     * Gets port.
      *
-     * @return port port
+     * @return the port
      */
     public int getPort() {
         return port;
     }
 
     /**
-     * Gets store mode
+     * Gets store mode.
      *
-     * @return storeMode store mode
+     * @return the store mode
      */
     public String getStoreMode() {
         return storeMode;
     }
 
     /**
-     * is help
+     * Is help boolean.
      *
-     * @return help boolean
+     * @return the boolean
      */
     public boolean isHelp() {
         return help;
     }
 
     /**
-     * Gets server node
+     * Gets server node.
      *
-     * @return server node
+     * @return the server node
      */
     public int getServerNode() {
         return serverNode;
