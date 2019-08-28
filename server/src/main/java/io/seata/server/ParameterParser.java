@@ -31,7 +31,6 @@ import io.seata.core.constants.ConfigurationKeys;
 public class ParameterParser {
     private static final String PROGRAM_NAME = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
     private static final int SERVER_DEFAULT_PORT = 8091;
-    private static final String SERVER_DEFAULT_BIND_IP = "0.0.0.0";
     private static final String SERVER_DEFAULT_STORE_MODE = "file";
     private static final int SERVER_DEFAULT_NODE = 1;
     /**
@@ -42,7 +41,7 @@ public class ParameterParser {
     @Parameter(names = "--help", help = true)
     private boolean help;
     @Parameter(names = {"--host", "-h"}, description = "The ip to register to registry center.", order = 1)
-    private String host = SERVER_DEFAULT_BIND_IP;
+    private String host;
     @Parameter(names = {"--port", "-p"}, description = "The port to listen.", order = 2)
     private int port = SERVER_DEFAULT_PORT;
     @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file、db", order = 3)
