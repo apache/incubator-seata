@@ -17,12 +17,9 @@ package io.seata.rm.datasource.mock;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Properties;
-
 import com.alibaba.druid.mock.MockStatementBase;
-import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
+import com.alibaba.druid.mock.handler.MockExecuteHandler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,14 +48,16 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      */
     private Object[][] mockIndexMetasReturnValue = null;
 
+    /**
+     * the mock execute handler
+     */
+    private MockExecuteHandler mockExecuteHandler = null;
+
 
 
     /**
      * Instantiate a new MockDriver
      */
-    public MockDriver() {
-    }
-
     public MockDriver(Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue) {
         this.mockReturnValue = mockReturnValue;
         this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
@@ -80,7 +79,7 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
 
     @Override
     public ResultSet executeQuery(MockStatementBase stmt, String sql) throws SQLException {
-        return super.executeQuery(stmt, sql);
+        return this.mockExecuteHandler.executeQuery(stmt, sql);
     }
 
     /**
@@ -129,5 +128,13 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      */
     public Object[][] getMockIndexMetasReturnValue() {
         return mockIndexMetasReturnValue;
+    }
+
+    /**
+     * set the mock execute handler
+     * @param mockExecuteHandler
+     */
+    public void setMockExecuteHandler(MockExecuteHandler mockExecuteHandler){
+        this.mockExecuteHandler = mockExecuteHandler;
     }
 }

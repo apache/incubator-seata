@@ -60,7 +60,7 @@ public class TableMetaTest {
     public void getTableMetaTest_0() {
 
         MockDriver mockDriver = new MockDriver(null, columnMetas, indexMetas);
-        mockDriver.setExecuteHandler(new MockExecuteHandlerImpl(1));
+        mockDriver.setMockExecuteHandler(new MockExecuteHandlerImpl(1));
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
@@ -96,7 +96,7 @@ public class TableMetaTest {
     @Test
     public void refreshTest_0() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
         MockDriver mockDriver = new MockDriver(null, columnMetas, indexMetas);
-        mockDriver.setExecuteHandler(new MockExecuteHandlerImpl(1));
+        mockDriver.setMockExecuteHandler(new MockExecuteHandlerImpl(1));
 
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setUrl("jdbc:mock:xxx");
