@@ -16,20 +16,26 @@
 package io.seata.rm.datasource.mock;
 
 import com.alibaba.druid.mock.MockStatementBase;
-import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
+import com.alibaba.druid.util.jdbc.ResultSetBase;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author will
  * @date 2019/8/14
  */
-public class MockResultSet extends com.alibaba.druid.mock.MockResultSet {
+public class MockResultSet extends ResultSetBase {
 
     private List<String> columnLabels;
+
+    private int rowIndex = -1;
+
+    private List<Object[]> rows;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockResultSet.class);
 
@@ -46,42 +52,83 @@ public class MockResultSet extends com.alibaba.druid.mock.MockResultSet {
     public MockResultSet(Statement statement, List<String> columnLabels) {
         super(statement);
         this.columnLabels = columnLabels;
+        this.rows = new ArrayList<Object[]>();
+        super.metaData = new MockResultSetMetaData();
     }
 
     /**
      * mock result set
-     * @param stmt
-     * @param labels
+     * @param metas
      * @return
      */
-    public MockResultSet mockResultSet(MockStatementBase stmt, List<String> labels, Object[][] metas){
+    public MockResultSet mockResultSet(Object[][] metas){
         if(metas.length < 1){
             LOGGER.error("please initialize the column meta and index meta");
             throw new RuntimeException("please initialize the column meta and index meta");
         }
-        MockResultSet resultSet = new MockResultSet(stmt, labels);
+        List<ColumnMeta> columns = this.getMockMetaData().getColumns();
 
-        List<ResultSetMetaDataBase.ColumnMetaData> columns = null;
-        try {
-            columns = resultSet.getMockMetaData().getColumns();
-        } catch (SQLException e) {
-            LOGGER.error("Could not get columns:{}", e.getMessage(), e);
-        }
         for (String columnLabel : columnLabels) {
-            ResultSetMetaDataBase.ColumnMetaData column = new ResultSetMetaDataBase.ColumnMetaData();
+            ColumnMeta column = new ColumnMeta();
             column.setColumnName(columnLabel);
             columns.add(column);
         }
 
         for (Object[] columnMeta : metas) {
-            resultSet.getRows().add(columnMeta);
+            this.getRows().add(columnMeta);
         }
 
-        return resultSet;
+        return this;
+    }
+
+    public MockResultSetMetaData getMockMetaData() {
+        return (MockResultSetMetaData) metaData;
+    }
+
+    @Override
+    public boolean next() throws SQLException {
+        if (closed) {
+            throw new SQLException();
+        }
+
+        if (rowIndex < rows.size() - 1) {
+            rowIndex++;
+            return true;
+        }
+        return false;
     }
 
     @Override
     public int findColumn(String columnLabel) throws SQLException {
         return columnLabels.indexOf(columnLabel) + 1;
+    }
+
+    public Object getObjectInternal(int columnIndex) {
+        Object[] row = rows.get(rowIndex);
+        Object obj = row[columnIndex - 1];
+        return obj;
+    }
+
+    @Override
+    public boolean previous() throws SQLException {
+        if (closed) {
+            throw new SQLException();
+        }
+
+        if (rowIndex >= 0) {
+            rowIndex--;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void updateObject(int columnIndex, Object x) throws SQLException {
+        Object[] row = rows.get(rowIndex);
+        row[columnIndex - 1] = x;
+    }
+
+    public List<Object[]> getRows() {
+        return rows;
     }
 }

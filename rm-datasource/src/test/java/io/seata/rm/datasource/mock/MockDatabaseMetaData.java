@@ -705,7 +705,7 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
         throws SQLException {
         return new MockResultSet((MockStatementBase)this.connection.createStatement(), columnMetaColumnLabels)
-                .mockResultSet((MockStatementBase)this.connection.createStatement(), columnMetaColumnLabels, columnsMetasReturnValue);
+                .mockResultSet(columnsMetasReturnValue);
     }
 
     @Override
@@ -762,7 +762,7 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate)
         throws SQLException {
         return new MockResultSet((MockStatementBase)this.connection.createStatement(), indexMetaColumnLabels)
-                .mockResultSet((MockStatementBase)this.connection.createStatement(), indexMetaColumnLabels, indexMetasReturnValue);
+                .mockResultSet(indexMetasReturnValue);
     }
 
     @Override

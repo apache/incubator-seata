@@ -18,11 +18,9 @@ package io.seata.rm.datasource.mock;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.mock.handler.MockExecuteHandler;
-import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
-import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase.ColumnMetaData;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
 
 /**
   * @author will
@@ -44,9 +42,9 @@ public class MockExecuteHandlerImpl implements MockExecuteHandler {
     public ResultSet executeQuery(MockStatementBase statement, String sql) throws SQLException {
         MockResultSet resultSet = new MockResultSet(statement);
 
-        List<ColumnMetaData> columns = resultSet.getMockMetaData().getColumns();
+        List<ColumnMeta> columns = resultSet.getMockMetaData().getColumns();
         for (int i = 0; i < resultSetSize; i++) {
-            columns.add(new ResultSetMetaDataBase.ColumnMetaData());
+            columns.add(new ColumnMeta());
         }
 
         return resultSet;
