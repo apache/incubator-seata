@@ -15,6 +15,7 @@
  */
 package io.seata.spring.annotation;
 
+import javax.sql.DataSource;
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
@@ -25,6 +26,8 @@ import io.seata.core.rpc.netty.RmRpcClient;
 import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.core.rpc.netty.TmRpcClient;
 import io.seata.rm.RMClient;
+import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.spring.annotation.datasource.DataSourceProxyHolder;
 import io.seata.spring.tcc.TccActionInterceptor;
 import io.seata.spring.util.SpringProxyUtils;
 import io.seata.spring.util.TCCBeanParserUtils;
@@ -39,12 +42,17 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+
+import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_AUTOPROXY;
 
 /**
  * The type Global transaction scanner.
@@ -54,7 +62,7 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     implements InitializingBean, ApplicationContextAware,
-    DisposableBean {
+    DisposableBean, BeanPostProcessor {
 
     /**
      *
@@ -190,7 +198,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     private void registerSpringShutdownHook() {
         if (applicationContext instanceof ConfigurableApplicationContext) {
-            ((ConfigurableApplicationContext)applicationContext).registerShutdownHook();
+            ((ConfigurableApplicationContext) applicationContext).registerShutdownHook();
             ShutdownHook.removeRuntimeShutdownHook();
         }
         ShutdownHook.getInstance().addDisposable(TmRpcClient.getInstance(applicationId, txServiceGroup));
@@ -216,7 +224,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
                     Class<?>[] interfacesIfJdk = SpringProxyUtils.findInterfaces(bean);
 
-                    if (!existsAnnotation(new Class[] {serviceInterface})
+                    if (!existsAnnotation(new Class[]{serviceInterface})
                         && !existsAnnotation(interfacesIfJdk)) {
                         return bean;
                     }
@@ -276,7 +284,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     @Override
     protected Object[] getAdvicesAndAdvisorsForBean(Class beanClass, String beanName, TargetSource customTargetSource)
         throws BeansException {
-        return new Object[] {interceptor};
+        return new Object[]{interceptor};
     }
 
     @Override
@@ -297,4 +305,22 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         this.setBeanFactory(applicationContext);
     }
 
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+        if (bean instanceof DataSource && !(bean instanceof DataSourceProxy) && ConfigurationFactory.getInstance().getBoolean(DATASOURCE_AUTOPROXY, false)) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Auto proxy of  [" + beanName + "]");
+            }
+            DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
+            return Enhancer.create(bean.getClass(), (org.springframework.cglib.proxy.MethodInterceptor) (o, method, args, methodProxy) -> {
+                Method m = BeanUtils.findDeclaredMethod(DataSourceProxy.class, method.getName(), method.getParameterTypes());
+                if (null != m) {
+                    return m.invoke(dataSourceProxy, args);
+                } else {
+                    return method.invoke(bean, args);
+                }
+            });
+        }
+        return bean;
+    }
 }
