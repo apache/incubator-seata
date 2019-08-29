@@ -459,7 +459,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception undoLog deleting ... ", e);
             }
-        },0, UNDOLOG_DELETE_PERIOD,TimeUnit.MILLISECONDS);
+        },3 * 60 * 1000, UNDOLOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     @Override
