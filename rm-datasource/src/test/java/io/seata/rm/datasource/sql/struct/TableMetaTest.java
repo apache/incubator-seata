@@ -22,7 +22,6 @@ import java.util.Collections;
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.mock.MockDriver;
-import io.seata.rm.datasource.mock.MockExecuteHandlerImpl;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
@@ -59,8 +58,7 @@ public class TableMetaTest {
     @Test
     public void getTableMetaTest_0() {
 
-        MockDriver mockDriver = new MockDriver(null, columnMetas, indexMetas);
-        mockDriver.setMockExecuteHandler(new MockExecuteHandlerImpl(1));
+        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas);
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
@@ -95,8 +93,7 @@ public class TableMetaTest {
 
     @Test
     public void refreshTest_0() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        MockDriver mockDriver = new MockDriver(null, columnMetas, indexMetas);
-        mockDriver.setMockExecuteHandler(new MockExecuteHandlerImpl(1));
+        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas);
 
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setUrl("jdbc:mock:xxx");

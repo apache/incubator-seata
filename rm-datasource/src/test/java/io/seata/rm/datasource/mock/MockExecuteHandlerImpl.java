@@ -28,24 +28,25 @@ import io.seata.rm.datasource.sql.struct.ColumnMeta;
   */
 public class MockExecuteHandlerImpl implements MockExecuteHandler {
 
-    private int resultSetSize;
+    /**
+     * the mock value of return value
+     */
+    private Object[][] mockReturnValue = null;
 
     /**
      * Instantiate MockExecuteHandlerImpl
-     * @param resultSetSize
+     * @param mockReturnValue
      */
-    public MockExecuteHandlerImpl(int resultSetSize) {
-        this.resultSetSize = resultSetSize;
+    public MockExecuteHandlerImpl(Object[][] mockReturnValue) {
+        this.mockReturnValue = mockReturnValue;
     }
 
     @Override
     public ResultSet executeQuery(MockStatementBase statement, String sql) throws SQLException {
         MockResultSet resultSet = new MockResultSet(statement);
 
-        List<ColumnMeta> columns = resultSet.getMockMetaData().getColumns();
-        for (int i = 0; i < resultSetSize; i++) {
-            columns.add(new ColumnMeta());
-        }
+        //mock the return value
+        resultSet.mockResultSet(mockReturnValue);
 
         return resultSet;
     }

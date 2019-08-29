@@ -63,15 +63,7 @@ public class MockResultSet extends ResultSetBase {
      */
     public MockResultSet mockResultSet(Object[][] metas){
         if(metas.length < 1){
-            LOGGER.error("please initialize the column meta and index meta");
-            throw new RuntimeException("please initialize the column meta and index meta");
-        }
-        List<ColumnMeta> columns = this.getMockMetaData().getColumns();
-
-        for (String columnLabel : columnLabels) {
-            ColumnMeta column = new ColumnMeta();
-            column.setColumnName(columnLabel);
-            columns.add(column);
+            return this;
         }
 
         for (Object[] columnMeta : metas) {
