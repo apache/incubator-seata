@@ -20,6 +20,7 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
+import com.alibaba.druid.sql.ast.expr.SQLSequenceExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
@@ -114,7 +115,8 @@ public class OracleInsertRecognizer extends BaseRecognizer implements SQLInsertR
                     row.add(((SQLValuableExpr)expr).getValue());
                 } else if (expr instanceof SQLVariantRefExpr) {
                     row.add(((SQLVariantRefExpr)expr).getName());
-                } else if (expr instanceof SQLMethodInvokeExpr) {
+                } else if (expr instanceof SQLMethodInvokeExpr || expr instanceof SQLSequenceExpr) {
+                    // TODO temporary processing SQLMethodInvokeExpr and SQLSequenceExpr
                     row.add(new SqlMethodExpr());
                 } else {
                     throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
