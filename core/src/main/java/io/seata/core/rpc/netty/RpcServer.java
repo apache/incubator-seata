@@ -322,7 +322,7 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof RpcMessage) {
             RpcMessage rpcMessage = (RpcMessage) msg;
-            debugLog("read:" + rpcMessage.getBody().toString());
+            debugLog("read:" + rpcMessage.getBody());
             if (rpcMessage.getBody() instanceof RegisterTMRequest) {
                 serverMessageListener.onRegTmMessage(rpcMessage, ctx, this, checkAuthHandler);
                 return;
