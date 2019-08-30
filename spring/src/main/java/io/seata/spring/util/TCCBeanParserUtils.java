@@ -48,6 +48,10 @@ public class TCCBeanParserUtils {
             if (remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM) {
                 //LocalTCC
                 return isTccProxyTargetBean(remotingDesc);
+            } else if(remotingDesc != null && (remotingDesc.getProtocol() == Protocols.SOFA_RPC
+                                                || remotingDesc.getProtocol() == Protocols.DUBBO)){
+                //sofa:service  dubbo:service
+                return isTccProxyTargetBean(remotingDesc);
             } else {
                 // sofa:reference / dubbo:reference, factory bean
                 return false;
