@@ -120,6 +120,9 @@ public class TableMetaCacheOracle {
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
+        if(tableName.indexOf("\"") != -1){
+            tableName = tableName.replace("\"", "").toLowerCase();
+        }
 
         ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
         ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
