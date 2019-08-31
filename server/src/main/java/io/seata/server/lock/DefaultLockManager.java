@@ -71,7 +71,7 @@ public class DefaultLockManager extends AbstractLockManager {
             locks.addAll(collectRowLocks(branchSession));
         }
         try {
-            return this.doReleaseLock(locks, globalSession.getBranchSessions().get(0));
+            return this.doReleaseLock(locks, null);
         } catch (Exception t) {
             LOGGER.error("unLock globalSession error, xid:" + globalSession.getXid(), t);
             return false;
