@@ -273,7 +273,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
     }
 
     @Override
-    public boolean unlock() throws TransactionException {
+    public boolean unlock() {
         return LockerFactory.getLockManager().releaseLock(this);
     }
 

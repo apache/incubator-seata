@@ -110,12 +110,8 @@ public class MemoryLocker extends AbstractLocker {
                     continue;
                 } else {
                     LOGGER.info("Global lock on [" + tableName + ":" + pk + "] is holding by " + lockingTransactionId);
-                    try {
-                        // Release all acquired locks.
-                        branchSession.unlock();
-                    } catch (TransactionException e) {
-                        throw new FrameworkException(e);
-                    }
+                    // Release all acquired locks.
+                    branchSession.unlock();
                     return false;
                 }
             }

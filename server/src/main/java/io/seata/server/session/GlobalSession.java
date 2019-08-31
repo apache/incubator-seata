@@ -25,12 +25,17 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import io.seata.common.XID;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
+import io.seata.core.store.StoreMode;
 import io.seata.server.UUIDGenerator;
+import io.seata.server.lock.LockerFactory;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import org.slf4j.Logger;
@@ -73,6 +78,11 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     private final ArrayList<BranchSession> branchSessions = new ArrayList<>();
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
+
+    /**
+     * The constant CONFIG.
+     */
+    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
      * Add boolean.
@@ -172,9 +182,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     }
 
-    public void clean() throws TransactionException {
-        for (BranchSession branchSession : branchSessions) {
-            branchSession.unlock();
+    public void clean() {
+        String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
+        if (StoreMode.DB.name().equalsIgnoreCase(storeMode)) {
+            LockerFactory.getLockManager().releaseGlobalSessionLock(this);
+        } else {
+            for (BranchSession branchSession : branchSessions) {
+                branchSession.unlock();
+            }
         }
 
     }
@@ -630,5 +645,9 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public interface LockCallable<V> {
 
         V call() throws TransactionException;
+    }
+
+    public ArrayList<BranchSession> getBranchSessions() {
+        return branchSessions;
     }
 }

@@ -15,6 +15,7 @@
  */
 package io.seata.server.lock;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.seata.common.util.CollectionUtils;
@@ -23,6 +24,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.core.lock.RowLock;
 import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
 
 /**
  * The type Default lock manager.
@@ -51,7 +53,7 @@ public class DefaultLockManager extends AbstractLockManager {
     }
 
     @Override
-    public boolean releaseLock(BranchSession branchSession) throws TransactionException {
+    public boolean releaseLock(BranchSession branchSession) {
         List<RowLock> locks = collectRowLocks(branchSession);
         if (CollectionUtils.isEmpty(locks)) {
             //no lock
@@ -61,6 +63,25 @@ public class DefaultLockManager extends AbstractLockManager {
             return getLocker(branchSession).releaseLock(locks);
         } catch (Exception t) {
             LOGGER.error("unLock error, branchSession:" + branchSession, t);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean releaseGlobalSessionLock(GlobalSession globalSession)  {
+        List<RowLock> locks = new ArrayList<>();
+        ArrayList<BranchSession> branchSessions = globalSession.getBranchSessions();
+        for (BranchSession branchSession : branchSessions) {
+            locks.addAll(collectRowLocks(branchSession));
+        }
+        if (CollectionUtils.isEmpty(locks)) {
+            //no lock
+            return true;
+        }
+        try {
+            return getLocker(branchSessions.get(0)).releaseLock(locks);
+        } catch (Exception t) {
+            LOGGER.error("unLock globalSession error, xid:" + globalSession.getXid(), t);
             return false;
         }
     }
