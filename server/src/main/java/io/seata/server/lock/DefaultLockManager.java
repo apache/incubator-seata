@@ -53,7 +53,7 @@ public class DefaultLockManager extends AbstractLockManager {
     }
 
     @Override
-    public boolean releaseLock(BranchSession branchSession) {
+    public boolean releaseLock(BranchSession branchSession) throws TransactionException {
         List<RowLock> locks = collectRowLocks(branchSession);
         if (CollectionUtils.isEmpty(locks)) {
             //no lock
@@ -68,7 +68,7 @@ public class DefaultLockManager extends AbstractLockManager {
     }
 
     @Override
-    public boolean releaseGlobalSessionLock(GlobalSession globalSession)  {
+    public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
         List<RowLock> locks = new ArrayList<>();
         ArrayList<BranchSession> branchSessions = globalSession.getBranchSessions();
         for (BranchSession branchSession : branchSessions) {

@@ -40,16 +40,18 @@ public interface LockManager {
      *
      * @param branchSession the branch session
      * @return the boolean
+     * @throws TransactionException the transaction exception
      */
-    boolean releaseLock(BranchSession branchSession);
+    boolean releaseLock(BranchSession branchSession) throws TransactionException;
 
     /**
      * Un lock boolean.
      *
      * @param globalSession the global session
      * @return the boolean
+     * @throws TransactionException the transaction exception
      */
-    boolean releaseGlobalSessionLock(GlobalSession globalSession);
+    boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException;
 
     /**
      * Is lockable boolean.
