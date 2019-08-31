@@ -85,6 +85,7 @@ public class DefaultCore implements Core {
                 LOGGER.error("Failed to add branchSession to globalSession:{}",ex.getMessage(),ex);
                 throw new TransactionException(FailedToAddBranch);
             }
+            LOGGER.info("Successfully register branch xid = {}, branchId = {}", globalSession.getXid(), branchSession.getBranchId());
             return branchSession.getBranchId();
         });
     }
@@ -107,6 +108,8 @@ public class DefaultCore implements Core {
         }
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.changeBranchStatus(branchSession, status);
+
+        LOGGER.info("Successfully branch report xid = {}, branchId = {}", globalSession.getXid(), branchSession.getBranchId());
     }
 
     @Override
@@ -133,6 +136,7 @@ public class DefaultCore implements Core {
         eventBus.post(new GlobalTransactionEvent(session.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
             session.getTransactionName(), session.getBeginTime(), null, session.getStatus()));
 
+        LOGGER.info("Successfully begin global transaction xid = {}", session.getXid());
         return session.getXid();
     }
 
@@ -306,7 +310,7 @@ public class DefaultCore implements Core {
                 switch (branchStatus) {
                     case PhaseTwo_Rollbacked:
                         globalSession.removeBranch(branchSession);
-                        LOGGER.info("Successfully rollbacked branch " + branchSession);
+                        LOGGER.info("Successfully rollback branch " + branchSession);
                         continue;
                     case PhaseTwo_RollbackFailed_Unretryable:
                         SessionHelper.endRollbackFailed(globalSession);
@@ -336,6 +340,8 @@ public class DefaultCore implements Core {
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
             globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
             globalSession.getStatus()));
+
+        LOGGER.info("Successfully rollback global, xid = {}", globalSession.getXid());
     }
 
     @Override
