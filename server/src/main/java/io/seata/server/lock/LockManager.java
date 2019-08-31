@@ -46,6 +46,7 @@ public interface LockManager {
 
     /**
      * Un lock boolean.
+     * only used by db mode
      *
      * @param globalSession the global session
      * @return the boolean

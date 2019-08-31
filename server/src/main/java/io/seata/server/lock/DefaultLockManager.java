@@ -55,12 +55,8 @@ public class DefaultLockManager extends AbstractLockManager {
     @Override
     public boolean releaseLock(BranchSession branchSession) throws TransactionException {
         List<RowLock> locks = collectRowLocks(branchSession);
-        if (CollectionUtils.isEmpty(locks)) {
-            //no lock
-            return true;
-        }
         try {
-            return getLocker(branchSession).releaseLock(locks);
+            return this.doReleaseLock(locks, branchSession);
         } catch (Exception t) {
             LOGGER.error("unLock error, branchSession:" + branchSession, t);
             return false;
@@ -74,16 +70,20 @@ public class DefaultLockManager extends AbstractLockManager {
         for (BranchSession branchSession : branchSessions) {
             locks.addAll(collectRowLocks(branchSession));
         }
-        if (CollectionUtils.isEmpty(locks)) {
-            //no lock
-            return true;
-        }
         try {
-            return getLocker(branchSessions.get(0)).releaseLock(locks);
+            return this.doReleaseLock(locks, globalSession.getBranchSessions().get(0));
         } catch (Exception t) {
             LOGGER.error("unLock globalSession error, xid:" + globalSession.getXid(), t);
             return false;
         }
+    }
+
+    private boolean doReleaseLock(List<RowLock> locks, BranchSession branchSession) {
+        if (CollectionUtils.isEmpty(locks)) {
+            //no lock
+            return true;
+        }
+        return getLocker(branchSession).releaseLock(locks);
     }
 
     @Override
