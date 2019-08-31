@@ -411,7 +411,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     }
 
     private boolean writeDataFile(byte[] bs) {
-        if (bs == null) {
+        if (bs == null || bs.length >= Integer.MAX_VALUE - 3) {
             return false;
         }
         ByteBuffer byteBuffer = null;
