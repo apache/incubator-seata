@@ -33,6 +33,7 @@ import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.druid.BaseRecognizer;
 import io.seata.rm.datasource.sql.struct.Null;
 import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
+import io.seata.rm.datasource.sql.struct.SqlSequenceExpr;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -115,9 +116,13 @@ public class OracleInsertRecognizer extends BaseRecognizer implements SQLInsertR
                     row.add(((SQLValuableExpr)expr).getValue());
                 } else if (expr instanceof SQLVariantRefExpr) {
                     row.add(((SQLVariantRefExpr)expr).getName());
-                } else if (expr instanceof SQLMethodInvokeExpr || expr instanceof SQLSequenceExpr) {
-                    // TODO temporary processing SQLMethodInvokeExpr and SQLSequenceExpr
+                } else if (expr instanceof SQLMethodInvokeExpr) {
                     row.add(new SqlMethodExpr());
+                } else if (expr instanceof SQLSequenceExpr) {
+                    SQLSequenceExpr sequenceExpr = ((SQLSequenceExpr) expr);
+                    String sequence = sequenceExpr.getSequence().getSimpleName();
+                    String function = sequenceExpr.getFunction().name;
+                    row.add(new SqlSequenceExpr(sequence, function));
                 } else {
                     throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                 }

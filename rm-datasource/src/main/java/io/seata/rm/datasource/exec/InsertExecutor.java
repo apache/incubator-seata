@@ -32,6 +32,7 @@ import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Null;
 import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
+import io.seata.rm.datasource.sql.struct.SqlSequenceExpr;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.slf4j.Logger;
@@ -72,7 +73,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         //Pk column exists or PK is just auto generated
-        List<Object> pkValues = containsPK() ? getPkValuesByColumn() : getPkValuesByAuto();
+        List<Object> pkValues = getPkValuesByColumn();
 
         TableRecords afterImage = buildTableRecords(pkValues);
 
@@ -93,19 +94,10 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected List<Object> getPkValuesByColumn() throws SQLException {
         // insert values including PK
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        List<String> insertColumns = recognizer.getInsertColumns();
-        String pk = getTableMeta().getPkName();
+        final int pkIndex = getPkIndex();
         List<Object> pkValues = null;
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
-            int insertColumnsSize = insertColumns.size();
-            int pkIndex = 0;
-            for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
-                if (insertColumns.get(paramIdx).equalsIgnoreCase(pk)) {
-                    pkIndex = paramIdx;
-                    break;
-                }
-            }
 
             List<List<Object>> insertRows = recognizer.getInsertRows();
             if (insertRows != null && !insertRows.isEmpty()) {
@@ -149,15 +141,10 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 }
             }
         } else {
-            for (int paramIdx = 0; paramIdx < insertColumns.size(); paramIdx++) {
-                if (insertColumns.get(paramIdx).equalsIgnoreCase(pk)) {
-                    List<List<Object>> insertRows = recognizer.getInsertRows();
-                    pkValues = new ArrayList<>(insertRows.size());
-                    for (List<Object> row : insertRows) {
-                        pkValues.add(row.get(paramIdx));
-                    }
-                    break;
-                }
+            List<List<Object>> insertRows = recognizer.getInsertRows();
+            pkValues = new ArrayList<>(insertRows.size());
+            for (List<Object> row : insertRows) {
+                pkValues.add(row.get(pkIndex));
             }
         }
         if (pkValues == null) {
@@ -165,15 +152,36 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         boolean b = this.checkPkValues(pkValues);
         if (!b) {
-            throw new NotSupportYetException("not support sql [" + recognizer.getOriginalSQL() + "]");
+            throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+        }
+        if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlSequenceExpr) {
+            pkValues = getPkValuesBySequence(pkValues.get(0));
         }
         // pk auto generated while single insert primary key is expression
-        if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlMethodExpr) {
+        else if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlMethodExpr) {
             pkValues = getPkValuesByAuto();
         }
         // pk auto generated while column exists and value is null
         else if (pkValues.size() > 0 && pkValues.get(0) instanceof Null) {
             pkValues = getPkValuesByAuto();
+        }
+        return pkValues;
+    }
+
+    protected List<Object> getPkValuesBySequence(Object expr) throws SQLException {
+        ResultSet genKeys = null;
+        if (expr instanceof SqlSequenceExpr) {
+            SqlSequenceExpr sequenceExpr = (SqlSequenceExpr) expr;
+            final String sql = "SELECT " + sequenceExpr.getSequence() + ".currval FROM DUAL";
+            LOGGER.warn("Fail to get auto-generated keys, use \'{}\' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
+            genKeys = statementProxy.getConnection().createStatement().executeQuery(sql);
+        } else {
+            throw new NotSupportYetException(String.format("not support expr [%s]", expr.getClass().getName()));
+        }
+        List<Object> pkValues = new ArrayList<>();
+        while (genKeys.next()) {
+            Object v = genKeys.getObject(1);
+            pkValues.add(v);
         }
         return pkValues;
     }
@@ -241,4 +249,31 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         return true;
     }
+
+    private int getPkIndex() {
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
+        String pkName = getTableMeta().getPkName();
+        List<String> insertColumns = recognizer.getInsertColumns();
+        if (insertColumns != null && !insertColumns.isEmpty()) {
+            final int insertColumnsSize = insertColumns.size();
+            int pkIndex = 0;
+            for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
+                if (insertColumns.get(paramIdx).equalsIgnoreCase(pkName)) {
+                    pkIndex = paramIdx;
+                    break;
+                }
+            }
+            return pkIndex;
+        }
+        int pkIndex = -1;
+        Map<String, ColumnMeta> allColumns = getTableMeta().getAllColumns();
+        for (Map.Entry<String, ColumnMeta> entry : allColumns.entrySet()) {
+            pkIndex++;
+            if (entry.getValue().getColumnName().equals(pkName)) {
+                break;
+            }
+        }
+        return pkIndex;
+    }
+
 }

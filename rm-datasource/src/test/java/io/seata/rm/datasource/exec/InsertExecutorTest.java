@@ -106,10 +106,9 @@ public class InsertExecutorTest {
 
     @Test
     public void testAfterImage_ByAuto() throws SQLException {
-        doReturn(false).when(insertExecutor).containsPK();
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
-        doReturn(pkValues).when(insertExecutor).getPkValuesByAuto();
+        doReturn(pkValues).when(insertExecutor).getPkValuesByColumn();
         TableRecords tableRecords = new TableRecords();
         doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValues);
         TableRecords resultTableRecords = insertExecutor.afterImage(new TableRecords());
@@ -119,10 +118,9 @@ public class InsertExecutorTest {
     @Test
     public void testAfterImage_Exception() {
         Assertions.assertThrows(SQLException.class, () -> {
-            doReturn(false).when(insertExecutor).containsPK();
             List<Object> pkValues = new ArrayList<>();
             pkValues.add(PK_VALUE);
-            doReturn(pkValues).when(insertExecutor).getPkValuesByAuto();
+            doReturn(pkValues).when(insertExecutor).getPkValuesByColumn();
             doReturn(null).when(insertExecutor).buildTableRecords(pkValues);
             insertExecutor.afterImage(new TableRecords());
         });
