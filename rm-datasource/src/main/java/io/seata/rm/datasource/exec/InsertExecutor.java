@@ -73,7 +73,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         //Pk column exists or PK is just auto generated
-        List<Object> pkValues = getPkValuesByColumn();
+        List<Object> pkValues = getPkIndex() == -1 ? getPkValuesByAuto() : getPkValuesByColumn();
 
         TableRecords afterImage = buildTableRecords(pkValues);
 
@@ -220,6 +220,36 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     /**
+     * get pk index
+     * @return -1 not found pk index
+     */
+    protected int getPkIndex() {
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
+        String pkName = getTableMeta().getPkName();
+        List<String> insertColumns = recognizer.getInsertColumns();
+        if (insertColumns != null && !insertColumns.isEmpty()) {
+            final int insertColumnsSize = insertColumns.size();
+            int pkIndex = -1;
+            for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
+                if (insertColumns.get(paramIdx).equalsIgnoreCase(pkName)) {
+                    pkIndex = paramIdx;
+                    break;
+                }
+            }
+            return pkIndex;
+        }
+        int pkIndex = -1;
+        Map<String, ColumnMeta> allColumns = getTableMeta().getAllColumns();
+        for (Map.Entry<String, ColumnMeta> entry : allColumns.entrySet()) {
+            pkIndex++;
+            if (entry.getValue().getColumnName().equals(pkName)) {
+                break;
+            }
+        }
+        return pkIndex;
+    }
+
+    /**
      * check pk values
      * @param pkValues
      * @return true support false not support
@@ -248,32 +278,6 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             return false;
         }
         return true;
-    }
-
-    private int getPkIndex() {
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        String pkName = getTableMeta().getPkName();
-        List<String> insertColumns = recognizer.getInsertColumns();
-        if (insertColumns != null && !insertColumns.isEmpty()) {
-            final int insertColumnsSize = insertColumns.size();
-            int pkIndex = 0;
-            for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
-                if (insertColumns.get(paramIdx).equalsIgnoreCase(pkName)) {
-                    pkIndex = paramIdx;
-                    break;
-                }
-            }
-            return pkIndex;
-        }
-        int pkIndex = -1;
-        Map<String, ColumnMeta> allColumns = getTableMeta().getAllColumns();
-        for (Map.Entry<String, ColumnMeta> entry : allColumns.entrySet()) {
-            pkIndex++;
-            if (entry.getValue().getColumnName().equals(pkName)) {
-                break;
-            }
-        }
-        return pkIndex;
     }
 
 }
