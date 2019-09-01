@@ -64,7 +64,7 @@ public class DefaultLockManager extends AbstractLockManager {
     }
 
     @Override
-    public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
+    public boolean releaseDBGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
         List<RowLock> locks = new ArrayList<>();
         ArrayList<BranchSession> branchSessions = globalSession.getBranchSessions();
         for (BranchSession branchSession : branchSessions) {

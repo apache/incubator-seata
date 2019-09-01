@@ -185,7 +185,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public void clean() throws TransactionException {
         String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         if (StoreMode.DB.name().equalsIgnoreCase(storeMode)) {
-            LockerFactory.getLockManager().releaseGlobalSessionLock(this);
+            LockerFactory.getLockManager().releaseDBGlobalSessionLock(this);
         } else {
             for (BranchSession branchSession : branchSessions) {
                 branchSession.unlock();

@@ -52,7 +52,7 @@ public interface LockManager {
      * @return the boolean
      * @throws TransactionException the transaction exception
      */
-    boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException;
+    boolean releaseDBGlobalSessionLock(GlobalSession globalSession) throws TransactionException;
 
     /**
      * Is lockable boolean.
