@@ -23,14 +23,16 @@ import org.junit.jupiter.api.Test;
 
 /**
  * The type Register tm request test.
+ * @author linqiuping
+ * @since 2019/9/2
+ *
  */
 public class RegisterTMRequestTest {
 
     /**
      * Test to string.
-     *
      * @throws Exception the exception
-     * @author linqiuping
+     *
      */
     @Test
     public void testToString() throws Exception {
