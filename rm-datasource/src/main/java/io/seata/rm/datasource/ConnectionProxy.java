@@ -15,9 +15,10 @@
  */
 package io.seata.rm.datasource;
 
-import com.alibaba.druid.util.JdbcConstants;
 import java.sql.Connection;
 import java.sql.SQLException;
+
+import com.alibaba.druid.util.JdbcConstants;
 
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -186,18 +187,17 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
         try {
             if (context.hasUndoLog()) {
-               if(JdbcConstants.ORACLE.equalsIgnoreCase(this.getDbType())) {
-                   UndoLogManagerOracle.flushUndoLogs(this);
-               } else {
-                   UndoLogManager.flushUndoLogs(this);
-               }
+                if (JdbcConstants.ORACLE.equalsIgnoreCase(this.getDbType())) {
+                    UndoLogManagerOracle.flushUndoLogs(this);
+                } else {
+                    UndoLogManager.flushUndoLogs(this);
+                }
             }
             targetConnection.commit();
         } catch (Throwable ex) {
+            LOGGER.error("process connectionProxy commit error: {}", ex.getMessage(), ex);
             report(false);
-            if (ex instanceof SQLException) {
-                throw new SQLException(ex);
-            }
+            throw new SQLException(ex);
         }
         report(true);
         context.reset();
