@@ -28,6 +28,7 @@ public class RegisterTMRequestTest {
 
     /**
      * Test to string.
+     *
      * @throws Exception the exception
      * @author linqiuping
      */
