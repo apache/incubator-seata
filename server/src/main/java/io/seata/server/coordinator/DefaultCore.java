@@ -107,7 +107,7 @@ public class DefaultCore implements Core {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid);
         BranchSession branchSession = globalSession.getBranch(branchId);
         if (branchSession == null) {
-            throw new TransactionException(BranchTransactionNotExist);
+            throw new BranchTransactionException(BranchTransactionNotExist, "Could not found branch session xid=" + xid + ", branchId=" + branchId);
         }
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.changeBranchStatus(branchSession, status);
