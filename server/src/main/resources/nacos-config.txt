@@ -19,6 +19,7 @@ service.max.rollback.retry.timeout=-1
 client.async.commit.buffer.limit=10000
 client.lock.retry.internal=10
 client.lock.retry.times=30
+client.table.meta.check.enable=true
 store.mode=file
 store.file.dir=file_store/data
 store.file.max-branch-session-size=16384
@@ -53,4 +54,4 @@ metrics.enabled=false
 metrics.registry-type=compact
 metrics.exporter-list=prometheus
 metrics.exporter-prometheus-port=9898
-
+support.spring.datasource.autoproxy=false
