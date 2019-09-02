@@ -17,6 +17,7 @@ package io.seata.server.coordinator;
 
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GlobalTransactionEvent;
+import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -93,7 +94,7 @@ public class DefaultCore implements Core {
     private GlobalSession assertGlobalSessionNotNull(String xid) throws TransactionException {
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         if (globalSession == null) {
-            throw new TransactionException(TransactionExceptionCode.GlobalTransactionNotExist, "" + xid + "");
+            throw new GlobalTransactionException(TransactionExceptionCode.GlobalTransactionNotExist, "Could not found global transaction xid = " + xid);
         }
         return globalSession;
     }
