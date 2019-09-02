@@ -15,6 +15,7 @@
  */
 package io.seata.server.session;
 
+import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -149,7 +150,19 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
 
     private void writeSession(LogOperation logOperation, SessionStorable sessionStorable) throws TransactionException {
         if (!transactionStoreManager.writeSession(logOperation, sessionStorable)) {
-            throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to store global session");
+            if (LogOperation.GLOBAL_ADD.equals(logOperation)) {
+                throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to store global session");
+            } else if (LogOperation.GLOBAL_UPDATE.equals(logOperation)) {
+                throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to update global session");
+            } else if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
+                throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to remove global session");
+            } else if (LogOperation.BRANCH_ADD.equals(logOperation)) {
+                throw new BranchTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to store branch session");
+            } else if (LogOperation.BRANCH_UPDATE.equals(logOperation)) {
+                throw new BranchTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to update branch session");
+            } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
+                throw new BranchTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to remove branch session");
+            }
         }
     }
 
