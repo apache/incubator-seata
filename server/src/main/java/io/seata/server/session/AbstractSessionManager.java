@@ -15,6 +15,7 @@
  */
 package io.seata.server.session;
 
+import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -148,7 +149,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
 
     private void writeSession(LogOperation logOperation, SessionStorable sessionStorable) throws TransactionException {
         if (!transactionStoreManager.writeSession(logOperation, sessionStorable)) {
-            throw new TransactionException(TransactionExceptionCode.FailedWriteSession);
+            throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to store global session");
         }
     }
 
