@@ -385,6 +385,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         }
         for (GlobalSession asyncCommittingSession : asyncCommittingSessions) {
             try {
+                // Instruction reordering in DefaultCore#asyncCommit may cause this situation
+                if (GlobalStatus.AsyncCommitting != asyncCommittingSession.getStatus()) {
+                   continue;
+                }
                 asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(asyncCommittingSession, true);
             } catch (TransactionException ex) {
