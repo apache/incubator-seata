@@ -15,14 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.PreparedStatementProxy;
@@ -37,6 +29,14 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * The type Insert executor.
@@ -73,7 +73,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     @Override
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         //Pk column exists or PK is just auto generated
-        List<Object> pkValues = getPkIndex() == -1 ? getPkValuesByAuto() : getPkValuesByColumn();
+        List<Object> pkValues = containsPK() ? getPkValuesByColumn() : containsColumns() ? getPkValuesByAuto() : getPkValuesByColumn();
 
         TableRecords afterImage = buildTableRecords(pkValues);
 
@@ -89,6 +89,12 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         List<String> insertColumns = recognizer.getInsertColumns();
         TableMeta tmeta = getTableMeta();
         return tmeta.containsPK(insertColumns);
+    }
+
+    protected boolean containsColumns() {
+        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
+        List<String> insertColumns = recognizer.getInsertColumns();
+        return insertColumns != null && !insertColumns.isEmpty();
     }
 
     protected List<Object> getPkValuesByColumn() throws SQLException {
@@ -242,7 +248,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         Map<String, ColumnMeta> allColumns = getTableMeta().getAllColumns();
         for (Map.Entry<String, ColumnMeta> entry : allColumns.entrySet()) {
             pkIndex++;
-            if (entry.getValue().getColumnName().equals(pkName)) {
+            if (entry.getValue().getColumnName().equalsIgnoreCase(pkName)) {
                 break;
             }
         }

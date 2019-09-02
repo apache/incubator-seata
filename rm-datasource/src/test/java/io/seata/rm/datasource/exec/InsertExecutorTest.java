@@ -55,7 +55,6 @@ public class InsertExecutorTest {
     private static final String USER_NAME_COLUMN = "user_name";
     private static final String USER_STATUS_COLUMN = "user_status";
     private static final Integer PK_VALUE = 100;
-    private static final Integer PK_INDEX = 0;
 
     private PreparedStatementProxy statementProxy;
 
@@ -95,7 +94,7 @@ public class InsertExecutorTest {
 
     @Test
     public void testAfterImage_ByColumn() throws SQLException {
-        doReturn(PK_INDEX).when(insertExecutor).getPkIndex();
+        doReturn(true).when(insertExecutor).containsPK();
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
         doReturn(pkValues).when(insertExecutor).getPkValuesByColumn();
@@ -107,7 +106,8 @@ public class InsertExecutorTest {
 
     @Test
     public void testAfterImage_ByAuto() throws SQLException {
-        doReturn(-1).when(insertExecutor).getPkIndex();
+        doReturn(false).when(insertExecutor).containsPK();
+        doReturn(true).when(insertExecutor).containsColumns();
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
         doReturn(pkValues).when(insertExecutor).getPkValuesByAuto();
@@ -120,10 +120,11 @@ public class InsertExecutorTest {
     @Test
     public void testAfterImage_Exception() {
         Assertions.assertThrows(SQLException.class, () -> {
-            doReturn(PK_INDEX).when(insertExecutor).getPkIndex();
+            doReturn(false).when(insertExecutor).containsPK();
+            doReturn(true).when(insertExecutor).containsColumns();
             List<Object> pkValues = new ArrayList<>();
             pkValues.add(PK_VALUE);
-            doReturn(pkValues).when(insertExecutor).getPkValuesByColumn();
+            doReturn(pkValues).when(insertExecutor).getPkValuesByAuto();
             doReturn(null).when(insertExecutor).buildTableRecords(pkValues);
             insertExecutor.afterImage(new TableRecords());
         });
