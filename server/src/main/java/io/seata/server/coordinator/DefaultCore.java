@@ -17,6 +17,7 @@ package io.seata.server.coordinator;
 
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GlobalTransactionEvent;
+import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
@@ -66,25 +67,26 @@ public class DefaultCore implements Core {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid);
         return globalSession.lockAndExcute(() -> {
             if (!globalSession.isActive()) {
-                throw new TransactionException(GlobalTransactionNotActive,
-                    "Current Status: " + globalSession.getStatus());
+                throw new GlobalTransactionException(GlobalTransactionNotActive,
+                    "Could not register branch into global session xid=" + globalSession.getXid() + " status=" + globalSession.getStatus());
             }
             if (globalSession.getStatus() != GlobalStatus.Begin) {
-                throw new TransactionException(GlobalTransactionStatusInvalid,
-                    globalSession.getStatus() + " while expecting " + GlobalStatus.Begin);
+                throw new GlobalTransactionException(GlobalTransactionStatusInvalid,
+                    "Could not register branch into global session xid=" + globalSession.getXid() + ", " + globalSession.getStatus() + " while expecting " + GlobalStatus.Begin);
             }
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
                 applicationData, lockKeys, clientId);
             if (!branchSession.lock()) {
-                throw new TransactionException(LockKeyConflict);
+                throw new BranchTransactionException(LockKeyConflict, "Global lock acquire failed, "
+                    + "xid=" + globalSession.getXid() + ", branchId=" + branchSession.getBranchId());
             }
             try {
                 globalSession.addBranch(branchSession);
             } catch (RuntimeException ex) {
                 branchSession.unlock();
-                LOGGER.error("Failed to add branchSession to globalSession:{}",ex.getMessage(),ex);
-                throw new TransactionException(FailedToAddBranch);
+                LOGGER.error("Failed to store branch xid={}, branchId={} :{}",globalSession.getXid(), branchSession.getBranchId(), ex.getMessage(),ex);
+                throw new BranchTransactionException(FailedToAddBranch, "Failed to store branch, xid=" + globalSession.getXid() + ", branchId=" + branchSession.getBranchId());
             }
             LOGGER.info("Successfully register branch xid = {}, branchId = {}", globalSession.getXid(), branchSession.getBranchId());
             return branchSession.getBranchId();
