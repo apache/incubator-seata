@@ -20,12 +20,11 @@ import java.sql.SQLException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
 import javax.sql.DataSource;
-
 import com.alibaba.druid.util.JdbcUtils;
-
 import io.seata.common.thread.NamedThreadFactory;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
@@ -49,10 +48,16 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     private String jdbcUrl;
 
     private String dbType;
+
+    /**
+     * Enable the table meta checker
+     */
+    private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, true);
+
     /**
      * Table meta checker interval
      */
-    private static final long TABLE_MATA_CHECKER_INTERVAL = 60000L;
+    private static final long TABLE_META_CHECKER_INTERVAL = 60000L;
 
     private final ScheduledExecutorService tableMetaExcutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("tableMetaChecker", 1, true));
 
@@ -85,12 +90,14 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             throw new IllegalStateException("can not init dataSource", e);
         }
         DefaultResourceManager.get().registerResource(this);
-        tableMetaExcutor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                TableMetaCache.refresh(DataSourceProxy.this);
-            }
-        }, 0, TABLE_MATA_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
+        if(ENABLE_TABLE_META_CHECKER_ENABLE){
+            tableMetaExcutor.scheduleAtFixedRate(new Runnable() {
+                @Override
+                public void run() {
+                    TableMetaCache.refresh(DataSourceProxy.this);
+                }
+            }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
+        }
     }
 
     /**

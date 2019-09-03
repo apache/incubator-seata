@@ -50,7 +50,7 @@ public class ProtobufHelper {
     public Class getPbClass(String clazzName) {
         Class reqClass = requestClassCache.get(clazzName);
         if (reqClass == null) {
-            // 读取接口里的方法参数和返回值
+            // get the parameter and result
             Class clazz = null;
             try {
                 clazz = Class.forName(clazzName);
