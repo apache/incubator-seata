@@ -17,8 +17,6 @@ package io.seata.core.protocol;
 
 import java.io.Serializable;
 
-import io.netty.buffer.ByteBuf;
-
 /**
  * The type Register rm request.
  *

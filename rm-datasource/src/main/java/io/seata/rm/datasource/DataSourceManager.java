@@ -16,6 +16,7 @@
 package io.seata.rm.datasource;
 
 import com.alibaba.druid.util.JdbcConstants;
+
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -82,17 +83,17 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
 
             GlobalLockQueryResponse response = null;
             if (RootContext.inGlobalTransaction()) {
-                response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
+                response = (GlobalLockQueryResponse)RmRpcClient.getInstance().sendMsgWithResponse(request);
             } else if (RootContext.requireGlobalLock()) {
-                response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(loadBalance(),
-                        request, NettyClientConfig.getRpcRequestTimeout());
+                response = (GlobalLockQueryResponse)RmRpcClient.getInstance().sendMsgWithResponse(loadBalance(),
+                    request, NettyClientConfig.getRpcRequestTimeout());
             } else {
                 throw new RuntimeException("unknow situation!");
             }
 
             if (response.getResultCode() == ResultCode.Failed) {
                 throw new TransactionException(response.getTransactionExceptionCode(),
-                        "Response[" + response.getMsg() + "]");
+                    "Response[" + response.getMsg() + "]");
             }
             return response.isLockable();
         } catch (TimeoutException toe) {
@@ -108,7 +109,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
         InetSocketAddress address = null;
         try {
             List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(
-                    TmRpcClient.getInstance().getTransactionServiceGroup());
+                TmRpcClient.getInstance().getTransactionServiceGroup());
             address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
         } catch (Exception ignore) {
             LOGGER.error(ignore.getMessage());
@@ -143,7 +144,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
 
     @Override
     public void registerResource(Resource resource) {
-        DataSourceProxy dataSourceProxy = (DataSourceProxy) resource;
+        DataSourceProxy dataSourceProxy = (DataSourceProxy)resource;
         dataSourceCache.put(dataSourceProxy.getResourceId(), dataSourceProxy);
         super.registerResource(dataSourceProxy);
     }
@@ -164,7 +165,8 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     }
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
+                                     String applicationData) throws TransactionException {
         return asyncWorker.branchCommit(branchType, xid, branchId, resourceId, applicationData);
     }
 

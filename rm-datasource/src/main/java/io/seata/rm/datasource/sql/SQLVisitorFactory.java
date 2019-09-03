@@ -73,12 +73,12 @@ public class SQLVisitorFactory {
             } else if (ast instanceof SQLDeleteStatement) {
                 recognizer = new OracleDeleteRecognizer(sql, ast);
             } else if (ast instanceof SQLSelectStatement) {
-                if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
+                if (((SQLSelectStatement) ast).getSelect().getQueryBlock().isForUpdate()) {
                     recognizer = new OracleSelectForUpdateRecognizer(sql, ast);
                 }
             }
         }else {
-            throw new UnsupportedOperationException("Just support MySQL by now!");
+            throw new UnsupportedOperationException("Just support MySQL and Oracle by now!");
         }
         return recognizer;
     }

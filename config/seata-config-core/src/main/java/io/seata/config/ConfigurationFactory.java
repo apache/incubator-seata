@@ -15,11 +15,11 @@
  */
 package io.seata.config;
 
+import java.util.Objects;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import org.apache.commons.lang.StringUtils;
-
-import java.util.Objects;
 
 /**
  * The type Configuration factory.
@@ -36,7 +36,7 @@ public final class ConfigurationFactory {
     /**
      * The constant FILE_INSTANCE.
      */
-    private static String ENV_VALUE;
+    private static String envValue;
 
     static {
         String env = System.getenv(ENV_SYSTEM_KEY);
@@ -44,15 +44,18 @@ public final class ConfigurationFactory {
             //Help users get
             System.setProperty(ENV_PROPERTY_KEY, env);
         }
-        ENV_VALUE = System.getProperty(ENV_PROPERTY_KEY);
+        envValue = System.getProperty(ENV_PROPERTY_KEY);
     }
 
-    private static final Configuration DEFAULT_FILE_INSTANCE = new FileConfiguration(REGISTRY_CONF_PREFIX + REGISTRY_CONF_SUFFIX);
-    public static final Configuration CURRENT_FILE_INSTANCE = (ENV_VALUE == null || DEFAULT_ENV_VALUE.equals(ENV_VALUE)) ? DEFAULT_FILE_INSTANCE : new FileConfiguration(REGISTRY_CONF_PREFIX + "-" + ENV_VALUE + REGISTRY_CONF_SUFFIX);
+    private static final Configuration DEFAULT_FILE_INSTANCE = new FileConfiguration(
+        REGISTRY_CONF_PREFIX + REGISTRY_CONF_SUFFIX);
+    public static final Configuration CURRENT_FILE_INSTANCE = (envValue == null || DEFAULT_ENV_VALUE.equals(envValue))
+        ? DEFAULT_FILE_INSTANCE : new FileConfiguration(REGISTRY_CONF_PREFIX + "-" + envValue
+        + REGISTRY_CONF_SUFFIX);
     private static final String NAME_KEY = "name";
     private static final String FILE_TYPE = "file";
 
-    private static volatile Configuration CONFIG_INSTANCE = null;
+    private static volatile Configuration instance = null;
 
     /**
      * Gets instance.
@@ -60,14 +63,14 @@ public final class ConfigurationFactory {
      * @return the instance
      */
     public static Configuration getInstance() {
-        if (CONFIG_INSTANCE == null) {
+        if (instance == null) {
             synchronized (Configuration.class) {
-                if (CONFIG_INSTANCE == null) {
-                    CONFIG_INSTANCE = buildConfiguration();
+                if (instance == null) {
+                    instance = buildConfiguration();
                 }
             }
         }
-        return CONFIG_INSTANCE;
+        return instance;
     }
 
     private static Configuration buildConfiguration() {
@@ -91,7 +94,8 @@ public final class ConfigurationFactory {
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             return new FileConfiguration(name);
         } else {
-            return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name()).provide();
+            return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
+                .provide();
         }
     }
 }

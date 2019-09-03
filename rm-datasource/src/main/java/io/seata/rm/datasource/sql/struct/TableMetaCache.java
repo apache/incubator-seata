@@ -21,6 +21,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
@@ -72,7 +74,7 @@ public class TableMetaCache {
             try {
                 return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
-                LOGGER.error("get cache error !", e);
+                LOGGER.error("get cache error:{}", e.getMessage(), e);
                 return null;
             }
         });
@@ -81,6 +83,7 @@ public class TableMetaCache {
             try {
                 tmeta = fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
+                LOGGER.error("get table meta error:{}", e.getMessage(), e);
             }
         }
 
@@ -88,6 +91,28 @@ public class TableMetaCache {
             throw new ShouldNeverHappenException(String.format("[xid:%s]get tablemeta failed", RootContext.getXID()));
         }
         return tmeta;
+    }
+
+    /**
+     * Clear the table meta cache
+     * @param dataSourceProxy
+     */
+    public static void refresh(final DataSourceProxy dataSourceProxy){
+        ConcurrentMap<String, TableMeta> tableMetaMap = TABLE_META_CACHE.asMap();
+        for (Entry<String, TableMeta> entry : tableMetaMap.entrySet()) {
+            try {
+                TableMeta tableMeta = fetchSchema(dataSourceProxy, entry.getValue().getTableName());
+                if (tableMeta == null){
+                    LOGGER.error("get table meta error");
+                }
+                if (!tableMeta.equals(entry.getValue())){
+                    TABLE_META_CACHE.put(entry.getKey(), tableMeta);
+                    LOGGER.info("table meta change was found, update table meta cache automatically.");
+                }
+            } catch (SQLException e) {
+                LOGGER.error("get table meta error:{}", e.getMessage(), e);
+            }
+        }
     }
 
     private static TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {

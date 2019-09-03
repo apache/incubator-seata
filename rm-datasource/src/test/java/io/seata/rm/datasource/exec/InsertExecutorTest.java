@@ -97,7 +97,7 @@ public class InsertExecutorTest {
         pkValues.add(PK_VALUE);
         doReturn(pkValues).when(insertExecutor).getPkValuesByColumn();
         TableRecords tableRecords = new TableRecords();
-        doReturn(tableRecords).when(insertExecutor).getTableRecords(pkValues);
+        doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValues);
         TableRecords resultTableRecords = insertExecutor.afterImage(new TableRecords());
         Assertions.assertEquals(resultTableRecords, tableRecords);
     }
@@ -109,7 +109,7 @@ public class InsertExecutorTest {
         pkValues.add(PK_VALUE);
         doReturn(pkValues).when(insertExecutor).getPkValuesByAuto();
         TableRecords tableRecords = new TableRecords();
-        doReturn(tableRecords).when(insertExecutor).getTableRecords(pkValues);
+        doReturn(tableRecords).when(insertExecutor).buildTableRecords(pkValues);
         TableRecords resultTableRecords = insertExecutor.afterImage(new TableRecords());
         Assertions.assertEquals(resultTableRecords, tableRecords);
     }
@@ -121,7 +121,7 @@ public class InsertExecutorTest {
             List<Object> pkValues = new ArrayList<>();
             pkValues.add(PK_VALUE);
             doReturn(pkValues).when(insertExecutor).getPkValuesByAuto();
-            doReturn(null).when(insertExecutor).getTableRecords(pkValues);
+            doReturn(null).when(insertExecutor).buildTableRecords(pkValues);
             insertExecutor.afterImage(new TableRecords());
         });
     }
@@ -129,6 +129,7 @@ public class InsertExecutorTest {
     @Test
     public void testContainsPK() {
         List<String> insertColumns = mockInsertColumns();
+        mockParameters();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.containsPK(insertColumns)).thenReturn(true);
         Assertions.assertTrue(insertExecutor.containsPK());
@@ -139,6 +140,7 @@ public class InsertExecutorTest {
     @Test
     public void testGetPkValuesByColumn() throws SQLException {
         mockInsertColumns();
+        mockParameters();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
         List<Object> pkValues = new ArrayList<>();
@@ -152,6 +154,7 @@ public class InsertExecutorTest {
     public void testGetPkValuesByColumn_Exception() {
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
             mockInsertColumns();
+            mockParameters();
             doReturn(tableMeta).when(insertExecutor).getTableMeta();
             when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
             when(statementProxy.getParamsByIndex(0)).thenReturn(null);
@@ -162,6 +165,7 @@ public class InsertExecutorTest {
     @Test
     public void testGetPkValuesByColumn_PkValue_Null() throws SQLException {
         mockInsertColumns();
+        mockParameters();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
         List<Object> pkValuesNull = new ArrayList<>();
@@ -301,5 +305,19 @@ public class InsertExecutorTest {
         columns.add(USER_NAME_COLUMN);
         when(sqlInsertRecognizer.getInsertColumns()).thenReturn(columns);
         return columns;
+    }
+
+    private void mockParameters() {
+        ArrayList<Object>[] paramters = new ArrayList[3];
+        ArrayList arrayList1 = new ArrayList<>();
+        arrayList1.add(PK_VALUE);
+        ArrayList arrayList2 = new ArrayList<>();
+        arrayList2.add("userId1");
+        ArrayList arrayList3 = new ArrayList<>();
+        arrayList3.add("userName1");
+        paramters[0] = arrayList1;
+        paramters[1] = arrayList2;
+        paramters[2] = arrayList3;
+        when(statementProxy.getParameters()).thenReturn(paramters);
     }
 }

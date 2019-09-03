@@ -85,8 +85,7 @@
 
     <properties>
         <!-- seata version -->
-        <co.faao.speed.version>6.2.0-SNAPSHOT</co.faao.speed.version>
-        <revision>0.7.0-SNAPSHOT</revision>
+        <revision>0.8.0</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>

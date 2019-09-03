@@ -20,15 +20,11 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSetMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
-import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.util.StringUtils;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -63,13 +59,14 @@ public class TableMetaCacheOracle {
         if (StringUtils.isEmpty(tableName)) {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
+
         String dataSourceKey =  dataSourceProxy.getResourceId();
 
         TableMeta tmeta = null;
-        final String key = dataSourceKey + "." + tableName.toUpperCase();//转换大写，oracle表名要大写才能取元数据
+        final String key = dataSourceKey + "." + tableName;
         tmeta = TABLE_META_CACHE.get(key, mappingFunction -> {
             try {
-                return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName.toUpperCase());
+                return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
                 logger.error("get cache error !", e);
                 return null;
@@ -77,7 +74,7 @@ public class TableMetaCacheOracle {
         });
         if (tmeta == null) {
             try {
-                tmeta = fetchSchema(dataSourceProxy.getTargetDataSource(), tableName.toUpperCase());
+                tmeta = fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
             }
         }
@@ -96,7 +93,6 @@ public class TableMetaCacheOracle {
         throws SQLException {
         Connection conn = null;
         java.sql.Statement stmt = null;
-        java.sql.ResultSet rs = null;
         try {
             conn = dataSource.getConnection();
             stmt = conn.createStatement();
@@ -109,14 +105,12 @@ public class TableMetaCacheOracle {
             throw new SQLException("Failed to fetch schema of " + tableName, e);
 
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
             if (stmt != null) {
                 stmt.close();
             }
         }
     }
+
     private static TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
         throws SQLException {
         tableName = tableName.toUpperCase();//转换大写，oracle表名要大写才能取元数据

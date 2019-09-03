@@ -23,18 +23,16 @@ import java.util.Arrays;
 import co.faao.plugin.starter.dubbo.util.ThreadLocalTools;
 import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
 import co.faao.plugin.starter.seata.util.SeataXidWorker;
+import io.seata.rm.datasource.exec.noseata.NoSeata;
+import io.seata.rm.datasource.exec.noseata.DeleteExecutorNoSeata;
+import io.seata.rm.datasource.exec.noseata.InsertExecutorNoSeata;
+import io.seata.rm.datasource.exec.noseata.UpdateExecutorNoSeata;
+
 import io.seata.core.constants.Seata;
 import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.exec.noseata.*;
 import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
-import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.rm.datasource.undo.BranchUndoLog;
-import io.seata.rm.datasource.undo.SQLUndoLog;
-import org.apache.commons.lang.time.DateFormatUtils;
 
 /**
  * The type Execute template.
@@ -145,7 +143,9 @@ public class ExecuteTemplate {
         }
 
         if (sqlRecognizer == null) {
-            sqlRecognizer = SQLVisitorFactory.get(  statementProxy.getTargetSQL(),  statementProxy.getConnectionProxy().getDbType());
+            sqlRecognizer = SQLVisitorFactory.get(
+                    statementProxy.getTargetSQL(),
+                    statementProxy.getConnectionProxy().getDbType());
         }
         Executor<T> executor = null;
         if (sqlRecognizer == null) {

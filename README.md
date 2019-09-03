@@ -8,10 +8,10 @@
 [![maven](https://img.shields.io/maven-central/v/io.seata/seata-parent.svg)](https://search.maven.org/search?q=io.seata)
 [![](https://img.shields.io/twitter/follow/seataio.svg?label=Follow&style=social&logoWidth=0)](https://twitter.com/intent/follow?screen_name=seataio)
 
+
 ## What is Seata?
 
 A **distributed transaction solution** with high performance and ease of use for **microservices** architecture.
-
 ### Distributed Transaction Problem in Microservices
 
 Let's imagine a traditional monolithic application. Its business is built up with 3 modules. They use a single local data source.
@@ -75,13 +75,13 @@ For more details about principle and design, please go to [Seata wiki page](http
 
 ##### Seata Community
 
-- **Seata** :Simple Extensible Autonomous Transaction Architecture. Ant Financial joins Fescar, which make it to be a more neutral and open community for distributed transaction，and Fescar be rename to Seata.
+- **Seata** :Simple Extensible Autonomous Transaction Architecture. Ant Financial joins Fescar, which make it to be a more neutral and open community for distributed transaction，and Fescar be renamed to Seata.
 
 
 
 ## Maven dependency
 ```xml
-<seata.version>0.7.1</seata.version>
+<seata.version>0.8.0</seata.version>
 
 <dependency>
     <groupId>io.seata</groupId>

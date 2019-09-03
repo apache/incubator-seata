@@ -39,6 +39,7 @@ import java.util.List;
 
 /**
  * The type oracle update recognizer.
+ *
  * @author ccg
  * @date 2019/3/25
  */
@@ -70,11 +71,11 @@ public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
             SQLExpr expr = updateSetItem.getColumn();
             if (expr instanceof SQLIdentifierExpr) {
                 list.add(((SQLIdentifierExpr) expr).getName().toUpperCase());
-            } else if (expr instanceof SQLPropertyExpr){
+            } else if (expr instanceof SQLPropertyExpr) {
                 // This is alias case, like UPDATE xxx_tbl a SET a.name = ? WHERE a.id = ?
                 SQLExpr owner = ((SQLPropertyExpr) expr).getOwner();
                 if (owner instanceof SQLIdentifierExpr) {
-                    list.add((((SQLIdentifierExpr)owner).getName() + "." + ((SQLPropertyExpr) expr).getName()));
+                    list.add((((SQLIdentifierExpr) owner).getName() + "." + ((SQLPropertyExpr) expr).getName()));
                 }
             } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
@@ -101,23 +102,13 @@ public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<Object> paramAppender) {
+    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
         if (where == null) {
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
-
-            @Override
-            public boolean visit(SQLVariantRefExpr x) {
-                if ("?".equals(x.getName())) {
-                    ArrayList<Object> params = parametersHolder.getParameters()[x.getIndex()];
-                    paramAppender.add(params.get(0));
-                }
-                return super.visit(x);
-            }
-        };
+        OracleOutputVisitor visitor = super.createOracleOutputVisitor(parametersHolder, paramAppenderList, sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
     }
@@ -133,11 +124,11 @@ public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
         StringBuffer sb = new StringBuffer();
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb);
 
-        if(where instanceof SQLBetweenExpr){
+        if (where instanceof SQLBetweenExpr) {
             visitor.visit((SQLBetweenExpr) where);
-        }else if(where instanceof SQLInListExpr){
+        } else if (where instanceof SQLInListExpr) {
             visitor.visit((SQLInListExpr) where);
-        }else{
+        } else {
             visitor.visit((SQLBinaryOpExpr) where);
         }
 

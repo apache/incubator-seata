@@ -18,7 +18,6 @@ package io.seata.rm.datasource.sql.druid.oracle;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
@@ -32,9 +31,17 @@ import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.druid.BaseRecognizer;
 
 import java.util.ArrayList;
+<<<<<<< HEAD
 
 /**
  * The type oralceselect for update recognizer.
+=======
+import java.util.List;
+
+/**
+ * The type oralceselect for update recognizer.
+ *
+>>>>>>> 543b0da6c7028dc5a1e1eefaa9225e0bdf466444
  * @author ccg
  * @date 2019/3/25
  */
@@ -60,24 +67,14 @@ public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements S
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<Object> paramAppender) {
+    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
         if (where == null) {
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
-
-            @Override
-            public boolean visit(SQLVariantRefExpr x) {
-                if ("?".equals(x.getName())) {
-                    ArrayList<Object> params = parametersHolder.getParameters()[x.getIndex()];
-                    paramAppender.add(params.get(0));
-                }
-                return super.visit(x);
-            }
-        };
+        OracleOutputVisitor visitor = super.createOracleOutputVisitor(parametersHolder, paramAppenderList, sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
     }
@@ -127,7 +124,7 @@ public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements S
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource)tableSource);
+        visitor.visit((SQLExprTableSource) tableSource);
         return sb.toString();
     }
 

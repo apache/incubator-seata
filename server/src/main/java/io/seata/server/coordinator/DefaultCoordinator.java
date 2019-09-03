@@ -18,16 +18,19 @@ package io.seata.server.coordinator;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
+import java.util.Map;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import io.netty.channel.Channel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.DurationUtil;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.event.EventBus;
+import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -55,6 +58,8 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
+import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
+import io.seata.core.rpc.ChannelManager;
 import io.seata.core.rpc.Disposable;
 import io.seata.core.rpc.RpcContext;
 import io.seata.core.rpc.ServerMessageSender;
@@ -62,7 +67,6 @@ import io.seata.core.rpc.TransactionMessageHandler;
 import io.seata.core.rpc.netty.RpcServer;
 import io.seata.server.AbstractTCInboundHandler;
 import io.seata.server.event.EventBusManager;
-import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
@@ -74,8 +78,6 @@ import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranc
 
 /**
  * The type Default coordinator.
- *
- * @author sharajava
  */
 public class DefaultCoordinator extends AbstractTCInboundHandler
     implements TransactionMessageHandler, ResourceManagerInbound, Disposable {
@@ -85,24 +87,31 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     private static final int TIMED_TASK_SHUTDOWN_MAX_WAIT_MILLS = 5000;
 
     /**
-     * The Committing retry delay.
+     * The constant COMMITTING_RETRY_PERIOD.
      */
-    protected int committingRetryDelay = CONFIG.getInt(ConfigurationKeys.COMMITING_RETRY_DELAY, 5);
+    protected static final long COMMITTING_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.COMMITING_RETRY_PERIOD, 1000L);
 
     /**
-     * The Asyn committing retry delay.
+     * The constant ASYN_COMMITTING_RETRY_PERIOD.
      */
-    protected int asynCommittingRetryDelay = CONFIG.getInt(ConfigurationKeys.ASYN_COMMITING_RETRY_DELAY, 5);
+    protected static final long ASYN_COMMITTING_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.ASYN_COMMITING_RETRY_PERIOD,
+        1000L);
 
     /**
-     * The Rollbacking retry delay.
+     * The constant ROLLBACKING_RETRY_PERIOD.
      */
-    protected int rollbackingRetryDelay = CONFIG.getInt(ConfigurationKeys.ROLLBACKING_RETRY_DELAY, 5);
+    protected static final long ROLLBACKING_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.ROLLBACKING_RETRY_PERIOD,
+        1000L);
 
     /**
-     * The Timeout retry delay.
+     * The constant TIMEOUT_RETRY_PERIOD.
      */
-    protected int timeoutRetryDelay = CONFIG.getInt(ConfigurationKeys.TIMEOUT_RETRY_DELAY, 5);
+    protected static final long TIMEOUT_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.TIMEOUT_RETRY_PERIOD, 1000L);
+
+    /**
+     * The Transaction undolog delete period.
+     */
+    protected static final long UNDOLOG_DELETE_PERIOD = CONFIG.getLong(ConfigurationKeys.TRANSACTION_UNDO_LOG_DELETE_PERIOD, 24 * 60 * 60 * 1000);
 
     private static final int ALWAYS_RETRY_BOUNDARY = 0;
 
@@ -123,6 +132,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
 
     private ScheduledThreadPoolExecutor timeoutCheck = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("TxTimeoutCheck", 1));
+
+    private ScheduledThreadPoolExecutor undoLogDelete = new ScheduledThreadPoolExecutor(1,
+        new NamedThreadFactory("UndoLogDelete", 1));
 
     private ServerMessageSender messageSender;
 
@@ -310,7 +322,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                     /**
                      * Prevent thread safety issues
                      */
-                    SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(rollbackingSession);
+                    SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
                     LOGGER.error("GlobalSession rollback retry timeout [{}]", rollbackingSession.getXid());
                     continue;
                 }
@@ -383,6 +395,29 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     }
 
     /**
+     * Undo log delete.
+     */
+    protected void undoLogDelete() {
+        Map<String,Channel> rmChannels = ChannelManager.getRmChannels();
+        if (rmChannels == null || rmChannels.isEmpty()) {
+            LOGGER.info("no active rm channels to delete undo log");
+            return;
+        }
+        short saveDays = CONFIG.getShort(ConfigurationKeys.TRANSACTION_UNDO_LOG_SAVE_DAYS, UndoLogDeleteRequest.DEFAULT_SAVE_DAYS);
+        for (Map.Entry<String, Channel> channelEntry : rmChannels.entrySet()) {
+            String resourceId = channelEntry.getKey();
+            UndoLogDeleteRequest deleteRequest = new UndoLogDeleteRequest();
+            deleteRequest.setResourceId(resourceId);
+            deleteRequest.setSaveDays(saveDays > 0 ? saveDays : UndoLogDeleteRequest.DEFAULT_SAVE_DAYS);
+            try {
+                messageSender.sendASyncRequest(channelEntry.getValue(), deleteRequest);
+            } catch (Exception e) {
+                LOGGER.error("Failed to async delete undo log resourceId = " + resourceId);
+            }
+        }
+    }
+
+    /**
      * Init.
      */
     public void init() {
@@ -392,7 +427,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception retry rollbacking ... ", e);
             }
-        }, 0, rollbackingRetryDelay, TimeUnit.SECONDS);
+        }, 0, ROLLBACKING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         retryCommitting.scheduleAtFixedRate(() -> {
             try {
@@ -400,7 +435,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception retry committing ... ", e);
             }
-        }, 0, committingRetryDelay, TimeUnit.SECONDS);
+        }, 0, COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         asyncCommitting.scheduleAtFixedRate(() -> {
             try {
@@ -408,7 +443,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception async committing ... ", e);
             }
-        }, 0, asynCommittingRetryDelay, TimeUnit.SECONDS);
+        }, 0, ASYN_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(() -> {
             try {
@@ -416,7 +451,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception timeout checking ... ", e);
             }
-        }, 0, timeoutRetryDelay, TimeUnit.SECONDS);
+        }, 0, TIMEOUT_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+
+        undoLogDelete.scheduleAtFixedRate(() -> {
+            try {
+                undoLogDelete();
+            } catch (Exception e) {
+                LOGGER.info("Exception undoLog deleting ... ", e);
+            }
+        },0, UNDOLOG_DELETE_PERIOD,TimeUnit.MILLISECONDS);
     }
 
     @Override

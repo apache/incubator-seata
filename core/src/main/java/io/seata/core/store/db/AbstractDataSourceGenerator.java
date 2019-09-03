@@ -26,7 +26,7 @@ import io.seata.core.constants.DBType;
  * The type Abstract data source generator.
  *
  * @author zhangsen
- * @data 2019 /4/24
+ * @date 2019 /4/24
  */
 public abstract class AbstractDataSourceGenerator implements DataSourceGenerator {
 
@@ -43,7 +43,17 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     protected DBType getDBType() {
         return DBType.valueof(CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
     }
-
+    /**
+     * get db driver class name
+     * @return the db driver class name
+     */
+    protected String getDriverClassName() {
+		String driverClassName = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME);
+		if (StringUtils.isBlank(driverClassName)) {
+	            throw new StoreException("the {store.db.driver-class-name} can't be empty.");
+	        }
+	    return driverClassName;
+	}
     /**
      * Get url string.
      *
@@ -52,7 +62,7 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     protected String getUrl() {
         String url = CONFIG.getConfig(ConfigurationKeys.STORE_DB_URL);
         if (StringUtils.isBlank(url)) {
-            throw new StoreException("the {store.db.url} can't empty.");
+            throw new StoreException("the {store.db.url} can't be empty.");
         }
         return url;
     }
@@ -65,7 +75,7 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     protected String getUser() {
         String user = CONFIG.getConfig(ConfigurationKeys.STORE_DB_USER);
         if (StringUtils.isBlank(user)) {
-            throw new StoreException("the {store.db.user} can't empty.");
+            throw new StoreException("the {store.db.user} can't be empty.");
         }
         return user;
     }

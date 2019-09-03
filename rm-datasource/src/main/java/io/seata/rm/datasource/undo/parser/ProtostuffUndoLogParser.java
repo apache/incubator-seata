@@ -17,6 +17,8 @@ package io.seata.rm.datasource.undo.parser;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+import java.io.IOException;
+
 import io.protostuff.Input;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.Output;

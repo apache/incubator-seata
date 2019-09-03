@@ -16,6 +16,9 @@
 package io.seata.rm.datasource;
 
 import com.alibaba.druid.util.JdbcConstants;
+import java.sql.Connection;
+import java.sql.SQLException;
+
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
@@ -46,7 +49,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private static final int DEFAULT_REPORT_RETRY_COUNT = 5;
 
-    private static int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
+    private static int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
+        ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
 
     /**
      * Instantiates a new Connection proxy.
@@ -235,7 +239,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["
-                    + commitDone + "] Retry Countdown: " + retry);
+                        + commitDone + "] Retry Countdown: " + retry);
                 retry--;
 
                 if (retry == 0) {

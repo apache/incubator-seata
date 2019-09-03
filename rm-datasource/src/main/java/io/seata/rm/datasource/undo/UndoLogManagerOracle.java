@@ -33,6 +33,8 @@ import io.seata.common.Constants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
 import io.seata.common.util.CollectionUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
@@ -76,20 +78,22 @@ public final class UndoLogManagerOracle {
     }
     private static final Logger LOGGER = LoggerFactory.getLogger(UndoLogManagerOracle.class);
 
-    private static String UNDO_LOG_TABLE_NAME = "undo_log";
-    private static String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
+    private static final String UNDO_LOG_TABLE_NAME = ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, ConfigurationKeys.TRANSACTION_UNDO_LOG_DEFAULT_TABLE);
+    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
         "\t(id,branch_id, xid,context, rollback_info, log_status, log_created, log_modified)\n" +
         "VALUES (UNDO_LOG_SEQ.nextval,?, ?,?, ?, ?, sysdate, sysdate)";
 
-    private static String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + "\n" +
+    private static final String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + "\n" +
         "\tWHERE branch_id = ? AND xid = ?";
 
-    private static String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME
+    private static final String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME
         + " WHERE  branch_id = ? AND xid = ? FOR UPDATE";
 
     private static final ThreadLocal<String> SERIALIZER_LOCAL = new ThreadLocal<>();
 
     private UndoLogManagerOracle() {
+
     }
 
     /**
@@ -118,7 +122,7 @@ public final class UndoLogManagerOracle {
             LOGGER.debug("Flushing UNDO LOG: {}",new String(undoLogContent, Constants.DEFAULT_CHARSET));
         }
 
-        insertUndoLogWithNormal(xid, branchID, buildContext(parser.getName()),undoLogContent, cp.getTargetConnection());
+        insertUndoLogWithNormal(xid, branchID,buildContext(parser.getName()), undoLogContent, cp.getTargetConnection());
     }
 
     private static void assertDbSupport(String dbType) {
@@ -154,11 +158,9 @@ public final class UndoLogManagerOracle {
                 selectPST.setLong(1, branchId);
                 selectPST.setString(2, xid);
                 rs = selectPST.executeQuery();
-
                 boolean exists = false;
                 while (rs.next()) {
                     exists = true;
-
                     // It is possible that the server repeatedly sends a rollback request to roll back
                     // the same branch transaction to multiple processes,
                     // ensuring that only the undo_log in the normal state is processed.
@@ -256,6 +258,7 @@ public final class UndoLogManagerOracle {
             }
         }
     }
+
 
     /**
      * batch Delete undo log.
