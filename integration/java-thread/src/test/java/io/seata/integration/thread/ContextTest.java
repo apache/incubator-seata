@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.concurrent.*;
 
 public class ContextTest {
@@ -38,38 +39,55 @@ public class ContextTest {
 
     @Test
     public void threadTest() throws InterruptedException {
+        String[] results = new String[2];
+        CountDownLatch countDownLatch = new CountDownLatch(2);
         RootContext.bind("test-context");
         executorService.submit(new Runnable() {
             @Override
             public void run() {
-                Assertions.assertEquals(RootContext.getXID(), "test-context");
+                results[0] = RootContext.getXID();
+                countDownLatch.countDown();
             }
         });
         executorService.submit(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
-                Assertions.assertEquals(RootContext.getXID(), "test-context");
+                results[1] = RootContext.getXID();
+                countDownLatch.countDown();
                 return null;
             }
         });
+
+        countDownLatch.await();
+        System.out.println(Arrays.toString(results));
+        Assertions.assertArrayEquals(new String[]{"test-context", "test-context"}, results);
     }
 
     @Test
     public void nonPropagateRunnable() throws InterruptedException {
+        String[] results = new String[2];
+        CountDownLatch countDownLatch = new CountDownLatch(2);
 
         RootContext.bind("none-context");
         executorService.submit(new NonPropagateRunnable() {
             @Override
             public void run() {
-                Assertions.assertEquals(RootContext.getXID(), "none-context");
+                results[0] = RootContext.getXID();
+                countDownLatch.countDown();
             }
         });
         executorService.submit(new NonPropagateCallable<Object>() {
             @Override
             public Object call() throws Exception {
-                Assertions.assertEquals(RootContext.getXID(), "none-context");
+                results[1] = RootContext.getXID();
+                countDownLatch.countDown();
                 return null;
             }
         });
+
+        countDownLatch.await();
+        System.out.println(Arrays.toString(results));
+        Assertions.assertNull(results[0]);
+        Assertions.assertNull(results[1]);
     }
 }
