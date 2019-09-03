@@ -81,6 +81,24 @@ public enum MessageTypeProto
   /**
    * <pre>
    **
+   * The constant TYPE_GLOBAL_REPORT.
+   * </pre>
+   *
+   * <code>TYPE_GLOBAL_REPORT = 17;</code>
+   */
+  TYPE_GLOBAL_REPORT(17),
+  /**
+   * <pre>
+   **
+   * The constant TYPE_GLOBAL_REPORT_RESULT.
+   * </pre>
+   *
+   * <code>TYPE_GLOBAL_REPORT_RESULT = 18;</code>
+   */
+  TYPE_GLOBAL_REPORT_RESULT(18),
+  /**
+   * <pre>
+   **
    * The constant TYPE_GLOBAL_LOCK_QUERY.
    * </pre>
    *
@@ -294,6 +312,24 @@ public enum MessageTypeProto
   /**
    * <pre>
    **
+   * The constant TYPE_GLOBAL_REPORT.
+   * </pre>
+   *
+   * <code>TYPE_GLOBAL_REPORT = 17;</code>
+   */
+  public static final int TYPE_GLOBAL_REPORT_VALUE = 17;
+  /**
+   * <pre>
+   **
+   * The constant TYPE_GLOBAL_REPORT_RESULT.
+   * </pre>
+   *
+   * <code>TYPE_GLOBAL_REPORT_RESULT = 18;</code>
+   */
+  public static final int TYPE_GLOBAL_REPORT_RESULT_VALUE = 18;
+  /**
+   * <pre>
+   **
    * The constant TYPE_GLOBAL_LOCK_QUERY.
    * </pre>
    *
@@ -464,6 +500,8 @@ public enum MessageTypeProto
       case 10: return TYPE_GLOBAL_ROLLBACK_RESULT;
       case 15: return TYPE_GLOBAL_STATUS;
       case 16: return TYPE_GLOBAL_STATUS_RESULT;
+      case 17: return TYPE_GLOBAL_REPORT;
+      case 18: return TYPE_GLOBAL_REPORT_RESULT;
       case 21: return TYPE_GLOBAL_LOCK_QUERY;
       case 22: return TYPE_GLOBAL_LOCK_QUERY_RESULT;
       case 3: return TYPE_BRANCH_COMMIT;

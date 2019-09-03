@@ -24,9 +24,9 @@ public final class BranchType {
   static {
     java.lang.String[] descriptorData = {
       "\n\020branchType.proto\022\032io.seata.protocol.pr" +
-      "otobuf*\"\n\017BranchTypeProto\022\006\n\002AT\020\000\022\007\n\003TCC" +
-      "\020\001B1\n!io.seata.codec.protobuf.generatedB" +
-      "\nBranchTypeP\001b\006proto3"
+      "otobuf*,\n\017BranchTypeProto\022\006\n\002AT\020\000\022\007\n\003TCC" +
+      "\020\001\022\010\n\004SAGA\020\002B1\n!io.seata.codec.protobuf." +
+      "generatedB\nBranchTypeP\001b\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {

@@ -20,6 +20,10 @@ public enum BranchTypeProto
    * <code>TCC = 1;</code>
    */
   TCC(1),
+  /**
+   * <code>SAGA = 2;</code>
+   */
+  SAGA(2),
   UNRECOGNIZED(-1),
   ;
 
@@ -31,6 +35,10 @@ public enum BranchTypeProto
    * <code>TCC = 1;</code>
    */
   public static final int TCC_VALUE = 1;
+  /**
+   * <code>SAGA = 2;</code>
+   */
+  public static final int SAGA_VALUE = 2;
 
 
   public final int getNumber() {
@@ -53,6 +61,7 @@ public enum BranchTypeProto
     switch (value) {
       case 0: return AT;
       case 1: return TCC;
+      case 2: return SAGA;
       default: return null;
     }
   }

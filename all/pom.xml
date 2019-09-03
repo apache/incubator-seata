@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>0.7.1</version>
+    <version>0.8.0</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -215,6 +215,38 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-codec-protobuf</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- saga -->
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-saga-processctrl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-saga-statelang</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-saga-engine</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-saga-rm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-saga-tm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-saga-engine-store</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -502,6 +534,14 @@
                                     <include>io.seata:seata-tm</include>
                                     <include>io.seata:seata-codec-seata</include>
                                     <include>io.seata:seata-codec-protobuf</include>
+
+                                    <!-- saga -->
+                                    <include>io.seata:seata-saga-processctrl</include>
+                                    <include>io.seata:seata-saga-statelang</include>
+                                    <include>io.seata:seata-saga-engine</include>
+                                    <include>io.seata:seata-saga-rm</include>
+                                    <include>io.seata:seata-saga-tm</include>
+                                    <include>io.seata:seata-saga-engine-store</include>
                                 </includes>
                             </artifactSet>
                             <transformers>

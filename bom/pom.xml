@@ -20,7 +20,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-bom</artifactId>
-    <version>0.7.1</version>
+    <version>0.8.0</version>
 
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
@@ -112,6 +112,13 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <protobuf.version>3.7.1</protobuf.version>
+
+        <google.gson.version>2.8.5</google.gson.version>
+        <commons-io.version>1.2</commons-io.version>
+        <commons-beanutils.version>1.9.2</commons-beanutils.version>
+        <mybatis.version>3.4.6</mybatis.version>
+        <mybatis-spring.version>1.3.2</mybatis-spring.version>
+        <junit.version>4.12</junit.version>
     </properties>
 
     <dependencyManagement>
@@ -413,6 +420,39 @@
                 <groupId>com.beust</groupId>
                 <artifactId>jcommander</artifactId>
                 <version>${jcommander.version}</version>
+            </dependency>
+
+            <!-- saga dependencies -->
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>${google.gson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons-beanutils.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis</artifactId>
+                <version>${mybatis.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mybatis</groupId>
+                <artifactId>mybatis-spring</artifactId>
+                <version>${mybatis-spring.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

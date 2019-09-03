@@ -32,6 +32,8 @@ import io.seata.codec.protobuf.convertor.GlobalCommitRequestConvertor;
 import io.seata.codec.protobuf.convertor.GlobalCommitResponseConvertor;
 import io.seata.codec.protobuf.convertor.GlobalLockQueryRequestConvertor;
 import io.seata.codec.protobuf.convertor.GlobalLockQueryResponseConvertor;
+import io.seata.codec.protobuf.convertor.GlobalReportRequestConvertor;
+import io.seata.codec.protobuf.convertor.GlobalReportResponseConvertor;
 import io.seata.codec.protobuf.convertor.GlobalRollbackRequestConvertor;
 import io.seata.codec.protobuf.convertor.GlobalRollbackResponseConvertor;
 import io.seata.codec.protobuf.convertor.GlobalStatusRequestConvertor;
@@ -44,6 +46,8 @@ import io.seata.codec.protobuf.convertor.RegisterRMRequestConvertor;
 import io.seata.codec.protobuf.convertor.RegisterRMResponseConvertor;
 import io.seata.codec.protobuf.convertor.RegisterTMRequestConvertor;
 import io.seata.codec.protobuf.convertor.RegisterTMResponseConvertor;
+import io.seata.codec.protobuf.generated.GlobalReportRequestProto;
+import io.seata.codec.protobuf.generated.GlobalReportResponseProto;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MergedWarpMessage;
@@ -90,6 +94,8 @@ import io.seata.core.protocol.transaction.GlobalCommitRequest;
 import io.seata.core.protocol.transaction.GlobalCommitResponse;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
+import io.seata.core.protocol.transaction.GlobalReportRequest;
+import io.seata.core.protocol.transaction.GlobalReportResponse;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
@@ -147,6 +153,10 @@ public class ProtobufConvertManager {
                 new GlobalStatusRequestConvertor());
             protobufConvertManager.convertorMap.put(GlobalStatusResponse.class.getName(),
                 new GlobalStatusResponseConvertor());
+            protobufConvertManager.convertorMap.put(GlobalReportRequest.class.getName(),
+                    new GlobalReportRequestConvertor());
+            protobufConvertManager.convertorMap.put(GlobalReportResponse.class.getName(),
+                    new GlobalReportResponseConvertor());
 
             protobufConvertManager.convertorMap.put(MergedWarpMessage.class.getName(),
                 new MergedWarpMessageConvertor());
@@ -198,6 +208,10 @@ public class ProtobufConvertManager {
                 GlobalStatusRequestProto.class);
             protobufConvertManager.protoClazzMap.put(GlobalStatusResponseProto.getDescriptor().getFullName(),
                 GlobalStatusResponseProto.class);
+            protobufConvertManager.protoClazzMap.put(GlobalReportRequestProto.getDescriptor().getFullName(),
+                    GlobalReportRequestProto.class);
+            protobufConvertManager.protoClazzMap.put(GlobalReportResponseProto.getDescriptor().getFullName(),
+                    GlobalReportResponseProto.class);
 
             protobufConvertManager.protoClazzMap.put(MergedWarpMessageProto.getDescriptor().getFullName(),
                 MergedWarpMessageProto.class);
@@ -250,6 +264,10 @@ public class ProtobufConvertManager {
                 new GlobalStatusRequestConvertor());
             protobufConvertManager.reverseConvertorMap.put(GlobalStatusResponseProto.class.getName(),
                 new GlobalStatusResponseConvertor());
+            protobufConvertManager.reverseConvertorMap.put(GlobalReportRequestProto.class.getName(),
+                    new GlobalReportRequestConvertor());
+            protobufConvertManager.reverseConvertorMap.put(GlobalReportResponseProto.class.getName(),
+                    new GlobalReportResponseConvertor());
 
             protobufConvertManager.reverseConvertorMap.put(MergedWarpMessageProto.class.getName(),
                 new MergedWarpMessageConvertor());

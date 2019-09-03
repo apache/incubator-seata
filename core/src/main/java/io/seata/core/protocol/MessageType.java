@@ -56,6 +56,14 @@ public class MessageType {
      */
     public static final short TYPE_GLOBAL_STATUS_RESULT = 16;
     /**
+     * The constant TYPE_GLOBAL_REPORT.
+     */
+    public static final short TYPE_GLOBAL_REPORT = 17;
+    /**
+     * The constant TYPE_GLOBAL_REPORT_RESULT.
+     */
+    public static final short TYPE_GLOBAL_REPORT_RESULT = 18;
+    /**
      * The constant TYPE_GLOBAL_LOCK_QUERY.
      */
     public static final short TYPE_GLOBAL_LOCK_QUERY = 21;

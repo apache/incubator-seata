@@ -163,6 +163,27 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         return xid;
     }
 
+    @Override
+    public void globalReport(GlobalStatus globalStatus) throws TransactionException {
+        if (xid == null) {
+            throw new IllegalStateException();
+        }
+        if (globalStatus == null) {
+            throw new IllegalStateException();
+        }
+
+        status = transactionManager.globalReport(xid, globalStatus);
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("[" + xid + "] report status:" + status);
+        }
+
+        if (RootContext.getXID() != null) {
+            if (xid.equals(RootContext.getXID())) {
+                RootContext.unbind();
+            }
+        }
+    }
+
     private void check() {
         if (xid == null) {
             throw new ShouldNeverHappenException();
