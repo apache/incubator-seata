@@ -120,13 +120,16 @@ public class ConnectionProxy extends AbstractConnectionProxy {
      * @param lockKeys the lock keys
      * @throws SQLException the sql exception
      */
-    public void lockQuery(String lockKeys) throws SQLException {
+    public boolean lockQuery(String lockKeys) throws SQLException {
         // Just check lock without requiring lock by now.
+        boolean result = false;
         try {
-            DefaultResourceManager.get().lockQuery(BranchType.AT, getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
+            result = DefaultResourceManager.get().lockQuery(BranchType.AT, getDataSourceProxy().getResourceId(),
+                context.getXid(), lockKeys);
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e, lockKeys);
         }
+        return result;
     }
 
     private void recognizeLockKeyConflictException(TransactionException te) throws SQLException {
