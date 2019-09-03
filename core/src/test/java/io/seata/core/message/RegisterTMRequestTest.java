@@ -39,6 +39,5 @@ public class RegisterTMRequestTest {
         registerTMRequest.setVersion("2019-snapshot");
         Assertions.assertEquals("RegisterTMRequest{applicationId='seata', transactionServiceGroup='daliy_2019'}",
                 registerTMRequest.toString());
-
     }
 }
