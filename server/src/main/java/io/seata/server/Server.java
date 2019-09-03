@@ -62,11 +62,9 @@ public class Server {
         System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
 
         RpcServer rpcServer = new RpcServer(WORKING_THREADS);
-        //server host
-        rpcServer.setHost(parameterParser.getHost());
         //server port
         rpcServer.setListenPort(parameterParser.getPort());
-        UUIDGenerator.init(1);
+        UUIDGenerator.init(parameterParser.getServerNode());
         //log store mode : file、db
         SessionHolder.init(parameterParser.getStoreMode());
 
