@@ -88,7 +88,7 @@ public class ContextTest {
         });
 
         countDownLatch.await();
-        Assertions.assertArrayEquals(new String[]{null, null}, results);
+        Assertions.assertNull(results);
     }
 
     @Test
