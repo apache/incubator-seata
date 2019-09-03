@@ -31,17 +31,11 @@ import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.druid.BaseRecognizer;
 
 import java.util.ArrayList;
-<<<<<<< HEAD
-
-/**
- * The type oralceselect for update recognizer.
-=======
 import java.util.List;
 
 /**
  * The type oralceselect for update recognizer.
  *
->>>>>>> 543b0da6c7028dc5a1e1eefaa9225e0bdf466444
  * @author ccg
  * @date 2019/3/25
  */

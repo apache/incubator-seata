@@ -69,22 +69,4 @@ public class InsertExecutorNoSeata<T, S extends Statement> extends InsertExecuto
     public TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         return super.afterImage(beforeImage);
     }
-
-    public boolean containsPK() {
-
-        return super.containsPK();
-    }
-
-//    public List<Object> getPkValuesByColumn() throws SQLException {
-//        return  super.getPkValuesByColumn( this.statementProxy.getConnectionProxy().getDbType());
-//    }
-//
-//
-//    public List<Object> getPkValuesByAuto() throws SQLException {
-//       return super.getPkValuesByAuto(this.statementProxy.getConnectionProxy().getDbType());
-//    }
-
-    public TableRecords getTableRecords(List<Object> pkValues) throws SQLException {
-        return super.getTableRecords(pkValues);
-    }
 }

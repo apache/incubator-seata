@@ -35,6 +35,7 @@ import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.SQLRecognizer;
+import io.seata.rm.datasource.sql.druid.oracle.OracleInsertRecognizer;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Null;
 import io.seata.rm.datasource.sql.struct.TableMeta;
@@ -97,19 +98,19 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     protected List<Object> getPkValuesByColumn() throws SQLException {
         //Oracle contains nextval for automatic growth
-        String dbType = this.statementProxy.getConnectionProxy().getDbType();
-        if(JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
-            List<SQLInsertStatement.ValuesClause> list = ((OracleInsertRecognizer)sqlRecognizer).getAst().getValuesList();
-            for(SQLInsertStatement.ValuesClause vs : list) {
-                List<SQLExpr> sqlExprs = vs.getValues();
-                for(SQLExpr expr:sqlExprs ) {
-                    if (expr instanceof SQLSequenceExpr) {
-                        //There's a sequence in value
-                        return getPkValuesByAuto();
-                    }
-                }
-            }
-        }
+//        String dbType = this.statementProxy.getConnectionProxy().getDbType();
+//        if(JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
+//            List<SQLInsertStatement.ValuesClause> list = ((OracleInsertRecognizer)sqlRecognizer).getAst().getValuesList();
+//            for(SQLInsertStatement.ValuesClause vs : list) {
+//                List<SQLExpr> sqlExprs = vs.getValues();
+//                for(SQLExpr expr:sqlExprs ) {
+//                    if (expr instanceof SQLSequenceExpr) {
+//                        //There's a sequence in value
+//                        return getPkValuesByAuto();
+//                    }
+//                }
+//            }
+//        }
         // insert values including PK
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();

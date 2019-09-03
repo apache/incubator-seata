@@ -32,7 +32,12 @@ import io.seata.core.constants.Seata;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
+import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.undo.BranchUndoLog;
+import io.seata.rm.datasource.undo.SQLUndoLog;
+import org.apache.commons.lang.time.DateFormatUtils;
 
 /**
  * The type Execute template.

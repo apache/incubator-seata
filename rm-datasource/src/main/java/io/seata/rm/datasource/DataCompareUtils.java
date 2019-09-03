@@ -41,42 +41,38 @@ public class DataCompareUtils {
      * Is field equals.
      *
      * @param f0 the f0
-     * @param f1  the f1
-     * @return the boolean
+     * @param f1 the f1
+     * @return the Result<Boolean>
      */
-    public static boolean isFieldEquals(Field f0, Field f1) {
+    public static Result<Boolean> isFieldEquals(Field f0, Field f1) {
         if (f0 == null) {
-            return f1 == null;
+            return Result.build(f1 == null);
         } else {
             if (f1 == null) {
-                return false;
+                return Result.build(false);
             } else {
                 if (StringUtils.equalsIgnoreCase(f0.getName(), f1.getName())
-                        && f0.getType() == f1.getType()) {
+                    && f0.getType() == f1.getType()) {
                     if (f0.getValue() == null) {
-                        return f1.getValue() == null;
+                        return Result.build(f1.getValue() == null);
                     } else {
                         if (f1.getValue() == null) {
-                            return false;
+                            return Result.buildWithParams(false, "Field not equals, name {}, new value is null", f0.getName());
                         } else {
                             String currentSerializer = UndoLogManager.getCurrentSerializer();
                             if (StringUtils.equals(currentSerializer, FastjsonUndoLogParser.NAME)) {
                                 convertType(f0, f1);
                             }
-                            if(f0.getType() == -3) {//byte[]
-                                return Arrays.toString((byte[])f0.getValue()).equals(Arrays.toString((byte[])f1.getValue()));
+                            boolean result = Objects.deepEquals(f0.getValue(), f1.getValue());
+                            if (result) {
+                                return Result.ok();
                             } else {
-                                boolean result = Objects.deepEquals(f0.getValue(), f1.getValue());
-                                if (result) {
-                                    return Result.ok();
-                                } else {
-                                    return Result.buildWithParams(false, "Field not equals, name {}, old value {}, new value {}", f0.getName(), f0.getValue(), f1.getValue());
-                                }
+                                return Result.buildWithParams(false, "Field not equals, name {}, old value {}, new value {}", f0.getName(), f0.getValue(), f1.getValue());
                             }
                         }
                     }
                 } else {
-                    return false;
+                    return Result.buildWithParams(false, "Field not equals, old name {} type {}, new name {} type {}", f0.getName(), f0.getType(), f1.getName(), f1.getType());
                 }
             }
         }
