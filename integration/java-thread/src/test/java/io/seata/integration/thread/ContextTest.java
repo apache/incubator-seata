@@ -15,6 +15,8 @@
  */
 package io.seata.integration.thread;
 
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -39,6 +41,7 @@ public class ContextTest {
 
     @Test
     public void threadTest() throws InterruptedException {
+        ConfigurationFactory.getInstance().putConfigIfAbsent(ConfigurationKeys.CLIENT_THREAD_PROPAGATE, Boolean.toString(true));
         String[] results = new String[2];
         CountDownLatch countDownLatch = new CountDownLatch(2);
         RootContext.bind("test-context");
@@ -59,12 +62,38 @@ public class ContextTest {
         });
 
         countDownLatch.await();
-        System.out.println(Arrays.toString(results));
         Assertions.assertArrayEquals(new String[]{"test-context", "test-context"}, results);
     }
 
     @Test
+    public void threadConfigTest() throws InterruptedException {
+        ConfigurationFactory.getInstance().putConfigIfAbsent(ConfigurationKeys.CLIENT_THREAD_PROPAGATE, Boolean.toString(false));
+        String[] results = new String[2];
+        CountDownLatch countDownLatch = new CountDownLatch(2);
+        RootContext.bind("test-context");
+        executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                results[0] = RootContext.getXID();
+                countDownLatch.countDown();
+            }
+        });
+        executorService.submit(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                results[1] = RootContext.getXID();
+                countDownLatch.countDown();
+                return null;
+            }
+        });
+
+        countDownLatch.await();
+        Assertions.assertArrayEquals(new String[]{null, null}, results);
+    }
+
+    @Test
     public void nonPropagateRunnable() throws InterruptedException {
+        ConfigurationFactory.getInstance().putConfigIfAbsent(ConfigurationKeys.CLIENT_THREAD_PROPAGATE, Boolean.toString(true));
         String[] results = new String[2];
         CountDownLatch countDownLatch = new CountDownLatch(2);
 
@@ -86,7 +115,6 @@ public class ContextTest {
         });
 
         countDownLatch.await();
-        System.out.println(Arrays.toString(results));
         Assertions.assertNull(results[0]);
         Assertions.assertNull(results[1]);
     }

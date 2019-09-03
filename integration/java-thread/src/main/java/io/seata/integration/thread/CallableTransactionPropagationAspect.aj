@@ -15,6 +15,8 @@
  */
 package io.seata.integration.thread;
 
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 
 public aspect CallableTransactionPropagationAspect {
@@ -42,7 +44,8 @@ public aspect CallableTransactionPropagationAspect {
         String xid = m.xid();
         if (NonPropagateCallable.class.isAssignableFrom(m.getClass())) {
             RootContext.unbind();
-        } else if (null != xid) {
+        } else if (ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_THREAD_PROPAGATE, true) && xid != null){
+            RootContext.unbind();
             RootContext.bind(xid);
         }
     }
