@@ -33,7 +33,6 @@ public class RegisterTMRequestTest {
      */
     @Test
     public void testToString() throws Exception {
-
         RegisterTMRequest registerTMRequest = new RegisterTMRequest();
         registerTMRequest.setApplicationId("seata");
         registerTMRequest.setTransactionServiceGroup("daliy_2019");
