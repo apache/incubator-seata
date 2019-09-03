@@ -1,0 +1,139 @@
+{
+    "Name": "simpleCompensationStateMachineForRecovery",
+    "Comment": "用于测试事务恢复的状态机定义",
+    "StartAt": "FirstState",
+    "Version": "0.0.1",
+    "States": {
+        "FirstState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
+            "CompensateState": "CompensateFirstState",
+            "Next": "ChoiceState",
+            "Input": [
+                {
+                    "fooInput": "$.[a]",
+                    "throwExceptionRandomly": "$.[fooThrowExceptionRandomly]",
+                    "throwException": "$.[fooThrowException]"
+                }
+            ],
+            "Output": {
+                "fooResult": "$.#root"
+            },
+            "Status": {
+                "UN": "$Exception{io.seata.saga.engine.exception.EngineExecutionException}",
+                "SU": "#root != null &&  #root.size() > 0",
+                "FA": "#root == null || #root.size() == 0"
+            }
+        },
+        "ChoiceState":{
+            "Type": "Choice",
+            "Choices":[
+                {
+                    "Expression":"[a] == 1",
+                    "Next":"SecondState"
+                },
+                {
+                    "Expression":"[a] == 2",
+                    "Next":"ThirdState"
+                }
+            ],
+            "Default":"Fail"
+        },
+        "SecondState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "bar",
+            "CompensateState": "CompensateSecondState",
+            "Input": [
+                {
+                    "barInput": "$.[fooResult]",
+                    "throwExceptionRandomly": "$.[barThrowExceptionRandomly]",
+                    "throwException": "$.[barThrowException]"
+                }
+            ],
+            "Output": {
+                "barResult": "$.#root"
+            },
+            "Status": {
+                "UN": "$Exception{io.seata.saga.engine.exception.EngineExecutionException}",
+                "SU": "#root != null &&  #root.size() > 0",
+                "FA": "#root == null || #root.size() == 0"
+            },
+            "Catch": [
+                {
+                    "Exceptions": [
+                        "io.seata.common.exception.FrameworkException"
+                    ],
+                    "Next": "CompensationStart"
+                }
+            ],
+            "Next": "Succeed"
+        },
+        "ThirdState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
+            "Input": [
+                {
+                    "fooInput": "$.[fooResult]"
+                }
+            ],
+            "Output": {
+                "fooResult": "$.#root"
+            },
+            "Status": {
+                "UN": "$Exception{io.seata.saga.engine.exception.EngineExecutionException}",
+                "SU": "#root != null &&  #root.size() > 0",
+                "FA": "#root == null || #root.size() == 0"
+            },
+            "Next": "Succeed"
+        },
+        "CompensateFirstState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "compensateFoo",
+            "Input": [
+                {
+                    "compensateFooInput": "$.[a]",
+                    "throwExceptionRandomly": "$.[compensateFooThrowExceptionRandomly]",
+                    "throwException": "$.[compensateFooThrowException]"
+                }
+            ],
+            "Status": {
+                "UN": "$Exception{io.seata.saga.engine.exception.EngineExecutionException}",
+                "SU": "#root != null &&  #root.size() > 0",
+                "FA": "#root == null || #root.size() == 0"
+            }
+        },
+        "CompensateSecondState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "compensateBar",
+            "Input": [
+                {
+                    "compensateBarInput": "$.[a]",
+                    "throwExceptionRandomly": "$.[compensateBarThrowExceptionRandomly]",
+                    "throwException": "$.[compensateBarThrowException]"
+                }
+            ],
+            "Status": {
+                "UN": "$Exception{io.seata.saga.engine.exception.EngineExecutionException}",
+                "SU": "#root != null &&  #root.size() > 0",
+                "FA": "#root == null || #root.size() == 0"
+            }
+        },
+        "CompensationStart": {
+            "Type": "CompensationStart",
+            "Next": "Fail"
+        },
+        "Succeed": {
+            "Type":"Succeed"
+        },
+        "Fail": {
+            "Type":"Fail",
+            "ErrorCode": "NOT_FOUND",
+            "Message": "not found"
+        }
+    }
+}

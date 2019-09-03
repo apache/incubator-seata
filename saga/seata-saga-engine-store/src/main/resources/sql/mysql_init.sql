@@ -1,0 +1,58 @@
+CREATE TABLE IF NOT EXISTS
+SEATA_STATE_MACHINE_DEF
+(
+    ID VARCHAR(32) NOT NULL COMMENT 'id',
+    NAME VARCHAR(255) NOT NULL COMMENT 'name',
+    INSTANCE_ID VARCHAR(32) NOT NULL COMMENT 'instance id',
+    APP_NAME VARCHAR(32) NOT NULL COMMENT 'application name',
+    TYPE VARCHAR(20) COMMENT 'state language type',
+    COMMENT VARCHAR(255) COMMENT 'comment',
+    VER VARCHAR(16) NOT NULL  COMMENT 'version',
+    GMT_CREATE DATETIME NOT NULL COMMENT 'create time',
+    STATUS VARCHAR(2) NOT NULL COMMENT 'status(AC:Active|IN:Inactive)',
+    CONTENT LONGTEXT COMMENT 'content',
+    TRANS_STRATEGY VARCHAR(16) COMMENT 'transaction recovery strategy(COMPENSATE|RETRY)',
+    PRIMARY KEY(ID)
+) COMMENT 'state machine definition';
+
+CREATE TABLE IF NOT EXISTS
+SEATA_STATE_MACHINE_INST
+(
+    ID VARCHAR(32) NOT NULL COMMENT 'id',
+    MACHINE_ID VARCHAR(32) NOT NULL COMMENT 'state machine definition id',
+    PARENT_ID VARCHAR(46) COMMENT 'parentId',
+    GMT_STARTED DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'start time',
+    BUSINESS_KEY VARCHAR(48) unique COMMENT 'businessKey',
+    START_PARAMS LONGTEXT COMMENT 'start parameters',
+    GMT_END DATETIME COMMENT 'end time',
+    EXCEP LONGBLOB COMMENT 'exception',
+    END_PARAMS LONGTEXT COMMENT 'end parameters',
+    STATUS VARCHAR(2) COMMENT 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
+    COMPENSATION_STATUS VARCHAR(2) COMMENT 'compensation status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
+    IS_RUNNING TINYINT(1) COMMENT 'is running(0 no|1 yes)',
+    GMT_UPDATED DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY(ID)
+) COMMENT 'state machine instance';
+
+CREATE TABLE IF NOT EXISTS
+SEATA_STATE_INST
+(
+    ID VARCHAR(32) NOT NULL COMMENT 'id',
+    MACHINE_INST_ID VARCHAR(32) NOT NULL  COMMENT 'state machine instance id',
+    NAME VARCHAR(255) NOT NULL COMMENT 'state name',
+    TYPE VARCHAR(20) COMMENT 'state type',
+    SERVICE_NAME VARCHAR(255) COMMENT 'service name',
+    SERVICE_METHOD VARCHAR(255) COMMENT 'method name',
+    SERVICE_TYPE VARCHAR(16) COMMENT 'service type',
+    BUSINESS_KEY VARCHAR(48) unique COMMENT 'business key',
+    STATE_ID_COMPENSATED_FOR VARCHAR(32) COMMENT 'state compensated for',
+    STATE_ID_RETRIED_FOR VARCHAR(32) COMMENT 'state retried for',
+    GMT_STARTED DATETIME NOT NULL COMMENT 'start time',
+    IS_FOR_UPDATE TINYINT(1) COMMENT 'is service for update',
+    INPUT_PARAMS LONGTEXT COMMENT 'input parameters',
+    OUTPUT_PARAMS LONGTEXT COMMENT 'output parameters',
+    STATUS VARCHAR(2) NOT NULL COMMENT 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
+    EXCEP LONGBLOB COMMENT 'exception',
+    GMT_END DATETIME COMMENT 'end time',
+    PRIMARY KEY(ID, MACHINE_INST_ID)
+) COMMENT 'state instance';

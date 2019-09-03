@@ -1,0 +1,114 @@
+{
+    "Name": "simpleTestStateMachine",
+    "Comment": "测试状态机定义",
+    "StartAt": "FirstState",
+    "Version": "0.0.1",
+    "States": {
+        "FirstState": {
+            "Type": "ServiceTask",
+            "ServiceName": "com.alipay.sofa.DemoService",
+            "ServiceMethod": "foo",
+            "Next": "ChoiceState"
+        },
+        "ChoiceState": {
+            "Type": "Choice",
+            "Choices": [
+                {
+                    "Expression": "foo == 1",
+                    "Next": "FirstMatchState"
+                },
+                {
+                    "Expression": "foo == 2",
+                    "Next": "SecondMatchState"
+                }
+            ],
+            "Default": "FailState"
+        },
+        "FirstMatchState": {
+            "Type": "ServiceTask",
+            "ServiceName": "com.alipay.sofa.DemoService",
+            "ServiceMethod": "bar",
+            "CompensateState": "CompensateFirst",
+            "Status": {
+                "SU": "return.code == 'S'",
+                "FA": "return.code == 'F'",
+                "UN": "$exception{java.lang.Throwable}"
+            },
+            "Input": [
+                {
+                    "inputA1": "$.data1",
+                    "inputA2": {
+                        "a": "$.data2.a"
+                    }
+                },
+                {
+                    "inputB": "$.header"
+                }
+            ],
+            "Output": {
+                "firstMatchStateResult": "$.#root"
+            },
+            "Catch": [
+                {
+                    "Exceptions": [
+                        "java.lang.Exception"
+                    ],
+                    "Next": "StartCompensation"
+                }
+            ],
+            "Next": "SuccessState"
+        },
+        "CompensateFirst": {
+            "Type": "ServiceTask",
+            "ServiceName": "com.alipay.sofa.DemoService",
+            "ServiceMethod": "compensateBar",
+            "isForCompensation": true,
+            "Input": [
+                {
+                    "input": "$.data"
+                }
+            ],
+            "Output": {
+                "firstMatchStateResult": "$.#root"
+            },
+            "Status": {
+                "SU": "return.code == 'S'",
+                "FA": "return.code == 'F'",
+                "UN": "return.code == 'Unknow'"
+            }
+        },
+        "StartCompensation": {
+            "Type": "CompensationStart",
+            "Next": "CompensateEndState"
+        },
+        "CompensateEndState": {
+            "Type": "Fail",
+            "ErrorCode": "StateCompensated",
+            "Message": "State Compensated!"
+        },
+        "SecondMatchState": {
+            "Type": "SubStateMachine",
+            "StateMachineName": "simpleTestStateMachine",
+            "Input": [
+                {
+                    "input": "$.data"
+                },
+                {
+                    "header": "$.header"
+                }
+            ],
+            "Output": {
+                "firstMatchStateResult": "$.#root"
+            },
+            "Next": "SuccessState"
+        },
+        "FailState": {
+            "Type": "Fail",
+            "ErrorCode": "DefaultStateError",
+            "Message": "No Matches!"
+        },
+        "SuccessState": {
+            "Type": "Succeed"
+        }
+    }
+}
