@@ -375,6 +375,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
             + 4 // lockKeyBytes.length
             + 2 // clientIdBytes.length
             + 4 // applicationDataBytes.length
+            + 4 // xidBytes.size
             + 1 // statusCode
             + (resourceIdBytes == null ? 0 : resourceIdBytes.length)
             + (lockKeyBytes == null ? 0 : lockKeyBytes.length)
