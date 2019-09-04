@@ -35,6 +35,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private DataSource                dataSource;
     private String                    applicationId;
     private String                    txServiceGroup;
+    private String                    tablePrefix = "SEATA_";
     private MybatisConfig             mybatisConfig;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
 
@@ -44,6 +45,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
         if(mybatisConfig == null){
             mybatisConfig = new MybatisConfig();
             mybatisConfig.setDataSource(dataSource);
+            mybatisConfig.setTablePrefix(tablePrefix);
             mybatisConfig.afterPropertiesSet();
         }
 
@@ -111,5 +113,13 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     public void setSagaTransactionalTemplate(SagaTransactionalTemplate sagaTransactionalTemplate) {
         this.sagaTransactionalTemplate = sagaTransactionalTemplate;
+    }
+
+    public String getTablePrefix() {
+        return tablePrefix;
+    }
+
+    public void setTablePrefix(String tablePrefix) {
+        this.tablePrefix = tablePrefix;
     }
 }
