@@ -18,6 +18,7 @@ package io.seata.rm;
 import java.util.concurrent.TimeoutException;
 
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.core.exception.RmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -69,9 +70,9 @@ public abstract class AbstractResourceManager implements ResourceManager {
             }
             return response.getBranchId();
         } catch (TimeoutException toe) {
-            throw new TransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
+            throw new RmTransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
         } catch (RuntimeException rex) {
-            throw new TransactionException(TransactionExceptionCode.BranchRegisterFailed, "Runtime", rex);
+            throw new RmTransactionException(TransactionExceptionCode.BranchRegisterFailed, "Runtime", rex);
         }
     }
 
@@ -98,9 +99,9 @@ public abstract class AbstractResourceManager implements ResourceManager {
                 throw new TransactionException(response.getTransactionExceptionCode(), "Response[" + response.getMsg() + "]");
             }
         } catch (TimeoutException toe) {
-            throw new TransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
+            throw new RmTransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
         } catch (RuntimeException rex) {
-            throw new TransactionException(TransactionExceptionCode.BranchReportFailed, "Runtime", rex);
+            throw new RmTransactionException(TransactionExceptionCode.BranchReportFailed, "Runtime", rex);
         }
     }
 
