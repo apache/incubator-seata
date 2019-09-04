@@ -170,7 +170,9 @@ public class TableMetaCacheOracle {
                     index.setAscOrDesc(rsIndex.getString("ASC_OR_DESC"));
                     index.setCardinality(rsIndex.getInt("CARDINALITY"));
                     index.getValues().add(col);
-                    if (!index.isNonUnique()) {
+                    if ("PRIMARY".equalsIgnoreCase(indexName)) {
+                        index.setIndextype(IndexType.PRIMARY);
+                    } else if (!index.isNonUnique()) {
                         index.setIndextype(IndexType.Unique);
                     } else {
                         index.setIndextype(IndexType.Normal);
@@ -181,7 +183,7 @@ public class TableMetaCacheOracle {
             }
 
             while (rsPrimary.next()) {
-                String pkIndexName = rsPrimary.getString("PK_NAME");
+                String pkIndexName = rsPrimary.getObject(6).toString();
                 if (tm.getAllIndexes().containsKey(pkIndexName)) {
                     IndexMeta index = tm.getAllIndexes().get(pkIndexName);
                     index.setIndextype(IndexType.PRIMARY);
