@@ -50,7 +50,7 @@ public class DefaultTransactionManager implements TransactionManager {
         request.setTimeout(timeout);
         GlobalBeginResponse response = (GlobalBeginResponse)syncCall(request);
         if (response.getResultCode() == ResultCode.Failed) {
-            throw new TransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());
+            throw new TmTransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());
         }
         return response.getXid();
     }
