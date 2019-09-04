@@ -284,6 +284,22 @@ public class DBStateLogStore implements StateLogStore {
         return stateMachineInstance;
     }
 
+    @Override
+    public StateMachineInstance getStateMachineInstanceByBusinessKey(String businessKey) {
+
+        StateMachineInstance stateMachineInstance = sqlSessionTemplate.selectOne(MAPPER_PREFIX + "getStateMachineInstanceByBusinessKey", businessKey);
+        if (stateMachineInstance == null) {
+            return null;
+        }
+        List<StateInstance> stateInstanceList = queryStateInstanceListByMachineInstanceId(stateMachineInstance.getId());
+        for (StateInstance stateInstance : stateInstanceList) {
+            stateMachineInstance.putStateInstance(stateInstance.getId(), stateInstance);
+        }
+        deserializeParamsAndException(stateMachineInstance);
+
+        return stateMachineInstance;
+    }
+
     private void deserializeParamsAndException(StateMachineInstance stateMachineInstance) {
         byte[] serializedException = (byte[])stateMachineInstance.getSerializedException();
         if (serializedException != null) {

@@ -45,7 +45,7 @@
 	</bean>
 	<bean id="threadExecutor"
 		  class="org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean">
-		<property name="threadNamePrefix" value="SAGA_ASYNC_EXE_THREAD" />
+		<property name="threadNamePrefix" value="SAGA_ASYNC_EXE_" />
 		<property name="corePoolSize" value="1" />
 		<property name="maxPoolSize" value="20" />
 	</bean>

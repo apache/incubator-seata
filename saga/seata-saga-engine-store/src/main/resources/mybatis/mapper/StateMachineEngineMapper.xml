@@ -188,6 +188,15 @@
 		ID = #{id, jdbcType=VARCHAR}
 	</select>
 
+	<select id="getStateMachineInstanceByBusinessKey" parameterType="string" resultMap="StateMachineInstanceResultMap">
+		SELECT
+		<include refid="StateMachineInstanceFields" />
+		FROM
+		${TABLE_PREFIX}STATE_MACHINE_INST
+		WHERE
+		BUSINESS_KEY = #{businessKey, jdbcType=VARCHAR}
+	</select>
+
 	<select id="queryStateMachineInstanceByParentId" parameterType="string" resultMap="StateMachineInstanceResultMap">
 		SELECT
 		<include refid="StateMachineInstanceFieldsWithoutParams" />
@@ -197,6 +206,7 @@
 		PARENT_ID = #{parentId, jdbcType=VARCHAR}
 		ORDER BY GMT_STARTED DESC
 	</select>
+
 	<!-- ********************************************************************** -->
 
 
