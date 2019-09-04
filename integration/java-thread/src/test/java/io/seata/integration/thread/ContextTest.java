@@ -40,8 +40,14 @@ public class ContextTest {
     }
 
     @Test
+    public void testConfig() {
+        System.setProperty(ConfigurationKeys.CLIENT_THREAD_PROPAGATE, "true");
+        Assertions.assertEquals(ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_THREAD_PROPAGATE), true);
+    }
+
+    @Test
     public void threadTest() throws InterruptedException {
-        ConfigurationFactory.getInstance().putConfigIfAbsent(ConfigurationKeys.CLIENT_THREAD_PROPAGATE, Boolean.toString(true));
+        System.setProperty(ConfigurationKeys.CLIENT_THREAD_PROPAGATE, "true");
         String[] results = new String[2];
         CountDownLatch countDownLatch = new CountDownLatch(2);
         RootContext.bind("test-context");
@@ -67,7 +73,7 @@ public class ContextTest {
 
     @Test
     public void threadConfigTest() throws InterruptedException {
-        ConfigurationFactory.getInstance().putConfigIfAbsent(ConfigurationKeys.CLIENT_THREAD_PROPAGATE, Boolean.toString(false));
+        System.setProperty(ConfigurationKeys.CLIENT_THREAD_PROPAGATE, "false");
         String[] results = new String[2];
         CountDownLatch countDownLatch = new CountDownLatch(2);
         RootContext.bind("test-context");
@@ -88,12 +94,12 @@ public class ContextTest {
         });
 
         countDownLatch.await();
-        Assertions.assertNull(results);
+        Assertions.assertArrayEquals(new String[]{null, null}, results);
     }
 
     @Test
     public void nonPropagateRunnable() throws InterruptedException {
-        ConfigurationFactory.getInstance().putConfigIfAbsent(ConfigurationKeys.CLIENT_THREAD_PROPAGATE, Boolean.toString(true));
+        System.setProperty(ConfigurationKeys.CLIENT_THREAD_PROPAGATE, "true");
         String[] results = new String[2];
         CountDownLatch countDownLatch = new CountDownLatch(2);
 

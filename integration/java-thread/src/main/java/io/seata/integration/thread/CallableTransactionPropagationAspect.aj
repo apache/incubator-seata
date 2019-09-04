@@ -44,9 +44,11 @@ public aspect CallableTransactionPropagationAspect {
         String xid = m.xid();
         if (NonPropagateCallable.class.isAssignableFrom(m.getClass())) {
             RootContext.unbind();
-        } else if (ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_THREAD_PROPAGATE, true) && xid != null){
+        } else if (ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_THREAD_PROPAGATE, false) && xid != null){
             RootContext.unbind();
             RootContext.bind(xid);
+        } else {
+            RootContext.unbind();
         }
     }
 }
