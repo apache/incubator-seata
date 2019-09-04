@@ -52,7 +52,7 @@ public class MybatisConfig implements InitializingBean {
     private TransactionFactory transactionFactory;
     private SqlSessionTemplate sqlSessionTemplate;
     private DataSource         dataSource;
-    private boolean transactionsExternallyManaged = true;
+    private boolean transactionsExternallyManaged = false;
     private String  tablePrefix                   = "SEATA_";
     private String  databaseType                  = "mysql";
     private boolean initTable                     = false;

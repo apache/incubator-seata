@@ -35,7 +35,9 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private DataSource                dataSource;
     private String                    applicationId;
     private String                    txServiceGroup;
-    private String                    tablePrefix = "SEATA_";
+    private String                    tablePrefix                   = "SEATA_";
+    private boolean                   transactionsExternallyManaged = false;
+    private String                    databaseType                  = "mysql";
     private MybatisConfig             mybatisConfig;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
 
@@ -46,6 +48,8 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             mybatisConfig = new MybatisConfig();
             mybatisConfig.setDataSource(dataSource);
             mybatisConfig.setTablePrefix(tablePrefix);
+            mybatisConfig.setDatabaseType(databaseType);
+            mybatisConfig.setTransactionsExternallyManaged(transactionsExternallyManaged);
             mybatisConfig.afterPropertiesSet();
         }
 
@@ -121,5 +125,21 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     public void setTablePrefix(String tablePrefix) {
         this.tablePrefix = tablePrefix;
+    }
+
+    public boolean isTransactionsExternallyManaged() {
+        return transactionsExternallyManaged;
+    }
+
+    public void setTransactionsExternallyManaged(boolean transactionsExternallyManaged) {
+        this.transactionsExternallyManaged = transactionsExternallyManaged;
+    }
+
+    public String getDatabaseType() {
+        return databaseType;
+    }
+
+    public void setDatabaseType(String databaseType) {
+        this.databaseType = databaseType;
     }
 }
