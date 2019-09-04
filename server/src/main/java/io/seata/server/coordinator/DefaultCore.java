@@ -313,15 +313,14 @@ public class DefaultCore implements Core {
                 switch (branchStatus) {
                     case PhaseTwo_Rollbacked:
                         globalSession.removeBranch(branchSession);
-                        LOGGER.info("Successfully rollback branch " + branchSession);
+                        LOGGER.info("Successfully rollback branch xid={} branchId={}", globalSession.getXid(), branchSession.getBranchId());
                         continue;
                     case PhaseTwo_RollbackFailed_Unretryable:
                         SessionHelper.endRollbackFailed(globalSession);
-                        LOGGER.error("Failed to rollback global[" + globalSession.getXid() + "] since branch["
-                            + branchSession.getBranchId() + "] rollback failed");
+                        LOGGER.info("Failed to rollback branch xid={} branchId={}", globalSession.getXid(), branchSession.getBranchId());
                         return;
                     default:
-                        LOGGER.info("Failed to rollback branch " + branchSession);
+                        LOGGER.info("Failed to rollback branch xid={} branchId={}", globalSession.getXid(), branchSession.getBranchId());
                         if (!retrying) {
                             queueToRetryRollback(globalSession);
                         }
@@ -329,7 +328,7 @@ public class DefaultCore implements Core {
 
                 }
             } catch (Exception ex) {
-                LOGGER.error("Exception rollbacking branch " + branchSession, ex);
+                LOGGER.error("Exception rollbacking branch xid={} branchId={}", globalSession.getXid(), branchSession.getBranchId(), ex);
                 if (!retrying) {
                     queueToRetryRollback(globalSession);
                 }
