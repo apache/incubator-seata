@@ -31,7 +31,7 @@ public class ContextTest {
 
     @BeforeAll
     public static void before() {
-        executorService = new ThreadPoolExecutor(1, 1, 1, TimeUnit.HOURS, new LinkedBlockingQueue<>(), new ThreadFactory() {
+        executorService = new ThreadPoolExecutor(2, 2, 1, TimeUnit.HOURS, new LinkedBlockingQueue<>(), new ThreadFactory() {
             @Override
             public Thread newThread(Runnable r) {
                 return new Thread(r, "contextText-" + System.currentTimeMillis());
