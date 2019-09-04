@@ -15,12 +15,8 @@
  */
 package io.seata.spring.tcc;
 
-import java.lang.reflect.Method;
-import java.util.Map;
-
 import io.seata.common.Constants;
 import io.seata.common.executor.Callback;
-import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.interceptor.ActionInterceptorHandler;
@@ -32,6 +28,9 @@ import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Method;
+import java.util.Map;
+
 /**
  * TCC Interceptor
  *
@@ -40,6 +39,9 @@ import org.slf4j.LoggerFactory;
 public class TccActionInterceptor implements MethodInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptor.class);
+
+    private static final String DUBBO_PROXY_NAME_PREFIX="com.alibaba.dubbo.common.bytecode.proxy";
+
 
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
@@ -65,25 +67,34 @@ public class TccActionInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
+        if(!RootContext.inGlobalTransaction()){
+            //not in transaction
+            return invocation.proceed();
+        }
         Method method = getActionInterfaceMethod(invocation);
         TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
         //try method
         if (businessAction != null) {
-            if (StringUtils.isBlank(RootContext.getXID())) {
-                //not in distribute transaction
-                return invocation.proceed();
+            //save the xid
+            String xid = RootContext.getXID();
+            //clear the context
+            RootContext.unbind();
+            try {
+                Object[] methodArgs = invocation.getArguments();
+                //Handler the TCC Aspect
+                Map<String, Object> ret = actionInterceptorHandler.proceed(method, methodArgs, xid, businessAction,
+                        new Callback<Object>() {
+                            @Override
+                            public Object execute() throws Throwable {
+                                return invocation.proceed();
+                            }
+                        });
+                //return the final result
+                return ret.get(Constants.TCC_METHOD_RESULT);
+            } finally {
+                //recovery the context
+                RootContext.bind(xid);
             }
-            Object[] methodArgs = invocation.getArguments();
-            //Handler the TCC Aspect
-            Map<String, Object> ret = actionInterceptorHandler.proceed(method, methodArgs, businessAction,
-                new Callback<Object>() {
-                    @Override
-                    public Object execute() throws Throwable {
-                        return invocation.proceed();
-                    }
-                });
-            //return the final result
-            return ret.get(Constants.TCC_METHOD_RESULT);
         }
         return invocation.proceed();
     }
@@ -126,7 +137,7 @@ public class TccActionInterceptor implements MethodInterceptor {
      * @throws Exception the exception
      */
     protected Class<?> getProxyInterface(Object proxyBean) throws Exception {
-        if (proxyBean.getClass().getName().startsWith("com.alibaba.dubbo.common.bytecode.proxy")) {
+        if (proxyBean.getClass().getName().startsWith(DUBBO_PROXY_NAME_PREFIX)) {
             //dubbo javaassist proxy
             return DubboUtil.getAssistInterface(proxyBean);
         } else {

@@ -15,8 +15,6 @@
  */
 package io.seata.core.protocol.transaction;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.UnpooledByteBufAllocator;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.protocol.ResultCode;
 import org.junit.jupiter.api.Assertions;
@@ -39,31 +37,6 @@ public class BranchRollbackResponseTest {
             "xid=127.0.0.1:8091:123456,branchId=2345678,branchStatus=PhaseOne_Done,result code =Success,getMsg =",
             branchRollbackResponse.toString());
 
-    }
-
-    @Test
-    public void testEncodeDecode() {
-        BranchRollbackResponse branchRollbackResponse = new BranchRollbackResponse();
-
-        branchRollbackResponse.setXid("127.0.0.1:9999:39875642");
-        branchRollbackResponse.setBranchId(10241024L);
-        branchRollbackResponse.setResultCode(ResultCode.Success);
-        branchRollbackResponse.setBranchStatus(BranchStatus.PhaseTwo_Committed);
-
-        byte[] encodeResult = branchRollbackResponse.encode();
-
-        ByteBuf byteBuffer = UnpooledByteBufAllocator.DEFAULT.directBuffer(encodeResult.length);
-        byteBuffer.writeBytes(encodeResult);
-
-        BranchRollbackResponse decodeBranchRollbackResponse = new BranchRollbackResponse();
-        decodeBranchRollbackResponse.decode(byteBuffer);
-        Assertions.assertEquals(decodeBranchRollbackResponse.getXid(), branchRollbackResponse.getXid());
-        Assertions.assertEquals(decodeBranchRollbackResponse.getBranchId(), branchRollbackResponse.getBranchId());
-        Assertions.assertEquals(decodeBranchRollbackResponse.getResultCode(), branchRollbackResponse.getResultCode());
-        Assertions.assertEquals(decodeBranchRollbackResponse.getBranchStatus(), branchRollbackResponse.getBranchStatus());
-        Assertions.assertEquals(decodeBranchRollbackResponse.getTransactionExceptionCode(),
-            branchRollbackResponse.getTransactionExceptionCode());
-        Assertions.assertEquals(decodeBranchRollbackResponse.getMsg(), branchRollbackResponse.getMsg());
     }
 
 }

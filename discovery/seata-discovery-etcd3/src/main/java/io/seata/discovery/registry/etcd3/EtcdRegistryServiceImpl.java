@@ -70,8 +70,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final int THREAD_POOL_SIZE = 2;
-    private final static ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE,
-        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("registry-etcd3", THREAD_POOL_SIZE));
+    private ExecutorService executorService;
     /**
      * TTL for lease
      */
@@ -86,9 +85,9 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     private final static long LIFE_KEEP_CRITICAL = 6;
     private static volatile EtcdRegistryServiceImpl instance;
     private static volatile Client client;
-    private static ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap = null;
-    private static ConcurrentMap<String, Set<Watch.Listener>> listenerMap = null;
-    private static ConcurrentMap<String, EtcdWatcher> watcherMap = null;
+    private ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap;
+    private ConcurrentMap<String, Set<Watch.Listener>> listenerMap;
+    private ConcurrentMap<String, EtcdWatcher> watcherMap;
     private static long leaseId = 0;
     private EtcdLifeKeeper lifeKeeper = null;
     private Future<Boolean> lifeKeeperFuture = null;
@@ -99,6 +98,10 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
 
 
     private EtcdRegistryServiceImpl() {
+        clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        watcherMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        executorService = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("registry-etcd3", THREAD_POOL_SIZE));
     }
 
     /**
@@ -110,9 +113,6 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         if (null == instance) {
             synchronized (EtcdRegistryServiceImpl.class) {
                 if (null == instance) {
-                    clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    watcherMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
                     instance = new EtcdRegistryServiceImpl();
                 }
             }
@@ -134,7 +134,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      */
     private void doRegister(InetSocketAddress address) throws Exception {
         PutOption putOption = PutOption.newBuilder().withLeaseId(getLeaseId()).build();
-        getClient().getKVClient().put(buildRegestryKey(address), buildRegistryValue(address), putOption).get();
+        getClient().getKVClient().put(buildRegistryKey(address), buildRegistryValue(address), putOption).get();
     }
 
 
@@ -151,7 +151,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      * @throws Exception
      */
     private void doUnregister(InetSocketAddress address) throws Exception {
-        getClient().getKVClient().delete(buildRegestryKey(address)).get();
+        getClient().getKVClient().delete(buildRegistryKey(address)).get();
     }
 
     @Override
@@ -159,7 +159,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         listenerMap.putIfAbsent(cluster, new HashSet<>());
         listenerMap.get(cluster).add(listener);
         EtcdWatcher watcher = watcherMap.computeIfAbsent(cluster, w -> new EtcdWatcher(listener));
-        EXECUTOR_SERVICE.submit(watcher);
+        executorService.submit(watcher);
     }
 
     @Override
@@ -237,8 +237,8 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             return;
         }
         //1.get all available registries
-        GetOption getOption = GetOption.newBuilder().withPrefix(buildRegestryKeyPrefix()).build();
-        GetResponse getResponse = getClient().getKVClient().get(buildRegestryKeyPrefix(), getOption).get();
+        GetOption getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
+        GetResponse getResponse = getClient().getKVClient().get(buildRegistryKeyPrefix(), getOption).get();
         //2.add to list
         List<InetSocketAddress> instanceList = getResponse.getKvs().stream().map(keyValue -> {
             String[] instanceInfo = keyValue.getValue().toString(UTF_8).split(":");
@@ -298,7 +298,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             //create a new lease
             leaseId = getClient().getLeaseClient().grant(TTL).get().getID();
             lifeKeeper = new EtcdLifeKeeper(leaseId);
-            lifeKeeperFuture = EXECUTOR_SERVICE.submit(lifeKeeper);
+            lifeKeeperFuture = executorService.submit(lifeKeeper);
         }
         return leaseId;
     }
@@ -308,7 +308,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      *
      * @return registry key
      */
-    private ByteSequence buildRegestryKey(InetSocketAddress address) {
+    private ByteSequence buildRegistryKey(InetSocketAddress address) {
         return ByteSequence.from(REGISTRY_KEY_PREFIX + getClusterName() + "-" + NetUtil.toStringAddress(address), UTF_8);
     }
 
@@ -317,7 +317,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      *
      * @return registry key prefix
      */
-    private ByteSequence buildRegestryKeyPrefix() {
+    private ByteSequence buildRegistryKeyPrefix() {
         return ByteSequence.from(REGISTRY_KEY_PREFIX + getClusterName(), UTF_8);
     }
 
@@ -398,8 +398,8 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         @Override
         public void run() {
             Watch watchClient = getClient().getWatchClient();
-            WatchOption watchOption = WatchOption.newBuilder().withPrefix(buildRegestryKeyPrefix()).build();
-            this.watcher = watchClient.watch(buildRegestryKeyPrefix(), watchOption, this.listener);
+            WatchOption watchOption = WatchOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
+            this.watcher = watchClient.watch(buildRegistryKeyPrefix(), watchOption, this.listener);
         }
 
         /**

@@ -68,14 +68,20 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private static ExecutorService etcdConfigExecutor = null;
-    private static ExecutorService etcdNotifierExecutor = null;
-    private static ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = null;
-    private static ConcurrentHashMap<String, List<ConfigChangeNotifier>> configChangeNotifiersMap = null;
+    private ExecutorService etcdConfigExecutor;
+    private ExecutorService etcdNotifierExecutor;
+    private ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap;
+    private ConcurrentHashMap<String, List<ConfigChangeNotifier>> configChangeNotifiersMap;
 
     private static final long VERSION_NOT_EXIST = 0;
 
     private EtcdConfiguration() {
+        etcdConfigExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
+            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("etcd-config-executor", THREAD_POOL_NUM));
+        etcdNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
+            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("etcd-config-notifier-executor", THREAD_POOL_NUM));
+        configListenersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        configChangeNotifiersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
     }
 
     /**
@@ -87,12 +93,6 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         if (null == instance) {
             synchronized (EtcdConfiguration.class) {
                 if (null == instance) {
-                    etcdConfigExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-                        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("etcd-config-executor", THREAD_POOL_NUM));
-                    etcdNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-                        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("etcd-config-notifier-executor", THREAD_POOL_NUM));
-                    configListenersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    configChangeNotifiersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
                     instance = new EtcdConfiguration();
                 }
             }
@@ -108,19 +108,19 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+        String value;
+        if ((value = getConfigFromSysPro(dataId)) != null) {
+            return value;
+        }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET, timeoutMills);
-        etcdConfigExecutor.execute(() -> {
-            complete(getClient().getKVClient().get(ByteSequence.from(dataId, UTF_8)), configFuture);
-        });
+        etcdConfigExecutor.execute(() -> complete(getClient().getKVClient().get(ByteSequence.from(dataId, UTF_8)), configFuture));
         return (String) configFuture.get();
     }
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUT, timeoutMills);
-        etcdConfigExecutor.execute(() -> {
-            complete(getClient().getKVClient().put(ByteSequence.from(dataId, UTF_8), ByteSequence.from(content, UTF_8)), configFuture);
-        });
+        etcdConfigExecutor.execute(() -> complete(getClient().getKVClient().put(ByteSequence.from(dataId, UTF_8), ByteSequence.from(content, UTF_8)), configFuture));
         return (Boolean) configFuture.get();
     }
 
@@ -250,7 +250,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
     /**
      * the type config change notifier
      */
-    private static class ConfigChangeNotifier implements Runnable {
+    private class ConfigChangeNotifier implements Runnable {
         private final String dataId;
         private final ConfigChangeListener listener;
         private Watch.Watcher watcher;
@@ -311,7 +311,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         /**
          * stop the notifier
          */
-        public void stop() {
+        private void stop() {
             this.watcher.close();
         }
     }

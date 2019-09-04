@@ -19,19 +19,19 @@ package io.seata.core.lock;
  * lock mode
  *
  * @author zhangsen
- * @data 2019 /4/25
+ * @date 2019 /4/25
  */
 public enum LockMode {
 
     /**
-     * store the lock in memory of server
+     * store the lock in user's database
      */
-    MEMORY,
+    LOCAL,
 
     /**
-     * store the lock in db of server
+     * store the lock in seata's server
      */
-    DB;
+    REMOTE;
 
 
 }

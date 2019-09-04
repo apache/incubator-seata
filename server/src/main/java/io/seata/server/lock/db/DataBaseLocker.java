@@ -23,9 +23,9 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.lock.AbstractLocker;
-import io.seata.core.lock.LockMode;
 import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockStore;
+import io.seata.core.store.StoreMode;
 
 /**
  * The type Data base locker.
@@ -50,7 +50,7 @@ public class DataBaseLocker extends AbstractLocker {
      * @param logStoreDataSource the log store data source
      */
     public DataBaseLocker(DataSource logStoreDataSource) {
-        lockStore = EnhancedServiceLoader.load(LockStore.class, LockMode.DB.name(), new Class[] {DataSource.class},
+        lockStore = EnhancedServiceLoader.load(LockStore.class, StoreMode.DB.name(), new Class[] {DataSource.class},
             new Object[] {logStoreDataSource});
     }
 

@@ -15,13 +15,10 @@
  */
 package io.seata.core.protocol.transaction;
 
+import io.seata.core.protocol.MessageType;
 import io.seata.core.protocol.ResultCode;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.nio.ByteBuffer;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * A unit test for {@link GlobalBeginResponse}
@@ -51,20 +48,7 @@ public class GlobalBeginResponseTest {
     @Test
     public void testGetTypeCode() {
         GlobalBeginResponse globalBeginResponse = new GlobalBeginResponse();
-        Assertions.assertEquals(GlobalBeginResponse.TYPE_GLOBAL_BEGIN_RESULT, globalBeginResponse.getTypeCode());
+        Assertions.assertEquals(MessageType.TYPE_GLOBAL_BEGIN_RESULT, globalBeginResponse.getTypeCode());
     }
 
-    @Test
-    public void testDoEncodeAndDecode() {
-        GlobalBeginResponse globalBeginResponseOne = new GlobalBeginResponse();
-        globalBeginResponseOne.setXid(XID);
-        globalBeginResponseOne.setExtraData(EXTRA_DATA);
-        globalBeginResponseOne.setResultCode(RESULT_CODE);
-        byte[] encode = globalBeginResponseOne.encode();
-        GlobalBeginResponse globalBeginResponseTwo = new GlobalBeginResponse();
-        globalBeginResponseTwo.decode(ByteBuffer.wrap(encode));
-        assertThat(globalBeginResponseOne.getXid()).isEqualTo(globalBeginResponseTwo.getXid());
-        assertThat(globalBeginResponseOne.getExtraData()).isEqualTo(globalBeginResponseTwo.getExtraData());
-        assertThat(globalBeginResponseOne.getResultCode()).isEqualTo(globalBeginResponseTwo.getResultCode());
-    }
 }

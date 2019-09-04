@@ -18,9 +18,11 @@ package io.seata.server;
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.netty.RpcServer;
 import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.server.coordinator.DefaultCoordinator;
+import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
 
 import java.io.IOException;
@@ -51,15 +53,18 @@ public class Server {
      * @throws IOException the io exception
      */
     public static void main(String[] args) throws IOException {
+        //initialize the metrics
+        MetricsManager.get().init();
+
         //initialize the parameter parser
         ParameterParser parameterParser = new ParameterParser(args);
 
+        System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
+
         RpcServer rpcServer = new RpcServer(WORKING_THREADS);
-        //server host
-        rpcServer.setHost(parameterParser.getHost());
         //server port
         rpcServer.setListenPort(parameterParser.getPort());
-        UUIDGenerator.init(1);
+        UUIDGenerator.init(parameterParser.getServerNode());
         //log store mode : file、db
         SessionHolder.init(parameterParser.getStoreMode());
 
