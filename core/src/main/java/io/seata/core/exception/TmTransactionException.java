@@ -20,7 +20,7 @@ package io.seata.core.exception;
  *
  * @author will
  */
-public class TmTransactionException extends BranchTransactionException{
+public class TmTransactionException extends GlobalTransactionException{
 
     /**
      * Instantiates a new Transaction exception.
