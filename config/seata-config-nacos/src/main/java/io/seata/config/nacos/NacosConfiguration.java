@@ -44,7 +44,7 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     private static final String SEATA_GROUP = "SEATA_GROUP";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String CONFIG_TYPE = "nacos";
-    private static final String DEFAULT_NAMESPACE = "public";
+    private static final String DEFAULT_NAMESPACE = "";
     private static final String PRO_NAMESPACE_KEY = "namespace";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
