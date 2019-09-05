@@ -41,7 +41,7 @@ import com.alibaba.nacos.client.naming.utils.CollectionUtils;
  * @date 2019 /1/31
  */
 public class NacosRegistryServiceImpl implements RegistryService<EventListener> {
-    private static final String DEFAULT_NAMESPACE = "public";
+    private static final String DEFAULT_NAMESPACE = "";
     private static final String DEFAULT_CLUSTER = "default";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
     private static final String PRO_NAMESPACE_KEY = "namespace";
