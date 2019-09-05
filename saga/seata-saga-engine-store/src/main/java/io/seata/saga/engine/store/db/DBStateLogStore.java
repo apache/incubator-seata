@@ -411,10 +411,6 @@ public class DBStateLogStore implements StateLogStore {
 
     }
 
-    public SqlSessionExecutor getSqlSessionExecutor() {
-        return sqlSessionExecutor;
-    }
-
     public void setSqlSessionExecutor(SqlSessionExecutor sqlSessionExecutor) {
         this.sqlSessionExecutor = sqlSessionExecutor;
     }

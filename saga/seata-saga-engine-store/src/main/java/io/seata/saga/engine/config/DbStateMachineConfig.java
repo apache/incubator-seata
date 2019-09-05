@@ -81,7 +81,13 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
         if(getStateLangStore() == null){
             DBStateLangStore dbStateLangStore = new DBStateLangStore();
-            dbStateLangStore.setSqlSessionTemplate(mybatisConfig.getSqlSessionTemplate());
+
+            TransactionalSqlSessionExecutor sqlSessionExecutor = new TransactionalSqlSessionExecutor();
+            sqlSessionExecutor.setTransactionTemplate(mybatisConfig.getTransactionTemplate());
+            sqlSessionExecutor.setSqlSessionTemplate(mybatisConfig.getSqlSessionTemplate());
+
+            dbStateLangStore.setSqlSessionExecutor(sqlSessionExecutor);
+
             setStateLangStore(dbStateLangStore);
         }
 

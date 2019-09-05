@@ -17,7 +17,6 @@ package io.seata.saga.engine.store.db;
 
 import io.seata.saga.engine.store.StateLangStore;
 import io.seata.saga.statelang.domain.StateMachine;
-import org.mybatis.spring.SqlSessionTemplate;
 
 import static io.seata.saga.engine.store.db.MybatisConfig.MAPPER_PREFIX;
 
@@ -28,24 +27,24 @@ import static io.seata.saga.engine.store.db.MybatisConfig.MAPPER_PREFIX;
  */
 public class DBStateLangStore implements StateLangStore {
 
-    private SqlSessionTemplate sqlSessionTemplate;
+    private SqlSessionExecutor sqlSessionExecutor;
 
     @Override
     public StateMachine getStateMachineById(String stateMachineId) {
-        return sqlSessionTemplate.selectOne( MAPPER_PREFIX + "getStateMachineById", stateMachineId);
+        return sqlSessionExecutor.selectOne( MAPPER_PREFIX + "getStateMachineById", stateMachineId);
     }
 
     @Override
     public StateMachine getLastVersionStateMachine(String stateMachineName) {
-        return sqlSessionTemplate.selectOne( MAPPER_PREFIX + "getLastVersionStateMachine", stateMachineName);
+        return sqlSessionExecutor.selectOne( MAPPER_PREFIX + "getLastVersionStateMachine", stateMachineName);
     }
 
     @Override
     public boolean storeStateMachine(StateMachine stateMachine) {
-        return sqlSessionTemplate.insert(MAPPER_PREFIX + "insertStateMachine", stateMachine) > 0;
+        return sqlSessionExecutor.insert(MAPPER_PREFIX + "insertStateMachine", stateMachine) > 0;
     }
 
-    public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-        this.sqlSessionTemplate = sqlSessionTemplate;
+    public void setSqlSessionExecutor(SqlSessionExecutor sqlSessionExecutor) {
+        this.sqlSessionExecutor = sqlSessionExecutor;
     }
 }
