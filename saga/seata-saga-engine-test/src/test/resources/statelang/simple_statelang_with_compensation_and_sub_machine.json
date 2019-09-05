@@ -48,9 +48,9 @@
                 "barResult": "$.#root"
             },
             "Status": {
-                "SU": "#root != null",
-                "FA": "#root == null",
-                "UN": "$Exception{io.seata.saga.engine.exception.EngineExecutionException}"
+                "#root != null": "SU",
+                "#root == null": "FA",
+                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN"
             },
             "Catch": [
                 {

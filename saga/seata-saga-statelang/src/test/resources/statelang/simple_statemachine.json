@@ -30,9 +30,9 @@
             "ServiceMethod": "bar",
             "CompensateState": "CompensateFirst",
             "Status": {
-                "SU": "return.code == 'S'",
-                "FA": "return.code == 'F'",
-                "UN": "$exception{java.lang.Throwable}"
+                "return.code == 'S'": "SU",
+                "return.code == 'F'": "FA",
+                "$exception{java.lang.Throwable}": "UN"
             },
             "Input": [
                 {
@@ -72,9 +72,9 @@
                 "firstMatchStateResult": "$.#root"
             },
             "Status": {
-                "SU": "return.code == 'S'",
-                "FA": "return.code == 'F'",
-                "UN": "return.code == 'Unknow'"
+                "return.code == 'S'": "SU",
+                "return.code == 'F'": "FA",
+                "$exception{java.lang.Throwable}": "UN"
             }
         },
         "StartCompensation": {

@@ -376,28 +376,30 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
             StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
-            Map<String, Object> statusEvaluators = state.getStatusEvaluators();
+            Map<Object, String> statusEvaluators = state.getStatusEvaluators();
             if(statusEvaluators == null){
                 synchronized (state){
                     statusEvaluators = state.getStatusEvaluators();
                     if(statusEvaluators == null){
                         statusEvaluators = new LinkedHashMap<>(statusMatchList.size());
-                        for(String statusKey : statusMatchList.keySet()){
+                        for(String expressionStr : statusMatchList.keySet()){
 
-                            String expressionStr = statusMatchList.get(statusKey);
+                            String statusVal = statusMatchList.get(expressionStr);
                             Evaluator evaluator = createEvaluator(stateMachineConfig.getEvaluatorFactoryManager(), expressionStr);
                             if(evaluator != null){
-                                statusEvaluators.put(statusKey, evaluator);
+                                statusEvaluators.put(evaluator, statusVal);
                             }
                         }
                     }
+                    state.setStatusEvaluators(statusEvaluators);
                 }
             }
 
-            for(String statusKey : statusEvaluators.keySet()){
-                Evaluator evaluator = (Evaluator)statusEvaluators.get(statusKey);
+            for(Object evaluatorObj : statusEvaluators.keySet()){
+                Evaluator evaluator = (Evaluator) evaluatorObj;
+                String statusVal = statusEvaluators.get(evaluator);
                 if (evaluator.evaluate(context.getVariables())) {
-                    stateInstance.setStatus(ExecutionStatus.valueOf(statusKey));
+                    stateInstance.setStatus(ExecutionStatus.valueOf(statusVal));
                     break;
                 }
             }

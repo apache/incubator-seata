@@ -21,9 +21,9 @@
                 "fooResult": "$.#root"
             },
             "Status": {
-                "UN": "$Exception{io.seata.saga.engine.exception.EngineExecutionException}",
-                "SU": "#root != null &&  #root.size() > 0",
-                "FA": "#root == null || #root.size() == 0"
+                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN",
+                "#root != null &&  #root.size() > 0": "SU",
+                "#root == null || #root.size() == 0": "FA"
             }
         },
         "ChoiceState":{
@@ -56,9 +56,9 @@
                 "barResult": "$.#root"
             },
             "Status": {
-                "UN": "$Exception{io.seata.saga.engine.exception.EngineExecutionException}",
-                "SU": "#root != null &&  #root.size() > 0",
-                "FA": "#root == null || #root.size() == 0"
+                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN",
+                "#root != null &&  #root.size() > 0": "SU",
+                "#root == null || #root.size() == 0": "FA"
             },
             "Catch": [
                 {
@@ -83,9 +83,9 @@
                 "fooResult": "$.#root"
             },
             "Status": {
-                "UN": "$Exception{io.seata.saga.engine.exception.EngineExecutionException}",
-                "SU": "#root != null &&  #root.size() > 0",
-                "FA": "#root == null || #root.size() == 0"
+                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN",
+                "#root != null &&  #root.size() > 0": "SU",
+                "#root == null || #root.size() == 0": "FA"
             },
             "Next": "Succeed"
         },
@@ -101,9 +101,9 @@
                 }
             ],
             "Status": {
-                "UN": "$Exception{io.seata.saga.engine.exception.EngineExecutionException}",
-                "SU": "#root != null &&  #root.size() > 0",
-                "FA": "#root == null || #root.size() == 0"
+                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN",
+                "#root != null &&  #root.size() > 0": "SU",
+                "#root == null || #root.size() == 0": "FA"
             }
         },
         "CompensateSecondState": {
@@ -118,9 +118,9 @@
                 }
             ],
             "Status": {
-                "UN": "$Exception{io.seata.saga.engine.exception.EngineExecutionException}",
-                "SU": "#root != null &&  #root.size() > 0",
-                "FA": "#root == null || #root.size() == 0"
+                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN",
+                "#root != null &&  #root.size() > 0": "SU",
+                "#root == null || #root.size() == 0": "FA"
             }
         },
         "CompensationStart": {

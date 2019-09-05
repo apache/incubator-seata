@@ -34,7 +34,7 @@ public class ServiceTaskStateImpl extends AbstractTaskState implements ServiceTa
     private Method              method;
     private List<Object>        inputExpressions;
     private Map<String, Object> outputExpressions;
-    private Map<String, Object> statusEvaluators;
+    private Map<Object, String> statusEvaluators;
 
     public ServiceTaskStateImpl() {
         setType(DomainConstants.STATE_TYPE_SERVICE_TASK);
@@ -100,11 +100,11 @@ public class ServiceTaskStateImpl extends AbstractTaskState implements ServiceTa
         this.outputExpressions = outputExpressions;
     }
 
-    public Map<String, Object> getStatusEvaluators() {
+    public Map<Object, String> getStatusEvaluators() {
         return statusEvaluators;
     }
 
-    public void setStatusEvaluators(Map<String, Object> statusEvaluators) {
+    public void setStatusEvaluators(Map<Object, String> statusEvaluators) {
         this.statusEvaluators = statusEvaluators;
     }
 }
