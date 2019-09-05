@@ -17,6 +17,7 @@ package io.seata.rm.datasource.sql.struct;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -33,8 +34,8 @@ import io.seata.common.util.CollectionUtils;
 public class TableMeta {
     private String tableName;
 
-    private Map<String, ColumnMeta> allColumns = new HashMap<String, ColumnMeta>();
-    private Map<String, IndexMeta> allIndexes = new HashMap<String, IndexMeta>();
+    private Map<String, ColumnMeta> allColumns = new LinkedHashMap<String, ColumnMeta>();
+    private Map<String, IndexMeta> allIndexes = new LinkedHashMap<String, IndexMeta>();
 
     /**
      * Gets table name.
