@@ -20,8 +20,10 @@ import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.server.Server;
 import io.seata.tm.api.GlobalTransaction;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +43,25 @@ import java.util.Map;
 @ContextConfiguration(locations = { "classpath:spring/statemachine_engine_db_test.xml" })
 public class StateMachineDBTests {
 
+    private static Server server;
+
     private StateMachineEngine stateMachineEngine;
+
+    @BeforeClass
+    public static void startSeataServer() throws InterruptedException {
+        (new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    server = new Server();
+                    server.main(new String[]{});
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        })).start();
+        Thread.sleep(5000);
+    }
 
     private GlobalTransaction getGlobalTransaction(StateMachineInstance instance){
         Map<String, Object> params = instance.getContext();

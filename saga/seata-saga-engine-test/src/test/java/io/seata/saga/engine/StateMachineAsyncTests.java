@@ -40,24 +40,6 @@ public class StateMachineAsyncTests {
 
     private StateMachineEngine stateMachineEngine;
 
-    private volatile Object lock = new Object();
-
-    private AsyncCallback callback = new AsyncCallback() {
-        @Override
-        public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
-            synchronized (lock){
-                lock.notifyAll();
-            }
-        }
-
-        @Override
-        public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
-            synchronized (lock){
-                lock.notifyAll();
-            }
-        }
-    };
-
     @Test
     public void testSimpleCatchesStateMachine() {
 
@@ -71,15 +53,7 @@ public class StateMachineAsyncTests {
 
         StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, paramMap, callback);
 
-        synchronized (lock){
-            if(ExecutionStatus.RU.equals(inst.getStatus())){
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -102,15 +76,7 @@ public class StateMachineAsyncTests {
 
         StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, paramMap, callback);
 
-        synchronized (lock){
-            if(ExecutionStatus.RU.equals(inst.getStatus())){
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -133,15 +99,7 @@ public class StateMachineAsyncTests {
 
         StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, paramMap, callback);
 
-        synchronized (lock){
-            if(ExecutionStatus.RU.equals(inst.getStatus())){
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -163,15 +121,7 @@ public class StateMachineAsyncTests {
 
         StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, paramMap, callback);
 
-        synchronized (lock){
-            if(ExecutionStatus.RU.equals(inst.getStatus())){
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -194,15 +144,7 @@ public class StateMachineAsyncTests {
 
         StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, paramMap, callback);
 
-        synchronized (lock){
-            if(ExecutionStatus.RU.equals(inst.getStatus())){
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
 
@@ -219,4 +161,33 @@ public class StateMachineAsyncTests {
     public void setStateMachineEngine(@Qualifier("stateMachineEngine") StateMachineEngine stateMachineEngine) {
         this.stateMachineEngine = stateMachineEngine;
     }
+
+    private void waittingForFinish(StateMachineInstance inst){
+        synchronized (lock){
+            if(ExecutionStatus.RU.equals(inst.getStatus())){
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private volatile Object lock = new Object();
+    private AsyncCallback callback = new AsyncCallback() {
+        @Override
+        public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
+            synchronized (lock){
+                lock.notifyAll();
+            }
+        }
+
+        @Override
+        public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
+            synchronized (lock){
+                lock.notifyAll();
+            }
+        }
+    };
 }

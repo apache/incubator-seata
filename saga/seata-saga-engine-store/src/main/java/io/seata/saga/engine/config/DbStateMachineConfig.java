@@ -18,6 +18,7 @@ package io.seata.saga.engine.config;
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
 import io.seata.saga.engine.store.db.DBStateLangStore;
 import io.seata.saga.engine.store.db.DBStateLogStore;
+import io.seata.saga.engine.store.db.TransactionalSqlSessionExecutor;
 import io.seata.saga.engine.store.db.MybatisConfig;
 import io.seata.saga.tm.DefaultSagaTransactionalTemplate;
 import io.seata.saga.tm.SagaTransactionalTemplate;
@@ -35,9 +36,10 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private DataSource                dataSource;
     private String                    applicationId;
     private String                    txServiceGroup;
-    private String                    tablePrefix                   = "SEATA_";
-    private boolean                   transactionsExternallyManaged = false;
-    private String                    databaseType                  = "mysql";
+    private String  tablePrefix                  = "SEATA_";
+    private String  transPropagationBehaviorName = "PROPAGATION_REQUIRES_NEW";
+    private String  transIsolationLevelName      = "ISOLATION_DEFAULT";
+    private String  databaseType                 = "mysql";
     private MybatisConfig             mybatisConfig;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
 
@@ -49,13 +51,19 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
             mybatisConfig.setDataSource(dataSource);
             mybatisConfig.setTablePrefix(tablePrefix);
             mybatisConfig.setDatabaseType(databaseType);
-            mybatisConfig.setTransactionsExternallyManaged(transactionsExternallyManaged);
+            mybatisConfig.setTransPropagationBehaviorName(transPropagationBehaviorName);
+            mybatisConfig.setTransIsolationLevelName(transIsolationLevelName);
             mybatisConfig.afterPropertiesSet();
         }
 
         if(getStateLogStore() == null){
             DBStateLogStore dbStateLogStore = new DBStateLogStore();
-            dbStateLogStore.setSqlSessionTemplate(mybatisConfig.getSqlSessionTemplate());
+
+            TransactionalSqlSessionExecutor sqlSessionExecutor = new TransactionalSqlSessionExecutor();
+            sqlSessionExecutor.setTransactionTemplate(mybatisConfig.getTransactionTemplate());
+            sqlSessionExecutor.setSqlSessionTemplate(mybatisConfig.getSqlSessionTemplate());
+
+            dbStateLogStore.setSqlSessionExecutor(sqlSessionExecutor);
 
             if(sagaTransactionalTemplate == null){
                 DefaultSagaTransactionalTemplate defaultSagaTransactionalTemplate = new DefaultSagaTransactionalTemplate();
@@ -127,12 +135,20 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
         this.tablePrefix = tablePrefix;
     }
 
-    public boolean isTransactionsExternallyManaged() {
-        return transactionsExternallyManaged;
+    public String getTransPropagationBehaviorName() {
+        return transPropagationBehaviorName;
     }
 
-    public void setTransactionsExternallyManaged(boolean transactionsExternallyManaged) {
-        this.transactionsExternallyManaged = transactionsExternallyManaged;
+    public void setTransPropagationBehaviorName(String transPropagationBehaviorName) {
+        this.transPropagationBehaviorName = transPropagationBehaviorName;
+    }
+
+    public String getTransIsolationLevelName() {
+        return transIsolationLevelName;
+    }
+
+    public void setTransIsolationLevelName(String transIsolationLevelName) {
+        this.transIsolationLevelName = transIsolationLevelName;
     }
 
     public String getDatabaseType() {

@@ -35,7 +35,6 @@ import io.seata.tm.api.GlobalTransaction;
 import io.seata.tm.api.GlobalTransactionContext;
 import io.seata.tm.api.TransactionalExecutor.ExecutionException;
 import io.seata.tm.api.transaction.TransactionInfo;
-import org.mybatis.spring.SqlSessionTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -56,7 +55,7 @@ public class DBStateLogStore implements StateLogStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(DBStateLogStore.class);
 
     private SagaTransactionalTemplate           sagaTransactionalTemplate;
-    private SqlSessionTemplate                  sqlSessionTemplate;
+    private SqlSessionExecutor                  sqlSessionExecutor;
     private ObjectSerializer<Object, String>    paramsSerializer = new ParamsFastjsonSerializer();
     private ObjectSerializer<Exception, byte[]> exceptionSerializer = new ExceptionSerializer();
 
@@ -80,7 +79,7 @@ public class DBStateLogStore implements StateLogStore {
 
                 // save to db
                 machineInstance.setSerializedStartParams(paramsSerializer.serialize(machineInstance.getStartParams()));
-                sqlSessionTemplate.insert(MAPPER_PREFIX + "recordStateMachineStarted", machineInstance);
+                sqlSessionExecutor.insert(MAPPER_PREFIX + "recordStateMachineStarted", machineInstance);
             } catch (ExecutionException e) {
 
                 String xid = null;
@@ -104,7 +103,7 @@ public class DBStateLogStore implements StateLogStore {
 
             machineInstance.setSerializedEndParams(paramsSerializer.serialize(machineInstance.getEndParams()));
             machineInstance.setSerializedException(exceptionSerializer.serialize(machineInstance.getException()));
-            sqlSessionTemplate.update(MAPPER_PREFIX + "recordStateMachineFinished", machineInstance);
+            sqlSessionExecutor.update(MAPPER_PREFIX + "recordStateMachineFinished", machineInstance);
 
             try {
                 GlobalTransaction globalTransaction = (GlobalTransaction)context.getVariable(DomainConstants.VAR_NAME_GLOBAL_TX);
@@ -160,7 +159,7 @@ public class DBStateLogStore implements StateLogStore {
 
         if (machineInstance != null) {
 
-            sqlSessionTemplate.update(MAPPER_PREFIX + "updateStateMachineRunningStatus", machineInstance);
+            sqlSessionExecutor.update(MAPPER_PREFIX + "updateStateMachineRunningStatus", machineInstance);
 
             GlobalStatus globalStatus;
             if(DomainConstants.OPERATION_NAME_COMPENSATE.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))){
@@ -212,7 +211,7 @@ public class DBStateLogStore implements StateLogStore {
             }
 
             stateInstance.setSerializedInputParams(paramsSerializer.serialize(stateInstance.getInputParams()));
-            sqlSessionTemplate.insert(MAPPER_PREFIX + "recordStateStarted", stateInstance);
+            sqlSessionExecutor.insert(MAPPER_PREFIX + "recordStateStarted", stateInstance);
         }
     }
 
@@ -223,7 +222,7 @@ public class DBStateLogStore implements StateLogStore {
 
             stateInstance.setSerializedOutputParams(paramsSerializer.serialize(stateInstance.getOutputParams()));
             stateInstance.setSerializedException(exceptionSerializer.serialize(stateInstance.getException()));
-            sqlSessionTemplate.update(MAPPER_PREFIX + "recordStateFinished", stateInstance);
+            sqlSessionExecutor.update(MAPPER_PREFIX + "recordStateFinished", stateInstance);
 
             BranchStatus branchStatus = null;
             try {
@@ -271,7 +270,7 @@ public class DBStateLogStore implements StateLogStore {
     @Override
     public StateMachineInstance getStateMachineInstance(String stateMachineInstanceId) {
 
-        StateMachineInstance stateMachineInstance = sqlSessionTemplate.selectOne(MAPPER_PREFIX + "getStateMachineInstanceById", stateMachineInstanceId);
+        StateMachineInstance stateMachineInstance = sqlSessionExecutor.selectOne(MAPPER_PREFIX + "getStateMachineInstanceById", stateMachineInstanceId);
         if (stateMachineInstance == null) {
             return null;
         }
@@ -287,7 +286,7 @@ public class DBStateLogStore implements StateLogStore {
     @Override
     public StateMachineInstance getStateMachineInstanceByBusinessKey(String businessKey) {
 
-        StateMachineInstance stateMachineInstance = sqlSessionTemplate.selectOne(MAPPER_PREFIX + "getStateMachineInstanceByBusinessKey", businessKey);
+        StateMachineInstance stateMachineInstance = sqlSessionExecutor.selectOne(MAPPER_PREFIX + "getStateMachineInstanceByBusinessKey", businessKey);
         if (stateMachineInstance == null) {
             return null;
         }
@@ -319,7 +318,7 @@ public class DBStateLogStore implements StateLogStore {
 
     @Override
     public List<StateMachineInstance> queryStateMachineInstanceByParentId(String parentId) {
-        return sqlSessionTemplate.selectList(MAPPER_PREFIX + "queryStateMachineInstanceByParentId", parentId);
+        return sqlSessionExecutor.selectList(MAPPER_PREFIX + "queryStateMachineInstanceByParentId", parentId);
     }
 
     @Override
@@ -327,7 +326,7 @@ public class DBStateLogStore implements StateLogStore {
         Map<String, String> params = new HashMap<>(2);
         params.put("machineInstanceId", machineInstId);
         params.put("id", stateInstanceId);
-        StateInstance stateInstance = sqlSessionTemplate.selectOne(MAPPER_PREFIX + "getStateInstanceByIdAndMachineInstId", params);
+        StateInstance stateInstance = sqlSessionExecutor.selectOne(MAPPER_PREFIX + "getStateInstanceByIdAndMachineInstId", params);
 
         deserializeParamsAndException(stateInstance);
         return stateInstance;
@@ -353,7 +352,7 @@ public class DBStateLogStore implements StateLogStore {
     @Override
     public List<StateInstance> queryStateInstanceListByMachineInstanceId(String stateMachineInstanceId) {
 
-        List<StateInstance> stateInstanceList = sqlSessionTemplate.selectList(MAPPER_PREFIX + "queryStateInstanceListByMachineInstanceId", stateMachineInstanceId);
+        List<StateInstance> stateInstanceList = sqlSessionExecutor.selectList(MAPPER_PREFIX + "queryStateInstanceListByMachineInstanceId", stateMachineInstanceId);
 
         if (stateInstanceList == null || stateInstanceList.size() == 0) {
             return stateInstanceList;
@@ -412,8 +411,12 @@ public class DBStateLogStore implements StateLogStore {
 
     }
 
-    public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
-        this.sqlSessionTemplate = sqlSessionTemplate;
+    public SqlSessionExecutor getSqlSessionExecutor() {
+        return sqlSessionExecutor;
+    }
+
+    public void setSqlSessionExecutor(SqlSessionExecutor sqlSessionExecutor) {
+        this.sqlSessionExecutor = sqlSessionExecutor;
     }
 
     public void setExceptionSerializer(ObjectSerializer<Exception, byte[]> exceptionSerializer) {

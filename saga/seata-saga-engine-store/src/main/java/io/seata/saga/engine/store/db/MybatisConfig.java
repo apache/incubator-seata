@@ -22,11 +22,14 @@ import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.session.defaults.DefaultSqlSessionFactory;
 import org.apache.ibatis.transaction.TransactionFactory;
 import org.apache.ibatis.transaction.jdbc.JdbcTransactionFactory;
-import org.apache.ibatis.transaction.managed.ManagedTransactionFactory;
 import org.mybatis.spring.SqlSessionTemplate;
+import org.mybatis.spring.transaction.SpringManagedTransactionFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -48,14 +51,17 @@ public class MybatisConfig implements InitializingBean {
     private static final String TABLE_PREFIX_KEY             = "TABLE_PREFIX";
     private static final String DEFAULT_MYBATIS_MAPPING_FILE = "mybatis/mappings.xml";
 
-    private SqlSessionFactory  sqlSessionFactory;
-    private TransactionFactory transactionFactory;
-    private SqlSessionTemplate sqlSessionTemplate;
-    private DataSource         dataSource;
-    private boolean transactionsExternallyManaged = false;
-    private String  tablePrefix                   = "SEATA_";
-    private String  databaseType                  = "mysql";
-    private boolean initTable                     = false;
+    private TransactionTemplate        transactionTemplate;
+    private PlatformTransactionManager transactionManager;
+    private SqlSessionFactory          sqlSessionFactory;
+    private TransactionFactory         transactionFactory;
+    private SqlSessionTemplate         sqlSessionTemplate;
+    private DataSource                 dataSource;
+    private String  transPropagationBehaviorName = "PROPAGATION_REQUIRES_NEW";
+    private String  transIsolationLevelName      = "ISOLATION_DEFAULT";
+    private String  tablePrefix                  = "SEATA_";
+    private String  databaseType                 = "mysql";
+    private boolean initTable                    = false;
 
     @Override
     public void afterPropertiesSet() throws Exception {
@@ -66,6 +72,9 @@ public class MybatisConfig implements InitializingBean {
         initTransactionFactory();
         initSqlSessionFactory();
         initSqlSessionTemplate();
+
+        initTransactionManager();
+        initTransactionTemplate();
     }
 
     public void initSqlSessionFactory() {
@@ -93,17 +102,21 @@ public class MybatisConfig implements InitializingBean {
     }
 
     public void initTransactionFactory() {
-        if (transactionFactory == null) {
-            if (transactionsExternallyManaged) {
-                transactionFactory = new ManagedTransactionFactory();
-            } else {
-                transactionFactory = new JdbcTransactionFactory();
-            }
-        }
+        transactionFactory = new SpringManagedTransactionFactory();
     }
 
     public void initSqlSessionTemplate() {
         sqlSessionTemplate = new SqlSessionTemplate(sqlSessionFactory);
+    }
+
+    public void initTransactionManager(){
+        transactionManager = new DataSourceTransactionManager(dataSource);
+    }
+
+    public void initTransactionTemplate() {
+        transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehaviorName(transPropagationBehaviorName);
+        transactionTemplate.setIsolationLevelName(transIsolationLevelName);
     }
 
     public InputStream getMyBatisXmlConfigurationSteam() {
@@ -135,12 +148,20 @@ public class MybatisConfig implements InitializingBean {
         this.dataSource = dataSource;
     }
 
-    public boolean isTransactionsExternallyManaged() {
-        return transactionsExternallyManaged;
+    public String getTransPropagationBehaviorName() {
+        return transPropagationBehaviorName;
     }
 
-    public void setTransactionsExternallyManaged(boolean transactionsExternallyManaged) {
-        this.transactionsExternallyManaged = transactionsExternallyManaged;
+    public void setTransPropagationBehaviorName(String transPropagationBehaviorName) {
+        this.transPropagationBehaviorName = transPropagationBehaviorName;
+    }
+
+    public String getTransIsolationLevelName() {
+        return transIsolationLevelName;
+    }
+
+    public void setTransIsolationLevelName(String transIsolationLevelName) {
+        this.transIsolationLevelName = transIsolationLevelName;
     }
 
     public String getTablePrefix() {
@@ -189,5 +210,21 @@ public class MybatisConfig implements InitializingBean {
 
     public void setSqlSessionTemplate(SqlSessionTemplate sqlSessionTemplate) {
         this.sqlSessionTemplate = sqlSessionTemplate;
+    }
+
+    public TransactionTemplate getTransactionTemplate() {
+        return transactionTemplate;
+    }
+
+    public void setTransactionTemplate(TransactionTemplate transactionTemplate) {
+        this.transactionTemplate = transactionTemplate;
+    }
+
+    public PlatformTransactionManager getTransactionManager() {
+        return transactionManager;
+    }
+
+    public void setTransactionManager(PlatformTransactionManager transactionManager) {
+        this.transactionManager = transactionManager;
     }
 }

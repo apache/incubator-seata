@@ -61,9 +61,9 @@ import org.springframework.core.io.Resource;
  */
 public class DefaultStateMachineConfig implements StateMachineConfig, ApplicationContextAware, InitializingBean {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStateMachineConfig.class);
+    private static final Logger       LOGGER = LoggerFactory.getLogger(DefaultStateMachineConfig.class);
 
-    private static final int DEFAULT_TRANS_OPER_TIMEOUT = 60000;
+    private static final int          DEFAULT_TRANS_OPER_TIMEOUT = 60000;
 
     private StateLogStore             stateLogStore;
     private StateLangStore            stateLangStore;
@@ -76,12 +76,12 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     private ProcessCtrlEventPublisher asyncProcessCtrlEventPublisher;
     private ApplicationContext        applicationContext;
     private ThreadPoolExecutor        threadPoolExecutor;
-    private boolean enableAsync;
-    private int transOperationTimeout = DEFAULT_TRANS_OPER_TIMEOUT;
+    private boolean                   enableAsync;
+    private int                       transOperationTimeout = DEFAULT_TRANS_OPER_TIMEOUT;
     private ServiceInvokerManager     serviceInvokerManager;
 
-    private Resource[] resources = new Resource[0];
-    private String charset = "UTF-8";
+    private Resource[]                resources = new Resource[0];
+    private String                    charset = "UTF-8";
 
     protected void init() throws Exception {
 

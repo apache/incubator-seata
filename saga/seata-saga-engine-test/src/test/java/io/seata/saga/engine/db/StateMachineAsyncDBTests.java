@@ -22,8 +22,10 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.server.Server;
 import io.seata.tm.api.GlobalTransaction;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,23 +47,23 @@ public class StateMachineAsyncDBTests {
 
     private StateMachineEngine stateMachineEngine;
 
-    private volatile Object lock = new Object();
+    private static Server server;
 
-    private AsyncCallback callback = new AsyncCallback() {
-        @Override
-        public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
-            synchronized (lock){
-                lock.notifyAll();
+    @BeforeClass
+    public static void startSeataServer() throws InterruptedException {
+        (new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    server = new Server();
+                    server.main(new String[]{});
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
-        }
-
-        @Override
-        public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
-            synchronized (lock){
-                lock.notifyAll();
-            }
-        }
-    };
+        })).start();
+        Thread.sleep(5000);
+    }
 
     private GlobalTransaction getGlobalTransaction(StateMachineInstance instance){
         Map<String, Object> params = instance.getContext();
@@ -83,15 +86,7 @@ public class StateMachineAsyncDBTests {
 
         StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, paramMap, callback);
 
-        synchronized (lock){
-            if(ExecutionStatus.RU.equals(inst.getStatus())){
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -118,15 +113,7 @@ public class StateMachineAsyncDBTests {
 
         StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, paramMap, callback);
 
-        synchronized (lock){
-            if(ExecutionStatus.RU.equals(inst.getStatus())){
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -153,15 +140,7 @@ public class StateMachineAsyncDBTests {
 
         StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, paramMap, callback);
 
-        synchronized (lock){
-            if(ExecutionStatus.RU.equals(inst.getStatus())){
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -187,15 +166,7 @@ public class StateMachineAsyncDBTests {
 
         StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, paramMap, callback);
 
-        synchronized (lock){
-            if(ExecutionStatus.RU.equals(inst.getStatus())){
-                try {
-                    lock.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        waittingForFinish(inst);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -211,4 +182,33 @@ public class StateMachineAsyncDBTests {
     public void setStateMachineEngine(@Qualifier("stateMachineEngine") StateMachineEngine stateMachineEngine) {
         this.stateMachineEngine = stateMachineEngine;
     }
+
+    private void waittingForFinish(StateMachineInstance inst){
+        synchronized (lock){
+            if(ExecutionStatus.RU.equals(inst.getStatus())){
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private volatile Object lock = new Object();
+    private AsyncCallback callback = new AsyncCallback() {
+        @Override
+        public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
+            synchronized (lock){
+                lock.notifyAll();
+            }
+        }
+
+        @Override
+        public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
+            synchronized (lock){
+                lock.notifyAll();
+            }
+        }
+    };
 }
