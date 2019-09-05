@@ -20,9 +20,13 @@ import java.util.List;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.core.lock.RowLock;
+import io.seata.core.store.StoreMode;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 
@@ -35,6 +39,11 @@ import io.seata.server.session.GlobalSession;
 public class DefaultLockManager extends AbstractLockManager {
 
     private static Locker locker = null;
+
+    /**
+     * The constant CONFIG.
+     */
+    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     @Override
     public boolean acquireLock(BranchSession branchSession) throws TransactionException {
@@ -64,17 +73,28 @@ public class DefaultLockManager extends AbstractLockManager {
     }
 
     @Override
-    public boolean releaseDBGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
-        List<RowLock> locks = new ArrayList<>();
+    public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
         ArrayList<BranchSession> branchSessions = globalSession.getBranchSessions();
-        for (BranchSession branchSession : branchSessions) {
-            locks.addAll(collectRowLocks(branchSession));
-        }
-        try {
-            return this.doReleaseLock(locks, null);
-        } catch (Exception t) {
-            LOGGER.error("unLock globalSession error, xid:" + globalSession.getXid(), t);
-            return false;
+        String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
+        if (StoreMode.DB.name().equalsIgnoreCase(storeMode)) {
+            List<RowLock> locks = new ArrayList<>();
+            for (BranchSession branchSession : branchSessions) {
+                locks.addAll(collectRowLocks(branchSession));
+            }
+            try {
+                return this.doReleaseLock(locks, null);
+            } catch (Exception t) {
+                LOGGER.error("unLock globalSession error, xid:" + globalSession.getXid(), t);
+                return false;
+            }
+        } else {
+            boolean releaseLockResult = true;
+            for (BranchSession branchSession : branchSessions) {
+                if (!this.releaseLock(branchSession)) {
+                    releaseLockResult = false;
+                }
+            }
+            return releaseLockResult;
         }
     }
 

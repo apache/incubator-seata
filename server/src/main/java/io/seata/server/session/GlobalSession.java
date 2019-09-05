@@ -25,15 +25,11 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import io.seata.common.XID;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.StoreMode;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.lock.LockerFactory;
 import io.seata.server.store.SessionStorable;
@@ -79,10 +75,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
 
     private GlobalSessionLock globalSessionLock = new GlobalSessionLock();
 
-    /**
-     * The constant CONFIG.
-     */
-    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
      * Add boolean.
@@ -183,14 +175,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     public void clean() throws TransactionException {
-        String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
-        if (StoreMode.DB.name().equalsIgnoreCase(storeMode)) {
-            LockerFactory.getLockManager().releaseDBGlobalSessionLock(this);
-        } else {
-            for (BranchSession branchSession : branchSessions) {
-                branchSession.unlock();
-            }
-        }
+        LockerFactory.getLockManager().releaseGlobalSessionLock(this);
 
     }
 

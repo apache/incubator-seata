@@ -46,13 +46,12 @@ public interface LockManager {
 
     /**
      * Un lock boolean.
-     * only used by db mode
      *
      * @param globalSession the global session
      * @return the boolean
      * @throws TransactionException the transaction exception
      */
-    boolean releaseDBGlobalSessionLock(GlobalSession globalSession) throws TransactionException;
+    boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException;
 
     /**
      * Is lockable boolean.
