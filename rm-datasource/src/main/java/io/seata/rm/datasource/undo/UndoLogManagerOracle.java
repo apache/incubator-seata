@@ -236,7 +236,7 @@ public final class UndoLogManagerOracle {
                         LOGGER.warn("Failed to close JDBC resource while undo ... ", rollbackEx);
                     }
                 }
-                throw new BranchTransactionException(BranchRollbackFailed_Retriable, "Branch session rollback failed and try again later xid=" + xid + ", branchId=" + branchId + " " + e.getMessage(), e);
+                throw new BranchTransactionException(BranchRollbackFailed_Retriable, String.format("Branch session rollback failed and try again later xid = %s branchId = %s %s", xid, branchId, e.getMessage()), e);
 
             } finally {
                 try {

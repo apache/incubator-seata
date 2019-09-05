@@ -66,7 +66,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
             BranchRegisterResponse response = (BranchRegisterResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
             if (response.getResultCode() == ResultCode.Failed) {
-                throw new RmTransactionException(response.getTransactionExceptionCode(), "Response[" + response.getMsg() + "]");
+                throw new RmTransactionException(response.getTransactionExceptionCode(), String.format("Response[ %s ]", response.getMsg()));
             }
             return response.getBranchId();
         } catch (TimeoutException toe) {
@@ -96,7 +96,7 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
             BranchReportResponse response = (BranchReportResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
             if (response.getResultCode() == ResultCode.Failed) {
-                throw new RmTransactionException(response.getTransactionExceptionCode(), "Response[" + response.getMsg() + "]");
+                throw new RmTransactionException(response.getTransactionExceptionCode(), String.format("Response[ %s ]", response.getMsg()));
             }
         } catch (TimeoutException toe) {
             throw new RmTransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);

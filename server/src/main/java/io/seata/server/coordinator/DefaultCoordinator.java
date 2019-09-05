@@ -227,7 +227,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 branchSession.getClientId(), request);
             return response.getBranchStatus();
         } catch (IOException | TimeoutException e) {
-            throw new BranchTransactionException(FailedToSendBranchCommitRequest, "Send branch commit failed, xid=" + xid + ", branchId=" + branchId, e);
+            throw new BranchTransactionException(FailedToSendBranchCommitRequest, String.format("Send branch commit failed, xid = %s branchId = %s", xid, branchId), e);
         }
     }
 
@@ -254,7 +254,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 branchSession.getClientId(), request);
             return response.getBranchStatus();
         } catch (IOException | TimeoutException e) {
-            throw new BranchTransactionException(FailedToSendBranchRollbackRequest, "Send branch rollback failed, xid=" + xid + ", branchId=" + branchId, e);
+            throw new BranchTransactionException(FailedToSendBranchRollbackRequest, String.format("Send branch rollback failed, xid = %s branchId = %s", xid, branchId), e);
         }
     }
 
