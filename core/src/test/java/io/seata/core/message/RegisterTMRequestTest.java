@@ -15,16 +15,16 @@
  */
 package io.seata.core.message;
 
-import io.seata.core.protocol.RegisterTMResponse;
-import io.seata.core.protocol.ResultCode;
-
+import io.seata.core.protocol.RegisterTMRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * The type Register tm response test.
+ * The type Register tm request test.
+ *
+ * @author linqiuping
  */
-public class RegisterTMResponseTest {
+public class RegisterTMRequestTest {
 
     /**
      * Test to string.
@@ -33,11 +33,11 @@ public class RegisterTMResponseTest {
      */
     @Test
     public void testToString() throws Exception {
-        RegisterTMResponse registerTMResponse = new RegisterTMResponse();
-        registerTMResponse.setVersion("1");
-        registerTMResponse.setIdentified(true);
-        registerTMResponse.setResultCode(ResultCode.Success);
-        Assertions.assertEquals("version=1,extraData=null,identified=true,resultCode=Success,msg=null",
-                registerTMResponse.toString());
+        RegisterTMRequest registerTMRequest = new RegisterTMRequest();
+        registerTMRequest.setApplicationId("seata");
+        registerTMRequest.setTransactionServiceGroup("daliy_2019");
+        registerTMRequest.setVersion("2019-snapshot");
+        Assertions.assertEquals("RegisterTMRequest{applicationId='seata', transactionServiceGroup='daliy_2019'}",
+                registerTMRequest.toString());
     }
 }
