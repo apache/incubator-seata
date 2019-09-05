@@ -35,6 +35,7 @@ public class StateInstruction implements Instruction {
 
     private String  stateName;
     private String  stateMachineName;
+    private String  tenantId;
     private boolean end;
 
     /**
@@ -45,8 +46,9 @@ public class StateInstruction implements Instruction {
     public StateInstruction() {
     }
 
-    public StateInstruction(String stateMachineName) {
+    public StateInstruction(String stateMachineName, String tenantId) {
         this.stateMachineName = stateMachineName;
+        this.tenantId = tenantId;
     }
 
     public State getState(ProcessContext context){
@@ -58,13 +60,14 @@ public class StateInstruction implements Instruction {
 
         String stateName = getStateName();
         String stateMachineName = getStateMachineName();
+        String tenantId = getTenantId();
 
         if (StringUtils.isEmpty(stateMachineName)) {
             throw new EngineExecutionException("StateMachineName is required", FrameworkErrorCode.ParameterRequired);
         }
 
         StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-        StateMachine stateMachine = stateMachineConfig.getStateMachineRepository().getStateMachine(stateMachineName);
+        StateMachine stateMachine = stateMachineConfig.getStateMachineRepository().getStateMachine(stateMachineName, tenantId);
         if (stateMachine == null) {
             throw new EngineExecutionException("StateMachine[" + stateMachineName + "] is not exist", FrameworkErrorCode.ObjectNotExists);
         }
@@ -155,5 +158,13 @@ public class StateInstruction implements Instruction {
      */
     public void setTemporaryState(State temporaryState) {
         this.temporaryState = temporaryState;
+    }
+
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 }

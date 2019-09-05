@@ -54,7 +54,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
         }
         else{
             StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-            StateMachine stateMachine = stateMachineConfig.getStateMachineRepository().getStateMachine(stateInstruction.getStateMachineName());
+            StateMachine stateMachine = stateMachineConfig.getStateMachineRepository().getStateMachine(stateInstruction.getStateMachineName(), stateInstruction.getTenantId());
             state = stateMachine.getStates().get(stateInstruction.getStateName());
         }
 

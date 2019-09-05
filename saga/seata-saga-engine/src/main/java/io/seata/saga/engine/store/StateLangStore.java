@@ -34,9 +34,10 @@ public interface StateLangStore {
     /**
      * Get the latest version of the state machine by state machine name
      * @param stateMachineName
+     * @param tenantId
      * @return
      */
-    StateMachine getLastVersionStateMachine(String stateMachineName);
+    StateMachine getLastVersionStateMachine(String stateMachineName, String tenantId);
 
     /**
      * Storage state machine definition

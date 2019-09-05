@@ -16,6 +16,9 @@
 package io.seata.saga.engine.repo;
 
 import io.seata.saga.statelang.domain.StateMachine;
+import org.springframework.core.io.Resource;
+
+import java.io.IOException;
 
 /**
  * StateMachineRepository
@@ -35,22 +38,31 @@ public interface StateMachineRepository {
      * Gets get state machine.
      *
      * @param stateMachineName the state machine name
+     * @param tenantId the tenant id
      * @return the get state machine
      */
-    StateMachine getStateMachine(String stateMachineName);
+    StateMachine getStateMachine(String stateMachineName, String tenantId);
 
     /**
      * Gets get state machine.
      *
      * @param stateMachineName the state machine name
+     * @param tenantId the tenant id
      * @param version the version
      * @return the get state machine
      */
-    StateMachine getStateMachine(String stateMachineName, String version);
+    StateMachine getStateMachine(String stateMachineName, String tenantId, String version);
 
     /**
      * Register the state machine to the repository (if the same version already exists, return the existing version)
      * @param stateMachine
      */
     StateMachine registryStateMachine(StateMachine stateMachine);
+
+    /**
+     * registry by resources
+     * @param resources
+     * @param tenantId
+     */
+    void registryByResources(Resource[] resources, String tenantId) throws IOException;
 }

@@ -84,7 +84,7 @@ public class StateMachineAsyncDBTests {
 
         String stateMachineName = "simpleCachesStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, paramMap, callback);
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
 
         waittingForFinish(inst);
 
@@ -111,7 +111,7 @@ public class StateMachineAsyncDBTests {
 
         String stateMachineName = "simpleStatusMatchingStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, paramMap, callback);
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
 
         waittingForFinish(inst);
 
@@ -138,7 +138,7 @@ public class StateMachineAsyncDBTests {
 
         String stateMachineName = "simpleCompensationStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, paramMap, callback);
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
 
         waittingForFinish(inst);
 
@@ -164,7 +164,7 @@ public class StateMachineAsyncDBTests {
 
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine";
 
-        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, paramMap, callback);
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
 
         waittingForFinish(inst);
 

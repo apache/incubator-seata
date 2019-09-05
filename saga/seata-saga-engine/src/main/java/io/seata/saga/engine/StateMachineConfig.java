@@ -69,6 +69,13 @@ public interface StateMachineConfig {
     String getCharset();
 
     /**
+     * Gets get default tenant id.
+     *
+     * @return the default tenant id
+     */
+    String getDefaultTenantId();
+
+    /**
      * Gets get state machine repository.
      *
      * @return the get state machine repository

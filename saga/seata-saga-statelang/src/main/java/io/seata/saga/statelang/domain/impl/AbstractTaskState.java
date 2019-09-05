@@ -34,7 +34,7 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
     private List<ExceptionMatch>      catches;
     private List<Object>              input;
     private Map<String, Object>       output;
-    private Map<String, String>       status;
+    private Map<String, String>       status;//Map<String/* expression */, String /* status */>
     private boolean                   isPersist = true;
 
     @Override
@@ -45,7 +45,7 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
     public void setCompensateState(String compensateState) {
         this.compensateState = compensateState;
 
-        if(StringUtils.isNotBlank(this.compensateState)){//如果配置了补偿state，则认为是一个更新类state
+        if(StringUtils.isNotBlank(this.compensateState)){
             setForUpdate(true);
         }
     }

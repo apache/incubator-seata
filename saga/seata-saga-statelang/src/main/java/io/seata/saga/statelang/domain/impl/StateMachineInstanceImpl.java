@@ -35,6 +35,7 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
 
     private String              id;
     private String              machineId;
+    private String              tenantId;
     private String              parentId;
     private Date                gmtStarted;
     private String              businessKey;
@@ -60,6 +61,7 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         return id;
     }
 
+    @Override
     public void setId(String id) {
         this.id = id;
     }
@@ -69,8 +71,19 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         return machineId;
     }
 
+    @Override
     public void setMachineId(String machineId) {
         this.machineId = machineId;
+    }
+
+    @Override
+    public String getTenantId() {
+        return tenantId;
+    }
+
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     @Override
@@ -78,6 +91,7 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         return parentId;
     }
 
+    @Override
     public void setParentId(String parentId) {
         this.parentId = parentId;
     }
@@ -87,6 +101,7 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         return gmtStarted;
     }
 
+    @Override
     public void setGmtStarted(Date gmtStarted) {
         this.gmtStarted = gmtStarted;
     }
@@ -96,6 +111,7 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         return gmtEnd;
     }
 
+    @Override
     public void setGmtEnd(Date gmtEnd) {
         this.gmtEnd = gmtEnd;
     }
@@ -112,6 +128,7 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         return status;
     }
 
+    @Override
     public void setStatus(ExecutionStatus status) {
         this.status = status;
     }
@@ -121,6 +138,7 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         return compensationStatus;
     }
 
+    @Override
     public void setCompensationStatus(ExecutionStatus compensationStatus) {
         this.compensationStatus = compensationStatus;
     }
@@ -130,6 +148,7 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         return isRunning;
     }
 
+    @Override
     public void setRunning(boolean running) {
         isRunning = running;
     }
@@ -139,6 +158,7 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         return gmtUpdated;
     }
 
+    @Override
     public void setGmtUpdated(Date gmtUpdated) {
         this.gmtUpdated = gmtUpdated;
     }
@@ -148,6 +168,7 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         return businessKey;
     }
 
+    @Override
     public void setBusinessKey(String businessKey) {
         this.businessKey = businessKey;
     }
@@ -157,6 +178,7 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         return exception;
     }
 
+    @Override
     public void setException(Exception exception) {
         this.exception = exception;
     }
@@ -166,6 +188,7 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         return startParams;
     }
 
+    @Override
     public void setStartParams(Map<String, Object> startParams) {
         this.startParams = startParams;
     }
@@ -175,6 +198,7 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         return endParams;
     }
 
+    @Override
     public void setEndParams(Map<String, Object> endParams) {
         this.endParams = endParams;
     }
@@ -194,6 +218,7 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         return stateMachine;
     }
 
+    @Override
     public void setStateMachine(StateMachine stateMachine) {
         this.stateMachine = stateMachine;
     }
@@ -218,26 +243,32 @@ public class StateMachineInstanceImpl implements StateMachineInstance {
         this.stateMap = stateMap;
     }
 
+    @Override
     public Object getSerializedStartParams() {
         return serializedStartParams;
     }
 
+    @Override
     public void setSerializedStartParams(Object serializedStartParams) {
         this.serializedStartParams = serializedStartParams;
     }
 
+    @Override
     public Object getSerializedEndParams() {
         return serializedEndParams;
     }
 
+    @Override
     public void setSerializedEndParams(Object serializedEndParams) {
         this.serializedEndParams = serializedEndParams;
     }
 
+    @Override
     public Object getSerializedException() {
         return serializedException;
     }
 
+    @Override
     public void setSerializedException(Object serializedException) {
         this.serializedException = serializedException;
     }

@@ -21,98 +21,113 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
 import java.util.Map;
 
 /**
- * StateMachineEngine
+ * State machine engine
  *
  * @author lorne.cl
  */
 public interface StateMachineEngine {
 
     /**
-     * 启动状态机
-     * @param stateMachineName 状态机定义名，如果有多个版本，则执行最新版本
-     * @param startParams 启动参数
+     * start a state machine instance
+     * @param stateMachineName
+     * @param tenantId
+     * @param startParams
      * @return
      * @throws EngineExecutionException
      */
-    StateMachineInstance start(String stateMachineName, Map<String, Object> startParams) throws EngineExecutionException;
+    StateMachineInstance start(String stateMachineName, String tenantId, Map<String, Object> startParams) throws EngineExecutionException;
 
     /**
-     * 启动状态机(带业务主键)
-     * @param stateMachineName 状态机定义名，如果有多个版本，则执行最新版本
-     * @param businessKey 业务主键,如流水号
-     * @param startParams 启动参数
+     * start a state machine instance with businessKey
+     * @param stateMachineName
+     * @param tenantId
+     * @param businessKey
+     * @param startParams
      * @return
      * @throws EngineExecutionException
      */
-    StateMachineInstance startWithBusinessKey(String stateMachineName, String businessKey, Map<String, Object> startParams) throws EngineExecutionException;
+    StateMachineInstance startWithBusinessKey(String stateMachineName, String tenantId, String businessKey, Map<String, Object> startParams) throws EngineExecutionException;
 
     /**
-     * 启动状态机，采用整件驱动架构，每一个state都是异步执行的
-     * @param stateMachineName 状态机定义名，如果有多个版本，则执行最新版本
-     * @param startParams 启动参数
+     * start a state machine instance asynchronously
+     * @param stateMachineName
+     * @param tenantId
+     * @param startParams
+     * @param callback
      * @return
      * @throws EngineExecutionException
      */
-    StateMachineInstance startAsync(String stateMachineName, Map<String, Object> startParams, AsyncCallback callback) throws EngineExecutionException;
+    StateMachineInstance startAsync(String stateMachineName, String tenantId, Map<String, Object> startParams, AsyncCallback callback) throws EngineExecutionException;
 
     /**
-     * 异步启动状态机，采用整件驱动架构，每一个state都是异步执行的(带业务主键)
-     * @param stateMachineName 状态机定义名，如果有多个版本，则执行最新版本
-     * @param businessKey 业务主键,如流水号
-     * @param startParams 启动参数
+     * start a state machine instance asynchronously with businessKey
+     * @param stateMachineName
+     * @param tenantId
+     * @param businessKey
+     * @param startParams
+     * @param callback
      * @return
      * @throws EngineExecutionException
      */
-    StateMachineInstance startWithBusinessKeyAsync(String stateMachineName, String businessKey, Map<String, Object> startParams, AsyncCallback callback) throws EngineExecutionException;
+    StateMachineInstance startWithBusinessKeyAsync(String stateMachineName, String tenantId, String businessKey, Map<String, Object> startParams, AsyncCallback callback) throws EngineExecutionException;
 
     /**
-     * 恢复出错状态的状态机实例，让其往前执行
-     * @param stateMachineInstId 状态机实例编号
-     * @param replaceParams 用来替换(订正)上下文参数中相同名称的参数(非必输)
-     * @throws EngineExecutionException
+     * forward restart a failed state machine instance
+     * @param stateMachineInstId
+     * @param replaceParams
+     * @return
+     * @throws ForwardInvalidException
      */
     StateMachineInstance forward(String stateMachineInstId, Map<String, Object> replaceParams) throws ForwardInvalidException;
 
     /**
-     * 恢复出错状态的状态机实例，让其往前执行（异步执行）
-     * @param stateMachineInstId 状态机实例编号
-     * @param replaceParams 用来替换(订正)上下文参数中相同名称的参数(非必输)
-     * @throws EngineExecutionException
+     * forward restart a failed state machine instance asynchronously
+     * @param stateMachineInstId
+     * @param replaceParams
+     * @param callback
+     * @return
+     * @throws ForwardInvalidException
      */
     StateMachineInstance forwardAsync(String stateMachineInstId, Map<String, Object> replaceParams, AsyncCallback callback) throws ForwardInvalidException;
 
     /**
-     * 反向补偿有数据不一致性状态的状态机实例（异步执行）
-     * @param stateMachineInstId 状态机实例编号
-     * @param replaceParams 用来替换状态机上下相同名称的参数(非必输)
+     * compensate a state machine instance
+     * @param stateMachineInstId
+     * @param replaceParams
+     * @return
      * @throws EngineExecutionException
      */
     StateMachineInstance compensate(String stateMachineInstId, Map<String, Object> replaceParams) throws EngineExecutionException;
 
     /**
-     * 反向补偿有数据不一致性状态的状态机实例（异步执行）
-     * @param stateMachineInstId 状态机实例编号
-     * @param replaceParams 用来替换状态机上下相同名称的参数(非必输)
+     * compensate a state machine instance asynchronously
+     * @param stateMachineInstId
+     * @param replaceParams
+     * @param callback
+     * @return
      * @throws EngineExecutionException
      */
     StateMachineInstance compensateAsync(String stateMachineInstId, Map<String, Object> replaceParams, AsyncCallback callback) throws EngineExecutionException;
 
     /**
-     * 跳过当前失败的state节点，继续往前执行
-     * @param stateMachineInstId 状态机实例编号
+     * skip current failed state instance and forward restart state machine instance
+     * @param stateMachineInstId
+     * @return
      * @throws EngineExecutionException
      */
     StateMachineInstance skipAndForward(String stateMachineInstId) throws EngineExecutionException;
 
     /**
-     * 跳过当前失败的state节点，继续往前执行（异步执行）
-     * @param stateMachineInstId 状态机实例编号
+     * skip current failed state instance and forward restart state machine instance asynchronously
+     * @param stateMachineInstId
+     * @param callback
+     * @return
      * @throws EngineExecutionException
      */
     StateMachineInstance skipAndForwardAsync(String stateMachineInstId, AsyncCallback callback) throws EngineExecutionException;
 
     /**
-     * 获取引擎的参数设置
+     * get state machine configurations
      * @return
      */
     StateMachineConfig getStateMachineConfig();

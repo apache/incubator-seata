@@ -144,9 +144,9 @@ public class SubStateMachineHandler implements StateHandler, InterceptibleStateH
 
         StateMachineInstance subStateMachineInstance;
         if (stateInstance.getBusinessKey() != null) {
-            subStateMachineInstance = engine.startWithBusinessKey(subStateMachine.getStateMachineName(), stateInstance.getBusinessKey(), startParams);
+            subStateMachineInstance = engine.startWithBusinessKey(subStateMachine.getStateMachineName(), stateInstance.getStateMachineInstance().getTenantId(), stateInstance.getBusinessKey(), startParams);
         } else {
-            subStateMachineInstance = engine.start(subStateMachine.getStateMachineName(), startParams);
+            subStateMachineInstance = engine.start(subStateMachine.getStateMachineName(), stateInstance.getStateMachineInstance().getTenantId(), startParams);
         }
         return subStateMachineInstance;
     }

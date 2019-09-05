@@ -54,6 +54,20 @@ public interface StateMachineInstance {
     void setMachineId(String machineId);
 
     /**
+     * Gets get tenant id.
+     *
+     * @return the tenant id
+     */
+    String getTenantId();
+
+    /**
+     * Sets set tenant id.
+     *
+     * @param tenantId the tenant id
+     */
+    void setTenantId(String tenantId);
+
+    /**
      * Gets get parent id.
      *
      * @return the get parent id

@@ -74,7 +74,7 @@ public class StateMachineDBTests {
     @Test
     public void testSimpleStateMachine() {
 
-        stateMachineEngine.start("simpleTestStateMachine", new HashMap<>());
+        stateMachineEngine.start("simpleTestStateMachine", null, new HashMap<>());
     }
 
     @Test
@@ -87,14 +87,14 @@ public class StateMachineDBTests {
 
         String stateMachineName = "simpleChoiceTestStateMachine";
 
-        stateMachineEngine.start(stateMachineName, paramMap);
+        stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
         start  = System.currentTimeMillis();
         paramMap.put("a", 2);
-        stateMachineEngine.start(stateMachineName, paramMap);
+        stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -110,7 +110,7 @@ public class StateMachineDBTests {
 
         String stateMachineName = "simpleChoiceAndEndTestStateMachine";
 
-        stateMachineEngine.start(stateMachineName, paramMap);
+        stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -118,7 +118,7 @@ public class StateMachineDBTests {
         start  = System.currentTimeMillis();
 
         paramMap.put("a", 3);
-        stateMachineEngine.start(stateMachineName, paramMap);
+        stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -134,7 +134,7 @@ public class StateMachineDBTests {
 
         String stateMachineName = "simpleInputAssignmentStateMachine";
 
-        StateMachineInstance instance = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         String businessKey = instance.getStateList().get(0).getBusinessKey();
         Assert.assertNotNull(businessKey);
@@ -159,7 +159,7 @@ public class StateMachineDBTests {
 
         String stateMachineName = "simpleCachesStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -183,7 +183,7 @@ public class StateMachineDBTests {
 
         String stateMachineName = "simpleStatusMatchingStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -209,7 +209,7 @@ public class StateMachineDBTests {
 
         String stateMachineName = "simpleCompensationStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -234,7 +234,7 @@ public class StateMachineDBTests {
 
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -260,7 +260,7 @@ public class StateMachineDBTests {
 
         String stateMachineName = "simpleCompensationStateMachineForRecovery";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);

@@ -65,7 +65,7 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
             state.setOutput(outputMap);
         }
 
-        Map<String, String> statusMap = (Map<String, String>) nodeMap.get("Status");
+        Map<String/* expression */, String /* status */> statusMap = (Map<String, String>) nodeMap.get("Status");
         if (statusMap != null) {
             state.setStatus(statusMap);
         }

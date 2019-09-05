@@ -82,6 +82,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
     private Resource[]                resources = new Resource[0];
     private String                    charset = "UTF-8";
+    private String                    defaultTenantId = "000001";
 
     protected void init() throws Exception {
 
@@ -118,9 +119,10 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             stateMachineRepository.setCharset(charset);
             stateMachineRepository.setSeqGenerator(seqGenerator);
             stateMachineRepository.setStateLangStore(stateLangStore);
+            stateMachineRepository.setDefaultTenantId(defaultTenantId);
             if (resources != null) {
                 try {
-                    stateMachineRepository.load(resources);
+                    stateMachineRepository.registryByResources(resources, defaultTenantId);
                 } catch (IOException e) {
                     LOGGER.error("Load State Language Resources failed.", e);
                 }
@@ -346,5 +348,14 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
     public void setServiceInvokerManager(ServiceInvokerManager serviceInvokerManager) {
         this.serviceInvokerManager = serviceInvokerManager;
+    }
+
+    @Override
+    public String getDefaultTenantId() {
+        return defaultTenantId;
+    }
+
+    public void setDefaultTenantId(String defaultTenantId) {
+        this.defaultTenantId = defaultTenantId;
     }
 }

@@ -17,7 +17,6 @@ package io.seata.saga.engine.repo.impl;
 
 import io.seata.common.util.StringUtils;
 import io.seata.saga.engine.store.StateLangStore;
-import io.seata.saga.engine.store.StateLogStore;
 import io.seata.saga.engine.repo.StateMachineRepository;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.StateMachine;
@@ -42,14 +41,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class StateMachineRepositoryImpl implements StateMachineRepository {
 
-    private Map<String/** Name **/, Item> stateMachineMapByName = new ConcurrentHashMap<>();
-    private Map<String/** Id **/, Item>   stateMachineMapById   = new ConcurrentHashMap<>();
+    private Map<String/** Name_Tenant **/, Item> stateMachineMapByNameAndTenant = new ConcurrentHashMap<>();
+    private Map<String/** Id **/, Item>          stateMachineMapById            = new ConcurrentHashMap<>();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StateMachineRepositoryImpl.class);
 
     private StateLangStore    stateLangStore;
     private SeqGenerator      seqGenerator = new SpringJvmUUIDSeqGenerator();
     private String            charset = "UTF-8";
+    private String            defaultTenantId;
 
     private static class Item {
 
@@ -94,7 +94,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                         stateMachine.setStartAt(parsedStatMachine.getStartAt());
                         stateMachine.getStates().putAll(parsedStatMachine.getStates());
                         item.setValue(stateMachine);
-                        stateMachineMapByName.put(stateMachine.getName(), item);
+                        stateMachineMapByNameAndTenant.put(stateMachine.getName() + "_" + stateMachine.getTenantId(), item);
                     }
 
                 }
@@ -104,11 +104,11 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
     }
 
     @Override
-    public StateMachine getStateMachine(String stateMachineName) {
-        Item item = stateMachineMapByName.get(stateMachineName);
+    public StateMachine getStateMachine(String stateMachineName, String tenantId) {
+        Item item = stateMachineMapByNameAndTenant.get(stateMachineName + "_" + tenantId);
         if(item == null){
             Item newItem = new Item();
-            item = stateMachineMapByName.putIfAbsent(stateMachineName, newItem);
+            item = stateMachineMapByNameAndTenant.putIfAbsent(stateMachineName + "_" + tenantId, newItem);
             if(item == null){
                 item = newItem;
             }
@@ -116,7 +116,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
         if(item.getValue() == null && stateLangStore!=null){
             synchronized (item){
                 if(item.getValue() == null && stateLangStore!=null){
-                    StateMachine stateMachine = stateLangStore.getStateMachineById(stateMachineName);
+                    StateMachine stateMachine = stateLangStore.getLastVersionStateMachine(stateMachineName, tenantId);
                     if(stateMachine != null){
                         StateMachine parsedStatMachine = StateMachineParserFactory.getStateMachineParser().parse(stateMachine.getContent());
                         if(parsedStatMachine == null){
@@ -135,7 +135,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
     }
 
     @Override
-    public StateMachine getStateMachine(String stateMachineName, String version) {
+    public StateMachine getStateMachine(String stateMachineName, String tenantId, String version) {
         throw new UnsupportedOperationException("not implement yet");
     }
 
@@ -143,9 +143,10 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
     public StateMachine registryStateMachine(StateMachine stateMachine) {
 
         String stateMachineName = stateMachine.getName();
+        String tenantId = stateMachine.getTenantId();
 
         if(stateLangStore != null){
-            StateMachine oldStateMachine = stateLangStore.getLastVersionStateMachine(stateMachineName);
+            StateMachine oldStateMachine = stateLangStore.getLastVersionStateMachine(stateMachineName, tenantId);
 
             if (oldStateMachine != null) {
                 byte[] oldBytesContent = null;
@@ -165,7 +166,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                     stateMachine.setGmtCreate(oldStateMachine.getGmtCreate());
 
                     Item item = new Item(stateMachine);
-                    stateMachineMapByName.put(stateMachineName, item);
+                    stateMachineMapByNameAndTenant.put(stateMachineName + "_" + tenantId, item);
                     stateMachineMapById.put(stateMachine.getId(), item);
                     return stateMachine;
                 }
@@ -180,18 +181,22 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
         }
 
         Item item = new Item(stateMachine);
-        stateMachineMapByName.put(stateMachineName, item);
+        stateMachineMapByNameAndTenant.put(stateMachineName + "_" + tenantId, item);
         stateMachineMapById.put(stateMachine.getId(), item);
         return stateMachine;
     }
 
-    public void load(Resource[] resources) throws IOException {
+    @Override
+    public void registryByResources(Resource[] resources, String tenantId) throws IOException {
         if (resources != null) {
             for (Resource resource : resources) {
                 String json = IOUtils.toString(resource.getInputStream(), "UTF-8");
                 StateMachine stateMachine = StateMachineParserFactory.getStateMachineParser().parse(json);
                 if (stateMachine != null) {
                     stateMachine.setContent(json);
+                    if(StringUtils.isBlank(stateMachine.getTenantId())){
+                        stateMachine.setTenantId(tenantId);
+                    }
                     registryStateMachine(stateMachine);
 
                     LOGGER.info("===== StateMachine Loaded: \n" + json);
@@ -214,5 +219,13 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
 
     public void setCharset(String charset) {
         this.charset = charset;
+    }
+
+    public String getDefaultTenantId() {
+        return defaultTenantId;
+    }
+
+    public void setDefaultTenantId(String defaultTenantId) {
+        this.defaultTenantId = defaultTenantId;
     }
 }

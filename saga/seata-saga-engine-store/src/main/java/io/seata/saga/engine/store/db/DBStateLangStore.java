@@ -18,6 +18,9 @@ package io.seata.saga.engine.store.db;
 import io.seata.saga.engine.store.StateLangStore;
 import io.seata.saga.statelang.domain.StateMachine;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static io.seata.saga.engine.store.db.MybatisConfig.MAPPER_PREFIX;
 
 /**
@@ -35,8 +38,11 @@ public class DBStateLangStore implements StateLangStore {
     }
 
     @Override
-    public StateMachine getLastVersionStateMachine(String stateMachineName) {
-        return sqlSessionExecutor.selectOne( MAPPER_PREFIX + "getLastVersionStateMachine", stateMachineName);
+    public StateMachine getLastVersionStateMachine(String stateMachineName, String tenantId) {
+        Map<String, Object> params = new HashMap<>(2);
+        params.put("name", stateMachineName);
+        params.put("tenantId", tenantId);
+        return sqlSessionExecutor.selectOne( MAPPER_PREFIX + "getLastVersionStateMachine", params);
     }
 
     @Override

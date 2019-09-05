@@ -45,7 +45,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testSimpleStateMachine() {
 
-        stateMachineEngine.start("simpleTestStateMachine", new HashMap<>());
+        stateMachineEngine.start("simpleTestStateMachine", null, new HashMap<>());
     }
 
     @Test
@@ -58,14 +58,14 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleChoiceTestStateMachine";
 
-        stateMachineEngine.start(stateMachineName, paramMap);
+        stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
         start  = System.currentTimeMillis();
         paramMap.put("a", 2);
-        stateMachineEngine.start(stateMachineName, paramMap);
+        stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -81,7 +81,7 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleChoiceAndEndTestStateMachine";
 
-        stateMachineEngine.start(stateMachineName, paramMap);
+        stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -89,7 +89,7 @@ public class StateMachineDBMockServerTests {
         start  = System.currentTimeMillis();
 
         paramMap.put("a", 3);
-        stateMachineEngine.start(stateMachineName, paramMap);
+        stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -105,7 +105,7 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleInputAssignmentStateMachine";
 
-        StateMachineInstance instance = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         String businessKey = instance.getStateList().get(0).getBusinessKey();
         Assert.assertNotNull(businessKey);
@@ -130,7 +130,7 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleCachesStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -150,7 +150,7 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleStatusMatchingStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -171,7 +171,7 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleCompensationStateMachine";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
@@ -191,7 +191,7 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
@@ -220,7 +220,7 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
@@ -250,7 +250,7 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
@@ -279,7 +279,7 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleStateMachineWithUseDefCompensationSubMachine";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
@@ -308,7 +308,7 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleCompensationStateMachineForRecovery";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: "+ inst.getId() +" cost :" + cost);
@@ -339,7 +339,7 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleCompensationStateMachineForRecovery";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: "+ inst.getId() +" cost :" + cost);
@@ -372,7 +372,7 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleCompensationStateMachineForRecovery";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: "+ inst.getId() +" cost :" + cost);
@@ -406,7 +406,7 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleCompensationStateMachineForRecovery";
 
-        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== XID: "+ inst.getId() +" cost :" + cost);
@@ -450,7 +450,7 @@ public class StateMachineDBMockServerTests {
 
         String stateMachineName = "simpleStateMachineWithComplexParams";
 
-        StateMachineInstance instance = stateMachineEngine.start(stateMachineName, paramMap);
+        StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         People peopleResult = (People)instance.getEndParams().get("complexParameterMethodResult");
         Assert.assertNotNull(peopleResult);

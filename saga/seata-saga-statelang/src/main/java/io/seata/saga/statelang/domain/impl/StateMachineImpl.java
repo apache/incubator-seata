@@ -29,14 +29,14 @@ import java.util.Map;
 public class StateMachineImpl implements StateMachine {
 
     private           String id;
-    private           String instanceId = "000001";
-    private           String appName = "SEATA";
+    private           String tenantId;
+    private           String appName  = "SEATA";
     private           String name;
     private           String comment;
     private           String version;
     private           String startAt;
     private           Status status = Status.AC;
-    private           String transStrategy;
+    private           String recoverStrategy;
     private           boolean isPersist = true;
     private           String  type      = "STATE_LANG";
     private transient String  content;
@@ -112,12 +112,13 @@ public class StateMachineImpl implements StateMachine {
     }
 
     @Override
-    public String getInstanceId() {
-        return instanceId;
+    public String getTenantId() {
+        return tenantId;
     }
 
-    public void setInstanceId(String instanceId) {
-        this.instanceId = instanceId;
+    @Override
+    public void setTenantId(String tenantId) {
+        this.tenantId = tenantId;
     }
 
     @Override
@@ -148,12 +149,13 @@ public class StateMachineImpl implements StateMachine {
     }
 
     @Override
-    public String getTransStrategy() {
-        return transStrategy;
+    public String getRecoverStrategy() {
+        return recoverStrategy;
     }
 
-    public void setTransStrategy(String transStrategy) {
-        this.transStrategy = transStrategy;
+    @Override
+    public void setRecoverStrategy(String recoverStrategy) {
+        this.recoverStrategy = recoverStrategy;
     }
 
     @Override

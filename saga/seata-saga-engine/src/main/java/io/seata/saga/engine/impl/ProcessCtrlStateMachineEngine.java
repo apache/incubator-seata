@@ -60,34 +60,34 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     private StateMachineConfig stateMachineConfig;
 
     @Override
-    public StateMachineInstance start(String stateMachineName, Map<String, Object> startParams) throws EngineExecutionException {
+    public StateMachineInstance start(String stateMachineName, String tenantId, Map<String, Object> startParams) throws EngineExecutionException {
 
-        return startInternal(stateMachineName, null, startParams, false, null);
+        return startInternal(stateMachineName, tenantId, null, startParams, false, null);
     }
 
     @Override
-    public StateMachineInstance startAsync(String stateMachineName, Map<String, Object> startParams, AsyncCallback callback)
+    public StateMachineInstance startAsync(String stateMachineName, String tenantId, Map<String, Object> startParams, AsyncCallback callback)
             throws EngineExecutionException {
 
-        return startInternal(stateMachineName, null, startParams, true, callback);
+        return startInternal(stateMachineName, tenantId, null, startParams, true, callback);
     }
 
     @Override
-    public StateMachineInstance startWithBusinessKey(String stateMachineName, String businessKey, Map<String, Object> startParams)
+    public StateMachineInstance startWithBusinessKey(String stateMachineName, String tenantId, String businessKey, Map<String, Object> startParams)
             throws EngineExecutionException {
 
-        return startInternal(stateMachineName, businessKey, startParams, false, null);
+        return startInternal(stateMachineName, tenantId, businessKey, startParams, false, null);
     }
 
     @Override
-    public StateMachineInstance startWithBusinessKeyAsync(String stateMachineName, String businessKey, Map<String, Object> startParams,
+    public StateMachineInstance startWithBusinessKeyAsync(String stateMachineName, String tenantId, String businessKey, Map<String, Object> startParams,
                                            AsyncCallback callback)
             throws EngineExecutionException {
 
-        return startInternal(stateMachineName, businessKey, startParams, true, callback);
+        return startInternal(stateMachineName, tenantId, businessKey, startParams, true, callback);
     }
 
-    private StateMachineInstance startInternal(String stateMachineName, String businessKey, Map<String, Object> startParams, boolean async, AsyncCallback callback)
+    private StateMachineInstance startInternal(String stateMachineName, String tenantId, String businessKey, Map<String, Object> startParams, boolean async, AsyncCallback callback)
             throws EngineExecutionException {
 
         if (async && !stateMachineConfig.isEnableAsync()) {
@@ -95,12 +95,16 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                     FrameworkErrorCode.AsynchronousStartDisabled);
         }
 
-        StateMachineInstance instance = createMachineInstance(stateMachineName, businessKey, startParams);
+        if(StringUtils.isEmpty(tenantId)){
+            tenantId = stateMachineConfig.getDefaultTenantId();
+        }
+
+        StateMachineInstance instance = createMachineInstance(stateMachineName, tenantId, businessKey, startParams);
 
         ProcessContextBuilder contextBuilder = ProcessContextBuilder.create().withProcessType(ProcessType.STATE_LANG)
                 .withOperationName(DomainConstants.OPERATION_NAME_START)
                 .withAsyncCallback(callback)
-                .withInstruction(new StateInstruction(stateMachineName))
+                .withInstruction(new StateInstruction(stateMachineName, tenantId))
                 .withStateMachineInstance(instance)
                 .withStateMachineConfig(getStateMachineConfig())
                 .withStateMachineEngine(this);
@@ -135,10 +139,9 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         return instance;
     }
 
-    private StateMachineInstance createMachineInstance(String stateMachineName, String businessKey,
+    private StateMachineInstance createMachineInstance(String stateMachineName, String tenantId, String businessKey,
                                                        Map<String, Object> startParams) {
-
-        StateMachine stateMachine = stateMachineConfig.getStateMachineRepository().getStateMachine(stateMachineName);
+        StateMachine stateMachine = stateMachineConfig.getStateMachineRepository().getStateMachine(stateMachineName, tenantId);
         if (stateMachine == null) {
             throw new EngineExecutionException("StateMachine[" + stateMachineName + "] is not exists",
                 FrameworkErrorCode.ObjectNotExists);
@@ -147,6 +150,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         StateMachineInstanceImpl inst = new StateMachineInstanceImpl();
         inst.setStateMachine(stateMachine);
         inst.setMachineId(stateMachine.getId());
+        inst.setTenantId(tenantId);
         inst.setBusinessKey(businessKey);
 
         inst.setStartParams(startParams);
@@ -253,6 +257,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
         try {
             StateInstruction inst = new StateInstruction();
+            inst.setTenantId(stateMachineInstance.getTenantId());
             inst.setStateMachineName(stateMachineInstance.getStateMachine().getName());
             if (skip || ExecutionStatus.SU.equals(lastForwardState.getStatus())) {
 
@@ -451,6 +456,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         }
         try {
             StateInstruction inst = new StateInstruction();
+            inst.setTenantId(stateMachineInstance.getTenantId());
             inst.setStateMachineName(stateMachineInstance.getStateMachine().getName());
             inst.setTemporaryState(tempCompensationStartState);
 

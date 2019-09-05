@@ -22,7 +22,7 @@
 	<!--****************************** StateMachine定义相关SQL语句 ******************************-->
 	<resultMap id="StateMachineResultMap" type="io.seata.saga.statelang.domain.impl.StateMachineImpl">
 		<id property="id" column="ID" />
-		<result property="instanceId" column="INSTANCE_ID" />
+		<result property="tenantId" column="TENANT_ID" />
 		<result property="appName" column="APP_NAME" />
 		<result property="name" column="NAME" />
 		<result property="status" column="STATUS" />
@@ -32,12 +32,12 @@
 		<result property="type" column="TYPE" />
 		<result property="comment" column="COMMENT" />
 		<result property="isPersist" column="IS_PERSIST" jdbcType="TINYINT"/>
-		<result property="transStrategy" column="TRANS_STRATEGY"/>
+		<result property="recoverStrategy" column="RECOVER_STRATEGY"/>
 	</resultMap>
 
 	<sql id="StateMachineFields">
 		ID,
-		INSTANCE_ID,
+		TENANT_ID,
 		APP_NAME,
 		NAME,
 		STATUS,
@@ -45,7 +45,7 @@
 		VER,
 		TYPE,
 		CONTENT,
-		TRANS_STRATEGY
+		RECOVER_STRATEGY
 	</sql>
 
 	<select id="getStateMachineById" resultMap="StateMachineResultMap" parameterType="string">
@@ -57,13 +57,15 @@
 		ID = #{id}
 	</select>
 
-	<select id="getLastVersionStateMachine" resultMap="StateMachineResultMap" parameterType="string">
+	<select id="getLastVersionStateMachine" resultMap="StateMachineResultMap" parameterType="map">
 		SELECT
 		<include refid="StateMachineFields" />
 		FROM
 		${TABLE_PREFIX}STATE_MACHINE_DEF
 		WHERE
 		NAME = #{name}
+		AND
+		TENANT_ID = #{tenantId}
 		ORDER BY GMT_CREATE DESC
 		LIMIT 1
 	</select>
@@ -77,7 +79,7 @@
 		VALUES
 		(
 		#{id, jdbcType=VARCHAR},
-		#{instanceId, jdbcType=VARCHAR},
+		#{tenantId, jdbcType=VARCHAR},
 		#{appName, jdbcType=VARCHAR},
 		#{name, jdbcType=VARCHAR},
 		#{status, jdbcType=VARCHAR},
@@ -85,7 +87,7 @@
 		#{version, jdbcType=VARCHAR},
 		#{type, jdbcType=VARCHAR},
 		#{content, jdbcType=CLOB},
-		#{transStrategy, jdbcType=VARCHAR}
+		#{recoverStrategy, jdbcType=VARCHAR}
 		)
 	</insert>
 
@@ -95,6 +97,7 @@
 	<resultMap id="StateMachineInstanceResultMap" type="io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl">
 		<result column="ID" jdbcType="VARCHAR" property="id" />
 		<result column="MACHINE_ID" jdbcType="VARCHAR" property="machineId" />
+		<result column="TENANT_ID" jdbcType="VARCHAR" property="tenantId"/>
 		<result column="PARENT_ID" jdbcType="VARCHAR" property="parentId" />
 		<result column="BUSINESS_KEY" jdbcType="VARCHAR" property="businessKey" />
 		<result column="GMT_STARTED" jdbcType="TIMESTAMP" property="gmtStarted" />
@@ -111,6 +114,7 @@
 	<sql id="StateMachineInstanceFields">
 		ID,
 		MACHINE_ID,
+		TENANT_ID,
 		PARENT_ID,
 		BUSINESS_KEY,
 		GMT_STARTED,
@@ -126,6 +130,7 @@
 	<sql id="StateMachineInstanceFieldsWithoutParams">
 		ID,
 		MACHINE_ID,
+		TENANT_ID,
 		PARENT_ID,
 		BUSINESS_KEY,
 		GMT_STARTED,
@@ -140,11 +145,12 @@
 		INSERT
 		INTO
 		${TABLE_PREFIX}STATE_MACHINE_INST
-		(ID, MACHINE_ID, PARENT_ID, GMT_STARTED, BUSINESS_KEY, START_PARAMS, IS_RUNNING, GMT_UPDATED)
+		(ID, MACHINE_ID, TENANT_ID, PARENT_ID, GMT_STARTED, BUSINESS_KEY, START_PARAMS, IS_RUNNING, GMT_UPDATED)
 		VALUES
 		(
 		#{id, jdbcType=VARCHAR},
 		#{machineId, jdbcType=VARCHAR},
+		#{tenantId, jdbcType=VARCHAR},
 		#{parentId, jdbcType=VARCHAR},
 		#{gmtStarted, jdbcType=TIMESTAMP},
 		#{businessKey, jdbcType=VARCHAR},

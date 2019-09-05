@@ -99,10 +99,16 @@ public interface StateMachine {
     String getId();
 
     /**
-     * instanceId(tenant and environment)
+     * get tenantId
      * @return
      */
-    String getInstanceId();
+    String getTenantId();
+
+    /**
+     * set tenantId
+     * @param tenantId
+     */
+    void setTenantId(String tenantId);
 
     /**
      * app name
@@ -123,10 +129,16 @@ public interface StateMachine {
     Status getStatus();
 
     /**
-     * transaction strategy: prefer compensation or forward when error occurred
+     * recover strategy: prefer compensation or forward when error occurred
      * @return
      */
-    String getTransStrategy();
+    String getRecoverStrategy();
+
+    /**
+     * set RecoverStrategy
+     * @param recoverStrategy
+     */
+    void setRecoverStrategy(String recoverStrategy);
 
     /**
      * Is it persist execution log to storage?, default true
