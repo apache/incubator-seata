@@ -23,8 +23,11 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -41,10 +44,12 @@ import java.util.stream.Collectors;
  * The type Data base lock store.
  *
  * @author zhangsen
- * @data 2019 /4/25
+ * @date 2019 /4/25
  */
 @LoadLevel(name = "db")
 public class LockStoreDataBaseDAO implements LockStore, Initialize {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LockStoreDataBaseDAO.class);
 
     /**
      * The constant CONFIG.
@@ -119,12 +124,20 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
                 ps.setString(i + 1, lockDOs.get(i).getRowKey());
             }
             rs = ps.executeQuery();
+            String currentXID = lockDOs.get(0).getXid();
             while (rs.next()) {
-                if (!StringUtils.equals(rs.getString("xid"), lockDOs.get(0).getXid())) {
+                String dbXID = rs.getString(ServerTableColumnsName.LOCK_TABLE_XID);
+                if (!StringUtils.equals(dbXID, currentXID)) {
+                    if (LOGGER.isInfoEnabled()) {
+                        String dbPk = rs.getString(ServerTableColumnsName.LOCK_TABLE_PK);
+                        String dbTableName = rs.getString(ServerTableColumnsName.LOCK_TABLE_TABLE_NAME);
+                        Long dbBranchId = rs.getLong(ServerTableColumnsName.LOCK_TABLE_BRANCH_ID);
+                        LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", dbTableName, dbPk, dbXID, dbBranchId);
+                    }
                     canLock &= false;
                     break;
                 }
-                dbExistedRowKeys.add(rs.getString("row_key"));
+                dbExistedRowKeys.add(rs.getString(ServerTableColumnsName.LOCK_TABLE_ROW_KEY));
             }
 
             if (!canLock) {
@@ -144,6 +157,9 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             //lock
             for (LockDO lockDO : unrepeatedLockDOs) {
                 if (!doAcquireLock(conn, lockDO)) {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("Global lock acquire failed, xid {} branchId {} pk {}", lockDO.getXid(), lockDO.getBranchId(), lockDO.getPk());
+                    }
                     conn.rollback();
                     return false;
                 }

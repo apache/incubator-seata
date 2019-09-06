@@ -97,6 +97,10 @@ public class ConfigurationKeys {
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_PREFIX + "report.retry.count";
+    /**
+     * The constant CLIENT_TABLE_META_CHECK_ENABLE.
+     */
+    public static final String CLIENT_TABLE_META_CHECK_ENABLE  = CLIENT_PREFIX + "table.meta.check.enable";
 
 
     /**
@@ -192,24 +196,24 @@ public class ConfigurationKeys {
     public static final String LOCK_DB_DEFAULT_TABLE  = "lock_table";
 
     /**
-     * The constant COMMITING_RETRY_DELAY.
+     * The constant COMMITING_RETRY_PERIOD.
      */
-    public static final String  COMMITING_RETRY_DELAY = "recovery.committing-retry-delay";
+    public static final String COMMITING_RETRY_PERIOD = "recovery.committing-retry-period";
 
     /**
-     * The constant ASYN_COMMITING_RETRY_DELAY.
+     * The constant ASYN_COMMITING_RETRY_PERIOD.
      */
-    public static final String  ASYN_COMMITING_RETRY_DELAY = "recovery.asyn-committing-retry-delay";
+    public static final String ASYN_COMMITING_RETRY_PERIOD = "recovery.asyn-committing-retry-period";
 
     /**
-     * The constant ROLLBACKING_RETRY_DELAY.
+     * The constant ROLLBACKING_RETRY_PERIOD.
      */
-    public static final String  ROLLBACKING_RETRY_DELAY = "recovery.rollbacking-retry-delay";
+    public static final String ROLLBACKING_RETRY_PERIOD = "recovery.rollbacking-retry-period";
 
     /**
-     * The constant TIMEOUT_RETRY_DELAY.
+     * The constant TIMEOUT_RETRY_PERIOD.
      */
-    public static final String  TIMEOUT_RETRY_DELAY = "recovery.timeout-retry-delay";
+    public static final String TIMEOUT_RETRY_PERIOD = "recovery.timeout-retry-period";
 
     /**
      * The constant TRANSACTION_PREFIX.
@@ -251,7 +255,34 @@ public class ConfigurationKeys {
     public static final String TRANSACTION_UNDO_LOG_SAVE_DAYS = TRANSACTION_PREFIX + "undo.log.save.days";
 
     /**
-     * The constant TRANSACTION_UNDO_LOG_DELETE_DELAY
+     * The constant TRANSACTION_UNDO_LOG_DELETE_PERIOD
      */
-    public static final String TRANSACTION_UNDO_LOG_DELETE_DELAY = TRANSACTION_PREFIX + "undo.log.delete.delay";
+    public static final String TRANSACTION_UNDO_LOG_DELETE_PERIOD = TRANSACTION_PREFIX + "undo.log.delete.period";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_TABLE
+     */
+    public static final String TRANSACTION_UNDO_LOG_TABLE = TRANSACTION_PREFIX + "undo.log.table";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_DEFAULT_TABLE.
+     */
+    public static final String TRANSACTION_UNDO_LOG_DEFAULT_TABLE  = "undo_log";
+
+    /**
+     * The constant SUPPORT_PREFIX.
+     */
+    public static final String SUPPORT_PREFIX = "support.";
+    /**
+     * The constant SPRING_PREFIX.
+     */
+    public static final String SPRING_PREFIX = "spring.";
+    /**
+     * The constant DATASOURCE_PREFIX.
+     */
+    public static final String DATASOURCE_PREFIX = "datasource.";
+    /**
+     * The constant DATASOURCE_AUTOPROXY.
+     */
+    public static final String DATASOURCE_AUTOPROXY = SUPPORT_PREFIX + SPRING_PREFIX + DATASOURCE_PREFIX + "autoproxy";
 }

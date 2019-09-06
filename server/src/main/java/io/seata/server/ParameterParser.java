@@ -23,7 +23,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 
 /**
- * The type parameter parser
+ * The type Parameter parser.
  *
  * @author xingfudeshi@gmail.com
  * @date 2019/05/30
@@ -31,29 +31,33 @@ import io.seata.core.constants.ConfigurationKeys;
 public class ParameterParser {
     private static final String PROGRAM_NAME = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
     private static final int SERVER_DEFAULT_PORT = 8091;
-    private static final String SERVER_DEFAULT_BIND_IP = "0.0.0.0";
     private static final String SERVER_DEFAULT_STORE_MODE = "file";
+    private static final int SERVER_DEFAULT_NODE = 1;
+    /**
+     * The constant CONFIG.
+     */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     @Parameter(names = "--help", help = true)
     private boolean help;
-    @Parameter(names = {"--host", "-h"}, description = "The host to bind.", order = 1)
-    private String host = SERVER_DEFAULT_BIND_IP;
+    @Parameter(names = {"--host", "-h"}, description = "The ip to register to registry center.", order = 1)
+    private String host;
     @Parameter(names = {"--port", "-p"}, description = "The port to listen.", order = 2)
     private int port = SERVER_DEFAULT_PORT;
     @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file、db", order = 3)
     private String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE);
+    @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3. default is 1", order = 4)
+    private int serverNode = SERVER_DEFAULT_NODE;
 
-
+    /**
+     * Instantiates a new Parameter parser.
+     *
+     * @param args the args
+     */
     public ParameterParser(String[] args) {
         this.init(args);
     }
 
-    /**
-     * initialize the parameter parser
-     *
-     * @param args
-     */
     private void init(String[] args) {
         try {
             JCommander jCommander = JCommander.newBuilder().addObject(this).build();
@@ -69,11 +73,6 @@ public class ParameterParser {
 
     }
 
-    /**
-     * print the error
-     *
-     * @param e
-     */
     private void printError(ParameterException e) {
         System.err.println("Option error " + e.getMessage());
         e.getJCommander().setProgramName(PROGRAM_NAME);
@@ -82,38 +81,47 @@ public class ParameterParser {
     }
 
     /**
-     * Gets host
+     * Gets host.
      *
-     * @return host
+     * @return the host
      */
     public String getHost() {
         return host;
     }
 
     /**
-     * Gets port
+     * Gets port.
      *
-     * @return port
+     * @return the port
      */
     public int getPort() {
         return port;
     }
 
     /**
-     * Gets store mode
+     * Gets store mode.
      *
-     * @return storeMode
+     * @return the store mode
      */
     public String getStoreMode() {
         return storeMode;
     }
 
     /**
-     * is help
+     * Is help boolean.
      *
-     * @return help
+     * @return the boolean
      */
     public boolean isHelp() {
         return help;
+    }
+
+    /**
+     * Gets server node.
+     *
+     * @return the server node
+     */
+    public int getServerNode() {
+        return serverNode;
     }
 }

@@ -90,6 +90,10 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+        String value;
+        if ((value = getConfigFromSysPro(dataId)) != null) {
+            return value;
+        }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET, timeoutMills);
         consulNotifierExecutor.execute(() -> {
             complete(getConsulClient().getKVValue(dataId), configFuture);
@@ -203,12 +207,12 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
      * @param configFuture
      */
     private void complete(Response response, ConfigFuture configFuture) {
-        Object value = response.getValue();
-        if (null != response && null != value) {
+        if (null != response && null != response.getValue()) {
+            Object value = response.getValue();
             if (value instanceof GetValue) {
-                configFuture.setResult(((GetValue) response.getValue()).getDecodedValue());
+                configFuture.setResult(((GetValue) value).getDecodedValue());
             } else {
-                configFuture.setResult(response.getValue());
+                configFuture.setResult(value);
             }
         }
     }
