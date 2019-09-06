@@ -15,6 +15,7 @@
  */
 package io.seata.codec.seata.protocol.transaction;
 
+import io.netty.buffer.ByteBuf;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.transaction.GlobalReportRequest;
 
@@ -33,16 +34,16 @@ public class GlobalReportRequestCodec extends AbstractGlobalEndRequestCodec {
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer out) {
+    public <T> void encode(T t, ByteBuf out) {
         super.encode(t, out);
 
         GlobalReportRequest reportRequest = (GlobalReportRequest)t;
         GlobalStatus globalStatus = reportRequest.getGlobalStatus();
         if(globalStatus != null){
-            out.put((byte)globalStatus.getCode());
+            out.writeByte((byte)globalStatus.getCode());
         }
         else{
-            out.put((byte) -1);
+            out.writeByte((byte) -1);
         }
     }
 

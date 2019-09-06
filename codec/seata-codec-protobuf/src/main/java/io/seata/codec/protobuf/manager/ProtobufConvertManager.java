@@ -157,11 +157,11 @@ public class ProtobufConvertManager {
             protobufConvertManager.convertorMap.put(GlobalStatusResponse.class.getName(),
                 new GlobalStatusResponseConvertor());
             protobufConvertManager.convertorMap.put(GlobalReportRequest.class.getName(),
-                    new GlobalReportRequestConvertor());
+                new GlobalReportRequestConvertor());
             protobufConvertManager.convertorMap.put(GlobalReportResponse.class.getName(),
-                    new GlobalReportResponseConvertor());
+                new GlobalReportResponseConvertor());
             protobufConvertManager.convertorMap.put(UndoLogDeleteRequest.class.getName(),
-                    new UndoLogDeleteRequestConvertor());
+                new UndoLogDeleteRequestConvertor());
 
             protobufConvertManager.convertorMap.put(MergedWarpMessage.class.getName(),
                 new MergedWarpMessageConvertor());
@@ -214,11 +214,11 @@ public class ProtobufConvertManager {
             protobufConvertManager.protoClazzMap.put(GlobalStatusResponseProto.getDescriptor().getFullName(),
                 GlobalStatusResponseProto.class);
             protobufConvertManager.protoClazzMap.put(GlobalReportRequestProto.getDescriptor().getFullName(),
-                    GlobalReportRequestProto.class);
+                GlobalReportRequestProto.class);
             protobufConvertManager.protoClazzMap.put(GlobalReportResponseProto.getDescriptor().getFullName(),
-                    GlobalReportResponseProto.class);
+                GlobalReportResponseProto.class);
             protobufConvertManager.protoClazzMap.put(UndoLogDeleteRequestProto.getDescriptor().getFullName(),
-                    UndoLogDeleteRequestProto.class);
+                UndoLogDeleteRequestProto.class);
 
             protobufConvertManager.protoClazzMap.put(MergedWarpMessageProto.getDescriptor().getFullName(),
                 MergedWarpMessageProto.class);
@@ -272,9 +272,9 @@ public class ProtobufConvertManager {
             protobufConvertManager.reverseConvertorMap.put(GlobalStatusResponseProto.class.getName(),
                 new GlobalStatusResponseConvertor());
             protobufConvertManager.reverseConvertorMap.put(GlobalReportRequestProto.class.getName(),
-                    new GlobalReportRequestConvertor());
+                new GlobalReportRequestConvertor());
             protobufConvertManager.reverseConvertorMap.put(GlobalReportResponseProto.class.getName(),
-                    new GlobalReportResponseConvertor());
+                new GlobalReportResponseConvertor());
             protobufConvertManager.reverseConvertorMap.put(UndoLogDeleteRequestProto.class.getName(),
                 new UndoLogDeleteRequestConvertor());
 

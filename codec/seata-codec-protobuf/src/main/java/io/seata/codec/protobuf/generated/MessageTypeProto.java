@@ -493,7 +493,7 @@ public enum MessageTypeProto
 
   public final int getNumber() {
     if (this == UNRECOGNIZED) {
-      throw new IllegalArgumentException(
+      throw new java.lang.IllegalArgumentException(
           "Can't get the number of an unknown enum value.");
     }
     return value;
@@ -502,7 +502,7 @@ public enum MessageTypeProto
   /**
    * @deprecated Use {@link #forNumber(int)} instead.
    */
-  @Deprecated
+  @java.lang.Deprecated
   public static MessageTypeProto valueOf(int value) {
     return forNumber(value);
   }
@@ -546,7 +546,7 @@ public enum MessageTypeProto
     return internalValueMap;
   }
   private static final com.google.protobuf.Internal.EnumLiteMap<
-          MessageTypeProto> internalValueMap =
+      MessageTypeProto> internalValueMap =
         new com.google.protobuf.Internal.EnumLiteMap<MessageTypeProto>() {
           public MessageTypeProto findValueByNumber(int number) {
             return MessageTypeProto.forNumber(number);
@@ -571,7 +571,7 @@ public enum MessageTypeProto
   public static MessageTypeProto valueOf(
       com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
     if (desc.getType() != getDescriptor()) {
-      throw new IllegalArgumentException(
+      throw new java.lang.IllegalArgumentException(
         "EnumValueDescriptor is not for this type.");
     }
     if (desc.getIndex() == -1) {
