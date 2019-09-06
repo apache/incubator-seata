@@ -26,7 +26,7 @@ public class DurationUtil {
 
     public static final String DAY_UNIT = "d";
     public static final String HOUR_UNIT = "h";
-    public static final String MINIUTE_UNIT = "m";
+    public static final String MINUTE_UNIT = "m";
     public static final String SECOND_UNIT = "s";
     public static final String MILLIS_SECOND_UNIT = "ms";
 
@@ -44,8 +44,8 @@ public class DurationUtil {
         } else if (str.contains(HOUR_UNIT)) {
             Long value = doParse(HOUR_UNIT, str);
             return value == null ? null : Duration.ofHours(value);
-        } else if (str.contains(MINIUTE_UNIT)) {
-            Long value = doParse(MINIUTE_UNIT, str);
+        } else if (str.contains(MINUTE_UNIT)) {
+            Long value = doParse(MINUTE_UNIT, str);
             return value == null ? null : Duration.ofMinutes(value);
         } else if (str.contains(SECOND_UNIT)) {
             Long value = doParse(SECOND_UNIT, str);
