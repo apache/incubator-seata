@@ -194,13 +194,15 @@
 		ID = #{id, jdbcType=VARCHAR}
 	</select>
 
-	<select id="getStateMachineInstanceByBusinessKey" parameterType="string" resultMap="StateMachineInstanceResultMap">
+	<select id="getStateMachineInstanceByBusinessKey" parameterType="map" resultMap="StateMachineInstanceResultMap">
 		SELECT
 		<include refid="StateMachineInstanceFields" />
 		FROM
 		${TABLE_PREFIX}STATE_MACHINE_INST
 		WHERE
 		BUSINESS_KEY = #{businessKey, jdbcType=VARCHAR}
+		AND
+		TENANT_ID = #{tenantId, jdbcType=VARCHAR}
 	</select>
 
 	<select id="queryStateMachineInstanceByParentId" parameterType="string" resultMap="StateMachineInstanceResultMap">

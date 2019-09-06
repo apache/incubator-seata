@@ -69,7 +69,6 @@ public class StateMachineParserImpl implements StateMachineParser {
             stateMachine.putState(stateName, state);
         }
 
-        //处理state的isForCompensation|isForUpdate类型
         Map<String, State> stateMap = stateMachine.getStates();
         for(String name : stateMap.keySet()){
             State state = stateMap.get(name);

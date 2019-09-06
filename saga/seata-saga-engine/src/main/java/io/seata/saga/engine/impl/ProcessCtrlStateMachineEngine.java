@@ -356,7 +356,6 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
                     continue;
                 }
 
-
                 if(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(stateInstance.getType())){
 
                     StateInstance finalState = stateInstance;

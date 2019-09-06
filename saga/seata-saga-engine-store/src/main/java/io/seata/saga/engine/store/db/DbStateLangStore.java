@@ -28,7 +28,7 @@ import static io.seata.saga.engine.store.db.MybatisConfig.MAPPER_PREFIX;
  *
  * @author lorne.cl
  */
-public class DBStateLangStore implements StateLangStore {
+public class DbStateLangStore implements StateLangStore {
 
     private SqlSessionExecutor sqlSessionExecutor;
 

@@ -16,8 +16,8 @@
 package io.seata.saga.engine.config;
 
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
-import io.seata.saga.engine.store.db.DBStateLangStore;
-import io.seata.saga.engine.store.db.DBStateLogStore;
+import io.seata.saga.engine.store.db.DbStateLangStore;
+import io.seata.saga.engine.store.db.DbAndReportTcStateLogStore;
 import io.seata.saga.engine.store.db.TransactionalSqlSessionExecutor;
 import io.seata.saga.engine.store.db.MybatisConfig;
 import io.seata.saga.tm.DefaultSagaTransactionalTemplate;
@@ -57,13 +57,14 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
         }
 
         if(getStateLogStore() == null){
-            DBStateLogStore dbStateLogStore = new DBStateLogStore();
+            DbAndReportTcStateLogStore dbStateLogStore = new DbAndReportTcStateLogStore();
 
             TransactionalSqlSessionExecutor sqlSessionExecutor = new TransactionalSqlSessionExecutor();
             sqlSessionExecutor.setTransactionTemplate(mybatisConfig.getTransactionTemplate());
             sqlSessionExecutor.setSqlSessionTemplate(mybatisConfig.getSqlSessionTemplate());
 
             dbStateLogStore.setSqlSessionExecutor(sqlSessionExecutor);
+            dbStateLogStore.setDefaultTenantId(getDefaultTenantId());
 
             if(sagaTransactionalTemplate == null){
                 DefaultSagaTransactionalTemplate defaultSagaTransactionalTemplate = new DefaultSagaTransactionalTemplate();
@@ -80,7 +81,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
         }
 
         if(getStateLangStore() == null){
-            DBStateLangStore dbStateLangStore = new DBStateLangStore();
+            DbStateLangStore dbStateLangStore = new DbStateLangStore();
 
             TransactionalSqlSessionExecutor sqlSessionExecutor = new TransactionalSqlSessionExecutor();
             sqlSessionExecutor.setTransactionTemplate(mybatisConfig.getTransactionTemplate());

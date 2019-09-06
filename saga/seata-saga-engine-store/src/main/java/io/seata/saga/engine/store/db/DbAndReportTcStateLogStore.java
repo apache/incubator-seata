@@ -50,14 +50,15 @@ import static io.seata.saga.engine.store.db.MybatisConfig.MAPPER_PREFIX;
  *
  * @author lorne.cl
  */
-public class DBStateLogStore implements StateLogStore {
+public class DbAndReportTcStateLogStore implements StateLogStore {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DBStateLogStore.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DbAndReportTcStateLogStore.class);
 
     private SagaTransactionalTemplate           sagaTransactionalTemplate;
     private SqlSessionExecutor                  sqlSessionExecutor;
     private ObjectSerializer<Object, String>    paramsSerializer = new ParamsFastjsonSerializer();
     private ObjectSerializer<Exception, byte[]> exceptionSerializer = new ExceptionSerializer();
+    private String defaultTenantId;
 
     @Override
     public void recordStateMachineStarted(StateMachineInstance machineInstance, ProcessContext context) {
@@ -284,9 +285,15 @@ public class DBStateLogStore implements StateLogStore {
     }
 
     @Override
-    public StateMachineInstance getStateMachineInstanceByBusinessKey(String businessKey) {
+    public StateMachineInstance getStateMachineInstanceByBusinessKey(String businessKey, String tenantId) {
 
-        StateMachineInstance stateMachineInstance = sqlSessionExecutor.selectOne(MAPPER_PREFIX + "getStateMachineInstanceByBusinessKey", businessKey);
+        if(StringUtils.isEmpty(tenantId)){
+            tenantId = defaultTenantId;
+        }
+        Map<String, String> params = new HashMap<>(2);
+        params.put("businessKey", businessKey);
+        params.put("tenantId", tenantId);
+        StateMachineInstance stateMachineInstance = sqlSessionExecutor.selectOne(MAPPER_PREFIX + "getStateMachineInstanceByBusinessKey", params);
         if (stateMachineInstance == null) {
             return null;
         }
@@ -433,5 +440,13 @@ public class DBStateLogStore implements StateLogStore {
 
     public void setParamsSerializer(ObjectSerializer<Object, String> paramsSerializer) {
         this.paramsSerializer = paramsSerializer;
+    }
+
+    public String getDefaultTenantId() {
+        return defaultTenantId;
+    }
+
+    public void setDefaultTenantId(String defaultTenantId) {
+        this.defaultTenantId = defaultTenantId;
     }
 }

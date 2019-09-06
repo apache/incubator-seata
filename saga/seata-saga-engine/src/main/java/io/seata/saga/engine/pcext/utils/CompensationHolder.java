@@ -85,7 +85,7 @@ public class CompensationHolder {
             StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
 
             for(StateInstance stateInstance : stateInstanceList){
-                if (stateNeedToCompensate(stateInstance) || subMachineNeedToCompensate(stateInstance)) {
+                if (stateNeedToCompensate(stateInstance)) {
                     State state = stateMachine.getState(stateInstance.getName());
                     AbstractTaskState taskState = null;
                     if(state instanceof AbstractTaskState){
@@ -118,20 +118,18 @@ public class CompensationHolder {
         if(stateInstance.isIgnoreStatus()){
             return false;
         }
-        return DomainConstants.STATE_TYPE_SERVICE_TASK.equals(stateInstance.getType())
-                && !stateInstance.isForCompensation()
-                && (!ExecutionStatus.FA.equals(stateInstance.getStatus()))
-                && (!ExecutionStatus.SU.equals(stateInstance.getCompensationStatus()));
-    }
+        if(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(stateInstance.getType())){
 
-    private static boolean subMachineNeedToCompensate(StateInstance stateInstance) {
-        //If it has been retried, it will not be compensated
-        if(stateInstance.isIgnoreStatus()){
-            return false;
+            return (!ExecutionStatus.FA.equals(stateInstance.getStatus()))
+                    && (!ExecutionStatus.SU.equals(stateInstance.getCompensationStatus()));
         }
-        return DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(stateInstance.getType())
-                && (!ExecutionStatus.FA.equals(stateInstance.getStatus()))
-                && (!ExecutionStatus.SU.equals(stateInstance.getCompensationStatus()));
+        else{
+
+            return DomainConstants.STATE_TYPE_SERVICE_TASK.equals(stateInstance.getType())
+                    && !stateInstance.isForCompensation()
+                    && (!ExecutionStatus.FA.equals(stateInstance.getStatus()))
+                    && (!ExecutionStatus.SU.equals(stateInstance.getCompensationStatus()));
+        }
     }
 
     public static void clearCurrent(ProcessContext context){

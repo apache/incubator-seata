@@ -69,9 +69,10 @@ public interface StateLogStore {
     /**
      * Get state machine instance by businessKey
      * @param businessKey
+     * @param tenantId
      * @return
      */
-    StateMachineInstance getStateMachineInstanceByBusinessKey(String businessKey);
+    StateMachineInstance getStateMachineInstanceByBusinessKey(String businessKey, String tenantId);
 
     /**
      * Query the list of state machine instances by parent id

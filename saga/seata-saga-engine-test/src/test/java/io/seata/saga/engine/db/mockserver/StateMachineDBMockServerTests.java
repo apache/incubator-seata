@@ -53,22 +53,30 @@ public class StateMachineDBMockServerTests {
 
         long start  = System.currentTimeMillis();
 
-        Map<String, Object> paramMap = new HashMap<>();
+        Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
 
         String stateMachineName = "simpleChoiceTestStateMachine";
-
-        stateMachineEngine.start(stateMachineName, null, paramMap);
+        String businessKey = String.valueOf(start);
+        StateMachineInstance inst = stateMachineEngine.startWithBusinessKey(stateMachineName, null, businessKey, paramMap);
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
+        Assert.assertNotNull(inst);
+        Assert.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+
+        inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstanceByBusinessKey(businessKey, null);
+        Assert.assertNotNull(inst);
+        Assert.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
 
         start  = System.currentTimeMillis();
         paramMap.put("a", 2);
-        stateMachineEngine.start(stateMachineName, null, paramMap);
+        inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
+        Assert.assertNotNull(inst);
+        Assert.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
     }
 
     @Test
