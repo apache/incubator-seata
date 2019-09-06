@@ -13,18 +13,26 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.statelang.domain.impl;
-
-import io.seata.saga.statelang.domain.CompensationStartState;
-import io.seata.saga.statelang.domain.DomainConstants;
+package io.seata.saga.engine.serializer;
 
 /**
- * Triggering the "compensation" process for the state machine
+ * Object serializer
+ *
  * @author lorne.cl
  */
-public class CompensationStartStateImpl extends BaseState implements CompensationStartState {
+public interface Serializer<S, T> {
 
-    public CompensationStartStateImpl() {
-        setType(DomainConstants.STATE_TYPE_COMPENSATION_START);
-    }
+    /**
+     * serialize
+     * @param object
+     * @return
+     */
+    T serialize(S object);
+
+    /**
+     * deserialize
+     * @param obj
+     * @return
+     */
+    S deserialize(T obj);
 }

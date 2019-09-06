@@ -91,7 +91,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                         if(parsedStatMachine == null){
                             throw new RuntimeException("Parse State Language failed, stateMachineId："+stateMachine.getId()+", name:"+stateMachine.getName());
                         }
-                        stateMachine.setStartAt(parsedStatMachine.getStartAt());
+                        stateMachine.setStartState(parsedStatMachine.getStartState());
                         stateMachine.getStates().putAll(parsedStatMachine.getStates());
                         item.setValue(stateMachine);
                         stateMachineMapByNameAndTenant.put(stateMachine.getName() + "_" + stateMachine.getTenantId(), item);
@@ -122,7 +122,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                         if(parsedStatMachine == null){
                             throw new RuntimeException("Parse State Language failed, stateMachineId："+stateMachine.getId()+", name:"+stateMachine.getName());
                         }
-                        stateMachine.setStartAt(parsedStatMachine.getStartAt());
+                        stateMachine.setStartState(parsedStatMachine.getStartState());
                         stateMachine.getStates().putAll(parsedStatMachine.getStates());
                         item.setValue(stateMachine);
                         stateMachineMapById.put(stateMachine.getId(), item);
@@ -171,13 +171,13 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                     return stateMachine;
                 }
             }
-            stateMachine.setId(seqGenerator.generate(DomainConstants.SEQ_NAME_STATE_MACHINE));
+            stateMachine.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE));
             stateMachine.setGmtCreate(new Date());
             stateLangStore.storeStateMachine(stateMachine);
         }
 
         if(StringUtils.isBlank(stateMachine.getId())){
-            stateMachine.setId(seqGenerator.generate(DomainConstants.SEQ_NAME_STATE_MACHINE));
+            stateMachine.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE));
         }
 
         Item item = new Item(stateMachine);

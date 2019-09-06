@@ -1,7 +1,7 @@
 {
     "Name": "simpleTestStateMachine",
     "Comment": "测试状态机定义",
-    "StartAt": "FirstState",
+    "StartState": "FirstState",
     "Version": "0.0.2",
     "States": {
         "FirstState": {

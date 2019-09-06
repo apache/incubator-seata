@@ -16,11 +16,11 @@
 package io.seata.saga.statelang.domain;
 
 /**
- * Compensation Start State
+ * Compensation trigger State
  *
  * @author lorne.cl
  */
-public interface CompensationStartState extends State {
+public interface CompensationTriggerState extends State {
 
 
 }

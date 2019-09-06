@@ -76,7 +76,7 @@ public class StateInstruction implements Instruction {
 
         if (StringUtils.isEmpty(stateName)) {
 
-            stateName = stateMachine.getStartAt();
+            stateName = stateMachine.getStartState();
             setStateName(stateName);
         }
 

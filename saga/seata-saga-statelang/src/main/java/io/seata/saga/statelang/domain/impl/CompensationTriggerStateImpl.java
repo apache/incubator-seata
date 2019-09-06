@@ -13,24 +13,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.statelang.parser.impl;
+package io.seata.saga.statelang.domain.impl;
 
-import io.seata.saga.statelang.domain.CompensationStartState;
-import io.seata.saga.statelang.domain.impl.CompensationStartStateImpl;
-import io.seata.saga.statelang.parser.StateParser;
+import io.seata.saga.statelang.domain.CompensationTriggerState;
+import io.seata.saga.statelang.domain.DomainConstants;
 
 /**
- * 'Start compensation process' state parser
+ * Triggering the "compensation" process for the state machine
  * @author lorne.cl
  */
-public class CompensationStartStateParser extends BaseStatePaser implements StateParser<CompensationStartState> {
+public class CompensationTriggerStateImpl extends BaseState implements CompensationTriggerState {
 
-    @Override
-    public CompensationStartState parse(Object node) {
-
-        CompensationStartStateImpl compensationStartState = new CompensationStartStateImpl();
-        parseBaseAttributes(compensationStartState, node);
-
-        return compensationStartState;
+    public CompensationTriggerStateImpl() {
+        setType(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER);
     }
 }

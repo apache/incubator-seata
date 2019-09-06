@@ -1,7 +1,7 @@
 {
     "Name": "simpleStateMachineWithCompensationAndSubMachine",
     "Comment": "带补偿定义和调用子状态机",
-    "StartAt": "FirstState",
+    "StartState": "FirstState",
     "Version": "0.0.1",
     "States": {
         "FirstState": {
@@ -57,7 +57,7 @@
                     "Exceptions": [
                         "io.seata.common.exception.FrameworkException"
                     ],
-                    "Next": "CompensationStart"
+                    "Next": "CompensationTrigger"
                 }
             ],
             "Next": "Succeed"
@@ -88,8 +88,8 @@
                 }
             ]
         },
-        "CompensationStart": {
-            "Type": "CompensationStart",
+        "CompensationTrigger": {
+            "Type": "CompensationTrigger",
             "Next": "Fail"
         },
         "Succeed": {

@@ -35,7 +35,7 @@ import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
-import io.seata.saga.statelang.domain.impl.CompensationStartStateImpl;
+import io.seata.saga.statelang.domain.impl.CompensationTriggerStateImpl;
 import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 
@@ -127,7 +127,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             stateMachineConfig.getStateLogStore().recordStateMachineStarted(instance, processContext);
         }
         if(StringUtils.isEmpty(instance.getId())){
-            instance.setId(stateMachineConfig.getSeqGenerator().generate(DomainConstants.SEQ_NAME_STATE_MACHINE_INST));
+            instance.setId(stateMachineConfig.getSeqGenerator().generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE_INST));
         }
 
         if(async){
@@ -446,8 +446,8 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         context.setVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT, concurrentContextVariables);
         stateMachineInstance.setContext(concurrentContextVariables);
 
-        CompensationStartStateImpl tempCompensationStartState = new CompensationStartStateImpl();
-        tempCompensationStartState.setStateMachine(stateMachineInstance.getStateMachine());
+        CompensationTriggerStateImpl tempCompensationTriggerState = new CompensationTriggerStateImpl();
+        tempCompensationTriggerState.setStateMachine(stateMachineInstance.getStateMachine());
 
         stateMachineInstance.setRunning(true);
         if(stateMachineInstance.getStateMachine().isPersist()) {
@@ -457,7 +457,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             StateInstruction inst = new StateInstruction();
             inst.setTenantId(stateMachineInstance.getTenantId());
             inst.setStateMachineName(stateMachineInstance.getStateMachine().getName());
-            inst.setTemporaryState(tempCompensationStartState);
+            inst.setTemporaryState(tempCompensationTriggerState);
 
             context.setInstruction(inst);
 

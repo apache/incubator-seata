@@ -1,7 +1,7 @@
 {
     "Name": "simpleChoiceTestStateMachine",
     "Comment": "带条件分支的测试状态机定义",
-    "StartAt": "FirstState",
+    "StartState": "FirstState",
     "Version": "0.0.1",
     "States": {
         "FirstState": {

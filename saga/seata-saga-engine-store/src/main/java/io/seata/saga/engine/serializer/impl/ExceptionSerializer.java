@@ -15,7 +15,7 @@
  */
 package io.seata.saga.engine.serializer.impl;
 
-import io.seata.saga.engine.serializer.ObjectSerializer;
+import io.seata.saga.engine.serializer.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ import java.io.ObjectOutputStream;
  * Exception serializer
  * @author lorne.cl
  */
-public class ExceptionSerializer implements ObjectSerializer<Exception, byte[]> {
+public class ExceptionSerializer implements Serializer<Exception, byte[]> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionSerializer.class);
 

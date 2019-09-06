@@ -27,12 +27,12 @@ public class DomainConstants {
     public static final String STATE_TYPE_CHOICE                        = "Choice";
     public static final String STATE_TYPE_FAIL                          = "Fail";
     public static final String STATE_TYPE_SUCCEED                       = "Succeed";
-    public static final String STATE_TYPE_COMPENSATION_START            = "CompensationStart";
+    public static final String STATE_TYPE_COMPENSATION_TRIGGER          = "CompensationTrigger";
     public static final String STATE_TYPE_SUB_STATE_MACHINE             = "SubStateMachine";
     public static final String STATE_TYPE_SUB_MACHINE_COMPENSATION      = "CompensateSubMachine";
     /** State Types **/
 
-    public static final String COMPENSATE_SUB_MACHINE_STATE_NAME_PREFIX = "_CompensateSubMachineState_";
+    public static final String COMPENSATE_SUB_MACHINE_STATE_NAME_PREFIX = "_compensate_sub_machine_state_";
 
 
     /** Service Types **/
@@ -43,38 +43,38 @@ public class DomainConstants {
     public static final String VAR_NAME_STATEMACHINE_CONTEXT             = "context";
     public static final String VAR_NAME_INPUT_PARAMS                     = "inputParams";
     public static final String VAR_NAME_OUTPUT_PARAMS                    = "outputParams";
-    public static final String VAR_NAME_CURRENT_EXCEPTION                = "currentException";//当前state执行产生的异常
-    public static final String VAR_NAME_BUSINESSKEY                      = "_businesskey_";
-    public static final String VAR_NAME_SUB_MACHINE_PARENT_ID            = "_sub_machine_parent_id_";//子状态机的父id，用于在对子状态机进行补偿的时候找到对应的状态机实例
-    public static final String VAR_NAME_CURRENT_CHOICE                   = "_current_choice_";//ChoiceState选择出的下一个state
-    public static final String VAR_NAME_STATEMACHINE_ERROR_CODE          = "_statemachine_error_code_";//整个状态机的错误码
-    public static final String VAR_NAME_STATEMACHINE_ERROR_MSG           = "_statemachine_error_message_";//整个状态机错误消息
-    public static final String VAR_NAME_CURRENT_EXCEPTION_ROUTE          = "_current_exception_route_";//当前state执行异常后匹配的路由
-    public static final String VAR_NAME_STATEMACHINE                     = "_current_statemachine_";//当前的statemachine定义
-    public static final String VAR_NAME_STATEMACHINE_INST                = "_current_statemachine_instance_";//当前的statemachine实例
-    public static final String VAR_NAME_STATEMACHINE_ENGINE              = "_current_statemachine_engine_";//当前的statemachine引擎实例
-    public static final String VAR_NAME_STATE_INST                       = "_current_state_instance_";//当前的state实例
-    public static final String VAR_NAME_STATEMACHINE_CONFIG              = "_statemachine_config_";//状态机引擎配置
-    public static final String VAR_NAME_FAIL_END_STATE_FLAG              = "_fail_end_state_flag_";//执行到失败结束状态标志
+    public static final String VAR_NAME_CURRENT_EXCEPTION                = "currentException";//exception of current state
+    public static final String VAR_NAME_BUSINESSKEY                      = "_business_key_";
+    public static final String VAR_NAME_SUB_MACHINE_PARENT_ID            = "_sub_machine_parent_id_";
+    public static final String VAR_NAME_CURRENT_CHOICE                   = "_current_choice_";
+    public static final String VAR_NAME_STATEMACHINE_ERROR_CODE          = "_statemachine_error_code_";
+    public static final String VAR_NAME_STATEMACHINE_ERROR_MSG           = "_statemachine_error_message_";
+    public static final String VAR_NAME_CURRENT_EXCEPTION_ROUTE          = "_current_exception_route_";
+    public static final String VAR_NAME_STATEMACHINE                     = "_current_statemachine_";
+    public static final String VAR_NAME_STATEMACHINE_INST                = "_current_statemachine_instance_";
+    public static final String VAR_NAME_STATEMACHINE_ENGINE              = "_current_statemachine_engine_";
+    public static final String VAR_NAME_STATE_INST                       = "_current_state_instance_";
+    public static final String VAR_NAME_STATEMACHINE_CONFIG              = "_statemachine_config_";
+    public static final String VAR_NAME_FAIL_END_STATE_FLAG              = "_fail_end_state_flag_";
     public static final String VAR_NAME_CURRENT_COMPENSATION_HOLDER      = "_current_compensation_holder_";
     public static final String VAR_NAME_RETRIED_STATE_INST_ID            = "_retried_state_instance_id";
     public static final String VAR_NAME_OPERATION_NAME                   = "_operation_name_";
     public static final String VAR_NAME_ASYNC_CALLBACK                   = "_async_callback_";
-    public static final String VAR_NAME_CURRENT_COMPENSATION_START_STATE = "_is_compensating_";//当前的CompensationStartState，可以标志进入了补偿流程
-    public static final String VAR_NAME_IS_EXCEPTION_NOT_CATCH           = "_is_exception_not_catch_";//异常是否没有catch
-    public static final String VAR_NAME_PARENT_ID                        = "_parent_id_";//parent id
-    public static final String VAR_NAME_SUB_STATEMACHINE_EXEC_STATUE     = "_sub_statemachine_execution_status_";//子状态机执行状态
-    public static final String VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD   = "_is_for_sub_statemachine_forward_";//子状态机执行forward操作
-    public static final String VAR_NAME_FIRST_COMPENSATION_STATE_STARTED = "_first_compensation_state_started";//第一个补偿state已启动执行
-    public static final String VAR_NAME_GLOBAL_TX                        = "_global_transaction_";//global transaction object
-    public static final String VAR_NAME_ROOT_CONTEXT_HOLDER              = "_root_context_holder_";//seata RootContext holder object
+    public static final String VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE     = "_is_compensating_";
+    public static final String VAR_NAME_IS_EXCEPTION_NOT_CATCH           = "_is_exception_not_catch_";
+    public static final String VAR_NAME_PARENT_ID                        = "_parent_id_";
+    public static final String VAR_NAME_SUB_STATEMACHINE_EXEC_STATUE     = "_sub_statemachine_execution_status_";
+    public static final String VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD   = "_is_for_sub_statemachine_forward_";
+    public static final String VAR_NAME_FIRST_COMPENSATION_STATE_STARTED = "_first_compensation_state_started";
+    public static final String VAR_NAME_GLOBAL_TX                        = "_global_transaction_";
+    public static final String VAR_NAME_ROOT_CONTEXT_HOLDER              = "_root_context_holder_";
 
     public static final String OPERATION_NAME_START      = "start";
     public static final String OPERATION_NAME_FORWARD    = "forward";
     public static final String OPERATION_NAME_COMPENSATE = "compensate";
 
-    public static final String SEQ_NAME_STATE_MACHINE      = "STATE_MACHINE";
-    public static final String SEQ_NAME_STATE_MACHINE_INST = "STATE_MACHINE_INST";
-    public static final String SEQ_NAME_STATE_INST         = "STATE_INST";
+    public static final String SEQ_ENTITY_STATE_MACHINE      = "STATE_MACHINE";
+    public static final String SEQ_ENTITY_STATE_MACHINE_INST = "STATE_MACHINE_INST";
+    public static final String SEQ_ENTITY_STATE_INST         = "STATE_INST";
 
 }

@@ -56,10 +56,10 @@ public class TaskStateRouter implements StateRouter {
             return null;
         }
 
-        //The current CompensationStartState can mark the compensation process is started and perform compensation route processing.
-        State compensationStartState = (State) context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_START_STATE);
-        if(compensationStartState != null){
-            return compensateRoute(context, compensationStartState);
+        //The current CompensationTriggerState can mark the compensation process is started and perform compensation route processing.
+        State compensationTriggerState = (State) context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
+        if(compensationTriggerState != null){
+            return compensateRoute(context, compensationTriggerState);
         }
 
         //There is an exception route, indicating that an exception is thrown, and the exception route is prioritized.
@@ -95,7 +95,7 @@ public class TaskStateRouter implements StateRouter {
     }
 
 
-    private Instruction compensateRoute(ProcessContext context, State compensationStartState) {
+    private Instruction compensateRoute(ProcessContext context, State compensationTriggerState) {
 
         //If there is already a compensation state that has been executed,
         // it is judged whether it is wrong or unsuccessful,
@@ -158,16 +158,16 @@ public class TaskStateRouter implements StateRouter {
             }
         }
 
-        context.removeVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_START_STATE);
+        context.removeVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
 
-        String compensationStartStateNext = compensationStartState.getNext();
-        if(StringUtils.isEmpty(compensationStartStateNext)){
+        String compensationTriggerStateNext = compensationTriggerState.getNext();
+        if(StringUtils.isEmpty(compensationTriggerStateNext)){
             EngineUtils.endStateMachine(context);
             return null;
         }
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
-        instruction.setStateName(compensationStartStateNext);
+        instruction.setStateName(compensationTriggerStateNext);
         return instruction;
     }
 }

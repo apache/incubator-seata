@@ -18,13 +18,13 @@ package io.seata.saga.engine.serializer.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import io.seata.saga.engine.serializer.ObjectSerializer;
+import io.seata.saga.engine.serializer.Serializer;
 
 /**
  * Parameter serializer based on Fastjson
  * @author lorne.cl
  */
-public class ParamsFastjsonSerializer implements ObjectSerializer<Object, String> {
+public class ParamsFastjsonSerializer implements Serializer<Object, String> {
 
     private static final SerializerFeature[] SERIALIZER_FEATURES = new SerializerFeature[] {
             SerializerFeature.DisableCircularReferenceDetect,
@@ -40,8 +40,6 @@ public class ParamsFastjsonSerializer implements ObjectSerializer<Object, String
         return null;
     }
 
-
-    @SuppressWarnings("unchecked")
     @Override
     public Object deserialize(String json) {
         if(json != null){

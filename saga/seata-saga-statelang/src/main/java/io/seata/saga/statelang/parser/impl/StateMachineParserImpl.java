@@ -45,7 +45,7 @@ public class StateMachineParserImpl implements StateMachineParser {
         stateMachine.setName((String)node.get("Name"));
         stateMachine.setComment((String)node.get("Comment"));
         stateMachine.setVersion((String)node.get("Version"));
-        stateMachine.setStartAt((String)node.get("StartAt"));
+        stateMachine.setStartState((String)node.get("StartState"));
         if("false".equals(node.get("IsPersist"))){
             stateMachine.setPersist(false);
         }

@@ -31,12 +31,12 @@ import java.util.List;
 import java.util.Stack;
 
 /**
- * CompensationStartState Handler
+ * CompensationTriggerState Handler
  * Start to execute compensation
  *
  * @author lorne.cl
  */
-public class CompensationStartStateHandler implements StateHandler {
+public class CompensationTriggerStateHandler implements StateHandler {
 
     @Override
     public void process(ProcessContext context) throws EngineExecutionException {
@@ -73,7 +73,7 @@ public class CompensationStartStateHandler implements StateHandler {
             }
             //Record the status of the state machine as "compensating", and the subsequent routing logic will route to the compensation state
             stateMachineInstance.setCompensationStatus(ExecutionStatus.RU);
-            context.setVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_START_STATE, instruction.getState(context));
+            context.setVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE, instruction.getState(context));
         }
         else{
             EngineUtils.endStateMachine(context);

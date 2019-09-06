@@ -1,7 +1,7 @@
 {
     "Name": "simpleTestStateMachine",
     "Comment": "测试状态机定义",
-    "StartAt": "FirstState",
+    "StartState": "FirstState",
     "Version": "0.0.1",
     "States": {
         "FirstState": {
@@ -53,7 +53,7 @@
                     "Exceptions": [
                         "java.lang.Exception"
                     ],
-                    "Next": "StartCompensation"
+                    "Next": "CompensationTrigger"
                 }
             ],
             "Next": "SuccessState"
@@ -77,8 +77,8 @@
                 "$exception{java.lang.Throwable}": "UN"
             }
         },
-        "StartCompensation": {
-            "Type": "CompensationStart",
+        "CompensationTrigger": {
+            "Type": "CompensationTrigger",
             "Next": "CompensateEndState"
         },
         "CompensateEndState": {

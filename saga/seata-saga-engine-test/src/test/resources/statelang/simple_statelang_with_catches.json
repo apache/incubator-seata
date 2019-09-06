@@ -1,7 +1,7 @@
 {
     "Name": "simpleCachesStateMachine",
     "Comment": "带Caches异常路由的测试状态机定义",
-    "StartAt": "FirstState",
+    "StartState": "FirstState",
     "Version": "0.0.1",
     "States": {
         "FirstState": {

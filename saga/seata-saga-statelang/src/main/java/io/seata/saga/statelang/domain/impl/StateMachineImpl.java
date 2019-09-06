@@ -17,7 +17,7 @@ package io.seata.saga.statelang.domain.impl;
 
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
-import java.util.Collections;
+
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,7 +34,7 @@ public class StateMachineImpl implements StateMachine {
     private           String name;
     private           String comment;
     private           String version;
-    private           String startAt;
+    private           String startState;
     private           Status status = Status.AC;
     private           String recoverStrategy;
     private           boolean isPersist = true;
@@ -62,12 +62,12 @@ public class StateMachineImpl implements StateMachine {
     }
 
     @Override
-    public String getStartAt() {
-        return startAt;
+    public String getStartState() {
+        return startState;
     }
 
-    public void setStartAt(String startAt) {
-        this.startAt = startAt;
+    public void setStartState(String startState) {
+        this.startState = startState;
     }
 
     @Override

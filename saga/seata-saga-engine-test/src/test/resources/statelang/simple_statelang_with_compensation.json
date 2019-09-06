@@ -1,7 +1,7 @@
 {
     "Name": "simpleCompensationStateMachine",
     "Comment": "带补偿定义的测试状态机定义",
-    "StartAt": "FirstState",
+    "StartState": "FirstState",
     "Version": "0.0.1",
     "States": {
         "FirstState": {
@@ -58,7 +58,7 @@
                     "Exceptions": [
                         "io.seata.common.exception.FrameworkException"
                     ],
-                    "Next": "CompensationStart"
+                    "Next": "CompensationTrigger"
                 }
             ],
             "Next": "Succeed"
@@ -99,8 +99,8 @@
                 }
             ]
         },
-        "CompensationStart": {
-            "Type": "CompensationStart",
+        "CompensationTrigger": {
+            "Type": "CompensationTrigger",
             "Next": "Fail"
         },
         "Succeed": {

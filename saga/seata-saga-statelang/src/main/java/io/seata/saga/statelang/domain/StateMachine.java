@@ -47,7 +47,7 @@ public interface StateMachine {
 
     void setId(String id);
 
-    void setStartAt(String startAt);
+    void setStartState(String startState);
 
     /**
      * name
@@ -65,7 +65,7 @@ public interface StateMachine {
      * start state name
      * @return
      */
-    String getStartAt();
+    String getStartState();
 
     /**
      * version

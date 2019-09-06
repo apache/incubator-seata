@@ -18,7 +18,7 @@ package io.seata.saga.statelang.parser;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.parser.impl.ChoiceStateParser;
 import io.seata.saga.statelang.parser.impl.CompensateSubStateMachineStateParser;
-import io.seata.saga.statelang.parser.impl.CompensationStartStateParser;
+import io.seata.saga.statelang.parser.impl.CompensationTriggerStateParser;
 import io.seata.saga.statelang.parser.impl.FailEndStateParser;
 import io.seata.saga.statelang.parser.impl.ServiceTaskStateParser;
 import io.seata.saga.statelang.parser.impl.SubStateMachineParser;
@@ -37,7 +37,7 @@ public class StateParserFactory {
     static{
         stateParserMap.put(DomainConstants.STATE_TYPE_SERVICE_TASK, new ServiceTaskStateParser());
         stateParserMap.put(DomainConstants.STATE_TYPE_CHOICE, new ChoiceStateParser());
-        stateParserMap.put(DomainConstants.STATE_TYPE_COMPENSATION_START, new CompensationStartStateParser());
+        stateParserMap.put(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER, new CompensationTriggerStateParser());
         stateParserMap.put(DomainConstants.STATE_TYPE_FAIL, new FailEndStateParser());
         stateParserMap.put(DomainConstants.STATE_TYPE_SUCCEED, new SucceedEndStateParser());
         stateParserMap.put(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE, new SubStateMachineParser());

@@ -22,7 +22,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.store.StateLogStore;
-import io.seata.saga.engine.serializer.ObjectSerializer;
+import io.seata.saga.engine.serializer.Serializer;
 import io.seata.saga.engine.serializer.impl.ExceptionSerializer;
 import io.seata.saga.engine.serializer.impl.ParamsFastjsonSerializer;
 import io.seata.saga.proctrl.ProcessContext;
@@ -56,8 +56,8 @@ public class DbAndReportTcStateLogStore implements StateLogStore {
 
     private SagaTransactionalTemplate           sagaTransactionalTemplate;
     private SqlSessionExecutor                  sqlSessionExecutor;
-    private ObjectSerializer<Object, String>    paramsSerializer = new ParamsFastjsonSerializer();
-    private ObjectSerializer<Exception, byte[]> exceptionSerializer = new ExceptionSerializer();
+    private Serializer<Object, String>    paramsSerializer    = new ParamsFastjsonSerializer();
+    private Serializer<Exception, byte[]> exceptionSerializer = new ExceptionSerializer();
     private String defaultTenantId;
 
     @Override
@@ -369,26 +369,26 @@ public class DbAndReportTcStateLogStore implements StateLogStore {
             lastStateInstance.setStatus(ExecutionStatus.RU);
         }
         Map<String, StateInstance> originStateMap = new HashMap<>();
-        Map<String, StateInstance> compensateStateMap = new HashMap<>();
-        Map<String, StateInstance> retriedStateMap = new HashMap<>();
+        Map<String/* originStateId */, StateInstance/* compensatedState */> compensatedStateMap = new HashMap<>();
+        Map<String/* originStateId */, StateInstance/* retriedState */> retriedStateMap = new HashMap<>();
         for (int i = 0; i < stateInstanceList.size(); i++) {
             StateInstance tempStateInstance = stateInstanceList.get(i);
 
             deserializeParamsAndException(tempStateInstance);
 
             if (StringUtils.hasText(tempStateInstance.getStateIdCompensatedFor())) {
-                updateStateMap(compensateStateMap, tempStateInstance, tempStateInstance.getStateIdCompensatedFor());
+                putLastStateToMap(compensatedStateMap, tempStateInstance, tempStateInstance.getStateIdCompensatedFor());
             } else {
                 if (StringUtils.hasText(tempStateInstance.getStateIdRetriedFor())) {
-                    updateStateMap(retriedStateMap, tempStateInstance, tempStateInstance.getStateIdRetriedFor());
+                    putLastStateToMap(retriedStateMap, tempStateInstance, tempStateInstance.getStateIdRetriedFor());
                 }
                 originStateMap.put(tempStateInstance.getId(), tempStateInstance);
             }
         }
 
-        if (compensateStateMap.size() != 0) {
+        if (compensatedStateMap.size() != 0) {
             for (StateInstance origState : originStateMap.values()) {
-                origState.setCompensationState(compensateStateMap.get(origState.getId()));
+                origState.setCompensationState(compensatedStateMap.get(origState.getId()));
             }
         }
 
@@ -402,14 +402,16 @@ public class DbAndReportTcStateLogStore implements StateLogStore {
         return stateInstanceList;
     }
 
-    private void updateStateMap(Map<String, StateInstance> resultMap, StateInstance newState, String key) {
+    private void putLastStateToMap(Map<String, StateInstance> resultMap, StateInstance newState, String key) {
+
         if (!resultMap.containsKey(key)) {
 
             resultMap.put(key, newState);
         } else if (newState.getGmtEnd().after(resultMap.get(key).getGmtEnd())) {
 
-            resultMap.get(key).setIgnoreStatus(true);
-            resultMap.remove(key);
+            StateInstance oldState = resultMap.remove(key);
+            oldState.setIgnoreStatus(true);
+
             resultMap.put(key, newState);
         } else {
 
@@ -422,7 +424,7 @@ public class DbAndReportTcStateLogStore implements StateLogStore {
         this.sqlSessionExecutor = sqlSessionExecutor;
     }
 
-    public void setExceptionSerializer(ObjectSerializer<Exception, byte[]> exceptionSerializer) {
+    public void setExceptionSerializer(Serializer<Exception, byte[]> exceptionSerializer) {
         this.exceptionSerializer = exceptionSerializer;
     }
 
@@ -434,11 +436,11 @@ public class DbAndReportTcStateLogStore implements StateLogStore {
         this.sagaTransactionalTemplate = sagaTransactionalTemplate;
     }
 
-    public ObjectSerializer<Object, String> getParamsSerializer() {
+    public Serializer<Object, String> getParamsSerializer() {
         return paramsSerializer;
     }
 
-    public void setParamsSerializer(ObjectSerializer<Object, String> paramsSerializer) {
+    public void setParamsSerializer(Serializer<Object, String> paramsSerializer) {
         this.paramsSerializer = paramsSerializer;
     }
 

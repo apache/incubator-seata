@@ -150,7 +150,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         }
 
         if(StringUtils.isEmpty(stateInstance.getId())){
-            stateInstance.setId(stateMachineConfig.getSeqGenerator().generate(DomainConstants.SEQ_NAME_STATE_INST));
+            stateInstance.setId(stateMachineConfig.getSeqGenerator().generate(DomainConstants.SEQ_ENTITY_STATE_INST));
         }
         stateMachineInstance.putStateInstance(stateInstance.getId(), stateInstance);
         ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_STATE_INST, stateInstance);

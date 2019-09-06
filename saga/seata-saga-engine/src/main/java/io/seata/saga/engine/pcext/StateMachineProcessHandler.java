@@ -18,7 +18,7 @@ package io.seata.saga.engine.pcext;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.saga.engine.pcext.handlers.ChoiceStateHandler;
-import io.seata.saga.engine.pcext.handlers.CompensationStartStateHandler;
+import io.seata.saga.engine.pcext.handlers.CompensationTriggerStateHandler;
 import io.seata.saga.engine.pcext.handlers.FailEndStateHandler;
 import io.seata.saga.engine.pcext.handlers.ServiceTaskStateHandler;
 import io.seata.saga.engine.pcext.handlers.SubStateMachineHandler;
@@ -103,7 +103,7 @@ public class StateMachineProcessHandler implements ProcessHandler {
             stateHandlers.put(DomainConstants.STATE_TYPE_CHOICE, new ChoiceStateHandler());
             stateHandlers.put(DomainConstants.STATE_TYPE_SUCCEED, new SucceedEndStateHandler());
             stateHandlers.put(DomainConstants.STATE_TYPE_FAIL, new FailEndStateHandler());
-            stateHandlers.put(DomainConstants.STATE_TYPE_COMPENSATION_START, new CompensationStartStateHandler());
+            stateHandlers.put(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER, new CompensationTriggerStateHandler());
         }
     }
 
