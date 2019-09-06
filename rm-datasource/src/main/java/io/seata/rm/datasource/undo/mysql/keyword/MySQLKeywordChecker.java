@@ -29,9 +29,10 @@ import java.util.stream.Collectors;
  */
 public class MySQLKeywordChecker implements KeywordChecker {
     private static volatile KeywordChecker keywordChecker = null;
-    private static volatile Set<String> keywordSet = null;
+    private Set<String> keywordSet;
 
     private MySQLKeywordChecker() {
+        keywordSet = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
     }
 
     /**
@@ -44,7 +45,6 @@ public class MySQLKeywordChecker implements KeywordChecker {
             synchronized (MySQLKeywordChecker.class) {
                 if (keywordChecker == null) {
                     keywordChecker = new MySQLKeywordChecker();
-                    keywordSet = Arrays.stream(MySQLKeyword.values()).map(MySQLKeyword::name).collect(Collectors.toSet());
                 }
             }
         }
