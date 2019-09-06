@@ -69,7 +69,7 @@
         <dubbo.version>2.7.0</dubbo.version>
         <dubbo.alibaba.version>2.6.5</dubbo.alibaba.version>
         <sofa.rpc.version>5.5.3</sofa.rpc.version>
-        <fastjson.version>1.2.58</fastjson.version>
+        <fastjson.version>1.2.60</fastjson.version>
         <protostuff.version>1.5.9</protostuff.version>
         <config.version>1.2.1</config.version>
         <slf4j-api.version>1.7.22</slf4j-api.version>
