@@ -18,7 +18,10 @@ package io.seata.saga.proctrl.eventing.impl;
 import io.seata.common.exception.FrameworkException;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.eventing.EventConsumer;
+
 import java.util.List;
+import java.util.Stack;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +34,8 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DirectEventBus.class);
 
+    private static final String VAR_NAME_SYNC_EXE_STACK = "_sync_execution_stack_";
+
     @Override
     public boolean offer(ProcessContext context) throws FrameworkException {
         List<EventConsumer> eventHandlers = getEventConsumers(context.getClass());
@@ -41,9 +46,32 @@ public class DirectEventBus extends AbstractEventBus<ProcessContext> {
             return false;
         }
 
-        for(EventConsumer eventHandler : eventHandlers){
+        boolean isFirstEvent = false;
+        Stack<ProcessContext> currentStack = (Stack<ProcessContext>)context.getVariable(VAR_NAME_SYNC_EXE_STACK);
+        if(currentStack == null){
+            synchronized (context) {
+                currentStack = (Stack<ProcessContext>)context.getVariable(VAR_NAME_SYNC_EXE_STACK);
+                if(currentStack == null){
+                    currentStack = new Stack<>();
+                    context.setVariable(VAR_NAME_SYNC_EXE_STACK, currentStack);
+                    isFirstEvent = true;
+                }
+            }
+        }
 
-            eventHandler.process(context);
+        currentStack.push(context);
+
+        if(isFirstEvent){
+            try {
+                while (currentStack.size() > 0){
+                    ProcessContext currentContext = currentStack.pop();
+                    for(EventConsumer eventHandler : eventHandlers){
+                        eventHandler.process(currentContext);
+                    }
+                }
+            } finally {
+                context.removeVariable(VAR_NAME_SYNC_EXE_STACK);
+            }
         }
         return true;
     }
