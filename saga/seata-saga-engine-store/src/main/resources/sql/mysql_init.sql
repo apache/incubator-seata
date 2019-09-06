@@ -1,60 +1,60 @@
-CREATE TABLE IF NOT EXISTS
-SEATA_STATE_MACHINE_DEF
+create table if not exists
+seata_state_machine_def
 (
-    ID VARCHAR(32) NOT NULL COMMENT 'id',
-    NAME VARCHAR(255) NOT NULL COMMENT 'name',
-    TENANT_ID VARCHAR(32) NOT NULL COMMENT 'tenant id',
-    APP_NAME VARCHAR(32) NOT NULL COMMENT 'application name',
-    TYPE VARCHAR(20) COMMENT 'state language type',
-    COMMENT VARCHAR(255) COMMENT 'comment',
-    VER VARCHAR(16) NOT NULL  COMMENT 'version',
-    GMT_CREATE DATETIME NOT NULL COMMENT 'create time',
-    STATUS VARCHAR(2) NOT NULL COMMENT 'status(AC:Active|IN:Inactive)',
-    CONTENT LONGTEXT COMMENT 'content',
-    RECOVER_STRATEGY VARCHAR(16) COMMENT 'transaction recover strategy(COMPENSATE|RETRY)',
-    PRIMARY KEY(ID)
-) COMMENT 'state machine definition';
+    id varchar(32) not null comment 'id',
+    name varchar(255) not null comment 'name',
+    tenant_id varchar(32) not null comment 'tenant id',
+    app_name varchar(32) not null comment 'application name',
+    type varchar(20) comment 'state language type',
+    comment varchar(255) comment 'comment',
+    ver varchar(16) not null  comment 'version',
+    gmt_create datetime not null comment 'create time',
+    status varchar(2) not null comment 'status(AC:active|IN:inactive)',
+    content longtext comment 'content',
+    recover_strategy varchar(16) comment 'transaction recover strategy(compensate|retry)',
+    primary key(id)
+) comment 'state machine definition';
 
-CREATE TABLE IF NOT EXISTS
-SEATA_STATE_MACHINE_INST
+create table if not exists
+seata_state_machine_inst
 (
-    ID VARCHAR(32) NOT NULL COMMENT 'id',
-    MACHINE_ID VARCHAR(32) NOT NULL COMMENT 'state machine definition id',
-    TENANT_ID VARCHAR(32) NOT NULL COMMENT 'tenant id',
-    PARENT_ID VARCHAR(46) COMMENT 'parentId',
-    GMT_STARTED DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'start time',
-    BUSINESS_KEY VARCHAR(48) COMMENT 'businessKey',
-    START_PARAMS LONGTEXT COMMENT 'start parameters',
-    GMT_END DATETIME COMMENT 'end time',
-    EXCEP LONGBLOB COMMENT 'exception',
-    END_PARAMS LONGTEXT COMMENT 'end parameters',
-    STATUS VARCHAR(2) COMMENT 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
-    COMPENSATION_STATUS VARCHAR(2) COMMENT 'compensation status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
-    IS_RUNNING TINYINT(1) COMMENT 'is running(0 no|1 yes)',
-    GMT_UPDATED DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY(ID),
-    UNIQUE KEY unikey_buz_tenant (BUSINESS_KEY, TENANT_ID)
-) COMMENT 'state machine instance';
+    id varchar(32) not null comment 'id',
+    machine_id varchar(32) not null comment 'state machine definition id',
+    tenant_id varchar(32) not null comment 'tenant id',
+    parent_id varchar(46) comment 'parentid',
+    gmt_started datetime not null default current_timestamp comment 'start time',
+    business_key varchar(48) comment 'business key',
+    start_params longtext comment 'start parameters',
+    gmt_end datetime comment 'end time',
+    excep longblob comment 'exception',
+    end_params longtext comment 'end parameters',
+    status varchar(2) comment 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
+    compensation_status varchar(2) comment 'compensation status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
+    is_running tinyint(1) comment 'is running(0 no|1 yes)',
+    gmt_updated datetime not null default current_timestamp on update current_timestamp,
+    primary key(id),
+    unique key unikey_buz_tenant (business_key, tenant_id)
+) comment 'state machine instance';
 
-CREATE TABLE IF NOT EXISTS
-SEATA_STATE_INST
+create table if not exists
+seata_state_inst
 (
-    ID VARCHAR(32) NOT NULL COMMENT 'id',
-    MACHINE_INST_ID VARCHAR(32) NOT NULL  COMMENT 'state machine instance id',
-    NAME VARCHAR(255) NOT NULL COMMENT 'state name',
-    TYPE VARCHAR(20) COMMENT 'state type',
-    SERVICE_NAME VARCHAR(255) COMMENT 'service name',
-    SERVICE_METHOD VARCHAR(255) COMMENT 'method name',
-    SERVICE_TYPE VARCHAR(16) COMMENT 'service type',
-    BUSINESS_KEY VARCHAR(48) unique COMMENT 'business key',
-    STATE_ID_COMPENSATED_FOR VARCHAR(32) COMMENT 'state compensated for',
-    STATE_ID_RETRIED_FOR VARCHAR(32) COMMENT 'state retried for',
-    GMT_STARTED DATETIME NOT NULL COMMENT 'start time',
-    IS_FOR_UPDATE TINYINT(1) COMMENT 'is service for update',
-    INPUT_PARAMS LONGTEXT COMMENT 'input parameters',
-    OUTPUT_PARAMS LONGTEXT COMMENT 'output parameters',
-    STATUS VARCHAR(2) NOT NULL COMMENT 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
-    EXCEP LONGBLOB COMMENT 'exception',
-    GMT_END DATETIME COMMENT 'end time',
-    PRIMARY KEY(ID, MACHINE_INST_ID)
-) COMMENT 'state instance';
+    id varchar(32) not null comment 'id',
+    machine_inst_id varchar(32) not null  comment 'state machine instance id',
+    name varchar(255) not null comment 'state name',
+    type varchar(20) comment 'state type',
+    service_name varchar(255) comment 'service name',
+    service_method varchar(255) comment 'method name',
+    service_type varchar(16) comment 'service type',
+    business_key varchar(48) unique comment 'business key',
+    state_id_compensated_for varchar(32) comment 'state compensated for',
+    state_id_retried_for varchar(32) comment 'state retried for',
+    gmt_started datetime not null comment 'start time',
+    is_for_update tinyint(1) comment 'is service for update',
+    input_params longtext comment 'input parameters',
+    output_params longtext comment 'output parameters',
+    status varchar(2) not null comment 'status(SU succeed|FA failed|UN unknown|SK skipped|RU running)',
+    excep longblob comment 'exception',
+    gmt_end datetime comment 'end time',
+    primary key(id, machine_inst_id)
+) comment 'state instance';

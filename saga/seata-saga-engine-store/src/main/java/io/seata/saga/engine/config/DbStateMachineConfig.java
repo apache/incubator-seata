@@ -36,7 +36,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private DataSource                dataSource;
     private String                    applicationId;
     private String                    txServiceGroup;
-    private String  tablePrefix                  = "SEATA_";
+    private String  tablePrefix                  = "seata_";
     private String  transPropagationBehaviorName = "PROPAGATION_REQUIRES_NEW";
     private String  transIsolationLevelName      = "ISOLATION_DEFAULT";
     private String  databaseType                 = "mysql";

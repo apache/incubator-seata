@@ -21,58 +21,58 @@
 
 	<!--****************************** StateMachine定义相关SQL语句 ******************************-->
 	<resultMap id="StateMachineResultMap" type="io.seata.saga.statelang.domain.impl.StateMachineImpl">
-		<id property="id" column="ID" />
-		<result property="tenantId" column="TENANT_ID" />
-		<result property="appName" column="APP_NAME" />
-		<result property="name" column="NAME" />
-		<result property="status" column="STATUS" />
-		<result property="gmtCreate" jdbcType="TIMESTAMP" column="GMT_CREATE" />
-		<result property="version" column="VER" />
-		<result property="content" column="CONTENT" />
-		<result property="type" column="TYPE" />
-		<result property="comment" column="COMMENT" />
-		<result property="isPersist" column="IS_PERSIST" jdbcType="TINYINT"/>
-		<result property="recoverStrategy" column="RECOVER_STRATEGY"/>
+		<id property="id" column="id" />
+		<result property="tenantId" column="tenant_id" />
+		<result property="appName" column="app_name" />
+		<result property="name" column="name" />
+		<result property="status" column="status" />
+		<result property="gmtCreate" column="gmt_create" jdbcType="TIMESTAMP" />
+		<result property="version" column="ver" />
+		<result property="content" column="content" />
+		<result property="type" column="type" />
+		<result property="comment" column="comment" />
+		<result property="isPersist" column="is_persist" jdbcType="TINYINT"/>
+		<result property="recoverStrategy" column="recover_strategy"/>
 	</resultMap>
 
 	<sql id="StateMachineFields">
-		ID,
-		TENANT_ID,
-		APP_NAME,
-		NAME,
-		STATUS,
-		GMT_CREATE,
-		VER,
-		TYPE,
-		CONTENT,
-		RECOVER_STRATEGY
+		id,
+		tenant_id,
+		app_name,
+		name,
+		status,
+		gmt_create,
+		ver,
+		type,
+		content,
+		recover_strategy
 	</sql>
 
 	<select id="getStateMachineById" resultMap="StateMachineResultMap" parameterType="string">
 		SELECT
 		<include refid="StateMachineFields" />
 		FROM
-		${TABLE_PREFIX}STATE_MACHINE_DEF
+		${TABLE_PREFIX}state_machine_def
 		WHERE
-		ID = #{id}
+		id = #{id}
 	</select>
 
 	<select id="getLastVersionStateMachine" resultMap="StateMachineResultMap" parameterType="map">
 		SELECT
 		<include refid="StateMachineFields" />
 		FROM
-		${TABLE_PREFIX}STATE_MACHINE_DEF
+		${TABLE_PREFIX}state_machine_def
 		WHERE
-		NAME = #{name}
+		name = #{name}
 		AND
-		TENANT_ID = #{tenantId}
-		ORDER BY GMT_CREATE DESC
+		tenant_id = #{tenantId}
+		ORDER BY gmt_create DESC
 		LIMIT 1
 	</select>
 
 	<insert id="insertStateMachine" parameterType="io.seata.saga.statelang.domain.impl.StateMachineImpl">
 		INSERT INTO
-		${TABLE_PREFIX}STATE_MACHINE_DEF
+		${TABLE_PREFIX}state_machine_def
 		(
 		<include refid="StateMachineFields" />
 		)
@@ -95,57 +95,57 @@
 
 	<!--****************************** StateMachine执行实例相关SQL语句 ******************************-->
 	<resultMap id="StateMachineInstanceResultMap" type="io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl">
-		<result column="ID" jdbcType="VARCHAR" property="id" />
-		<result column="MACHINE_ID" jdbcType="VARCHAR" property="machineId" />
-		<result column="TENANT_ID" jdbcType="VARCHAR" property="tenantId"/>
-		<result column="PARENT_ID" jdbcType="VARCHAR" property="parentId" />
-		<result column="BUSINESS_KEY" jdbcType="VARCHAR" property="businessKey" />
-		<result column="GMT_STARTED" jdbcType="TIMESTAMP" property="gmtStarted" />
-		<result column="GMT_END" jdbcType="TIMESTAMP" property="gmtEnd" />
-		<result column="STATUS" jdbcType="VARCHAR" property="status" />
-		<result column="COMPENSATION_STATUS" jdbcType="VARCHAR" property="compensationStatus"/>
-		<result column="IS_RUNNING" property="isRunning" jdbcType="TINYINT"/>
-		<result column="GMT_UPDATED" jdbcType="TIMESTAMP" property="gmtUpdated" />
-		<result column="START_PARAMS" jdbcType="VARCHAR" property="serializedStartParams"/>
-		<result column="END_PARAMS" jdbcType="VARCHAR" property="serializedEndParams"/>
-		<result column="EXCEP" jdbcType="BLOB" property="serializedException"/>
+		<result column="id" jdbcType="VARCHAR" property="id" />
+		<result column="machine_id" jdbcType="VARCHAR" property="machineId" />
+		<result column="tenant_id" jdbcType="VARCHAR" property="tenantId"/>
+		<result column="parent_id" jdbcType="VARCHAR" property="parentId" />
+		<result column="business_key" jdbcType="VARCHAR" property="businessKey" />
+		<result column="gmt_started" jdbcType="TIMESTAMP" property="gmtStarted" />
+		<result column="gmt_end" jdbcType="TIMESTAMP" property="gmtEnd" />
+		<result column="status" jdbcType="VARCHAR" property="status" />
+		<result column="compensation_status" jdbcType="VARCHAR" property="compensationStatus"/>
+		<result column="is_running" jdbcType="TINYINT" property="isRunning"/>
+		<result column="gmt_updated" jdbcType="TIMESTAMP" property="gmtUpdated" />
+		<result column="start_params" jdbcType="VARCHAR" property="serializedStartParams"/>
+		<result column="end_params" jdbcType="VARCHAR" property="serializedEndParams"/>
+		<result column="excep" jdbcType="BLOB" property="serializedException"/>
 	</resultMap>
 
 	<sql id="StateMachineInstanceFields">
-		ID,
-		MACHINE_ID,
-		TENANT_ID,
-		PARENT_ID,
-		BUSINESS_KEY,
-		GMT_STARTED,
-		GMT_END,
-		STATUS,
-		COMPENSATION_STATUS,
-		IS_RUNNING,
-		GMT_UPDATED,
-		START_PARAMS,
-		END_PARAMS,
-		EXCEP
+		id,
+		machine_id,
+		tenant_id,
+		parent_id,
+		business_key,
+		gmt_started,
+		gmt_end,
+		status,
+		compensation_status,
+		is_running,
+		gmt_updated,
+		start_params,
+		end_params,
+		excep
 	</sql>
 	<sql id="StateMachineInstanceFieldsWithoutParams">
-		ID,
-		MACHINE_ID,
-		TENANT_ID,
-		PARENT_ID,
-		BUSINESS_KEY,
-		GMT_STARTED,
-		GMT_END,
-		STATUS,
-		COMPENSATION_STATUS,
-		IS_RUNNING,
-		GMT_UPDATED
+		id,
+		machine_id,
+		tenant_id,
+		parent_id,
+		business_key,
+		gmt_started,
+		gmt_end,
+		status,
+		compensation_status,
+		is_running,
+		gmt_updated
 	</sql>
 
 	<insert id="recordStateMachineStarted" parameterType="io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl">
 		INSERT
 		INTO
-		${TABLE_PREFIX}STATE_MACHINE_INST
-		(ID, MACHINE_ID, TENANT_ID, PARENT_ID, GMT_STARTED, BUSINESS_KEY, START_PARAMS, IS_RUNNING, GMT_UPDATED)
+		${TABLE_PREFIX}state_machine_inst
+		(id, machine_id, tenant_id, parent_id, gmt_started, business_key, start_params, is_running, gmt_updated)
 		VALUES
 		(
 		#{id, jdbcType=VARCHAR},
@@ -162,57 +162,57 @@
 
 	<update id="recordStateMachineFinished" parameterType="io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl">
 		UPDATE
-		${TABLE_PREFIX}STATE_MACHINE_INST
+		${TABLE_PREFIX}state_machine_inst
 		<set>
-			<if test="gmtEnd != null">GMT_END = #{gmtEnd, jdbcType=TIMESTAMP},</if>
-			<if test="serializedException != null">EXCEP = #{serializedException, jdbcType=BLOB},</if>
-			<if test="serializedEndParams != null">END_PARAMS = #{serializedEndParams, jdbcType=CLOB},</if>
-			<if test="status != null">STATUS = #{status, jdbcType=VARCHAR},</if>
-			<if test="compensationStatus != null">COMPENSATION_STATUS = #{compensationStatus, jdbcType=VARCHAR},</if>
-			<if test="isRunning != null">IS_RUNNING = #{isRunning, jdbcType=TINYINT},</if>
-			GMT_UPDATED = current_timestamp
+			<if test="gmtEnd != null">gmt_end = #{gmtEnd, jdbcType=TIMESTAMP},</if>
+			<if test="serializedException != null">excep = #{serializedException, jdbcType=BLOB},</if>
+			<if test="serializedEndParams != null">end_params = #{serializedEndParams, jdbcType=CLOB},</if>
+			<if test="status != null">status = #{status, jdbcType=VARCHAR},</if>
+			<if test="compensationStatus != null">compensation_status = #{compensationStatus, jdbcType=VARCHAR},</if>
+			<if test="isRunning != null">is_running = #{isRunning, jdbcType=TINYINT},</if>
+			gmt_updated = current_timestamp
 		</set>
-		where ID = #{id}
+		where id = #{id}
 	</update>
 
 	<update id="updateStateMachineRunningStatus" parameterType="io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl">
 		UPDATE
-		${TABLE_PREFIX}STATE_MACHINE_INST
+		${TABLE_PREFIX}state_machine_inst
 		<set>
-			<if test="isRunning != null">IS_RUNNING = #{isRunning, jdbcType=TINYINT},</if>
-			GMT_UPDATED = current_timestamp
+			<if test="isRunning != null">is_running = #{isRunning, jdbcType=TINYINT},</if>
+			gmt_updated = current_timestamp
 		</set>
-		where ID = #{id}
+		where id = #{id}
 	</update>
 
 	<select id="getStateMachineInstanceById" parameterType="string" resultMap="StateMachineInstanceResultMap">
 		SELECT
 		<include refid="StateMachineInstanceFields" />
 		FROM
-		${TABLE_PREFIX}STATE_MACHINE_INST
+		${TABLE_PREFIX}state_machine_inst
 		WHERE
-		ID = #{id, jdbcType=VARCHAR}
+		id = #{id, jdbcType=VARCHAR}
 	</select>
 
 	<select id="getStateMachineInstanceByBusinessKey" parameterType="map" resultMap="StateMachineInstanceResultMap">
 		SELECT
 		<include refid="StateMachineInstanceFields" />
 		FROM
-		${TABLE_PREFIX}STATE_MACHINE_INST
+		${TABLE_PREFIX}state_machine_inst
 		WHERE
-		BUSINESS_KEY = #{businessKey, jdbcType=VARCHAR}
+		business_key = #{businessKey, jdbcType=VARCHAR}
 		AND
-		TENANT_ID = #{tenantId, jdbcType=VARCHAR}
+		tenant_id = #{tenantId, jdbcType=VARCHAR}
 	</select>
 
 	<select id="queryStateMachineInstanceByParentId" parameterType="string" resultMap="StateMachineInstanceResultMap">
 		SELECT
 		<include refid="StateMachineInstanceFieldsWithoutParams" />
 		FROM
-		${TABLE_PREFIX}STATE_MACHINE_INST
+		${TABLE_PREFIX}state_machine_inst
 		WHERE
-		PARENT_ID = #{parentId, jdbcType=VARCHAR}
-		ORDER BY GMT_STARTED DESC
+		parent_id = #{parentId, jdbcType=VARCHAR}
+		ORDER BY gmt_started DESC
 	</select>
 
 	<!-- ********************************************************************** -->
@@ -221,64 +221,64 @@
 
 	<!--****************************** State执行实例相关SQL语句 ******************************-->
 	<resultMap id="StateInstanceResultMap" type="io.seata.saga.statelang.domain.impl.StateInstanceImpl">
-		<result column="ID" jdbcType="VARCHAR" property="id" />
-		<result column="MACHINE_INST_ID" jdbcType="VARCHAR" property="machineInstanceId" />
-		<result column="NAME" jdbcType="VARCHAR" property="name" />
-		<result column="TYPE" jdbcType="VARCHAR" property="type" />
-		<result column="BUSINESS_KEY" jdbcType="VARCHAR" property="businessKey"/>
-		<result column="STATUS" jdbcType="VARCHAR" property="status" />
-		<result column="GMT_STARTED" jdbcType="TIMESTAMP" property="gmtStarted" />
-		<result column="GMT_END" jdbcType="TIMESTAMP" property="gmtEnd" />
-		<result column="SERVICE_NAME" jdbcType="VARCHAR" property="serviceName"/>
-		<result column="SERVICE_METHOD" jdbcType="VARCHAR" property="serviceName"/>
-		<result column="SERVICE_TYPE" jdbcType="VARCHAR" property="serviceType"/>
-		<result column="IS_FOR_UPDATE" property="isForUpdate"/>
-		<result column="STATE_ID_COMPENSATED_FOR" jdbcType="VARCHAR" property="stateIdCompensatedFor" />
-		<result column="STATE_ID_RETRIED_FOR" jdbcType="VARCHAR" property="stateIdRetriedFor" />
-		<result column="STATUS" jdbcType="VARCHAR" property="status" />
-		<result column="INPUT_PARAMS" jdbcType="VARCHAR" property="serializedInputParams"/>
-		<result column="OUTPUT_PARAMS" jdbcType="VARCHAR" property="serializedOutputParams"/>
-		<result column="EXCEP" jdbcType="BLOB" property="serializedException"/>
+		<result column="id" jdbcType="VARCHAR" property="id" />
+		<result column="machine_inst_id" jdbcType="VARCHAR" property="machineInstanceId" />
+		<result column="name" jdbcType="VARCHAR" property="name" />
+		<result column="type" jdbcType="VARCHAR" property="type" />
+		<result column="business_key" jdbcType="VARCHAR" property="businessKey"/>
+		<result column="status" jdbcType="VARCHAR" property="status" />
+		<result column="gmt_started" jdbcType="TIMESTAMP" property="gmtStarted" />
+		<result column="gmt_end" jdbcType="TIMESTAMP" property="gmtEnd" />
+		<result column="service_name" jdbcType="VARCHAR" property="serviceName"/>
+		<result column="service_method" jdbcType="VARCHAR" property="serviceName"/>
+		<result column="service_type" jdbcType="VARCHAR" property="serviceType"/>
+		<result column="is_for_update" property="isForUpdate"/>
+		<result column="state_id_compensated_for" jdbcType="VARCHAR" property="stateIdCompensatedFor" />
+		<result column="state_id_retried_for" jdbcType="VARCHAR" property="stateIdRetriedFor" />
+		<result column="status" jdbcType="VARCHAR" property="status" />
+		<result column="input_params" jdbcType="VARCHAR" property="serializedInputParams"/>
+		<result column="output_params" jdbcType="VARCHAR" property="serializedOutputParams"/>
+		<result column="excep" jdbcType="BLOB" property="serializedException"/>
 	</resultMap>
 
 	<sql id="StateInstanceFields">
-		ID,
-		MACHINE_INST_ID,
-		NAME,
-		TYPE,
-		BUSINESS_KEY,
-		GMT_STARTED,
-		SERVICE_NAME,
-		SERVICE_METHOD,
-		SERVICE_TYPE,
-		IS_FOR_UPDATE,
-		STATUS,
-		INPUT_PARAMS,
-		OUTPUT_PARAMS,
-		EXCEP,
-		GMT_END,
-		STATE_ID_COMPENSATED_FOR,
-		STATE_ID_RETRIED_FOR
+		id,
+		machine_inst_id,
+		name,
+		type,
+		business_key,
+		gmt_started,
+		service_name,
+		service_method,
+		service_type,
+		is_for_update,
+		status,
+		input_params,
+		output_params,
+		excep,
+		gmt_end,
+		state_id_compensated_for,
+		state_id_retried_for
 	</sql>
 
 	<insert id="recordStateStarted" parameterType="io.seata.saga.statelang.domain.impl.StateInstanceImpl">
 		INSERT INTO
-		${TABLE_PREFIX}STATE_INST
+		${TABLE_PREFIX}state_inst
 		(
-		ID,
-		MACHINE_INST_ID,
-		NAME,
-		TYPE,
-		GMT_STARTED,
-		SERVICE_NAME,
-		SERVICE_METHOD,
-		SERVICE_TYPE,
-		IS_FOR_UPDATE,
-		INPUT_PARAMS,
-		STATUS,
-		BUSINESS_KEY,
-		STATE_ID_COMPENSATED_FOR,
-		STATE_ID_RETRIED_FOR
+		id,
+		machine_inst_id,
+		name,
+		type,
+		gmt_started,
+		service_name,
+		service_method,
+		service_type,
+		is_for_update,
+		input_params,
+		status,
+		business_key,
+		state_id_compensated_for,
+		state_id_retried_for
 		)
 		VALUES
 		(
@@ -301,26 +301,26 @@
 
 	<update id="recordStateFinished" parameterType="io.seata.saga.statelang.domain.impl.StateInstanceImpl">
 		UPDATE
-		${TABLE_PREFIX}STATE_INST
+		${TABLE_PREFIX}state_inst
 		SET
-		GMT_END = #{gmtEnd, jdbcType=TIMESTAMP},
-		EXCEP = #{serializedException, jdbcType=BLOB},
-		STATUS = #{status, jdbcType=VARCHAR},
-		OUTPUT_PARAMS = #{serializedInputParams, jdbcType=CLOB}
+		gmt_end = #{gmtEnd, jdbcType=TIMESTAMP},
+		excep = #{serializedException, jdbcType=BLOB},
+		status = #{status, jdbcType=VARCHAR},
+		output_params = #{serializedInputParams, jdbcType=CLOB}
 		WHERE
-		ID = #{id, jdbcType=VARCHAR}
+		id = #{id, jdbcType=VARCHAR}
 		AND
-		MACHINE_INST_ID = #{machineInstanceId, jdbcType=VARCHAR}
+		machine_inst_id = #{machineInstanceId, jdbcType=VARCHAR}
 	</update>
 
 	<update id="updateStateExecutionStatus" parameterType="io.seata.saga.statelang.domain.impl.StateInstanceImpl">
-		UPDATE ${TABLE_PREFIX}STATE_INST
+		UPDATE ${TABLE_PREFIX}state_inst
 		SET
-		STATUS = #{status, jdbcType=VARCHAR}
+		status = #{status, jdbcType=VARCHAR}
 		WHERE
-		MACHINE_INST_ID = #{machineInstanceId, jdbcType=VARCHAR}
+		machine_inst_id = #{machineInstanceId, jdbcType=VARCHAR}
 		AND
-		ID = #{id, jdbcType=VARCHAR}
+		id = #{id, jdbcType=VARCHAR}
 	</update>
 
 
@@ -328,21 +328,21 @@
 		SELECT
 		<include refid="StateInstanceFields" />
 		FROM
-		${TABLE_PREFIX}STATE_INST
+		${TABLE_PREFIX}state_inst
 		WHERE
-		MACHINE_INST_ID = #{stateMachineInstanceId, jdbcType=VARCHAR}
-		ORDER by GMT_STARTED, ID ASC
+		machine_inst_id = #{stateMachineInstanceId, jdbcType=VARCHAR}
+		ORDER by gmt_started, ID ASC
 	</select>
 
 	<select id="getStateInstanceByIdAndMachineInstId" parameterType="map" resultMap="StateInstanceResultMap">
 		SELECT
 		<include refid="StateInstanceFields" />
 		FROM
-		${TABLE_PREFIX}STATE_INST
+		${TABLE_PREFIX}state_inst
 		WHERE
-		MACHINE_INST_ID = #{machineInstanceId, jdbcType=VARCHAR}
+		machine_inst_id = #{machineInstanceId, jdbcType=VARCHAR}
 		AND
-		ID = #{id, jdbcType=VARCHAR}
+		id = #{id, jdbcType=VARCHAR}
 	</select>
 	<!-- **********************************************************************-->
 
