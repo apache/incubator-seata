@@ -27,11 +27,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
-import com.alibaba.druid.util.StringUtils;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
@@ -62,7 +61,7 @@ public class TableMetaCache {
      * @return the table meta
      */
     public static TableMeta getTableMeta(final DataSourceProxy dataSourceProxy, final String tableName) {
-        if (StringUtils.isEmpty(tableName)) {
+        if (StringUtils.isNullOrEmpty(tableName)) {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
@@ -161,7 +160,7 @@ public class TableMetaCache {
             col.setTableName(tableName);
             col.setColumnName(rs2.getString("COLUMN_NAME"));
             String datatype = rs2.getString("DATA_TYPE");
-            if (com.alibaba.druid.util.StringUtils.equalsIgnoreCase(datatype, "NUMBER")) {
+            if (StringUtils.equalsIgnoreCase(datatype, "NUMBER")) {
                 col.setDataType(java.sql.Types.BIGINT);
             } else if (StringUtils.equalsIgnoreCase(datatype, "VARCHAR2")) {
                 col.setDataType(java.sql.Types.VARCHAR);

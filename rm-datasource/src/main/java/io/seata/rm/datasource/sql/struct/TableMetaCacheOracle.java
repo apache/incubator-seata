@@ -23,11 +23,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
-import com.alibaba.druid.util.StringUtils;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.DataSourceProxy;
 import org.slf4j.Logger;
@@ -55,7 +54,7 @@ public class TableMetaCacheOracle {
      * @return the table meta
      */
     public static TableMeta getTableMeta(final DataSourceProxy dataSourceProxy, final String tableName) {
-        if (StringUtils.isEmpty(tableName)) {
+        if (StringUtils.isNullOrEmpty(tableName)) {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
@@ -151,7 +150,7 @@ public class TableMetaCacheOracle {
 
             while (rsIndex.next()) {
                 String indexName = rsIndex.getString("INDEX_NAME");
-                if (StringUtils.isEmpty(indexName)) {
+                if (StringUtils.isNullOrEmpty(indexName)) {
                     continue;
                 }
                 String colName = rsIndex.getString("COLUMN_NAME").toUpperCase();
