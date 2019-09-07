@@ -13,28 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.registry.redis;
+package io.seata.rm.datasource.sql.struct;
 
 /**
- * The RedisListener
- *
- * @author kl @kailing.pub
- * @date 2019 /2/27
+ * TODO
+ * sql method invoke expression
+ * @author jsbxyyx
  */
-public interface RedisListener {
-    /**
-     * The constant REGISTER.
-     */
-    String REGISTER = "register";
-    /**
-     * The constant UN_REGISTER.
-     */
-    String UN_REGISTER = "unregister";
+public class SqlMethodExpr {
 
-    /**
-     * use for redis event
-     *
-     * @param event the event
-     */
-    void onEvent(String event);
 }
