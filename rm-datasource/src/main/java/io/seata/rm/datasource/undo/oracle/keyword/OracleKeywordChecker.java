@@ -29,9 +29,10 @@ import java.util.stream.Collectors;
  */
 public class OracleKeywordChecker implements KeywordChecker {
     private static volatile KeywordChecker keywordChecker = null;
-    private static volatile Set<String> keywordSet = null;
+    private Set<String> keywordSet;
 
     private OracleKeywordChecker() {
+        keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
     }
 
     /**
@@ -44,7 +45,6 @@ public class OracleKeywordChecker implements KeywordChecker {
             synchronized (OracleKeywordChecker.class) {
                 if (keywordChecker == null) {
                     keywordChecker = new OracleKeywordChecker();
-                    keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
                 }
             }
         }
