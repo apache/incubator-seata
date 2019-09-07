@@ -17,6 +17,7 @@ package io.seata.server.lock;
 
 import io.seata.core.exception.TransactionException;
 import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
 
 /**
  * The interface Lock manager.
@@ -42,6 +43,15 @@ public interface LockManager {
      * @throws TransactionException the transaction exception
      */
     boolean releaseLock(BranchSession branchSession) throws TransactionException;
+
+    /**
+     * Un lock boolean.
+     *
+     * @param globalSession the global session
+     * @return the boolean
+     * @throws TransactionException the transaction exception
+     */
+    boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException;
 
     /**
      * Is lockable boolean.
