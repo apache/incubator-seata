@@ -163,7 +163,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
             } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
                 throw new BranchTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to remove branch session");
             }else{
-                throw new BranchTransactionException("Unknown LogOperation:" + logOperation.name());
+                throw new BranchTransactionException(TransactionExceptionCode.FailedWriteSession, "Unknown LogOperation:" + logOperation.name());
             }
         }
     }
