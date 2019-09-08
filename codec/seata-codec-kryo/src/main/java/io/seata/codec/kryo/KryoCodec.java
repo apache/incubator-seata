@@ -32,8 +32,7 @@ public class KryoCodec implements Codec {
         }
         KryoSerializer kryoSerializer = KryoSerializerFactory.getInstance().get();
         try {
-            byte[] bytes = kryoSerializer.serialize(t);
-            return bytes;
+            return kryoSerializer.serialize(t);
         } finally {
             KryoSerializerFactory.getInstance().returnKryo(kryoSerializer);
         }
@@ -46,8 +45,7 @@ public class KryoCodec implements Codec {
         }
         KryoSerializer kryoSerializer = KryoSerializerFactory.getInstance().get();
         try {
-            T t = kryoSerializer.deserialize(bytes);
-            return t;
+            return kryoSerializer.deserialize(bytes);
         } finally {
             KryoSerializerFactory.getInstance().returnKryo(kryoSerializer);
         }
