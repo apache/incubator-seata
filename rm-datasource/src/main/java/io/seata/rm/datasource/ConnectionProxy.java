@@ -29,8 +29,7 @@ import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.rm.datasource.undo.UndoLogManager;
-import io.seata.rm.datasource.undo.UndoLogManagerOracle;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -187,11 +186,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
         try {
             if (context.hasUndoLog()) {
-                if (JdbcConstants.ORACLE.equalsIgnoreCase(this.getDbType())) {
-                    UndoLogManagerOracle.flushUndoLogs(this);
-                } else {
-                    UndoLogManager.flushUndoLogs(this);
-                }
+                UndoLogManagerFactory.getUndoLogManager(this.getDbType()).flushUndoLogs(this);
             }
             targetConnection.commit();
         } catch (Throwable ex) {
