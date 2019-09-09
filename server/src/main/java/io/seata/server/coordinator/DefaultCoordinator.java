@@ -114,6 +114,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
      */
     protected static final long UNDOLOG_DELETE_PERIOD = CONFIG.getLong(ConfigurationKeys.TRANSACTION_UNDO_LOG_DELETE_PERIOD, 24 * 60 * 60 * 1000);
 
+    /**
+     * The Transaction undolog delay delete period
+     */
+    protected static final long UNDOLOG_DELAY_DELETE_PERIOD = 3 * 60 * 1000;
+
     private static final int ALWAYS_RETRY_BOUNDARY = 0;
 
     private static final Duration MAX_COMMIT_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(
@@ -460,7 +465,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception undoLog deleting ... ", e);
             }
-        },0, UNDOLOG_DELETE_PERIOD,TimeUnit.MILLISECONDS);
+        }, UNDOLOG_DELAY_DELETE_PERIOD, UNDOLOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     @Override
