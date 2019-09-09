@@ -21,6 +21,7 @@ import java.util.concurrent.Callable;
 
 import com.alibaba.druid.util.JdbcConstants;
 
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
@@ -49,7 +50,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private static final int DEFAULT_REPORT_RETRY_COUNT = 5;
 
-    private static int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
+    private static final int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
 
     private final static LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy();
@@ -113,29 +114,39 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                 throw new LockConflictException();
             }
         } catch (TransactionException e) {
-            recognizeLockKeyConflictException(e);
+            recognizeLockKeyConflictException(e, lockKeys);
         }
     }
 
     /**
-     * Register.
+     * Lock query.
      *
-     * @param lockKeys the lockKeys
+     * @param lockKeys the lock keys
      * @throws SQLException the sql exception
      */
-    public void register(String lockKeys) throws SQLException {
+    public boolean lockQuery(String lockKeys) throws SQLException {
         // Just check lock without requiring lock by now.
+        boolean result = false;
         try {
-            DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(), null,
-                context.getXid(), null, lockKeys);
+            result = DefaultResourceManager.get().lockQuery(BranchType.AT, getDataSourceProxy().getResourceId(),
+                context.getXid(), lockKeys);
         } catch (TransactionException e) {
-            recognizeLockKeyConflictException(e);
+            recognizeLockKeyConflictException(e, lockKeys);
         }
+        return result;
     }
 
     private void recognizeLockKeyConflictException(TransactionException te) throws SQLException {
+        recognizeLockKeyConflictException(te, null);
+    }
+
+    private void recognizeLockKeyConflictException(TransactionException te, String lockKeys) throws SQLException {
         if (te.getCode() == TransactionExceptionCode.LockKeyConflict) {
-            throw new LockConflictException();
+            StringBuilder reasonBuilder = new StringBuilder("get global lock fail, xid:" + context.getXid());
+            if (StringUtils.isNotBlank(lockKeys)) {
+                reasonBuilder.append(", lockKeys:" + lockKeys);
+            }
+            throw new LockConflictException(reasonBuilder.toString());
         } else {
             throw new SQLException(te);
         }
@@ -199,7 +210,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         try {
             register();
         } catch (TransactionException e) {
-            recognizeLockKeyConflictException(e);
+            recognizeLockKeyConflictException(e, context.buildLockKeys());
         }
 
         try {
