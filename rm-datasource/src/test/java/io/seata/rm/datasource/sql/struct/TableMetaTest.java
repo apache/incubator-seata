@@ -17,27 +17,14 @@ package io.seata.rm.datasource.sql.struct;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.RowIdLifetime;
-import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Types;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-
-import com.alibaba.druid.mock.MockStatementBase;
-import com.alibaba.druid.mock.handler.MockExecuteHandler;
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.druid.util.jdbc.ResultSetMetaDataBase;
 import io.seata.rm.datasource.DataSourceProxy;
-
+import io.seata.rm.datasource.mock.MockDriver;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 
 import javax.sql.DataSource;
 
@@ -71,23 +58,7 @@ public class TableMetaTest {
     @Test
     public void getTableMetaTest_0() {
 
-        MockDriver mockDriver = new MockDriver();
-        mockDriver.setExecuteHandler(new MockExecuteHandler() {
-            @Override
-            public ResultSet executeQuery(MockStatementBase statement, String s) throws SQLException {
-
-                com.alibaba.druid.mock.MockResultSet resultSet = new com.alibaba.druid.mock.MockResultSet(statement);
-
-                // just fetch meta from select * from `table` limit 1
-                List<ResultSetMetaDataBase.ColumnMetaData> columns = resultSet.getMockMetaData().getColumns();
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-
-                return resultSet;
-            }
-        });
+        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas);
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
@@ -122,21 +93,7 @@ public class TableMetaTest {
 
     @Test
     public void refreshTest_0() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        MockDriver mockDriver = new MockDriver();
-        mockDriver.setExecuteHandler(new MockExecuteHandler() {
-            @Override
-            public ResultSet executeQuery(MockStatementBase statement, String s) throws SQLException {
-
-                com.alibaba.druid.mock.MockResultSet resultSet = new com.alibaba.druid.mock.MockResultSet(statement);
-
-                List<ResultSetMetaDataBase.ColumnMetaData> columns = resultSet.getMockMetaData().getColumns();
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-                columns.add(new ResultSetMetaDataBase.ColumnMetaData());
-                return resultSet;
-            }
-        });
+        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas);
 
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setUrl("jdbc:mock:xxx");
@@ -157,6 +114,7 @@ public class TableMetaTest {
                     new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 35},
                     new Object[] {"name1", "name1", false, "", 3, 1, "A", 35}
             };
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertEquals(cacheTableMeta, realTableMeta);
@@ -168,6 +126,7 @@ public class TableMetaTest {
                 new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
                 new Object[] {"id_card", "id_card", false, "", 3, 1, "A", 34}
             };
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -182,6 +141,7 @@ public class TableMetaTest {
                 new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
                 new Object[] {"id_card", "id_card", false, "", 3, 1, "D", 34}
             };
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -196,6 +156,7 @@ public class TableMetaTest {
                 new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
                 new Object[] {"id_card", "id_card", false, "", 3, 2, "D", 34}
             };
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -210,6 +171,7 @@ public class TableMetaTest {
                 new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
                 new Object[] {"id_card", "id_card", false, "", 1, 1, "D", 34}
             };
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -224,6 +186,7 @@ public class TableMetaTest {
                 new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
                 new Object[] {"id_card", "id_card", false, "t", 1, 1, "D", 34}
             };
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -238,12 +201,32 @@ public class TableMetaTest {
                 new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
                 new Object[] {"id_card_number", "id_card_number", false, "t", 1, 1, "D", 34}
             };
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
         TableMetaCache.refresh(dataSourceProxy);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         Assertions.assertEquals(cacheTableMeta, realTableMeta);
+
+        //clear the index
+        indexMetas = new Object[][]{};
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
+        Assertions.assertThrows(Exception.class, new Executable() {
+            @Override
+            public void execute() throws Throwable {
+                method.invoke(null, dataSourceProxy, "t1");
+            }
+        });
+
+        //reset index meta
+        indexMetas =
+            new Object[][] {
+                new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
+                new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
+                new Object[] {"id_card_number", "id_card_number", false, "t", 1, 1, "D", 34}
+            };
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
 
         //add a new column
         columnMetas =
@@ -254,6 +237,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"}
             };
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -270,6 +254,7 @@ public class TableMetaTest {
                     new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "YES"}
             };
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -286,6 +271,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 64, 0, 10, 1, "", "", 0, 0, 64, 5, "NO", "YES"}
             };
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -302,6 +288,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 64, 0, 10, 1, "", "", 0, 0, 64, 4, "NO", "YES"}
             };
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -318,6 +305,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 20, 0, 10, 1, "", "", 0, 0, 64, 4, "NO", "YES"}
             };
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -338,6 +326,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 20, 0, 10, 1, "", "001", 0, 0, 64, 4, "NO", "YES"}
             };
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -354,6 +343,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 20, 0, 10, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
             };
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -370,6 +360,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.DECIMAL, "DECIMAL", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
             };
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -386,6 +377,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card", Types.VARCHAR, "VARCHAR", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
             };
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -402,6 +394,7 @@ public class TableMetaTest {
                 new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "", "t1", "id_card_number", Types.VARCHAR, "VARCHAR", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
             };
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -418,6 +411,7 @@ public class TableMetaTest {
                 new Object[] {"", "user", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"", "user", "t1", "id_card_number", Types.VARCHAR, "VARCHAR", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
             };
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -434,6 +428,7 @@ public class TableMetaTest {
                 new Object[] {"t", "user", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 5, "YES", "NO"},
                 new Object[] {"t", "user", "t1", "id_card_number", Types.VARCHAR, "VARCHAR", 20, 0, 2, 1, "ID Card", "001", 0, 0, 64, 4, "NO", "YES"}
             };
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
         realTableMeta = (TableMeta) method.invoke(null, dataSourceProxy, "t1");
         Assertions.assertNotEquals(cacheTableMeta, realTableMeta);
@@ -468,1012 +463,5 @@ public class TableMetaTest {
         Assertions.assertEquals(expected[5], actual.getOrdinalPosition());
         Assertions.assertEquals(expected[6], actual.getAscOrDesc());
         Assertions.assertEquals(expected[7], actual.getCardinality());
-    }
-
-    private class MockDriver extends com.alibaba.druid.mock.MockDriver {
-
-        @Override
-        public MockConnection createMockConnection(com.alibaba.druid.mock.MockDriver driver, String url,
-                                                   Properties connectProperties) {
-            return new MockConnection(this, url, connectProperties);
-        }
-    }
-
-    private class MockResultSet extends com.alibaba.druid.mock.MockResultSet {
-
-        private List<String> columnLabels;
-
-        /**
-         * Instantiates a new Mock result set.
-         *
-         * @param statement    the statement
-         * @param columnLabels the column labels
-         */
-        public MockResultSet(Statement statement, List<String> columnLabels) {
-            super(statement);
-            this.columnLabels = new ArrayList<>(columnLabels);
-        }
-
-        @Override
-        public int findColumn(String columnLabel) throws SQLException {
-            return columnLabels.indexOf(columnLabel) + 1;
-        }
-    }
-
-    private class MockConnection extends com.alibaba.druid.mock.MockConnection {
-
-        /**
-         * Instantiates a new Mock connection.
-         *
-         * @param driver            the driver
-         * @param url               the url
-         * @param connectProperties the connect properties
-         */
-        public MockConnection(com.alibaba.druid.mock.MockDriver driver, String url, Properties connectProperties) {
-            super(driver, url, connectProperties);
-        }
-
-        @Override
-        public DatabaseMetaData getMetaData() throws SQLException {
-
-            return new DatabaseMetaData() {
-
-                @Override
-                public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern,
-                                            String columnNamePattern) throws SQLException {
-                    List<String> columnLabels = Arrays.asList(
-                        "TABLE_CAT",
-                        "TABLE_SCHEM",
-                        "TABLE_NAME",
-                        "COLUMN_NAME",
-                        "DATA_TYPE",
-                        "TYPE_NAME",
-                        "COLUMN_SIZE",
-                        "DECIMAL_DIGITS",
-                        "NUM_PREC_RADIX",
-                        "NULLABLE",
-                        "REMARKS",
-                        "COLUMN_DEF",
-                        "SQL_DATA_TYPE",
-                        "SQL_DATETIME_SUB",
-                        "CHAR_OCTET_LENGTH",
-                        "ORDINAL_POSITION",
-                        "IS_NULLABLE",
-                        "IS_AUTOINCREMENT"
-                    );
-
-                    MockResultSet resultSet = new MockResultSet(createStatement(), columnLabels);
-
-                    List<ResultSetMetaDataBase.ColumnMetaData> columns = resultSet.getMockMetaData().getColumns();
-                    for (String columnLabel : columnLabels) {
-                        ResultSetMetaDataBase.ColumnMetaData column = new ResultSetMetaDataBase.ColumnMetaData();
-                        column.setColumnName(columnLabel);
-                        columns.add(column);
-                    }
-
-                    for (Object[] columnMeta : columnMetas) {
-                        resultSet.getRows().add(columnMeta);
-                    }
-
-                    return resultSet;
-                }
-
-                @Override
-                public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique,
-                                              boolean approximate) throws SQLException {
-
-                    List<String> columnLabels = Arrays.asList(
-                        "INDEX_NAME",
-                        "COLUMN_NAME",
-                        "NON_UNIQUE",
-                        "INDEX_QUALIFIER",
-                        "TYPE",
-                        "ORDINAL_POSITION",
-                        "ASC_OR_DESC",
-                        "CARDINALITY"
-                    );
-
-                    MockResultSet resultSet = new MockResultSet(createStatement(), columnLabels);
-
-                    List<ResultSetMetaDataBase.ColumnMetaData> columns = resultSet.getMockMetaData().getColumns();
-                    for (String columnLabel : columnLabels) {
-                        ResultSetMetaDataBase.ColumnMetaData column = new ResultSetMetaDataBase.ColumnMetaData();
-                        column.setColumnName(columnLabel);
-                        columns.add(column);
-                    }
-
-                    for (Object[] indexMeta : indexMetas) {
-                        resultSet.getRows().add(indexMeta);
-                    }
-
-                    return resultSet;
-                }
-
-                @Override
-                public boolean allProceduresAreCallable() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean allTablesAreSelectable() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public String getURL() throws SQLException {
-                    return getUrl();
-                }
-
-                @Override
-                public String getUserName() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public boolean isReadOnly() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean nullsAreSortedHigh() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean nullsAreSortedLow() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean nullsAreSortedAtStart() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean nullsAreSortedAtEnd() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public String getDatabaseProductName() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public String getDatabaseProductVersion() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public String getDriverName() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public String getDriverVersion() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public int getDriverMajorVersion() {
-                    return 0;
-                }
-
-                @Override
-                public int getDriverMinorVersion() {
-                    return 0;
-                }
-
-                @Override
-                public boolean usesLocalFiles() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean usesLocalFilePerTable() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsMixedCaseIdentifiers() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean storesUpperCaseIdentifiers() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean storesLowerCaseIdentifiers() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean storesMixedCaseIdentifiers() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsMixedCaseQuotedIdentifiers() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean storesUpperCaseQuotedIdentifiers() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean storesLowerCaseQuotedIdentifiers() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean storesMixedCaseQuotedIdentifiers() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public String getIdentifierQuoteString() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public String getSQLKeywords() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public String getNumericFunctions() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public String getStringFunctions() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public String getSystemFunctions() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public String getTimeDateFunctions() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public String getSearchStringEscape() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public String getExtraNameCharacters() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public boolean supportsAlterTableWithAddColumn() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsAlterTableWithDropColumn() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsColumnAliasing() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean nullPlusNonNullIsNull() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsConvert() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsConvert(int fromType, int toType) throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsTableCorrelationNames() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsDifferentTableCorrelationNames() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsExpressionsInOrderBy() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsOrderByUnrelated() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsGroupBy() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsGroupByUnrelated() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsGroupByBeyondSelect() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsLikeEscapeClause() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsMultipleResultSets() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsMultipleTransactions() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsNonNullableColumns() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsMinimumSQLGrammar() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsCoreSQLGrammar() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsExtendedSQLGrammar() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsANSI92EntryLevelSQL() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsANSI92IntermediateSQL() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsANSI92FullSQL() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsIntegrityEnhancementFacility() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsOuterJoins() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsFullOuterJoins() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsLimitedOuterJoins() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public String getSchemaTerm() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public String getProcedureTerm() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public String getCatalogTerm() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public boolean isCatalogAtStart() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public String getCatalogSeparator() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public boolean supportsSchemasInDataManipulation() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsSchemasInProcedureCalls() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsSchemasInTableDefinitions() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsSchemasInIndexDefinitions() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsSchemasInPrivilegeDefinitions() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsCatalogsInDataManipulation() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsCatalogsInProcedureCalls() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsCatalogsInTableDefinitions() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsCatalogsInIndexDefinitions() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsCatalogsInPrivilegeDefinitions() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsPositionedDelete() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsPositionedUpdate() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsSelectForUpdate() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsStoredProcedures() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsSubqueriesInComparisons() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsSubqueriesInExists() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsSubqueriesInIns() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsSubqueriesInQuantifieds() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsCorrelatedSubqueries() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsUnion() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsUnionAll() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsOpenCursorsAcrossCommit() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsOpenCursorsAcrossRollback() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsOpenStatementsAcrossCommit() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsOpenStatementsAcrossRollback() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public int getMaxBinaryLiteralLength() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxCharLiteralLength() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxColumnNameLength() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxColumnsInGroupBy() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxColumnsInIndex() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxColumnsInOrderBy() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxColumnsInSelect() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxColumnsInTable() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxConnections() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxCursorNameLength() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxIndexLength() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxSchemaNameLength() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxProcedureNameLength() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxCatalogNameLength() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxRowSize() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public boolean doesMaxRowSizeIncludeBlobs() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public int getMaxStatementLength() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxStatements() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxTableNameLength() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxTablesInSelect() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getMaxUserNameLength() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getDefaultTransactionIsolation() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public boolean supportsTransactions() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsTransactionIsolationLevel(int level) throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsDataDefinitionAndDataManipulationTransactions() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsDataManipulationTransactionsOnly() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean dataDefinitionCausesTransactionCommit() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean dataDefinitionIgnoredInTransactions() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public ResultSet getProcedures(String catalog, String schemaPattern, String procedureNamePattern)
-                    throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getProcedureColumns(String catalog, String schemaPattern, String procedureNamePattern,
-                                                     String columnNamePattern) throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getTables(String catalog, String schemaPattern, String tableNamePattern,
-                                           String[] types) throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getSchemas() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getCatalogs() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getTableTypes() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getColumnPrivileges(String catalog, String schema, String table,
-                                                     String columnNamePattern) throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getTablePrivileges(String catalog, String schemaPattern, String tableNamePattern)
-                    throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getBestRowIdentifier(String catalog, String schema, String table, int scope,
-                                                      boolean nullable) throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getVersionColumns(String catalog, String schema, String table) throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getImportedKeys(String catalog, String schema, String table) throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getExportedKeys(String catalog, String schema, String table) throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getCrossReference(String parentCatalog, String parentSchema, String parentTable,
-                                                   String foreignCatalog, String foreignSchema, String foreignTable)
-                    throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getTypeInfo() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public boolean supportsResultSetType(int type) throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsResultSetConcurrency(int type, int concurrency) throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean ownUpdatesAreVisible(int type) throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean ownDeletesAreVisible(int type) throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean ownInsertsAreVisible(int type) throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean othersUpdatesAreVisible(int type) throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean othersDeletesAreVisible(int type) throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean othersInsertsAreVisible(int type) throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean updatesAreDetected(int type) throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean deletesAreDetected(int type) throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean insertsAreDetected(int type) throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsBatchUpdates() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public ResultSet getUDTs(String catalog, String schemaPattern, String typeNamePattern, int[] types)
-                    throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public Connection getConnection() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public boolean supportsSavepoints() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsNamedParameters() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsMultipleOpenResults() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsGetGeneratedKeys() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public ResultSet getSuperTypes(String catalog, String schemaPattern, String typeNamePattern)
-                    throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getSuperTables(String catalog, String schemaPattern, String tableNamePattern)
-                    throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getAttributes(String catalog, String schemaPattern, String typeNamePattern,
-                                               String attributeNamePattern) throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public boolean supportsResultSetHoldability(int holdability) throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public int getResultSetHoldability() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getDatabaseMajorVersion() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getDatabaseMinorVersion() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getJDBCMajorVersion() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getJDBCMinorVersion() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public int getSQLStateType() throws SQLException {
-                    return 0;
-                }
-
-                @Override
-                public boolean locatorsUpdateCopy() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean supportsStatementPooling() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public RowIdLifetime getRowIdLifetime() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getSchemas(String catalog, String schemaPattern) throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public boolean supportsStoredFunctionsUsingCallSyntax() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public boolean autoCommitFailureClosesAllResultSets() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public ResultSet getClientInfoProperties() throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getFunctions(String catalog, String schemaPattern, String functionNamePattern)
-                    throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getFunctionColumns(String catalog, String schemaPattern, String functionNamePattern,
-                                                    String columnNamePattern) throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public ResultSet getPseudoColumns(String catalog, String schemaPattern, String tableNamePattern,
-                                                  String columnNamePattern) throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public boolean generatedKeyAlwaysReturned() throws SQLException {
-                    return false;
-                }
-
-                @Override
-                public <T> T unwrap(Class<T> iface) throws SQLException {
-                    return null;
-                }
-
-                @Override
-                public boolean isWrapperFor(Class<?> iface) throws SQLException {
-                    return false;
-                }
-            };
-        }
     }
 }
