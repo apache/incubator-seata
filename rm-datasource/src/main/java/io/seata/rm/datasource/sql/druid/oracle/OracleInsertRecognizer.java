@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type oralce insert recognizer.
+ * The type oracle insert recognizer.
  * @author ccg
  * @date 2019/3/25
  */
@@ -70,7 +70,7 @@ public class OracleInsertRecognizer extends BaseRecognizer implements SQLInsertR
 
     @Override
     public String getTableName() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
             @Override

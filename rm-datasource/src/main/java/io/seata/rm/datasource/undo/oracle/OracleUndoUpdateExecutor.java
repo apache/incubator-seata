@@ -44,8 +44,8 @@ public class OracleUndoUpdateExecutor extends AbstractUndoExecutor {
             throw new ShouldNeverHappenException("Invalid UNDO LOG"); // TODO
         }
         Row row = beforeImageRows.get(0);
-        StringBuffer mainSQL = new StringBuffer("UPDATE " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()) + " SET ");
-        StringBuffer where = new StringBuffer(" WHERE ");
+        StringBuilder mainSQL = new StringBuilder("UPDATE " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()) + " SET ");
+        StringBuilder where = new StringBuilder(" WHERE ");
         boolean first = true;
         for (Field field : row.getFields()) {
             if (field.getKeyType() == KeyType.PrimaryKey) {
