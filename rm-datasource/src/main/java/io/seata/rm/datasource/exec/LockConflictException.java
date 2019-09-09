@@ -29,4 +29,8 @@ public class LockConflictException extends SQLException {
      */
     public LockConflictException() {
     }
+
+    public LockConflictException(String message) {
+        super(message);
+    }
 }
