@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type oralceselect for update recognizer.
+ * The type oracle select for update recognizer.
  *
  * @author ccg
  * @date 2019/3/25
@@ -67,7 +67,7 @@ public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements S
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = super.createOracleOutputVisitor(parametersHolder, paramAppenderList, sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
@@ -80,7 +80,7 @@ public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements S
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
@@ -109,7 +109,7 @@ public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements S
     public String getTableName() {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLTableSource tableSource = selectQueryBlock.getFrom();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
             @Override

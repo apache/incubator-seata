@@ -105,7 +105,7 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         MySqlOutputVisitor visitor = super.createMySqlOutputVisitor(parametersHolder, paramAppenderList, sb);
         if (where instanceof SQLBinaryOpExpr) {
             visitor.visit((SQLBinaryOpExpr) where);
@@ -126,7 +126,7 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
             return "";
         }
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
 
         if (where instanceof SQLBetweenExpr) {
@@ -147,7 +147,7 @@ public class MySQLUpdateRecognizer extends BaseRecognizer implements SQLUpdateRe
 
     @Override
     public String getTableName() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
 
             @Override

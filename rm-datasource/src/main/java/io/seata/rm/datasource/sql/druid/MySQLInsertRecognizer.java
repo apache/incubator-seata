@@ -67,7 +67,7 @@ public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRe
 
     @Override
     public String getTableName() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
 
             @Override

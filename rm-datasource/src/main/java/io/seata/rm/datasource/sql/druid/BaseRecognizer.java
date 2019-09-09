@@ -62,7 +62,7 @@ public abstract class BaseRecognizer implements SQLRecognizer {
         return originalSQL;
     }
 
-    public MySqlOutputVisitor createMySqlOutputVisitor(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList, final StringBuffer sb) {
+    public MySqlOutputVisitor createMySqlOutputVisitor(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList, final StringBuilder sb) {
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
 
             @Override
@@ -83,7 +83,7 @@ public abstract class BaseRecognizer implements SQLRecognizer {
         return visitor;
     }
 
-    public OracleOutputVisitor createOracleOutputVisitor(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList, final StringBuffer sb) {
+    public OracleOutputVisitor createOracleOutputVisitor(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList, final StringBuilder sb) {
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
             @Override
