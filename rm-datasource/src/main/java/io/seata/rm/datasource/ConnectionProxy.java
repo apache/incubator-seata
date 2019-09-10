@@ -17,6 +17,7 @@ package io.seata.rm.datasource;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.concurrent.Callable;
 
 import com.alibaba.druid.util.JdbcConstants;
 
@@ -29,6 +30,7 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
+import io.seata.rm.datasource.exec.LockRetryController;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogManagerOracle;
@@ -50,6 +52,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private static final int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
+
+    private final static LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy();
 
     /**
      * Instantiates a new Connection proxy.
@@ -169,6 +173,19 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void commit() throws SQLException {
+        try {
+            LOCK_RETRY_POLICY.execute(() -> {
+                doCommit();
+                return null;
+            });
+        } catch (SQLException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new SQLException(e);
+        }
+    }
+
+    private void doCommit() throws SQLException {
         if (context.inGlobalTransaction()) {
             processGlobalTransactionCommit();
         } else if (context.isGlobalLockRequire()) {
@@ -235,7 +252,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     public void setAutoCommit(boolean autoCommit) throws SQLException {
         if ((autoCommit) && !getAutoCommit()) {
             // change autocommit from false to true, we should commit() first according to JDBC spec.
-            commit();
+            doCommit();
         }
         targetConnection.setAutoCommit(autoCommit);
     }
@@ -256,6 +273,43 @@ public class ConnectionProxy extends AbstractConnectionProxy {
                     throw new SQLException("Failed to report branch status " + commitDone, ex);
                 }
             }
+        }
+    }
+
+    public static class LockRetryPolicy {
+        protected final static boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT =
+                ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, true);
+
+        public <T> T execute(Callable<T> callable) throws Exception {
+            if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT) {
+                return callable.call();
+            } else {
+                return doRetryOnLockConflict(callable);
+            }
+        }
+
+        protected <T> T doRetryOnLockConflict(Callable<T> callable) throws Exception {
+            LockRetryController lockRetryController = new LockRetryController();
+            while (true) {
+                try {
+                    return callable.call();
+                } catch (LockConflictException lockConflict) {
+                    onException(lockConflict);
+                    lockRetryController.sleep(lockConflict);
+                } catch (Exception e) {
+                    onException(e);
+                    throw e;
+                }
+            }
+        }
+
+        /**
+         * Callback on exception in doLockRetryOnConflict.
+         *
+         * @param e invocation exception
+         * @throws Exception error
+         */
+        protected void onException(Exception e) throws Exception {
         }
     }
 }
