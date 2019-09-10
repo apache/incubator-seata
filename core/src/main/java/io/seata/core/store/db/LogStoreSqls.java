@@ -267,7 +267,9 @@ public class LogStoreSqls {
      */
     public static String getQueryGlobalTransactionSQLByStatus(String globalTable, String dbType,
                                                               String paramsPlaceHolder) {
-        if (DBType.MYSQL.name().equalsIgnoreCase(dbType)) {
+        if (DBType.MYSQL.name().equalsIgnoreCase(dbType)
+            || DBType.OCEANBASE.name().equalsIgnoreCase(dbType)
+            || DBType.H2.name().equalsIgnoreCase(dbType)) {
             return QUERY_GLOBAL_TRANSACTION_BY_STATUS_MYSQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(
                     PRAMETER_PLACEHOLD, paramsPlaceHolder);
         } else if (DBType.ORACLE.name().equalsIgnoreCase(dbType)) {
