@@ -85,7 +85,6 @@ public class DefaultCore implements Core {
                 globalSession.addBranch(branchSession);
             } catch (RuntimeException ex) {
                 branchSession.unlock();
-                LOGGER.error("Failed to store branch xid={}, branchId={} :{}",globalSession.getXid(), branchSession.getBranchId(), ex.getMessage(),ex);
                 throw new BranchTransactionException(FailedToAddBranch,
                     String.format("Failed to store branch xid = %s branchId = %s", globalSession.getXid(), branchSession.getBranchId()));
             }
@@ -318,7 +317,7 @@ public class DefaultCore implements Core {
                         continue;
                     case PhaseTwo_RollbackFailed_Unretryable:
                         SessionHelper.endRollbackFailed(globalSession);
-                        LOGGER.info("Failed to rollback branch xid={} branchId={}", globalSession.getXid(), branchSession.getBranchId());
+                        LOGGER.info("Failed to rollback branch and stop retry xid={} branchId={}", globalSession.getXid(), branchSession.getBranchId());
                         return;
                     default:
                         LOGGER.info("Failed to rollback branch xid={} branchId={}", globalSession.getXid(), branchSession.getBranchId());
