@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.undo;
 
 import com.alibaba.druid.util.JdbcConstants;
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.undo.postgresql.PostgresqlUndoTableManager;
 
 public class UndoTableManagerFactory {
@@ -25,8 +24,7 @@ public class UndoTableManagerFactory {
         if (dbType.equals(JdbcConstants.POSTGRESQL)) {
             return new PostgresqlUndoTableManager();
         } else {
-            throw new NotSupportYetException(dbType);
+            throw new UnsupportedOperationException(dbType);
         }
-
     }
 }

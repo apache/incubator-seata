@@ -19,6 +19,7 @@ import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
+import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGInsertStatement;
@@ -30,6 +31,7 @@ import io.seata.rm.datasource.sql.druid.BaseRecognizer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The type postgresql insert recognizer.
@@ -102,13 +104,20 @@ public class PostgresqlInsertRecognizer extends BaseRecognizer implements SQLIns
         for (SQLInsertStatement.ValuesClause valuesClause : valuesClauses) {
             List<SQLExpr> exprs = valuesClause.getValues();
             List<Object> row = new ArrayList<>(exprs.size());
-            rows.add(row);
             for (SQLExpr expr : valuesClause.getValues()) {
                 if (expr instanceof SQLValuableExpr) {
                     row.add(((SQLValuableExpr) expr).getValue());
+                } else if (expr instanceof SQLVariantRefExpr) {
+                    String name = ((SQLVariantRefExpr) expr).getName();
+                    if (Objects.equals("?", name)) {
+                        row.add(name);
+                    }
                 } else {
                     throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                 }
+            }
+            if (!row.isEmpty()) {
+                rows.add(row);
             }
         }
         return rows;
