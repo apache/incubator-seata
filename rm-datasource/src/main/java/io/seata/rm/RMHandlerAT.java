@@ -59,10 +59,10 @@ public class RMHandlerAT extends AbstractRMHandler {
                 try {
                     if (JdbcConstants.POSTGRESQL.equalsIgnoreCase(dataSourceProxy.getDbType())) {
                         deleteRows = UndoLogManagerPostgresql.deleteUndoLogByLogCreated(logCreatedSave, dataSourceProxy.getDbType(),
-                                LIMIT_ROWS, conn);
+                            LIMIT_ROWS, conn);
                     } else {
                         deleteRows = UndoLogManager.deleteUndoLogByLogCreated(logCreatedSave, dataSourceProxy.getDbType(),
-                                LIMIT_ROWS, conn);
+                            LIMIT_ROWS, conn);
                     }
                     if (deleteRows > 0 && !conn.getAutoCommit()) {
                         conn.commit();
