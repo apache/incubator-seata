@@ -265,6 +265,12 @@ public class ConfigurationKeys {
     public static final String TRANSACTION_UNDO_LOG_TABLE = TRANSACTION_PREFIX + "undo.log.table";
 
     /**
+     * The constant TRANSACTION_UNDO_LOG_SEQUENCE
+     * only used in database that only support sequence, like oracle
+     */
+    public static final String TRANSACTION_UNDO_LOG_SEQUENCE = TRANSACTION_PREFIX + "undo.log.sequence";
+
+    /**
      * The constant TRANSACTION_UNDO_LOG_DEFAULT_TABLE.
      */
     public static final String TRANSACTION_UNDO_LOG_DEFAULT_TABLE  = "undo_log";

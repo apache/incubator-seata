@@ -77,9 +77,13 @@ public final class UndoLogManagerOracle {
 
     private static final String UNDO_LOG_TABLE_NAME = ConfigurationFactory.getInstance()
             .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, ConfigurationKeys.TRANSACTION_UNDO_LOG_DEFAULT_TABLE);
-    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
-        "\t(id,branch_id, xid,context, rollback_info, log_status, log_created, log_modified)\n" +
-        "VALUES (UNDO_LOG_SEQ.nextval,?, ?,?, ?, ?, sysdate, sysdate)";
+
+    private static final String UNDO_LOG_SEQUENCE_NAME = ConfigurationFactory.getInstance()
+            .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SEQUENCE, UNDO_LOG_TABLE_NAME + "_SEQ");
+
+    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n"
+            + "\t(id,branch_id, xid,context, rollback_info, log_status, log_created, log_modified)\n"
+            + "VALUES (" + UNDO_LOG_SEQUENCE_NAME + ".nextval, ?, ?, ?, ?, ?, sysdate, sysdate)";
 
     private static final String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + "\n" +
         "\tWHERE branch_id = ? AND xid = ?";
