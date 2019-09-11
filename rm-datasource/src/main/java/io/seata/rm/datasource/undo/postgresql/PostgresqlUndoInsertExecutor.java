@@ -33,6 +33,7 @@ import java.util.List;
 
 /**
  * The type oralce undo insert executor.
+ *
  * @author ccg
  * @date 2019/3/25
  */
@@ -40,7 +41,7 @@ public class PostgresqlUndoInsertExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
         TableRecords afterImage = sqlUndoLog.getAfterImage();
         List<Row> afterImageRows = afterImage.getRows();
         if (afterImageRows == null || afterImageRows.size() == 0) {
@@ -52,7 +53,7 @@ public class PostgresqlUndoInsertExecutor extends AbstractUndoExecutor {
         boolean first = true;
         for (Field field : row.getFields()) {
             if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(keywordChecker.checkAndReplace(field.getName()) +" = ?");
+                where.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
             }
 
         }

@@ -30,6 +30,7 @@ import java.util.List;
 
 /**
  * The type oracle undo update executor.
+ *
  * @author ccg
  * @date 2019/3/25
  */
@@ -37,7 +38,7 @@ public class PostgresqlUndoUpdateExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (beforeImageRows == null || beforeImageRows.size() == 0) {
@@ -49,14 +50,14 @@ public class PostgresqlUndoUpdateExecutor extends AbstractUndoExecutor {
         boolean first = true;
         for (Field field : row.getFields()) {
             if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(keywordChecker.checkAndReplace(field.getName()) +" = ?");
+                where.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
             } else {
                 if (first) {
                     first = false;
                 } else {
                     mainSQL.append(", ");
                 }
-                mainSQL.append(keywordChecker.checkAndReplace(field.getName()) +" = ?");
+                mainSQL.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
             }
 
         }

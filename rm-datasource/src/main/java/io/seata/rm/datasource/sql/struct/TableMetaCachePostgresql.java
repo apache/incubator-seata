@@ -38,7 +38,7 @@ public class TableMetaCachePostgresql {
     private static final long EXPIRE_TIME = 900 * 1000;
 
     private static final Cache<String, TableMeta> TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
-            .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
+        .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
 
     private static Logger logger = LoggerFactory.getLogger(TableMetaCachePostgresql.class);
 
@@ -84,7 +84,7 @@ public class TableMetaCachePostgresql {
     }
 
     private static TableMeta fetchSchemeInDefaultWay(DataSource dataSource, String tableName)
-            throws SQLException {
+        throws SQLException {
         Connection conn = null;
         java.sql.Statement stmt = null;
         try {
@@ -106,7 +106,7 @@ public class TableMetaCachePostgresql {
     }
 
     private static TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
-            throws SQLException {
+        throws SQLException {
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
@@ -165,7 +165,7 @@ public class TableMetaCachePostgresql {
                 index.setCardinality(rs2.getInt("CARDINALITY"));
                 index.getValues().add(col);
                 if ("PRIMARY".equalsIgnoreCase(indexName) || (
-                        tableName + "_pkey").equalsIgnoreCase(indexName)) {
+                    tableName + "_pkey").equalsIgnoreCase(indexName)) {
                     index.setIndextype(IndexType.PRIMARY);
                 } else if (index.isNonUnique() == false) {
                     index.setIndextype(IndexType.Unique);

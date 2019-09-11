@@ -73,19 +73,19 @@ public final class UndoLogManagerPostgresql {
     private static final Logger LOGGER = LoggerFactory.getLogger(UndoLogManagerPostgresql.class);
 
     private static final String UNDO_LOG_TABLE_NAME = ConfigurationFactory.getInstance()
-            .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, ConfigurationKeys.TRANSACTION_UNDO_LOG_DEFAULT_TABLE);
+        .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, ConfigurationKeys.TRANSACTION_UNDO_LOG_DEFAULT_TABLE);
     private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
-            "\t(id,branch_id, xid,context, rollback_info, log_status, log_created, log_modified)\n" +
-            "VALUES (nextval('undo_log_seq'),?, ?,?, ?, ?, now(), now())";
+        "\t(id,branch_id, xid,context, rollback_info, log_status, log_created, log_modified)\n" +
+        "VALUES (nextval('undo_log_seq'),?, ?,?, ?, ?, now(), now())";
 
     private static final String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + "\n" +
-            "\tWHERE branch_id = ? AND xid = ?";
+        "\tWHERE branch_id = ? AND xid = ?";
 
     private static final String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME
-            + " WHERE  branch_id = ? AND xid = ? FOR UPDATE";
+        + " WHERE  branch_id = ? AND xid = ? FOR UPDATE";
 
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
-            " WHERE log_created <= ? LIMIT ?";
+        " WHERE log_created <= ? LIMIT ?";
 
     private static final ThreadLocal<String> SERIALIZER_LOCAL = new ThreadLocal<>();
 
@@ -164,7 +164,7 @@ public final class UndoLogManagerPostgresql {
                     if (!canUndo(state)) {
                         if (LOGGER.isInfoEnabled()) {
                             LOGGER.info("xid {} branch {}, ignore {} undo_log",
-                                    xid, branchId, state);
+                                xid, branchId, state);
                         }
                         return;
                     }
@@ -178,7 +178,7 @@ public final class UndoLogManagerPostgresql {
 
                     String serializer = context == null ? null : context.get(UndoLogConstants.SERIALIZER_KEY);
                     UndoLogParser parser = serializer == null ? UndoLogParserFactory.getInstance() :
-                            UndoLogParserFactory.getInstance(serializer);
+                        UndoLogParserFactory.getInstance(serializer);
                     BranchUndoLog branchUndoLog = parser.decode(rollbackInfo);
 
                     try {
@@ -189,7 +189,7 @@ public final class UndoLogManagerPostgresql {
                             TableMeta tableMeta = TableMetaCachePostgresql.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(dataSourceProxy.getDbType(),
-                                    sqlUndoLog);
+                                sqlUndoLog);
                             undoExecutor.executeOn(conn);
                         }
                     } finally {
@@ -211,14 +211,14 @@ public final class UndoLogManagerPostgresql {
                     conn.commit();
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("xid {} branch {}, undo_log deleted with {}",
-                                xid, branchId, State.GlobalFinished.name());
+                            xid, branchId, State.GlobalFinished.name());
                     }
                 } else {
                     insertUndoLogWithGlobalFinished(xid, branchId, UndoLogParserFactory.getInstance(), conn);
                     conn.commit();
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("xid {} branch {}, undo_log added with {}",
-                                xid, branchId, State.GlobalFinished.name());
+                            xid, branchId, State.GlobalFinished.name());
                     }
                 }
 
@@ -227,7 +227,7 @@ public final class UndoLogManagerPostgresql {
                 // Possible undo_log has been inserted into the database by other processes, retrying rollback undo_log
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("xid {} branch {}, undo_log inserted, retry rollback",
-                            xid, branchId);
+                        xid, branchId);
                 }
             } catch (Throwable e) {
                 if (conn != null) {
@@ -331,8 +331,8 @@ public final class UndoLogManagerPostgresql {
     protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize) {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("DELETE FROM ")
-                .append(UNDO_LOG_TABLE_NAME)
-                .append(" WHERE  branch_id IN ");
+            .append(UNDO_LOG_TABLE_NAME)
+            .append(" WHERE  branch_id IN ");
         appendInParam(branchIdSize, sqlBuilder);
         sqlBuilder.append(" AND xid IN ");
         appendInParam(xidSize, sqlBuilder);
@@ -389,7 +389,7 @@ public final class UndoLogManagerPostgresql {
     private static void insertUndoLogWithGlobalFinished(String xid, long branchID, UndoLogParser parser,
                                                         Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, buildContext(parser.getName()),
-                parser.getDefaultContent(), State.GlobalFinished, conn);
+            parser.getDefaultContent(), State.GlobalFinished, conn);
     }
 
     private static void insertUndoLog(String xid, long branchID, String rollbackCtx,

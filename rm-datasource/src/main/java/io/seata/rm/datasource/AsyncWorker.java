@@ -95,7 +95,7 @@ public class AsyncWorker implements ResourceManagerInbound {
     }
 
     private static int ASYNC_COMMIT_BUFFER_LIMIT = ConfigurationFactory.getInstance().getInt(
-            CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, 10000);
+        CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, 10000);
 
     private static final BlockingQueue<Phase2Context> ASYNC_COMMIT_BUFFER = new LinkedBlockingQueue<>(ASYNC_COMMIT_BUFFER_LIMIT);
 
@@ -116,7 +116,7 @@ public class AsyncWorker implements ResourceManagerInbound {
     public synchronized void init() {
         LOGGER.info("Async Commit Buffer Limit: " + ASYNC_COMMIT_BUFFER_LIMIT);
         timerExecutor = new ScheduledThreadPoolExecutor(1,
-                new NamedThreadFactory("AsyncWorker", 1, true));
+            new NamedThreadFactory("AsyncWorker", 1, true));
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {

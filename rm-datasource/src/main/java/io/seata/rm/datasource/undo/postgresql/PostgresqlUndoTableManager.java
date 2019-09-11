@@ -33,18 +33,18 @@ public class PostgresqlUndoTableManager implements UndoTableManager {
             }
             try (Statement statement = connection.createStatement()) {
                 statement.executeUpdate("CREATE TABLE IF NOT EXISTS \"undo_log\" (\n" +
-                        "  \"id\" int8 NOT NULL DEFAULT NULL,\n" +
-                        "  \"branch_id\" int8 NOT NULL DEFAULT NULL,\n" +
-                        "  \"xid\" varchar(100) NOT NULL DEFAULT NULL,\n" +
-                        "  \"context\" varchar(128) NOT NULL DEFAULT NULL,\n" +
-                        "  \"rollback_info\" bytea NOT NULL DEFAULT NULL,\n" +
-                        "  \"log_status\" int4 NOT NULL DEFAULT NULL,\n" +
-                        "  \"log_created\" timestamp(6) NOT NULL DEFAULT NULL,\n" +
-                        "  \"log_modified\" timestamp(6) NOT NULL DEFAULT NULL,\n" +
-                        "  \"ext\" varchar(100) DEFAULT NULL,\n" +
-                        "  CONSTRAINT \"undo_log_pkey\" PRIMARY KEY (\"id\"),\n" +
-                        "  CONSTRAINT \"undo_log_branch_id_xid_key\" UNIQUE (\"branch_id\", \"xid\")\n" +
-                        ")");
+                    "  \"id\" int8 NOT NULL DEFAULT NULL,\n" +
+                    "  \"branch_id\" int8 NOT NULL DEFAULT NULL,\n" +
+                    "  \"xid\" varchar(100) NOT NULL DEFAULT NULL,\n" +
+                    "  \"context\" varchar(128) NOT NULL DEFAULT NULL,\n" +
+                    "  \"rollback_info\" bytea NOT NULL DEFAULT NULL,\n" +
+                    "  \"log_status\" int4 NOT NULL DEFAULT NULL,\n" +
+                    "  \"log_created\" timestamp(6) NOT NULL DEFAULT NULL,\n" +
+                    "  \"log_modified\" timestamp(6) NOT NULL DEFAULT NULL,\n" +
+                    "  \"ext\" varchar(100) DEFAULT NULL,\n" +
+                    "  CONSTRAINT \"undo_log_pkey\" PRIMARY KEY (\"id\"),\n" +
+                    "  CONSTRAINT \"undo_log_branch_id_xid_key\" UNIQUE (\"branch_id\", \"xid\")\n" +
+                    ")");
             }
             connection.commit();
         }
