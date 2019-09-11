@@ -34,6 +34,7 @@ import io.seata.rm.datasource.exec.LockRetryController;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogManagerOracle;
+import io.seata.rm.datasource.undo.UndoLogManagerPostgresql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +52,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     private static final int DEFAULT_REPORT_RETRY_COUNT = 5;
 
     private static final int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
+            ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
 
     private final static LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy();
 
@@ -109,7 +110,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         // Just check lock without requiring lock by now.
         try {
             boolean lockable = DefaultResourceManager.get().lockQuery(BranchType.AT,
-                getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
+                    getDataSourceProxy().getResourceId(), context.getXid(), lockKeys);
             if (!lockable) {
                 throw new LockConflictException();
             }
@@ -129,7 +130,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         boolean result = false;
         try {
             result = DefaultResourceManager.get().lockQuery(BranchType.AT, getDataSourceProxy().getResourceId(),
-                context.getXid(), lockKeys);
+                    context.getXid(), lockKeys);
         } catch (TransactionException e) {
             recognizeLockKeyConflictException(e, lockKeys);
         }
@@ -217,6 +218,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             if (context.hasUndoLog()) {
                 if (JdbcConstants.ORACLE.equalsIgnoreCase(this.getDbType())) {
                     UndoLogManagerOracle.flushUndoLogs(this);
+                } else if (JdbcConstants.POSTGRESQL.equalsIgnoreCase(this.getDbType())) {
+                    UndoLogManagerPostgresql.flushUndoLogs(this);
                 } else {
                     UndoLogManager.flushUndoLogs(this);
                 }
@@ -233,7 +236,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     private void register() throws TransactionException {
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
-            null, context.getXid(), null, context.buildLockKeys());
+                null, context.getXid(), null, context.buildLockKeys());
         context.setBranchId(branchId);
     }
 
@@ -262,11 +265,11 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         while (retry > 0) {
             try {
                 DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),
-                    (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
+                        (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["
-                    + commitDone + "] Retry Countdown: " + retry);
+                        + commitDone + "] Retry Countdown: " + retry);
                 retry--;
 
                 if (retry == 0) {

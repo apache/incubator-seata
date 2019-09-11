@@ -40,6 +40,7 @@ import io.seata.discovery.registry.RegistryFactory;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogManagerOracle;
+import io.seata.rm.datasource.undo.UndoLogManagerPostgresql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
@@ -180,6 +181,9 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
         try {
             if(JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
                 UndoLogManagerOracle.undo(dataSourceProxy, xid, branchId);
+            }
+            else if (JdbcConstants.POSTGRESQL.equalsIgnoreCase(dataSourceProxy.getDbType())) {
+                UndoLogManagerPostgresql.undo(dataSourceProxy, xid, branchId);
             }
             else if(JdbcConstants.MYSQL.equalsIgnoreCase(dataSourceProxy.getDbType())){
                 UndoLogManager.undo(dataSourceProxy, xid, branchId);

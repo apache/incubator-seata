@@ -28,22 +28,14 @@ import io.seata.core.model.ResourceManagerInbound;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogManagerOracle;
+import io.seata.rm.datasource.undo.UndoLogManagerPostgresql;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 
 import static io.seata.core.constants.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 
@@ -179,10 +171,12 @@ public class AsyncWorker implements ResourceManagerInbound {
                     xids.add(commitContext.xid);
                     branchIds.add(commitContext.branchId);
                     int maxSize = xids.size() > branchIds.size() ? xids.size() : branchIds.size();
-                    if(maxSize == UNDOLOG_DELETE_LIMIT_SIZE){
+                    if (maxSize == UNDOLOG_DELETE_LIMIT_SIZE) {
                         try {
-                            if(JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
+                            if (JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
                                 UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, conn);
+                            } else if (JdbcConstants.POSTGRESQL.equalsIgnoreCase(dataSourceProxy.getDbType())) {
+                                UndoLogManagerPostgresql.batchDeleteUndoLog(xids, branchIds, conn);
                             } else {
                                 UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
                             }
@@ -199,12 +193,14 @@ public class AsyncWorker implements ResourceManagerInbound {
                 }
 
                 try {
-                    if(JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
+                    if (JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
                         UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, conn);
+                    } else if (JdbcConstants.POSTGRESQL.equalsIgnoreCase(dataSourceProxy.getDbType())) {
+                        UndoLogManagerPostgresql.batchDeleteUndoLog(xids, branchIds, conn);
                     } else {
                         UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
                     }
-                }catch (Exception ex) {
+                } catch (Exception ex) {
                     LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                 }
 

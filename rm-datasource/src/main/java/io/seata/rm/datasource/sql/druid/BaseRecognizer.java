@@ -18,6 +18,7 @@ package io.seata.rm.datasource.sql.druid;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
+import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 
@@ -85,6 +86,27 @@ public abstract class BaseRecognizer implements SQLRecognizer {
 
     public OracleOutputVisitor createOracleOutputVisitor(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList, final StringBuilder sb) {
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
+
+            @Override
+            public boolean visit(SQLVariantRefExpr x) {
+                if ("?".equals(x.getName())) {
+                    ArrayList<Object> oneParamValues = parametersHolder.getParameters()[x.getIndex()];
+                    if (paramAppenderList.size() == 0) {
+                        oneParamValues.stream().forEach(t -> paramAppenderList.add(new ArrayList<>()));
+                    }
+                    for (int i = 0; i < oneParamValues.size(); i++) {
+                        paramAppenderList.get(i).add(oneParamValues.get(i));
+                    }
+
+                }
+                return super.visit(x);
+            }
+        };
+        return visitor;
+    }
+
+    public PGOutputVisitor createPGOutputVisitor(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList, final StringBuffer sb) {
+        PGOutputVisitor visitor = new PGOutputVisitor(sb) {
 
             @Override
             public boolean visit(SQLVariantRefExpr x) {
