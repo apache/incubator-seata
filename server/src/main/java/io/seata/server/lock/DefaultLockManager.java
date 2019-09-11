@@ -16,6 +16,7 @@
 package io.seata.server.lock;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import io.seata.common.util.CollectionUtils;
@@ -58,6 +59,8 @@ public class DefaultLockManager extends AbstractLockManager {
             //no lock
             return true;
         }
+        //sort locks of branch by pk, if this influence performance, could move this work to RM
+        locks.sort(Comparator.comparing(RowLock::getPk));
         return getLocker(branchSession).acquireLock(locks);
     }
 
