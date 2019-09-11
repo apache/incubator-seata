@@ -15,23 +15,23 @@
  */
 package io.seata.rm.datasource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import javax.sql.DataSource;
-
 import com.alibaba.druid.util.JdbcUtils;
-
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.rm.datasource.undo.UndoTableManager;
+import io.seata.rm.datasource.undo.UndoTableManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Data source proxy.
@@ -83,6 +83,14 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             dbType = JdbcUtils.getDbType(jdbcUrl, null);
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
+        }
+        try {
+            UndoTableManager undoTableManager = UndoTableManagerFactory.getUndoTableManager(dbType);
+            undoTableManager.createTable(this);
+        } catch (UnsupportedOperationException e) {
+            logger.error(e.getMessage());
+        } catch (SQLException e) {
+            throw new IllegalStateException("can not create undo table", e);
         }
         DefaultResourceManager.get().registerResource(this);
         tableMetaExcutor.scheduleAtFixedRate(new Runnable() {

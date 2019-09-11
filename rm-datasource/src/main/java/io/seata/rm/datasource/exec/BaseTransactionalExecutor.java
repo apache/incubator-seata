@@ -33,20 +33,15 @@ import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.WhereRecognizer;
-import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
-import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
-import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.sql.struct.*;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
 /**
  * The type Base transactional executor.
  *
- * @author sharajava
- *
  * @param <T> the type parameter
  * @param <S> the type parameter
+ * @author sharajava
  */
 public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor {
 
@@ -190,6 +185,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         }
         if (JdbcConstants.ORACLE.equalsIgnoreCase(statementProxy.getConnectionProxy().getDbType())) {
             tableMeta = TableMetaCacheOracle.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
+        } else if (JdbcConstants.POSTGRESQL.equalsIgnoreCase(statementProxy.getConnectionProxy().getDbType())) {
+            tableMeta = TableMetaCachePostgresql.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
         } else {
             tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
         }
