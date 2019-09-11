@@ -444,4 +444,11 @@
         </plugins>
     </build>
 
+    <repositories>
+        <repository>
+            <id>ICM</id>
+            <url>http://maven.icm.edu.pl/artifactory/repo/</url>
+            <releases><enabled>true</enabled></releases>
+        </repository>
+    </repositories>
 </project>
