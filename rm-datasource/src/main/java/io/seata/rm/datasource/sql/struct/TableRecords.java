@@ -17,11 +17,17 @@ package io.seata.rm.datasource.sql.struct;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.JDBCType;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
 
 /**
  * The type Table records.
@@ -182,7 +188,16 @@ public class TableRecords {
                     field.setKeyType(KeyType.PrimaryKey);
                 }
                 field.setType(col.getDataType());
-                field.setValue(resultSet.getObject(i));
+                if(col.getDataType() == JDBCType.BLOB.getVendorTypeNumber()){
+                    Blob blob = resultSet.getBlob(i);
+                    field.setValue(new SerialBlob(blob));
+                }else if(col.getDataType() == JDBCType.CLOB.getVendorTypeNumber()){
+                    Clob clob = resultSet.getClob(i);
+                    field.setValue(new SerialClob(clob));
+                }else{
+                    field.setValue(resultSet.getObject(i));
+                }
+
                 fields.add(field);
             }
 
