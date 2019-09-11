@@ -74,7 +74,7 @@
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.oracle.jdbc</groupId>
+            <groupId>com.oracle</groupId>
             <artifactId>ojdbc8</artifactId>
         </dependency>
         <dependency>
