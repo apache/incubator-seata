@@ -19,6 +19,7 @@ import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.Constants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
+import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
@@ -207,7 +208,8 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
                         LOGGER.warn("Failed to close JDBC resource while undo ... ", rollbackEx);
                     }
                 }
-                throw new BranchTransactionException(BranchRollbackFailed_Retriable, String.format("Branch session rollback failed and try again later xid = %s branchId = %s %s", xid, branchId, e.getMessage()), e);
+                throw new BranchTransactionException(BranchRollbackFailed_Retriable,
+                    String.format("Branch session rollback failed and try again later xid = %s branchId = %s %s", xid, branchId, e.getMessage()), e);
 
             } finally {
                 try {
