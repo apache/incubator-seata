@@ -375,7 +375,7 @@
                 <version>${mysql.client.version}</version>
             </dependency>
             <dependency>
-                <groupId>com.oracle</groupId>
+                <groupId>com.oracle.jdbc</groupId>
                 <artifactId>ojdbc8</artifactId>
                 <version>${oracle.client.version}</version>
             </dependency>
