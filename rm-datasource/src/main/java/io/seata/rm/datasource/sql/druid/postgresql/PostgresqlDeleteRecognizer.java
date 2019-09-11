@@ -30,10 +30,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type postgresql delete recognizer.
- *
- * @author ccg
- * @date 2019/3/25
+ * @author japsercloud
+ * @date 2019/09/11
  */
 public class PostgresqlDeleteRecognizer extends BaseRecognizer implements SQLDeleteRecognizer {
 

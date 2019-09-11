@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
@@ -27,8 +26,7 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManagerInbound;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManager;
-import io.seata.rm.datasource.undo.UndoLogManagerOracle;
-import io.seata.rm.datasource.undo.UndoLogManagerPostgresql;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -173,13 +171,8 @@ public class AsyncWorker implements ResourceManagerInbound {
                     int maxSize = xids.size() > branchIds.size() ? xids.size() : branchIds.size();
                     if (maxSize == UNDOLOG_DELETE_LIMIT_SIZE) {
                         try {
-                            if (JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
-                                UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, conn);
-                            } else if (JdbcConstants.POSTGRESQL.equalsIgnoreCase(dataSourceProxy.getDbType())) {
-                                UndoLogManagerPostgresql.batchDeleteUndoLog(xids, branchIds, conn);
-                            } else {
-                                UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
-                            }
+                            UndoLogManager undoLogManager = UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType());
+                            undoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
                         } catch (Exception ex) {
                             LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                         }
@@ -191,15 +184,9 @@ public class AsyncWorker implements ResourceManagerInbound {
                 if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
                     return;
                 }
-
                 try {
-                    if (JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
-                        UndoLogManagerOracle.batchDeleteUndoLog(xids, branchIds, conn);
-                    } else if (JdbcConstants.POSTGRESQL.equalsIgnoreCase(dataSourceProxy.getDbType())) {
-                        UndoLogManagerPostgresql.batchDeleteUndoLog(xids, branchIds, conn);
-                    } else {
-                        UndoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
-                    }
+                    UndoLogManager undoLogManager = UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType());
+                    undoLogManager.batchDeleteUndoLog(xids, branchIds, conn);
                 } catch (Exception ex) {
                     LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                 }

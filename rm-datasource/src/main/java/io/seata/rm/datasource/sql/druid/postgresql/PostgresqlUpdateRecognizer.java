@@ -32,10 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type postgresql update recognizer.
- *
- * @author ccg
- * @date 2019/3/25
+ * @author japsercloud
+ * @date 2019/09/11
  */
 public class PostgresqlUpdateRecognizer extends BaseRecognizer implements SQLUpdateRecognizer {
 

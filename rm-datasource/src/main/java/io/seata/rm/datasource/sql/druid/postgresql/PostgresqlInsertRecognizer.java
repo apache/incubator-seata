@@ -34,10 +34,8 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * The type postgresql insert recognizer.
- *
- * @author ccg
- * @date 2019/3/25
+ * @author japsercloud
+ * @date 2019/09/11
  */
 public class PostgresqlInsertRecognizer extends BaseRecognizer implements SQLInsertRecognizer {
 

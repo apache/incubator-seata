@@ -30,12 +30,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type postgresql select for update recognizer.
- *
- * @author ccg
- * @date 2019/3/25
+ * @author japsercloud
+ * @date 2019/09/11
  */
-
 public class PostgresqlSelectForUpdateRecognizer extends BaseRecognizer implements SQLSelectRecognizer {
 
     private final SQLSelectStatement ast;

@@ -22,10 +22,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * The type oracle sql keyword checker.
+ * The type oracle undo delete executor.
  *
- * @author ccg
- * @date 2019/3/25 oracle keyword checker
+ * @author japsercloud
+ * @date 2019/09/11
  */
 public class PostgresqlKeywordChecker implements KeywordChecker {
     private static volatile KeywordChecker keywordChecker = null;
