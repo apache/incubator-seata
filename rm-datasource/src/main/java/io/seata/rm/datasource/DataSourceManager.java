@@ -23,6 +23,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.util.NetUtil;
 import io.seata.core.context.RootContext;
+import io.seata.core.exception.RmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -99,9 +100,9 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
             }
             return response.isLockable();
         } catch (TimeoutException toe) {
-            throw new TransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
+            throw new RmTransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
         } catch (RuntimeException rex) {
-            throw new TransactionException(TransactionExceptionCode.LockableCheckFailed, "Runtime", rex);
+            throw new RmTransactionException(TransactionExceptionCode.LockableCheckFailed, "Runtime", rex);
         }
 
     }
