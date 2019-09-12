@@ -15,6 +15,16 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleState;
@@ -29,25 +39,13 @@ import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
-import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.RpcMessage;
-import io.seata.core.protocol.transaction.GlobalBeginResponse;
 import io.seata.core.rpc.ClientMessageListener;
 import io.seata.core.rpc.ClientMessageSender;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
 
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
@@ -146,7 +144,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             MergeResultMessage results = (MergeResultMessage) rpcMessage.getBody();
             MergedWarpMessage mergeMessage = (MergedWarpMessage) mergeMsgMap.remove(rpcMessage.getId());
             for (int i = 0; i < mergeMessage.msgs.size(); i++) {
-                long msgId = mergeMessage.msgIds.get(i);
+                int msgId = mergeMessage.msgIds.get(i);
                 MessageFuture future = futures.remove(msgId);
                 if (future == null) {
                     if (LOGGER.isInfoEnabled()) {
@@ -162,10 +160,10 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     }
     
     @Override
-    public void dispatch(long msgId, ChannelHandlerContext ctx, Object msg) {
+    public void dispatch(RpcMessage request, ChannelHandlerContext ctx) {
         if (clientMessageListener != null) {
             String remoteAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
-            clientMessageListener.onMessage(msgId, remoteAddress, msg, this);
+            clientMessageListener.onMessage(request, remoteAddress, this);
         }
     }
 
@@ -227,11 +225,6 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         String validAddress = loadBalance(getTransactionServiceGroup());
         Channel channel = clientChannelManager.acquireChannel(validAddress);
         Object result = super.sendAsyncRequestWithResponse(validAddress, channel, msg, timeout);
-        if (result instanceof GlobalBeginResponse
-            && ((GlobalBeginResponse) result).getResultCode() == ResultCode.Failed) {
-            LOGGER.error("begin response error,release channel:" + channel);
-            clientChannelManager.releaseChannel(channel, validAddress);
-        }
         return result;
     }
     
@@ -247,8 +240,8 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     }
     
     @Override
-    public void sendResponse(long msgId, String serverAddress, Object msg) {
-        super.sendResponse(msgId, clientChannelManager.acquireChannel(serverAddress), msg);
+    public void sendResponse(RpcMessage request, String serverAddress, Object msg) {
+        super.sendResponse(request, clientChannelManager.acquireChannel(serverAddress), msg);
     }
     
     /**
@@ -331,7 +324,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                             destroyChannel(address, sendChannel);
                         }
                         // fast fail
-                        for (Long msgId : mergeMessage.msgIds) {
+                        for (Integer msgId : mergeMessage.msgIds) {
                             MessageFuture messageFuture = futures.remove(msgId);
                             if (messageFuture != null) {
                                 messageFuture.setResultMessage(null);

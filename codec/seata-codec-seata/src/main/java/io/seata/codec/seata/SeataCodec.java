@@ -15,11 +15,13 @@
  */
 package io.seata.codec.seata;
 
+import java.nio.ByteBuffer;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.codec.Codec;
 import io.seata.core.protocol.AbstractMessage;
-
-import java.nio.ByteBuffer;
 
 /**
  * The Seata codec.
@@ -27,29 +29,28 @@ import java.nio.ByteBuffer;
  * @author zhangsen
  * @data 2019 /5/6
  */
-@LoadLevel(name="SEATA")
+@LoadLevel(name = "SEATA")
 public class SeataCodec implements Codec {
 
     @Override
     public <T> byte[] encode(T t) {
-        if(t == null || !(t instanceof AbstractMessage)){
+        if (t == null || !(t instanceof AbstractMessage)) {
             throw new IllegalArgumentException("AbstractMessage isn't available.");
         }
-        AbstractMessage abstractMessage = (AbstractMessage) t;
+        AbstractMessage abstractMessage = (AbstractMessage)t;
         //typecode
         short typecode = abstractMessage.getTypeCode();
         //msg codec
         MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode);
         //get empty ByteBuffer
-        ByteBuffer out = MessageCodecFactory.getByteBuffer(abstractMessage);
+        ByteBuf out = Unpooled.buffer(1024);
         //msg encode
         messageCodec.encode(t, out);
-        out.flip();
-        byte[] body = new byte[out.limit()];
-        out.get(body);
+        byte[] body = new byte[out.readableBytes()];
+        out.readBytes(body);
 
         //typecode + body
-        ByteBuffer byteBuffer = ByteBuffer.allocate(4+ body.length);
+        ByteBuffer byteBuffer = ByteBuffer.allocate(2 + body.length);
         byteBuffer.putShort(typecode);
         byteBuffer.put(body);
 
@@ -61,10 +62,10 @@ public class SeataCodec implements Codec {
 
     @Override
     public <T> T decode(byte[] bytes) {
-        if(bytes == null || bytes.length == 0){
+        if (bytes == null || bytes.length == 0) {
             throw new IllegalArgumentException("Nothing to decode.");
         }
-        if(bytes.length < 2){
+        if (bytes.length < 2) {
             throw new IllegalArgumentException("The byte[] isn't available for decode.");
         }
         ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
@@ -80,8 +81,7 @@ public class SeataCodec implements Codec {
         MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode);
         //decode
         messageCodec.decode(abstractMessage, in);
-        return (T) abstractMessage;
+        return (T)abstractMessage;
     }
-
 
 }

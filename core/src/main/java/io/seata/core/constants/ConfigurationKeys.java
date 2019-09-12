@@ -98,11 +98,28 @@ public class ConfigurationKeys {
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_PREFIX + "report.retry.count";
 
+    /**
+     * The constant CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT.
+     */
+    public static final String CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = CLIENT_PREFIX + "lock.retry.policy.branch-rollback-on-conflict";
+
+    /**
+     * The constant CLIENT_TABLE_META_CHECK_ENABLE.
+     */
+    public static final String CLIENT_TABLE_META_CHECK_ENABLE  = CLIENT_PREFIX + "table.meta.check.enable";
+
 
     /**
      * The constant SERIALIZE_FOR_RPC.
      */
     public static final String SERIALIZE_FOR_RPC = TRANSPORT_PREFIX + "serialization";
+
+    /**
+     * The constant COMPRESSOR_FOR_RPC.
+     * 
+     * @since 0.7.0
+     */
+    public static final String COMPRESSOR_FOR_RPC = TRANSPORT_PREFIX + "compressor";
 
     /**
      * The constant STORE_DB_GLOBAL_TABLE.
@@ -134,6 +151,10 @@ public class ConfigurationKeys {
      * The constant STORE_DB_TYPE.
      */
     public static final String STORE_DB_TYPE  = "store.db.db-type";
+    /**
+     * The constant STORE_DB_DRIVER_CLASS_NAME.
+     */
+    public static final String STORE_DB_DRIVER_CLASS_NAME  =  "store.db.driver-class-name";
 
     /**
      * The constant STORE_DB_URL.
@@ -181,24 +202,24 @@ public class ConfigurationKeys {
     public static final String LOCK_DB_DEFAULT_TABLE  = "lock_table";
 
     /**
-     * The constant COMMITING_RETRY_DELAY.
+     * The constant COMMITING_RETRY_PERIOD.
      */
-    public static final String  COMMITING_RETRY_DELAY = "recovery.committing-retry-delay";
+    public static final String COMMITING_RETRY_PERIOD = "recovery.committing-retry-period";
 
     /**
-     * The constant ASYN_COMMITING_RETRY_DELAY.
+     * The constant ASYN_COMMITING_RETRY_PERIOD.
      */
-    public static final String  ASYN_COMMITING_RETRY_DELAY = "recovery.asyn-committing-retry-delay";
+    public static final String ASYN_COMMITING_RETRY_PERIOD = "recovery.asyn-committing-retry-period";
 
     /**
-     * The constant ROLLBACKING_RETRY_DELAY.
+     * The constant ROLLBACKING_RETRY_PERIOD.
      */
-    public static final String  ROLLBACKING_RETRY_DELAY = "recovery.rollbacking-retry-delay";
+    public static final String ROLLBACKING_RETRY_PERIOD = "recovery.rollbacking-retry-period";
 
     /**
-     * The constant TIMEOUT_RETRY_DELAY.
+     * The constant TIMEOUT_RETRY_PERIOD.
      */
-    public static final String  TIMEOUT_RETRY_DELAY = "recovery.timeout-retry-delay";
+    public static final String TIMEOUT_RETRY_PERIOD = "recovery.timeout-retry-period";
 
     /**
      * The constant TRANSACTION_PREFIX.
@@ -213,4 +234,61 @@ public class ConfigurationKeys {
      * The constant TRANSACTION_UNDO_LOG_SERIALIZATION.
      */
     public static final String TRANSACTION_UNDO_LOG_SERIALIZATION = TRANSACTION_PREFIX + "undo.log.serialization";
+
+    /**
+     * The constant METRICS_PREFIX.
+     */
+    public static final String METRICS_PREFIX = "metrics.";
+
+    /**
+     * The constant METRICS_ENABLED.
+     */
+    public static final String METRICS_ENABLED = "enabled";
+
+    /**
+     * The constant METRICS_REGISTRY_TYPE.
+     */
+    public static final String METRICS_REGISTRY_TYPE = "registry-type";
+
+    /**
+     * The constant METRICS_EXPORTER_LIST.
+     */
+    public static final String METRICS_EXPORTER_LIST = "exporter-list";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_SAVE_DAYS.
+     */
+    public static final String TRANSACTION_UNDO_LOG_SAVE_DAYS = TRANSACTION_PREFIX + "undo.log.save.days";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_DELETE_PERIOD
+     */
+    public static final String TRANSACTION_UNDO_LOG_DELETE_PERIOD = TRANSACTION_PREFIX + "undo.log.delete.period";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_TABLE
+     */
+    public static final String TRANSACTION_UNDO_LOG_TABLE = TRANSACTION_PREFIX + "undo.log.table";
+
+    /**
+     * The constant TRANSACTION_UNDO_LOG_DEFAULT_TABLE.
+     */
+    public static final String TRANSACTION_UNDO_LOG_DEFAULT_TABLE  = "undo_log";
+
+    /**
+     * The constant SUPPORT_PREFIX.
+     */
+    public static final String SUPPORT_PREFIX = "support.";
+    /**
+     * The constant SPRING_PREFIX.
+     */
+    public static final String SPRING_PREFIX = "spring.";
+    /**
+     * The constant DATASOURCE_PREFIX.
+     */
+    public static final String DATASOURCE_PREFIX = "datasource.";
+    /**
+     * The constant DATASOURCE_AUTOPROXY.
+     */
+    public static final String DATASOURCE_AUTOPROXY = SUPPORT_PREFIX + SPRING_PREFIX + DATASOURCE_PREFIX + "autoproxy";
 }

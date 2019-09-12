@@ -201,6 +201,7 @@ class NettyClientChannelManager {
                 ((RegisterRMRequest) previousPoolKey.getMessage()).setResourceIds(registerRMRequest.getResourceIds());
             }
             channelFromPool = nettyClientKeyPool.borrowObject(poolKeyMap.get(serverAddress));
+            channels.put(serverAddress, channelFromPool);
         } catch (Exception exx) {
             LOGGER.error(FrameworkErrorCode.RegisterRM.getErrCode(), "register RM failed.", exx);
             throw new FrameworkException("can not register RM,err:" + exx.getMessage());
@@ -232,7 +233,7 @@ class NettyClientChannelManager {
                     LOGGER.error(exx.getMessage());
                 }
                 rmChannel = channels.get(serverAddress);
-                if (null == rmChannel || rmChannel.isActive()) {
+                if (null != rmChannel && rmChannel.isActive()) {
                     return rmChannel;
                 }
             }

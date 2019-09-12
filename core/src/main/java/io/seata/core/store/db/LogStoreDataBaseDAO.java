@@ -31,6 +31,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
@@ -39,7 +40,7 @@ import io.seata.core.store.LogStore;
  * The type Log store data base dao.
  *
  * @author zhangsen
- * @data 2019 /4/2
+ * @date 2019 /4/2
  */
 @LoadLevel(name = "db")
 public class LogStoreDataBaseDAO implements LogStore, Initialize {
@@ -465,34 +466,34 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     private GlobalTransactionDO convertGlobalTransactionDO(ResultSet rs) throws SQLException {
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
-        globalTransactionDO.setXid(rs.getString("xid"));
-        globalTransactionDO.setStatus(rs.getInt("status"));
-        globalTransactionDO.setApplicationId(rs.getString("application_id"));
-        globalTransactionDO.setBeginTime(rs.getLong("begin_time"));
-        globalTransactionDO.setTimeout(rs.getInt("timeout"));
-        globalTransactionDO.setTransactionId(rs.getLong("transaction_id"));
-        globalTransactionDO.setTransactionName(rs.getString("transaction_name"));
-        globalTransactionDO.setTransactionServiceGroup(rs.getString("transaction_service_group"));
-        globalTransactionDO.setApplicationData(rs.getString("application_data"));
-        globalTransactionDO.setGmtCreate(rs.getTimestamp("gmt_create"));
-        globalTransactionDO.setGmtModified(rs.getTimestamp("gmt_modified"));
+        globalTransactionDO.setXid(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_XID));
+        globalTransactionDO.setStatus(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_STATUS));
+        globalTransactionDO.setApplicationId(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID));
+        globalTransactionDO.setBeginTime(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME));
+        globalTransactionDO.setTimeout(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT));
+        globalTransactionDO.setTransactionId(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID));
+        globalTransactionDO.setTransactionName(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME));
+        globalTransactionDO.setTransactionServiceGroup(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
+        globalTransactionDO.setApplicationData(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA));
+        globalTransactionDO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE));
+        globalTransactionDO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED));
         return globalTransactionDO;
     }
 
     private BranchTransactionDO convertBranchTransactionDO(ResultSet rs) throws SQLException {
         BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
-        branchTransactionDO.setResourceGroupId(rs.getString("resource_group_id"));
-        branchTransactionDO.setStatus(rs.getInt("status"));
-        branchTransactionDO.setApplicationData(rs.getString("application_data"));
-        branchTransactionDO.setClientId(rs.getString("client_id"));
-        branchTransactionDO.setLockKey(rs.getString("lock_key"));
-        branchTransactionDO.setXid(rs.getString("xid"));
-        branchTransactionDO.setResourceId(rs.getString("resource_id"));
-        branchTransactionDO.setBranchId(rs.getLong("branch_id"));
-        branchTransactionDO.setBranchType(rs.getString("branch_type"));
-        branchTransactionDO.setTransactionId(rs.getLong("transaction_id"));
-        branchTransactionDO.setGmtCreate(rs.getTimestamp("gmt_create"));
-        branchTransactionDO.setGmtModified(rs.getTimestamp("gmt_modified"));
+        branchTransactionDO.setResourceGroupId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_GROUP_ID));
+        branchTransactionDO.setStatus(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_STATUS));
+        branchTransactionDO.setApplicationData(rs.getString(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA));
+        branchTransactionDO.setClientId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID));
+        branchTransactionDO.setLockKey(rs.getString(ServerTableColumnsName.BRANCH_TABLE_LOCK_KEY));
+        branchTransactionDO.setXid(rs.getString(ServerTableColumnsName.BRANCH_TABLE_XID));
+        branchTransactionDO.setResourceId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_ID));
+        branchTransactionDO.setBranchId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID));
+        branchTransactionDO.setBranchType(rs.getString(ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE));
+        branchTransactionDO.setTransactionId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_TRANSACTION_ID));
+        branchTransactionDO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE));
+        branchTransactionDO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED));
         return branchTransactionDO;
     }
 

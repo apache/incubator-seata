@@ -15,6 +15,9 @@
  */
 package io.seata.codec.seata;
 
+import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
+
 import io.seata.codec.seata.protocol.MergeResultMessageCodec;
 import io.seata.codec.seata.protocol.MergedWarpMessageCodec;
 import io.seata.codec.seata.protocol.RegisterRMRequestCodec;
@@ -39,6 +42,7 @@ import io.seata.codec.seata.protocol.transaction.GlobalRollbackRequestCodec;
 import io.seata.codec.seata.protocol.transaction.GlobalRollbackResponseCodec;
 import io.seata.codec.seata.protocol.transaction.GlobalStatusRequestCodec;
 import io.seata.codec.seata.protocol.transaction.GlobalStatusResponseCodec;
+import io.seata.codec.seata.protocol.transaction.UndoLogDeleteRequestCodec;
 import io.seata.core.protocol.AbstractIdentifyRequest;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
@@ -69,9 +73,7 @@ import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
 import io.seata.core.protocol.transaction.GlobalStatusResponse;
-
-import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
+import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 
 /**
  * The type Message codec factory.
@@ -91,7 +93,7 @@ public class MessageCodecFactory {
      * @param abstractMessage the abstract message
      * @return the message codec
      */
-    public static MessageSeataCodec getMessageCodec(AbstractMessage abstractMessage){
+    public static MessageSeataCodec getMessageCodec(AbstractMessage abstractMessage) {
         return getMessageCodec(abstractMessage.getTypeCode());
     }
 
@@ -202,11 +204,12 @@ public class MessageCodecFactory {
                 return new BranchCommitResponseCodec();
             case MessageType.TYPE_BRANCH_ROLLBACK_RESULT:
                 return new BranchRollbackResponseCodec();
+            case MessageType.TYPE_RM_DELETE_UNDOLOG:
+                return new UndoLogDeleteRequestCodec();
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
     }
-
 
     /**
      * Gets message.
@@ -241,6 +244,9 @@ public class MessageCodecFactory {
             case MessageType.TYPE_BRANCH_ROLLBACK:
                 abstractMessage = new BranchRollbackRequest();
                 break;
+            case MessageType.TYPE_RM_DELETE_UNDOLOG:
+                abstractMessage = new UndoLogDeleteRequest();
+                break;
             default:
                 break;
         }
@@ -259,7 +265,6 @@ public class MessageCodecFactory {
 
         return getMergeResponseInstanceByCode(typeCode);
     }
-
 
     /**
      * Gets merge request instance by code.
@@ -319,42 +324,41 @@ public class MessageCodecFactory {
         }
     }
 
-
     /**
      * Get byte buffer byte buffer.
      *
      * @param abstractMessage the abstract message
      * @return the byte buffer
      */
-    public static ByteBuffer getByteBuffer(AbstractMessage abstractMessage ){
+    public static ByteBuffer getByteBuffer(AbstractMessage abstractMessage) {
         int bufferSize = 1024;
-        if(abstractMessage instanceof MergedWarpMessage){
+        if (abstractMessage instanceof MergedWarpMessage) {
             bufferSize = ((MergedWarpMessage)abstractMessage).msgs.size() * 1024 + 4;
-        }else if(abstractMessage instanceof MergeResultMessage){
+        } else if (abstractMessage instanceof MergeResultMessage) {
             bufferSize = ((MergeResultMessage)abstractMessage).msgs.length * 1024 + 4;
-        }else if(abstractMessage instanceof AbstractIdentifyRequest){
+        } else if (abstractMessage instanceof AbstractIdentifyRequest) {
             bufferSize = 10 * 1024;
-        }else if (abstractMessage instanceof AbstractResultMessage){
+        } else if (abstractMessage instanceof AbstractResultMessage) {
             bufferSize = 512;
-        }else if(abstractMessage instanceof AbstractBranchEndRequest){
-            AbstractBranchEndRequest abstractBranchEndRequest = (AbstractBranchEndRequest) abstractMessage;
+        } else if (abstractMessage instanceof AbstractBranchEndRequest) {
+            AbstractBranchEndRequest abstractBranchEndRequest = (AbstractBranchEndRequest)abstractMessage;
             byte[] applicationDataBytes = null;
             if (abstractBranchEndRequest.getApplicationData() != null) {
                 applicationDataBytes = abstractBranchEndRequest.getApplicationData().getBytes(UTF8);
                 if (applicationDataBytes.length > 512) {
                     bufferSize = applicationDataBytes.length + 1024;
-                }else {
+                } else {
                     bufferSize = 1024;
                 }
-            }else {
+            } else {
                 bufferSize = 1024;
             }
-        }else if(abstractMessage instanceof GlobalBeginRequest){
+        } else if (abstractMessage instanceof GlobalBeginRequest) {
             bufferSize = 256;
-        }else if(abstractMessage instanceof AbstractGlobalEndRequest){
+        } else if (abstractMessage instanceof AbstractGlobalEndRequest) {
             bufferSize = 256;
-        }else if(abstractMessage instanceof BranchRegisterRequest){
-            BranchRegisterRequest branchRegisterRequest = (BranchRegisterRequest) abstractMessage;
+        } else if (abstractMessage instanceof BranchRegisterRequest) {
+            BranchRegisterRequest branchRegisterRequest = (BranchRegisterRequest)abstractMessage;
             int byteLenth = 0;
             byte[] lockKeyBytes = null;
             if (branchRegisterRequest.getLockKey() != null) {
@@ -371,8 +375,8 @@ public class MessageCodecFactory {
                 }
             }
             bufferSize = byteLenth + 1024;
-        }else if(abstractMessage instanceof BranchReportRequest){
-            BranchReportRequest branchReportRequest = (BranchReportRequest) abstractMessage;
+        } else if (abstractMessage instanceof BranchReportRequest) {
+            BranchReportRequest branchReportRequest = (BranchReportRequest)abstractMessage;
             int byteLenth = 0;
             byte[] applicationDataBytes = null;
             if (branchReportRequest.getApplicationData() != null) {
@@ -382,7 +386,7 @@ public class MessageCodecFactory {
                 }
             }
             bufferSize = byteLenth + 1024;
-        }else {
+        } else {
             bufferSize = 512;
         }
         return ByteBuffer.allocate(bufferSize);

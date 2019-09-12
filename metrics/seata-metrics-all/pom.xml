@@ -39,7 +39,12 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-metrics-prometheus</artifactId>
+            <artifactId>seata-metrics-registry-compact</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-metrics-exporter-prometheus</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>

@@ -15,6 +15,8 @@
  */
 package io.seata.server.session;
 
+import io.seata.core.exception.BranchTransactionException;
+import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -96,7 +98,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     public void updateBranchSessionStatus(BranchSession branchSession, BranchStatus status)
         throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.GLOBAL_ADD);
+            LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_UPDATE);
         }
         writeSession(LogOperation.BRANCH_UPDATE, branchSession);
     }
@@ -105,7 +107,7 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
     public void removeBranchSession(GlobalSession globalSession, BranchSession branchSession)
         throws TransactionException {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.GLOBAL_ADD);
+            LOGGER.debug("MANAGER[" + name + "] SESSION[" + branchSession + "] " + LogOperation.BRANCH_REMOVE);
         }
         writeSession(LogOperation.BRANCH_REMOVE, branchSession);
     }
@@ -148,7 +150,21 @@ public abstract class AbstractSessionManager implements SessionManager, SessionL
 
     private void writeSession(LogOperation logOperation, SessionStorable sessionStorable) throws TransactionException {
         if (!transactionStoreManager.writeSession(logOperation, sessionStorable)) {
-            throw new TransactionException(TransactionExceptionCode.FailedWriteSession);
+            if (LogOperation.GLOBAL_ADD.equals(logOperation)) {
+                throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to store global session");
+            } else if (LogOperation.GLOBAL_UPDATE.equals(logOperation)) {
+                throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to update global session");
+            } else if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
+                throw new GlobalTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to remove global session");
+            } else if (LogOperation.BRANCH_ADD.equals(logOperation)) {
+                throw new BranchTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to store branch session");
+            } else if (LogOperation.BRANCH_UPDATE.equals(logOperation)) {
+                throw new BranchTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to update branch session");
+            } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
+                throw new BranchTransactionException(TransactionExceptionCode.FailedWriteSession, "Fail to remove branch session");
+            }else{
+                throw new BranchTransactionException(TransactionExceptionCode.FailedWriteSession, "Unknown LogOperation:" + logOperation.name());
+            }
         }
     }
 
