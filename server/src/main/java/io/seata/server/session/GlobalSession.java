@@ -25,6 +25,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import io.seata.common.XID;
+import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -613,7 +614,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
             } catch (InterruptedException e) {
                 LOGGER.error("Interrupted error", e);
             }
-            throw new TransactionException(TransactionExceptionCode.FailedLockGlobalTranscation);
+            throw new GlobalTransactionException(TransactionExceptionCode.FailedLockGlobalTranscation, "Lock global session failed");
         }
 
         public void unlock() {
