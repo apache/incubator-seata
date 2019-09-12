@@ -223,7 +223,6 @@ public class JacksonUndoLogParser implements UndoLogParser {
             } catch (SQLException e) {
                 LOGGER.error("deserialize java.sql.Blob error : {}", e.getMessage(), e);
             }
-            LOGGER.error("deserialize java.sql.Blob type error.");
             return null;
         }
     }
@@ -262,7 +261,6 @@ public class JacksonUndoLogParser implements UndoLogParser {
             } catch (SQLException e) {
                 LOGGER.error("deserialize java.sql.Clob error : {}", e.getMessage(), e);
             }
-            LOGGER.error("deserialize java.sql.Clob type error.");
             return null;
         }
     }
