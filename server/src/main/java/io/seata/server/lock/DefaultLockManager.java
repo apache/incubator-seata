@@ -128,7 +128,8 @@ public class DefaultLockManager extends AbstractLockManager {
      * @return the locker
      */
     protected Locker getLocker() {
-        return getLocker(null);
+        BranchSession emptyBranchSession = new BranchSession();
+        return getLocker(emptyBranchSession);
     }
 
     /**
