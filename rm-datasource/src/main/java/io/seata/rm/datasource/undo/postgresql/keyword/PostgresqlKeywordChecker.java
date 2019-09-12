@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  */
 public class PostgresqlKeywordChecker implements KeywordChecker {
     private static volatile KeywordChecker keywordChecker = null;
-    private static volatile Set<String> keywordSet = null;
+    private Set<String> keywordSet;
 
     private PostgresqlKeywordChecker() {
         keywordSet = Arrays.stream(PostgresqlKeywordChecker.PostgresqlKeyword.values()).map(PostgresqlKeywordChecker.PostgresqlKeyword::name).collect(Collectors.toSet());
