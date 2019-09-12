@@ -21,7 +21,6 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
-@Component
 public class SpringContextProvider implements ApplicationContextAware {
     private static ApplicationContext applicationContext;
     private static Environment environment;
