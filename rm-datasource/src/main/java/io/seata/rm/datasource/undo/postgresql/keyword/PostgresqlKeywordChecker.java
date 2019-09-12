@@ -35,7 +35,7 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
     }
 
     /**
-     * get instance of type oracle keyword checker
+     * get instance of type postgresql keyword checker
      *
      * @return instance
      */
@@ -44,7 +44,7 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
             synchronized (PostgresqlKeywordChecker.class) {
                 if (keywordChecker == null) {
                     keywordChecker = new PostgresqlKeywordChecker();
-                    keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
+                    keywordSet = Arrays.stream(PostgresqlKeyword.values()).map(PostgresqlKeyword::name).collect(Collectors.toSet());
                 }
             }
         }
@@ -52,447 +52,447 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
     }
 
     /**
-     * oracle keyword
+     * postgresql keyword
      */
-    private enum OracleKeyword {
+    private enum PostgresqlKeyword {
         /**
-         * ACCESS is oracle keyword
+         * ACCESS is postgresql keyword
          */
         ACCESS("ACCESS"),
         /**
-         * ADD is oracle keyword
+         * ADD is postgresql keyword
          */
         ADD("ADD"),
         /**
-         * ALL is oracle keyword
+         * ALL is postgresql keyword
          */
         ALL("ALL"),
         /**
-         * ALTER is oracle keyword
+         * ALTER is postgresql keyword
          */
         ALTER("ALTER"),
         /**
-         * AND is oracle keyword
+         * AND is postgresql keyword
          */
         AND("AND"),
         /**
-         * ANY is oracle keyword
+         * ANY is postgresql keyword
          */
         ANY("ANY"),
         /**
-         * AS is oracle keyword
+         * AS is postgresql keyword
          */
         AS("AS"),
         /**
-         * ASC is oracle keyword
+         * ASC is postgresql keyword
          */
         ASC("ASC"),
         /**
-         * AUDIT is oracle keyword
+         * AUDIT is postgresql keyword
          */
         AUDIT("AUDIT"),
         /**
-         * BETWEEN is oracle keyword
+         * BETWEEN is postgresql keyword
          */
         BETWEEN("BETWEEN"),
         /**
-         * BY is oracle keyword
+         * BY is postgresql keyword
          */
         BY("BY"),
         /**
-         * CHAR is oracle keyword
+         * CHAR is postgresql keyword
          */
         CHAR("CHAR"),
         /**
-         * CHECK is oracle keyword
+         * CHECK is postgresql keyword
          */
         CHECK("CHECK"),
         /**
-         * CLUSTER is oracle keyword
+         * CLUSTER is postgresql keyword
          */
         CLUSTER("CLUSTER"),
         /**
-         * COLUMN is oracle keyword
+         * COLUMN is postgresql keyword
          */
         COLUMN("COLUMN"),
         /**
-         * COLUMN_VALUE is oracle keyword
+         * COLUMN_VALUE is postgresql keyword
          */
         COLUMN_VALUE("COLUMN_VALUE"),
         /**
-         * COMMENT is oracle keyword
+         * COMMENT is postgresql keyword
          */
         COMMENT("COMMENT"),
         /**
-         * COMPRESS is oracle keyword
+         * COMPRESS is postgresql keyword
          */
         COMPRESS("COMPRESS"),
         /**
-         * CONNECT is oracle keyword
+         * CONNECT is postgresql keyword
          */
         CONNECT("CONNECT"),
         /**
-         * CREATE is oracle keyword
+         * CREATE is postgresql keyword
          */
         CREATE("CREATE"),
         /**
-         * CURRENT is oracle keyword
+         * CURRENT is postgresql keyword
          */
         CURRENT("CURRENT"),
         /**
-         * DATE is oracle keyword
+         * DATE is postgresql keyword
          */
         DATE("DATE"),
         /**
-         * DECIMAL is oracle keyword
+         * DECIMAL is postgresql keyword
          */
         DECIMAL("DECIMAL"),
         /**
-         * DEFAULT is oracle keyword
+         * DEFAULT is postgresql keyword
          */
         DEFAULT("DEFAULT"),
         /**
-         * DELETE is oracle keyword
+         * DELETE is postgresql keyword
          */
         DELETE("DELETE"),
         /**
-         * DESC is oracle keyword
+         * DESC is postgresql keyword
          */
         DESC("DESC"),
         /**
-         * DISTINCT is oracle keyword
+         * DISTINCT is postgresql keyword
          */
         DISTINCT("DISTINCT"),
         /**
-         * DROP is oracle keyword
+         * DROP is postgresql keyword
          */
         DROP("DROP"),
         /**
-         * ELSE is oracle keyword
+         * ELSE is postgresql keyword
          */
         ELSE("ELSE"),
         /**
-         * EXCLUSIVE is oracle keyword
+         * EXCLUSIVE is postgresql keyword
          */
         EXCLUSIVE("EXCLUSIVE"),
         /**
-         * EXISTS is oracle keyword
+         * EXISTS is postgresql keyword
          */
         EXISTS("EXISTS"),
         /**
-         * FILE is oracle keyword
+         * FILE is postgresql keyword
          */
         FILE("FILE"),
         /**
-         * FLOAT is oracle keyword
+         * FLOAT is postgresql keyword
          */
         FLOAT("FLOAT"),
         /**
-         * FOR is oracle keyword
+         * FOR is postgresql keyword
          */
         FOR("FOR"),
         /**
-         * FROM is oracle keyword
+         * FROM is postgresql keyword
          */
         FROM("FROM"),
         /**
-         * GRANT is oracle keyword
+         * GRANT is postgresql keyword
          */
         GRANT("GRANT"),
         /**
-         * GROUP is oracle keyword
+         * GROUP is postgresql keyword
          */
         GROUP("GROUP"),
         /**
-         * HAVING is oracle keyword
+         * HAVING is postgresql keyword
          */
         HAVING("HAVING"),
         /**
-         * IDENTIFIED is oracle keyword
+         * IDENTIFIED is postgresql keyword
          */
         IDENTIFIED("IDENTIFIED"),
         /**
-         * IMMEDIATE is oracle keyword
+         * IMMEDIATE is postgresql keyword
          */
         IMMEDIATE("IMMEDIATE"),
         /**
-         * IN is oracle keyword
+         * IN is postgresql keyword
          */
         IN("IN"),
         /**
-         * INCREMENT is oracle keyword
+         * INCREMENT is postgresql keyword
          */
         INCREMENT("INCREMENT"),
         /**
-         * INDEX is oracle keyword
+         * INDEX is postgresql keyword
          */
         INDEX("INDEX"),
         /**
-         * INITIAL is oracle keyword
+         * INITIAL is postgresql keyword
          */
         INITIAL("INITIAL"),
         /**
-         * INSERT is oracle keyword
+         * INSERT is postgresql keyword
          */
         INSERT("INSERT"),
         /**
-         * INTEGER is oracle keyword
+         * INTEGER is postgresql keyword
          */
         INTEGER("INTEGER"),
         /**
-         * INTERSECT is oracle keyword
+         * INTERSECT is postgresql keyword
          */
         INTERSECT("INTERSECT"),
         /**
-         * INTO is oracle keyword
+         * INTO is postgresql keyword
          */
         INTO("INTO"),
         /**
-         * IS is oracle keyword
+         * IS is postgresql keyword
          */
         IS("IS"),
         /**
-         * LEVEL is oracle keyword
+         * LEVEL is postgresql keyword
          */
         LEVEL("LEVEL"),
         /**
-         * LIKE is oracle keyword
+         * LIKE is postgresql keyword
          */
         LIKE("LIKE"),
         /**
-         * LOCK is oracle keyword
+         * LOCK is postgresql keyword
          */
         LOCK("LOCK"),
         /**
-         * LONG is oracle keyword
+         * LONG is postgresql keyword
          */
         LONG("LONG"),
         /**
-         * MAXEXTENTS is oracle keyword
+         * MAXEXTENTS is postgresql keyword
          */
         MAXEXTENTS("MAXEXTENTS"),
         /**
-         * MINUS is oracle keyword
+         * MINUS is postgresql keyword
          */
         MINUS("MINUS"),
         /**
-         * MLSLABEL is oracle keyword
+         * MLSLABEL is postgresql keyword
          */
         MLSLABEL("MLSLABEL"),
         /**
-         * MODE is oracle keyword
+         * MODE is postgresql keyword
          */
         MODE("MODE"),
         /**
-         * MODIFY is oracle keyword
+         * MODIFY is postgresql keyword
          */
         MODIFY("MODIFY"),
         /**
-         * NESTED_TABLE_ID is oracle keyword
+         * NESTED_TABLE_ID is postgresql keyword
          */
         NESTED_TABLE_ID("NESTED_TABLE_ID"),
         /**
-         * NOAUDIT is oracle keyword
+         * NOAUDIT is postgresql keyword
          */
         NOAUDIT("NOAUDIT"),
         /**
-         * NOCOMPRESS is oracle keyword
+         * NOCOMPRESS is postgresql keyword
          */
         NOCOMPRESS("NOCOMPRESS"),
         /**
-         * NOT is oracle keyword
+         * NOT is postgresql keyword
          */
         NOT("NOT"),
         /**
-         * NOWAIT is oracle keyword
+         * NOWAIT is postgresql keyword
          */
         NOWAIT("NOWAIT"),
         /**
-         * NULL is oracle keyword
+         * NULL is postgresql keyword
          */
         NULL("NULL"),
         /**
-         * NUMBER is oracle keyword
+         * NUMBER is postgresql keyword
          */
         NUMBER("NUMBER"),
         /**
-         * OF is oracle keyword
+         * OF is postgresql keyword
          */
         OF("OF"),
         /**
-         * OFFLINE is oracle keyword
+         * OFFLINE is postgresql keyword
          */
         OFFLINE("OFFLINE"),
         /**
-         * ON is oracle keyword
+         * ON is postgresql keyword
          */
         ON("ON"),
         /**
-         * ONLINE is oracle keyword
+         * ONLINE is postgresql keyword
          */
         ONLINE("ONLINE"),
         /**
-         * OPTION is oracle keyword
+         * OPTION is postgresql keyword
          */
         OPTION("OPTION"),
         /**
-         * OR is oracle keyword
+         * OR is postgresql keyword
          */
         OR("OR"),
         /**
-         * ORDER is oracle keyword
+         * ORDER is postgresql keyword
          */
         ORDER("ORDER"),
         /**
-         * PCTFREE is oracle keyword
+         * PCTFREE is postgresql keyword
          */
         PCTFREE("PCTFREE"),
         /**
-         * PRIOR is oracle keyword
+         * PRIOR is postgresql keyword
          */
         PRIOR("PRIOR"),
         /**
-         * PUBLIC is oracle keyword
+         * PUBLIC is postgresql keyword
          */
         PUBLIC("PUBLIC"),
         /**
-         * RAW is oracle keyword
+         * RAW is postgresql keyword
          */
         RAW("RAW"),
         /**
-         * RENAME is oracle keyword
+         * RENAME is postgresql keyword
          */
         RENAME("RENAME"),
         /**
-         * RESOURCE is oracle keyword
+         * RESOURCE is postgresql keyword
          */
         RESOURCE("RESOURCE"),
         /**
-         * REVOKE is oracle keyword
+         * REVOKE is postgresql keyword
          */
         REVOKE("REVOKE"),
         /**
-         * ROW is oracle keyword
+         * ROW is postgresql keyword
          */
         ROW("ROW"),
         /**
-         * ROWID is oracle keyword
+         * ROWID is postgresql keyword
          */
         ROWID("ROWID"),
         /**
-         * ROWNUM is oracle keyword
+         * ROWNUM is postgresql keyword
          */
         ROWNUM("ROWNUM"),
         /**
-         * ROWS is oracle keyword
+         * ROWS is postgresql keyword
          */
         ROWS("ROWS"),
         /**
-         * SELECT is oracle keyword
+         * SELECT is postgresql keyword
          */
         SELECT("SELECT"),
         /**
-         * SESSION is oracle keyword
+         * SESSION is postgresql keyword
          */
         SESSION("SESSION"),
         /**
-         * SET is oracle keyword
+         * SET is postgresql keyword
          */
         SET("SET"),
         /**
-         * SHARE is oracle keyword
+         * SHARE is postgresql keyword
          */
         SHARE("SHARE"),
         /**
-         * SIZE is oracle keyword
+         * SIZE is postgresql keyword
          */
         SIZE("SIZE"),
         /**
-         * SMALLINT is oracle keyword
+         * SMALLINT is postgresql keyword
          */
         SMALLINT("SMALLINT"),
         /**
-         * START is oracle keyword
+         * START is postgresql keyword
          */
         START("START"),
         /**
-         * SUCCESSFUL is oracle keyword
+         * SUCCESSFUL is postgresql keyword
          */
         SUCCESSFUL("SUCCESSFUL"),
         /**
-         * SYNONYM is oracle keyword
+         * SYNONYM is postgresql keyword
          */
         SYNONYM("SYNONYM"),
         /**
-         * SYSDATE is oracle keyword
+         * SYSDATE is postgresql keyword
          */
         SYSDATE("SYSDATE"),
         /**
-         * TABLE is oracle keyword
+         * TABLE is postgresql keyword
          */
         TABLE("TABLE"),
         /**
-         * THEN is oracle keyword
+         * THEN is postgresql keyword
          */
         THEN("THEN"),
         /**
-         * TO is oracle keyword
+         * TO is postgresql keyword
          */
         TO("TO"),
         /**
-         * TRIGGER is oracle keyword
+         * TRIGGER is postgresql keyword
          */
         TRIGGER("TRIGGER"),
         /**
-         * UID is oracle keyword
+         * UID is postgresql keyword
          */
         UID("UID"),
         /**
-         * UNION is oracle keyword
+         * UNION is postgresql keyword
          */
         UNION("UNION"),
         /**
-         * UNIQUE is oracle keyword
+         * UNIQUE is postgresql keyword
          */
         UNIQUE("UNIQUE"),
         /**
-         * UPDATE is oracle keyword
+         * UPDATE is postgresql keyword
          */
         UPDATE("UPDATE"),
         /**
-         * USER is oracle keyword
+         * USER is postgresql keyword
          */
         USER("USER"),
         /**
-         * VALIDATE is oracle keyword
+         * VALIDATE is postgresql keyword
          */
         VALIDATE("VALIDATE"),
         /**
-         * VALUES is oracle keyword
+         * VALUES is postgresql keyword
          */
         VALUES("VALUES"),
         /**
-         * VARCHAR is oracle keyword
+         * VARCHAR is postgresql keyword
          */
         VARCHAR("VARCHAR"),
         /**
-         * VARCHAR2 is oracle keyword
+         * VARCHAR2 is postgresql keyword
          */
         VARCHAR2("VARCHAR2"),
         /**
-         * VIEW is oracle keyword
+         * VIEW is postgresql keyword
          */
         VIEW("VIEW"),
         /**
-         * WHENEVER is oracle keyword
+         * WHENEVER is postgresql keyword
          */
         WHENEVER("WHENEVER"),
         /**
-         * WHERE is oracle keyword
+         * WHERE is postgresql keyword
          */
         WHERE("WHERE"),
         /**
-         * WITH is oracle keyword
+         * WITH is postgresql keyword
          */
         WITH("WITH");
         /**
@@ -500,7 +500,7 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
          */
         public final String name;
 
-        OracleKeyword(String name) {
+        PostgresqlKeyword(String name) {
             this.name = name;
         }
     }
