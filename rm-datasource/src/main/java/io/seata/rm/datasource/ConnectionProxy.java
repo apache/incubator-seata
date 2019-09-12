@@ -56,7 +56,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     /**
      * Instantiates a new Connection proxy.
      *
-     * @param dataSourceProxy  the data source proxy
+     * @param dataSourceProxy the data source proxy
      * @param targetConnection the target connection
      */
     public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {

@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
  * The type oracle undo delete executor.
  *
  * @author japsercloud
- * @date 2019/09/11
  */
 public class PostgresqlKeywordChecker implements KeywordChecker {
     private static volatile KeywordChecker keywordChecker = null;
@@ -504,7 +503,6 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
             this.name = name;
         }
     }
-
 
     @Override
     public boolean check(String fieldOrTableName) {

@@ -77,7 +77,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * Instantiates a new Data source proxy.
      *
      * @param targetDataSource the target data source
-     * @param resourceGroupId  the resource group id
+     * @param resourceGroupId the resource group id
      */
     public DataSourceProxy(DataSource targetDataSource, String resourceGroupId) {
         super(targetDataSource);

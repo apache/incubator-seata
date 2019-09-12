@@ -38,7 +38,7 @@ public class UndoExecutorFactory {
     /**
      * Gets undo executor.
      *
-     * @param dbType     the db type
+     * @param dbType the db type
      * @param sqlUndoLog the sql undo log
      * @return the undo executor
      */

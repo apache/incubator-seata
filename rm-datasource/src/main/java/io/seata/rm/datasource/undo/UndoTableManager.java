@@ -19,6 +19,11 @@ import io.seata.rm.datasource.DataSourceProxy;
 
 import java.sql.SQLException;
 
+/**
+ * The type Undo executor factory.
+ *
+ * @author jaspercloud
+ */
 public interface UndoTableManager {
 
     void createTable(DataSourceProxy dataSourceProxy) throws SQLException;

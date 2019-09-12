@@ -65,12 +65,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * Instantiates a new Base transactional executor.
      *
-     * @param statementProxy    the statement proxy
+     * @param statementProxy the statement proxy
      * @param statementCallback the statement callback
-     * @param sqlRecognizer     the sql recognizer
+     * @param sqlRecognizer the sql recognizer
      */
     public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
-                                     SQLRecognizer sqlRecognizer) {
+        SQLRecognizer sqlRecognizer) {
         this.statementProxy = statementProxy;
         this.statementCallback = statementCallback;
         this.sqlRecognizer = sqlRecognizer;
@@ -119,7 +119,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * build buildWhereCondition
      *
-     * @param recognizer        the recognizer
+     * @param recognizer the recognizer
      * @param paramAppenderList the param paramAppender list
      * @return the string
      */
@@ -197,7 +197,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * prepare undo log.
      *
      * @param beforeImage the before image
-     * @param afterImage  the after image
+     * @param afterImage the after image
      * @throws SQLException the sql exception
      */
     protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
@@ -243,7 +243,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * build a SQLUndoLog
      *
      * @param beforeImage the before image
-     * @param afterImage  the after image
+     * @param afterImage the after image
      * @return sql undo log
      */
     protected SQLUndoLog buildUndoItem(TableRecords beforeImage, TableRecords afterImage) {
@@ -258,17 +258,17 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         return sqlUndoLog;
     }
 
-
     /**
      * build a BeforeImage
      *
-     * @param tableMeta         the tableMeta
-     * @param selectSQL         the selectSQL
+     * @param tableMeta the tableMeta
+     * @param selectSQL the selectSQL
      * @param paramAppenderList the paramAppender list
      * @return a tableRecords
      * @throws SQLException the sql exception
      */
-    protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
+    protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL,
+        ArrayList<List<Object>> paramAppenderList) throws SQLException {
         TableRecords tableRecords = null;
         PreparedStatement ps = null;
         Statement st = null;

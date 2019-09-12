@@ -31,7 +31,6 @@ import java.util.List;
 
 /**
  * @author japsercloud
- * @date 2019/09/11
  */
 public class PostgresqlSelectForUpdateRecognizer extends BaseRecognizer implements SQLSelectRecognizer {
 
@@ -41,7 +40,7 @@ public class PostgresqlSelectForUpdateRecognizer extends BaseRecognizer implemen
      * Instantiates a new My sql select for update recognizer.
      *
      * @param originalSQL the original sql
-     * @param ast         the ast
+     * @param ast the ast
      */
     public PostgresqlSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
@@ -54,7 +53,8 @@ public class PostgresqlSelectForUpdateRecognizer extends BaseRecognizer implemen
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(final ParametersHolder parametersHolder,
+        final ArrayList<List<Object>> paramAppenderList) {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
         if (where == null) {

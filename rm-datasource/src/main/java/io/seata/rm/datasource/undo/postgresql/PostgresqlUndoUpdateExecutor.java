@@ -30,7 +30,6 @@ import java.util.List;
 
 /**
  * @author japsercloud
- * @date 2019/09/11
  */
 public class PostgresqlUndoUpdateExecutor extends AbstractUndoExecutor {
 

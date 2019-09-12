@@ -35,7 +35,6 @@ import java.util.List;
  * The type oralce undo insert executor.
  *
  * @author japsercloud
- * @date 2019/09/11
  */
 public class PostgresqlUndoInsertExecutor extends AbstractUndoExecutor {
 
@@ -61,7 +60,8 @@ public class PostgresqlUndoInsertExecutor extends AbstractUndoExecutor {
     }
 
     @Override
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue) throws SQLException {
+    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues,
+        Field pkValue) throws SQLException {
         undoPST.setObject(1, pkValue.getValue(), pkValue.getType());
     }
 

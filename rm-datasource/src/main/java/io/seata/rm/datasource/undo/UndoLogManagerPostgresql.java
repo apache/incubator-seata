@@ -44,7 +44,6 @@ import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFai
  * The type Undo log manager.
  *
  * @author ccg
- * @date 2019/3/25
  */
 public final class UndoLogManagerPostgresql {
 
@@ -131,8 +130,8 @@ public final class UndoLogManagerPostgresql {
      * Undo.
      *
      * @param dataSourceProxy the data source proxy
-     * @param xid             the xid
-     * @param branchId        the branch id
+     * @param xid the xid
+     * @param branchId the branch id
      * @throws TransactionException the transaction exception
      */
     public static void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {
@@ -304,7 +303,8 @@ public final class UndoLogManagerPostgresql {
 
     }
 
-    public static int deleteUndoLogByLogCreated(Date logCreated, String dbType, int limitRows, Connection conn) throws SQLException {
+    public static int deleteUndoLogByLogCreated(Date logCreated, String dbType, int limitRows,
+        Connection conn) throws SQLException {
         assertDbSupport(dbType);
         PreparedStatement deletePST = null;
         try {
@@ -353,9 +353,9 @@ public final class UndoLogManagerPostgresql {
     /**
      * Delete undo log.
      *
-     * @param xid      the xid
+     * @param xid the xid
      * @param branchId the branch id
-     * @param conn     the conn
+     * @param conn the conn
      * @throws SQLException the sql exception
      */
     public static void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
@@ -382,18 +382,18 @@ public final class UndoLogManagerPostgresql {
     }
 
     private static void insertUndoLogWithNormal(String xid, long branchID, String rollbackCtx,
-                                                byte[] undoLogContent, Connection conn) throws SQLException {
+        byte[] undoLogContent, Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, rollbackCtx, undoLogContent, State.Normal, conn);
     }
 
     private static void insertUndoLogWithGlobalFinished(String xid, long branchID, UndoLogParser parser,
-                                                        Connection conn) throws SQLException {
+        Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, buildContext(parser.getName()),
             parser.getDefaultContent(), State.GlobalFinished, conn);
     }
 
     private static void insertUndoLog(String xid, long branchID, String rollbackCtx,
-                                      byte[] undoLogContent, State state, Connection conn) throws SQLException {
+        byte[] undoLogContent, State state, Connection conn) throws SQLException {
         PreparedStatement pst = null;
         try {
             pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL);

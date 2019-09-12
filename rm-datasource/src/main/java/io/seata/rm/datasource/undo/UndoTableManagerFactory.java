@@ -18,6 +18,11 @@ package io.seata.rm.datasource.undo;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.undo.postgresql.PostgresqlUndoTableManager;
 
+/**
+ * The type Undo executor factory.
+ *
+ * @author jaspercloud
+ */
 public class UndoTableManagerFactory {
 
     public static UndoTableManager getUndoTableManager(String dbType) {

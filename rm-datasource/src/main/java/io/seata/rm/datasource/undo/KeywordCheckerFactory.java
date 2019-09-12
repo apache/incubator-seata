@@ -25,7 +25,6 @@ import io.seata.rm.datasource.undo.postgresql.keyword.PostgresqlKeywordChecker;
  * The type Keyword checker factory.
  *
  * @author Wu
- * @date 2019 /3/5 The Type keyword checker factory
  */
 public class KeywordCheckerFactory {
 

@@ -55,13 +55,14 @@ public class AsyncWorker implements ResourceManagerInbound {
         /**
          * Instantiates a new Phase 2 context.
          *
-         * @param branchType      the branchType
-         * @param xid             the xid
-         * @param branchId        the branch id
-         * @param resourceId      the resource id
+         * @param branchType the branchType
+         * @param xid the xid
+         * @param branchId the branch id
+         * @param resourceId the resource id
          * @param applicationData the application data
          */
-        public Phase2Context(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) {
+        public Phase2Context(BranchType branchType, String xid, long branchId, String resourceId,
+            String applicationData) {
             this.xid = xid;
             this.branchId = branchId;
             this.resourceId = resourceId;
@@ -97,11 +98,11 @@ public class AsyncWorker implements ResourceManagerInbound {
 
     private static final BlockingQueue<Phase2Context> ASYNC_COMMIT_BUFFER = new LinkedBlockingQueue<>(ASYNC_COMMIT_BUFFER_LIMIT);
 
-
     private static ScheduledExecutorService timerExecutor;
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
+        String applicationData) throws TransactionException {
         if (!ASYNC_COMMIT_BUFFER.offer(new Phase2Context(branchType, xid, branchId, resourceId, applicationData))) {
             LOGGER.warn("Async commit buffer is FULL. Rejected branch [" + branchId + "/" + xid + "] will be handled by housekeeping later.");
         }
@@ -204,7 +205,8 @@ public class AsyncWorker implements ResourceManagerInbound {
     }
 
     @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
+        String applicationData) throws TransactionException {
         throw new NotSupportYetException();
 
     }

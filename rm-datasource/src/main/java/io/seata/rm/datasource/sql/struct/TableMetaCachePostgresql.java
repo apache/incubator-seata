@@ -46,7 +46,7 @@ public class TableMetaCachePostgresql {
      * Gets table meta.
      *
      * @param dataSourceProxy the druid data source
-     * @param tableName       the table name
+     * @param tableName the table name
      * @return the table meta
      */
     public static TableMeta getTableMeta(final DataSourceProxy dataSourceProxy, final String tableName) {
@@ -137,7 +137,6 @@ public class TableMetaCachePostgresql {
 
             tm.getAllColumns().put(col.getColumnName(), col);
         }
-
 
         ResultSet rs2 = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
 

@@ -31,7 +31,6 @@ import java.util.List;
 
 /**
  * @author japsercloud
- * @date 2019/09/11
  */
 public class PostgresqlDeleteRecognizer extends BaseRecognizer implements SQLDeleteRecognizer {
 
@@ -41,7 +40,7 @@ public class PostgresqlDeleteRecognizer extends BaseRecognizer implements SQLDel
      * Instantiates a new My sql delete recognizer.
      *
      * @param originalSQL the original sql
-     * @param ast         the ast
+     * @param ast the ast
      */
     public PostgresqlDeleteRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
@@ -74,7 +73,8 @@ public class PostgresqlDeleteRecognizer extends BaseRecognizer implements SQLDel
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(final ParametersHolder parametersHolder,
+        final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
         if (where == null) {
             return "";

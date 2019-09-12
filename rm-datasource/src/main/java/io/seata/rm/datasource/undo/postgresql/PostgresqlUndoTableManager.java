@@ -24,7 +24,6 @@ import java.sql.Statement;
 
 /**
  * @author japsercloud
- * @date 2019/09/11
  */
 public class PostgresqlUndoTableManager implements UndoTableManager {
 

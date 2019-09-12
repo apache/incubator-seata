@@ -32,7 +32,6 @@ import java.util.List;
  * The type oracle undo delete executor.
  *
  * @author japsercloud
- * @date 2019/09/11
  */
 public class PostgresqlUndoDeleteExecutor extends AbstractUndoExecutor {
 

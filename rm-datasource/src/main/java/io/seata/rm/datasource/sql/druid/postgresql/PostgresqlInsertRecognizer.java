@@ -35,7 +35,6 @@ import java.util.Objects;
 
 /**
  * @author japsercloud
- * @date 2019/09/11
  */
 public class PostgresqlInsertRecognizer extends BaseRecognizer implements SQLInsertRecognizer {
 
@@ -45,7 +44,7 @@ public class PostgresqlInsertRecognizer extends BaseRecognizer implements SQLIns
      * Instantiates a new My sql insert recognizer.
      *
      * @param originalSQL the original sql
-     * @param ast         the ast
+     * @param ast the ast
      */
     public PostgresqlInsertRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
