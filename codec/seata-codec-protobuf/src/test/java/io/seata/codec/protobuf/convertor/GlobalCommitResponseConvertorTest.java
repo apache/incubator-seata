@@ -15,10 +15,10 @@
  */
 package io.seata.codec.protobuf.convertor;
 
+import io.seata.codec.protobuf.generated.GlobalCommitResponseProto;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.protocol.ResultCode;
-import io.seata.codec.protobuf.generated.GlobalCommitResponseProto;
 import io.seata.core.protocol.transaction.GlobalCommitResponse;
 import org.junit.jupiter.api.Test;
 
