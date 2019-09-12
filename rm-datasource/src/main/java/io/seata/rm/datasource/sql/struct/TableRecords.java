@@ -188,13 +188,13 @@ public class TableRecords {
                     field.setKeyType(KeyType.PrimaryKey);
                 }
                 field.setType(col.getDataType());
-                if(col.getDataType() == JDBCType.BLOB.getVendorTypeNumber()){
+                if (col.getDataType() == JDBCType.BLOB.getVendorTypeNumber()) {
                     Blob blob = resultSet.getBlob(i);
                     field.setValue(new SerialBlob(blob));
-                }else if(col.getDataType() == JDBCType.CLOB.getVendorTypeNumber()){
+                } else if (col.getDataType() == JDBCType.CLOB.getVendorTypeNumber()) {
                     Clob clob = resultSet.getClob(i);
                     field.setValue(new SerialClob(clob));
-                }else{
+                } else {
                     field.setValue(resultSet.getObject(i));
                 }
 
