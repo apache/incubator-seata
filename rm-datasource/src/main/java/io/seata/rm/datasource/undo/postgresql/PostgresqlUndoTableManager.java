@@ -44,7 +44,6 @@ public class PostgresqlUndoTableManager implements UndoTableManager {
                     "  \"log_status\" int4 NOT NULL DEFAULT NULL,\n" +
                     "  \"log_created\" timestamp(6) NOT NULL DEFAULT NULL,\n" +
                     "  \"log_modified\" timestamp(6) NOT NULL DEFAULT NULL,\n" +
-                    "  \"ext\" varchar(100) DEFAULT NULL,\n" +
                     "  CONSTRAINT \"undo_log_pkey\" PRIMARY KEY (\"id\"),\n" +
                     "  CONSTRAINT \"undo_log_branch_id_xid_key\" UNIQUE (\"branch_id\", \"xid\")\n" +
                     ")");

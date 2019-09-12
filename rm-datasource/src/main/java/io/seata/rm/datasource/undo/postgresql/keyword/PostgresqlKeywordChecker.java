@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.undo.postgresql.keyword;
 
 import io.seata.rm.datasource.undo.KeywordChecker;
-
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +30,7 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
     private static volatile Set<String> keywordSet = null;
 
     private PostgresqlKeywordChecker() {
+        keywordSet = Arrays.stream(PostgresqlKeywordChecker.PostgresqlKeyword.values()).map(PostgresqlKeywordChecker.PostgresqlKeyword::name).collect(Collectors.toSet());
     }
 
     /**
@@ -43,7 +43,6 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
             synchronized (PostgresqlKeywordChecker.class) {
                 if (keywordChecker == null) {
                     keywordChecker = new PostgresqlKeywordChecker();
-                    keywordSet = Arrays.stream(PostgresqlKeyword.values()).map(PostgresqlKeyword::name).collect(Collectors.toSet());
                 }
             }
         }
