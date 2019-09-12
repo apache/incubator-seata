@@ -25,26 +25,34 @@ import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCachePostgresql;
-import io.seata.rm.datasource.undo.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import io.seata.rm.datasource.undo.AbstractUndoExecutor;
+import io.seata.rm.datasource.undo.AbstractUndoLogManager;
+import io.seata.rm.datasource.undo.BranchUndoLog;
+import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.rm.datasource.undo.UndoExecutorFactory;
+import io.seata.rm.datasource.undo.UndoLogConstants;
+import io.seata.rm.datasource.undo.UndoLogParser;
+import io.seata.rm.datasource.undo.UndoLogParserFactory;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Date;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Retriable;
 
 /**
  * @author japsercloud
- * @date 2019/09/11
  */
 public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PostgresqlUndoLogManager.class);
-
 
     private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
         "\t(id,branch_id, xid,context, rollback_info, log_status, log_created, log_modified)\n" +
@@ -91,8 +99,8 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
      * Undo.
      *
      * @param dataSourceProxy the data source proxy
-     * @param xid             the xid
-     * @param branchId        the branch id
+     * @param xid the xid
+     * @param branchId the branch id
      * @throws TransactionException the transaction exception
      */
     @Override
@@ -248,19 +256,19 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
         }
     }
 
-    private static void insertUndoLogWithNormal(String xid, long branchID, String rollbackCtx,
-                                                byte[] undoLogContent, Connection conn) throws SQLException {
+    private static void insertUndoLogWithNormal(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,
+        Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, rollbackCtx, undoLogContent, State.Normal, conn);
     }
 
     private static void insertUndoLogWithGlobalFinished(String xid, long branchID, UndoLogParser parser,
-                                                        Connection conn) throws SQLException {
+        Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, buildContext(parser.getName()),
             parser.getDefaultContent(), State.GlobalFinished, conn);
     }
 
-    private static void insertUndoLog(String xid, long branchID, String rollbackCtx,
-                                      byte[] undoLogContent, State state, Connection conn) throws SQLException {
+    private static void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent, State state,
+        Connection conn) throws SQLException {
         PreparedStatement pst = null;
         try {
             pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL);
