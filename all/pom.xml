@@ -217,6 +217,11 @@
             <artifactId>seata-codec-protobuf</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-codec-kryo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- spring  -->
         <dependency>
@@ -410,6 +415,16 @@
             <artifactId>jackson-databind</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.javakaffee</groupId>
+            <artifactId>kryo-serializers</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -512,6 +527,7 @@
                                     <include>io.seata:seata-tm</include>
                                     <include>io.seata:seata-codec-seata</include>
                                     <include>io.seata:seata-codec-protobuf</include>
+                                    <include>io.seata:seata-codec-kryo</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
