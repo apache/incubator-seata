@@ -217,6 +217,11 @@
             <artifactId>seata-codec-protobuf</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-codec-kryo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- spring  -->
         <dependency>
@@ -522,6 +527,7 @@
                                     <include>io.seata:seata-tm</include>
                                     <include>io.seata:seata-codec-seata</include>
                                     <include>io.seata:seata-codec-protobuf</include>
+                                    <include>io.seata:seata-codec-kryo</include>
                                 </includes>
                             </artifactSet>
                             <transformers>
