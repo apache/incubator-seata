@@ -19,6 +19,7 @@ service.max.rollback.retry.timeout=-1
 client.async.commit.buffer.limit=10000
 client.lock.retry.internal=10
 client.lock.retry.times=30
+client.lock.retry.policy.branch-rollback-on-conflict=true
 client.table.meta.check.enable=true
 store.mode=file
 store.file.dir=file_store/data
