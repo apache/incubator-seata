@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type oralce undo insert executor.
+ * The type postgresql undo insert executor.
  *
  * @author japsercloud
  */

@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * The type oracle undo delete executor.
+ * The type postgresql undo delete executor.
  *
  * @author japsercloud
  */

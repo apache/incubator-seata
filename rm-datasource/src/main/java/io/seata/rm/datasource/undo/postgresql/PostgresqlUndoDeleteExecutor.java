@@ -29,14 +29,14 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
 import java.util.List;
 
 /**
- * The type oracle undo delete executor.
+ * The type postgresql undo delete executor.
  *
  * @author japsercloud
  */
 public class PostgresqlUndoDeleteExecutor extends AbstractUndoExecutor {
 
     /**
-     * Instantiates a new oracle undo delete executor.
+     * Instantiates a new postgresql undo delete executor.
      *
      * @param sqlUndoLog the sql undo log
      */
