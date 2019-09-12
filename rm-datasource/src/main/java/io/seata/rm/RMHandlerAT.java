@@ -22,13 +22,12 @@ import io.seata.rm.datasource.DataSourceManager;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Rm handler at.
@@ -67,7 +66,8 @@ public class RMHandlerAT extends AbstractRMHandler {
                     }
                     throw exx;
                 }
-            } while (deleteRows == LIMIT_ROWS);
+            }
+            while (deleteRows == LIMIT_ROWS);
         } catch (Exception e) {
             LOGGER.error("Failed to delete expired undo_log，error:{}", e.getMessage(), e);
         } finally {
