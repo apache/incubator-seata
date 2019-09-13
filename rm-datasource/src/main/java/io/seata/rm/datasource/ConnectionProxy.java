@@ -195,6 +195,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     private void processLocalCommitWithGlobalLocks() throws SQLException {
+        checkLock(context.buildLockKeys());
         try {
             targetConnection.commit();
         } catch (Throwable ex) {
