@@ -6,7 +6,7 @@ create table `global_table` (
   `status` tinyint not null,
   `application_id` varchar(32),
   `transaction_service_group` varchar(32),
-  `transaction_name` varchar(64),
+  `transaction_name` varchar(128),
   `timeout` int,
   `begin_time` bigint,
   `application_data` varchar(2000),
