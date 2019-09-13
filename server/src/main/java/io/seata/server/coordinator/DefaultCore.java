@@ -17,6 +17,8 @@ package io.seata.server.coordinator;
 
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GlobalTransactionEvent;
+import io.seata.core.exception.BranchTransactionException;
+import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -65,26 +67,28 @@ public class DefaultCore implements Core {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid);
         return globalSession.lockAndExcute(() -> {
             if (!globalSession.isActive()) {
-                throw new TransactionException(GlobalTransactionNotActive,
-                    "Current Status: " + globalSession.getStatus());
+                throw new GlobalTransactionException(GlobalTransactionNotActive,
+                    String.format("Could not register branch into global session xid = %s status = %s", globalSession.getXid(), globalSession.getStatus()));
             }
             if (globalSession.getStatus() != GlobalStatus.Begin) {
-                throw new TransactionException(GlobalTransactionStatusInvalid,
-                    globalSession.getStatus() + " while expecting " + GlobalStatus.Begin);
+                throw new GlobalTransactionException(GlobalTransactionStatusInvalid,
+                    String.format("Could not register branch into global session xid = %s status = %s while expecting %s", globalSession.getXid(), globalSession.getStatus(), GlobalStatus.Begin));
             }
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
                 applicationData, lockKeys, clientId);
             if (!branchSession.lock()) {
-                throw new TransactionException(LockKeyConflict);
+                throw new BranchTransactionException(LockKeyConflict,
+                    String.format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(), branchSession.getBranchId()));
             }
             try {
                 globalSession.addBranch(branchSession);
             } catch (RuntimeException ex) {
                 branchSession.unlock();
-                LOGGER.error("Failed to add branchSession to globalSession:{}",ex.getMessage(),ex);
-                throw new TransactionException(FailedToAddBranch);
+                throw new BranchTransactionException(FailedToAddBranch,
+                    String.format("Failed to store branch xid = %s branchId = %s", globalSession.getXid(), branchSession.getBranchId()));
             }
+            LOGGER.info("Successfully register branch xid = {}, branchId = {}", globalSession.getXid(), branchSession.getBranchId());
             return branchSession.getBranchId();
         });
     }
@@ -92,7 +96,7 @@ public class DefaultCore implements Core {
     private GlobalSession assertGlobalSessionNotNull(String xid) throws TransactionException {
         GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         if (globalSession == null) {
-            throw new TransactionException(TransactionExceptionCode.GlobalTransactionNotExist, "" + xid + "");
+            throw new GlobalTransactionException(TransactionExceptionCode.GlobalTransactionNotExist, String.format("Could not found global transaction xid = %s", xid));
         }
         return globalSession;
     }
@@ -103,10 +107,12 @@ public class DefaultCore implements Core {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid);
         BranchSession branchSession = globalSession.getBranch(branchId);
         if (branchSession == null) {
-            throw new TransactionException(BranchTransactionNotExist);
+            throw new BranchTransactionException(BranchTransactionNotExist, String.format("Could not found branch session xid = %s branchId = %s", xid, branchId));
         }
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         globalSession.changeBranchStatus(branchSession, status);
+
+        LOGGER.info("Successfully branch report xid = {}, branchId = {}", globalSession.getXid(), branchSession.getBranchId());
     }
 
     @Override
@@ -133,6 +139,7 @@ public class DefaultCore implements Core {
         eventBus.post(new GlobalTransactionEvent(session.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
             session.getTransactionName(), session.getBeginTime(), null, session.getStatus()));
 
+        LOGGER.info("Successfully begin global transaction xid = {}", session.getXid());
         return session.getXid();
     }
 
@@ -306,15 +313,14 @@ public class DefaultCore implements Core {
                 switch (branchStatus) {
                     case PhaseTwo_Rollbacked:
                         globalSession.removeBranch(branchSession);
-                        LOGGER.info("Successfully rollbacked branch " + branchSession);
+                        LOGGER.info("Successfully rollback branch xid={} branchId={}", globalSession.getXid(), branchSession.getBranchId());
                         continue;
                     case PhaseTwo_RollbackFailed_Unretryable:
                         SessionHelper.endRollbackFailed(globalSession);
-                        LOGGER.error("Failed to rollback global[" + globalSession.getXid() + "] since branch["
-                            + branchSession.getBranchId() + "] rollback failed");
+                        LOGGER.info("Failed to rollback branch and stop retry xid={} branchId={}", globalSession.getXid(), branchSession.getBranchId());
                         return;
                     default:
-                        LOGGER.info("Failed to rollback branch " + branchSession);
+                        LOGGER.info("Failed to rollback branch xid={} branchId={}", globalSession.getXid(), branchSession.getBranchId());
                         if (!retrying) {
                             queueToRetryRollback(globalSession);
                         }
@@ -322,7 +328,7 @@ public class DefaultCore implements Core {
 
                 }
             } catch (Exception ex) {
-                LOGGER.error("Exception rollbacking branch " + branchSession, ex);
+                LOGGER.error("Exception rollbacking branch xid={} branchId={}", globalSession.getXid(), branchSession.getBranchId(), ex);
                 if (!retrying) {
                     queueToRetryRollback(globalSession);
                 }
@@ -336,6 +342,8 @@ public class DefaultCore implements Core {
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
             globalSession.getTransactionName(), globalSession.getBeginTime(), System.currentTimeMillis(),
             globalSession.getStatus()));
+
+        LOGGER.info("Successfully rollback global, xid = {}", globalSession.getXid());
     }
 
     @Override
