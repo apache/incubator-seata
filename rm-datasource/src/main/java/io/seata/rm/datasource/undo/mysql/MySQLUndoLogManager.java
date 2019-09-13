@@ -13,88 +13,68 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo;
+package io.seata.rm.datasource.undo.mysql;
 
-import java.io.ByteArrayInputStream;
+import com.alibaba.druid.util.JdbcConstants;
+import io.seata.common.Constants;
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.util.BlobUtils;
+import io.seata.core.constants.ClientTableColumnsName;
+import io.seata.core.exception.BranchTransactionException;
+import io.seata.core.exception.TransactionException;
+import io.seata.rm.datasource.ConnectionContext;
+import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.rm.datasource.undo.AbstractUndoExecutor;
+import io.seata.rm.datasource.undo.AbstractUndoLogManager;
+import io.seata.rm.datasource.undo.BranchUndoLog;
+import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.rm.datasource.undo.UndoExecutorFactory;
+import io.seata.rm.datasource.undo.UndoLogConstants;
+import io.seata.rm.datasource.undo.UndoLogParser;
+import io.seata.rm.datasource.undo.UndoLogParserFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
-
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.common.Constants;
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.util.BlobUtils;
-import io.seata.common.util.CollectionUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.exception.TransactionException;
-import io.seata.rm.datasource.ConnectionContext;
-import io.seata.rm.datasource.ConnectionProxy;
-import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-
-import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Retriable;
 
 /**
- * The type Undo log manager.
- * @author ccg
- * @date 2019/3/25
+ * @author jsbxyyx
+ * @date 2019/09/07
  */
-public final class UndoLogManagerOracle {
+public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
-    private enum State {
-        /**
-         * This state can be properly rolled back by services
-         */
-        Normal(0),
-        /**
-         * This state prevents the branch transaction from inserting undo_log after the global transaction is rolled
-         * back.
-         */
-        GlobalFinished(1);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MySQLUndoLogManager.class);
 
-        private int value;
+    /**
+     * branch_id, xid, context, rollback_info, log_status, log_created, log_modified
+     */
+    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME +
+            " (" + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + ", " + ClientTableColumnsName.UNDO_LOG_XID + ", "
+            + ClientTableColumnsName.UNDO_LOG_CONTEXT + ", " + ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO + ", "
+            + ClientTableColumnsName.UNDO_LOG_LOG_STATUS + ", " + ClientTableColumnsName.UNDO_LOG_LOG_CREATED + ", "
+            + ClientTableColumnsName.UNDO_LOG_LOG_MODIFIED + ")" +
+            " VALUES (?, ?, ?, ?, ?, now(), now())";
 
-        State(int value) {
-            this.value = value;
-        }
+    private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
+            " WHERE log_created <= ? LIMIT ?";
 
-        public int getValue() {
-            return value;
-        }
-    }
-    private static final Logger LOGGER = LoggerFactory.getLogger(UndoLogManagerOracle.class);
-
-    private static final String UNDO_LOG_TABLE_NAME = ConfigurationFactory.getInstance()
-            .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_TABLE, ConfigurationKeys.TRANSACTION_UNDO_LOG_DEFAULT_TABLE);
-
-    private static final String UNDO_LOG_SEQUENCE_NAME = ConfigurationFactory.getInstance()
-            .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SEQUENCE, UNDO_LOG_TABLE_NAME + "_SEQ");
-
-    private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n"
-            + "\t(id,branch_id, xid,context, rollback_info, log_status, log_created, log_modified)\n"
-            + "VALUES (" + UNDO_LOG_SEQUENCE_NAME + ".nextval, ?, ?, ?, ?, ?, sysdate, sysdate)";
-
-    private static final String DELETE_UNDO_LOG_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME + "\n" +
-        "\tWHERE branch_id = ? AND xid = ?";
-
-    private static final String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME
-        + " WHERE  branch_id = ? AND xid = ? FOR UPDATE";
-
-    private static final ThreadLocal<String> SERIALIZER_LOCAL = new ThreadLocal<>();
-
-    private UndoLogManagerOracle() {
-
+    @Override
+    public String getDbType() {
+        return JdbcConstants.MYSQL;
     }
 
     /**
@@ -103,7 +83,8 @@ public final class UndoLogManagerOracle {
      * @param cp the cp
      * @throws SQLException the sql exception
      */
-    public static void flushUndoLogs(ConnectionProxy cp) throws SQLException {
+    @Override
+    public void flushUndoLogs(ConnectionProxy cp) throws SQLException {
         assertDbSupport(cp.getDbType());
 
         ConnectionContext connectionContext = cp.getContext();
@@ -119,16 +100,11 @@ public final class UndoLogManagerOracle {
         byte[] undoLogContent = parser.encode(branchUndoLog);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Flushing UNDO LOG: {}",new String(undoLogContent, Constants.DEFAULT_CHARSET));
+            LOGGER.debug("Flushing UNDO LOG: {}", new String(undoLogContent, Constants.DEFAULT_CHARSET));
         }
 
-        insertUndoLogWithNormal(xid, branchID,buildContext(parser.getName()), undoLogContent, cp.getTargetConnection());
-    }
-
-    private static void assertDbSupport(String dbType) {
-        if (!JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
-            throw new NotSupportYetException("DbType[" + dbType + "] is not support yet!");
-        }
+        insertUndoLogWithNormal(xid, branchID, buildContext(parser.getName()), undoLogContent,
+                cp.getTargetConnection());
     }
 
     /**
@@ -139,7 +115,8 @@ public final class UndoLogManagerOracle {
      * @param branchId        the branch id
      * @throws TransactionException the transaction exception
      */
-    public static void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {
+    @Override
+    public void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {
         assertDbSupport(dataSourceProxy.getDbType());
 
         Connection conn = null;
@@ -158,47 +135,54 @@ public final class UndoLogManagerOracle {
                 selectPST.setLong(1, branchId);
                 selectPST.setString(2, xid);
                 rs = selectPST.executeQuery();
+
                 boolean exists = false;
                 while (rs.next()) {
                     exists = true;
+
                     // It is possible that the server repeatedly sends a rollback request to roll back
                     // the same branch transaction to multiple processes,
                     // ensuring that only the undo_log in the normal state is processed.
-                    int state = rs.getInt("log_status");
+                    int state = rs.getInt(ClientTableColumnsName.UNDO_LOG_LOG_STATUS);
                     if (!canUndo(state)) {
                         if (LOGGER.isInfoEnabled()) {
                             LOGGER.info("xid {} branch {}, ignore {} undo_log",
-                                xid, branchId, state);
+                                    xid, branchId, state);
                         }
                         return;
                     }
 
-                    String contextString = rs.getString("context");
+                    String contextString = rs.getString(ClientTableColumnsName.UNDO_LOG_CONTEXT);
                     Map<String, String> context = parseContext(contextString);
-                    Blob b = rs.getBlob("rollback_info");
+                    Blob b = rs.getBlob(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
                     byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
 
                     String serializer = context == null ? null : context.get(UndoLogConstants.SERIALIZER_KEY);
                     UndoLogParser parser = serializer == null ? UndoLogParserFactory.getInstance() :
-                        UndoLogParserFactory.getInstance(serializer);
+                            UndoLogParserFactory.getInstance(serializer);
                     BranchUndoLog branchUndoLog = parser.decode(rollbackInfo);
 
                     try {
                         // put serializer name to local
-                        SERIALIZER_LOCAL.set(parser.getName());
-
-                        for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
-                            TableMeta tableMeta = TableMetaCacheOracle.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
+                        setCurrentSerializer(parser.getName());
+                        List<SQLUndoLog> sqlUndoLogs = branchUndoLog.getSqlUndoLogs();
+                        if (sqlUndoLogs.size() > 1) {
+                            Collections.reverse(sqlUndoLogs);
+                        }
+                        for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
+                            TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
                             sqlUndoLog.setTableMeta(tableMeta);
-                            AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(dataSourceProxy.getDbType(),
+                            AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
+                                    dataSourceProxy.getDbType(),
                                     sqlUndoLog);
                             undoExecutor.executeOn(conn);
                         }
                     } finally {
                         // remove serializer name
-                        SERIALIZER_LOCAL.remove();
+                        removeCurrentSerializer();
                     }
                 }
+
                 // If undo_log exists, it means that the branch transaction has completed the first phase,
                 // we can directly roll back and clean the undo_log
                 // Otherwise, it indicates that there is an exception in the branch transaction,
@@ -239,7 +223,8 @@ public final class UndoLogManagerOracle {
                         LOGGER.warn("Failed to close JDBC resource while undo ... ", rollbackEx);
                     }
                 }
-                throw new TransactionException(BranchRollbackFailed_Retriable, String.format("%s/%s", branchId, xid), e);
+                throw new BranchTransactionException(BranchRollbackFailed_Retriable,
+                    String.format("Branch session rollback failed and try again later xid = %s branchId = %s %s", xid, branchId, e.getMessage()), e);
 
             } finally {
                 try {
@@ -259,86 +244,19 @@ public final class UndoLogManagerOracle {
         }
     }
 
-
-    /**
-     * batch Delete undo log.
-     *
-     * @param xids
-     * @param branchIds
-     * @param conn
-     */
-    public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, Connection conn) throws SQLException {
-        if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
-            return;
-        }
-        int xidSize = xids.size();
-        int branchIdSize = branchIds.size();
-        String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
+    @Override
+    public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
         PreparedStatement deletePST = null;
         try {
-            deletePST = conn.prepareStatement(batchDeleteSql);
-            int paramsIndex = 1;
-            for (Long branchId : branchIds) {
-                deletePST.setLong(paramsIndex++,branchId);
-            }
-            for (String xid: xids){
-                deletePST.setString(paramsIndex++, xid);
-            }
+            deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL);
+            deletePST.setDate(1, new java.sql.Date(logCreated.getTime()));
+            deletePST.setInt(2, limitRows);
             int deleteRows = deletePST.executeUpdate();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("batch delete undo log size " + deleteRows);
             }
-        }catch (Exception e){
-            if (!(e instanceof SQLException)) {
-                e = new SQLException(e);
-            }
-            throw (SQLException) e;
-        } finally {
-            if (deletePST != null) {
-                deletePST.close();
-            }
-        }
-
-    }
-
-    protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("DELETE FROM ")
-                .append(UNDO_LOG_TABLE_NAME)
-                .append(" WHERE  branch_id IN ");
-        appendInParam(branchIdSize, sqlBuilder);
-        sqlBuilder.append(" AND xid IN ");
-        appendInParam(xidSize, sqlBuilder);
-        return sqlBuilder.toString();
-    }
-
-    protected static void appendInParam(int size, StringBuilder sqlBuilder) {
-        sqlBuilder.append(" (");
-        for (int i = 0;i < size;i++) {
-            sqlBuilder.append("?");
-            if (i < (size - 1)) {
-                sqlBuilder.append(",");
-            }
-        }
-        sqlBuilder.append(") ");
-    }
-
-    /**
-     * Delete undo log.
-     *
-     * @param xid the xid
-     * @param branchId the branch id
-     * @param conn the conn
-     * @throws SQLException the sql exception
-     */
-    public static void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
-        PreparedStatement deletePST = null;
-        try {
-            deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
-            deletePST.setLong(1, branchId);
-            deletePST.setString(2, xid);
-            deletePST.executeUpdate();
-        }catch (Exception e){
+            return deleteRows;
+        } catch (Exception e) {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
             }
@@ -349,30 +267,29 @@ public final class UndoLogManagerOracle {
             }
         }
     }
-    public static String getCurrentSerializer() {
-        return SERIALIZER_LOCAL.get();
-    }
+
+
+
     private static void insertUndoLogWithNormal(String xid, long branchID, String rollbackCtx,
                                                 byte[] undoLogContent, Connection conn) throws SQLException {
-        insertUndoLog(xid, branchID,rollbackCtx, undoLogContent, State.Normal, conn);
+        insertUndoLog(xid, branchID, rollbackCtx, undoLogContent, State.Normal, conn);
     }
 
     private static void insertUndoLogWithGlobalFinished(String xid, long branchID, UndoLogParser parser,
-        Connection conn) throws SQLException {
+                                                        Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, buildContext(parser.getName()),
-            parser.getDefaultContent(), State.GlobalFinished, conn);
+                parser.getDefaultContent(), State.GlobalFinished, conn);
     }
 
     private static void insertUndoLog(String xid, long branchID, String rollbackCtx,
-        byte[] undoLogContent, State state, Connection conn) throws SQLException {
+                                      byte[] undoLogContent, State state, Connection conn) throws SQLException {
         PreparedStatement pst = null;
         try {
             pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL);
             pst.setLong(1, branchID);
             pst.setString(2, xid);
             pst.setString(3, rollbackCtx);
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(undoLogContent);
-            pst.setBlob(4, inputStream);
+            pst.setBlob(4, BlobUtils.bytes2Blob(undoLogContent));
             pst.setInt(5, state.getValue());
             pst.executeUpdate();
         } catch (Exception e) {
@@ -387,18 +304,10 @@ public final class UndoLogManagerOracle {
         }
     }
 
-    private static boolean canUndo(int state) {
-        return state == State.Normal.getValue();
-    }
-
-    private static String buildContext(String serializer) {
-        Map<String, String> map = new HashMap<>();
-        map.put(UndoLogConstants.SERIALIZER_KEY, serializer);
-        return CollectionUtils.encodeMap(map);
-    }
-
-    private static Map<String, String> parseContext(String data) {
-        return CollectionUtils.decodeMap(data);
+    private static void assertDbSupport(String dbType) {
+        if (!JdbcConstants.MYSQL.equals(dbType)) {
+            throw new NotSupportYetException("DbType[" + dbType + "] is not support yet!");
+        }
     }
 
 }
