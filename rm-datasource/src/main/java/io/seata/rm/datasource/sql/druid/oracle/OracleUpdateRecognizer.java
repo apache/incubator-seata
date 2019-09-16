@@ -107,7 +107,7 @@ public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = super.createOracleOutputVisitor(parametersHolder, paramAppenderList, sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
@@ -120,8 +120,7 @@ public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
             return "";
         }
 
-
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb);
 
         if (where instanceof SQLBetweenExpr) {
@@ -142,7 +141,7 @@ public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
 
     @Override
     public String getTableName() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
             @Override
