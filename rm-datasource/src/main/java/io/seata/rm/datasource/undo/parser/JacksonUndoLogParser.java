@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.parser;
 
+import com.alibaba.druid.proxy.jdbc.ClobProxyImpl;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
@@ -33,14 +34,21 @@ import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.ser.std.ArraySerializerBase;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
+import oracle.sql.CLOB;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.sql.Clob;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -61,20 +69,32 @@ public class JacksonUndoLogParser implements UndoLogParser {
 
     private static final SimpleModule MODULE = new SimpleModule();
 
+    private static final SimpleModule ORACLE_CLOB_MODULE = new SimpleModule();
+
     /**
      * customize serializer for java.sql.Timestamp
      */
     private static final JsonSerializer TIMESTAMP_SERIALIZER = new TimestampSerializer();
+    private static final JsonSerializer ORACLECLOB_SERIALIZER = new OracleClobSerializer();
+    private static final JsonSerializer JAVASQLCLOB_SERIALIZER = new JavaSqlClobSerializer();
 
     /**
      * customize deserializer for java.sql.Timestamp
      */
     private static final JsonDeserializer TIMESTAMP_DESERIALIZER = new TimestampDeserializer();
+    private static final JsonDeserializer ORACLECLOB_DESERIALIZER = new OracleClobDeserializer();
 
     static {
+//        ORACLE_CLOB_MODULE.addSerializer(CLOB.class, ORACLECLOB_SERIALIZER);
+//        ORACLE_CLOB_MODULE.addSerializer(Clob.class, JavaSqlClobToStringSerializer.INSTANCE);
+        ORACLE_CLOB_MODULE.addSerializer(Clob.class, JAVASQLCLOB_SERIALIZER);
+//        ORACLE_CLOB_MODULE.addDeserializer(CLOB.class, ORACLECLOB_DESERIALIZER);
+        MAPPER.registerModule(ORACLE_CLOB_MODULE);
+
         MODULE.addSerializer(Timestamp.class, TIMESTAMP_SERIALIZER);
         MODULE.addDeserializer(Timestamp.class, TIMESTAMP_DESERIALIZER);
         MAPPER.registerModule(MODULE);
+
         MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         MAPPER.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
         MAPPER.enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER);
@@ -189,6 +209,89 @@ public class JacksonUndoLogParser implements UndoLogParser {
             }
             LOGGER.error("deserialize java.sql.Timestamp type error.");
             return null;
+        }
+    }
+
+    private static class OracleClobSerializer extends JsonSerializer<CLOB> {
+        @Override
+        public void serialize(CLOB clob, JsonGenerator jgen, SerializerProvider provider)
+                throws IOException, JsonProcessingException {
+            String clobToStr= "";
+            String reString = "";
+            Reader is = null;// 得到流
+            try {
+                is = clob.getCharacterStream();
+            } catch (SQLException e) {
+                LOGGER.error("OracleClobSerializer json encode exception, {}", e.getMessage(), e);
+            }
+            BufferedReader br = new BufferedReader(is);
+            String s = br.readLine();
+             StringBuffer sb = new StringBuffer();
+             // 执行循环将字符串全部取出付值给StringBuffer由StringBuffer转成STRING
+             while (s != null) {
+                 sb.append(s);
+                 s = br.readLine();
+             }
+            clobToStr = sb.toString();
+            jgen.writeString(clobToStr);
+        }
+    }
+
+    private static class JavaSqlClobSerializer extends JsonSerializer<Clob> {
+//        protected JavaSqlClobSerializer(Class<Clob> t) {
+//            super(t);
+//        }
+
+
+        @Override
+        public void serializeWithType(Clob clob, JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSerializer) throws IOException {
+            ClobString clobs = new ClobString("");
+            String str = new String("");
+            WritableTypeId typeId = typeSerializer.writeTypePrefix(gen, typeSerializer.typeId(str, JsonToken.VALUE_STRING));
+            serialize(clob, gen, serializers);
+            gen.writeTypeSuffix(typeId);
+        }
+
+
+        @Override
+        public void serialize(Clob clob, JsonGenerator jgen, SerializerProvider provider)
+                throws IOException, JsonProcessingException {
+            String clobToStr= "";
+            Reader is = null;// 得到流
+            try {
+                is = clob.getCharacterStream();
+            } catch (SQLException e) {
+                LOGGER.error("OracleClobSerializer json encode exception, {}", e.getMessage(), e);
+            }
+            BufferedReader br = new BufferedReader(is);
+            String s = br.readLine();
+            StringBuffer sb = new StringBuffer();
+            // 执行循环将字符串全部取出付值给StringBuffer由StringBuffer转成STRING
+            while (s != null) {
+                sb.append(s);
+                s = br.readLine();
+            }
+            clobToStr = sb.toString();
+            jgen.writeString(clobToStr);
+        }
+    }
+
+    private static class OracleClobDeserializer extends JsonDeserializer<java.sql.Clob> {
+
+        @Override
+        public java.sql.Clob deserialize(JsonParser jp, DeserializationContext ctxt)
+                throws IOException, JsonProcessingException {
+            Clob clob= null;
+//            String encrypted = jp.readValueAs(String);
+            ArrayNode arrayNode;
+            try {
+                arrayNode = jp.getCodec().readTree(jp);
+                String context = arrayNode.get(0).asText();
+                clob = new javax.sql.rowset.serial.SerialClob(context.toCharArray());
+            } catch (SQLException e) {
+                LOGGER.error("OracleClobDeserializer json encode exception, {}", e.getMessage(), e);
+            }
+            return clob;
         }
     }
 

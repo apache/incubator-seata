@@ -29,6 +29,7 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.StringReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -151,7 +152,12 @@ public abstract class AbstractUndoExecutor {
         int undoIndex = 0;
         for (Field undoValue : undoValues) {
             undoIndex++;
-            undoPST.setObject(undoIndex, undoValue.getValue(), undoValue.getType());
+            if(pkValue.getType() == 2005&&undoValue.getValue() instanceof String) {//orcle clob字段,已经之前序列化自定义转为string
+                StringReader reader = new StringReader(undoValue.getValue().toString());
+                undoPST.setClob(undoIndex,reader);
+            } else {
+                undoPST.setObject(undoIndex, undoValue.getValue(), undoValue.getType());
+            }
         }
         // PK is at last one.
         // INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)

@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -89,6 +90,10 @@ public final class UndoLogManagerOracle {
 
     private static final String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME
         + " WHERE  branch_id = ? AND xid = ? FOR UPDATE";
+
+    private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
+            " WHERE log_created <= ? ";
+
 
     private static final ThreadLocal<String> SERIALIZER_LOCAL = new ThreadLocal<>();
 
@@ -430,6 +435,31 @@ public final class UndoLogManagerOracle {
             }
         }
     }
+
+    public static int deleteUndoLogByLogCreated(Date logCreated, String dbType, int limitRows, Connection conn) throws SQLException {
+        assertDbSupport(dbType);
+        PreparedStatement deletePST = null;
+        try {
+            deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL);
+            deletePST.setDate(1, new java.sql.Date(logCreated.getTime()));
+//            deletePST.setInt(2, limitRows);
+            int deleteRows = deletePST.executeUpdate();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("batch delete undo log size " + deleteRows);
+            }
+            return deleteRows;
+        } catch (Exception e) {
+            if (!(e instanceof SQLException)) {
+                e = new SQLException(e);
+            }
+            throw (SQLException) e;
+        } finally {
+            if (deletePST != null) {
+                deletePST.close();
+            }
+        }
+    }
+
 
     private static boolean canUndo(int state) {
         return state == State.Normal.getValue();
