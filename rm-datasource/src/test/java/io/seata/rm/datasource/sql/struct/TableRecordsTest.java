@@ -37,8 +37,8 @@ public class TableRecordsTest {
 
     private static Object[][] columnMetas =
         new Object[][] {
-            new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-            new Object[] {"", "", "t1", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+            new Object[] {"", "", "table_records_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+            new Object[] {"", "", "table_records_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
         };
 
     private static Object[][] indexMetas =
@@ -59,9 +59,9 @@ public class TableRecordsTest {
         MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
         DataSourceProxy proxy = new DataSourceProxy(dataSource);
 
-        TableMeta tableMeta = TableMetaCache.getTableMeta(proxy, "t1");
+        TableMeta tableMeta = TableMetaCache.getTableMeta(proxy, "table_records_test");
 
-        ResultSet resultSet = mockDriver.executeQuery(mockStatement, "select * from t");
+        ResultSet resultSet = mockDriver.executeQuery(mockStatement, "select * from table_records_test");
 
         TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet);
 
