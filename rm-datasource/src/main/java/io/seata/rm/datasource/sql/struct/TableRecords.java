@@ -188,6 +188,8 @@ public class TableRecords {
                     field.setKeyType(KeyType.PrimaryKey);
                 }
                 field.setType(col.getDataType());
+                // mysql will not run in this code
+                // cause mysql does not use java.sql.Blob, java.sql.sql.Clob to process Blob and Clob column
                 if (col.getDataType() == JDBCType.BLOB.getVendorTypeNumber()) {
                     Blob blob = resultSet.getBlob(i);
                     field.setValue(new SerialBlob(blob));
