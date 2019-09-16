@@ -192,10 +192,15 @@ public class TableRecords {
                 // cause mysql does not use java.sql.Blob, java.sql.sql.Clob to process Blob and Clob column
                 if (col.getDataType() == JDBCType.BLOB.getVendorTypeNumber()) {
                     Blob blob = resultSet.getBlob(i);
-                    field.setValue(new SerialBlob(blob));
+                    if (blob != null) {
+                        field.setValue(new SerialBlob(blob));
+                    }
+
                 } else if (col.getDataType() == JDBCType.CLOB.getVendorTypeNumber()) {
                     Clob clob = resultSet.getClob(i);
-                    field.setValue(new SerialClob(clob));
+                    if (clob != null){
+                        field.setValue(new SerialClob(clob));
+                    }
                 } else {
                     field.setValue(resultSet.getObject(i));
                 }
