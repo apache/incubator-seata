@@ -54,31 +54,31 @@ public class SpringCloudConfiguration extends AbstractConfiguration<ConfigChange
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void addConfigListener(String dataId, ConfigChangeListener listener) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void removeConfigListener(String dataId, ConfigChangeListener listener) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<ConfigChangeListener> getConfigListeners(String dataId) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 }
