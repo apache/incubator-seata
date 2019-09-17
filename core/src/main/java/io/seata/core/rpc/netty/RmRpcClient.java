@@ -251,7 +251,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                     LOGGER.info("remove channel:" + channel);
                 }
             } else {
-                LOGGER.error("", "register failed", e);
+                LOGGER.error("register failed: {}", e.getMessage(), e);
             }
         } catch (TimeoutException e) {
             LOGGER.error(e.getMessage());

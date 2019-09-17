@@ -85,7 +85,7 @@ public class RmMessageListener implements ClientMessageListener {
         try {
             sender.sendResponse(request, serverAddress, resultMessage);
         } catch (Throwable throwable) {
-            LOGGER.error("", "send response error", throwable);
+            LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
         }
     }
 
