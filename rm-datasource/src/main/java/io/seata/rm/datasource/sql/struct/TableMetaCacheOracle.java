@@ -119,6 +119,7 @@ public class TableMetaCacheOracle {
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
         if(tableName.indexOf("\"") != -1){
             tableName = tableName.replace("\"", "");
+            schemaName = schemaName.replace("\"", "");
         }else{
             tableName = tableName.toUpperCase();
         }
@@ -156,7 +157,7 @@ public class TableMetaCacheOracle {
                 if (StringUtils.isNullOrEmpty(indexName)) {
                     continue;
                 }
-                String colName = rsIndex.getString("COLUMN_NAME").toUpperCase();
+                String colName = rsIndex.getString("COLUMN_NAME");
                 ColumnMeta col = tm.getAllColumns().get(colName);
                 if (tm.getAllIndexes().containsKey(indexName)) {
                     IndexMeta index = tm.getAllIndexes().get(indexName);
