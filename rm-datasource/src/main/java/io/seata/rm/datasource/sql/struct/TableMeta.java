@@ -25,7 +25,6 @@ import java.util.Objects;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
-import io.seata.rm.datasource.ColumnUtils;
 
 /**
  * The type Table meta.
@@ -169,8 +168,6 @@ public class TableMeta {
         if (pk.isEmpty()) {
             return false;
         }
-
-        ColumnUtils.delBackticks(cols);
 
         if (cols.containsAll(pk)) {
             return true;

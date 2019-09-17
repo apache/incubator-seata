@@ -24,39 +24,55 @@ import java.util.List;
  */
 public final class ColumnUtils {
 
-    public static final char BACKTICKS = '`';
+    /**
+     * The escape
+     */
+    public enum Escape {
+        /** mysql escape */
+        MYSQL_ESCAPE('`'),
+        /** oracle escape */
+        ORACLE_ESCAPE('"'),
+        ;
+        public final char value;
+        Escape(char value) {
+            this.value = value;
+        }
+    }
 
     /**
-     * del back quote
+     * del escape
      * @param cols the cols
+     * @param escape the escape
      * @throws NullPointerException if cols is null
      */
-    public static void delBackticks(List<String> cols) {
+    public static void delEscape(List<String> cols, Escape escape) {
         if (cols == null) {
             throw new NullPointerException("cols is null");
         }
         for (int i = 0, len = cols.size(); i < len; i++) {
             String col = cols.get(i);
-            if (col != null && col.charAt(0) == BACKTICKS) {
+            if (col != null && col.charAt(0) == escape.value) {
                 cols.set(i, col.substring(1, col.length() - 1));
             }
         }
     }
 
     /**
-     * add back quote
+     * add escape
      * @param col the column name
+     * @param escape the escape
      */
-    public static String addBackticks(String col) {
+    public static String addEscape(String col, Escape escape) {
         if (col == null) {
             throw new NullPointerException("col is null");
         }
         if (col.isEmpty()) {
             return col;
         }
-        if (col.charAt(0) == BACKTICKS) {
+        if (col.charAt(0) == escape.value) {
             return col;
         }
-        return BACKTICKS + col + BACKTICKS;
+        return String.format("%s%s%s", escape.value, col, escape.value);
     }
+
 }

@@ -15,6 +15,8 @@
  */
 package io.seata.rm.datasource.exec;
 
+import com.alibaba.druid.util.JdbcConstants;
+import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.struct.SqlSequenceExpr;
@@ -62,6 +64,10 @@ public class OracleInsertExecutorTest {
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+
+        ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
+        when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
+        when(connectionProxy.getDbType()).thenReturn(JdbcConstants.ORACLE);
     }
 
     @Test

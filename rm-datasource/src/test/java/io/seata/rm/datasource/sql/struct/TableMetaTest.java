@@ -468,21 +468,4 @@ public class TableMetaTest {
         Assertions.assertEquals(expected[7], actual.getCardinality());
     }
 
-    @Test
-    public void test_containsPK() {
-        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas);
-        DruidDataSource dataSource = new DruidDataSource();
-        dataSource.setUrl("jdbc:mock:xxx");
-        dataSource.setDriver(mockDriver);
-
-        DataSourceProxy proxy = new DataSourceProxy(dataSource);
-
-        TableMeta tableMeta = TableMetaCache.getTableMeta(proxy, "t1");
-
-        List<String> cols = new ArrayList<>();
-        cols.add("`id`");
-        boolean b = tableMeta.containsPK(cols);
-
-        Assertions.assertEquals(true, b);
-    }
 }

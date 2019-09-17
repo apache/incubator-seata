@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
@@ -89,6 +88,10 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected boolean containsPK() {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();
+        if (insertColumns == null) {
+            return false;
+        }
+        delEscape(insertColumns);
         TableMeta tmeta = getTableMeta();
         return tmeta.containsPK(insertColumns);
     }
@@ -236,7 +239,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         String pkName = getTableMeta().getPkName();
         List<String> insertColumns = recognizer.getInsertColumns();
         if (insertColumns != null && !insertColumns.isEmpty()) {
-            ColumnUtils.delBackticks(insertColumns);
+            delEscape(insertColumns);
             final int insertColumnsSize = insertColumns.size();
             int pkIndex = -1;
             for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {

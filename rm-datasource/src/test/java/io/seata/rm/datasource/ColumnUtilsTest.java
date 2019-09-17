@@ -32,31 +32,31 @@ public class ColumnUtilsTest {
         List<String> cols = new ArrayList<>();
         cols.add("`id`");
         cols.add("name");
-        ColumnUtils.delBackticks(cols);
+        ColumnUtils.delEscape(cols, ColumnUtils.Escape.MYSQL_ESCAPE);
         Assertions.assertEquals("id", cols.get(0));
         Assertions.assertEquals("name", cols.get(1));
 
         Assertions.assertThrows(NullPointerException.class, () -> {
-            ColumnUtils.delBackticks(null);
+            ColumnUtils.delEscape(null, ColumnUtils.Escape.MYSQL_ESCAPE);
         });
     }
 
     @Test
     public void test_addBackticks() {
         String col = "`id`";
-        String newCol = ColumnUtils.addBackticks(col);
+        String newCol = ColumnUtils.addEscape(col, ColumnUtils.Escape.MYSQL_ESCAPE);
         Assertions.assertEquals(col, newCol);
 
         String col2 = "id";
-        String newCol2 = ColumnUtils.addBackticks(col2);
+        String newCol2 = ColumnUtils.addEscape(col2, ColumnUtils.Escape.MYSQL_ESCAPE);
         Assertions.assertEquals(col, newCol2);
 
         String col3 = "";
-        String newCol3 = ColumnUtils.addBackticks(col3);
+        String newCol3 = ColumnUtils.addEscape(col3, ColumnUtils.Escape.MYSQL_ESCAPE);
         Assertions.assertEquals(col3, newCol3);
 
         Assertions.assertThrows(NullPointerException.class, () -> {
-            ColumnUtils.addBackticks(null);
+            ColumnUtils.addEscape(null, ColumnUtils.Escape.MYSQL_ESCAPE);
         });
     }
 

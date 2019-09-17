@@ -24,9 +24,11 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import com.alibaba.druid.util.JdbcConstants;
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
@@ -326,7 +328,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         String pk = getTableMeta().getPkName();
         StringJoiner pkValuesJoiner = new StringJoiner(" OR ", "SELECT * FROM " + getTableMeta().getTableName() + " WHERE ", "");
         for (Object pkValue : pkValues) {
-            pkValuesJoiner.add(pk + "=?");
+            pkValuesJoiner.add(addEscape(pk) + "=?");
         }
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -349,6 +351,36 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             }
         }
         return afterImage;
+    }
+
+    /**
+     * delete escape
+     * @param cols the cols
+     */
+    protected void delEscape(List<String> cols) {
+        String dbType = statementProxy.getConnectionProxy().getDbType();
+        if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.ORACLE)) {
+            ColumnUtils.delEscape(cols, ColumnUtils.Escape.ORACLE_ESCAPE);
+        } else if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL)) {
+            ColumnUtils.delEscape(cols, ColumnUtils.Escape.MYSQL_ESCAPE);
+        } else {
+            throw new NotSupportYetException(String.format("dbType[%s] not support", dbType));
+        }
+    }
+
+    /**
+     * add escape
+     * @param col
+     * @return
+     */
+    protected String addEscape(String col) {
+        String dbType = statementProxy.getConnectionProxy().getDbType();
+        if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.ORACLE)) {
+            return ColumnUtils.addEscape(col, ColumnUtils.Escape.ORACLE_ESCAPE);
+        } else if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL)) {
+            return ColumnUtils.addEscape(col, ColumnUtils.Escape.MYSQL_ESCAPE);
+        }
+        throw new NotSupportYetException(String.format("dbType[%s] not support", dbType));
     }
 
 }
