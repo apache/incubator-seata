@@ -15,6 +15,16 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Function;
+
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.timeout.IdleState;
@@ -24,18 +34,18 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
-import io.seata.core.protocol.*;
+import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.HeartbeatMessage;
+import io.seata.core.protocol.MergeResultMessage;
+import io.seata.core.protocol.MergedWarpMessage;
+import io.seata.core.protocol.MessageFuture;
+import io.seata.core.protocol.RpcMessage;
 import io.seata.core.rpc.ClientMessageListener;
 import io.seata.core.rpc.ClientMessageSender;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.concurrent.*;
-import java.util.function.Function;
 
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
@@ -193,7 +203,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                     }
                     sendRequest(ctx.channel(), HeartbeatMessage.PING);
                 } catch (Throwable throwable) {
-                    LOGGER.error("send request error", throwable);
+                    LOGGER.error("send request error: {}", throwable.getMessage(), throwable);
                 }
             }
         }
@@ -320,7 +330,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                                 messageFuture.setResultMessage(null);
                             }
                         }
-                        LOGGER.error("client merge call failed", e);
+                        LOGGER.error("client merge call failed: {}", e.getMessage(), e);
                     }
                 }
                 isSending = false;

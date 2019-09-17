@@ -15,15 +15,30 @@
  */
 package io.seata.core.rpc;
 
-import io.netty.channel.ChannelHandlerContext;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
-import io.seata.core.protocol.*;
+import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.AbstractResultMessage;
+import io.seata.core.protocol.HeartbeatMessage;
+import io.seata.core.protocol.MergeResultMessage;
+import io.seata.core.protocol.MergedWarpMessage;
+import io.seata.core.protocol.RegisterRMRequest;
+import io.seata.core.protocol.RegisterRMResponse;
+import io.seata.core.protocol.RegisterTMRequest;
+import io.seata.core.protocol.RegisterTMResponse;
+import io.seata.core.protocol.RpcMessage;
+import io.seata.core.protocol.Version;
 import io.seata.core.rpc.netty.RegisterCheckAuthHandler;
+
+import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.*;
 
 /**
  * The type Default server message listener.
@@ -132,7 +147,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         try {
             sender.sendResponse(request, ctx.channel(), HeartbeatMessage.PONG);
         } catch (Throwable throwable) {
-            LOGGER.error("send response error", throwable);
+            LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
         }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("received PING from " + ctx.channel().remoteAddress());
