@@ -15,13 +15,14 @@
  */
 package io.seata.spring.util;
 
+import java.lang.reflect.Method;
+
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.remoting.Protocols;
 import io.seata.rm.tcc.remoting.RemotingDesc;
 import io.seata.rm.tcc.remoting.parser.DefaultRemotingParser;
 import org.springframework.context.ApplicationContext;
 
-import java.lang.reflect.Method;
 
 /**
  * parser TCC bean
