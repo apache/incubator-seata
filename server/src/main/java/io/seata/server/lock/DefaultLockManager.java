@@ -47,6 +47,9 @@ public class DefaultLockManager extends AbstractLockManager {
 
     @Override
     public boolean acquireLock(BranchSession branchSession) throws TransactionException {
+        if (branchSession == null) {
+            throw new IllegalArgumentException("branchSession can't be null for memory/file locker.");
+        }
         String lockKey = branchSession.getLockKey();
         if (StringUtils.isNullOrEmpty(lockKey)) {
             //no lock
@@ -63,6 +66,9 @@ public class DefaultLockManager extends AbstractLockManager {
 
     @Override
     public boolean releaseLock(BranchSession branchSession) throws TransactionException {
+        if (branchSession == null) {
+            throw new IllegalArgumentException("branchSession can't be null for memory/file locker.");
+        }
         List<RowLock> locks = collectRowLocks(branchSession);
         try {
             return this.doReleaseLock(locks, branchSession);
