@@ -54,7 +54,7 @@ public class TableMetaCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TableMetaCache.class);
 
-    private static final KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+    private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
 
     /**
      * Gets table meta.
