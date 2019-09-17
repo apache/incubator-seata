@@ -513,7 +513,10 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         return branchTransactionDO;
     }
 
-    private void initTransactionNameSize() {
+    /**
+     * the public modifier only for test
+     */
+    public void initTransactionNameSize() {
         Map<String, ColumnInfo> result = this.queryTableStructure(globalTable);
         if (result == null || result.isEmpty()) {
             LOGGER.warn("{} not found", globalTable);
@@ -533,7 +536,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         Map<String, ColumnInfo> result = new HashMap<>();
         try(Connection conn = logStoreDataSource.getConnection()) {
             DatabaseMetaData dbmd = conn.getMetaData();
-            String schema = conn.getMetaData().getUserName();
+            String schema = getSchema(conn);
             ResultSet tableRs = dbmd.getTables(null, schema, null, new String[] { "TABLE" });
             while (tableRs.next()) {
                 String tableName = tableRs.getString("TABLE_NAME");
@@ -558,6 +561,13 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             LOGGER.error("query transaction_name size fail, {}", e.getMessage(), e);
         }
         return result;
+    }
+
+    private String getSchema(Connection conn) throws SQLException {
+        if (dbType.equalsIgnoreCase("h2")) {
+            return null;
+        }
+        return conn.getMetaData().getUserName();
     }
 
     /**
@@ -596,6 +606,9 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         this.dbType = dbType;
     }
 
+    public int getTransactionNameColumnSize() {
+        return transactionNameColumnSize;
+    }
 
     /**
      * column info
