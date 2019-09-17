@@ -115,14 +115,14 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
         Connection conn = null;
         ResultSet rs = null;
         PreparedStatement selectPST = null;
-        boolean autoCommit = true;
+        boolean originalAutoCommit = true;
 
         for (; ; ) {
             try {
                 conn = dataSourceProxy.getPlainConnection();
 
                 // The entire undo process should run in a local transaction.
-                if (autoCommit = conn.getAutoCommit()) {
+                if (originalAutoCommit = conn.getAutoCommit()) {
                     conn.setAutoCommit(false);
                 }
 
@@ -224,7 +224,7 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
                         selectPST.close();
                     }
                     if (conn != null) {
-                        if (autoCommit) {
+                        if (originalAutoCommit) {
                             conn.setAutoCommit(true);
                         }
                         conn.close();

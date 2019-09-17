@@ -105,10 +105,10 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         ResultSet rs = null;
         List<LockDO> unrepeatedLockDOs = null;
         Set<String> dbExistedRowKeys = new HashSet<>();
-        boolean autoCommit = true;
+        boolean originalAutoCommit = true;
         try {
             conn = logStoreDataSource.getConnection();
-            if (autoCommit = conn.getAutoCommit()) {
+            if (originalAutoCommit = conn.getAutoCommit()) {
                 conn.setAutoCommit(false);
             }
             //check lock
@@ -189,7 +189,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             }
             if (conn != null) {
                 try {
-                    if (autoCommit) {
+                    if (originalAutoCommit) {
                         conn.setAutoCommit(true);
                     }
                     conn.close();
