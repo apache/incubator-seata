@@ -83,10 +83,9 @@ public class AbstractDMLBaseExecutorTest {
         boolean oldBranchRollbackFlag = (boolean) branchRollbackFlagField.get(null);
         branchRollbackFlagField.set(null, true);
         Assertions.assertThrows(LockWaitTimeoutException.class, executor::execute);
-        Mockito.verify(connectionProxy, Mockito.times(1))
-                .rollback();
         Mockito.verify(connectionProxy.getTargetConnection(), Mockito.atLeastOnce())
                 .rollback();
+        Mockito.verify(connectionProxy, Mockito.never()).rollback();
         branchRollbackFlagField.set(null, oldBranchRollbackFlag);
     }
 
@@ -95,10 +94,8 @@ public class AbstractDMLBaseExecutorTest {
         boolean oldBranchRollbackFlag = (boolean) branchRollbackFlagField.get(null);
         branchRollbackFlagField.set(null, false);
         Assertions.assertThrows(LockConflictException.class, executor::execute);
-        Mockito.verify(connectionProxy, Mockito.times(1))
-                .rollback();
-        Mockito.verify(connectionProxy.getTargetConnection(), Mockito.never())
-                .rollback();
+        Mockito.verify(connectionProxy.getTargetConnection(), Mockito.times(1)).rollback();
+        Mockito.verify(connectionProxy, Mockito.never()).rollback();
         branchRollbackFlagField.set(null, oldBranchRollbackFlag);
     }
 }
