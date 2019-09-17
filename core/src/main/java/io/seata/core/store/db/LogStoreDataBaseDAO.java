@@ -55,9 +55,9 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
      */
     private static final String TRANSACTION_NAME_KEY = "TRANSACTION_NAME";
     /**
-     * The transaction name default size is 64
+     * The transaction name default size is 128
      */
-    private static final int TRANSACTION_NAME_DEFAULT_SIZE = 64;
+    private static final int TRANSACTION_NAME_DEFAULT_SIZE = 128;
 
     /**
      * The constant CONFIG.
@@ -532,18 +532,18 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     /**
      * query column info from table
-     * @param table the table name
-     * @param col the column name
+     * @param tableName the table name
+     * @param colName the column name
      * @return the column info
      */
-    private ColumnInfo queryTableStructure(final String table, String col) {
+    private ColumnInfo queryTableStructure(final String tableName, String colName) {
         try(Connection conn = logStoreDataSource.getConnection()) {
             DatabaseMetaData dbmd = conn.getMetaData();
             String schema = getSchema(conn);
             ResultSet tableRs = dbmd.getTables(null, schema, null, new String[] { "TABLE" });
             while (tableRs.next()) {
-                String tableName = tableRs.getString("TABLE_NAME");
-                if (tableName.equalsIgnoreCase(table)) {
+                String table = tableRs.getString("TABLE_NAME");
+                if (StringUtils.equalsIgnoreCase(table, tableName)) {
                     ResultSet columnRs = conn.getMetaData().getColumns(null, schema, tableName, null);
                     while (columnRs.next()) {
                         ColumnInfo info = new ColumnInfo();
@@ -555,7 +555,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
                         info.setColumnSize(columnSize);
                         String remarks = columnRs.getString("REMARKS");
                         info.setRemarks(remarks);
-                        if (StringUtils.equalsIgnoreCase(columnName, col)) {
+                        if (StringUtils.equalsIgnoreCase(columnName, colName)) {
                             return info;
                         }
                     }
