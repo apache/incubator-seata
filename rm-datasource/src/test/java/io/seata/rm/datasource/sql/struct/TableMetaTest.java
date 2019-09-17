@@ -18,7 +18,10 @@ package io.seata.rm.datasource.sql.struct;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.mock.MockDriver;
@@ -463,5 +466,23 @@ public class TableMetaTest {
         Assertions.assertEquals(expected[5], actual.getOrdinalPosition());
         Assertions.assertEquals(expected[6], actual.getAscOrDesc());
         Assertions.assertEquals(expected[7], actual.getCardinality());
+    }
+
+    @Test
+    public void test_containsPK() {
+        MockDriver mockDriver = new MockDriver(columnMetas, indexMetas);
+        DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setUrl("jdbc:mock:xxx");
+        dataSource.setDriver(mockDriver);
+
+        DataSourceProxy proxy = new DataSourceProxy(dataSource);
+
+        TableMeta tableMeta = TableMetaCache.getTableMeta(proxy, "t1");
+
+        List<String> cols = new ArrayList<>();
+        cols.add("`id`");
+        boolean b = tableMeta.containsPK(cols);
+
+        Assertions.assertEquals(true, b);
     }
 }
