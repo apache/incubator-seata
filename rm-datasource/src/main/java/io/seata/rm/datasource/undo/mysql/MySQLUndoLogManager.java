@@ -235,6 +235,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
                         selectPST.close();
                     }
                     if (conn != null) {
+                        conn.setAutoCommit(true);
                         conn.close();
                     }
                 } catch (SQLException closeEx) {

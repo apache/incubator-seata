@@ -183,6 +183,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             }
             if (conn != null) {
                 try {
+                    conn.setAutoCommit(true);
                     conn.close();
                 } catch (SQLException e) {
                 }
