@@ -21,9 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -52,7 +50,14 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogStoreDataBaseDAO.class);
 
+    /**
+     * The transaction name key
+     */
     private static final String TRANSACTION_NAME_KEY = "TRANSACTION_NAME";
+    /**
+     * The transaction name default size is 64
+     */
+    private static final int TRANSACTION_NAME_DEFAULT_SIZE = 64;
 
     /**
      * The constant CONFIG.
@@ -76,7 +81,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     private String dbType;
 
-    private int transactionNameColumnSize;
+    private int transactionNameColumnSize = TRANSACTION_NAME_DEFAULT_SIZE;
 
     /**
      * Instantiates a new Log store data base dao.
@@ -517,23 +522,21 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
      * the public modifier only for test
      */
     public void initTransactionNameSize() {
-        Map<String, ColumnInfo> result = this.queryTableStructure(globalTable);
-        if (result == null || result.isEmpty()) {
-            LOGGER.warn("{} not found", globalTable);
+        ColumnInfo columnInfo = queryTableStructure(globalTable, TRANSACTION_NAME_KEY);
+        if (columnInfo == null) {
+            LOGGER.warn("{} table or {} column not found", globalTable, TRANSACTION_NAME_KEY);
             return ;
         }
-        ColumnInfo columnInfo = result.get(TRANSACTION_NAME_KEY);
-        int columnSize = columnInfo.getColumnSize();
-        this.transactionNameColumnSize = columnSize;
+        this.transactionNameColumnSize = columnInfo.getColumnSize();
     }
 
     /**
      * query column info from table
      * @param table the table name
-     * @return the column info {`columnName upperCase`=columnInfo}
+     * @param col the column name
+     * @return the column info
      */
-    private Map<String, ColumnInfo> queryTableStructure(final String table) {
-        Map<String, ColumnInfo> result = new HashMap<>();
+    private ColumnInfo queryTableStructure(final String table, String col) {
         try(Connection conn = logStoreDataSource.getConnection()) {
             DatabaseMetaData dbmd = conn.getMetaData();
             String schema = getSchema(conn);
@@ -552,7 +555,9 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
                         info.setColumnSize(columnSize);
                         String remarks = columnRs.getString("REMARKS");
                         info.setRemarks(remarks);
-                        result.put(columnName.toUpperCase(), info);
+                        if (StringUtils.equalsIgnoreCase(columnName, col)) {
+                            return info;
+                        }
                     }
                     break;
                 }
@@ -560,11 +565,11 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             LOGGER.error("query transaction_name size fail, {}", e.getMessage(), e);
         }
-        return result;
+        return null;
     }
 
     private String getSchema(Connection conn) throws SQLException {
-        if (dbType.equalsIgnoreCase("h2")) {
+        if ("h2".equalsIgnoreCase(dbType)) {
             return null;
         }
         return conn.getMetaData().getUserName();
