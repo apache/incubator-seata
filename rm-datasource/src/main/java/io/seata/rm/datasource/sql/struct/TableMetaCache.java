@@ -24,9 +24,8 @@ import java.sql.Statement;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-
 import javax.sql.DataSource;
-
+import com.alibaba.druid.util.JdbcConstants;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -34,6 +33,8 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +53,8 @@ public class TableMetaCache {
         .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TableMetaCache.class);
+
+    private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
 
     /**
      * Gets table meta.
@@ -125,7 +128,7 @@ public class TableMetaCache {
             conn = dataSource.getConnection();
             stmt = conn.createStatement();
             StringBuilder builder = new StringBuilder("SELECT * FROM ");
-            builder.append(tableName);
+            builder.append(keywordChecker.checkAndReplace(tableName));
             builder.append(" LIMIT 1");
             rs = stmt.executeQuery(builder.toString());
             ResultSetMetaData rsmd = rs.getMetaData();
