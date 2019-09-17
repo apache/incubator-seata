@@ -23,7 +23,6 @@ import io.seata.rm.tcc.remoting.RemotingDesc;
 import io.seata.rm.tcc.remoting.parser.DefaultRemotingParser;
 import org.springframework.context.ApplicationContext;
 
-
 /**
  * parser TCC bean
  *
