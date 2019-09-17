@@ -24,11 +24,8 @@ import java.sql.Statement;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-
 import javax.sql.DataSource;
-
 import com.alibaba.druid.util.JdbcConstants;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -56,6 +53,8 @@ public class TableMetaCache {
         .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TableMetaCache.class);
+
+    private static final KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
 
     /**
      * Gets table meta.
@@ -125,7 +124,6 @@ public class TableMetaCache {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
         try {
             conn = dataSource.getConnection();
             stmt = conn.createStatement();
