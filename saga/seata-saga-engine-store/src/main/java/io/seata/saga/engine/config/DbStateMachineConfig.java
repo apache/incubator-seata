@@ -18,8 +18,6 @@ package io.seata.saga.engine.config;
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
 import io.seata.saga.engine.store.db.DbStateLangStore;
 import io.seata.saga.engine.store.db.DbAndReportTcStateLogStore;
-import io.seata.saga.engine.store.db.TransactionalSqlSessionExecutor;
-import io.seata.saga.engine.store.db.MybatisConfig;
 import io.seata.saga.tm.DefaultSagaTransactionalTemplate;
 import io.seata.saga.tm.SagaTransactionalTemplate;
 import org.springframework.beans.factory.DisposableBean;
@@ -36,34 +34,18 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private DataSource                dataSource;
     private String                    applicationId;
     private String                    txServiceGroup;
-    private String  tablePrefix                  = "seata_";
-    private String  transPropagationBehaviorName = "PROPAGATION_REQUIRES_NEW";
-    private String  transIsolationLevelName      = "ISOLATION_DEFAULT";
-    private String  databaseType                 = "mysql";
-    private MybatisConfig             mybatisConfig;
+    private String                    tablePrefix                  = "seata_";
+    private String                    dbType                       = "mysql";
     private SagaTransactionalTemplate sagaTransactionalTemplate;
 
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        if(mybatisConfig == null){
-            mybatisConfig = new MybatisConfig();
-            mybatisConfig.setDataSource(dataSource);
-            mybatisConfig.setTablePrefix(tablePrefix);
-            mybatisConfig.setDatabaseType(databaseType);
-            mybatisConfig.setTransPropagationBehaviorName(transPropagationBehaviorName);
-            mybatisConfig.setTransIsolationLevelName(transIsolationLevelName);
-            mybatisConfig.afterPropertiesSet();
-        }
-
         if(getStateLogStore() == null){
             DbAndReportTcStateLogStore dbStateLogStore = new DbAndReportTcStateLogStore();
-
-            TransactionalSqlSessionExecutor sqlSessionExecutor = new TransactionalSqlSessionExecutor();
-            sqlSessionExecutor.setTransactionTemplate(mybatisConfig.getTransactionTemplate());
-            sqlSessionExecutor.setSqlSessionTemplate(mybatisConfig.getSqlSessionTemplate());
-
-            dbStateLogStore.setSqlSessionExecutor(sqlSessionExecutor);
+            dbStateLogStore.setDataSource(dataSource);
+            dbStateLogStore.setTablePrefix(tablePrefix);
+            dbStateLogStore.setDbType(dbType);
             dbStateLogStore.setDefaultTenantId(getDefaultTenantId());
 
             if(sagaTransactionalTemplate == null){
@@ -82,12 +64,9 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
         if(getStateLangStore() == null){
             DbStateLangStore dbStateLangStore = new DbStateLangStore();
-
-            TransactionalSqlSessionExecutor sqlSessionExecutor = new TransactionalSqlSessionExecutor();
-            sqlSessionExecutor.setTransactionTemplate(mybatisConfig.getTransactionTemplate());
-            sqlSessionExecutor.setSqlSessionTemplate(mybatisConfig.getSqlSessionTemplate());
-
-            dbStateLangStore.setSqlSessionExecutor(sqlSessionExecutor);
+            dbStateLangStore.setDataSource(dataSource);
+            dbStateLangStore.setTablePrefix(tablePrefix);
+            dbStateLangStore.setDbType(dbType);
 
             setStateLangStore(dbStateLangStore);
         }
@@ -126,10 +105,6 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
         this.txServiceGroup = txServiceGroup;
     }
 
-    public void setMybatisConfig(MybatisConfig mybatisConfig) {
-        this.mybatisConfig = mybatisConfig;
-    }
-
     public void setSagaTransactionalTemplate(SagaTransactionalTemplate sagaTransactionalTemplate) {
         this.sagaTransactionalTemplate = sagaTransactionalTemplate;
     }
@@ -142,27 +117,11 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
         this.tablePrefix = tablePrefix;
     }
 
-    public String getTransPropagationBehaviorName() {
-        return transPropagationBehaviorName;
+    public String getDbType() {
+        return dbType;
     }
 
-    public void setTransPropagationBehaviorName(String transPropagationBehaviorName) {
-        this.transPropagationBehaviorName = transPropagationBehaviorName;
-    }
-
-    public String getTransIsolationLevelName() {
-        return transIsolationLevelName;
-    }
-
-    public void setTransIsolationLevelName(String transIsolationLevelName) {
-        this.transIsolationLevelName = transIsolationLevelName;
-    }
-
-    public String getDatabaseType() {
-        return databaseType;
-    }
-
-    public void setDatabaseType(String databaseType) {
-        this.databaseType = databaseType;
+    public void setDbType(String dbType) {
+        this.dbType = dbType;
     }
 }

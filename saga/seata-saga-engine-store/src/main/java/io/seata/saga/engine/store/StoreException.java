@@ -13,24 +13,31 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.engine.store.db;
-
-import java.util.List;
+package io.seata.saga.engine.store;
 
 /**
- * SqlSession Executor
+ * StoreException
  *
  * @author lorne.cl
  */
-public interface SqlSessionExecutor {
+public class StoreException extends RuntimeException {
 
-    <T> T selectOne(String statement, Object parameter);
+    public StoreException() {
+    }
 
-    <E> List<E> selectList(String statement, Object parameter);
+    public StoreException(String message) {
+        super(message);
+    }
 
-    int insert(String statement, Object parameter);
+    public StoreException(String message, Throwable cause) {
+        super(message, cause);
+    }
 
-    int update(String statement, Object parameter);
+    public StoreException(Throwable cause) {
+        super(cause);
+    }
 
-    int delete(String statement, Object parameter);
+    public StoreException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }

@@ -23,7 +23,7 @@ import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.parser.StateMachineParserFactory;
 import io.seata.saga.engine.sequence.SeqGenerator;
 import io.seata.saga.engine.sequence.SpringJvmUUIDSeqGenerator;
-import org.apache.commons.io.IOUtils;
+import io.seata.saga.statelang.parser.utils.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.Resource;
@@ -190,7 +190,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
     public void registryByResources(Resource[] resources, String tenantId) throws IOException {
         if (resources != null) {
             for (Resource resource : resources) {
-                String json = IOUtils.toString(resource.getInputStream(), "UTF-8");
+                String json = IOUtils.toString(resource.getInputStream(), charset);
                 StateMachine stateMachine = StateMachineParserFactory.getStateMachineParser().parse(json);
                 if (stateMachine != null) {
                     stateMachine.setContent(json);

@@ -15,10 +15,9 @@
  */
 package io.seata.saga.statelang.parser;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.GsonBuilder;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import io.seata.saga.statelang.domain.StateMachine;
-import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.core.io.ClassPathResource;
@@ -35,15 +34,11 @@ public class StateParserTests {
     public void testParser() throws IOException {
 
         ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine.json");
-        String json = IOUtils.toString(resource.getInputStream(), "UTF-8");
+        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
         StateMachine stateMachine = StateMachineParserFactory.getStateMachineParser().parse(json);
         Assert.assertNotNull(stateMachine);
 
-        String outputJson = (new GsonBuilder()).
-                setFieldNamingPolicy(FieldNamingPolicy.UPPER_CAMEL_CASE).
-                disableHtmlEscaping().
-                setPrettyPrinting().create().
-                toJson(stateMachine);
+        String outputJson = JSON.toJSONString(stateMachine, SerializerFeature.PrettyFormat);
         System.out.println(outputJson);
 
         Assert.assertEquals(stateMachine.getName(), "simpleTestStateMachine");

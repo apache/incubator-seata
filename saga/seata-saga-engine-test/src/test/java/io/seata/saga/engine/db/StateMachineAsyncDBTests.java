@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,6 +56,11 @@ public class StateMachineAsyncDBTests {
             @Override
             public void run() {
                 try {
+                    File file = new File("sessionStore/root.data");
+                    if(file.exists()){
+                        file.delete();
+                    }
+
                     server = new Server();
                     server.main(new String[]{});
                 } catch (IOException e) {

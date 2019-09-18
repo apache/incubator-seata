@@ -15,6 +15,8 @@
  */
 package io.seata.saga.statelang.parser.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.parser.Feature;
 import io.seata.common.util.StringUtils;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
@@ -24,9 +26,6 @@ import io.seata.saga.statelang.domain.impl.StateMachineImpl;
 import io.seata.saga.statelang.parser.StateMachineParser;
 import io.seata.saga.statelang.parser.StateParser;
 import io.seata.saga.statelang.parser.StateParserFactory;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,12 +34,10 @@ import java.util.Map;
  */
 public class StateMachineParserImpl implements StateMachineParser {
 
-    private Gson gson = new GsonBuilder().create();
-
     @Override
     public StateMachine parse(String json) {
 
-        Map<String, Object> node = parseMap(json);
+        Map<String, Object> node = JSON.parseObject(json, Map.class, Feature.IgnoreAutoType);
         StateMachineImpl stateMachine = new StateMachineImpl();
         stateMachine.setName((String)node.get("Name"));
         stateMachine.setComment((String)node.get("Comment"));
@@ -85,26 +82,5 @@ public class StateMachineParserImpl implements StateMachineParser {
             }
         }
         return stateMachine;
-    }
-
-    public Map<String, Object> parseMap(String json) {
-        if (json != null) {
-            json = json.trim();
-            if (json.startsWith("{")) {
-                return this.gson.fromJson(json, Map.class);
-            }
-        }
-        throw new IllegalArgumentException("Cannot parse JSON");
-    }
-
-    @SuppressWarnings("unchecked")
-    public List<Object> parseList(String json) {
-        if (json != null) {
-            json = json.trim();
-            if (json.startsWith("[")) {
-                return this.gson.fromJson(json, List.class);
-            }
-        }
-        throw new IllegalArgumentException("Cannot parse JSON");
     }
 }

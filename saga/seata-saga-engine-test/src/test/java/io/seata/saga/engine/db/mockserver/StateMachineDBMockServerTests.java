@@ -20,7 +20,6 @@ import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
-import io.seata.tm.api.GlobalTransaction;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
