@@ -147,7 +147,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         try {
             sender.sendResponse(request, ctx.channel(), HeartbeatMessage.PONG);
         } catch (Throwable throwable) {
-            LOGGER.error("", "send response error", throwable);
+            LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
         }
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("received PING from " + ctx.channel().remoteAddress());
