@@ -18,9 +18,7 @@ package io.seata.rm.datasource.sql.struct;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
 import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.rm.datasource.DataSourceProxy;
