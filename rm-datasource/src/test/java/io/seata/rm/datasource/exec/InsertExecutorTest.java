@@ -306,17 +306,6 @@ public class InsertExecutorTest {
         Assertions.assertEquals(pkValuesByAuto, pkValues);
     }
 
-    @Test
-    public void test_dbType() {
-        ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
-        when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
-        when(connectionProxy.getDbType()).thenReturn(JdbcConstants.MARIADB);
-
-        Assertions.assertThrows(NotSupportYetException.class, () -> {
-            insertExecutor.containsPK();
-        });
-    }
-
     private List<String> mockInsertColumns() {
         List<String> columns = new ArrayList<>();
         columns.add(ID_COLUMN);

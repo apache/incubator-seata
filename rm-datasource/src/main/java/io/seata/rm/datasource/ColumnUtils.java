@@ -15,6 +15,9 @@
  */
 package io.seata.rm.datasource;
 
+import com.alibaba.druid.util.JdbcConstants;
+import io.seata.common.util.StringUtils;
+
 import java.util.List;
 
 /**
@@ -28,14 +31,30 @@ public final class ColumnUtils {
      * The escape
      */
     public enum Escape {
+        /** standard escape */
+        STANDARD('"'),
         /** mysql escape */
-        MYSQL_ESCAPE('`'),
-        /** oracle escape */
-        ORACLE_ESCAPE('"'),
+        MYSQL('`')
         ;
         public final char value;
         Escape(char value) {
             this.value = value;
+        }
+    }
+
+    /**
+     * del escape by db type
+     * @param cols the cols
+     * @param dbType the db type
+     */
+    public static void delEscape(List<String> cols, String dbType) {
+        // sql standard
+        // https://db.apache.org/derby/docs/10.1/ref/crefsqlj1003454.html
+        // https://docs.oracle.com/javadb/10.8.3.0/ref/crefsqlj1003454.html
+        // https://www.informit.com/articles/article.aspx?p=2036581&seqNum=2
+        delEscape(cols, Escape.STANDARD);
+        if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL)) {
+            delEscape(cols, Escape.MYSQL);
         }
     }
 
@@ -58,21 +77,34 @@ public final class ColumnUtils {
     }
 
     /**
+     * add escape by db type
+     * @param colName the column name
+     * @param dbType the db type
+     * @return the colName left and right add escape
+     */
+    public static String addEscape(String colName, String dbType) {
+        if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL)) {
+            return ColumnUtils.addEscape(colName, ColumnUtils.Escape.MYSQL);
+        }
+        return ColumnUtils.addEscape(colName, ColumnUtils.Escape.STANDARD);
+    }
+
+    /**
      * add escape
-     * @param col the column name
+     * @param colName the column name
      * @param escape the escape
      */
-    public static String addEscape(String col, Escape escape) {
-        if (col == null) {
-            throw new NullPointerException("col is null");
+    public static String addEscape(String colName, Escape escape) {
+        if (colName == null) {
+            throw new NullPointerException("colName is null");
         }
-        if (col.isEmpty()) {
-            return col;
+        if (colName.isEmpty()) {
+            return colName;
         }
-        if (col.charAt(0) == escape.value) {
-            return col;
+        if (colName.charAt(0) == escape.value) {
+            return colName;
         }
-        return String.format("%s%s%s", escape.value, col, escape.value);
+        return String.format("%s%s%s", escape.value, colName, escape.value);
     }
 
 }

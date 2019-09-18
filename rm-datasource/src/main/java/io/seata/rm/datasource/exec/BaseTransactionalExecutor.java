@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import com.alibaba.druid.util.JdbcConstants;
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
@@ -359,28 +358,17 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected void delEscape(List<String> cols) {
         String dbType = statementProxy.getConnectionProxy().getDbType();
-        if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.ORACLE)) {
-            ColumnUtils.delEscape(cols, ColumnUtils.Escape.ORACLE_ESCAPE);
-        } else if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL)) {
-            ColumnUtils.delEscape(cols, ColumnUtils.Escape.MYSQL_ESCAPE);
-        } else {
-            throw new NotSupportYetException(String.format("dbType[%s] not support", dbType));
-        }
+        ColumnUtils.delEscape(cols, dbType);
     }
 
     /**
      * add escape
-     * @param col
+     * @param colName the column name
      * @return
      */
-    protected String addEscape(String col) {
+    protected String addEscape(String colName) {
         String dbType = statementProxy.getConnectionProxy().getDbType();
-        if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.ORACLE)) {
-            return ColumnUtils.addEscape(col, ColumnUtils.Escape.ORACLE_ESCAPE);
-        } else if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL)) {
-            return ColumnUtils.addEscape(col, ColumnUtils.Escape.MYSQL_ESCAPE);
-        }
-        throw new NotSupportYetException(String.format("dbType[%s] not support", dbType));
+        return ColumnUtils.addEscape(colName, dbType);
     }
 
 }
