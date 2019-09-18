@@ -25,7 +25,7 @@ import java.util.List;
 public class SpringCloudConfiguration extends AbstractConfiguration<ConfigChangeListener> {
 
     private static final String CONFIG_TYPE = "SpringCloudConfig";
-    private static SpringCloudConfiguration instance;
+    private static volatile SpringCloudConfiguration instance;
     private static final String PREFIX = "seata.";
     public static SpringCloudConfiguration getInstance() {
         if (null == instance) {
@@ -36,6 +36,10 @@ public class SpringCloudConfiguration extends AbstractConfiguration<ConfigChange
             }
         }
         return instance;
+    }
+
+    private SpringCloudConfiguration(){
+
     }
 
     @Override
