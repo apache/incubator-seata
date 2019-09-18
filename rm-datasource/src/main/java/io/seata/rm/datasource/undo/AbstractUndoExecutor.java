@@ -28,7 +28,9 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import java.sql.JDBCType;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -151,7 +153,16 @@ public abstract class AbstractUndoExecutor {
         int undoIndex = 0;
         for (Field undoValue : undoValues) {
             undoIndex++;
-            undoPST.setObject(undoIndex, undoValue.getValue(), undoValue.getType());
+            if (undoValue.getType() == JDBCType.BLOB.getVendorTypeNumber()) {
+                SerialBlob serialBlob = (SerialBlob) undoValue.getValue();
+                undoPST.setBlob(undoIndex, serialBlob.getBinaryStream());
+            } else if (undoValue.getType() == JDBCType.CLOB.getVendorTypeNumber()) {
+                SerialClob serialClob = (SerialClob) undoValue.getValue();
+                undoPST.setClob(undoIndex, serialClob.getCharacterStream());
+            } else {
+                undoPST.setObject(undoIndex, undoValue.getValue(), undoValue.getType());
+            }
+
         }
         // PK is at last one.
         // INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)

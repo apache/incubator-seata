@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>0.8.1-SNAPSHOT</version>
+    <version>0.8.1</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -215,6 +215,11 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-codec-protobuf</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-codec-kryo</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -447,6 +452,16 @@
             <artifactId>jackson-databind</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>kryo</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.javakaffee</groupId>
+            <artifactId>kryo-serializers</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -549,7 +564,6 @@
                                     <include>io.seata:seata-tm</include>
                                     <include>io.seata:seata-codec-seata</include>
                                     <include>io.seata:seata-codec-protobuf</include>
-
                                     <!-- saga -->
                                     <include>io.seata:seata-saga-processctrl</include>
                                     <include>io.seata:seata-saga-statelang</include>
@@ -557,6 +571,8 @@
                                     <include>io.seata:seata-saga-rm</include>
                                     <include>io.seata:seata-saga-tm</include>
                                     <include>io.seata:seata-saga-engine-store</include>
+
+                                    <include>io.seata:seata-codec-kryo</include>
                                 </includes>
                             </artifactSet>
                             <transformers>

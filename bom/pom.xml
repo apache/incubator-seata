@@ -20,7 +20,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-bom</artifactId>
-    <version>0.8.1-SNAPSHOT</version>
+    <version>0.8.1</version>
 
     <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
@@ -114,6 +114,9 @@
         <protobuf.version>3.7.1</protobuf.version>
 
         <junit.version>4.12</junit.version>
+
+        <kryo.version>4.0.2</kryo.version>
+        <kryo-serializers.version>0.42</kryo-serializers.version>
     </properties>
 
     <dependencyManagement>
@@ -406,6 +409,16 @@
                 <groupId>com.beust</groupId>
                 <artifactId>jcommander</artifactId>
                 <version>${jcommander.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.esotericsoftware</groupId>
+                <artifactId>kryo</artifactId>
+                <version>${kryo.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.javakaffee</groupId>
+                <artifactId>kryo-serializers</artifactId>
+                <version>${kryo-serializers.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-dbcp</groupId>

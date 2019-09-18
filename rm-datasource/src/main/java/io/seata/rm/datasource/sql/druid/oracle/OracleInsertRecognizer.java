@@ -39,7 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type oralce insert recognizer.
+ * The type oracle insert recognizer.
  * @author ccg
  * @date 2019/3/25
  */
@@ -70,7 +70,7 @@ public class OracleInsertRecognizer extends BaseRecognizer implements SQLInsertR
 
     @Override
     public String getTableName() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
             @Override
@@ -93,7 +93,7 @@ public class OracleInsertRecognizer extends BaseRecognizer implements SQLInsertR
         List<String> list = new ArrayList<>(columnSQLExprs.size());
         for (SQLExpr expr : columnSQLExprs) {
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr)expr).getName().toUpperCase());
+                list.add(((SQLIdentifierExpr)expr).getName());
             } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
             }
