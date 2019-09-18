@@ -24,6 +24,7 @@ import com.fasterxml.jackson.core.type.WritableTypeId;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -39,7 +40,12 @@ import io.seata.rm.datasource.undo.UndoLogParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.sql.Timestamp;
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialException;
 
 /**
  * The type Json based undo log parser.
@@ -67,12 +73,37 @@ public class JacksonUndoLogParser implements UndoLogParser {
      */
     private static final JsonDeserializer TIMESTAMP_DESERIALIZER = new TimestampDeserializer();
 
+    /**
+     * customize serializer of java.sql.Blob
+     */
+    private static final JsonSerializer BLOB_SERIALIZER = new BlobSerializer();
+
+    /**
+     * customize deserializer of java.sql.Blob
+     */
+    private static final JsonDeserializer BLOB_DESERIALIZER = new BlobDeserializer();
+
+    /**
+     * customize serializer of java.sql.Clob
+     */
+    private static final JsonSerializer CLOB_SERIALIZER = new ClobSerializer();
+
+    /**
+     * customize deserializer of java.sql.Clob
+     */
+    private static final JsonDeserializer CLOB_DESERIALIZER = new ClobDeserializer();
+
     static {
         MODULE.addSerializer(Timestamp.class, TIMESTAMP_SERIALIZER);
         MODULE.addDeserializer(Timestamp.class, TIMESTAMP_DESERIALIZER);
+        MODULE.addSerializer(SerialBlob.class, BLOB_SERIALIZER);
+        MODULE.addDeserializer(SerialBlob.class, BLOB_DESERIALIZER);
+        MODULE.addSerializer(SerialClob.class, CLOB_SERIALIZER);
+        MODULE.addDeserializer(SerialClob.class, CLOB_DESERIALIZER);
         MAPPER.registerModule(MODULE);
         MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         MAPPER.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
+        MAPPER.enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER);
     }
 
     @Override
@@ -152,6 +183,84 @@ public class JacksonUndoLogParser implements UndoLogParser {
                 }
             }
             LOGGER.error("deserialize java.sql.Timestamp type error.");
+            return null;
+        }
+    }
+
+    /**
+     * the class of serialize blob type
+     */
+    private static class BlobSerializer extends JsonSerializer<SerialBlob> {
+
+        @Override
+        public void serializeWithType(SerialBlob blob, JsonGenerator gen, SerializerProvider serializers,
+                                      TypeSerializer typeSer) throws IOException {
+            WritableTypeId typeIdDef = typeSer.writeTypePrefix(gen, typeSer.typeId(blob, JsonToken.VALUE_EMBEDDED_OBJECT));
+            serialize(blob, gen, serializers);
+            typeSer.writeTypeSuffix(gen, typeIdDef);
+        }
+
+        @Override
+        public void serialize(SerialBlob blob, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            try {
+                gen.writeBinary(blob.getBytes(1, (int) blob.length()));
+            } catch (SerialException e) {
+                LOGGER.error("serialize java.sql.Blob error : {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    /**
+     * the class of deserialize blob type
+     */
+    private static class BlobDeserializer extends JsonDeserializer<SerialBlob> {
+
+        @Override
+        public SerialBlob deserialize(JsonParser p, DeserializationContext ctxt)
+            throws IOException {
+            try {
+                return new SerialBlob(p.getBinaryValue());
+            } catch (SQLException e) {
+                LOGGER.error("deserialize java.sql.Blob error : {}", e.getMessage(), e);
+            }
+            return null;
+        }
+    }
+
+    /**
+     * the class of serialize clob type
+     */
+    private static class ClobSerializer extends JsonSerializer<SerialClob> {
+
+        @Override
+        public void serializeWithType(SerialClob clob, JsonGenerator gen, SerializerProvider serializers,
+                                      TypeSerializer typeSer) throws IOException {
+            WritableTypeId typeIdDef = typeSer.writeTypePrefix(gen, typeSer.typeId(clob, JsonToken.VALUE_EMBEDDED_OBJECT));
+            serialize(clob, gen, serializers);
+            typeSer.writeTypeSuffix(gen, typeIdDef);
+        }
+
+        @Override
+        public void serialize(SerialClob clob, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+            try {
+                gen.writeString(clob.getCharacterStream(), (int) clob.length());
+            } catch (SerialException e) {
+                LOGGER.error("serialize java.sql.Blob error : {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    private static class ClobDeserializer extends JsonDeserializer<SerialClob> {
+
+        @Override
+        public SerialClob deserialize(JsonParser p, DeserializationContext ctxt)
+            throws IOException {
+            try {
+                return new SerialClob(p.getValueAsString().toCharArray());
+
+            } catch (SQLException e) {
+                LOGGER.error("deserialize java.sql.Clob error : {}", e.getMessage(), e);
+            }
             return null;
         }
     }

@@ -31,6 +31,7 @@ import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GlobalTransactionEvent;
+import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -112,6 +113,11 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
      * The Transaction undolog delete period.
      */
     protected static final long UNDOLOG_DELETE_PERIOD = CONFIG.getLong(ConfigurationKeys.TRANSACTION_UNDO_LOG_DELETE_PERIOD, 24 * 60 * 60 * 1000);
+
+    /**
+     * The Transaction undolog delay delete period
+     */
+    protected static final long UNDOLOG_DELAY_DELETE_PERIOD = 3 * 60 * 1000;
 
     private static final int ALWAYS_RETRY_BOUNDARY = 0;
 
@@ -226,7 +232,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 branchSession.getClientId(), request);
             return response.getBranchStatus();
         } catch (IOException | TimeoutException e) {
-            throw new TransactionException(FailedToSendBranchCommitRequest, branchId + "/" + xid, e);
+            throw new BranchTransactionException(FailedToSendBranchCommitRequest, String.format("Send branch commit failed, xid = %s branchId = %s", xid, branchId), e);
         }
     }
 
@@ -253,7 +259,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 branchSession.getClientId(), request);
             return response.getBranchStatus();
         } catch (IOException | TimeoutException e) {
-            throw new TransactionException(FailedToSendBranchRollbackRequest, branchId + "/" + xid, e);
+            throw new BranchTransactionException(FailedToSendBranchRollbackRequest, String.format("Send branch rollback failed, xid = %s branchId = %s", xid, branchId), e);
         }
     }
 
@@ -385,6 +391,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         }
         for (GlobalSession asyncCommittingSession : asyncCommittingSessions) {
             try {
+                // Instruction reordering in DefaultCore#asyncCommit may cause this situation
+                if (GlobalStatus.AsyncCommitting != asyncCommittingSession.getStatus()) {
+                   continue;
+                }
                 asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(asyncCommittingSession, true);
             } catch (TransactionException ex) {
@@ -459,7 +469,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception undoLog deleting ... ", e);
             }
-        },0, UNDOLOG_DELETE_PERIOD,TimeUnit.MILLISECONDS);
+        }, UNDOLOG_DELAY_DELETE_PERIOD, UNDOLOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     @Override
