@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * The type postgresql undo delete executor.
+ * The type postgresql keyword checker.
  *
  * @author japsercloud
  */
