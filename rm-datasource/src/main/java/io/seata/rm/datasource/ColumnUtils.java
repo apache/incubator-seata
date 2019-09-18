@@ -70,7 +70,7 @@ public final class ColumnUtils {
         }
         for (int i = 0, len = cols.size(); i < len; i++) {
             String col = cols.get(i);
-            if (col != null && col.charAt(0) == escape.value) {
+            if (col != null && col.charAt(0) == escape.value && col.charAt(col.length() - 1) == escape.value) {
                 cols.set(i, col.substring(1, col.length() - 1));
             }
         }
@@ -84,9 +84,9 @@ public final class ColumnUtils {
      */
     public static String addEscape(String colName, String dbType) {
         if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL)) {
-            return ColumnUtils.addEscape(colName, ColumnUtils.Escape.MYSQL);
+            return addEscape(colName, ColumnUtils.Escape.MYSQL);
         }
-        return ColumnUtils.addEscape(colName, ColumnUtils.Escape.STANDARD);
+        return addEscape(colName, ColumnUtils.Escape.STANDARD);
     }
 
     /**
@@ -101,7 +101,7 @@ public final class ColumnUtils {
         if (colName.isEmpty()) {
             return colName;
         }
-        if (colName.charAt(0) == escape.value) {
+        if (colName.charAt(0) == escape.value && colName.charAt(colName.length() - 1) == escape.value) {
             return colName;
         }
         return String.format("%s%s%s", escape.value, colName, escape.value);
