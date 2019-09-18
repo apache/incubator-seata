@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>0.8.1-SNAPSHOT</version>
+    <version>0.8.1</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
