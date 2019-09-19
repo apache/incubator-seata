@@ -85,7 +85,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>0.8.1</revision>
+        <revision>0.9.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -447,7 +447,7 @@
                         <id>validate</id>
                         <phase>validate</phase>
                         <configuration>
-                            <configLocation>${user.dir}/style/feats_checkstyle.xml</configLocation>
+                            <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
                             <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>false</failsOnError>
