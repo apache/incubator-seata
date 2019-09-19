@@ -38,6 +38,7 @@
         <module>rm-datasource</module>
         <module>server</module>
         <module>spring</module>
+        <module>saga</module>
         <module>tcc</module>
         <module>test</module>
         <module>tm</module>

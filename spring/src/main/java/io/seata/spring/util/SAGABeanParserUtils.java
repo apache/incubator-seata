@@ -16,10 +16,11 @@
 package io.seata.spring.util;
 
 import io.seata.common.util.ReflectionUtil;
+import io.seata.rm.saga.api.SagaCompensiable;
+import io.seata.rm.saga.remoting.Protocols;
+import io.seata.rm.saga.remoting.RemotingDesc;
+import io.seata.rm.saga.remoting.parser.DefaultRemotingParser;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
-import io.seata.rm.tcc.remoting.Protocols;
-import io.seata.rm.tcc.remoting.RemotingDesc;
-import io.seata.rm.tcc.remoting.parser.DefaultRemotingParser;
 import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.Method;
@@ -30,7 +31,7 @@ import java.lang.reflect.Method;
  * @author zhangsen
  * @data 2019 /3/18
  */
-public class TCCBeanParserUtils {
+public class SAGABeanParserUtils {
 
     /**
      * is auto proxy TCC bean
@@ -40,7 +41,7 @@ public class TCCBeanParserUtils {
      * @param applicationContext the application context
      * @return boolean boolean
      */
-    public static boolean isTccAutoProxy(Object bean, String beanName, ApplicationContext applicationContext) {
+    public static boolean isSagaAutoProxy(Object bean, String beanName, ApplicationContext applicationContext) {
         RemotingDesc remotingDesc = null;
         boolean isRemotingBean = parserRemotingServiceInfo(bean, beanName);
         //is remoting bean
@@ -48,7 +49,7 @@ public class TCCBeanParserUtils {
             remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
             if (remotingDesc != null && remotingDesc.getProtocol() == Protocols.IN_JVM) {
                 //LocalTCC
-                return isTccProxyTargetBean(remotingDesc);
+                return isSagaProxyTargetBean(remotingDesc);
             } else {
                 // sofa:reference / dubbo:reference, factory bean
                 return false;
@@ -60,32 +61,38 @@ public class TCCBeanParserUtils {
                 //check FactoryBean
                 if (isRemotingFactoryBean(bean, beanName, applicationContext)) {
                     remotingDesc = DefaultRemotingParser.get().getRemotingBeanDesc(beanName);
-                    return isTccProxyTargetBean(remotingDesc);
+                    return isSagaProxyTargetBean(remotingDesc);
                 } else {
                     return false;
                 }
             } else {
-                return isTccProxyTargetBean(remotingDesc);
+                return isSagaProxyTargetBean(remotingDesc);
             }
         }
     }
 
-    public static boolean isTccDubboProxy(Object bean, String proxyField) throws Exception {
+    public static boolean isSagaDubboProxy(Object bean, String proxyField) throws Exception {
         try{
             Object proxyBean = ReflectionUtil.getFieldValue(bean, proxyField);
             io.seata.rm.tcc.remoting.RemotingDesc remotingDesc = DubboUtil.getServiceDesc(proxyBean);
 
-            boolean isTccClazz = false;
+            boolean isSagaClazz = false;
             Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
             Method[] methods = tccInterfaceClazz.getMethods();
             for (Method method : methods) {
                 TwoPhaseBusinessAction twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
                 if (twoPhaseBusinessAction != null) {
-                    isTccClazz = true;
+                    isSagaClazz = true;
+                    break;
+                }
+
+                SagaCompensiable sagaCompensiable = method.getAnnotation(SagaCompensiable.class);
+                if (sagaCompensiable != null) {
+                    isSagaClazz = true;
                     break;
                 }
             }
-            return  isTccClazz;
+            return  isSagaClazz;
         }catch (Exception e){
             throw new Exception(e);
         }
@@ -120,23 +127,23 @@ public class TCCBeanParserUtils {
     }
 
     /**
-     * is TCC proxy-bean/target-bean: LocalTCC , the proxy bean of sofa:reference/dubbo:reference
+     * is SAGA proxy-bean/target-bean: LocalSAGA , the proxy bean of sofa:reference/dubbo:reference
      *
      * @param remotingDesc the remoting desc
      * @return boolean boolean
      */
-    protected static boolean isTccProxyTargetBean(RemotingDesc remotingDesc) {
+    protected static boolean isSagaProxyTargetBean(RemotingDesc remotingDesc) {
         if (remotingDesc == null) {
             return false;
         }
-        //check if it is TCC bean
+        //check if it is SAGA bean
         boolean isTccClazz = false;
         Class<?> tccInterfaceClazz = remotingDesc.getInterfaceClass();
         Method[] methods = tccInterfaceClazz.getMethods();
-        TwoPhaseBusinessAction twoPhaseBusinessAction = null;
+        SagaCompensiable sagaCompensiable = null;
         for (Method method : methods) {
-            twoPhaseBusinessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
-            if (twoPhaseBusinessAction != null) {
+            sagaCompensiable = method.getAnnotation(SagaCompensiable.class);
+            if (sagaCompensiable != null) {
                 isTccClazz = true;
                 break;
             }

@@ -13,16 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.tcc;
+package io.seata.spring.saga;
 
 import io.seata.common.Constants;
 import io.seata.common.executor.Callback;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
-import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
-import io.seata.rm.tcc.interceptor.ActionInterceptorHandler;
-import io.seata.rm.tcc.remoting.RemotingDesc;
-import io.seata.rm.tcc.remoting.parser.DubboUtil;
+import io.seata.rm.saga.api.SagaCompensiable;
+import io.seata.rm.saga.interceptor.ActionInterceptorHandler;
+import io.seata.rm.saga.remoting.RemotingDesc;
+import io.seata.rm.saga.remoting.parser.DubboUtil;
 import io.seata.spring.util.SpringProxyUtils;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
@@ -33,13 +33,13 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 /**
- * TCC Interceptor
+ * SAGA Interceptor
  *
  * @author zhangsen
  */
-public class TccActionInterceptor implements MethodInterceptor {
+public class SagaActionInterceptor implements MethodInterceptor {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SagaActionInterceptor.class);
 
     private static final String DUBBO_PROXY_NAME_PREFIX="com.alibaba.dubbo.common.bytecode.proxy";
 
@@ -52,17 +52,17 @@ public class TccActionInterceptor implements MethodInterceptor {
     protected RemotingDesc remotingDesc;
 
     /**
-     * Instantiates a new Tcc action interceptor.
+     * Instantiates a new SAGA action interceptor.
      */
-    public TccActionInterceptor() {
+    public SagaActionInterceptor() {
     }
 
     /**
-     * Instantiates a new Tcc action interceptor.
+     * Instantiates a new SAGA action interceptor.
      *
      * @param remotingDesc the remoting desc
      */
-    public TccActionInterceptor(RemotingDesc remotingDesc) {
+    public SagaActionInterceptor(RemotingDesc remotingDesc) {
         this.remotingDesc = remotingDesc;
     }
 
@@ -73,18 +73,18 @@ public class TccActionInterceptor implements MethodInterceptor {
             return invocation.proceed();
         }
         Method method = getActionInterfaceMethod(invocation);
-        TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
+        SagaCompensiable businessAction = method.getAnnotation(SagaCompensiable.class);
         //try method
         if (businessAction != null) {
             //save the xid
             String xid = RootContext.getXID();
-            String xidType = String.format("%s_%s", xid, BranchType.TCC.name());
+            String xidType = String.format("%s_%s", xid, BranchType.SAGA.name());
             //clear the context
             RootContext.unbind();
             RootContext.bindType(xidType);
             try {
                 Object[] methodArgs = invocation.getArguments();
-                //Handler the TCC Aspect
+                //Handler the SAGA Aspect
                 Map<String, Object> ret = actionInterceptorHandler.proceed(method, methodArgs, xid, businessAction,
                         new Callback<Object>() {
                             @Override
@@ -93,7 +93,7 @@ public class TccActionInterceptor implements MethodInterceptor {
                             }
                         });
                 //return the final result
-                return ret.get(Constants.TCC_METHOD_RESULT);
+                return ret.get(Constants.SAGA_METHOD_RESULT);
             } finally {
                 //recovery the context
                 RootContext.bind(xid);
