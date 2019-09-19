@@ -92,9 +92,6 @@ public class LockerFactory {
                 new Object[] {logStoreDataSource});
             lockerMap.put(storeMode, locker);
         } else if (StoreMode.FILE.name().equalsIgnoreCase(storeMode)) {
-            if (branchSession == null) {
-                throw new IllegalArgumentException("branchSession can be null for memory/file locker.");
-            }
             locker = EnhancedServiceLoader.load(Locker.class, storeMode,
                 new Class[] {BranchSession.class}, new Object[] {branchSession});
         } else {
