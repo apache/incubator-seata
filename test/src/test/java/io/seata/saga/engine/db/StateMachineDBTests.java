@@ -22,14 +22,11 @@ import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.server.Server;
 import io.seata.tm.api.GlobalTransaction;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.File;
 import java.io.IOException;
@@ -40,15 +37,21 @@ import java.util.Map;
  * State machine tests with db log store
  * @author lorne.cl
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "classpath:spring/statemachine_engine_db_test.xml" })
 public class StateMachineDBTests {
 
     private static Server server;
 
-    private StateMachineEngine stateMachineEngine;
+    private static StateMachineEngine stateMachineEngine;
 
-    @BeforeClass
+    @BeforeAll
+    public static void initApplicationContext() throws InterruptedException {
+
+        startSeataServer();
+
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_db_test.xml");
+        stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
+    }
+
     public static void startSeataServer() throws InterruptedException {
         (new Thread(new Runnable() {
             @Override
@@ -144,11 +147,11 @@ public class StateMachineDBTests {
         StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         String businessKey = instance.getStateList().get(0).getBusinessKey();
-        Assert.assertNotNull(businessKey);
+        Assertions.assertNotNull(businessKey);
         System.out.println("====== businessKey :" + businessKey);
 
         String contextBusinessKey = (String)instance.getEndParams().get(instance.getStateList().get(0).getName()+ DomainConstants.VAR_NAME_BUSINESSKEY);
-        Assert.assertNotNull(contextBusinessKey);
+        Assertions.assertNotNull(contextBusinessKey);
         System.out.println("====== context businessKey :" + businessKey);
 
         long cost = System.currentTimeMillis() - start;
@@ -171,12 +174,12 @@ public class StateMachineDBTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assert.assertNotNull(inst.getException());
-        Assert.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
-        Assert.assertNotNull(globalTransaction);
-        Assert.assertTrue(GlobalStatus.Finished.equals(globalTransaction.getStatus()));
+        Assertions.assertNotNull(globalTransaction);
+        Assertions.assertTrue(GlobalStatus.Finished.equals(globalTransaction.getStatus()));
     }
 
     @Test
@@ -195,13 +198,13 @@ public class StateMachineDBTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assert.assertNotNull(inst.getException());
-        Assert.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
-        Assert.assertNotNull(globalTransaction);
+        Assertions.assertNotNull(globalTransaction);
         System.out.println(globalTransaction.getStatus());
-        Assert.assertTrue(GlobalStatus.CommitRetrying.equals(globalTransaction.getStatus()));
+        Assertions.assertTrue(GlobalStatus.CommitRetrying.equals(globalTransaction.getStatus()));
     }
 
 
@@ -221,13 +224,13 @@ public class StateMachineDBTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assert.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
-        Assert.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
-        Assert.assertNotNull(globalTransaction);
+        Assertions.assertNotNull(globalTransaction);
         //End with Rollbacked = Finished
-        Assert.assertTrue(GlobalStatus.Finished.equals(globalTransaction.getStatus()));
+        Assertions.assertTrue(GlobalStatus.Finished.equals(globalTransaction.getStatus()));
     }
 
     @Test
@@ -246,11 +249,11 @@ public class StateMachineDBTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assert.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
-        Assert.assertNotNull(globalTransaction);
-        Assert.assertTrue(GlobalStatus.CommitRetrying.equals(globalTransaction.getStatus()));
+        Assertions.assertNotNull(globalTransaction);
+        Assertions.assertTrue(GlobalStatus.CommitRetrying.equals(globalTransaction.getStatus()));
     }
 
     @Test
@@ -273,7 +276,7 @@ public class StateMachineDBTests {
         System.out.println("====== cost :" + cost);
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
-        Assert.assertNotNull(globalTransaction);
+        Assertions.assertNotNull(globalTransaction);
         System.out.println("====== GlobalStatus: "+globalTransaction.getStatus());
 
         // waiting for global transaction recover
@@ -288,10 +291,5 @@ public class StateMachineDBTests {
     public void testReloadStateMachineInstance(){
         StateMachineInstance instance = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance("10.15.232.93:8091:2019567124");
         System.out.println(instance);
-    }
-
-    @Autowired
-    public void setStateMachineEngine(@Qualifier("stateMachineEngine") StateMachineEngine stateMachineEngine) {
-        this.stateMachineEngine = stateMachineEngine;
     }
 }

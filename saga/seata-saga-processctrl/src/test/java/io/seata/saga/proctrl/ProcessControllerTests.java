@@ -28,7 +28,8 @@ import io.seata.saga.proctrl.mock.MockInstruction;
 import io.seata.saga.proctrl.mock.MockProcessHandler;
 import io.seata.saga.proctrl.mock.MockProcessRouter;
 import io.seata.saga.proctrl.process.impl.CustomizeBusinessProcessor;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +57,7 @@ public class ProcessControllerTests {
 
             processCtrlEventPublisher.publish(context);
         } catch (Exception e) {
-            e.printStackTrace();
+            Assertions.fail(e);
         }
     }
 
@@ -74,7 +75,7 @@ public class ProcessControllerTests {
 
             processCtrlEventPublisher.publish(context);
         } catch (Exception e) {
-            e.printStackTrace();
+            Assertions.fail(e);
         }
     }
 

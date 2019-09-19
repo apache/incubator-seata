@@ -430,14 +430,6 @@
                 <artifactId>h2</artifactId>
                 <version>${h2.version}</version>
             </dependency>
-
-            <!-- saga dependencies -->
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-                <scope>test</scope>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 

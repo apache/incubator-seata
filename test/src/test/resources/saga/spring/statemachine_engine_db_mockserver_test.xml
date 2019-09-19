@@ -26,18 +26,18 @@
        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
 
 	<bean id="dataSource" class="org.h2.jdbcx.JdbcConnectionPool" destroy-method="dispose">
-		<constructor-arg>
-			<bean class="org.h2.jdbcx.JdbcDataSource">
-				<property name="URL" value="jdbc:h2:mem:seata_saga" />
-				<property name="user" value="sa" />
-				<property name="password" value="sa" />
-			</bean>
-		</constructor-arg>
+		 <constructor-arg>
+			 <bean class="org.h2.jdbcx.JdbcDataSource">
+				 <property name="URL" value="jdbc:h2:mem:seata_saga" />
+				 <property name="user" value="sa" />
+				 <property name="password" value="sa" />
+			 </bean>
+		 </constructor-arg>
 	</bean>
 
 	<!-- 初始化数据表结构 -->
 	<jdbc:initialize-database data-source="dataSource">
-		<jdbc:script location="classpath:sql/h2_init.sql" />
+		<jdbc:script location="classpath:saga/sql/h2_init.sql" />
 	</jdbc:initialize-database>
 
 	<bean id="stateMachineEngine" class="io.seata.saga.engine.impl.ProcessCtrlStateMachineEngine">
@@ -45,11 +45,13 @@
 	</bean>
 	<bean id="dbStateMachineConfig" class="io.seata.saga.engine.config.DbStateMachineConfig">
 		<property name="dataSource" ref="dataSource"></property>
-		<property name="resources" value="statelang/*.json"></property>
+		<property name="tablePrefix" value="seata_"></property>
+		<property name="resources" value="saga/statelang/*.json"></property>
 		<property name="enableAsync" value="true"></property>
 		<property name="threadPoolExecutor" ref="threadExecutor"></property>
 		<property name="applicationId" value="test_saga"></property>
 		<property name="txServiceGroup" value="my_test_tx_group"></property>
+		<property name="sagaTransactionalTemplate" ref="mockSagaTransactionTemplate"/>
 	</bean>
 	<bean id="threadExecutor"
 		  class="org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean">
@@ -64,4 +66,6 @@
 
 
 	<bean id="demoService" class="io.seata.saga.engine.mock.DemoService"/>
+
+	<bean id="mockSagaTransactionTemplate" class="io.seata.saga.engine.mock.MockSagaTransactionTemplate"/>
 </beans>

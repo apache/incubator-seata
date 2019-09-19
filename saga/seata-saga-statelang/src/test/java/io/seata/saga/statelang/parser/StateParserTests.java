@@ -18,8 +18,8 @@ package io.seata.saga.statelang.parser;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import io.seata.saga.statelang.domain.StateMachine;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.IOException;
@@ -36,12 +36,12 @@ public class StateParserTests {
         ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine.json");
         String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
         StateMachine stateMachine = StateMachineParserFactory.getStateMachineParser().parse(json);
-        Assert.assertNotNull(stateMachine);
+        Assertions.assertNotNull(stateMachine);
 
         String outputJson = JSON.toJSONString(stateMachine, SerializerFeature.PrettyFormat);
         System.out.println(outputJson);
 
-        Assert.assertEquals(stateMachine.getName(), "simpleTestStateMachine");
-        Assert.assertTrue(stateMachine.getStates().size() > 0);
+        Assertions.assertEquals(stateMachine.getName(), "simpleTestStateMachine");
+        Assertions.assertTrue(stateMachine.getStates().size() > 0);
     }
 }

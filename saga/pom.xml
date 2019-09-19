@@ -35,7 +35,6 @@
         <module>seata-saga-rm</module>
         <module>seata-saga-tm</module>
         <module>seata-saga-engine-store</module>
-        <module>seata-saga-engine-test</module>
     </modules>
 
     <dependencies>

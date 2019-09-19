@@ -19,13 +19,11 @@ import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,11 +32,15 @@ import java.util.Map;
  * State machine tests
  * @author lorne.cl
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "classpath:spring/statemachine_engine_test.xml" })
 public class StateMachineTests {
 
-    private StateMachineEngine stateMachineEngine;
+    private static StateMachineEngine stateMachineEngine;
+
+    @BeforeAll
+    public static void initApplicationContext(){
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_test.xml");
+        stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
+    }
 
     @Test
     public void testSimpleStateMachine() {
@@ -106,11 +108,11 @@ public class StateMachineTests {
         StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         String businessKey = instance.getStateList().get(0).getBusinessKey();
-        Assert.assertNotNull(businessKey);
+        Assertions.assertNotNull(businessKey);
         System.out.println("====== businessKey :" + businessKey);
 
         String contextBusinessKey = (String)instance.getEndParams().get(instance.getStateList().get(0).getName()+ DomainConstants.VAR_NAME_BUSINESSKEY);
-        Assert.assertNotNull(contextBusinessKey);
+        Assertions.assertNotNull(contextBusinessKey);
         System.out.println("====== context businessKey :" + businessKey);
 
         long cost = System.currentTimeMillis() - start;
@@ -133,8 +135,8 @@ public class StateMachineTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assert.assertNotNull(inst.getException());
-        Assert.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
     }
 
     @Test
@@ -153,8 +155,8 @@ public class StateMachineTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assert.assertNotNull(inst.getException());
-        Assert.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
     }
 
 
@@ -174,8 +176,8 @@ public class StateMachineTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assert.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
-        Assert.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
     }
 
     @Test
@@ -194,7 +196,7 @@ public class StateMachineTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assert.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
     }
 
     @Test
@@ -212,17 +214,12 @@ public class StateMachineTests {
         StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         People peopleResult = (People)instance.getEndParams().get("complexParameterMethodResult");
-        Assert.assertNotNull(peopleResult);
-        Assert.assertTrue(people.getName().equals(people.getName()));
+        Assertions.assertNotNull(peopleResult);
+        Assertions.assertTrue(people.getName().equals(people.getName()));
 
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assert.assertTrue(ExecutionStatus.SU.equals(instance.getStatus()));
-    }
-
-    @Autowired
-    public void setStateMachineEngine(@Qualifier("stateMachineEngine") StateMachineEngine stateMachineEngine) {
-        this.stateMachineEngine = stateMachineEngine;
+        Assertions.assertTrue(ExecutionStatus.SU.equals(instance.getStatus()));
     }
 }

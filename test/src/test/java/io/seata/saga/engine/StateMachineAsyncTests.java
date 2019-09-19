@@ -13,37 +13,37 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.engine.db.mockserver;
+package io.seata.saga.engine;
 
-import io.seata.saga.engine.AsyncCallback;
-import io.seata.saga.engine.StateMachineEngine;
 import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * State machine async tests with db log store
+ * State machine async tests
  * @author lorne.cl
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations = { "classpath:spring/statemachine_engine_db_mockserver_test.xml" })
-public class StateMachineAsyncDBMockServerTests {
+public class StateMachineAsyncTests {
 
-    private StateMachineEngine stateMachineEngine;
+    private static StateMachineEngine stateMachineEngine;
+
+    @BeforeAll
+    public static void initApplicationContext(){
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_test.xml");
+        stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
+    }
 
     @Test
-    public void testSimpleCatchesStateMachine() throws Exception {
+    public void testSimpleCatchesStateMachine() {
 
         long start  = System.currentTimeMillis();
 
@@ -61,12 +61,12 @@ public class StateMachineAsyncDBMockServerTests {
         System.out.println("====== cost :" + cost);
 
 
-        Assert.assertNotNull(inst.getException());
-        Assert.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
     }
 
     @Test
-    public void testStatusMatchingStateMachine() throws Exception {
+    public void testStatusMatchingStateMachine() {
 
         long start  = System.currentTimeMillis();
 
@@ -84,12 +84,12 @@ public class StateMachineAsyncDBMockServerTests {
         System.out.println("====== cost :" + cost);
 
 
-        Assert.assertNotNull(inst.getException());
-        Assert.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
     }
 
     @Test
-    public void testCompensationStateMachine() throws Exception {
+    public void testCompensationStateMachine() {
 
         long start  = System.currentTimeMillis();
 
@@ -106,12 +106,12 @@ public class StateMachineAsyncDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assert.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
-        Assert.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
     }
 
     @Test
-    public void testCompensationAndSubStateMachine() throws Exception {
+    public void testCompensationAndSubStateMachine() {
 
         long start  = System.currentTimeMillis();
 
@@ -128,7 +128,7 @@ public class StateMachineAsyncDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        Assert.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
     }
 
     @Test
@@ -151,17 +151,12 @@ public class StateMachineAsyncDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
 
         People peopleResult = (People)inst.getEndParams().get("complexParameterMethodResult");
-        Assert.assertNotNull(peopleResult);
-        Assert.assertTrue(people.getName().equals(people.getName()));
+        Assertions.assertNotNull(peopleResult);
+        Assertions.assertTrue(people.getName().equals(people.getName()));
 
         System.out.println("====== cost :" + cost);
 
-        Assert.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
-    }
-
-    @Autowired
-    public void setStateMachineEngine(@Qualifier("stateMachineEngine") StateMachineEngine stateMachineEngine) {
-        this.stateMachineEngine = stateMachineEngine;
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
     }
 
     private void waittingForFinish(StateMachineInstance inst){
