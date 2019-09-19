@@ -112,13 +112,17 @@ public class TableMetaCacheOracle {
     }
 
     private static TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
-        //Need to convert uppercase, oracle table name needs to be capitalized in order to get metadata
-        tableName = tableName.toUpperCase();
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
+        if(tableName.indexOf("\"") != -1){
+            tableName = tableName.replace("\"", "");
+            schemaName = schemaName.replace("\"", "");
+        }else{
+            tableName = tableName.toUpperCase();
+        }
 
         ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
         ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
@@ -153,7 +157,7 @@ public class TableMetaCacheOracle {
                 if (StringUtils.isNullOrEmpty(indexName)) {
                     continue;
                 }
-                String colName = rsIndex.getString("COLUMN_NAME").toUpperCase();
+                String colName = rsIndex.getString("COLUMN_NAME");
                 ColumnMeta col = tm.getAllColumns().get(colName);
                 if (tm.getAllIndexes().containsKey(indexName)) {
                     IndexMeta index = tm.getAllIndexes().get(indexName);
