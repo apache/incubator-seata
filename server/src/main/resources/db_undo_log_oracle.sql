@@ -6,17 +6,17 @@
 -- oracle version
 -- @author tq02ksu ( tq02ksu@gmail.com )
 CREATE TABLE undo_log (
-    id number(20) NOT NULL,
-    branch_id number(20) NOT NULL,
-    xid varchar2(100) NOT NULL,
-    context varchar2(128) NOT NULL,
-    rollback_info blob NOT NULL,
-    log_status number(11) NOT NULL,
-    log_created timestamp NOT NULL,
-    log_modified timestamp NOT NULL,
-    ext varchar2(100) DEFAULT NULL,
-    PRIMARY KEY (id)
-    )
+  id number(20) NOT NULL,
+  branch_id number(20) NOT NULL,
+  xid varchar2(100) NOT NULL,
+  context varchar2(128) NOT NULL,
+  rollback_info blob NOT NULL,
+  log_status number(11) NOT NULL,
+  log_created timestamp NOT NULL,
+  log_modified timestamp NOT NULL,
+  ext varchar2(100) DEFAULT NULL,
+  PRIMARY KEY (id)
+  )
 /
 create unique index index_ux_undo_log on undo_log (xid, branch_id)
 /

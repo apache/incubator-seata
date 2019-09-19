@@ -100,7 +100,7 @@
         <httpcore.version>4.4.11</httpcore.version>
         <druid.version>1.1.12</druid.version>
         <caffeine.version>2.7.0</caffeine.version>
-        <oracle.client.version>12.2.0.1.0</oracle.client.version>
+        <oracle.client.version>18.5.0.0.0</oracle.client.version>
         <mysql.client.version>5.1.30</mysql.client.version>
         <h2.version>1.4.181</h2.version>
         <motan.version>1.0.0</motan.version>
@@ -373,11 +373,13 @@
                 <groupId>mysql</groupId>
                 <artifactId>mysql-connector-java</artifactId>
                 <version>${mysql.client.version}</version>
+                <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>com.oracle</groupId>
                 <artifactId>ojdbc8</artifactId>
                 <version>${oracle.client.version}</version>
+                <scope>runtime</scope>
             </dependency>
             <dependency>
                 <groupId>com.weibo</groupId>
