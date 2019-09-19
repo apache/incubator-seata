@@ -203,7 +203,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                     }
                     sendRequest(ctx.channel(), HeartbeatMessage.PING);
                 } catch (Throwable throwable) {
-                    LOGGER.error("", "send request error", throwable);
+                    LOGGER.error("send request error: {}", throwable.getMessage(), throwable);
                 }
             }
         }
@@ -330,7 +330,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                                 messageFuture.setResultMessage(null);
                             }
                         }
-                        LOGGER.error("", "client merge call failed", e);
+                        LOGGER.error("client merge call failed: {}", e.getMessage(), e);
                     }
                 }
                 isSending = false;
