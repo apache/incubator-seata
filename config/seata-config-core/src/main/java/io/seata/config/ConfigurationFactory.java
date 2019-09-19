@@ -31,22 +31,29 @@ public final class ConfigurationFactory {
     private static final String REGISTRY_CONF_SUFFIX = ".conf";
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
     private static final String ENV_PROPERTY_KEY = "seataEnv";
-    /**
-     * the name of env
-     */
-    private static String envValue;
+
+    private static final String SYSTEM_PROPERTY_SEATA_CONFIG_NAME = "seata.config.name";
+
+    private static final String ENV_SEATA_CONFIG_NAME = "SEATA_CONFIG_NAME";
+
+    public static final Configuration CURRENT_FILE_INSTANCE;
 
     static {
-        envValue = System.getProperty(ENV_PROPERTY_KEY);
+        String seataConfigName = System.getProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME);
+        if (null == seataConfigName) {
+            seataConfigName = System.getenv(ENV_SEATA_CONFIG_NAME);
+        }
+        if (null == seataConfigName) {
+            seataConfigName = REGISTRY_CONF_PREFIX;
+        }
+        String envValue = System.getProperty(ENV_PROPERTY_KEY);
         if (null == envValue) {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
+        CURRENT_FILE_INSTANCE = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX)
+                : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX);
     }
 
-    private static final Configuration DEFAULT_FILE_INSTANCE = new FileConfiguration(
-        REGISTRY_CONF_PREFIX + REGISTRY_CONF_SUFFIX);
-    public static final Configuration CURRENT_FILE_INSTANCE = null == envValue ? DEFAULT_FILE_INSTANCE : new FileConfiguration(REGISTRY_CONF_PREFIX + "-" + envValue
-        + REGISTRY_CONF_SUFFIX);
     private static final String NAME_KEY = "name";
     private static final String FILE_TYPE = "file";
 
