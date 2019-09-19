@@ -16,6 +16,9 @@
 package io.seata.rm.datasource.undo.parser;
 
 import com.esotericsoftware.kryo.Kryo;
+import com.esotericsoftware.kryo.Serializer;
+import com.esotericsoftware.kryo.io.Input;
+import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryo.pool.KryoFactory;
 import com.esotericsoftware.kryo.pool.KryoPool;
 import com.esotericsoftware.kryo.serializers.DefaultSerializers;
@@ -27,11 +30,18 @@ import de.javakaffee.kryoserializers.RegexSerializer;
 import de.javakaffee.kryoserializers.URISerializer;
 import de.javakaffee.kryoserializers.UUIDSerializer;
 import io.seata.rm.datasource.undo.BranchUndoLog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
 import java.lang.reflect.InvocationHandler;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,6 +63,8 @@ import java.util.regex.Pattern;
  * @author jsbxyyx
  */
 public class KryoSerializerFactory implements KryoFactory {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(KryoSerializerFactory.class);
 
     private static final KryoSerializerFactory FACTORY = new KryoSerializerFactory();
 
@@ -91,6 +103,10 @@ public class KryoSerializerFactory implements KryoFactory {
         kryo.register(URI.class, new URISerializer());
         kryo.register(UUID.class, new UUIDSerializer());
 
+        // support clob and blob
+        kryo.register(SerialBlob.class, new BlobSerializer());
+        kryo.register(SerialClob.class, new ClobSerializer());
+
         // register commonly class
         kryo.register(HashMap.class);
         kryo.register(ArrayList.class);
@@ -120,6 +136,58 @@ public class KryoSerializerFactory implements KryoFactory {
         kryo.register(BranchUndoLog.class);
 
         return kryo;
+    }
+
+    private static class BlobSerializer extends Serializer<Blob> {
+
+        @Override
+        public void write(Kryo kryo, Output output, Blob object) {
+            try {
+                byte[] bytes = object.getBytes(1L, (int) object.length());
+                output.writeInt(bytes.length, true);
+                output.write(bytes);
+            } catch (SQLException e) {
+                LOGGER.error("kryo write java.sql.Blob error: {}", e.getMessage(), e);
+            }
+        }
+
+        @Override
+        public Blob read(Kryo kryo, Input input, Class<Blob> type) {
+            int length = input.readInt(true);
+            byte[] bytes = input.readBytes(length);
+            try {
+                return new SerialBlob(bytes);
+            } catch (SQLException e) {
+                LOGGER.error("kryo read java.sql.Blob error: {}", e.getMessage(), e);
+            }
+            return null;
+        }
+        
+    }
+
+    private static class ClobSerializer extends Serializer<Clob> {
+
+        @Override
+        public void write(Kryo kryo, Output output, Clob object) {
+            try {
+                String s = object.getSubString(1, (int) object.length());
+                output.writeString(s);
+            } catch (SQLException e) {
+                LOGGER.error("kryo write java.sql.Clob error: {}", e.getMessage(), e);
+            }
+        }
+
+        @Override
+        public Clob read(Kryo kryo, Input input, Class<Clob> type) {
+            try {
+                String s = input.readString();
+                return new SerialClob(s.toCharArray());
+            } catch (SQLException e) {
+                LOGGER.error("kryo read java.sql.Clob error: {}", e.getMessage(), e);
+            }
+            return null;
+        }
+
     }
 
 }
