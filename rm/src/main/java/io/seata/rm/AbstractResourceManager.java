@@ -18,6 +18,7 @@ package io.seata.rm;
 import java.util.concurrent.TimeoutException;
 
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.core.exception.RmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
@@ -65,13 +66,13 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
             BranchRegisterResponse response = (BranchRegisterResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
             if (response.getResultCode() == ResultCode.Failed) {
-                throw new TransactionException(response.getTransactionExceptionCode(), "Response[" + response.getMsg() + "]");
+                throw new RmTransactionException(response.getTransactionExceptionCode(), String.format("Response[ %s ]", response.getMsg()));
             }
             return response.getBranchId();
         } catch (TimeoutException toe) {
-            throw new TransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
+            throw new RmTransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
         } catch (RuntimeException rex) {
-            throw new TransactionException(TransactionExceptionCode.BranchRegisterFailed, "Runtime", rex);
+            throw new RmTransactionException(TransactionExceptionCode.BranchRegisterFailed, "Runtime", rex);
         }
     }
 
@@ -95,12 +96,12 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
             BranchReportResponse response = (BranchReportResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
             if (response.getResultCode() == ResultCode.Failed) {
-                throw new TransactionException(response.getTransactionExceptionCode(), "Response[" + response.getMsg() + "]");
+                throw new RmTransactionException(response.getTransactionExceptionCode(), String.format("Response[ %s ]", response.getMsg()));
             }
         } catch (TimeoutException toe) {
-            throw new TransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
+            throw new RmTransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
         } catch (RuntimeException rex) {
-            throw new TransactionException(TransactionExceptionCode.BranchReportFailed, "Runtime", rex);
+            throw new RmTransactionException(TransactionExceptionCode.BranchReportFailed, "Runtime", rex);
         }
     }
 
