@@ -70,7 +70,7 @@ public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
         for (SQLUpdateSetItem updateSetItem : updateSetItems) {
             SQLExpr expr = updateSetItem.getColumn();
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr) expr).getName().toUpperCase());
+                list.add(((SQLIdentifierExpr) expr).getName());
             } else if (expr instanceof SQLPropertyExpr) {
                 // This is alias case, like UPDATE xxx_tbl a SET a.name = ? WHERE a.id = ?
                 SQLExpr owner = ((SQLPropertyExpr) expr).getOwner();
@@ -107,7 +107,7 @@ public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = super.createOracleOutputVisitor(parametersHolder, paramAppenderList, sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
@@ -120,8 +120,7 @@ public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
             return "";
         }
 
-
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb);
 
         if (where instanceof SQLBetweenExpr) {
@@ -142,7 +141,7 @@ public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
 
     @Override
     public String getTableName() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
             @Override
