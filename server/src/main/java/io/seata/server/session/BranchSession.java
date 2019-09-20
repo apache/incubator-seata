@@ -15,12 +15,6 @@
  */
 package io.seata.server.session;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-
 import io.seata.common.util.CompressUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
@@ -28,6 +22,11 @@ import io.seata.core.model.BranchType;
 import io.seata.server.lock.LockerFactory;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +64,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private String applicationData;
 
-    private ConcurrentHashMap<ConcurrentHashMap<String, Long>, Set<String>> lockHolder
+    private ConcurrentHashMap<ConcurrentMap<String, Long>, Set<String>> lockHolder
         = new ConcurrentHashMap<>();
 
     /**
@@ -263,7 +262,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      *
      * @return the lock holder
      */
-    public ConcurrentHashMap<ConcurrentHashMap<String, Long>, Set<String>> getLockHolder() {
+    public ConcurrentHashMap<ConcurrentMap<String, Long>, Set<String>> getLockHolder() {
         return lockHolder;
     }
 
