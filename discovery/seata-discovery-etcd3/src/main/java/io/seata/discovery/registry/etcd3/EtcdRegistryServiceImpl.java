@@ -34,6 +34,7 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryService;
+import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +86,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     private final static long LIFE_KEEP_CRITICAL = 6;
     private static volatile EtcdRegistryServiceImpl instance;
     private static volatile Client client;
-    private ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap;
+    private ConcurrentMap<String, Pair<Long /*revision*/, List<InetSocketAddress>>> clusterAddressMap;
     private ConcurrentMap<String, Set<Watch.Listener>> listenerMap;
     private ConcurrentMap<String, EtcdWatcher> watcherMap;
     private static long leaseId = 0;
@@ -158,7 +159,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     public void subscribe(String cluster, Watch.Listener listener) throws Exception {
         listenerMap.putIfAbsent(cluster, new HashSet<>());
         listenerMap.get(cluster).add(listener);
-        EtcdWatcher watcher = watcherMap.computeIfAbsent(cluster, w -> new EtcdWatcher(listener));
+        EtcdWatcher watcher = watcherMap.computeIfAbsent(cluster, w -> new EtcdWatcher(cluster, listener));
         executorService.submit(watcher);
     }
 
@@ -212,7 +213,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             });
 
         }
-        return clusterAddressMap.get(cluster);
+        return clusterAddressMap.get(cluster).getValue();
     }
 
     @Override
@@ -244,7 +245,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             String[] instanceInfo = keyValue.getValue().toString(UTF_8).split(":");
             return new InetSocketAddress(instanceInfo[0], Integer.parseInt(instanceInfo[1]));
         }).collect(Collectors.toList());
-        clusterAddressMap.put(cluster, instanceList);
+        clusterAddressMap.put(cluster, new Pair<>(getResponse.getHeader().getRevision(), instanceList));
     }
 
     /**
@@ -390,16 +391,23 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     private class EtcdWatcher implements Runnable {
         private final Watch.Listener listener;
         private Watch.Watcher watcher;
+        private String cluster;
 
-        public EtcdWatcher(Watch.Listener listener) {
+        public EtcdWatcher(String cluster, Watch.Listener listener) {
+            this.cluster = cluster;
             this.listener = listener;
         }
 
         @Override
         public void run() {
             Watch watchClient = getClient().getWatchClient();
-            WatchOption watchOption = WatchOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
-            this.watcher = watchClient.watch(buildRegistryKeyPrefix(), watchOption, this.listener);
+            WatchOption.Builder watchOptionBuilder = WatchOption.newBuilder().withPrefix(buildRegistryKeyPrefix());
+            Pair<Long /*revision*/, List<InetSocketAddress>> addressPair = clusterAddressMap.get(cluster);
+            if (Objects.nonNull(addressPair)) {
+                // Maybe addressPair isn't newest now, but it's ok
+                watchOptionBuilder.withRevision(addressPair.getKey());
+            }
+            this.watcher = watchClient.watch(buildRegistryKeyPrefix(), watchOptionBuilder.build(), this.listener);
         }
 
         /**
@@ -408,5 +416,40 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         public void stop() {
             this.watcher.close();
         }
+    }
+
+    private static class Pair<K,V> {
+
+        /**
+         * Key of this <code>Pair</code>.
+         */
+        private K key;
+
+        /**
+         * Value of this this <code>Pair</code>.
+         */
+        private V value;
+
+        /**
+         * Creates a new pair
+         * @param key The key for this pair
+         * @param value The value to use for this pair
+         */
+        public Pair(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        /**
+         * Gets the key for this pair.
+         * @return key for this pair
+         */
+        public K getKey() { return key; }
+
+        /**
+         * Gets the value for this pair.
+         * @return value for this pair
+         */
+        public V getValue() { return value; }
     }
 }
