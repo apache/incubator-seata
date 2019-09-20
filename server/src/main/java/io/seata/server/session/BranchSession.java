@@ -64,7 +64,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private String applicationData;
 
-    private ConcurrentHashMap<ConcurrentMap<String, Long>, Set<String>> lockHolder
+    private ConcurrentMap<ConcurrentMap<String, Long>, Set<String>> lockHolder
         = new ConcurrentHashMap<>();
 
     /**
@@ -262,7 +262,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      *
      * @return the lock holder
      */
-    public ConcurrentHashMap<ConcurrentMap<String, Long>, Set<String>> getLockHolder() {
+    public ConcurrentMap<ConcurrentMap<String, Long>, Set<String>> getLockHolder() {
         return lockHolder;
     }
 
