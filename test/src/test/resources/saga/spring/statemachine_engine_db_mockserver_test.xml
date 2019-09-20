@@ -35,6 +35,43 @@
 		 </constructor-arg>
 	</bean>
 
+
+	<!--<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"  destroy-method="close">-->
+		<!--<property name="driverClassName" value="com.ibm.db2.jcc.DB2Driver" />-->
+		<!--<property name="url" value="jdbc:db2://100.88.9.78:50000/db2store" />-->
+		<!--<property name="username" value="ds" />-->
+		<!--<property name="password" value="ds" />-->
+		<!--<property name="initialSize" value="2" />-->
+		<!--<property name="minIdle" value="2" />-->
+		<!--<property name="maxActive" value="8" />-->
+		<!--<property name="maxIdle" value="5" />-->
+		<!--<property name="maxWait" value="60000" />-->
+	<!--</bean>-->
+
+	<!--<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"  destroy-method="close">-->
+		<!--<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />-->
+		<!--<property name="url" value="jdbc:oracle:thin:@47.95.143.87:1521:XE" />-->
+		<!--<property name="username" value="test" />-->
+		<!--<property name="password" value="123456" />-->
+		<!--<property name="initialSize" value="2" />-->
+		<!--<property name="minIdle" value="2" />-->
+		<!--<property name="maxActive" value="8" />-->
+		<!--<property name="maxIdle" value="5" />-->
+		<!--<property name="maxWait" value="60000" />-->
+	<!--</bean>-->
+
+	<!--<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"  destroy-method="close">-->
+		<!--<property name="driverClassName" value="com.mysql.jdbc.Driver" />-->
+		<!--<property name="url" value="jdbc:mysql://127.0.0.1:3306/seata_saga?characterEncoding=utf8" />-->
+		<!--<property name="username" value="root" />-->
+		<!--<property name="password" value="123456" />-->
+		<!--<property name="initialSize" value="2" />-->
+		<!--<property name="minIdle" value="2" />-->
+		<!--<property name="maxActive" value="8" />-->
+		<!--<property name="maxIdle" value="5" />-->
+		<!--<property name="maxWait" value="60000" />-->
+	<!--</bean>-->
+
 	<!-- 初始化数据表结构 -->
 	<jdbc:initialize-database data-source="dataSource">
 		<jdbc:script location="classpath:saga/sql/h2_init.sql" />

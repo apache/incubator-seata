@@ -65,7 +65,7 @@ public class DbStateLangStore extends AbstractStore implements StateLangStore {
             StateMachineImpl stateMachine = new StateMachineImpl();
             stateMachine.setId(resultSet.getString("id"));
             stateMachine.setName(resultSet.getString("name"));
-            stateMachine.setComment(resultSet.getString("comment"));
+            stateMachine.setComment(resultSet.getString("comment_"));
             stateMachine.setVersion(resultSet.getString("ver"));
             stateMachine.setAppName(resultSet.getString("app_name"));
             stateMachine.setContent(resultSet.getString("content"));

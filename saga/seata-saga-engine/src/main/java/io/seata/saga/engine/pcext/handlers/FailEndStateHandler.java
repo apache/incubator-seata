@@ -23,6 +23,8 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.FailEndState;
 
+import java.util.Map;
+
 /**
  * FailEndState Handler
  * @author lorne.cl
@@ -36,7 +38,8 @@ public class FailEndStateHandler implements StateHandler {
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         FailEndState state = (FailEndState) instruction.getState(context);
-        context.setVariable(DomainConstants.VAR_NAME_STATEMACHINE_ERROR_CODE, state.getErrorCode());
-        context.setVariable(DomainConstants.VAR_NAME_STATEMACHINE_ERROR_MSG, state.getMessage());
+        Map<String, Object> contextVariables = (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
+        contextVariables.put(DomainConstants.VAR_NAME_STATEMACHINE_ERROR_CODE, state.getErrorCode());
+        contextVariables.put(DomainConstants.VAR_NAME_STATEMACHINE_ERROR_MSG, state.getMessage());
     }
 }

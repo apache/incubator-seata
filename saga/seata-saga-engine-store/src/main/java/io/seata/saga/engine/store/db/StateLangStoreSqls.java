@@ -22,7 +22,7 @@ package io.seata.saga.engine.store.db;
  */
 public class StateLangStoreSqls {
 
-    private static final String STATE_MACHINE_FIELDS = "id, tenant_id, app_name, name, status, gmt_create, ver, type, content, recover_strategy, comment";
+    private static final String STATE_MACHINE_FIELDS = "id, tenant_id, app_name, name, status, gmt_create, ver, type, content, recover_strategy, comment_";
 
     private static final String GET_STATE_MACHINE_BY_ID_SQL = "SELECT " + STATE_MACHINE_FIELDS + " FROM ${TABLE_PREFIX}state_machine_def WHERE id = ?";
 
