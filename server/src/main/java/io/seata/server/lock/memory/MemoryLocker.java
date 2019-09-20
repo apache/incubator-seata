@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.FrameworkException;
@@ -29,7 +30,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
 import io.seata.server.session.BranchSession;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * The type Memory locker.
