@@ -55,15 +55,6 @@ import static org.springframework.core.BridgeMethodResolver.isVisibilityBridgeMe
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
 import static org.springframework.core.annotation.AnnotationUtils.getAnnotation;
 
-/**
- * <P>Copyright (C), 2003-2019, 浩鲸云计算科技股份有限公司</P>
- * <P>描述说明：默认dubbo注解注入二次解析</P>
- *
- * @author ZHONGFUHUA-PC
- * @version 0.8.1-SNAPSHOT
- * @date 2019/9/17 15:51
- * @since JDK1.8
- */
 public class SeataReferenceAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
     implements ApplicationContextAware, ApplicationListener, PriorityOrdered {
     

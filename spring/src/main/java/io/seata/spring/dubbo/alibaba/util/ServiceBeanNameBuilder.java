@@ -22,15 +22,6 @@ import com.alibaba.dubbo.config.annotation.Reference;
 import com.alibaba.dubbo.config.annotation.Service;
 
 
-/**
- * <P>Copyright (C), 2003-2019, 浩鲸云计算科技股份有限公司</P>
- * <P>描述说明: ServiceBeanNameBuilder</P>
- *
- * @author ZHONGFUHUA-PC
- * @version 0.0.1-SNAPSHOT
- * @date 2019/9/18 9:12
- * @since JDK1.8
- */
 public class ServiceBeanNameBuilder {
     
     private static final String SEPARATOR = ":";

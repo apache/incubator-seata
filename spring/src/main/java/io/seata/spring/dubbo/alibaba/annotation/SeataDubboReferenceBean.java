@@ -21,14 +21,6 @@ import org.springframework.beans.factory.FactoryBean;
 import java.io.Serializable;
 
 
-/**
- * <P>Copyright (C), 2003-2019, 浩鲸云计算科技股份有限公司</P>
- * <P>描述说明：</P>
- *
- * @author ZHONGFUHUA-PC
- * @date 2019/9/17 18:58
- * @since JDK1.8
- */
 public class SeataDubboReferenceBean implements FactoryBean, Serializable {
 
     private final Object referenceBean;

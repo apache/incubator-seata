@@ -17,14 +17,6 @@ package io.seata.spring.api;
 
 import java.lang.reflect.Method;
 
-/**
- * <P>Copyright (C), 2003-2019, 浩鲸云计算科技股份有限公司</P>
- * <P>描述说明：</P>
- *
- * @author ZHONGFUHUA-PC
- * @date 2019/9/19 17:29
- * @since JDK1.8
- */
 public interface SimpleInterceptor {
 
      void invoke(Object proxy, Method method, Object[] methodArgs) throws Throwable;

@@ -21,14 +21,6 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import com.alibaba.dubbo.config.spring.util.BeanRegistrar;
 
-/**
- * <P>Copyright (C), 2003-2019, 浩鲸云计算科技股份有限公司</P>
- * <P>描述说明：</P>
- *
- * @author ZHONGFUHUA-PC
- * @date 2019/9/18 13:37
- * @since JDK1.8
- */
 public class SeataDubboAlibabaReferenceScanRegistrar implements ImportBeanDefinitionRegistrar {
     
     @Override
