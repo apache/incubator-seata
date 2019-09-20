@@ -114,6 +114,11 @@ public enum TransactionExceptionCode {
      * FailedWriteSession
      */
     FailedWriteSession,
+
+    /**
+     * Failed to store exception code
+     */
+    FailedStore
     ;
 
     private static final Map<Integer, TransactionExceptionCode> MAP = new HashMap<>(values().length);
