@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>0.8.1</version>
+    <version>0.9.0-SNAPSHOT</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -94,6 +94,11 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-config-custom</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-config-apollo</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -125,6 +130,11 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-discovery-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-discovery-custom</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -503,12 +513,14 @@
                                     <include>io.seata:seata-common</include>
                                     <include>io.seata:seata-core</include>
                                     <include>io.seata:seata-config-core</include>
+                                    <include>io.seata:seata-config-custom</include>
                                     <include>io.seata:seata-config-apollo</include>
                                     <include>io.seata:seata-config-nacos</include>
                                     <include>io.seata:seata-config-zk</include>
                                     <include>io.seata:seata-config-consul</include>
                                     <include>io.seata:seata-config-etcd3</include>
                                     <include>io.seata:seata-discovery-core</include>
+                                    <include>io.seata:seata-discovery-custom</include>
                                     <include>io.seata:seata-discovery-consul</include>
                                     <include>io.seata:seata-discovery-eureka</include>
                                     <include>io.seata:seata-discovery-nacos</include>
