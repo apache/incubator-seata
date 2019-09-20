@@ -158,7 +158,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                 }
             }
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("RM will register :" + resourceIds);
+                LOGGER.info("RM will register :{}", resourceIds);
             }
             RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
             message.setResourceIds(resourceIds);
@@ -176,9 +176,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     public void onRegisterMsgSuccess(String serverAddress, Channel channel, Object response,
                                      AbstractMessage requestMessage) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(
-                "register RM success. server version:" + ((RegisterRMResponse)response).getVersion() + ",channel:"
-                    + channel);
+            LOGGER.info("register RM success. server version:{},channel:{}", ((RegisterRMResponse)response).getVersion(), channel);
         }
         getClientChannelManager().registerChannel(serverAddress, channel);
         String dbKey = getMergedResourceKeys();
@@ -196,9 +194,9 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                                   AbstractMessage requestMessage) {
 
         if (response instanceof RegisterRMResponse && LOGGER.isInfoEnabled()) {
-            LOGGER.info("register RM failed. server version:" + ((RegisterRMResponse)response).getVersion());
+            LOGGER.info("register RM failed. server version:{}", ((RegisterRMResponse)response).getVersion());
         }
-        throw new FrameworkException("register RM failed.");
+        throw new FrameworkException("register RM failed, channel:" + channel);
     }
 
     /**
@@ -209,7 +207,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
      */
     public void registerResource(String resourceGroupId, String resourceId) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("register to RM resourceId:" + resourceId);
+            LOGGER.info("register to RM resourceId:{}", resourceId);
         }
         if (getClientChannelManager().getChannels().isEmpty()) {
             getClientChannelManager().reconnect(transactionServiceGroup);
@@ -220,7 +218,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                 String serverAddress = entry.getKey();
                 Channel rmChannel = entry.getValue();
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("register resource, resourceId:" + resourceId);
+                    LOGGER.info("register resource, resourceId:{}", resourceId);
                 }
                 sendRegisterMessage(serverAddress, rmChannel, resourceId);
             }
@@ -236,10 +234,10 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
             if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable && serverAddress != null) {
                 getClientChannelManager().releaseChannel(channel, serverAddress);
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("remove channel:" + channel);
+                    LOGGER.info("remove channel:{}", channel);
                 }
             } else {
-                LOGGER.error("", "register failed", e);
+                LOGGER.error("register RM failed, channel:{}", channel, e);
             }
         } catch (TimeoutException e) {
             LOGGER.error(e.getMessage());
