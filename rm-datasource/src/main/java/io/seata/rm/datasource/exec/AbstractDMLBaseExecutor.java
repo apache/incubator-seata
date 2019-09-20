@@ -15,24 +15,25 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-
 import io.seata.rm.datasource.AbstractConnectionProxy;
+import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.concurrent.Callable;
 
 /**
  * The type Abstract dml base executor.
  *
- * @author sharajava
- *
  * @param <T> the type parameter
  * @param <S> the type parameter
+ * @author sharajava
  */
 public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
 
@@ -65,9 +66,9 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      *
      * @param args the args
      * @return the t
-     * @throws Throwable the throwable
+     * @throws Exception the exception
      */
-    protected T executeAutoCommitFalse(Object[] args) throws Throwable {
+    protected T executeAutoCommitFalse(Object[] args) throws Exception {
         TableRecords beforeImage = beforeImage();
         T result = statementCallback.execute(statementProxy.getTargetStatement(), args);
         TableRecords afterImage = afterImage(beforeImage);
@@ -83,30 +84,25 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @throws Throwable the throwable
      */
     protected T executeAutoCommitTrue(Object[] args) throws Throwable {
-        T result = null;
         AbstractConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
-        LockRetryController lockRetryController = new LockRetryController();
         try {
             connectionProxy.setAutoCommit(false);
-            while (true) {
-                try {
-                    result = executeAutoCommitFalse(args);
-                    connectionProxy.commit();
-                    break;
-                } catch (LockConflictException lockConflict) {
-                    connectionProxy.getTargetConnection().rollback();
-                    lockRetryController.sleep(lockConflict);
-                }
-            }
-
+            return new LockRetryPolicy(connectionProxy.getTargetConnection()).execute(() -> {
+                T result = executeAutoCommitFalse(args);
+                connectionProxy.commit();
+                return result;
+            });
         } catch (Exception e) {
             // when exception occur in finally,this exception will lost, so just print it here
-            LOGGER.error("exception occur", e);
+            LOGGER.error("execute executeAutoCommitTrue error:{}", e.getMessage(), e);
+            if (!LockRetryPolicy.isLockRetryPolicyBranchRollbackOnConflict()) {
+                connectionProxy.getTargetConnection().rollback();
+            }
             throw e;
         } finally {
+            ((ConnectionProxy) connectionProxy).getContext().reset();
             connectionProxy.setAutoCommit(true);
         }
-        return result;
     }
 
     /**
@@ -126,4 +122,29 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      */
     protected abstract TableRecords afterImage(TableRecords beforeImage) throws SQLException;
 
+    private static class LockRetryPolicy extends ConnectionProxy.LockRetryPolicy {
+        private final Connection connection;
+
+        LockRetryPolicy(final Connection connection) {
+            this.connection = connection;
+        }
+
+        @Override
+        public <T> T execute(Callable<T> callable) throws Exception {
+            if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT) {
+                return doRetryOnLockConflict(callable);
+            } else {
+                return callable.call();
+            }
+        }
+
+        @Override
+        protected void onException(Exception e) throws Exception {
+            connection.rollback();
+        }
+
+        public static boolean isLockRetryPolicyBranchRollbackOnConflict() {
+            return LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
+        }
+    }
 }

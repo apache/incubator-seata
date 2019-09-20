@@ -60,7 +60,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     private static final int MAX_QUEUE_SIZE = 20000;
     private String applicationId;
     private String transactionServiceGroup;
-
+    
     private RmRpcClient(NettyClientConfig nettyClientConfig, EventExecutorGroup eventExecutorGroup,
                         ThreadPoolExecutor messageExecutor) {
         super(nettyClientConfig, eventExecutorGroup, messageExecutor, TransactionRole.RMROLE);
@@ -101,7 +101,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
         }
         return instance;
     }
-
+    
     /**
      * Sets application id.
      *
@@ -110,7 +110,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
-
+    
     /**
      * Sets transaction service group.
      *
@@ -119,7 +119,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     public void setTransactionServiceGroup(String transactionServiceGroup) {
         this.transactionServiceGroup = transactionServiceGroup;
     }
-
+    
     /**
      * Sets resource manager.
      *
@@ -135,14 +135,14 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
             super.init();
         }
     }
-
+    
     @Override
     public void destroy() {
         super.destroy();
         initialized.getAndSet(false);
         instance = null;
     }
-
+    
     @Override
     protected Function<String, NettyPoolKey> getPoolKeyFunction() {
         return (serverAddress) -> {
@@ -171,7 +171,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     protected String getTransactionServiceGroup() {
         return transactionServiceGroup;
     }
-
+    
     @Override
     public void onRegisterMsgSuccess(String serverAddress, Channel channel, Object response,
                                      AbstractMessage requestMessage) {
