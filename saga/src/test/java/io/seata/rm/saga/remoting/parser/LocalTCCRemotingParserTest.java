@@ -32,7 +32,7 @@ public class LocalTCCRemotingParserTest {
     /**
      * The Local saga remoting parser.
      */
-    LocalSAGARemotingParser localTCCRemotingParser = new LocalSAGARemotingParser();
+    LocalSAGARemotingParser localSAGARemotingParser = new LocalSAGARemotingParser();
 
     /**
      * Test service parser.
@@ -41,7 +41,7 @@ public class LocalTCCRemotingParserTest {
     public void testServiceParser(){
         SagaActionImpl tccAction = new SagaActionImpl();
 
-        boolean result = localTCCRemotingParser.isService(tccAction, "a");
+        boolean result = localSAGARemotingParser.isService(tccAction, "a");
         Assertions.assertTrue(result);
     }
 
@@ -52,7 +52,7 @@ public class LocalTCCRemotingParserTest {
     public void testReferenceParser(){
         SagaActionImpl tccAction = new SagaActionImpl();
 
-        boolean result = localTCCRemotingParser.isReference(tccAction, "b");
+        boolean result = localSAGARemotingParser.isReference(tccAction, "b");
         Assertions.assertTrue(result);
     }
 
@@ -63,7 +63,7 @@ public class LocalTCCRemotingParserTest {
     public void testServiceDesc(){
         SagaActionImpl tccAction = new SagaActionImpl();
 
-        RemotingDesc remotingDesc = localTCCRemotingParser.getServiceDesc(tccAction, "c");
+        RemotingDesc remotingDesc = localSAGARemotingParser.getServiceDesc(tccAction, "c");
         Assertions.assertNotNull(remotingDesc);
 
         Assertions.assertEquals(remotingDesc.getInterfaceClassName(), "io.seata.rm.saga.SagaAction");

@@ -46,14 +46,6 @@ public interface SagaAction {
                            @BusinessActionContextParameter(isParamInProperty = true) SagaParam tccParam);
 
     /**
-     * Commit boolean.
-     *
-     * @param actionContext the action context
-     * @return the boolean
-     */
-    public boolean commit(BusinessActionContext actionContext);
-
-    /**
      * Rollback boolean.
      *
      * @param actionContext the action context

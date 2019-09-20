@@ -35,11 +35,6 @@ public class SagaActionImpl implements SagaAction {
     }
 
     @Override
-    public boolean commit(BusinessActionContext actionContext) {
-        return true;
-    }
-
-    @Override
     public boolean rollback(BusinessActionContext actionContext) {
         return true;
     }
