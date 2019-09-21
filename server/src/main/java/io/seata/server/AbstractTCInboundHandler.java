@@ -15,6 +15,7 @@
  */
 package io.seata.server;
 
+import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.core.exception.AbstractExceptionHandler;
 import io.seata.core.exception.TransactionException;
@@ -225,9 +226,9 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
                 throws TransactionException {
                 try {
                     doLockCheck(request, response, rpcContext);
-                } catch (StoreException e) {
+                } catch (DataAccessException e) {
                     throw new TransactionException(TransactionExceptionCode.FailedStore,
-                            String.format("global lock query store failed. xid=%s, msg=%s", request.getXid(), e.getMessage()));
+                            String.format("global lock query failed. xid=%s, msg=%s", request.getXid(), e.getMessage()));
                 }
             }
         }, request, response);

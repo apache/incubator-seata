@@ -19,6 +19,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
@@ -91,7 +92,7 @@ public class DataBaseLocker extends AbstractLocker {
     public boolean isLockable(List<RowLock> locks) {
         try {
             return lockStore.isLockable(convertToLockDO(locks));
-        } catch (StoreException e) {
+        } catch (DataAccessException e) {
             throw e;
         } catch (Exception t) {
             LOGGER.error("isLockable error, locks:" + CollectionUtils.toString(locks), t);
