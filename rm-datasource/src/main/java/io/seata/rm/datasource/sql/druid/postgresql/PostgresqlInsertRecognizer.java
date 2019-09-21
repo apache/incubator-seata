@@ -41,7 +41,7 @@ public class PostgresqlInsertRecognizer extends BaseRecognizer implements SQLIns
     private final PGInsertStatement ast;
 
     /**
-     * Instantiates a new My sql insert recognizer.
+     * Instantiates a new Postgresql insert recognizer.
      *
      * @param originalSQL the original sql
      * @param ast the ast

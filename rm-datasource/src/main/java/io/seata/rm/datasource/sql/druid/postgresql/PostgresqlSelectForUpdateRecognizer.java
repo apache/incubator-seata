@@ -37,7 +37,7 @@ public class PostgresqlSelectForUpdateRecognizer extends BaseRecognizer implemen
     private final SQLSelectStatement ast;
 
     /**
-     * Instantiates a new My sql select for update recognizer.
+     * Instantiates a new Postgresql select for update recognizer.
      *
      * @param originalSQL the original sql
      * @param ast the ast

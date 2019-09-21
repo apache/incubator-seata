@@ -37,7 +37,7 @@ public class PostgresqlDeleteRecognizer extends BaseRecognizer implements SQLDel
     private final PGDeleteStatement ast;
 
     /**
-     * Instantiates a new My sql delete recognizer.
+     * Instantiates a new Postgresql delete recognizer.
      *
      * @param originalSQL the original sql
      * @param ast the ast

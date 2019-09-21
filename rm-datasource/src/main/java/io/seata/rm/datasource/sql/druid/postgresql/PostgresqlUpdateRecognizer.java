@@ -39,7 +39,7 @@ public class PostgresqlUpdateRecognizer extends BaseRecognizer implements SQLUpd
     private PGUpdateStatement ast;
 
     /**
-     * Instantiates a new My sql update recognizer.
+     * Instantiates a new Postgresql update recognizer.
      *
      * @param originalSQL the original sql
      * @param ast the ast
