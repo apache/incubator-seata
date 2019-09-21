@@ -99,7 +99,7 @@ public class PostgresqlUpdateRecognizer extends BaseRecognizer implements SQLUpd
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         PGOutputVisitor visitor = super.createPGOutputVisitor(parametersHolder, paramAppenderList, sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
@@ -112,7 +112,7 @@ public class PostgresqlUpdateRecognizer extends BaseRecognizer implements SQLUpd
             return "";
         }
 
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         PGOutputVisitor visitor = new PGOutputVisitor(sb);
 
         if (where instanceof SQLBetweenExpr) {
@@ -133,7 +133,7 @@ public class PostgresqlUpdateRecognizer extends BaseRecognizer implements SQLUpd
 
     @Override
     public String getTableName() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         PGOutputVisitor visitor = new PGOutputVisitor(sb) {
 
             @Override

@@ -47,14 +47,12 @@ public class PostgresqlUndoInsertExecutor extends AbstractUndoExecutor {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = afterImageRows.get(0);
-        StringBuffer mainSQL = new StringBuffer("DELETE FROM " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()));
-        StringBuffer where = new StringBuffer(" WHERE ");
-        boolean first = true;
+        StringBuilder mainSQL = new StringBuilder("DELETE FROM " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()));
+        StringBuilder where = new StringBuilder(" WHERE ");
         for (Field field : row.getFields()) {
             if (field.getKeyType() == KeyType.PrimaryKey) {
                 where.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
             }
-
         }
         return mainSQL.append(where).toString();
     }

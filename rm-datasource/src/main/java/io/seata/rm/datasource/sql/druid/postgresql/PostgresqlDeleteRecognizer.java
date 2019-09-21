@@ -59,7 +59,7 @@ public class PostgresqlDeleteRecognizer extends BaseRecognizer implements SQLDel
 
     @Override
     public String getTableName() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         PGOutputVisitor visitor = new PGOutputVisitor(sb) {
 
             @Override
@@ -79,7 +79,7 @@ public class PostgresqlDeleteRecognizer extends BaseRecognizer implements SQLDel
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         PGOutputVisitor visitor = super.createPGOutputVisitor(parametersHolder, paramAppenderList, sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
@@ -91,7 +91,7 @@ public class PostgresqlDeleteRecognizer extends BaseRecognizer implements SQLDel
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         PGOutputVisitor visitor = new PGOutputVisitor(sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();

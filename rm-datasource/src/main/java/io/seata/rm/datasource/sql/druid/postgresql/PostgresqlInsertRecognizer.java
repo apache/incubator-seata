@@ -63,7 +63,7 @@ public class PostgresqlInsertRecognizer extends BaseRecognizer implements SQLIns
 
     @Override
     public String getTableName() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         PGOutputVisitor visitor = new PGOutputVisitor(sb) {
 
             @Override

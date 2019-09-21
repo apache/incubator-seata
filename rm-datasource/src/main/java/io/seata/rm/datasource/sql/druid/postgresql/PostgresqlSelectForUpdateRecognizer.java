@@ -60,7 +60,7 @@ public class PostgresqlSelectForUpdateRecognizer extends BaseRecognizer implemen
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         PGOutputVisitor visitor = super.createPGOutputVisitor(parametersHolder, paramAppenderList, sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
@@ -73,7 +73,7 @@ public class PostgresqlSelectForUpdateRecognizer extends BaseRecognizer implemen
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         PGOutputVisitor visitor = new PGOutputVisitor(sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
@@ -102,7 +102,7 @@ public class PostgresqlSelectForUpdateRecognizer extends BaseRecognizer implemen
     public String getTableName() {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLTableSource tableSource = selectQueryBlock.getFrom();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         PGOutputVisitor visitor = new PGOutputVisitor(sb) {
 
             @Override

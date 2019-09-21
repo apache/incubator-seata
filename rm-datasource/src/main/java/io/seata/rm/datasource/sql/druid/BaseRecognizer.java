@@ -108,7 +108,7 @@ public abstract class BaseRecognizer implements SQLRecognizer {
     }
 
     public PGOutputVisitor createPGOutputVisitor(final ParametersHolder parametersHolder,
-        final ArrayList<List<Object>> paramAppenderList, final StringBuffer sb) {
+        final ArrayList<List<Object>> paramAppenderList, final StringBuilder sb) {
         PGOutputVisitor visitor = new PGOutputVisitor(sb) {
 
             @Override
