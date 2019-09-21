@@ -17,13 +17,17 @@ package io.seata.discovery.registry;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigType;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
 
+import io.seata.config.ConfigurationProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * The type Registry factory.
