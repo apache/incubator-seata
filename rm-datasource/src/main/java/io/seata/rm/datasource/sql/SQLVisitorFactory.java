@@ -32,6 +32,7 @@ import io.seata.rm.datasource.sql.druid.oracle.OracleSelectForUpdateRecognizer;
 import io.seata.rm.datasource.sql.druid.oracle.OracleUpdateRecognizer;
 import io.seata.rm.datasource.sql.druid.postgresql.PostgresqlDeleteRecognizer;
 import io.seata.rm.datasource.sql.druid.postgresql.PostgresqlInsertRecognizer;
+import io.seata.rm.datasource.sql.druid.postgresql.PostgresqlSelectForUpdateRecognizer;
 import io.seata.rm.datasource.sql.druid.postgresql.PostgresqlUpdateRecognizer;
 
 import java.util.List;
@@ -90,7 +91,7 @@ public class SQLVisitorFactory {
                 recognizer = new PostgresqlDeleteRecognizer(sql, ast);
             } else if (ast instanceof SQLSelectStatement) {
                 if (((SQLSelectStatement) ast).getSelect().getQueryBlock().isForUpdate()) {
-                    recognizer = new OracleSelectForUpdateRecognizer(sql, ast);
+                    recognizer = new PostgresqlSelectForUpdateRecognizer(sql, ast);
                 }
             }
         } else {
