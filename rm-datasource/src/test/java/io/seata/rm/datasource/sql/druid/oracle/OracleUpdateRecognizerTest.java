@@ -109,11 +109,26 @@ public class OracleUpdateRecognizerTest {
 
     @Test
     public void testGetWhereCondition_0() {
-        String sql = "update t set a = 1 where id = ?";
+
+        String sql = "update t set a = 1";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OracleUpdateRecognizer recognizer = new OracleUpdateRecognizer(sql, asts.get(0));
         String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
+            @Override
+            public ArrayList<Object>[] getParameters() {
+                return null;
+            }
+        }, new ArrayList<>());
+
+        //test for no condition
+        Assertions.assertEquals("", whereCondition);
+
+        sql = "update t set a = 1 where id = ?";
+        asts = SQLUtils.parseStatements(sql, DB_TYPE);
+
+        recognizer = new OracleUpdateRecognizer(sql, asts.get(0));
+        whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
             @Override
             public ArrayList<Object>[] getParameters() {
                 ArrayList<Object> idParam = new ArrayList<>();
@@ -173,11 +188,21 @@ public class OracleUpdateRecognizerTest {
 
     @Test
     public void testGetWhereCondition_1() {
-        String sql = "update t set a = 1 where id = 1";
+
+        String sql = "update t set a = 1";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
         OracleUpdateRecognizer recognizer = new OracleUpdateRecognizer(sql, asts.get(0));
         String whereCondition = recognizer.getWhereCondition();
+
+        //test for no condition
+        Assertions.assertEquals("", whereCondition);
+
+        sql = "update t set a = 1 where id = 1";
+        asts = SQLUtils.parseStatements(sql, DB_TYPE);
+
+        recognizer = new OracleUpdateRecognizer(sql, asts.get(0));
+        whereCondition = recognizer.getWhereCondition();
 
         //test for normal sql
         Assertions.assertEquals("id = 1", whereCondition);
