@@ -14,27 +14,22 @@
   ~  See the License for the specific language governing permissions and
   ~  limitations under the License.
   -->
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>io.seata</groupId>
-        <artifactId>seata-parent</artifactId>
+        <artifactId>seata-discovery</artifactId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-config</artifactId>
-    <packaging>pom</packaging>
-    <name>seata-config ${project.version}</name>
-    <modules>
-        <module>seata-config-core</module>
-        <module>seata-config-custom</module>
-        <module>seata-config-apollo</module>
-        <module>seata-config-nacos</module>
-        <module>seata-config-zk</module>
-        <module>seata-config-all</module>
-        <module>seata-config-etcd3</module>
-        <module>seata-config-consul</module>
-        <module>seata-config-spring-cloud</module>
-    </modules>
+    <artifactId>seata-discovery-custom</artifactId>
+    <name>seata-discovery-custom ${project.version}</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-discovery-core</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+    </dependencies>
 </project>

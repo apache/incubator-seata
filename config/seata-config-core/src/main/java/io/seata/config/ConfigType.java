@@ -49,7 +49,11 @@ public enum ConfigType {
     /**
      * spring cloud config type
      */
-    SpringCloudConfig;
+    SpringCloudConfig,
+    /**
+     * Custom config type
+     */
+    Custom;
 
     /**
      * Gets type.
