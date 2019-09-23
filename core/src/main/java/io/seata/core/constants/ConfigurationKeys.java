@@ -425,4 +425,9 @@ public class ConfigurationKeys {
      * The constant DISABLE_GLOBAL_TRANSACTION.
      */
     public static final String DISABLE_GLOBAL_TRANSACTION = SERVICE_PREFIX + "disableGlobalTransaction";
+
+    /**
+     * The constant SQL_PARSER_TYPE.
+     */
+    public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlparser.type";
 }

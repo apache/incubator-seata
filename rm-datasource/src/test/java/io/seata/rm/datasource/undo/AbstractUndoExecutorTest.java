@@ -15,7 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
-import io.seata.rm.datasource.sql.SQLType;
+import io.seata.sqlparser.SQLType;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
