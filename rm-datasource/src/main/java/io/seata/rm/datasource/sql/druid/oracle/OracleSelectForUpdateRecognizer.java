@@ -17,7 +17,9 @@ package io.seata.rm.datasource.sql.druid.oracle;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
+import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
@@ -69,7 +71,15 @@ public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements S
         }
         StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = super.createOracleOutputVisitor(parametersHolder, paramAppenderList, sb);
-        visitor.visit((SQLBinaryOpExpr) where);
+        if (where instanceof SQLBinaryOpExpr) {
+            visitor.visit((SQLBinaryOpExpr) where);
+        } else if (where instanceof SQLInListExpr) {
+            visitor.visit((SQLInListExpr) where);
+        } else if (where instanceof SQLBetweenExpr) {
+            visitor.visit((SQLBetweenExpr) where);
+        } else {
+            throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
+        }
         return sb.toString();
     }
 
@@ -82,7 +92,15 @@ public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements S
         }
         StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb);
-        visitor.visit((SQLBinaryOpExpr) where);
+        if (where instanceof SQLBinaryOpExpr) {
+            visitor.visit((SQLBinaryOpExpr) where);
+        } else if (where instanceof SQLInListExpr) {
+            visitor.visit((SQLInListExpr) where);
+        } else if (where instanceof SQLBetweenExpr) {
+            visitor.visit((SQLBetweenExpr) where);
+        } else {
+            throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
+        }
         return sb.toString();
     }
 
