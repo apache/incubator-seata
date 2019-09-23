@@ -69,7 +69,7 @@ public class DbStateLangStore extends AbstractStore implements StateLangStore {
             stateMachine.setVersion(resultSet.getString("ver"));
             stateMachine.setAppName(resultSet.getString("app_name"));
             stateMachine.setContent(resultSet.getString("content"));
-            stateMachine.setGmtCreate(resultSet.getDate("gmt_create"));
+            stateMachine.setGmtCreate(resultSet.getTimestamp("gmt_create"));
             stateMachine.setType(resultSet.getString("type"));
             stateMachine.setRecoverStrategy(resultSet.getString("recover_strategy"));
             stateMachine.setTenantId(resultSet.getString("tenant_id"));

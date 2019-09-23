@@ -20,7 +20,7 @@ create table seata_state_machine_inst
     machine_id varchar(32) not null,
     tenant_id varchar(32) not null,
     parent_id varchar(46),
-    gmt_started timestamp not null default current_timestamp,
+    gmt_started timestamp not null,
     business_key varchar(48),
     uni_business_key varchar(48) not null generated always as( --Unique index does not allow empty columns on DB2
         CASE
@@ -52,7 +52,7 @@ create table seata_state_inst
     business_key varchar(48),
     state_id_compensated_for varchar(32),
     state_id_retried_for varchar(32),
-    gmt_started timestamp not null default current_timestamp,
+    gmt_started timestamp not null,
     is_for_update smallint,
     input_params clob(65536) inline length 1024,
     output_params clob(65536) inline length 1024,
