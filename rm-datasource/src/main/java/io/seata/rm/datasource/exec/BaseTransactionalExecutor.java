@@ -27,7 +27,6 @@ import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
@@ -36,6 +35,7 @@ import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.WhereRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableMetaAdapter;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -194,6 +194,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         } else {
             tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
         }
+        String dbType = getDbType();
+        tableMeta = TableMetaAdapter.createFromTableMeta(dbType, tableMeta);
         return tableMeta;
     }
 
@@ -327,7 +329,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         String pk = getTableMeta().getPkName();
         StringJoiner pkValuesJoiner = new StringJoiner(" OR ", "SELECT * FROM " + getTableMeta().getTableName() + " WHERE ", "");
         for (Object pkValue : pkValues) {
-            pkValuesJoiner.add(addEscape(pk) + "=?");
+            pkValuesJoiner.add(pk + "=?");
         }
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -353,22 +355,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     /**
-     * delete escape
-     * @param cols the cols
-     */
-    protected void delEscape(List<String> cols) {
-        String dbType = statementProxy.getConnectionProxy().getDbType();
-        ColumnUtils.delEscape(cols, dbType);
-    }
-
-    /**
-     * add escape
-     * @param colName the column name
+     * get db type
      * @return
      */
-    protected String addEscape(String colName) {
-        String dbType = statementProxy.getConnectionProxy().getDbType();
-        return ColumnUtils.addEscape(colName, dbType);
+    protected String getDbType() {
+        return statementProxy.getConnectionProxy().getDbType();
     }
 
 }

@@ -88,10 +88,6 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected boolean containsPK() {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();
-        if (insertColumns == null) {
-            return false;
-        }
-        delEscape(insertColumns);
         TableMeta tmeta = getTableMeta();
         return tmeta.containsPK(insertColumns);
     }
@@ -239,7 +235,6 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         String pkName = getTableMeta().getPkName();
         List<String> insertColumns = recognizer.getInsertColumns();
         if (insertColumns != null && !insertColumns.isEmpty()) {
-            delEscape(insertColumns);
             final int insertColumnsSize = insertColumns.size();
             int pkIndex = -1;
             for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {

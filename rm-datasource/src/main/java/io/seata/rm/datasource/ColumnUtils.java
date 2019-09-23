@@ -78,6 +78,23 @@ public final class ColumnUtils {
 
     /**
      * add escape by db type
+     * @param cols the column name list
+     * @param dbType the db type
+     */
+    public static void addEscape(List<String> cols, String dbType) {
+        if (cols == null || cols.isEmpty()) {
+            throw new NullPointerException("cols is null");
+        }
+        for (int i = 0, len = cols.size(); i < len; i++) {
+            String col = cols.get(i);
+            if (col != null) {
+                cols.set(i, addEscape(col, dbType));
+            }
+        }
+    }
+
+    /**
+     * add escape by db type
      * @param colName the column name
      * @param dbType the db type
      * @return the colName left and right add escape
