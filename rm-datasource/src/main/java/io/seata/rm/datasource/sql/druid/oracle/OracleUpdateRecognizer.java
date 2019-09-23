@@ -109,7 +109,15 @@ public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
         }
         StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = super.createOracleOutputVisitor(parametersHolder, paramAppenderList, sb);
-        visitor.visit((SQLBinaryOpExpr) where);
+        if (where instanceof SQLBinaryOpExpr) {
+            visitor.visit((SQLBinaryOpExpr) where);
+        } else if (where instanceof SQLInListExpr) {
+            visitor.visit((SQLInListExpr) where);
+        } else if (where instanceof SQLBetweenExpr) {
+            visitor.visit((SQLBetweenExpr) where);
+        } else {
+            throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
+        }
         return sb.toString();
     }
 
