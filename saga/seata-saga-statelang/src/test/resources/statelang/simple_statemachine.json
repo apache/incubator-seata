@@ -6,7 +6,7 @@
     "States": {
         "FirstState": {
             "Type": "ServiceTask",
-            "ServiceName": "com.alipay.sofa.DemoService",
+            "ServiceName": "is.seata.saga.DemoService",
             "ServiceMethod": "foo",
             "Next": "ChoiceState"
         },
@@ -26,7 +26,7 @@
         },
         "FirstMatchState": {
             "Type": "ServiceTask",
-            "ServiceName": "com.alipay.sofa.DemoService",
+            "ServiceName": "is.seata.saga.DemoService",
             "ServiceMethod": "bar",
             "CompensateState": "CompensateFirst",
             "Status": {
@@ -60,7 +60,7 @@
         },
         "CompensateFirst": {
             "Type": "ServiceTask",
-            "ServiceName": "com.alipay.sofa.DemoService",
+            "ServiceName": "is.seata.saga.DemoService",
             "ServiceMethod": "compensateBar",
             "isForCompensation": true,
             "Input": [

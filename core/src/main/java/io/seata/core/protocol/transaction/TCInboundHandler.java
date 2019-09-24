@@ -90,9 +90,9 @@ public interface TCInboundHandler {
     /**
      * Handle global report request.
      *
-     * @param globalReport the global report
+     * @param globalReport the global report request
      * @param rpcContext   the rpc context
-     * @return the global commit response
+     * @return the global report response
      */
     GlobalReportResponse handle(GlobalReportRequest globalReport, RpcContext rpcContext);
 

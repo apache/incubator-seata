@@ -15,13 +15,12 @@
  */
 package io.seata.saga.engine.store.db;
 
-import io.seata.common.util.ReflectionUtil;
-import io.seata.saga.engine.store.StoreException;
+import io.seata.common.exception.StoreException;
+import io.seata.saga.engine.store.utils.BeanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -46,15 +45,16 @@ public class AbstractStore {
 
     protected <T> T selectOne(String sql, ResultSetToObject<T> resultSetToObject, Object... args){
         Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
         try {
             connection = dataSource.getConnection();
-            connection.setAutoCommit(true);
 
             if(LOGGER.isDebugEnabled()){
                 LOGGER.debug("Preparing SQL statement: {}", sql);
             }
 
-            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt = connection.prepareStatement(sql);
 
             if(LOGGER.isDebugEnabled()){
                 LOGGER.debug("setting params to PreparedStatement: {}", Arrays.toString(args));
@@ -63,13 +63,15 @@ public class AbstractStore {
             for(int i = 0; i < args.length; i++){
                 stmt.setObject(i+1, args[i]);
             }
-            ResultSet resultSet = stmt.executeQuery();
+            resultSet = stmt.executeQuery();
             if(resultSet.next()){
                 return resultSetToObject.toObject(resultSet);
             }
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
+            closeSilent(resultSet);
+            closeSilent(stmt);
             closeSilent(connection);
         }
         return null;
@@ -77,15 +79,16 @@ public class AbstractStore {
 
     protected <T> List<T> selectList(String sql, ResultSetToObject<T> resultSetToObject, Object... args){
         Connection connection = null;
+        PreparedStatement stmt = null;
+        ResultSet resultSet = null;
         try {
             connection = dataSource.getConnection();
-            connection.setAutoCommit(true);
 
             if(LOGGER.isDebugEnabled()){
                 LOGGER.debug("Preparing SQL: {}", sql);
             }
 
-            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt = connection.prepareStatement(sql);
 
             if(LOGGER.isDebugEnabled()){
                 LOGGER.debug("setting params to PreparedStatement: {}", Arrays.toString(args));
@@ -94,7 +97,7 @@ public class AbstractStore {
             for(int i = 0; i < args.length; i++){
                 stmt.setObject((i+1), args[i]);
             }
-            ResultSet resultSet = stmt.executeQuery();
+            resultSet = stmt.executeQuery();
             List<T> list = new ArrayList<>();
             while (resultSet.next()){
                 list.add(resultSetToObject.toObject(resultSet));
@@ -103,46 +106,53 @@ public class AbstractStore {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
+            closeSilent(resultSet);
+            closeSilent(stmt);
             closeSilent(connection);
         }
     }
 
     protected <T> int executeUpdate(String sql, ObjectToStatement<T> objectToStatement, T o){
         Connection connection = null;
+        PreparedStatement stmt = null;
         try {
             connection = dataSource.getConnection();
-            connection.setAutoCommit(true);
 
             if(LOGGER.isDebugEnabled()){
                 LOGGER.debug("Preparing SQL: {}", sql);
             }
 
-            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt = connection.prepareStatement(sql);
 
             if(LOGGER.isDebugEnabled()){
-                LOGGER.debug("setting params to PreparedStatement: {}", beanToString(o));
+                LOGGER.debug("setting params to PreparedStatement: {}", BeanUtils.beanToString(o));
             }
 
             objectToStatement.toStatement(o, stmt);
-            return stmt.executeUpdate();
+            int count = stmt.executeUpdate();
+            if(!connection.getAutoCommit()){
+                connection.commit();
+            }
+            return count;
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
+            closeSilent(stmt);
             closeSilent(connection);
         }
     }
 
     protected int executeUpdate(String sql, Object... args){
         Connection connection = null;
+        PreparedStatement stmt = null;
         try {
             connection = dataSource.getConnection();
-            connection.setAutoCommit(true);
 
             if(LOGGER.isDebugEnabled()){
                 LOGGER.debug("Preparing SQL: {}", sql);
             }
 
-            PreparedStatement stmt = connection.prepareStatement(sql);
+            stmt = connection.prepareStatement(sql);
 
             if(LOGGER.isDebugEnabled()){
                 LOGGER.debug("setting params to PreparedStatement: {}", Arrays.toString(args));
@@ -151,10 +161,15 @@ public class AbstractStore {
             for(int i = 0; i < args.length; i++){
                 stmt.setObject((i+1), args[i]);
             }
-            return stmt.executeUpdate();
+            int count = stmt.executeUpdate();
+            if(!connection.getAutoCommit()){
+                connection.commit();
+            }
+            return count;
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
+            closeSilent(stmt);
             closeSilent(connection);
         }
     }
@@ -189,33 +204,5 @@ public class AbstractStore {
 
     public void setTablePrefix(String tablePrefix) {
         this.tablePrefix = tablePrefix;
-    }
-
-    private static String beanToString(Object o){
-        if(o == null){
-            return null;
-        }
-
-        Field[] fields = o.getClass().getDeclaredFields();
-        StringBuffer buffer = new StringBuffer();
-        buffer.append("[");
-        for(Field field : fields){
-            Object val = null;
-            try {
-                val = ReflectionUtil.getFieldValue(o, field.getName());
-            } catch (NoSuchFieldException e) {
-                LOGGER.warn(e.getMessage(), e);
-            } catch (IllegalAccessException e) {
-                LOGGER.warn(e.getMessage(), e);
-            }
-            if(val != null){
-                buffer.append(field.getName()).append("=").append(val).append(", ");
-            }
-        }
-        if(buffer.length() > 2){
-            buffer.delete(buffer.length() - 2, buffer.length());
-        }
-        buffer.append("]");
-        return buffer.toString();
     }
 }

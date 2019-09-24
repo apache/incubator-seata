@@ -24,7 +24,7 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
+    <name>seata-saga-engine ${project.version}</name>
     <artifactId>seata-saga-engine</artifactId>
 
     <dependencies>

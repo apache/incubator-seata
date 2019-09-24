@@ -145,57 +145,57 @@ public enum FrameworkErrorCode {
     /**
      * Not a exception class
      */
-    NotExceptionClass("0408", "Not a exception class", "Not a exception class"),
+    NotExceptionClass("0409", "Not a exception class", "Not a exception class"),
 
     /**
      * No such method
      */
-    NoSuchMethod("0409", "No such method", "No such method"),
+    NoSuchMethod("0410", "No such method", "No such method"),
 
     /**
      * Object not exists
      */
-    ObjectNotExists("0410", "Object not exists", "Object not exists"),
+    ObjectNotExists("0411", "Object not exists", "Object not exists"),
 
     /**
      * Parameter required
      */
-    ParameterRequired("0411", "Parameter required", "Parameter required"),
+    ParameterRequired("0412", "Parameter required", "Parameter required"),
 
     /**
      * Variables assign error
      */
-    VariablesAssignError("0412", "Variables assign error", "Variables assign error"),
+    VariablesAssignError("0413", "Variables assign error", "Variables assign error"),
 
     /**
      * No matched status
      */
-    NoMatchedStatus("0413", "No matched status", "No matched status"),
+    NoMatchedStatus("0414", "No matched status", "No matched status"),
 
     /**
      * Asynchronous start disabled
      */
-    AsynchronousStartDisabled("0414", "Asynchronous start disabled", "Asynchronous start disabled"),
+    AsynchronousStartDisabled("0415", "Asynchronous start disabled", "Asynchronous start disabled"),
 
     /**
      * Operation denied
      */
-    OperationDenied("0415", "Operation denied", "Operation denied"),
+    OperationDenied("0416", "Operation denied", "Operation denied"),
 
     /**
      * Context variable replay failed
      */
-    ContextVariableReplayFailed("0416", "Context variable replay failed", "Context variable replay failed"),
+    ContextVariableReplayFailed("0417", "Context variable replay failed", "Context variable replay failed"),
 
     /**
      * Context variable replay failed
      */
-    InvalidParameter("0417", "Invalid parameter", "Invalid parameter"),
+    InvalidParameter("0418", "Invalid parameter", "Invalid parameter"),
 
     /**
      * Invoke transaction manager error
      */
-    TransactionManagerError("0418", "Invoke transaction manager error", "Invoke transaction manager error"),
+    TransactionManagerError("0419", "Invoke transaction manager error", "Invoke transaction manager error"),
 
     /**
      * Undefined error
