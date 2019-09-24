@@ -45,7 +45,7 @@ create table `lock_table` (
   `branch_id` long,
   `resource_id` varchar(256) ,
   `table_name` varchar(32) ,
-  `pk` varchar(32) ,
+  `pk` varchar(36) ,
   `gmt_create` datetime ,
   `gmt_modified` datetime,
   primary key(`row_key`)
