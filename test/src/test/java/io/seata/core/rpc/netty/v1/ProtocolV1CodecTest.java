@@ -72,8 +72,9 @@ public class ProtocolV1CodecTest {
             final CountDownLatch cnt = new CountDownLatch(runTimes);
             final AtomicInteger tag = new AtomicInteger(0);
             final AtomicInteger success = new AtomicInteger(0);
+            // no queue
             final ThreadPoolExecutor service1 = new ThreadPoolExecutor(threads, threads, 0L, TimeUnit.MILLISECONDS,
-                    new SynchronousQueue<>(), new NamedThreadFactory("client-", false));// 无队列
+                    new SynchronousQueue<>(), new NamedThreadFactory("client-", false));
             for (int i = 0; i < threads; i++) {
                 service1.execute(() -> {
                     while (tag.getAndIncrement() < runTimes) {
