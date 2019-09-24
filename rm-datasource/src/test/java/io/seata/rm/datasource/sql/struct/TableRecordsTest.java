@@ -25,6 +25,7 @@ import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.pool.DruidDataSource;
 
 import com.google.common.collect.Lists;
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import org.junit.jupiter.api.Assertions;
@@ -63,6 +64,36 @@ public class TableRecordsTest {
     }
 
     @Test
+    public void testTableRecords() {
+
+        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
+            TableRecords tableRecords = new TableRecords(new TableMeta());
+            tableRecords.setTableMeta(new TableMeta());
+        });
+
+        TableRecords tableRecords = new TableRecords(new TableMeta());
+        Assertions.assertEquals(0, tableRecords.size());
+    }
+
+    @Test
+    public void testPkRow() throws SQLException {
+        MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas);
+        DruidDataSource dataSource = new DruidDataSource();
+        dataSource.setUrl("jdbc:mock:xxx");
+        dataSource.setDriver(mockDriver);
+        MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
+        DataSourceProxy proxy = new DataSourceProxy(dataSource);
+
+        TableMeta tableMeta = TableMetaCache.getTableMeta(proxy, "table_records_test");
+
+        ResultSet resultSet = mockDriver.executeQuery(mockStatement, "select * from table_records_test");
+
+        TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet);
+
+        Assertions.assertEquals(returnValue.length, tableRecords.pkRows().size());
+    }
+
+    @Test
     public void testBuildRecords() throws SQLException {
         MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas);
         DruidDataSource dataSource = new DruidDataSource();
@@ -78,5 +109,20 @@ public class TableRecordsTest {
         TableRecords tableRecords = TableRecords.buildRecords(tableMeta, resultSet);
 
         Assertions.assertNotNull(tableRecords);
+    }
+
+    @Test
+    public void testEmpty() {
+        TableRecords empty = TableRecords.empty(new TableMeta());
+
+        Assertions.assertEquals(0, empty.size());
+        Assertions.assertEquals(0, empty.getRows().size());
+        Assertions.assertEquals(0, empty.pkRows().size());
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            empty.add(new Row());
+        });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            empty.getTableMeta();
+        });
     }
 }
