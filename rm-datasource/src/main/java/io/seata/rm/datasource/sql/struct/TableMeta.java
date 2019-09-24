@@ -34,7 +34,13 @@ import io.seata.common.util.CollectionUtils;
 public class TableMeta {
     private String tableName;
 
+    /**
+     * key: column name
+     */
     private Map<String, ColumnMeta> allColumns = new LinkedHashMap<String, ColumnMeta>();
+    /**
+     * key: index name
+     */
     private Map<String, IndexMeta> allIndexes = new LinkedHashMap<String, IndexMeta>();
 
     /**

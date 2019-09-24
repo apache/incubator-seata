@@ -16,13 +16,24 @@
 package io.seata.rm.datasource.sql.struct;
 
 import com.alibaba.druid.util.JdbcConstants;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.DataSourceProxy;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author jsbxyyx
  */
 public class TableMetaCacheAdapter {
 
+    /**
+     * adapter table meta
+     * @param dbType the db type
+     * @param dataSourceProxy the datasource proxy
+     * @param tableName the table name
+     * @return the table meta
+     */
     public static TableMeta getTableMeta(final String dbType, final DataSourceProxy dataSourceProxy, final String tableName) {
         TableMeta tableMeta;
         if (JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
@@ -30,8 +41,47 @@ public class TableMetaCacheAdapter {
         } else {
             tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, tableName);
         }
-        tableMeta = TableMetaAdapter.createFromTableMeta(dbType, tableMeta);
-        return tableMeta;
+
+        TableMetaAdapter adapter = new TableMetaAdapter();
+
+        adapter.setDbType(dbType);
+        adapter.setTableName(ColumnUtils.addEscape(tableMeta.getTableName(), dbType));
+
+        for (Map.Entry<String, ColumnMeta> entry : tableMeta.getAllColumns().entrySet()) {
+            ColumnMeta value = entry.getValue();
+            if (value.getColumnName() != null) {
+                value.setColumnName(ColumnUtils.addEscape(value.getColumnName(), dbType));
+            }
+            if (value.getTableName() != null) {
+                value.setTableName(ColumnUtils.addEscape(value.getTableName(), dbType));
+            }
+            adapter.getAllColumns().put(ColumnUtils.addEscape(entry.getKey(), dbType), value);
+        }
+
+        for (Map.Entry<String, IndexMeta> entry : tableMeta.getAllIndexes().entrySet()) {
+            IndexMeta value = entry.getValue();
+            List<ColumnMeta> values = value.getValues();
+            if (values != null) {
+                for (int i = 0, len = values.size(); i < len; i++) {
+                    ColumnMeta columnMeta = values.get(i);
+                    if (columnMeta != null) {
+                        if (columnMeta.getColumnName() != null) {
+                            columnMeta.setColumnName(ColumnUtils.addEscape(columnMeta.getColumnName(), dbType));
+                        }
+                        if (columnMeta.getTableName() != null) {
+                            columnMeta.setTableName(ColumnUtils.addEscape(columnMeta.getTableName(), dbType));
+                        }
+                        values.set(i, columnMeta);
+                    }
+                }
+            }
+            if (value.getIndexName() != null) {
+                value.setIndexName(ColumnUtils.addEscape(value.getIndexName(), dbType));
+            }
+            adapter.getAllIndexes().put(entry.getKey(), value);
+        }
+
+        return adapter;
     }
 
 }

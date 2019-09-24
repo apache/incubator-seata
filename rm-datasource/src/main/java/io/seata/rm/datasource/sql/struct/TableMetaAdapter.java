@@ -18,9 +18,7 @@ package io.seata.rm.datasource.sql.struct;
 import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.ColumnUtils;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author jsbxyyx
@@ -35,26 +33,6 @@ public class TableMetaAdapter extends TableMeta {
 
     public void setDbType(String dbType) {
         this.dbType = dbType;
-    }
-
-    @Override
-    public String getTableName() {
-        return ColumnUtils.addEscape(super.getTableName(), dbType);
-    }
-
-    @Override
-    public Map<String, ColumnMeta> getPrimaryKeyMap() {
-        Map<String, ColumnMeta> map = new LinkedHashMap<>();
-        Map<String, ColumnMeta> primaryKeyMap = super.getPrimaryKeyMap();
-        for (Map.Entry<String, ColumnMeta> entry : primaryKeyMap.entrySet()) {
-            map.put(ColumnUtils.addEscape(entry.getKey(), dbType), ColumnMetaAdapter.createFromColumnMeta(dbType, entry.getValue()));
-        }
-        return map;
-    }
-
-    @Override
-    public ColumnMeta getColumnMeta(String colName) {
-        return ColumnMetaAdapter.createFromColumnMeta(dbType, super.getColumnMeta(colName));
     }
 
     @Override
@@ -77,21 +55,4 @@ public class TableMetaAdapter extends TableMeta {
         }
     }
 
-    /**
-     * create table meta adapter from table meta
-     * @param dbType the db type
-     * @param tableMeta the table meta
-     * @return the table meta adapter
-     */
-    public static TableMetaAdapter createFromTableMeta(String dbType, TableMeta tableMeta) {
-        if (tableMeta == null) {
-            throw new NullPointerException("tableMeta is null");
-        }
-        TableMetaAdapter adapter = new TableMetaAdapter();
-        adapter.setDbType(dbType);
-        adapter.setTableName(tableMeta.getTableName());
-        adapter.getAllColumns().putAll(tableMeta.getAllColumns());
-        adapter.getAllIndexes().putAll(tableMeta.getAllIndexes());
-        return adapter;
-    }
 }

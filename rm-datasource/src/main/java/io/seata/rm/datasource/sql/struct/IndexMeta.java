@@ -206,15 +206,6 @@ public class IndexMeta {
         this.indextype = indextype;
     }
 
-    /**
-     * Gets indexvalue.
-     *
-     * @return the indexvalue
-     */
-    public List<ColumnMeta> getIndexvalue() {
-        return values;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) {
