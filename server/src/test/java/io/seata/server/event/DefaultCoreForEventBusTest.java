@@ -29,6 +29,7 @@ import io.seata.server.coordinator.CoreFactory;
 import io.seata.server.coordinator.DefaultCoordinator;
 import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -36,6 +37,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author zhengyangyong
  */
+@Disabled
 public class DefaultCoreForEventBusTest {
     @Test
     public void test() throws IOException, TransactionException, InterruptedException {
