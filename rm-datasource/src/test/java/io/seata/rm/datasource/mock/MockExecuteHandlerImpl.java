@@ -17,10 +17,8 @@ package io.seata.rm.datasource.mock;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.mock.handler.MockExecuteHandler;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
 
 /**
   * @author will
