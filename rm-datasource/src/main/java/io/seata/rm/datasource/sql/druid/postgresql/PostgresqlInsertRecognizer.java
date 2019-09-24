@@ -86,7 +86,7 @@ public class PostgresqlInsertRecognizer extends BaseRecognizer implements SQLIns
         List<String> list = new ArrayList<>(columnSQLExprs.size());
         for (SQLExpr expr : columnSQLExprs) {
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr) expr).getName().toUpperCase());
+                list.add(((SQLIdentifierExpr) expr).getName());
             } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
             }
