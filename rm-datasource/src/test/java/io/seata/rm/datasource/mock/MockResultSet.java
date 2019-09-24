@@ -15,24 +15,18 @@
  */
 package io.seata.rm.datasource.mock;
 
-import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.util.jdbc.ResultSetBase;
 
 import com.google.common.collect.Lists;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.sql.Blob;
 import java.sql.Clob;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
 
 /**
  * @author will
