@@ -121,7 +121,7 @@ public enum TransactionExceptionCode {
     FailedStore
     ;
 
-    private static final Map<Integer, TransactionExceptionCode> MAP = new HashMap<>(values().length);
+    private static final Map<Integer, TransactionExceptionCode> MAP = new HashMap<>(values().length * 2);
 
     static {
         for (TransactionExceptionCode code : values()) {
