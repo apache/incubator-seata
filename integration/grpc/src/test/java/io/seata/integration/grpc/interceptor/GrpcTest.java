@@ -50,7 +50,6 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author eddyxu1213@126.com
- * @Date 2019 /08/26
  */
 public class GrpcTest {
 

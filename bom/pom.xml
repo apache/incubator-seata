@@ -106,6 +106,7 @@
         <motan.version>1.0.0</motan.version>
         <jackson.version>2.9.8</jackson.version>
         <jcommander.version>1.72</jcommander.version>
+        <annotation.api.version>1.2</annotation.api.version>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -449,6 +450,12 @@
                 <groupId>com.h2database</groupId>
                 <artifactId>h2</artifactId>
                 <version>${h2.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>${annotation.api.version}</version>
+                <scope>provided</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>

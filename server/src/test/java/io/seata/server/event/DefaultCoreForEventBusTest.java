@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
  *
  * @author zhengyangyong
  */
-@Disabled
+@Disabled("https://github.com/seata/seata/issues/1702")
 public class DefaultCoreForEventBusTest {
     @Test
     public void test() throws IOException, TransactionException, InterruptedException {
