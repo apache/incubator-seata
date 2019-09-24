@@ -39,6 +39,7 @@ import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheAdapter;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.BranchUndoLog;
@@ -174,7 +175,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
                             Collections.reverse(sqlUndoLogs);
                         }
                         for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
-                            TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
+                            TableMeta tableMeta = TableMetaCacheAdapter.getTableMeta(getDbType(), dataSourceProxy, sqlUndoLog.getTableName());
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
                                     dataSourceProxy.getDbType(),

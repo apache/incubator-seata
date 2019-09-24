@@ -36,6 +36,7 @@ import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheAdapter;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
@@ -161,7 +162,7 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
                         setCurrentSerializer(parser.getName());
 
                         for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
-                            TableMeta tableMeta = TableMetaCacheOracle.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
+                            TableMeta tableMeta = TableMetaCacheAdapter.getTableMeta(getDbType(), dataSourceProxy, sqlUndoLog.getTableName());
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(dataSourceProxy.getDbType(),
                                     sqlUndoLog);
