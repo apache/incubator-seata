@@ -18,6 +18,8 @@ package io.seata.rm.datasource.sql.druid.postgresql;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
+import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
+import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
@@ -28,10 +30,10 @@ import io.seata.rm.datasource.sql.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.druid.BaseRecognizer;
-
+import io.seata.rm.datasource.sql.struct.Null;
+import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author japsercloud
@@ -101,20 +103,19 @@ public class PostgresqlInsertRecognizer extends BaseRecognizer implements SQLIns
         for (SQLInsertStatement.ValuesClause valuesClause : valuesClauses) {
             List<SQLExpr> exprs = valuesClause.getValues();
             List<Object> row = new ArrayList<>(exprs.size());
+            rows.add(row);
             for (SQLExpr expr : valuesClause.getValues()) {
-                if (expr instanceof SQLValuableExpr) {
+                if (expr instanceof SQLNullExpr) {
+                    row.add(Null.get());
+                } else if (expr instanceof SQLValuableExpr) {
                     row.add(((SQLValuableExpr) expr).getValue());
                 } else if (expr instanceof SQLVariantRefExpr) {
-                    String name = ((SQLVariantRefExpr) expr).getName();
-                    if (Objects.equals("?", name)) {
-                        row.add(name);
-                    }
+                    row.add(((SQLVariantRefExpr) expr).getName());
+                } else if (expr instanceof SQLMethodInvokeExpr) {
+                    row.add(new SqlMethodExpr());
                 } else {
                     throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                 }
-            }
-            if (!row.isEmpty()) {
-                rows.add(row);
             }
         }
         return rows;
