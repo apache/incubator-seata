@@ -25,6 +25,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
@@ -133,7 +134,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
                 return null;
             }
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
             if (rs != null) {
                 try {
@@ -174,7 +175,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
                 return null;
             }
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
             if (rs != null) {
                 try {
@@ -228,7 +229,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             }
             return ret;
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
             if (rs != null) {
                 try {
@@ -369,7 +370,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             }
             return rets;
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
             if (ps != null) {
                 try {
