@@ -35,10 +35,7 @@ import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.WhereRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaAdapter;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheAdapter;
-import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
