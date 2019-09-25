@@ -53,11 +53,13 @@ public class Server {
      * @throws IOException the io exception
      */
     public static void main(String[] args) throws IOException {
+        //initialize the parameter parser
+        //Note that the parameter parser should always be the first line to execute.
+        //Because, here we need to parse the parameters needed for startup.
+        ParameterParser parameterParser = new ParameterParser(args);
+
         //initialize the metrics
         MetricsManager.get().init();
-
-        //initialize the parameter parser
-        ParameterParser parameterParser = new ParameterParser(args);
 
         System.setProperty(ConfigurationKeys.STORE_MODE, parameterParser.getStoreMode());
 

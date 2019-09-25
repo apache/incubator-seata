@@ -15,10 +15,10 @@
  */
 package io.seata.config;
 
+import java.util.Objects;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
-
-import java.util.Objects;
 
 /**
  * The type Configuration factory.
@@ -30,7 +30,7 @@ public final class ConfigurationFactory {
     private static final String REGISTRY_CONF_PREFIX = "registry";
     private static final String REGISTRY_CONF_SUFFIX = ".conf";
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
-    private static final String ENV_PROPERTY_KEY = "seataEnv";
+    public static final String ENV_PROPERTY_KEY = "seataEnv";
 
     private static final String SYSTEM_PROPERTY_SEATA_CONFIG_NAME = "seata.config.name";
 
@@ -51,7 +51,7 @@ public final class ConfigurationFactory {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
         CURRENT_FILE_INSTANCE = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX)
-                : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX);
+            : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX);
     }
 
     private static final String NAME_KEY = "name";
