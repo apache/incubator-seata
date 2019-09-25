@@ -25,6 +25,8 @@ import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Null;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableMetaAdapter;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheAdapter;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,6 +60,8 @@ public class InsertExecutorTest {
     private static final String USER_STATUS_COLUMN = "user_status";
     private static final Integer PK_VALUE = 100;
 
+    private ConnectionProxy connectionProxy;
+
     private PreparedStatementProxy statementProxy;
 
     private SQLInsertRecognizer sqlInsertRecognizer;
@@ -76,7 +80,7 @@ public class InsertExecutorTest {
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
-        ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
+        connectionProxy = mock(ConnectionProxy.class);
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.MYSQL);
     }
@@ -157,6 +161,7 @@ public class InsertExecutorTest {
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
+        doReturn(0).when(insertExecutor).getPkIndex();
         List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         Assertions.assertEquals(pkValuesByColumn, pkValues);
     }
@@ -183,6 +188,7 @@ public class InsertExecutorTest {
         pkValuesAuto.add(PK_VALUE);
         //mock getPkValuesByAuto
         doReturn(pkValuesAuto).when(insertExecutor).getPkValuesByAuto();
+        doReturn(0).when(insertExecutor).getPkIndex();
         List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         //pk value = Null so getPkValuesByAuto
         verify(insertExecutor).getPkValuesByAuto();
@@ -304,6 +310,14 @@ public class InsertExecutorTest {
         pkValues.add(PK_VALUE);
         List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
         Assertions.assertEquals(pkValuesByAuto, pkValues);
+    }
+
+    @Test
+    public void test_getPkIndex() {
+        mockInsertColumns();
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+        Assertions.assertEquals(-1, insertExecutor.getPkIndex());
     }
 
     private List<String> mockInsertColumns() {

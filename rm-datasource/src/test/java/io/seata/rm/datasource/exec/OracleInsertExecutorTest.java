@@ -47,6 +47,8 @@ public class OracleInsertExecutorTest {
     private static final String USER_STATUS_COLUMN = "user_status";
     private static final Integer PK_VALUE = 100;
 
+    private ConnectionProxy connectionProxy;
+
     private PreparedStatementProxy statementProxy;
 
     private SQLInsertRecognizer sqlInsertRecognizer;
@@ -65,7 +67,7 @@ public class OracleInsertExecutorTest {
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
-        ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
+        connectionProxy = mock(ConnectionProxy.class);
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.ORACLE);
     }
@@ -80,6 +82,7 @@ public class OracleInsertExecutorTest {
         pkValuesAuto.add(PK_VALUE);
 
         doReturn(pkValuesAuto).when(insertExecutor).getPkValuesBySequence(expr);
+        doReturn(0).when(insertExecutor).getPkIndex();
         List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         verify(insertExecutor).getPkValuesBySequence(expr);
         Assertions.assertEquals(pkValuesByColumn, pkValuesAuto);

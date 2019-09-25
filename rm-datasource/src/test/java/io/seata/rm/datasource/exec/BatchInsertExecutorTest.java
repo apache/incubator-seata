@@ -52,6 +52,9 @@ public class BatchInsertExecutorTest {
     private static final String USER_STATUS_COLUMN = "user_status";
     private static final List<Integer> PK_VALUES = Arrays.asList(100000001, 100000002, 100000003, 100000004, 100000005);
 
+
+    private ConnectionProxy connectionProxy;
+
     private PreparedStatementProxy statementProxy;
 
     private SQLInsertRecognizer sqlInsertRecognizer;
@@ -70,9 +73,10 @@ public class BatchInsertExecutorTest {
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
-        ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
+        connectionProxy = mock(ConnectionProxy.class);
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.MYSQL);
+        doReturn(1).when(insertExecutor).getPkIndex();
     }
 
     @Test

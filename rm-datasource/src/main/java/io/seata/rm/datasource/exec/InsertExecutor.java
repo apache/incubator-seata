@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
@@ -102,6 +103,9 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         // insert values including PK
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         final int pkIndex = getPkIndex();
+        if (pkIndex == -1) {
+            throw new ShouldNeverHappenException("pkIndex is " + pkIndex);
+        }
         List<Object> pkValues = null;
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
@@ -124,6 +128,10 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                     pkValues = new ArrayList<>(rowSize);
                     for (int i = 0; i < rowSize; i++) {
                         List<Object> row = insertRows.get(i);
+                        // oracle insert parameter count may be than the actual +1
+                        if (row.isEmpty()) {
+                            continue;
+                        }
                         Object pkValue = row.get(pkIndex);
                         int currentRowPlaceholderNum = -1;
                         for (Object r : row) {
@@ -235,6 +243,8 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         String pkName = getTableMeta().getPkName();
         List<String> insertColumns = recognizer.getInsertColumns();
         if (insertColumns != null && !insertColumns.isEmpty()) {
+            // add escape
+            ColumnUtils.addEscape(insertColumns, getDbType());
             final int insertColumnsSize = insertColumns.size();
             int pkIndex = -1;
             for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {

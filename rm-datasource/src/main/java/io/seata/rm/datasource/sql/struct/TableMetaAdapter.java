@@ -36,6 +36,23 @@ public class TableMetaAdapter extends TableMeta {
     }
 
     @Override
+    public void setTableName(String tableName) {
+        if (tableName == null) {
+            return ;
+        }
+        super.setTableName(ColumnUtils.addEscape(tableName, dbType));
+    }
+
+    @Override
+    public ColumnMeta getColumnMeta(String colName) {
+        if (colName == null) {
+            return null;
+        }
+        ColumnMeta col = getAllColumns().get(ColumnUtils.addEscape(colName, dbType));
+        return col;
+    }
+
+    @Override
     public boolean containsPK(List<String> cols) {
         if (cols == null) {
             return false;

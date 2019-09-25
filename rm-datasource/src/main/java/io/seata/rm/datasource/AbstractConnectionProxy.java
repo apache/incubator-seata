@@ -15,7 +15,11 @@
  */
 package io.seata.rm.datasource;
 
+import com.alibaba.druid.util.JdbcConstants;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.sql.SQLType;
+import io.seata.rm.datasource.sql.SQLVisitorFactory;
 
 import java.sql.Array;
 import java.sql.Blob;
@@ -99,7 +103,16 @@ public abstract class AbstractConnectionProxy implements Connection {
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        PreparedStatement targetPreparedStatement = getTargetConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        String dbType = getDbType();
+        PreparedStatement targetPreparedStatement;
+        // only mysql insert add Statement.RETURN_GENERATED_KEYS, resolve batch insert return primary key value
+        boolean dbTypeEquals = StringUtils.equalsIgnoreCase(JdbcConstants.MYSQL, dbType);
+        boolean sqlTypeEquals = SQLVisitorFactory.get(sql, dbType).getSQLType() == SQLType.INSERT;
+        if (dbTypeEquals && sqlTypeEquals) {
+            targetPreparedStatement = getTargetConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+        } else {
+            targetPreparedStatement = getTargetConnection().prepareStatement(sql);
+        }
         return new PreparedStatementProxy(this, targetPreparedStatement, sql);
     }
 
