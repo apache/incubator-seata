@@ -28,8 +28,8 @@ public class StateLogStoreSqls {
     private static final String STATE_MACHINE_INSTANCE_FIELDS_WITHOUT_PARAMS = "id, machine_id, tenant_id, parent_id, business_key, gmt_started, gmt_end, status, compensation_status, is_running, gmt_updated";
 
     private static final String RECORD_STATE_MACHINE_STARTED_SQL = "INSERT INTO ${TABLE_PREFIX}state_machine_inst\n"
-            + "(id, machine_id, tenant_id, parent_id, gmt_started, business_key, start_params, is_running, gmt_updated)\n"
-            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)";
+            + "(id, machine_id, tenant_id, parent_id, gmt_started, business_key, start_params, is_running, status, gmt_updated)\n"
+            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp)";
 
     private static final String RECORD_STATE_MACHINE_FINISHED_SQL = "UPDATE ${TABLE_PREFIX}state_machine_inst SET gmt_end = ?, excep = ?, end_params = ?,status = ?, compensation_status = ?, is_running = ?, gmt_updated = current_timestamp WHERE id = ?";
 

@@ -436,6 +436,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             statement.setString(6, stateMachineInstance.getBusinessKey());
             statement.setObject(7, stateMachineInstance.getSerializedStartParams());
             statement.setBoolean(8, stateMachineInstance.isRunning());
+            statement.setString(9, stateMachineInstance.getStatus().name());
         }
     }
 

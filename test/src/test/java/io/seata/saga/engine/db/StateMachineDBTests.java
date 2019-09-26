@@ -16,11 +16,12 @@
 package io.seata.saga.engine.db;
 
 import io.seata.core.model.GlobalStatus;
+import io.seata.saga.engine.AsyncCallback;
 import io.seata.saga.engine.StateMachineEngine;
+import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
-import io.seata.server.Server;
 import io.seata.tm.api.GlobalTransaction;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -28,8 +29,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,9 +36,7 @@ import java.util.Map;
  * State machine tests with db log store
  * @author lorne.cl
  */
-public class StateMachineDBTests {
-
-    private static Server server;
+public class StateMachineDBTests extends AbstractServerTest {
 
     private static StateMachineEngine stateMachineEngine;
 
@@ -50,27 +47,6 @@ public class StateMachineDBTests {
 
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_db_test.xml");
         stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
-    }
-
-    public static void startSeataServer() throws InterruptedException {
-        (new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-
-                    File file = new File("sessionStore/root.data");
-                    if(file.exists()){
-                        file.delete();
-                    }
-
-                    server = new Server();
-                    server.main(new String[]{});
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        })).start();
-        Thread.sleep(5000);
     }
 
     private GlobalTransaction getGlobalTransaction(StateMachineInstance instance){
@@ -292,4 +268,138 @@ public class StateMachineDBTests {
         StateMachineInstance instance = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance("10.15.232.93:8091:2019567124");
         System.out.println(instance);
     }
+
+    @Test
+    public void testSimpleCatchesStateMachineAsync() throws Exception {
+
+        long start  = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleCachesStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+
+        waittingForFinish(inst);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+
+        GlobalTransaction globalTransaction = getGlobalTransaction(inst);
+        Assertions.assertNotNull(globalTransaction);
+        Assertions.assertTrue(GlobalStatus.Finished.equals(globalTransaction.getStatus()));
+    }
+
+    @Test
+    public void testStatusMatchingStateMachineAsync() throws Exception {
+
+        long start  = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleStatusMatchingStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+
+        waittingForFinish(inst);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+
+        GlobalTransaction globalTransaction = getGlobalTransaction(inst);
+        Assertions.assertNotNull(globalTransaction);
+        Assertions.assertTrue(GlobalStatus.CommitRetrying.equals(globalTransaction.getStatus()));
+    }
+
+    @Test
+    public void testCompensationStateMachineAsync() throws Exception {
+
+        long start  = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleCompensationStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+
+        waittingForFinish(inst);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
+
+        GlobalTransaction globalTransaction = getGlobalTransaction(inst);
+        Assertions.assertNotNull(globalTransaction);
+        Assertions.assertTrue(GlobalStatus.Finished.equals(globalTransaction.getStatus()));
+    }
+
+    @Test
+    public void testCompensationAndSubStateMachineAsync() throws Exception {
+
+        long start  = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 2);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine";
+
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+
+        waittingForFinish(inst);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+
+        GlobalTransaction globalTransaction = getGlobalTransaction(inst);
+        Assertions.assertNotNull(globalTransaction);
+        Assertions.assertTrue(GlobalStatus.CommitRetrying.equals(globalTransaction.getStatus()));
+    }
+
+    private void waittingForFinish(StateMachineInstance inst){
+        synchronized (lock){
+            if(ExecutionStatus.RU.equals(inst.getStatus())){
+                try {
+                    lock.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private volatile Object        lock     = new Object();
+    private          AsyncCallback callback = new AsyncCallback() {
+        @Override
+        public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
+            synchronized (lock){
+                lock.notifyAll();
+            }
+        }
+
+        @Override
+        public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
+            synchronized (lock){
+                lock.notifyAll();
+            }
+        }
+    };
 }
