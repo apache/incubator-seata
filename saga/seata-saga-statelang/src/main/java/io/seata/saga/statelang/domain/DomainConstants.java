@@ -77,4 +77,7 @@ public class DomainConstants {
     public static final String SEQ_ENTITY_STATE_MACHINE_INST = "STATE_MACHINE_INST";
     public static final String SEQ_ENTITY_STATE_INST         = "STATE_INST";
 
+    public static final String EXPRESSION_TYPE_SEQUENCE = "Sequence";
+    public static final String EVALUATOR_TYPE_EXCEPTION = "Exception";
+
 }

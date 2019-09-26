@@ -132,12 +132,6 @@ public interface StateMachineConfig {
     boolean isEnableAsync();
 
     /**
-     * Gets Transaction operations execution timeout(such as begin, commit, rollback)
-     * @return
-     */
-    int getTransOperationTimeout();
-
-    /**
      * get ServiceInvokerManager
      * @return
      */

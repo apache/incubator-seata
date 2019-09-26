@@ -52,7 +52,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSagaTransactionalTemplate.class);
 
-    private static final int DEFAULT_TRANS_OPER_TIMEOUT = 60000;
+    private static final int DEFAULT_TRANS_OPER_TIMEOUT = 60000 * 10;
     private int timeout = DEFAULT_TRANS_OPER_TIMEOUT;
 
     private String             applicationId;

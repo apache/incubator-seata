@@ -31,11 +31,14 @@ import javax.sql.DataSource;
  */
 public class DbStateMachineConfig extends DefaultStateMachineConfig implements DisposableBean {
 
+    private static final int          DEFAULT_TRANS_OPER_TIMEOUT = 60000 * 10;
+
     private DataSource                dataSource;
     private String                    applicationId;
     private String                    txServiceGroup;
-    private String                    tablePrefix                  = "seata_";
-    private String                    dbType                       = "mysql";
+    private String                    tablePrefix           = "seata_";
+    private String                    dbType                = "mysql";
+    private int                       transOperationTimeout = DEFAULT_TRANS_OPER_TIMEOUT;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
 
     @Override
@@ -50,6 +53,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
             if(sagaTransactionalTemplate == null){
                 DefaultSagaTransactionalTemplate defaultSagaTransactionalTemplate = new DefaultSagaTransactionalTemplate();
+                defaultSagaTransactionalTemplate.setTimeout(transOperationTimeout);
                 defaultSagaTransactionalTemplate.setApplicationContext(getApplicationContext());
                 defaultSagaTransactionalTemplate.setApplicationId(applicationId);
                 defaultSagaTransactionalTemplate.setTxServiceGroup(txServiceGroup);
@@ -123,5 +127,13 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     public void setDbType(String dbType) {
         this.dbType = dbType;
+    }
+
+    public int getTransOperationTimeout() {
+        return transOperationTimeout;
+    }
+
+    public void setTransOperationTimeout(int transOperationTimeout) {
+        this.transOperationTimeout = transOperationTimeout;
     }
 }

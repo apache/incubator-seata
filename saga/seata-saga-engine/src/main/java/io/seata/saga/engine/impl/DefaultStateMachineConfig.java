@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
+import io.seata.saga.statelang.domain.DomainConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
@@ -63,8 +64,6 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
     private static final Logger       LOGGER = LoggerFactory.getLogger(DefaultStateMachineConfig.class);
 
-    private static final int          DEFAULT_TRANS_OPER_TIMEOUT = 60000;
-
     private StateLogStore             stateLogStore;
     private StateLangStore            stateLangStore;
     private ExpressionFactoryManager  expressionFactoryManager;
@@ -77,7 +76,6 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     private ApplicationContext        applicationContext;
     private ThreadPoolExecutor        threadPoolExecutor;
     private boolean                   enableAsync;
-    private int                       transOperationTimeout = DEFAULT_TRANS_OPER_TIMEOUT;
     private ServiceInvokerManager     serviceInvokerManager;
 
     private Resource[]                resources = new Resource[0];
@@ -100,7 +98,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
             SequenceExpressionFactory sequenceExpressionFactory = new SequenceExpressionFactory();
             sequenceExpressionFactory.setSeqGenerator(getSeqGenerator());
-            expressionFactoryManager.putExpressionFactory("Sequence", sequenceExpressionFactory);
+            expressionFactoryManager.putExpressionFactory(DomainConstants.EXPRESSION_TYPE_SEQUENCE, sequenceExpressionFactory);
         }
 
         if (evaluatorFactoryManager == null) {
@@ -111,7 +109,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
                 expressionFactoryManager.getExpressionFactory(ExpressionFactoryManager.DEFAULT_EXPRESSION_TYPE));
             evaluatorFactoryManager.putEvaluatorFactory(EvaluatorFactoryManager.EVALUATOR_TYPE_DEFAULT, expressionEvaluatorFactory);
 
-            evaluatorFactoryManager.putEvaluatorFactory("Exception", new ExceptionMatchEvaluatorFactory());
+            evaluatorFactoryManager.putEvaluatorFactory(DomainConstants.EVALUATOR_TYPE_EXCEPTION, new ExceptionMatchEvaluatorFactory());
         }
 
         if (stateMachineRepository == null) {
@@ -330,15 +328,6 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
     public void setCharset(String charset) {
         this.charset = charset;
-    }
-
-    @Override
-    public int getTransOperationTimeout() {
-        return transOperationTimeout;
-    }
-
-    public void setTransOperationTimeout(int transOperationTimeout) {
-        this.transOperationTimeout = transOperationTimeout;
     }
 
     @Override
