@@ -96,7 +96,7 @@ public class ColumnMetaTest {
         Assertions.assertNotEquals(columnMeta, other);
 
         other = new ColumnMeta();
-        other.setNullAble(1);
+        other.setIsNullAble("");
         Assertions.assertNotEquals(columnMeta, other);
 
         other = new ColumnMeta();
