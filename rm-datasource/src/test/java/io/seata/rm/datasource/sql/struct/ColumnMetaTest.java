@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * Mock connection
  * @author will
  * @date 2019/8/14
  */
