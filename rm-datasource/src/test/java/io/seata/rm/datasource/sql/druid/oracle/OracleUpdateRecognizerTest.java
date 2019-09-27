@@ -121,69 +121,7 @@ public class OracleUpdateRecognizerTest {
             }
         }, new ArrayList<>());
 
-        //test for no condition
         Assertions.assertEquals("", whereCondition);
-
-        sql = "update t set a = 1 where id = ?";
-        asts = SQLUtils.parseStatements(sql, DB_TYPE);
-
-        recognizer = new OracleUpdateRecognizer(sql, asts.get(0));
-        whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public ArrayList<Object>[] getParameters() {
-                ArrayList<Object> idParam = new ArrayList<>();
-                idParam.add(1);
-                return new ArrayList[] {idParam};
-            }
-        }, new ArrayList<>());
-
-        //test for normal sql
-        Assertions.assertEquals("id = ?", whereCondition);
-
-        sql = "update t set a = 1 where id in (?)";
-        asts = SQLUtils.parseStatements(sql, DB_TYPE);
-        recognizer = new OracleUpdateRecognizer(sql, asts.get(0));
-        whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public ArrayList<Object>[] getParameters() {
-                ArrayList<Object> idParam = new ArrayList<>();
-                idParam.add(1);
-                return new ArrayList[] {idParam};
-            }
-        }, new ArrayList<>());
-
-        //test for sql with in
-        Assertions.assertEquals("id IN (?)", whereCondition);
-
-        sql = "update t set a = 1 where id between ? and ?";
-        asts = SQLUtils.parseStatements(sql, DB_TYPE);
-        recognizer = new OracleUpdateRecognizer(sql, asts.get(0));
-        whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
-            @Override
-            public ArrayList<Object>[] getParameters() {
-                ArrayList<Object> idParam = new ArrayList<>();
-                idParam.add(1);
-                ArrayList<Object> idParam2 = new ArrayList<>();
-                idParam.add(2);
-                return new ArrayList[] {idParam, idParam2};
-            }
-        }, new ArrayList<>());
-        //test for sql with in
-        Assertions.assertEquals("id BETWEEN ? AND ?", whereCondition);
-
-        //test for exception
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            String s = "update t set a = 1 where id in (?)";
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
-            SQLUpdateStatement updateAst = (SQLUpdateStatement) sqlStatements.get(0);
-            updateAst.setWhere(new OracleArgumentExpr());
-            new OracleUpdateRecognizer(s, updateAst).getWhereCondition(new ParametersHolder() {
-                @Override
-                public ArrayList<Object>[] getParameters() {
-                    return new ArrayList[0];
-                }
-            }, new ArrayList<>());
-        });
     }
 
     @Test
@@ -195,41 +133,7 @@ public class OracleUpdateRecognizerTest {
         OracleUpdateRecognizer recognizer = new OracleUpdateRecognizer(sql, asts.get(0));
         String whereCondition = recognizer.getWhereCondition();
 
-        //test for no condition
         Assertions.assertEquals("", whereCondition);
-
-        sql = "update t set a = 1 where id = 1";
-        asts = SQLUtils.parseStatements(sql, DB_TYPE);
-
-        recognizer = new OracleUpdateRecognizer(sql, asts.get(0));
-        whereCondition = recognizer.getWhereCondition();
-
-        //test for normal sql
-        Assertions.assertEquals("id = 1", whereCondition);
-
-        sql = "update t set a = 1 where id in (1)";
-        asts = SQLUtils.parseStatements(sql, DB_TYPE);
-        recognizer = new OracleUpdateRecognizer(sql, asts.get(0));
-        whereCondition = recognizer.getWhereCondition();
-
-        //test for sql with in
-        Assertions.assertEquals("id IN (1)", whereCondition);
-
-        sql = "update t set a = 1 where id between 1 and 2";
-        asts = SQLUtils.parseStatements(sql, DB_TYPE);
-        recognizer = new OracleUpdateRecognizer(sql, asts.get(0));
-        whereCondition = recognizer.getWhereCondition();
-        //test for sql with in
-        Assertions.assertEquals("id BETWEEN 1 AND 2", whereCondition);
-
-        //test for exception
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            String s = "update t set a = 1 where id in (1)";
-            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
-            SQLUpdateStatement updateAst = (SQLUpdateStatement) sqlStatements.get(0);
-            updateAst.setWhere(new OracleArgumentExpr());
-            new OracleUpdateRecognizer(s, updateAst).getWhereCondition();
-        });
     }
 
     @Test
