@@ -21,6 +21,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
+
+import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.druid.util.JdbcUtils;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
@@ -29,6 +31,7 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +97,13 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             tableMetaExcutor.scheduleAtFixedRate(new Runnable() {
                 @Override
                 public void run() {
-                    TableMetaCache.refresh(DataSourceProxy.this);
+                    if (DataSourceProxy.this.getDbType().equalsIgnoreCase(JdbcConstants.MYSQL)) {
+                        TableMetaCache.refresh(DataSourceProxy.this);
+                    } else if (DataSourceProxy.this.getDbType().equalsIgnoreCase(JdbcConstants.ORACLE)) {
+                        TableMetaCacheOracle.refresh(DataSourceProxy.this);
+                    } else {
+                        logger.error("refresh table meta failed, {} dost not support.", DataSourceProxy.this.getDbType());
+                    }
                 }
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }
