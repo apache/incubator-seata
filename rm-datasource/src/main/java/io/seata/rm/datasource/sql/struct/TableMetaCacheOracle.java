@@ -23,11 +23,10 @@ import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
-import com.alibaba.druid.util.StringUtils;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.DataSourceProxy;
 import org.slf4j.Logger;
@@ -55,7 +54,7 @@ public class TableMetaCacheOracle {
      * @return the table meta
      */
     public static TableMeta getTableMeta(final DataSourceProxy dataSourceProxy, final String tableName) {
-        if (StringUtils.isEmpty(tableName)) {
+        if (StringUtils.isNullOrEmpty(tableName)) {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
@@ -113,13 +112,17 @@ public class TableMetaCacheOracle {
     }
 
     private static TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
-        //Need to convert uppercase, oracle table name needs to be capitalized in order to get metadata
-        tableName = tableName.toUpperCase();
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
+        if(tableName.indexOf("\"") != -1){
+            tableName = tableName.replace("\"", "");
+            schemaName = schemaName.replace("\"", "");
+        }else{
+            tableName = tableName.toUpperCase();
+        }
 
         ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
         ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
@@ -151,10 +154,10 @@ public class TableMetaCacheOracle {
 
             while (rsIndex.next()) {
                 String indexName = rsIndex.getString("INDEX_NAME");
-                if (StringUtils.isEmpty(indexName)) {
+                if (StringUtils.isNullOrEmpty(indexName)) {
                     continue;
                 }
-                String colName = rsIndex.getString("COLUMN_NAME").toUpperCase();
+                String colName = rsIndex.getString("COLUMN_NAME");
                 ColumnMeta col = tm.getAllColumns().get(colName);
                 if (tm.getAllIndexes().containsKey(indexName)) {
                     IndexMeta index = tm.getAllIndexes().get(indexName);
@@ -170,9 +173,7 @@ public class TableMetaCacheOracle {
                     index.setAscOrDesc(rsIndex.getString("ASC_OR_DESC"));
                     index.setCardinality(rsIndex.getInt("CARDINALITY"));
                     index.getValues().add(col);
-                    if ("PRIMARY".equalsIgnoreCase(indexName)) {
-                        index.setIndextype(IndexType.PRIMARY);
-                    } else if (!index.isNonUnique()) {
+                    if (!index.isNonUnique()) {
                         index.setIndextype(IndexType.Unique);
                     } else {
                         index.setIndextype(IndexType.Normal);
@@ -183,7 +184,7 @@ public class TableMetaCacheOracle {
             }
 
             while (rsPrimary.next()) {
-                String pkIndexName = rsPrimary.getObject(6).toString();
+                String pkIndexName = rsPrimary.getString("PK_NAME");
                 if (tm.getAllIndexes().containsKey(pkIndexName)) {
                     IndexMeta index = tm.getAllIndexes().get(pkIndexName);
                     index.setIndextype(IndexType.PRIMARY);

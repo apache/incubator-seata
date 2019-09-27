@@ -24,17 +24,17 @@ import java.sql.Statement;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
-
 import javax.sql.DataSource;
-
-import com.alibaba.druid.util.StringUtils;
-
+import com.alibaba.druid.util.JdbcConstants;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.AbstractConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +54,8 @@ public class TableMetaCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TableMetaCache.class);
 
+    private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+
     /**
      * Gets table meta.
      *
@@ -62,7 +64,7 @@ public class TableMetaCache {
      * @return the table meta
      */
     public static TableMeta getTableMeta(final DataSourceProxy dataSourceProxy, final String tableName) {
-        if (StringUtils.isEmpty(tableName)) {
+        if (StringUtils.isNullOrEmpty(tableName)) {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
@@ -126,7 +128,7 @@ public class TableMetaCache {
             conn = dataSource.getConnection();
             stmt = conn.createStatement();
             StringBuilder builder = new StringBuilder("SELECT * FROM ");
-            builder.append(tableName);
+            builder.append(keywordChecker.checkAndReplace(tableName));
             builder.append(" LIMIT 1");
             rs = stmt.executeQuery(builder.toString());
             ResultSetMetaData rsmd = rs.getMetaData();
@@ -161,7 +163,7 @@ public class TableMetaCache {
             col.setTableName(tableName);
             col.setColumnName(rs2.getString("COLUMN_NAME"));
             String datatype = rs2.getString("DATA_TYPE");
-            if (com.alibaba.druid.util.StringUtils.equalsIgnoreCase(datatype, "NUMBER")) {
+            if (StringUtils.equalsIgnoreCase(datatype, "NUMBER")) {
                 col.setDataType(java.sql.Types.BIGINT);
             } else if (StringUtils.equalsIgnoreCase(datatype, "VARCHAR2")) {
                 col.setDataType(java.sql.Types.VARCHAR);
