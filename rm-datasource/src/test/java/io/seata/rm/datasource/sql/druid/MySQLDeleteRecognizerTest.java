@@ -39,6 +39,11 @@ import org.junit.jupiter.api.Test;
  */
 public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
 
+    @Test
+    public void testVMarker() {
+        Assertions.assertEquals("?", new BaseRecognizer.VMarker().toString());
+    }
+
     /**
      * Delete recognizer test 0.
      */
