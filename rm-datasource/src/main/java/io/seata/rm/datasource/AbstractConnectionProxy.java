@@ -105,13 +105,12 @@ public abstract class AbstractConnectionProxy implements Connection {
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         String dbType = getDbType();
         PreparedStatement targetPreparedStatement;
-        // only mysql insert add Statement.RETURN_GENERATED_KEYS, resolve batch insert return primary key value
-        boolean dbTypeEquals = StringUtils.equalsIgnoreCase(JdbcConstants.MYSQL, dbType);
-        boolean sqlTypeEquals = SQLVisitorFactory.get(sql, dbType).getSQLType() == SQLType.INSERT;
-        if (dbTypeEquals && sqlTypeEquals) {
-            targetPreparedStatement = getTargetConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        } else {
+        // exclude oracle
+        boolean dbTypeEquals = StringUtils.equalsIgnoreCase(JdbcConstants.ORACLE, dbType);
+        if (dbTypeEquals) {
             targetPreparedStatement = getTargetConnection().prepareStatement(sql);
+        } else {
+            targetPreparedStatement = getTargetConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         }
         return new PreparedStatementProxy(this, targetPreparedStatement, sql);
     }
