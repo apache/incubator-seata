@@ -71,6 +71,24 @@ public class OracleSelectForUpdateRecognizerTest {
         String whereCondition = recognizer.getWhereCondition();
 
         Assertions.assertEquals("", whereCondition);
+
+        //test for select was null
+        Assertions.assertThrows(SQLParsingException.class, () -> {
+            String s = "select * from t for update";
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
+            SQLSelectStatement selectAst = (SQLSelectStatement) sqlStatements.get(0);
+            selectAst.setSelect(null);
+            new OracleSelectForUpdateRecognizer(s, selectAst).getWhereCondition();
+        });
+
+        //test for query was null
+        Assertions.assertThrows(SQLParsingException.class, () -> {
+            String s = "select * from t";
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, DB_TYPE);
+            SQLSelectStatement selectAst = (SQLSelectStatement) sqlStatements.get(0);
+            selectAst.getSelect().setQuery(null);
+            new OracleSelectForUpdateRecognizer(s, selectAst).getWhereCondition();
+        });
     }
 
     @Test
