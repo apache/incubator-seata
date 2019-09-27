@@ -31,6 +31,7 @@ public class TableMetaTest {
     public void testTableMeta() {
         TableMeta tableMeta = new TableMeta();
         Assertions.assertEquals(tableMeta, tableMeta);
+        Assertions.assertEquals(tableMeta, new TableMeta());
         Assertions.assertEquals(tableMeta.hashCode(), tableMeta.hashCode());
         Assertions.assertNotEquals(tableMeta, new String());
 
@@ -169,6 +170,17 @@ public class TableMetaTest {
         tableMeta.getAllIndexes().put("normal", normal);
         tableMeta.getAllIndexes().put("unique", unique);
         Assertions.assertNotNull(tableMeta.getCreateTableSQL());
+
+        tableMeta.getAllColumns().get("id").setColumnDef(null);
+        tableMeta.getAllColumns().get("id").setIsNullAble(null);
+        Assertions.assertNotNull(tableMeta.getCreateTableSQL());
+
+        IndexMeta nullIndex = new IndexMeta();
+        nullIndex.setIndextype(null);
+        tableMeta.getAllIndexes().put("nullIndex", nullIndex);
+        Assertions.assertThrows(NullPointerException.class, () -> {
+           tableMeta.getCreateTableSQL();
+        });
     }
 
 }

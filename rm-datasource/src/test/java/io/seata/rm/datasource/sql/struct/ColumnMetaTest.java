@@ -35,6 +35,10 @@ public class ColumnMetaTest {
         Assertions.assertNotEquals(columnMeta, new String());
 
         ColumnMeta other = new ColumnMeta();
+        other.setTableCat("");
+        Assertions.assertNotEquals(columnMeta, other);
+
+        other = new ColumnMeta();
         other.setTableSchemaName("");
         Assertions.assertNotEquals(columnMeta, other);
 
