@@ -34,7 +34,7 @@ public class ParameterParserTest {
      */
     @BeforeEach
     private void init() {
-        String[] args = new String[] {"-h", "127.0.0.1", "-p", "8088", "-m", "file"};
+        String[] args = new String[] {"-h", "127.0.0.1", "-p", "8088", "-m", "file","-e","test"};
         parameterParser = new ParameterParser(args);
     }
 
@@ -71,6 +71,14 @@ public class ParameterParserTest {
     @Test
     public void testGetStoreMode() {
         Assertions.assertEquals("file", parameterParser.getStoreMode());
+    }
+
+    /**
+     * test get seata env
+     */
+    @Test
+    public void testGetSeataEnv() {
+        Assertions.assertEquals("test", parameterParser.getSeataEnv());
     }
 
     /**
