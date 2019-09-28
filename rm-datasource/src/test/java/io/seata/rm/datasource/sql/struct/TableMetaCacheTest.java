@@ -17,9 +17,12 @@ package io.seata.rm.datasource.sql.struct;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
 import com.alibaba.druid.pool.DruidDataSource;
+
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import org.junit.jupiter.api.Assertions;
@@ -51,6 +54,15 @@ public class TableMetaCacheTest {
             new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
             new Object[] {"name1", "name1", false, "", 3, 1, "A", 34}
         };
+
+    @Test
+    public void testTableMeta() {
+        TableMetaCache tableMetaCache = new TableMetaCache();
+        Assertions.assertNotNull(tableMetaCache);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            TableMetaCache.getTableMeta(null, null);
+        });
+    }
 
     /**
      * The table meta fetch test.
@@ -89,6 +101,11 @@ public class TableMetaCacheTest {
         assertIndexMetaEquals(indexMetas[1], tableMeta.getAllIndexes().get("name1"));
         Assertions.assertEquals(IndexType.Unique, tableMeta.getAllIndexes().get("name1").getIndextype());
 
+        mockDriver.setMockColumnsMetasReturnValue(null);
+        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
+            TableMetaCache.getTableMeta(proxy, "t2");
+        });
+
     }
 
     @Test
@@ -101,8 +118,24 @@ public class TableMetaCacheTest {
 
         DataSourceProxy dataSourceProxy = new DataSourceProxy(druidDataSource);
 
-        TableMeta cacheTableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
-        Assertions.assertNotNull(cacheTableMeta);
+        TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
+        //change the columns meta
+        columnMetas =
+            new Object[][] {
+                new Object[] {"", "", "t1", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+                new Object[] {"", "", "t1", "name1", Types.VARCHAR, "VARCHAR", 65, 0, 10, 0, "", "", 0, 0, 64, 2, "YES",
+                    "NO"},
+                new Object[] {"", "", "t1", "name2", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 3, "YES",
+                    "NO"},
+                new Object[] {"", "", "t1", "name3", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 4, "YES",
+                    "NO"}
+            };
+        mockDriver.setMockColumnsMetasReturnValue(columnMetas);
+        TableMetaCache.refresh(dataSourceProxy);
+
+        //test exception
+        mockDriver.setMockColumnsMetasReturnValue(null);
+        TableMetaCache.refresh(dataSourceProxy);
 
     }
 

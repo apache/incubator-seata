@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author will
- * @date 2019/8/14
+ * @date 2019/9/28
  */
 public class ColumnMetaTest {
 
@@ -28,6 +28,7 @@ public class ColumnMetaTest {
     public void testColumnMeta() {
         ColumnMeta columnMeta = new ColumnMeta();
         Assertions.assertNotNull(columnMeta.toString());
+        Assertions.assertEquals(columnMeta, new ColumnMeta());
         columnMeta.setIsAutoincrement("Yes");
         Assertions.assertTrue(columnMeta.isAutoincrement());
         Assertions.assertEquals(columnMeta, columnMeta);
