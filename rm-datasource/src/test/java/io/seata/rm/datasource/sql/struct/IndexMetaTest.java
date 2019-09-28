@@ -74,8 +74,10 @@ public class IndexMetaTest {
         indexMeta.setIndextype(IndexType.Normal);
         Assertions.assertNotEquals(indexMeta, other);
 
-
-
+        other = new IndexMeta();
+        other.setIndextype(IndexType.Normal);
+        indexMeta.setIndextype(IndexType.Normal);
+        Assertions.assertEquals(indexMeta, other);
     }
 
 }

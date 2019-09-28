@@ -15,9 +15,6 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.Collections;
 import com.alibaba.druid.pool.DruidDataSource;
@@ -27,9 +24,6 @@ import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
-
-import javax.sql.DataSource;
 
 /**
  * The table meta fetch test.
@@ -51,8 +45,9 @@ public class TableMetaCacheTest {
 
     private static Object[][] indexMetas =
         new Object[][] {
-            new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
-            new Object[] {"name1", "name1", false, "", 3, 1, "A", 34}
+            new Object[] {"PRIMARY", "id", false, "", 3, 0, "A", 34},
+            new Object[] {"name1", "name1", false, "", 3, 1, "A", 34},
+            new Object[] {"name2", "name2", true, "", 3, 2, "A", 34},
         };
 
     @Test
@@ -100,6 +95,14 @@ public class TableMetaCacheTest {
         Assertions.assertEquals(IndexType.PRIMARY, tableMeta.getAllIndexes().get("PRIMARY").getIndextype());
         assertIndexMetaEquals(indexMetas[1], tableMeta.getAllIndexes().get("name1"));
         Assertions.assertEquals(IndexType.Unique, tableMeta.getAllIndexes().get("name1").getIndextype());
+
+        indexMetas =
+            new Object[][] {
+            };
+        mockDriver.setMockIndexMetasReturnValue(indexMetas);
+        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
+            TableMetaCache.getTableMeta(proxy, "t2");
+        });
 
         mockDriver.setMockColumnsMetasReturnValue(null);
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
