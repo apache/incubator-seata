@@ -29,6 +29,9 @@ public class GzipUtil {
     private static final int BUFFER_SIZE = 8192;
 
     public static byte[] compress(byte[] bytes) {
+        if (bytes == null) {
+            throw new NullPointerException("bytes is null");
+        }
         ByteArrayOutputStream out = null;
         GZIPOutputStream gzip = null;
         try {
@@ -51,6 +54,9 @@ public class GzipUtil {
     }
 
     public static byte[] decompress(byte[] bytes) {
+        if (bytes == null) {
+            throw new NullPointerException("bytes is null");
+        }
         ByteArrayOutputStream out = null;
         GZIPInputStream gunzip = null;
         try {
