@@ -43,6 +43,7 @@
         <module>tm</module>
         <module>metrics</module>
         <module>codec</module>
+        <module>benchmark</module>
     </modules>
     <packaging>pom</packaging>
 
