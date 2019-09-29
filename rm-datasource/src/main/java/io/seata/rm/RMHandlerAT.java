@@ -26,8 +26,7 @@ import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
 import io.seata.rm.datasource.DataSourceManager;
 import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.undo.UndoLogManager;
-import io.seata.rm.datasource.undo.UndoLogManagerOracle;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,11 +56,8 @@ public class RMHandlerAT extends AbstractRMHandler {
             int deleteRows = 0;
             do {
                 try {
-                    if(JdbcConstants.MYSQL.equalsIgnoreCase(dataSourceProxy.getDbType())) {
-                        deleteRows = UndoLogManagerOracle.deleteUndoLogByLogCreated(logCreatedSave, dataSourceProxy.getDbType(),  LIMIT_ROWS, conn);
-                    } else if (JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
-                        deleteRows = UndoLogManager.deleteUndoLogByLogCreated(logCreatedSave, dataSourceProxy.getDbType(),  LIMIT_ROWS, conn);
-                    }
+                    deleteRows = UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType())
+                            .deleteUndoLogByLogCreated(logCreatedSave, LIMIT_ROWS, conn);
                     if (deleteRows > 0 && !conn.getAutoCommit()) {
                         conn.commit();
                     }

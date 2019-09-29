@@ -31,7 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The type oralce delete recognizer.
+ * The type oracle delete recognizer.
  *
  * @author ccg
  * @date 2019/3/25
@@ -63,7 +63,7 @@ public class OracleDeleteRecognizer extends BaseRecognizer implements SQLDeleteR
 
     @Override
     public String getTableName() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
             @Override
@@ -82,7 +82,7 @@ public class OracleDeleteRecognizer extends BaseRecognizer implements SQLDeleteR
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = super.createOracleOutputVisitor(parametersHolder, paramAppenderList, sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
@@ -94,7 +94,7 @@ public class OracleDeleteRecognizer extends BaseRecognizer implements SQLDeleteR
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
