@@ -29,11 +29,10 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
 import java.io.StringReader;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -152,9 +151,12 @@ public abstract class AbstractUndoExecutor {
         int undoIndex = 0;
         for (Field undoValue : undoValues) {
             undoIndex++;
-            if(pkValue.getType() == 2005&&undoValue.getValue() instanceof String) {//orcle clob字段,已经之前序列化自定义转为string
-                StringReader reader = new StringReader(undoValue.getValue().toString());
-                undoPST.setClob(undoIndex,reader);
+            if (undoValue.getType() == JDBCType.BLOB.getVendorTypeNumber()) {
+                SerialBlob serialBlob = (SerialBlob) undoValue.getValue();
+                undoPST.setBlob(undoIndex, serialBlob.getBinaryStream());
+            } else if (undoValue.getType() == JDBCType.CLOB.getVendorTypeNumber()) {
+                SerialClob serialClob = (SerialClob) undoValue.getValue();
+                undoPST.setClob(undoIndex, serialClob.getCharacterStream());
             } else {
                 undoPST.setObject(undoIndex, undoValue.getValue(), undoValue.getType());
             }

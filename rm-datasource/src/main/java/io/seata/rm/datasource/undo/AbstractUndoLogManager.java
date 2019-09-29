@@ -15,6 +15,8 @@
  */
 package io.seata.rm.datasource.undo;
 
+import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
+import io.seata.common.util.BlobUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ClientTableColumnsName;
@@ -22,9 +24,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -130,6 +130,9 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         }
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
+        if("true".equals(System.getProperty("dataTrace"))) {
+            commitTraceData(xids, branchIds, conn);
+        }
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
         PreparedStatement deletePST = null;
         try {
@@ -156,6 +159,46 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             }
         }
 
+    }
+    /**
+     * 事务提交时，记录到es
+     * @param xids
+     * @param branchIds
+     * @param conn
+     */
+    protected static void commitTraceData(Set<String> xids, Set<Long> branchIds, Connection conn) {
+        try {
+            String selectSql= toBatchSelectUndoLogSql(xids.size(), branchIds.size());
+            PreparedStatement selectPST = conn.prepareStatement(selectSql);
+            int paramsIndex = 1;
+            for (Long branchId : branchIds) {
+                selectPST.setLong(paramsIndex++,branchId);
+            }
+            for (String xid: xids){
+                selectPST.setString(paramsIndex++, xid);
+            }
+
+            ResultSet rs = selectPST.executeQuery();
+            while (rs.next()) {
+                Blob b = rs.getBlob("rollback_info");
+                byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
+                BranchUndoLog branchUndoLog = UndoLogParserFactory.getInstance().decode(rollbackInfo);
+                ElasticsearchUtil.addData(branchUndoLog);
+            }
+            ElasticsearchUtil.commitData();
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    protected static String toBatchSelectUndoLogSql(int xidSize, int branchIdSize) {
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("select * FROM ")
+                .append(UNDO_LOG_TABLE_NAME)
+                .append(" WHERE  branch_id IN ");
+        appendInParam(branchIdSize, sqlBuilder);
+        sqlBuilder.append(" AND xid IN ");
+        appendInParam(xidSize, sqlBuilder);
+        return sqlBuilder.toString();
     }
 
     protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize) {

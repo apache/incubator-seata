@@ -20,7 +20,6 @@ import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;

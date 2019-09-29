@@ -70,16 +70,6 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
             " WHERE log_created <= ? and ROWNUM <= ?";
 
-
-    private static final String SELECT_UNDO_LOG_SQL = "SELECT * FROM " + UNDO_LOG_TABLE_NAME
-        + " WHERE  branch_id = ? AND xid = ? FOR UPDATE";
-
-    private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
-            " WHERE log_created <= ? ";
-
-
-    private static final ThreadLocal<String> SERIALIZER_LOCAL = new ThreadLocal<>();
-
     @Override
     public String getDbType() {
         return JdbcConstants.ORACLE;
@@ -154,7 +144,7 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
                     if (!canUndo(state)) {
                         if (LOGGER.isInfoEnabled()) {
                             LOGGER.info("xid {} branch {}, ignore {} undo_log",
-                                xid, branchId, state);
+                                    xid, branchId, state);
                         }
                         return;
                     }
@@ -225,7 +215,8 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
                         LOGGER.warn("Failed to close JDBC resource while undo ... ", rollbackEx);
                     }
                 }
-                throw new TransactionException(BranchRollbackFailed_Retriable, String.format("%s/%s", branchId, xid), e);
+                throw new BranchTransactionException(BranchRollbackFailed_Retriable,
+                    String.format("Branch session rollback failed and try again later xid = %s branchId = %s %s", xid, branchId, e.getMessage()), e);
 
             } finally {
                 try {
@@ -269,141 +260,6 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
         }
     }
 
-    /**
-     * batch Delete undo log.
-     *
-     * @param xids
-     * @param branchIds
-     * @param conn
-     */
-    public static void batchDeleteUndoLog(Set<String> xids, Set<Long> branchIds, Connection conn) throws SQLException {
-        if (CollectionUtils.isEmpty(xids) || CollectionUtils.isEmpty(branchIds)) {
-            return;
-        }
-        int xidSize = xids.size();
-        int branchIdSize = branchIds.size();
-        if("true".equals(System.getProperty("dataTrace"))) {
-            commitTraceData(xids, branchIds, conn);
-        }
-        String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
-        PreparedStatement deletePST = null;
-        try {
-            deletePST = conn.prepareStatement(batchDeleteSql);
-            int paramsIndex = 1;
-            for (Long branchId : branchIds) {
-                deletePST.setLong(paramsIndex++,branchId);
-            }
-            for (String xid: xids){
-                deletePST.setString(paramsIndex++, xid);
-            }
-            int deleteRows = deletePST.executeUpdate();
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("batch delete undo log size " + deleteRows);
-            }
-        }catch (Exception e){
-            if (!(e instanceof SQLException)) {
-                e = new SQLException(e);
-            }
-            throw (SQLException) e;
-        } finally {
-            if (deletePST != null) {
-                deletePST.close();
-            }
-        }
-
-    }
-    /**
-     * 事务提交时，记录到es
-     * @param xids
-     * @param branchIds
-     * @param conn
-     */
-    protected static void commitTraceData(Set<String> xids, Set<Long> branchIds, Connection conn) {
-        try {
-            String selectSql= toBatchSelectUndoLogSql(xids.size(), branchIds.size());
-            PreparedStatement selectPST = conn.prepareStatement(selectSql);
-            int paramsIndex = 1;
-            for (Long branchId : branchIds) {
-                selectPST.setLong(paramsIndex++,branchId);
-            }
-            for (String xid: xids){
-                selectPST.setString(paramsIndex++, xid);
-            }
-
-            ResultSet rs = selectPST.executeQuery();
-            while (rs.next()) {
-                Blob b = rs.getBlob("rollback_info");
-                byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
-                BranchUndoLog branchUndoLog = UndoLogParserFactory.getInstance().decode(rollbackInfo);
-                ElasticsearchUtil.addData(branchUndoLog);
-            }
-            ElasticsearchUtil.commitData();
-        }catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("DELETE FROM ")
-                .append(UNDO_LOG_TABLE_NAME)
-                .append(" WHERE  branch_id IN ");
-        appendInParam(branchIdSize, sqlBuilder);
-        sqlBuilder.append(" AND xid IN ");
-        appendInParam(xidSize, sqlBuilder);
-        return sqlBuilder.toString();
-    }
-    protected static String toBatchSelectUndoLogSql(int xidSize, int branchIdSize) {
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("select * FROM ")
-                .append(UNDO_LOG_TABLE_NAME)
-                .append(" WHERE  branch_id IN ");
-        appendInParam(branchIdSize, sqlBuilder);
-        sqlBuilder.append(" AND xid IN ");
-        appendInParam(xidSize, sqlBuilder);
-        return sqlBuilder.toString();
-    }
-
-    protected static void appendInParam(int size, StringBuilder sqlBuilder) {
-        sqlBuilder.append(" (");
-        for (int i = 0;i < size;i++) {
-            sqlBuilder.append("?");
-            if (i < (size - 1)) {
-                sqlBuilder.append(",");
-            }
-        }
-        sqlBuilder.append(") ");
-    }
-
-    /**
-     * Delete undo log.
-     *
-     * @param xid the xid
-     * @param branchId the branch id
-     * @param conn the conn
-     * @throws SQLException the sql exception
-     */
-    public static void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
-        PreparedStatement deletePST = null;
-        try {
-            deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
-            deletePST.setLong(1, branchId);
-            deletePST.setString(2, xid);
-            deletePST.executeUpdate();
-        }catch (Exception e){
-            if (!(e instanceof SQLException)) {
-                e = new SQLException(e);
-            }
-            throw (SQLException) e;
-        } finally {
-            if (deletePST != null) {
-                deletePST.close();
-            }
-        }
-    }
-    public static String getCurrentSerializer() {
-        return SERIALIZER_LOCAL.get();
-    }
     private static void insertUndoLogWithNormal(String xid, long branchID, String rollbackCtx,
                                                 byte[] undoLogContent, Connection conn) throws SQLException {
         insertUndoLog(xid, branchID,rollbackCtx, undoLogContent, State.Normal, conn);

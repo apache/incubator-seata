@@ -17,9 +17,9 @@ package io.seata.rm.datasource.sql.struct;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -182,7 +182,15 @@ public class TableRecords {
                     field.setKeyType(KeyType.PrimaryKey);
                 }
                 field.setType(col.getDataType());
-                field.setValue(resultSet.getObject(i));
+                if (col.getDataType() == JDBCType.BLOB.getVendorTypeNumber() && resultSet.getObject(i) != null) {
+                    Blob blob = resultSet.getBlob(i);
+                    field.setValue(new SerialBlob(blob));
+                } else if (col.getDataType() == JDBCType.CLOB.getVendorTypeNumber() && resultSet.getObject(i) != null) {
+                    Clob clob = resultSet.getClob(i);
+                    field.setValue(new SerialClob(clob));
+                } else {
+                    field.setValue(resultSet.getObject(i));
+                }
                 fields.add(field);
             }
 
