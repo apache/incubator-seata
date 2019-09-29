@@ -95,7 +95,7 @@ public class SQLVisitorFactory {
                 }
             }
         } else {
-            throw new UnsupportedOperationException("Just support MySQL and Oracle by now!");
+            throw new UnsupportedOperationException(String.format("not support %s by now!", dbType));
         }
         return recognizer;
     }
