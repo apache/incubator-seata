@@ -95,7 +95,9 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         } catch (Exception e) {
             // when exception occur in finally,this exception will lost, so just print it here
             LOGGER.error("execute executeAutoCommitTrue error:{}", e.getMessage(), e);
-            connectionProxy.rollback();
+            if (!LockRetryPolicy.isLockRetryPolicyBranchRollbackOnConflict()) {
+                connectionProxy.getTargetConnection().rollback();
+            }
             throw e;
         } finally {
             ((ConnectionProxy) connectionProxy).getContext().reset();
@@ -139,6 +141,10 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
         @Override
         protected void onException(Exception e) throws Exception {
             connection.rollback();
+        }
+
+        public static boolean isLockRetryPolicyBranchRollbackOnConflict() {
+            return LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT;
         }
     }
 }

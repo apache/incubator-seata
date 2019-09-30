@@ -16,6 +16,7 @@
 package io.seata.core.store.db;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -24,6 +25,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
@@ -35,6 +37,8 @@ import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Log store data base dao.
@@ -44,6 +48,17 @@ import io.seata.core.store.LogStore;
  */
 @LoadLevel(name = "db")
 public class LogStoreDataBaseDAO implements LogStore, Initialize {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogStoreDataBaseDAO.class);
+
+    /**
+     * The transaction name key
+     */
+    private static final String TRANSACTION_NAME_KEY = "TRANSACTION_NAME";
+    /**
+     * The transaction name default size is 128
+     */
+    private static final int TRANSACTION_NAME_DEFAULT_SIZE = 128;
 
     /**
      * The constant CONFIG.
@@ -66,6 +81,8 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
     protected String brachTable;
 
     private String dbType;
+
+    private int transactionNameColumnSize = TRANSACTION_NAME_DEFAULT_SIZE;
 
     /**
      * Instantiates a new Log store data base dao.
@@ -95,6 +112,8 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         if (logStoreDataSource == null) {
             throw new StoreException("there must be logStoreDataSource.");
         }
+        // init transaction_name size
+        initTransactionNameSize();
     }
 
     @Override
@@ -115,7 +134,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
                 return null;
             }
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
             if (rs != null) {
                 try {
@@ -156,7 +175,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
                 return null;
             }
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
             if (rs != null) {
                 try {
@@ -210,7 +229,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             }
             return ret;
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
             if (rs != null) {
                 try {
@@ -247,7 +266,10 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps.setInt(3, globalTransactionDO.getStatus());
             ps.setString(4, globalTransactionDO.getApplicationId());
             ps.setString(5, globalTransactionDO.getTransactionServiceGroup());
-            ps.setString(6, globalTransactionDO.getTransactionName());
+            String transactionName = globalTransactionDO.getTransactionName();
+            transactionName = transactionName.length() > transactionNameColumnSize ?
+                    transactionName.substring(0, transactionNameColumnSize) : transactionName;
+            ps.setString(6, transactionName);
             ps.setInt(7, globalTransactionDO.getTimeout());
             ps.setLong(8, globalTransactionDO.getBeginTime());
             ps.setString(9, globalTransactionDO.getApplicationData());
@@ -348,7 +370,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             }
             return rets;
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
             if (ps != null) {
                 try {
@@ -498,6 +520,63 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
     }
 
     /**
+     * the public modifier only for test
+     */
+    public void initTransactionNameSize() {
+        ColumnInfo columnInfo = queryTableStructure(globalTable, TRANSACTION_NAME_KEY);
+        if (columnInfo == null) {
+            LOGGER.warn("{} table or {} column not found", globalTable, TRANSACTION_NAME_KEY);
+            return ;
+        }
+        this.transactionNameColumnSize = columnInfo.getColumnSize();
+    }
+
+    /**
+     * query column info from table
+     * @param tableName the table name
+     * @param colName the column name
+     * @return the column info
+     */
+    private ColumnInfo queryTableStructure(final String tableName, String colName) {
+        try(Connection conn = logStoreDataSource.getConnection()) {
+            DatabaseMetaData dbmd = conn.getMetaData();
+            String schema = getSchema(conn);
+            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[] { "TABLE" });
+            while (tableRs.next()) {
+                String table = tableRs.getString("TABLE_NAME");
+                if (StringUtils.equalsIgnoreCase(table, tableName)) {
+                    ResultSet columnRs = conn.getMetaData().getColumns(null, schema, tableName, null);
+                    while (columnRs.next()) {
+                        ColumnInfo info = new ColumnInfo();
+                        String columnName = columnRs.getString("COLUMN_NAME");
+                        info.setColumnName(columnName);
+                        String typeName = columnRs.getString("TYPE_NAME");
+                        info.setTypeName(typeName);
+                        int columnSize = columnRs.getInt("COLUMN_SIZE");
+                        info.setColumnSize(columnSize);
+                        String remarks = columnRs.getString("REMARKS");
+                        info.setRemarks(remarks);
+                        if (StringUtils.equalsIgnoreCase(columnName, colName)) {
+                            return info;
+                        }
+                    }
+                    break;
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.error("query transaction_name size fail, {}", e.getMessage(), e);
+        }
+        return null;
+    }
+
+    private String getSchema(Connection conn) throws SQLException {
+        if ("h2".equalsIgnoreCase(dbType)) {
+            return null;
+        }
+        return conn.getMetaData().getUserName();
+    }
+
+    /**
      * Sets log store data source.
      *
      * @param logStoreDataSource the log store data source
@@ -531,5 +610,51 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
      */
     public void setDbType(String dbType) {
         this.dbType = dbType;
+    }
+
+    public int getTransactionNameColumnSize() {
+        return transactionNameColumnSize;
+    }
+
+    /**
+     * column info
+     */
+    private static class ColumnInfo {
+        private String columnName;
+        private String typeName;
+        private int columnSize;
+        private String remarks;
+
+        public String getColumnName() {
+            return columnName;
+        }
+
+        public void setColumnName(String columnName) {
+            this.columnName = columnName;
+        }
+
+        public String getTypeName() {
+            return typeName;
+        }
+
+        public void setTypeName(String typeName) {
+            this.typeName = typeName;
+        }
+
+        public int getColumnSize() {
+            return columnSize;
+        }
+
+        public void setColumnSize(int columnSize) {
+            this.columnSize = columnSize;
+        }
+
+        public String getRemarks() {
+            return remarks;
+        }
+
+        public void setRemarks(String remarks) {
+            this.remarks = remarks;
+        }
     }
 }
