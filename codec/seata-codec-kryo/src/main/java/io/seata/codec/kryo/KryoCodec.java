@@ -28,7 +28,7 @@ public class KryoCodec implements Codec {
     @Override
     public <T> byte[] encode(T t) {
         if (!(t instanceof AbstractMessage)) {
-            throw new IllegalArgumentException("message is null");
+            throw new IllegalArgumentException("message is illegal");
         }
         KryoSerializer kryoSerializer = KryoSerializerFactory.getInstance().get();
         try {
