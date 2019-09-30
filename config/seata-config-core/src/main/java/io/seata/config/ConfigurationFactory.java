@@ -50,8 +50,16 @@ public final class ConfigurationFactory {
         if (null == envValue) {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
-        CURRENT_FILE_INSTANCE = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX)
+        Configuration configuration = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX)
             : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX);
+        Configuration extConfiguration = null;
+        try {
+            extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+
+        } catch (Exception ignore) {
+
+        }
+        CURRENT_FILE_INSTANCE = null == extConfiguration ? configuration : extConfiguration;
     }
 
     private static final String NAME_KEY = "name";
@@ -91,7 +99,15 @@ public final class ConfigurationFactory {
                 + FILE_TYPE + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + NAME_KEY;
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
-            return new FileConfiguration(name);
+            Configuration configuration = new FileConfiguration(name);
+            Configuration extConfiguration=null;
+            try {
+                extConfiguration=EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+            }catch (Exception ignore){
+
+            }
+            
+            return null == extConfiguration ? configuration : extConfiguration;
         } else {
             return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
                 .provide();

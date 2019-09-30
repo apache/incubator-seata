@@ -232,7 +232,6 @@
             <artifactId>seata-codec-kryo</artifactId>
             <version>${project.version}</version>
         </dependency>
-
         <!-- spring  -->
         <dependency>
             <groupId>org.springframework</groupId>

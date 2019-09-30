@@ -317,6 +317,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 if (null != m) {
                     return m.invoke(dataSourceProxy, args);
                 } else {
+                    method.setAccessible(true);
                     return method.invoke(bean, args);
                 }
             });
