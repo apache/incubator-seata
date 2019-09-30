@@ -17,7 +17,18 @@ package io.seata.rm.datasource.undo.oracle;
 
 import co.faao.plugin.starter.dubbo.util.ThreadLocalTools;
 import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
+import java.io.ByteArrayInputStream;
+import java.sql.Blob;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Date;
+import java.util.Map;
+
 import com.alibaba.druid.util.JdbcConstants;
+
 import io.seata.common.Constants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
@@ -75,7 +86,6 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
         return JdbcConstants.ORACLE;
     }
 
-
     /**
      * Flush undo logs.
      *
@@ -121,6 +131,7 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
         Connection conn = null;
         ResultSet rs = null;
         PreparedStatement selectPST = null;
+        boolean originalAutoCommit = true;
 
         for (; ; ) {
             try {
@@ -227,6 +238,9 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
                         selectPST.close();
                     }
                     if (conn != null) {
+                        if (originalAutoCommit) {
+                            conn.setAutoCommit(true);
+                        }
                         conn.close();
                     }
                 } catch (SQLException closeEx) {

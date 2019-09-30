@@ -51,9 +51,14 @@ import java.io.IOException;
 import java.io.Reader;
 import java.sql.Clob;
 import java.sql.SQLException;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import javax.sql.rowset.serial.SerialException;
 
 /**
  * The type Json based undo log parser.
@@ -75,7 +80,6 @@ public class JacksonUndoLogParser implements UndoLogParser {
      * customize serializer for java.sql.Timestamp
      */
     private static final JsonSerializer TIMESTAMP_SERIALIZER = new TimestampSerializer();
-//    private static final JsonSerializer JAVASQLCLOB_SERIALIZER = new JavaSqlClobSerializer();
 
     /**
      * customize deserializer for java.sql.Timestamp
@@ -103,15 +107,13 @@ public class JacksonUndoLogParser implements UndoLogParser {
     private static final JsonDeserializer CLOB_DESERIALIZER = new ClobDeserializer();
 
     static {
+        MODULE.addSerializer(Timestamp.class, TIMESTAMP_SERIALIZER);
+        MODULE.addDeserializer(Timestamp.class, TIMESTAMP_DESERIALIZER);
         MODULE.addSerializer(SerialBlob.class, BLOB_SERIALIZER);
         MODULE.addDeserializer(SerialBlob.class, BLOB_DESERIALIZER);
         MODULE.addSerializer(SerialClob.class, CLOB_SERIALIZER);
         MODULE.addDeserializer(SerialClob.class, CLOB_DESERIALIZER);
-
-        MODULE.addSerializer(Timestamp.class, TIMESTAMP_SERIALIZER);
-        MODULE.addDeserializer(Timestamp.class, TIMESTAMP_DESERIALIZER);
         MAPPER.registerModule(MODULE);
-
         MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         MAPPER.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
         MAPPER.enable(MapperFeature.PROPAGATE_TRANSIENT_MARKER);
@@ -230,44 +232,6 @@ public class JacksonUndoLogParser implements UndoLogParser {
     }
 
     /**
-     * clob转string
-     */
-    private static class JavaSqlClobSerializer extends JsonSerializer<Clob> {
-
-        @Override
-        public void serializeWithType(Clob clob, JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSerializer) throws IOException {
-            ClobString clobs = new ClobString("");
-            String str = new String("");
-            WritableTypeId typeId = typeSerializer.writeTypePrefix(gen, typeSerializer.typeId(str, JsonToken.VALUE_STRING));
-            serialize(clob, gen, serializers);
-            gen.writeTypeSuffix(typeId);
-        }
-
-
-        @Override
-        public void serialize(Clob clob, JsonGenerator jgen, SerializerProvider provider)
-                throws IOException, JsonProcessingException {
-            String clobToStr= "";
-            Reader is = null;// 得到流
-            try {
-                is = clob.getCharacterStream();
-            } catch (SQLException e) {
-                LOGGER.error("OracleClobSerializer json encode exception, {}", e.getMessage(), e);
-            }
-            BufferedReader br = new BufferedReader(is);
-            String s = br.readLine();
-            StringBuffer sb = new StringBuffer();
-            // 执行循环将字符串全部取出付值给StringBuffer由StringBuffer转成STRING
-            while (s != null) {
-                sb.append(s);
-                s = br.readLine();
-            }
-            clobToStr = sb.toString();
-            jgen.writeString(clobToStr);
-        }
-    }
-
-    /**
      * the class of serialize blob type
      */
     private static class BlobSerializer extends JsonSerializer<SerialBlob> {
@@ -297,7 +261,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
 
         @Override
         public SerialBlob deserialize(JsonParser p, DeserializationContext ctxt)
-                throws IOException {
+            throws IOException {
             try {
                 return new SerialBlob(p.getBinaryValue());
             } catch (SQLException e) {
@@ -334,7 +298,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
 
         @Override
         public SerialClob deserialize(JsonParser p, DeserializationContext ctxt)
-                throws IOException {
+            throws IOException {
             try {
                 return new SerialClob(p.getValueAsString().toCharArray());
 
@@ -344,4 +308,5 @@ public class JacksonUndoLogParser implements UndoLogParser {
             return null;
         }
     }
+
 }

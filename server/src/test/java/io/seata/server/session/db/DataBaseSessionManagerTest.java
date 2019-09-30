@@ -76,6 +76,8 @@ public class DataBaseSessionManagerTest {
         sessionManager = tempSessionManager;
 
         prepareTable(dataSource);
+
+        logStoreDataBaseDAO.initTransactionNameSize();
     }
 
     private static void prepareTable(BasicDataSource dataSource) {
@@ -559,6 +561,44 @@ public class DataBaseSessionManagerTest {
         }
     }
 
+    @Test
+    public void test_transactionNameGreaterDbSize() throws Exception {
+
+        int transactionNameColumnSize = logStoreDataBaseDAO.getTransactionNameColumnSize();
+        StringBuilder sb = new StringBuilder("test");
+        for (int i = 4; i < transactionNameColumnSize; i++) {
+            sb.append("0");
+        }
+        final String finalTxName = sb.toString();
+        sb.append("1321465454545436");
+
+        GlobalSession session = GlobalSession.createGlobalSession("test",
+                "test", sb.toString(), 100);
+        String xid = XID.generateXID(session.getTransactionId());
+        session.setXid(xid);
+        session.setTransactionId(146757978);
+        session.setBeginTime(System.currentTimeMillis());
+        session.setApplicationData("abc=878s");
+        session.setStatus(GlobalStatus.Begin);
+
+        sessionManager.addGlobalSession(session);
+
+        GlobalSession globalSession_db = sessionManager.findGlobalSession(session.getXid());
+        Assertions.assertNotNull(globalSession_db);
+
+        Assertions.assertEquals(globalSession_db.getTransactionName(), finalTxName);
+
+        String delSql = "delete from global_table where xid= '"+xid+"'";
+        Connection conn = null;
+        try{
+            conn = dataSource.getConnection();
+            conn.createStatement().execute(delSql);
+        }finally {
+            if(conn != null){
+                conn.close();
+            }
+        }
+    }
 
 
 
