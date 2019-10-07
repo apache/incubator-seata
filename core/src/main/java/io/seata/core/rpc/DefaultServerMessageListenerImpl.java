@@ -72,8 +72,8 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug(
-                "server received:" + message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress())
-                    + ",vgroup:" + rpcContext.getTransactionServiceGroup());
+                "server received:{},clientIp:{},vgroup:{}", message, NetUtil.toIpAddress(ctx.channel().remoteAddress())
+                    ,rpcContext.getTransactionServiceGroup());
         } else {
             messageStrings.offer(
                 message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:" + rpcContext
@@ -111,7 +111,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         }
         sender.sendResponse(request, ctx.channel(), new RegisterRMResponse(isSuccess));
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("rm register success,message:" + message + ",channel:" + ctx.channel());
+            LOGGER.info("rm register success,message:{},channel:{}", message, ctx.channel());
         }
     }
 
@@ -150,7 +150,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
             LOGGER.error("send response error: {}", throwable.getMessage(), throwable);
         }
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("received PING from " + ctx.channel().remoteAddress());
+            LOGGER.debug("received PING from {}", ctx.channel().remoteAddress());
         }
     }
 

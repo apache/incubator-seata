@@ -49,7 +49,7 @@ public class RpcClientHandler extends ChannelDuplexHandler {
         final String request = (String)msg;
         try {
             ctx.writeAndFlush(request, ctx.voidPromise());
-            LOGGER.info("client:" + msg);
+            LOGGER.info("client:{}", msg);
 
         } catch (Exception e) {
             LOGGER.error("when try flush error", e);
