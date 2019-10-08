@@ -103,9 +103,9 @@ public abstract class AbstractConnectionProxy implements Connection {
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         String dbType = getDbType();
         // exclude oracle
-        boolean dbTypeEquals = StringUtils.equalsIgnoreCase(JdbcConstants.ORACLE, dbType);
+        boolean excludeOracle = StringUtils.equalsIgnoreCase(JdbcConstants.ORACLE, dbType);
         PreparedStatement targetPreparedStatement;
-        if (dbTypeEquals) {
+        if (excludeOracle) {
             targetPreparedStatement = getTargetConnection().prepareStatement(sql);
         } else {
             targetPreparedStatement = getTargetConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
