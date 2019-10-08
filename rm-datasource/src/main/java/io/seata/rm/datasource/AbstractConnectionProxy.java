@@ -15,11 +15,7 @@
  */
 package io.seata.rm.datasource;
 
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.sql.SQLType;
-import io.seata.rm.datasource.sql.SQLVisitorFactory;
 
 import java.sql.Array;
 import java.sql.Blob;
@@ -103,15 +99,7 @@ public abstract class AbstractConnectionProxy implements Connection {
 
     @Override
     public PreparedStatement prepareStatement(String sql) throws SQLException {
-        String dbType = getDbType();
-        PreparedStatement targetPreparedStatement;
-        // exclude oracle
-        boolean dbTypeEquals = StringUtils.equalsIgnoreCase(JdbcConstants.ORACLE, dbType);
-        if (dbTypeEquals) {
-            targetPreparedStatement = getTargetConnection().prepareStatement(sql);
-        } else {
-            targetPreparedStatement = getTargetConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        }
+        PreparedStatement targetPreparedStatement = getTargetConnection().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
         return new PreparedStatementProxy(this, targetPreparedStatement, sql);
     }
 
