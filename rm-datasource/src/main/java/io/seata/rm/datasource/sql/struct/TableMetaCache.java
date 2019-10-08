@@ -154,67 +154,6 @@ public class TableMetaCache {
         }
     }
 
-    private static TableMeta resultSetMetaToSchema(java.sql.ResultSet rs2, AbstractConnectionProxy conn,
-                                                   String tableName) throws SQLException {
-        TableMeta tm = new TableMeta();
-        tm.setTableName(tableName);
-        while (rs2.next()) {
-            ColumnMeta col = new ColumnMeta();
-            col.setTableName(tableName);
-            col.setColumnName(rs2.getString("COLUMN_NAME"));
-            String datatype = rs2.getString("DATA_TYPE");
-            if (StringUtils.equalsIgnoreCase(datatype, "NUMBER")) {
-                col.setDataType(java.sql.Types.BIGINT);
-            } else if (StringUtils.equalsIgnoreCase(datatype, "VARCHAR2")) {
-                col.setDataType(java.sql.Types.VARCHAR);
-            } else if (StringUtils.equalsIgnoreCase(datatype, "CHAR")) {
-                col.setDataType(java.sql.Types.CHAR);
-            } else if (StringUtils.equalsIgnoreCase(datatype, "DATE")) {
-                col.setDataType(java.sql.Types.DATE);
-            }
-
-            col.setColumnSize(rs2.getInt("DATA_LENGTH"));
-
-            tm.getAllColumns().put(col.getColumnName(), col);
-        }
-
-        java.sql.Statement stmt = null;
-        java.sql.ResultSet rs1 = null;
-        try {
-            stmt = conn.getTargetConnection().createStatement();
-            rs1 = stmt.executeQuery(
-                "select a.constraint_name,  a.column_name from user_cons_columns a, user_constraints b  where a"
-                    + ".constraint_name = b.constraint_name and b.constraint_type = 'P' and a.table_name ='" + tableName
-                    + "'");
-            while (rs1.next()) {
-                String indexName = rs1.getString(1);
-                String colName = rs1.getString(2);
-                ColumnMeta col = tm.getAllColumns().get(colName);
-
-                if (tm.getAllIndexes().containsKey(indexName)) {
-                    IndexMeta index = tm.getAllIndexes().get(indexName);
-                    index.getValues().add(col);
-                } else {
-                    IndexMeta index = new IndexMeta();
-                    index.setIndexName(indexName);
-                    index.getValues().add(col);
-                    index.setIndextype(IndexType.PRIMARY);
-                    tm.getAllIndexes().put(indexName, index);
-
-                }
-            }
-        } finally {
-            if (rs1 != null) {
-                rs1.close();
-            }
-            if (stmt != null) {
-                stmt.close();
-            }
-        }
-
-        return tm;
-    }
-
     private static TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
         throws SQLException {
         String schemaName = rsmd.getSchemaName(1);
