@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataSourceProxy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProxy.class);
 
     private String resourceGroupId;
 
@@ -102,7 +102,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                     } else if (DataSourceProxy.this.getDbType().equalsIgnoreCase(JdbcConstants.ORACLE)) {
                         TableMetaCacheOracle.refresh(DataSourceProxy.this);
                     } else {
-                        logger.error("refresh table meta failed, {} dost not support.", DataSourceProxy.this.getDbType());
+                        LOGGER.error("refresh table meta failed, {} does not support.", DataSourceProxy.this.getDbType());
                     }
                 }
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);

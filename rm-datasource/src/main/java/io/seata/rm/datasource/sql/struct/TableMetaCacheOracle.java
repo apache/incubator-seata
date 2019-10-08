@@ -46,7 +46,7 @@ public class TableMetaCacheOracle {
     private static final Cache<String, TableMeta> TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
         .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
 
-    private static Logger logger = LoggerFactory.getLogger(TableMetaCacheOracle.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(TableMetaCacheOracle.class);
 
     /**
      * Gets table meta.
@@ -66,7 +66,7 @@ public class TableMetaCacheOracle {
             try {
                 return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
-                logger.error("get cache error !", e);
+                LOGGER.error("get cache error !", e);
                 return null;
             }
         });
@@ -97,10 +97,10 @@ public class TableMetaCacheOracle {
                     TableMeta tableMeta = fetchSchema(dataSourceProxy, entry.getValue().getTableName());
                     if (!tableMeta.equals(entry.getValue())) {
                         TABLE_META_CACHE.put(entry.getKey(), tableMeta);
-                        logger.info("table meta change was found, update table meta cache automatically.");
+                        LOGGER.info("table meta change was found, update table meta cache automatically.");
                     }
                 } catch (SQLException e) {
-                    logger.error("get table meta error:{}", e.getMessage(), e);
+                    LOGGER.error("get table meta error:{}", e.getMessage(), e);
                 }
             }
         }
