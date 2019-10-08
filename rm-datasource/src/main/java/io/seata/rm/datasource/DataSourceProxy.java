@@ -94,16 +94,13 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         }
         DefaultResourceManager.get().registerResource(this);
         if(ENABLE_TABLE_META_CHECKER_ENABLE){
-            tableMetaExcutor.scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    if (DataSourceProxy.this.getDbType().equalsIgnoreCase(JdbcConstants.MYSQL)) {
-                        TableMetaCache.refresh(DataSourceProxy.this);
-                    } else if (DataSourceProxy.this.getDbType().equalsIgnoreCase(JdbcConstants.ORACLE)) {
-                        TableMetaCacheOracle.refresh(DataSourceProxy.this);
-                    } else {
-                        LOGGER.error("refresh table meta failed, {} does not support.", DataSourceProxy.this.getDbType());
-                    }
+            tableMetaExcutor.scheduleAtFixedRate(() -> {
+                if (DataSourceProxy.this.getDbType().equalsIgnoreCase(JdbcConstants.MYSQL)) {
+                    TableMetaCache.refresh(DataSourceProxy.this);
+                } else if (DataSourceProxy.this.getDbType().equalsIgnoreCase(JdbcConstants.ORACLE)) {
+                    TableMetaCacheOracle.refresh(DataSourceProxy.this);
+                } else {
+                    LOGGER.error("refresh table meta failed, {} does not support.", DataSourceProxy.this.getDbType());
                 }
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }
