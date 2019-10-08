@@ -42,7 +42,7 @@ public class ParameterParser {
     private String host;
     @Parameter(names = {"--port", "-p"}, description = "The port to listen.", order = 2)
     private int port = SERVER_DEFAULT_PORT;
-    @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file、db", order = 3)
+    @Parameter(names = {"--storeMode", "-m"}, description = "log store mode : file, db", order = 3)
     private String storeMode;
     @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3. default is 1", order = 4)
     private int serverNode = SERVER_DEFAULT_NODE;
