@@ -47,6 +47,7 @@
             },
             "Status": {
                 "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN",
+                "$Exception{java.lang.Exception}": "FA",
                 "#root != null &&  #root.size() > 0": "SU",
                 "#root == null || #root.size() == 0": "FA"
             },

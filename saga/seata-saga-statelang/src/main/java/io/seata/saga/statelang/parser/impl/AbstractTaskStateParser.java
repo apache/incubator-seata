@@ -92,40 +92,4 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
         }
         return exceptionMatchList;
     }
-
-    /*protected List<StatusMatch> parseStatusMatches(Map<String, String> statusMatchList) {
-
-        List<StatusMatch> statusMatchObjList = new ArrayList<>(statusMatchList.size());
-        for (String statusKey : statusMatchList.keySet()) {
-            String expressionStr = statusMatchList.get(statusKey);
-            StatusMatchImpl statusMatch = new StatusMatchImpl();
-
-            if(StringUtils.hasLength(expressionStr)){
-                if(expressionStr.startsWith("$")){
-                    int expTypeStart = expressionStr.indexOf("$");
-                    int expTypeEnd = expressionStr.indexOf("{", expTypeStart);
-
-                    if(expTypeStart >=0 && expTypeEnd > expTypeStart){
-                        String expressionType = expressionStr.substring(expTypeStart + 1, expTypeEnd);
-                        statusMatch.setExpressionType(expressionType);
-                    }
-
-                    int expEnd = expressionStr.lastIndexOf("}");
-                    if(expTypeEnd > 0 && expEnd > expTypeEnd){
-                        String expression = expressionStr.substring(expTypeEnd + 1, expEnd);
-                        statusMatch.setExpression(expression);
-                    }
-                }
-                else{
-                    statusMatch.setExpression(expressionStr);
-                }
-            }
-
-            statusMatch.setStatus(ExecutionStatus.valueOf(statusKey));
-
-            statusMatchObjList.add(statusMatch);
-        }
-        return statusMatchObjList;
-    }*/
-
 }

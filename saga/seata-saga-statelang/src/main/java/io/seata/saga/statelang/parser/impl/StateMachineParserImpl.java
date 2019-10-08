@@ -37,7 +37,7 @@ public class StateMachineParserImpl implements StateMachineParser {
     @Override
     public StateMachine parse(String json) {
 
-        Map<String, Object> node = JSON.parseObject(json, Map.class, Feature.IgnoreAutoType);
+        Map<String, Object> node = JSON.parseObject(json, Map.class, Feature.IgnoreAutoType, Feature.OrderedField);
         StateMachineImpl stateMachine = new StateMachineImpl();
         stateMachine.setName((String)node.get("Name"));
         stateMachine.setComment((String)node.get("Comment"));
