@@ -17,7 +17,6 @@ package io.seata.saga.engine.store;
 
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.StateInstance;
-import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 
 import java.util.List;
@@ -42,10 +41,10 @@ public interface StateLogStore {
     void recordStateMachineFinished(StateMachineInstance machineInstance, ProcessContext context);
 
     /**
-     * Update the state machine status to "Running"
+     * Record state machine restarted
      * @param machineInstance
      */
-    void updateStateMachineRunningStatus(StateMachineInstance machineInstance, ProcessContext context);
+    void recordStateMachineRestarted(StateMachineInstance machineInstance, ProcessContext context);
 
     /**
      * Record state start execution event

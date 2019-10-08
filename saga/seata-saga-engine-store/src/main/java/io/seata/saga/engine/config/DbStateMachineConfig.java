@@ -44,12 +44,15 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     @Override
     public void afterPropertiesSet() throws Exception {
 
+        super.afterPropertiesSet();
+
         if(getStateLogStore() == null){
             DbAndReportTcStateLogStore dbStateLogStore = new DbAndReportTcStateLogStore();
             dbStateLogStore.setDataSource(dataSource);
             dbStateLogStore.setTablePrefix(tablePrefix);
             dbStateLogStore.setDbType(dbType);
             dbStateLogStore.setDefaultTenantId(getDefaultTenantId());
+            dbStateLogStore.setSeqGenerator(getSeqGenerator());
 
             if(sagaTransactionalTemplate == null){
                 DefaultSagaTransactionalTemplate defaultSagaTransactionalTemplate = new DefaultSagaTransactionalTemplate();
@@ -74,8 +77,6 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
             setStateLangStore(dbStateLangStore);
         }
-
-        super.afterPropertiesSet();
     }
 
     @Override

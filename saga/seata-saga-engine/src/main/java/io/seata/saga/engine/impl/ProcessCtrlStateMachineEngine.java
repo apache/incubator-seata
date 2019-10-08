@@ -252,7 +252,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         }
 
         if(stateMachineInstance.getStateMachine().isPersist()) {
-            stateMachineConfig.getStateLogStore().updateStateMachineRunningStatus(stateMachineInstance, context);
+            stateMachineConfig.getStateLogStore().recordStateMachineRestarted(stateMachineInstance, context);
         }
 
         try {
@@ -451,7 +451,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
         stateMachineInstance.setRunning(true);
         if(stateMachineInstance.getStateMachine().isPersist()) {
-            stateMachineConfig.getStateLogStore().updateStateMachineRunningStatus(stateMachineInstance, context);
+            stateMachineConfig.getStateLogStore().recordStateMachineRestarted(stateMachineInstance, context);
         }
         try {
             StateInstruction inst = new StateInstruction();

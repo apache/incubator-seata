@@ -21,6 +21,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
 import io.seata.saga.engine.exception.EngineExecutionException;
+import io.seata.saga.engine.sequence.SeqGenerator;
 import io.seata.saga.engine.store.StateLogStore;
 import io.seata.saga.engine.serializer.Serializer;
 import io.seata.saga.engine.serializer.impl.ExceptionSerializer;
@@ -63,6 +64,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
     private Serializer<Exception, byte[]> exceptionSerializer = new ExceptionSerializer();
     private StateLogStoreSqls             stateLogStoreSqls;
     private String                        defaultTenantId;
+    private SeqGenerator                  seqGenerator;
 
     private static final StateMachineInstanceToStatementForInsert STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_INSERT = new StateMachineInstanceToStatementForInsert();
     private static final StateMachineInstanceToStatementForUpdate STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_UPDATE = new StateMachineInstanceToStatementForUpdate();
@@ -76,6 +78,22 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
     public void recordStateMachineStarted(StateMachineInstance machineInstance, ProcessContext context) {
 
         if(machineInstance != null){
+            beginTransaction(machineInstance, context);
+
+            if(StringUtils.isEmpty(machineInstance.getId()) && seqGenerator != null){
+                machineInstance.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_MACHINE_INST));
+            }
+
+            // save to db
+            machineInstance.setSerializedStartParams(paramsSerializer.serialize(machineInstance.getStartParams()));
+            executeUpdate(stateLogStoreSqls.getRecordStateMachineStartedSql(dbType), STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_INSERT, machineInstance);
+        }
+    }
+
+    private void beginTransaction(StateMachineInstance machineInstance, ProcessContext context){
+
+        if(sagaTransactionalTemplate != null){
+
             TransactionInfo transactionInfo = new TransactionInfo();
             transactionInfo.setTimeOut(sagaTransactionalTemplate.getTimeout());
             transactionInfo.setName(machineInstance.getStateMachine().getName());
@@ -90,9 +108,6 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 }
                 context.setVariable(DomainConstants.VAR_NAME_ROOT_CONTEXT_HOLDER, RootContext.entries());
 
-                // save to db
-                machineInstance.setSerializedStartParams(paramsSerializer.serialize(machineInstance.getStartParams()));
-                executeUpdate(stateLogStoreSqls.getRecordStateMachineStartedSql(dbType), STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_INSERT, machineInstance);
             } catch (ExecutionException e) {
 
                 String xid = null;
@@ -118,6 +133,14 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             machineInstance.setSerializedException(exceptionSerializer.serialize(machineInstance.getException()));
             executeUpdate(stateLogStoreSqls.getRecordStateMachineFinishedSql(dbType), STATE_MACHINE_INSTANCE_TO_STATEMENT_FOR_UPDATE, machineInstance);
 
+            reportTransactionFinished(machineInstance, context);
+        }
+    }
+
+    private void reportTransactionFinished(StateMachineInstance machineInstance, ProcessContext context){
+
+        if(sagaTransactionalTemplate != null){
+
             try {
                 GlobalTransaction globalTransaction = (GlobalTransaction)context.getVariable(DomainConstants.VAR_NAME_GLOBAL_TX);
                 if(globalTransaction == null){
@@ -137,7 +160,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                     globalStatus = GlobalStatus.Rollbacked;
                 }
                 else if(ExecutionStatus.FA.equals(machineInstance.getCompensationStatus())
-                            || ExecutionStatus.UN.equals(machineInstance.getCompensationStatus())){
+                        || ExecutionStatus.UN.equals(machineInstance.getCompensationStatus())){
                     globalStatus = GlobalStatus.RollbackRetrying;
                 }
                 else if(ExecutionStatus.FA.equals(machineInstance.getStatus()) && machineInstance.getCompensationStatus() == null){
@@ -168,11 +191,19 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
     }
 
     @Override
-    public void updateStateMachineRunningStatus(StateMachineInstance machineInstance, ProcessContext context) {
+    public void recordStateMachineRestarted(StateMachineInstance machineInstance, ProcessContext context) {
 
         if (machineInstance != null) {
-
+            //save to db
             executeUpdate(stateLogStoreSqls.getUpdateStateMachineRunningStatusSql(dbType), machineInstance.isRunning(), machineInstance.getId());
+
+            reportTransactionRestarted(machineInstance, context);
+        }
+    }
+
+    private void reportTransactionRestarted(StateMachineInstance machineInstance, ProcessContext context){
+
+        if(sagaTransactionalTemplate != null){
 
             GlobalStatus globalStatus;
             if(DomainConstants.OPERATION_NAME_COMPENSATE.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))){
@@ -206,6 +237,21 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
         if (stateInstance != null) {
 
+            branchRegister(stateInstance, context);
+
+            if(StringUtils.isEmpty(stateInstance.getId()) && seqGenerator != null){
+                stateInstance.setId(seqGenerator.generate(DomainConstants.SEQ_ENTITY_STATE_INST));
+            }
+
+            stateInstance.setSerializedInputParams(paramsSerializer.serialize(stateInstance.getInputParams()));
+            executeUpdate(stateLogStoreSqls.getRecordStateStartedSql(dbType), STATE_INSTANCE_TO_STATEMENT_FOR_INSERT, stateInstance);
+        }
+    }
+
+    private void branchRegister(StateInstance stateInstance, ProcessContext context){
+
+        if(sagaTransactionalTemplate != null){
+
             try {
                 GlobalTransaction globalTransaction = (GlobalTransaction)context.getVariable(DomainConstants.VAR_NAME_GLOBAL_TX);
                 if(globalTransaction == null){
@@ -222,9 +268,6 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             } catch (TransactionException e) {
                 throw new EngineExecutionException(e,  "Branch transaction error: " + e.getCode() + ", StateMachine:" + stateInstance.getStateMachineInstance().getStateMachine().getName() + ", XID: " + stateInstance.getStateMachineInstance().getId() + ", State:" + stateInstance.getName() + ", stateId: " + stateInstance.getId() + ", Reason: " + e.getMessage(), FrameworkErrorCode.TransactionManagerError);
             }
-
-            stateInstance.setSerializedInputParams(paramsSerializer.serialize(stateInstance.getInputParams()));
-            executeUpdate(stateLogStoreSqls.getRecordStateStartedSql(dbType), STATE_INSTANCE_TO_STATEMENT_FOR_INSERT, stateInstance);
         }
     }
 
@@ -236,6 +279,14 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             stateInstance.setSerializedOutputParams(paramsSerializer.serialize(stateInstance.getOutputParams()));
             stateInstance.setSerializedException(exceptionSerializer.serialize(stateInstance.getException()));
             executeUpdate(stateLogStoreSqls.getRecordStateFinishedSql(dbType), STATE_INSTANCE_TO_STATEMENT_FOR_UPDATE, stateInstance);
+
+            branchReport(stateInstance, context);
+        }
+    }
+
+    private void branchReport(StateInstance stateInstance, ProcessContext context){
+
+        if(sagaTransactionalTemplate != null){
 
             BranchStatus branchStatus = null;
             try {
@@ -568,6 +619,10 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
     public void setDefaultTenantId(String defaultTenantId) {
         this.defaultTenantId = defaultTenantId;
+    }
+
+    public void setSeqGenerator(SeqGenerator seqGenerator) {
+        this.seqGenerator = seqGenerator;
     }
 
     @Override
