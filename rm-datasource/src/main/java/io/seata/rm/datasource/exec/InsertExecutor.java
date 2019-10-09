@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
@@ -194,6 +196,15 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     protected List<Object> getPkValuesByAuto() throws SQLException {
+        boolean oracle = StringUtils.equalsIgnoreCase(JdbcConstants.ORACLE, getDbType());
+        if (oracle) {
+            return oracleByAuto();
+        } else {
+            return mysqlByAuto();
+        }
+    }
+
+    private List<Object> mysqlByAuto() throws SQLException {
         // PK is just auto generated
         Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
         if (pkMetaMap.size() != 1) {
@@ -222,6 +233,28 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);
             pkValues.add(v);
+        }
+        return pkValues;
+    }
+
+    private List<Object> oracleByAuto() throws SQLException {
+        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
+        if (pkMetaMap.size() != 1) {
+            throw new NotSupportYetException();
+        }
+        ResultSet genKeys = null;
+        try {
+            genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
+        } catch (SQLException e) {
+            throw e;
+        }
+        List<Object> pkValues = new ArrayList<>();
+        while (genKeys.next()) {
+            Object v = genKeys.getObject(1);
+            pkValues.add(v);
+        }
+        if (pkValues.isEmpty()) {
+            throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
         }
         return pkValues;
     }
