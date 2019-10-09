@@ -206,9 +206,8 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         boolean oracle = StringUtils.equalsIgnoreCase(JdbcConstants.ORACLE, getDbType());
         if (oracle) {
             return oracleByAuto();
-        } else {
-            return mysqlByAuto();
         }
+        return defaultByAuto();
     }
 
     /**
@@ -273,11 +272,11 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     /**
-     * mysql auto increment
+     * default auto increment
      * @return the primary key value
      * @throws SQLException the SQL exception
      */
-    private List<Object> mysqlByAuto() throws SQLException {
+    private List<Object> defaultByAuto() throws SQLException {
         // PK is just auto generated
         Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
         if (pkMetaMap.size() != 1) {
