@@ -163,7 +163,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (!b) {
             throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
         }
-        if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlSequenceExpr) {
+        if (pkValues.size() > 0 && pkValues.get(0) instanceof SqlSequenceExpr) {
             pkValues = getPkValuesBySequence(pkValues.get(0));
         }
         // pk auto generated while single insert primary key is expression
