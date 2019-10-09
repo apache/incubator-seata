@@ -126,9 +126,7 @@ public class MemoryLocker extends AbstractLocker {
         if (lockHolder == null || lockHolder.size() == 0) {
             return true;
         }
-        Iterator<Map.Entry<ConcurrentMap<String, Long>, Set<String>>> it = lockHolder.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<ConcurrentMap<String, Long>, Set<String>> entry = it.next();
+        for (Map.Entry<ConcurrentMap<String, Long>, Set<String>> entry : lockHolder.entrySet()) {
             ConcurrentMap<String, Long> bucket = entry.getKey();
             Set<String> keys = entry.getValue();
             for (String key : keys) {

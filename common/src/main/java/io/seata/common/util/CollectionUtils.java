@@ -80,11 +80,9 @@ public class CollectionUtils {
         if (isEmpty(col)) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("[");
-        Iterator it = col.iterator();
-        while (it.hasNext()) {
-            Object obj = it.next();
+        for (Object obj : col) {
             sb.append(StringUtils.toString(obj));
             sb.append(",");
         }

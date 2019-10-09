@@ -140,7 +140,7 @@ public class TableMetaCacheOracle {
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
-        if(tableName.indexOf("\"") != -1){
+        if(tableName.contains("\"")){
             tableName = tableName.replace("\"", "");
             schemaName = schemaName.replace("\"", "");
         }else{

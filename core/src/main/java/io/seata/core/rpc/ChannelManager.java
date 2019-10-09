@@ -292,7 +292,7 @@ public class ChannelManager {
     private static Channel getChannelFromSameClientMap(Map<Integer, RpcContext> clientChannelMap, int exclusivePort) {
         if (null != clientChannelMap && !clientChannelMap.isEmpty()) {
             for (ConcurrentMap.Entry<Integer, RpcContext> entry : clientChannelMap.entrySet()) {
-                if (entry.getKey().intValue() == exclusivePort) {
+                if (entry.getKey() == exclusivePort) {
                     clientChannelMap.remove(entry.getKey());
                     continue;
                 }
