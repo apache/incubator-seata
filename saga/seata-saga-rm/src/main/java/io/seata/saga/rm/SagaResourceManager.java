@@ -15,6 +15,7 @@
  */
 package io.seata.saga.rm;
 
+import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -97,6 +98,11 @@ public class SagaResourceManager extends AbstractResourceManager {
 
 		} catch (ForwardInvalidException e) {
 			LOGGER.error("StateMachine forward failed, xid: " + xid, e);
+
+			//if StateMachineInstanceNotExists stop retry
+			if(FrameworkErrorCode.StateMachineInstanceNotExists.equals(e.getErrcode())){
+				return BranchStatus.PhaseTwo_Committed;
+			}
 		}
 		return BranchStatus.PhaseTwo_CommitFailed_Retryable;
 	}
@@ -120,6 +126,11 @@ public class SagaResourceManager extends AbstractResourceManager {
             }
 		} catch (EngineExecutionException e) {
 			LOGGER.error("StateMachine compensate failed, xid: " + xid, e);
+
+			//if StateMachineInstanceNotExists stop retry
+			if(FrameworkErrorCode.StateMachineInstanceNotExists.equals(e.getErrcode())){
+				return BranchStatus.PhaseTwo_Rollbacked;
+			}
 		}
 		return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
 	}

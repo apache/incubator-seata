@@ -43,7 +43,7 @@ public class GlobalReportRequestConvertor implements PbConvertor<GlobalReportReq
         AbstractGlobalEndRequestProto abstractGlobalEndRequestProto = AbstractGlobalEndRequestProto.newBuilder()
             .setAbstractTransactionRequest(abstractTransactionRequestProto)
             .setXid(globalReportRequest.getXid())
-            .setExtraData(extraData==null?"":extraData)
+            .setExtraData(extraData == null ? "" : extraData)
             .build();
 
         GlobalReportRequestProto result = GlobalReportRequestProto.newBuilder().setAbstractGlobalEndRequest(

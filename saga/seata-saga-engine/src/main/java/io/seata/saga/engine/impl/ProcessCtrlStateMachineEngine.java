@@ -192,7 +192,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
 
         if(stateMachineInstance == null){
-            throw new ForwardInvalidException("StateMachineInstance is not exits", FrameworkErrorCode.ObjectNotExists);
+            throw new ForwardInvalidException("StateMachineInstance is not exits", FrameworkErrorCode.StateMachineInstanceNotExists);
         }
         if(ExecutionStatus.SU.equals(stateMachineInstance.getStatus()) &&
                 stateMachineInstance.getCompensationStatus() == null){
@@ -407,7 +407,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         StateMachineInstance stateMachineInstance  = reloadStateMachineInstance(stateMachineInstId);
 
         if(stateMachineInstance == null){
-            throw new EngineExecutionException("StateMachineInstance is not exits", FrameworkErrorCode.ObjectNotExists);
+            throw new EngineExecutionException("StateMachineInstance is not exits", FrameworkErrorCode.StateMachineInstanceNotExists);
         }
 
         if(ExecutionStatus.SU.equals(stateMachineInstance.getCompensationStatus())){

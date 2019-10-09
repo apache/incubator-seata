@@ -198,6 +198,11 @@ public enum FrameworkErrorCode {
     TransactionManagerError("0419", "Invoke transaction manager error", "Invoke transaction manager error"),
 
     /**
+     * State machine instance not exists
+     */
+    StateMachineInstanceNotExists("0420", "State machine instance not exists", "State machine instance not exists"),
+
+    /**
      * Undefined error
      */
     UnknownAppError("10000", "Unknown error", "Internal error"),

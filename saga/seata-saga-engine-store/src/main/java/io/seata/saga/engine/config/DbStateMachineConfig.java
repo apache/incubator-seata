@@ -20,9 +20,14 @@ import io.seata.saga.engine.store.db.DbStateLangStore;
 import io.seata.saga.engine.store.db.DbAndReportTcStateLogStore;
 import io.seata.saga.tm.DefaultSagaTransactionalTemplate;
 import io.seata.saga.tm.SagaTransactionalTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 
 /**
  * DbStateMachineConfig
@@ -31,13 +36,15 @@ import javax.sql.DataSource;
  */
 public class DbStateMachineConfig extends DefaultStateMachineConfig implements DisposableBean {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(DbStateMachineConfig.class);
+
     private static final int          DEFAULT_TRANS_OPER_TIMEOUT = 60000 * 10;
 
     private DataSource                dataSource;
     private String                    applicationId;
     private String                    txServiceGroup;
     private String                    tablePrefix           = "seata_";
-    private String                    dbType                = "mysql";
+    private String                    dbType;
     private int                       transOperationTimeout = DEFAULT_TRANS_OPER_TIMEOUT;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
 
@@ -45,6 +52,8 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     public void afterPropertiesSet() throws Exception {
 
         super.afterPropertiesSet();
+
+        dbType = getDbTypeFromDataSource(dataSource);
 
         if(getStateLogStore() == null){
             DbAndReportTcStateLogStore dbStateLogStore = new DbAndReportTcStateLogStore();
@@ -83,6 +92,23 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     public void destroy() throws Exception {
         if((sagaTransactionalTemplate != null) && (sagaTransactionalTemplate instanceof DisposableBean)){
             ((DisposableBean)sagaTransactionalTemplate).destroy();
+        }
+    }
+
+    public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
+        Connection con = null;
+        try {
+            con = dataSource.getConnection();
+            DatabaseMetaData metaData = con.getMetaData();
+            return metaData.getDatabaseProductName();
+        } finally {
+            if (con != null) {
+                try {
+                    con.close();
+                } catch (SQLException e) {
+                    LOGGER.error("Get dbType from failed: " + e.getMessage(), e);
+                }
+            }
         }
     }
 
