@@ -19,6 +19,8 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
@@ -44,7 +46,7 @@ public class TableMetaCacheOracle {
     private static final Cache<String, TableMeta> TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
         .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
 
-    private static Logger logger = LoggerFactory.getLogger(TableMetaCacheOracle.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(TableMetaCacheOracle.class);
 
     /**
      * Gets table meta.
@@ -58,15 +60,13 @@ public class TableMetaCacheOracle {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
-        String dataSourceKey = dataSourceProxy.getResourceId();
-
         TableMeta tmeta = null;
-        final String key = dataSourceKey + "." + tableName;
+        final String key = getCacheKey(dataSourceProxy, tableName);
         tmeta = TABLE_META_CACHE.get(key, mappingFunction -> {
             try {
                 return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
-                logger.error("get cache error !", e);
+                LOGGER.error("get cache error !", e);
                 return null;
             }
         });
@@ -81,6 +81,29 @@ public class TableMetaCacheOracle {
             throw new ShouldNeverHappenException(String.format("[xid:%s]get tablemeta failed", RootContext.getXID()));
         }
         return tmeta;
+    }
+
+    /**
+     * Clear the table meta cache
+     *
+     * @param dataSourceProxy
+     */
+    public static void refresh(final DataSourceProxy dataSourceProxy) {
+        ConcurrentMap<String, TableMeta> tableMetaMap = TABLE_META_CACHE.asMap();
+        for (Entry<String, TableMeta> entry : tableMetaMap.entrySet()) {
+            String key = getCacheKey(dataSourceProxy, entry.getValue().getTableName());
+            if (entry.getKey().equals(key)) {
+                try {
+                    TableMeta tableMeta = fetchSchema(dataSourceProxy, entry.getValue().getTableName());
+                    if (!tableMeta.equals(entry.getValue())) {
+                        TABLE_META_CACHE.put(entry.getKey(), tableMeta);
+                        LOGGER.info("table meta change was found, update table meta cache automatically.");
+                    }
+                } catch (SQLException e) {
+                    LOGGER.error("get table meta error:{}", e.getMessage(), e);
+                }
+            }
+        }
     }
 
     private static TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
@@ -206,5 +229,16 @@ public class TableMetaCacheOracle {
         }
 
         return tm;
+    }
+
+    /**
+     * generate cache key
+     *
+     * @param dataSourceProxy
+     * @param tableName
+     * @return
+     */
+    private static String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
+        return dataSourceProxy.getResourceId() + "." + tableName;
     }
 }
