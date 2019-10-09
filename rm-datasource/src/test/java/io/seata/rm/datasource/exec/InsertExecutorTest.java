@@ -15,9 +15,12 @@
  */
 package io.seata.rm.datasource.exec;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
+import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Null;
@@ -56,7 +59,9 @@ public class InsertExecutorTest {
     private static final String USER_STATUS_COLUMN = "user_status";
     private static final Integer PK_VALUE = 100;
 
-    private PreparedStatementProxy statementProxy;
+    private ConnectionProxy connectionProxy;
+
+    private StatementProxy statementProxy;
 
     private SQLInsertRecognizer sqlInsertRecognizer;
 
@@ -73,6 +78,10 @@ public class InsertExecutorTest {
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+
+        connectionProxy = mock(ConnectionProxy.class);
+        when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
+        when(connectionProxy.getDbType()).thenReturn(JdbcConstants.MYSQL);
     }
 
     @Test
@@ -324,7 +333,8 @@ public class InsertExecutorTest {
         paramters[1] = arrayList1;
         paramters[2] = arrayList2;
         paramters[3] = arrayList3;
-        when(statementProxy.getParameters()).thenReturn(paramters);
+        PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
+        when(psp.getParameters()).thenReturn(paramters);
     }
 
     private void mockParametersPkWithNull() {
@@ -341,7 +351,8 @@ public class InsertExecutorTest {
         paramters[1] = arrayList1;
         paramters[2] = arrayList2;
         paramters[3] = arrayList3;
-        when(statementProxy.getParameters()).thenReturn(paramters);
+        PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
+        when(psp.getParameters()).thenReturn(paramters);
     }
 
     private void mockParametersOfOnePk() {
@@ -349,7 +360,8 @@ public class InsertExecutorTest {
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add(PK_VALUE);
         paramters[0] = arrayList1;
-        when(statementProxy.getParameters()).thenReturn(paramters);
+        PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
+        when(psp.getParameters()).thenReturn(paramters);
     }
 
     private void mockInsertRows() {
