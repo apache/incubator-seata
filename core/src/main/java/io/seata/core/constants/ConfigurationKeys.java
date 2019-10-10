@@ -108,6 +108,15 @@ public class ConfigurationKeys {
      */
     public static final String CLIENT_TABLE_META_CHECK_ENABLE  = CLIENT_PREFIX + "table.meta.check.enable";
 
+    /**
+     * The constant CLIENT_TM_COMMIT_RETRY_TIMES.
+     */
+    public static final String CLIENT_TM_COMMIT_RETRY_TIMES = CLIENT_PREFIX + "tm.commit.retry.times";
+
+    /**
+     * The constant CLIENT_TM_ROLLBACK_RETRY_TIMES.
+     */
+    public static final String CLIENT_TM_ROLLBACK_RETRY_TIMES = CLIENT_PREFIX + "tm.rollback.retry.times";
 
     /**
      * The constant SERIALIZE_FOR_RPC.
