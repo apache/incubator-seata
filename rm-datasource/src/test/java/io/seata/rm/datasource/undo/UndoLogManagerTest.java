@@ -54,7 +54,7 @@ public class UndoLogManagerTest {
         }
         Set<Long> branchIds = new HashSet<>();
         for (int i = 0;i < APPEND_IN_SIZE;i++){
-            branchIds.add(Long.valueOf(i));
+            branchIds.add((long) i);
         }
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);

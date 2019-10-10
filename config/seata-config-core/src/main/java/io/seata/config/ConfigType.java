@@ -47,6 +47,10 @@ public enum ConfigType {
      */
     Etcd3,
     /**
+     * spring cloud config type
+     */
+    SpringCloudConfig,
+    /**
      * Custom config type
      */
     Custom;
