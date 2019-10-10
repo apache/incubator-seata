@@ -19,15 +19,16 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
-import com.alibaba.druid.util.StringUtils;
-
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.DataSourceProxy;
 import org.slf4j.Logger;
@@ -45,7 +46,7 @@ public class TableMetaCacheOracle {
     private static final Cache<String, TableMeta> TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
         .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
 
-    private static Logger logger = LoggerFactory.getLogger(TableMetaCacheOracle.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(TableMetaCacheOracle.class);
 
     /**
      * Gets table meta.
@@ -55,19 +56,17 @@ public class TableMetaCacheOracle {
      * @return the table meta
      */
     public static TableMeta getTableMeta(final DataSourceProxy dataSourceProxy, final String tableName) {
-        if (StringUtils.isEmpty(tableName)) {
+        if (StringUtils.isNullOrEmpty(tableName)) {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
-        String dataSourceKey = dataSourceProxy.getResourceId();
-
         TableMeta tmeta = null;
-        final String key = dataSourceKey + "." + tableName;
+        final String key = getCacheKey(dataSourceProxy, tableName);
         tmeta = TABLE_META_CACHE.get(key, mappingFunction -> {
             try {
                 return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
-                logger.error("get cache error !", e);
+                LOGGER.error("get cache error !", e);
                 return null;
             }
         });
@@ -82,6 +81,29 @@ public class TableMetaCacheOracle {
             throw new ShouldNeverHappenException(String.format("[xid:%s]get tablemeta failed", RootContext.getXID()));
         }
         return tmeta;
+    }
+
+    /**
+     * Clear the table meta cache
+     *
+     * @param dataSourceProxy
+     */
+    public static void refresh(final DataSourceProxy dataSourceProxy) {
+        ConcurrentMap<String, TableMeta> tableMetaMap = TABLE_META_CACHE.asMap();
+        for (Entry<String, TableMeta> entry : tableMetaMap.entrySet()) {
+            String key = getCacheKey(dataSourceProxy, entry.getValue().getTableName());
+            if (entry.getKey().equals(key)) {
+                try {
+                    TableMeta tableMeta = fetchSchema(dataSourceProxy, entry.getValue().getTableName());
+                    if (!tableMeta.equals(entry.getValue())) {
+                        TABLE_META_CACHE.put(entry.getKey(), tableMeta);
+                        LOGGER.info("table meta change was found, update table meta cache automatically.");
+                    }
+                } catch (SQLException e) {
+                    LOGGER.error("get table meta error:{}", e.getMessage(), e);
+                }
+            }
+        }
     }
 
     private static TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
@@ -113,13 +135,17 @@ public class TableMetaCacheOracle {
     }
 
     private static TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
-        //Need to convert uppercase, oracle table name needs to be capitalized in order to get metadata
-        tableName = tableName.toUpperCase();
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
+        if(tableName.contains("\"")){
+            tableName = tableName.replace("\"", "");
+            schemaName = schemaName.replace("\"", "");
+        }else{
+            tableName = tableName.toUpperCase();
+        }
 
         ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
         ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
@@ -151,10 +177,10 @@ public class TableMetaCacheOracle {
 
             while (rsIndex.next()) {
                 String indexName = rsIndex.getString("INDEX_NAME");
-                if (StringUtils.isEmpty(indexName)) {
+                if (StringUtils.isNullOrEmpty(indexName)) {
                     continue;
                 }
-                String colName = rsIndex.getString("COLUMN_NAME").toUpperCase();
+                String colName = rsIndex.getString("COLUMN_NAME");
                 ColumnMeta col = tm.getAllColumns().get(colName);
                 if (tm.getAllIndexes().containsKey(indexName)) {
                     IndexMeta index = tm.getAllIndexes().get(indexName);
@@ -170,9 +196,7 @@ public class TableMetaCacheOracle {
                     index.setAscOrDesc(rsIndex.getString("ASC_OR_DESC"));
                     index.setCardinality(rsIndex.getInt("CARDINALITY"));
                     index.getValues().add(col);
-                    if ("PRIMARY".equalsIgnoreCase(indexName)) {
-                        index.setIndextype(IndexType.PRIMARY);
-                    } else if (!index.isNonUnique()) {
+                    if (!index.isNonUnique()) {
                         index.setIndextype(IndexType.Unique);
                     } else {
                         index.setIndextype(IndexType.Normal);
@@ -183,7 +207,7 @@ public class TableMetaCacheOracle {
             }
 
             while (rsPrimary.next()) {
-                String pkIndexName = rsPrimary.getObject(6).toString();
+                String pkIndexName = rsPrimary.getString("PK_NAME");
                 if (tm.getAllIndexes().containsKey(pkIndexName)) {
                     IndexMeta index = tm.getAllIndexes().get(pkIndexName);
                     index.setIndextype(IndexType.PRIMARY);
@@ -205,5 +229,16 @@ public class TableMetaCacheOracle {
         }
 
         return tm;
+    }
+
+    /**
+     * generate cache key
+     *
+     * @param dataSourceProxy
+     * @param tableName
+     * @return
+     */
+    private static String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
+        return dataSourceProxy.getResourceId() + "." + tableName;
     }
 }

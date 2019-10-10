@@ -36,5 +36,10 @@
             <artifactId>seata-codec-protobuf</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-codec-kryo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

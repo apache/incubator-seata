@@ -23,7 +23,6 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
-import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
@@ -67,7 +66,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         MySqlOutputVisitor visitor = super.createMySqlOutputVisitor(parametersHolder, paramAppenderList, sb);
         if (where instanceof SQLBinaryOpExpr) {
             visitor.visit((SQLBinaryOpExpr) where);
@@ -88,7 +87,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
@@ -117,7 +116,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseRecognizer implements SQ
     public String getTableName() {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLTableSource tableSource = selectQueryBlock.getFrom();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
 
             @Override

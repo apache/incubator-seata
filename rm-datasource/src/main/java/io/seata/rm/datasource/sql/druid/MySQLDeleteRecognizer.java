@@ -23,7 +23,6 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
 import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
-import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlDeleteStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
@@ -63,7 +62,7 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
 
     @Override
     public String getTableName() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
 
             @Override
@@ -82,7 +81,7 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         MySqlOutputVisitor visitor = super.createMySqlOutputVisitor(parametersHolder, paramAppenderList, sb);
         if (where instanceof SQLBinaryOpExpr) {
             visitor.visit((SQLBinaryOpExpr) where);
@@ -102,7 +101,7 @@ public class MySQLDeleteRecognizer extends BaseRecognizer implements SQLDeleteRe
         if (where == null) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
         visitor.visit((SQLBinaryOpExpr) where);
         return sb.toString();
