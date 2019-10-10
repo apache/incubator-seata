@@ -48,10 +48,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     private GlobalTransactionRole role;
 
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_TIMES, 1);
+        ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, 1);
 
     private static final int ROLLBACK_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_TIMES, 1);
+        ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, 1);
 
     /**
      * Instantiates a new Default global transaction.
