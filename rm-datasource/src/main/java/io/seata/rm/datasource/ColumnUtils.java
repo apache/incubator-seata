@@ -71,9 +71,42 @@ public final class ColumnUtils {
         for (int i = 0, len = cols.size(); i < len; i++) {
             String col = cols.get(i);
             if (col != null && col.charAt(0) == escape.value && col.charAt(col.length() - 1) == escape.value) {
-                cols.set(i, col.substring(1, col.length() - 1));
+                cols.set(i, delEscape(col, escape));
             }
         }
+    }
+
+    /**
+     * del escape by db type
+     * @param colName the column name
+     * @param dbType the db type
+     * @return
+     */
+    public static String delEscape(String colName, String dbType) {
+        String newColName = delEscape(colName, Escape.STANDARD);
+        if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL)) {
+            newColName = delEscape(newColName, Escape.MYSQL);
+        }
+        return newColName;
+    }
+
+    /**
+     * del escape by escape
+     * @param colName the column name
+     * @param escape the escape
+     * @return
+     */
+    public static String delEscape(String colName, Escape escape) {
+        if (colName == null) {
+            throw new NullPointerException("colName is null");
+        }
+        if (colName.isEmpty()) {
+            return colName;
+        }
+        if (colName.charAt(0) == escape.value && colName.charAt(colName.length() - 1) == escape.value) {
+            return colName.substring(1, colName.length() - 1);
+        }
+        return colName;
     }
 
     /**

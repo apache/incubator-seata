@@ -28,18 +28,34 @@ import java.util.Map;
 public class TableMetaCacheAdapter {
 
     /**
-     * adapter table meta
+     * adapter table meta add escape
      * @param dbType the db type
      * @param dataSourceProxy the datasource proxy
      * @param tableName the table name
      * @return the table meta
      */
     public static TableMeta getTableMeta(final String dbType, final DataSourceProxy dataSourceProxy, final String tableName) {
+        return getTableMeta(dbType, dataSourceProxy, tableName, true);
+    }
+
+    /**
+     * adapter table meta
+     * @param dbType the db type
+     * @param dataSourceProxy the datasource proxy
+     * @param tableName the table name
+     * @param escape true: add escape. false: not add escape.
+     * @return the table meta
+     */
+    public static TableMeta getTableMeta(final String dbType, final DataSourceProxy dataSourceProxy, final String tableName, boolean escape) {
         TableMeta tableMeta;
         if (JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
             tableMeta = TableMetaCacheOracle.getTableMeta(dataSourceProxy, tableName);
         } else {
             tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, tableName);
+        }
+
+        if (!escape) {
+            return tableMeta;
         }
 
         TableMetaAdapter adapter = new TableMetaAdapter();
