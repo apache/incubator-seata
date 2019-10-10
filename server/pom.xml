@@ -126,7 +126,6 @@
                                     <extraArgument>-XX:MaxDirectMemorySize=1024m</extraArgument>
                                     <extraArgument>-XX:-OmitStackTraceInFastThrow</extraArgument>
                                     <extraArgument>-XX:+AggressiveOpts</extraArgument>
-                                    <extraArgument>-XX:+UseBiasedLocking</extraArgument>
                                     <extraArgument>-XX:+UseFastAccessorMethods</extraArgument>
                                     <extraArgument>-XX:-UseAdaptiveSizePolicy</extraArgument>
                                     <extraArgument>-XX:+HeapDumpOnOutOfMemoryError</extraArgument>
