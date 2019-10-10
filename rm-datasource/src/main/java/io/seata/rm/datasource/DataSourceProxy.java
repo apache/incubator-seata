@@ -23,8 +23,6 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
-import io.seata.rm.datasource.undo.UndoTableManager;
-import io.seata.rm.datasource.undo.UndoTableManagerFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ScheduledExecutorService;
@@ -90,13 +88,6 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             dbType = JdbcUtils.getDbType(jdbcUrl, null);
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
-        }
-        try {
-            UndoTableManager undoTableManager = UndoTableManagerFactory.getUndoTableManager(dbType);
-            undoTableManager.createTable(this);
-        } catch (UnsupportedOperationException e) {
-        } catch (SQLException e) {
-            throw new IllegalStateException("can not create undo table", e);
         }
         DefaultResourceManager.get().registerResource(this);
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
