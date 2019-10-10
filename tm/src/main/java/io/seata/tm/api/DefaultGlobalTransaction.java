@@ -113,10 +113,13 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             throw new IllegalStateException();
         }
 
-        status = transactionManager.commit(xid);
-        if (RootContext.getXID() != null) {
-            if (xid.equals(RootContext.getXID())) {
-                RootContext.unbind();
+        try {
+            status = transactionManager.commit(xid);
+        } finally {
+            if (RootContext.getXID() != null) {
+                if (xid.equals(RootContext.getXID())) {
+                    RootContext.unbind();
+                }
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -138,10 +141,13 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             throw new IllegalStateException();
         }
 
-        status = transactionManager.rollback(xid);
-        if (RootContext.getXID() != null) {
-            if (xid.equals(RootContext.getXID())) {
-                RootContext.unbind();
+        try {
+            status = transactionManager.rollback(xid);
+        } finally {
+            if (RootContext.getXID() != null) {
+                if (xid.equals(RootContext.getXID())) {
+                    RootContext.unbind();
+                }
             }
         }
         if (LOGGER.isInfoEnabled()) {
