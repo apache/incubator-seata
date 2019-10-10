@@ -125,6 +125,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             while (retry > 0) {
                 try {
                     status = transactionManager.commit(xid);
+                    break;
                 } catch (Throwable ex) {
                     LOGGER.error("Failed to report global commit [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
                     retry--;
@@ -164,6 +165,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             while (retry > 0) {
                 try {
                     status = transactionManager.rollback(xid);
+                    break;
                 } catch (Throwable ex) {
                     LOGGER.error("Failed to report global rollback [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
                     retry--;
