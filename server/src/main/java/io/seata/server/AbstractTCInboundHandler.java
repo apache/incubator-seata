@@ -31,6 +31,8 @@ import io.seata.core.protocol.transaction.GlobalCommitRequest;
 import io.seata.core.protocol.transaction.GlobalCommitResponse;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
+import io.seata.core.protocol.transaction.GlobalReportRequest;
+import io.seata.core.protocol.transaction.GlobalReportResponse;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
@@ -274,5 +276,29 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
      */
     protected abstract void doGlobalStatus(GlobalStatusRequest request, GlobalStatusResponse response,
         RpcContext rpcContext) throws TransactionException;
+
+    @Override
+    public GlobalReportResponse handle(GlobalReportRequest request, final RpcContext rpcContext) {
+        GlobalReportResponse response = new GlobalReportResponse();
+        exceptionHandleTemplate(new AbstractCallback<GlobalReportRequest, GlobalReportResponse>() {
+            @Override
+            public void execute(GlobalReportRequest request, GlobalReportResponse response)
+                    throws TransactionException {
+                doGlobalReport(request, response, rpcContext);
+            }
+        }, request, response);
+        return response;
+    }
+
+    /**
+     * Do global report.
+     *
+     * @param request    the request
+     * @param response   the response
+     * @param rpcContext the rpc context
+     * @throws TransactionException the transaction exception
+     */
+    protected abstract void doGlobalReport(GlobalReportRequest request, GlobalReportResponse response,
+                                           RpcContext rpcContext) throws TransactionException;
 
 }
