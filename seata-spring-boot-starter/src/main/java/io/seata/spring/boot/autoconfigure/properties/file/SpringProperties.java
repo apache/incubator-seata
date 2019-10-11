@@ -15,7 +15,6 @@
  */
 package io.seata.spring.boot.autoconfigure.properties.file;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 

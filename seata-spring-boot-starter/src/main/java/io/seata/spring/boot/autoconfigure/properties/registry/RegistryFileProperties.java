@@ -19,7 +19,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_FILE_PREFIX;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_SOFA_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
