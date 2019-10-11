@@ -15,12 +15,15 @@
  */
 package io.seata.core.rpc;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import io.netty.channel.ChannelHandlerContext;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.AbstractMessage;
@@ -35,8 +38,6 @@ import io.seata.core.protocol.RegisterTMResponse;
 import io.seata.core.protocol.RpcMessage;
 import io.seata.core.protocol.Version;
 import io.seata.core.rpc.netty.RegisterCheckAuthHandler;
-
-import io.netty.channel.ChannelHandlerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,14 +49,14 @@ import org.slf4j.LoggerFactory;
  */
 public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultServerMessageListenerImpl.class);
-    private static BlockingQueue<String> messageStrings = new LinkedBlockingQueue<String>();
+    private static BlockingQueue<String> logQueue = new LinkedBlockingQueue<>();
     private ServerMessageSender serverMessageSender;
     private final TransactionMessageHandler transactionMessageHandler;
     private static final int MAX_LOG_SEND_THREAD = 1;
+    private static final int MAX_LOG_TAKE_SIZE = 1024;
     private static final long KEEP_ALIVE_TIME = 0L;
     private static final String THREAD_PREFIX = "batchLoggerPrint";
-    private static final long IDLE_CHECK_MILLS = 3L;
-    private static final String BATCH_LOG_SPLIT = "\n";
+    private static final long BUSY_SLEEP_MILLS = 5L;
 
     /**
      * Instantiates a new Default server message listener.
@@ -75,7 +76,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
                 "server received:{},clientIp:{},vgroup:{}", message, NetUtil.toIpAddress(ctx.channel().remoteAddress())
                     ,rpcContext.getTransactionServiceGroup());
         } else {
-            messageStrings.offer(
+            logQueue.offer(
                 message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:" + rpcContext
                     .getTransactionServiceGroup());
         }
@@ -189,21 +190,22 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
 
         @Override
         public void run() {
+            List<String> logList = new ArrayList<>();
             while (true) {
-                if (messageStrings.size() > 0) {
-                    StringBuilder builder = new StringBuilder();
-                    while (!messageStrings.isEmpty()) {
-                        builder.append(messageStrings.poll()).append(BATCH_LOG_SPLIT);
-                    }
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info(builder.toString());
-                    }
-                }
                 try {
-                    Thread.sleep(IDLE_CHECK_MILLS);
+                    logList.add(logQueue.take());
+                    logQueue.drainTo(logList, MAX_LOG_TAKE_SIZE);
+                    if (LOGGER.isInfoEnabled()) {
+                        for (String str : logList) {
+                            LOGGER.info(str);
+                        }
+                    }
+                    logList.clear();
+                    TimeUnit.MILLISECONDS.sleep(BUSY_SLEEP_MILLS);
                 } catch (InterruptedException exx) {
-                    LOGGER.error(exx.getMessage());
+                    LOGGER.error("batch log busy sleep error:{}", exx.getMessage());
                 }
+
             }
         }
     }
