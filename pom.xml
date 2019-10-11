@@ -44,6 +44,7 @@
         <module>metrics</module>
         <module>codec</module>
         <module>seata-spring-boot-starter</module>
+        <module>saga</module>
     </modules>
     <packaging>pom</packaging>
 
