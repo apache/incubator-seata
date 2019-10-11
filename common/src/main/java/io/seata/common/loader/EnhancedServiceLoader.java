@@ -265,8 +265,8 @@ public class EnhancedServiceLoader {
         Collections.sort(extensions, new Comparator<Class>() {
             @Override
             public int compare(Class c1, Class c2) {
-                Integer o1 = 0;
-                Integer o2 = 0;
+                int o1 = 0;
+                int o2 = 0;
                 @SuppressWarnings("unchecked")
                 LoadLevel a1 = (LoadLevel)c1.getAnnotation(LoadLevel.class);
                 @SuppressWarnings("unchecked")
@@ -280,7 +280,7 @@ public class EnhancedServiceLoader {
                     o2 = a2.order();
                 }
 
-                return o1.compareTo(o2);
+                return Integer.compare(o1, o2);
 
             }
         });
