@@ -154,6 +154,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
     }
 
     protected Object toJavaObject(Object value, Class paramType){
+<<<<<<< HEAD
         if(value == null){
             return value;
         }
@@ -162,6 +163,10 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
             return value;
         }
         else if(isPrimitive(paramType)){
+=======
+
+        if(isPrimitive(paramType)){
+>>>>>>> upstream/develop
             return value;
         }
         else{

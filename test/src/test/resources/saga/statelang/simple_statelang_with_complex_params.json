@@ -15,6 +15,7 @@
                 "$.[people].age",
                 {
                     "name": "$.[people].name",
+<<<<<<< HEAD
                     "age": "$.[people].age",
                     "childrenArray": [
                         {
@@ -24,47 +25,86 @@
                         {
                             "name": "$.[people].name",
                             "age": "$.[people].age"
+=======
+                    "arg": "$.[people].age",
+                    "childrenArray": [
+                        {
+                            "name": "$.[people].name",
+                            "arg": "$.[people].age"
+                        },
+                        {
+                            "name": "$.[people].name",
+                            "arg": "$.[people].age"
+>>>>>>> upstream/develop
                         }
                     ],
                     "childrenList": [
                         {
                             "name": "$.[people].name",
+<<<<<<< HEAD
                             "age": "$.[people].age"
                         },
                         {
                             "name": "$.[people].name",
                             "age": "$.[people].age"
+=======
+                            "arg": "$.[people].age"
+                        },
+                        {
+                            "name": "$.[people].name",
+                            "arg": "$.[people].age"
+>>>>>>> upstream/develop
                         }
                     ],
                     "childrenMap": {
                         "lilei": {
                             "name": "$.[people].name",
+<<<<<<< HEAD
                             "age": "$.[people].age"
+=======
+                            "arg": "$.[people].age"
+>>>>>>> upstream/develop
                         }
                     }
                 },
                 [
                     {
                         "name": "$.[people].name",
+<<<<<<< HEAD
                         "age": "$.[people].age"
                     },
                     {
                         "name": "$.[people].name",
                         "age": "$.[people].age"
+=======
+                        "arg": "$.[people].age"
+                    },
+                    {
+                        "name": "$.[people].name",
+                        "arg": "$.[people].age"
+>>>>>>> upstream/develop
                     }
                 ],
                 [
                     {
                         "@type": "io.seata.saga.engine.mock.DemoService$People",
                         "name": "$.[people].name",
+<<<<<<< HEAD
                         "age": "$.[people].age"
+=======
+                        "arg": "$.[people].age"
+>>>>>>> upstream/develop
                     }
                 ],
                 {
                     "lilei": {
                         "@type": "io.seata.saga.engine.mock.DemoService$People",
                         "name": "$.[people].name",
+<<<<<<< HEAD
                         "age": "$.[people].age"
+=======
+                        "arg": "$.[people].age"
+>>>>>>> upstream/develop
                     }
                 }
             ],
@@ -89,6 +129,7 @@
         "SecondState": {
             "Type": "ServiceTask",
             "ServiceName": "demoService",
+<<<<<<< HEAD
             "ServiceMethod": "interfaceParameterMethod",
             "Input": [
                 "$.[career]"
@@ -97,13 +138,31 @@
                 "secondStateResult": "$.#root"
             },
             "Next": "ThirdState"
+=======
+            "ServiceMethod": "bar",
+            "Input": [
+                {
+                    "barInput" : "$.[complexParameterMethodResult]"
+                }
+            ],
+            "Next": "Succeed"
+>>>>>>> upstream/develop
         },
         "ThirdState": {
             "Type": "ServiceTask",
             "ServiceName": "demoService",
+<<<<<<< HEAD
             "ServiceMethod": "interfaceParameterMethod",
             "Input": [
                 "$.[secondStateResult]"
+=======
+            "ServiceMethod": "foo",
+            "listener":"",
+            "Input": [
+                {
+                    "fooInput" : "$.[complexParameterMethodResult]"
+                }
+>>>>>>> upstream/develop
             ],
             "Next": "Succeed"
         },

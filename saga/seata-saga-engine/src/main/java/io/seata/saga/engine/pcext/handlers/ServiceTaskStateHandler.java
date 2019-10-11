@@ -101,9 +101,13 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
                         + "] Execute finish. result: " + result);
             }
 
+<<<<<<< HEAD
             if(result != null){
                 ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_OUTPUT_PARAMS, result);
             }
+=======
+            ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_OUTPUT_PARAMS, result);
+>>>>>>> upstream/develop
 
         } catch (Exception e) {
 
