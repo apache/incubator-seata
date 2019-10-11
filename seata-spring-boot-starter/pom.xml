@@ -17,24 +17,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>io.seata</groupId>
+        <artifactId>seata-parent</artifactId>
+        <version>${revision}</version>
+    </parent>
     <modelVersion>4.0.0</modelVersion>
-
-    <groupId>io.seata</groupId>
     <artifactId>seata-spring-boot-starter</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
-
     <packaging>jar</packaging>
     <name>seata-spring-boot-starter ${project.version}</name>
 
     <properties>
-        <!-- Compiler settings properties -->
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
         <spring-boot.version>2.1.8.RELEASE</spring-boot.version>
     </properties>
-
 
     <dependencyManagement>
         <dependencies>
