@@ -90,13 +90,10 @@ public class DemoService {
         return people;
     }
 
-<<<<<<< HEAD
     public Career interfaceParameterMethod(Career career){
         return career;
     }
 
-=======
->>>>>>> upstream/develop
     public static class People {
 
         private String name;
@@ -146,7 +143,6 @@ public class DemoService {
             this.childrenMap = childrenMap;
         }
     }
-<<<<<<< HEAD
 
     public interface Career {
 
@@ -163,6 +159,4 @@ public class DemoService {
             this.name = name;
         }
     }
-=======
->>>>>>> upstream/develop
 }

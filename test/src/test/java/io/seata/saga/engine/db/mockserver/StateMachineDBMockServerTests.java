@@ -16,10 +16,7 @@
 package io.seata.saga.engine.db.mockserver;
 
 import io.seata.saga.engine.StateMachineEngine;
-<<<<<<< HEAD
 import io.seata.saga.engine.mock.DemoService.Engineer;
-=======
->>>>>>> upstream/develop
 import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
@@ -459,16 +456,12 @@ public class StateMachineDBMockServerTests {
         People people = new People();
         people.setName("lilei");
         people.setAge(18);
-<<<<<<< HEAD
 
         Engineer engineer = new Engineer();
         engineer.setName("programmer");
 
         paramMap.put("people", people);
         paramMap.put("career", engineer);
-=======
-        paramMap.put("people", people);
->>>>>>> upstream/develop
 
         String stateMachineName = "simpleStateMachineWithComplexParams";
 
