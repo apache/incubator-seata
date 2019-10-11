@@ -13,111 +13,59 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.sql.struct;
+package io.seata.rm.datasource.sql.struct.cache;
 
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import io.seata.rm.datasource.sql.struct.IndexMeta;
+import io.seata.rm.datasource.sql.struct.IndexType;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableMetaCache;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Map.Entry;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
-
-import javax.sql.DataSource;
-
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.util.StringUtils;
-import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.DataSourceProxy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Table meta cache.
+ *
+ * @author ygy
  */
-public class TableMetaCacheOracle {
+public class OracleTableMetaCache extends AbstractTableMetaCache {
 
-    private static final long CACHE_SIZE = 100000;
+    private static volatile TableMetaCache tableMetaCache = null;
 
-    private static final long EXPIRE_TIME = 900 * 1000;
-
-    private static final Cache<String, TableMeta> TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
-        .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
-
-    private static Logger LOGGER = LoggerFactory.getLogger(TableMetaCacheOracle.class);
-
-    /**
-     * Gets table meta.
-     *
-     * @param dataSourceProxy the druid data source
-     * @param tableName       the table name
-     * @return the table meta
-     */
-    public static TableMeta getTableMeta(final DataSourceProxy dataSourceProxy, final String tableName) {
-        if (StringUtils.isNullOrEmpty(tableName)) {
-            throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
-        }
-
-        TableMeta tmeta = null;
-        final String key = getCacheKey(dataSourceProxy, tableName);
-        tmeta = TABLE_META_CACHE.get(key, mappingFunction -> {
-            try {
-                return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
-            } catch (SQLException e) {
-                LOGGER.error("get cache error !", e);
-                return null;
-            }
-        });
-        if (tmeta == null) {
-            try {
-                tmeta = fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
-            } catch (SQLException e) {
-            }
-        }
-
-        if (tmeta == null) {
-            throw new ShouldNeverHappenException(String.format("[xid:%s]get tablemeta failed", RootContext.getXID()));
-        }
-        return tmeta;
+    private OracleTableMetaCache() {
     }
 
     /**
-     * Clear the table meta cache
+     * get instance of type MySQL keyword checker
      *
-     * @param dataSourceProxy
+     * @return instance
      */
-    public static void refresh(final DataSourceProxy dataSourceProxy) {
-        ConcurrentMap<String, TableMeta> tableMetaMap = TABLE_META_CACHE.asMap();
-        for (Entry<String, TableMeta> entry : tableMetaMap.entrySet()) {
-            String key = getCacheKey(dataSourceProxy, entry.getValue().getTableName());
-            if (entry.getKey().equals(key)) {
-                try {
-                    TableMeta tableMeta = fetchSchema(dataSourceProxy, entry.getValue().getTableName());
-                    if (!tableMeta.equals(entry.getValue())) {
-                        TABLE_META_CACHE.put(entry.getKey(), tableMeta);
-                        LOGGER.info("table meta change was found, update table meta cache automatically.");
-                    }
-                } catch (SQLException e) {
-                    LOGGER.error("get table meta error:{}", e.getMessage(), e);
+    public static TableMetaCache getInstance() {
+        if (tableMetaCache == null) {
+            synchronized (OracleTableMetaCache.class) {
+                if (tableMetaCache == null) {
+                    tableMetaCache = new OracleTableMetaCache();
                 }
             }
         }
+        return tableMetaCache;
     }
 
-    private static TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
-        return fetchSchemeInDefaultWay(dataSource, tableName);
-    }
-
-    private static TableMeta fetchSchemeInDefaultWay(DataSource dataSource, String tableName) throws SQLException {
+    @Override
+    protected TableMeta fetchScheme(DataSource dataSource, String tableName) throws SQLException {
         Connection conn = null;
         java.sql.Statement stmt = null;
         try {
             conn = dataSource.getConnection();
             stmt = conn.createStatement();
             DatabaseMetaData dbmd = conn.getMetaData();
-            return resultSetMetaToSchema(dbmd, tableName);
+            return resultSetMetaToScheme(dbmd, tableName);
         } catch (Exception e) {
             if (e instanceof SQLException) {
                 throw e;
@@ -134,7 +82,7 @@ public class TableMetaCacheOracle {
         }
     }
 
-    private static TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
+    private TableMeta resultSetMetaToScheme(DatabaseMetaData dbmd, String tableName) throws SQLException {
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
@@ -231,14 +179,4 @@ public class TableMetaCacheOracle {
         return tm;
     }
 
-    /**
-     * generate cache key
-     *
-     * @param dataSourceProxy
-     * @param tableName
-     * @return
-     */
-    private static String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
-        return dataSourceProxy.getResourceId() + "." + tableName;
-    }
 }

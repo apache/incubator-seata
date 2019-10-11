@@ -27,7 +27,7 @@ import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -303,7 +303,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                             Collections.reverse(sqlUndoLogs);
                         }
                         for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
-                            TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
+                            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy).getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
                                     dataSourceProxy.getDbType(),
