@@ -48,6 +48,7 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperP
  * @date 2019/09/30
  */
 public class StarterConstants {
+    private static final int MAP_CAPACITY = 64;
     public static final String SEATA_PREFIX = "seata";
     public static final String TRANSPORT_PREFIX = SEATA_PREFIX + ".transport";
     public static final String THREAD_FACTORY_PREFIX = TRANSPORT_PREFIX + ".thread-factory";
@@ -77,7 +78,7 @@ public class StarterConstants {
     public static final String CONFIG_ZK_PREFIX = CONFIG_PREFIX + ".zk";
     public static final String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
 
-    public static final HashMap<String, Class> PROPERTY_MAP = new HashMap<String, Class>() {
+    public static final HashMap<String, Class> PROPERTY_MAP = new HashMap<String, Class>(MAP_CAPACITY) {
         private static final long serialVersionUID = -8902807645596274597L;
 
         {
