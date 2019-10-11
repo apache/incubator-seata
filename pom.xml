@@ -44,6 +44,7 @@
         <module>tm</module>
         <module>metrics</module>
         <module>codec</module>
+        <module>saga</module>
     </modules>
     <packaging>pom</packaging>
 
