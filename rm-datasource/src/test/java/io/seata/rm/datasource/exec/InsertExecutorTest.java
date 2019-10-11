@@ -73,15 +73,16 @@ public class InsertExecutorTest {
 
     @BeforeEach
     public void init() {
+        connectionProxy = mock(ConnectionProxy.class);
+        when(connectionProxy.getDbType()).thenReturn(JdbcConstants.MYSQL);
+
         statementProxy = mock(PreparedStatementProxy.class);
+        when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
+
         statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
-
-        connectionProxy = mock(ConnectionProxy.class);
-        when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
-        when(connectionProxy.getDbType()).thenReturn(JdbcConstants.MYSQL);
     }
 
     @Test

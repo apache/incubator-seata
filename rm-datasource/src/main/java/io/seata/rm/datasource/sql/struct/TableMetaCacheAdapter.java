@@ -19,6 +19,7 @@ import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.DataSourceProxy;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -64,7 +65,7 @@ public class TableMetaCacheAdapter {
         adapter.setTableName(ColumnUtils.addEscape(tableMeta.getTableName(), dbType));
 
         for (Map.Entry<String, ColumnMeta> entry : tableMeta.getAllColumns().entrySet()) {
-            ColumnMeta value = entry.getValue();
+            ColumnMeta value = copyColumnMeta(entry.getValue());
             if (value.getColumnName() != null) {
                 value.setColumnName(ColumnUtils.addEscape(value.getColumnName(), dbType));
             }
@@ -75,7 +76,7 @@ public class TableMetaCacheAdapter {
         }
 
         for (Map.Entry<String, IndexMeta> entry : tableMeta.getAllIndexes().entrySet()) {
-            IndexMeta value = entry.getValue();
+            IndexMeta value = copyIndexMeta(entry.getValue());
             List<ColumnMeta> values = value.getValues();
             if (values != null) {
                 for (int i = 0, len = values.size(); i < len; i++) {
@@ -98,6 +99,45 @@ public class TableMetaCacheAdapter {
         }
 
         return adapter;
+    }
+
+    private static IndexMeta copyIndexMeta(IndexMeta src) {
+        IndexMeta dest = new IndexMeta();
+        dest.setIndexName(src.getIndexName());
+        dest.setIndextype(src.getIndextype());
+        for (ColumnMeta columnMeta : src.getValues()) {
+            dest.getValues().add(copyColumnMeta(columnMeta));
+        }
+        dest.setAscOrDesc(src.getAscOrDesc());
+        dest.setIndexQualifier(src.getIndexQualifier());
+        dest.setNonUnique(src.isNonUnique());
+        dest.setOrdinalPosition(src.getOrdinalPosition());
+        dest.setType(src.getType());
+        dest.setCardinality(src.getCardinality());
+        return dest;
+    }
+
+    private static ColumnMeta copyColumnMeta(ColumnMeta src) {
+        ColumnMeta dest = new ColumnMeta();
+        dest.setIsAutoincrement(src.getIsAutoincrement());
+        dest.setTableName(src.getTableName());
+        dest.setColumnName(src.getColumnName());
+        dest.setColumnDef(src.getColumnDef());
+        dest.setIsNullAble(src.getIsNullAble());
+        dest.setColumnSize(src.getColumnSize());
+        dest.setCharOctetLength(src.getCharOctetLength());
+        dest.setDataType(src.getDataType());
+        dest.setDataTypeName(src.getDataTypeName());
+        dest.setDecimalDigits(src.getDecimalDigits());
+        dest.setNullAble(src.getNullAble());
+        dest.setNumPrecRadix(src.getNumPrecRadix());
+        dest.setOrdinalPosition(src.getOrdinalPosition());
+        dest.setRemarks(src.getRemarks());
+        dest.setSqlDataType(src.getSqlDataType());
+        dest.setSqlDatetimeSub(src.getSqlDatetimeSub());
+        dest.setTableCat(src.getTableCat());
+        dest.setTableSchemaName(src.getTableSchemaName());
+        return dest;
     }
 
 }

@@ -26,11 +26,11 @@ import java.util.stream.Collectors;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.ColumnUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
+import io.seata.rm.datasource.sql.SQLInsertRecognizerAdapter;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Null;
@@ -56,6 +56,8 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     private static final String PLACEHOLDER = "?";
 
+    private final SQLInsertRecognizerAdapter sqlInsertRecognizerAdapter;
+
     /**
      * Instantiates a new Insert executor.
      *
@@ -66,6 +68,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     public InsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
                           SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
+        this.sqlInsertRecognizerAdapter = new SQLInsertRecognizerAdapter((SQLInsertRecognizer) sqlRecognizer, getDbType());
     }
 
     @Override
@@ -89,21 +92,18 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     protected boolean containsPK() {
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        List<String> insertColumns = recognizer.getInsertColumns();
+        List<String> insertColumns = sqlInsertRecognizerAdapter.getInsertColumns();
         TableMeta tmeta = getTableMeta();
         return tmeta.containsPK(insertColumns);
     }
 
     protected boolean containsColumns() {
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        List<String> insertColumns = recognizer.getInsertColumns();
+        List<String> insertColumns = sqlInsertRecognizerAdapter.getInsertColumns();
         return insertColumns != null && !insertColumns.isEmpty();
     }
 
     protected List<Object> getPkValuesByColumn() throws SQLException {
         // insert values including PK
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         final int pkIndex = getPkIndex();
         if (pkIndex == -1) {
             throw new ShouldNeverHappenException("pkIndex is " + pkIndex);
@@ -112,7 +112,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
 
-            List<List<Object>> insertRows = recognizer.getInsertRows();
+            List<List<Object>> insertRows = sqlInsertRecognizerAdapter.getInsertRows();
             if (insertRows != null && !insertRows.isEmpty()) {
                 ArrayList<Object>[] parameters = preparedStatementProxy.getParameters();
                 final int rowSize = insertRows.size();
@@ -158,7 +158,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                 }
             }
         } else {
-            List<List<Object>> insertRows = recognizer.getInsertRows();
+            List<List<Object>> insertRows = sqlInsertRecognizerAdapter.getInsertRows();
             pkValues = new ArrayList<>(insertRows.size());
             for (List<Object> row : insertRows) {
                 pkValues.add(row.get(pkIndex));
@@ -169,7 +169,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         boolean b = this.checkPkValues(pkValues);
         if (!b) {
-            throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+            throw new NotSupportYetException("not support sql [" + sqlInsertRecognizerAdapter.getOriginalSQL() + "]");
         }
         if (pkValues.size() > 0 && pkValues.get(0) instanceof SqlSequenceExpr) {
             pkValues = getPkValuesBySequence(pkValues.get(0));
@@ -223,12 +223,9 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @return -1 not found pk index
      */
     protected int getPkIndex() {
-        SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         String pkName = getTableMeta().getPkName();
-        List<String> insertColumns = recognizer.getInsertColumns();
+        List<String> insertColumns = sqlInsertRecognizerAdapter.getInsertColumns();
         if (insertColumns != null && !insertColumns.isEmpty()) {
-            // add escape
-            ColumnUtils.addEscape(insertColumns, getDbType());
             final int insertColumnsSize = insertColumns.size();
             int pkIndex = -1;
             for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
@@ -341,7 +338,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             pkValues.add(v);
         }
         if (pkValues.isEmpty()) {
-            throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+            throw new NotSupportYetException("not support sql [" + sqlInsertRecognizerAdapter.getOriginalSQL() + "]");
         }
         return pkValues;
     }
