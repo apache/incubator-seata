@@ -33,16 +33,22 @@ import java.util.stream.Stream;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_CLIENT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_CLIENT_LOCK;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_CONFIG_APOLLO;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_CONFIG_ZK;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_DATASOURCE_AUTOPROXY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_GROUPLIST;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_REGISTRY_ZK;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_TRANSACTION;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_TRANSPORT_THREAD_FACTORY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_VGROUP_MAPPING;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CLIENT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CLIENT_LOCK;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CONFIG_APOLLO;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CONFIG_ZK;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_DATASOURCE_AUTOPROXY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_REGISTRY_ZK;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_TRANSACTION;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_TRANSPORT_THREAD_FACTORY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
@@ -119,7 +125,6 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         if (rawDataId.startsWith(SPECIAL_KEY_VGROUP_MAPPING)) {
             return StarterConstants.SERVICE_PREFIX + "." + NORMALIZED_KEY_VGROUP_MAPPING;
         }
-
         if (rawDataId.endsWith(SPECIAL_KEY_GROUPLIST)) {
             return StarterConstants.SERVICE_PREFIX + "." + NORMALIZED_KEY_GROUPLIST;
         }
@@ -142,22 +147,47 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_TRANSPORT_THREAD_FACTORY);
             return StarterConstants.THREAD_FACTORY_PREFIX + "." + StringFormatUtils.minusToCamel(suffix);
         }
+        if(rawDataId.startsWith(SPECIAL_KEY_REGISTRY_ZK)){
+            String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_REGISTRY_ZK);
+            return StarterConstants.REGISTRY_ZK_PREFIX + "." + StringFormatUtils.dotToCamel(suffix);
+        }
+        if(rawDataId.startsWith(SPECIAL_KEY_CONFIG_ZK)){
+            String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_CONFIG_ZK);
+            return StarterConstants.CONFIG_ZK_PREFIX + "." + StringFormatUtils.dotToCamel(suffix);
+        }
+        if(rawDataId.startsWith(SPECIAL_KEY_CONFIG_APOLLO)){
+            String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_CONFIG_APOLLO);
+            return StarterConstants.CONFIG_APOLLO_PREFIX + "." + StringFormatUtils.dotToCamel(suffix);
+        }
 
         return StarterConstants.SEATA_PREFIX + "." + rawDataId;
     }
 
+    /**
+     * Get property prefix
+     * @param dataId
+     * @return propertyPrefix
+     */
     private String getPropertyPrefix(String dataId) {
         return StringFormatUtils.underlineToCamel(StringFormatUtils.minusToCamel(StringUtils.substringBeforeLast(dataId, ".")));
     }
 
+    /**
+     * Get property suffix
+     * @param dataId
+     * @return propertySuffix
+     */
     private String getPropertySuffix(String dataId) {
         return StringUtils.substringAfterLast(dataId, ".");
     }
 
+    /**
+     * Get property class
+     * @param propertyPrefix
+     * @return propertyClass
+     */
     private Class getPropertyClass(String propertyPrefix) {
         Optional<Map.Entry<String, Class>> entry = PROPERTY_MAP.entrySet().stream().filter(e -> propertyPrefix.equals(e.getKey())).findAny();
         return entry.map(Map.Entry::getValue).orElse(null);
     }
-
-
 }
