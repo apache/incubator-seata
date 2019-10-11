@@ -40,7 +40,7 @@ import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
  *
  * @author sharajava
  */
-public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRecognizer {
+public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLInsertRecognizer {
 
     private final MySqlInsertStatement ast;
 

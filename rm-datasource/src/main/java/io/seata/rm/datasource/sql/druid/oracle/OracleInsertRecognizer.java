@@ -43,7 +43,7 @@ import java.util.List;
  * @author ccg
  * @date 2019/3/25
  */
-public class OracleInsertRecognizer extends BaseRecognizer implements SQLInsertRecognizer {
+public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLInsertRecognizer {
 
     private final OracleInsertStatement ast;
 
