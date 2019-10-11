@@ -58,7 +58,7 @@ class HttpTransactionFilterTest {
         Map<String, String> params = Maps.newHashMap();
         params.put("name", "zhangsan");
         try {
-            HttpResponse response = httpExecuter.excuteGet(null, path, null, HttpResponse.class);
+            HttpResponse response = httpExecuter.excuteGet(host, path, params, HttpResponse.class);
             String content = readStreamAsStr(response.getEntity().getContent());
             Assertions.assertEquals(content, "hello world!");
         } catch (IOException e) {
