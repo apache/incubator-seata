@@ -600,7 +600,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         }
     }
 
-    private class GlobalSessionLock {
+    private static class GlobalSessionLock {
 
         private Lock globalSessionLock = new ReentrantLock();
 
