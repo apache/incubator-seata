@@ -238,7 +238,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         jedisPool.destroy();
     }
 
-    private class NotifySub extends JedisPubSub {
+    private static class NotifySub extends JedisPubSub {
 
         private final List<RedisListener> redisListeners;
 

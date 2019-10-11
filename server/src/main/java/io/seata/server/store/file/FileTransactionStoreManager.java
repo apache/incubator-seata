@@ -475,7 +475,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     }
 
-    abstract class AbstractFlushRequest implements StoreRequest {
+    abstract static class AbstractFlushRequest implements StoreRequest {
         private final long curFileTrxNum;
 
         private final FileChannel curFileChannel;
@@ -523,7 +523,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     }
 
-    class CloseFileRequest implements StoreRequest {
+    static class CloseFileRequest implements StoreRequest {
 
         private FileChannel fileChannel;
 

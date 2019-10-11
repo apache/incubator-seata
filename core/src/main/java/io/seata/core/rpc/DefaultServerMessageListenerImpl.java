@@ -185,7 +185,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     /**
      * The type Batch log runnable.
      */
-    class BatchLogRunnable implements Runnable {
+    static class BatchLogRunnable implements Runnable {
 
         @Override
         public void run() {
