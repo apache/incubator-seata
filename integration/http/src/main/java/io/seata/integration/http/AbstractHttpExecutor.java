@@ -1,0 +1,124 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package io.seata.integration.http;
+
+import com.alibaba.fastjson.JSON;
+import com.google.common.collect.Maps;
+import io.seata.core.context.RootContext;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.Args;
+
+import java.io.IOException;
+import java.util.Map;
+
+/**
+ * The abstract http executer.
+ *
+ * @author wangxb
+ */
+public abstract class AbstractHttpExecutor implements HttpExecutor {
+
+
+    private static final int SUCCESS_CODE = 200;
+
+
+    @Override
+    public <T, K> K excutePost(String host, String path, T paramObject, Class<K> returnType) throws IOException {
+
+        Args.notNull(returnType, "returnType");
+        Args.notNull(host, "host");
+        Args.notNull(path, "path");
+
+        CloseableHttpClient httpClient = initHttpClientInstance(paramObject);
+        HttpPost httpPost = new HttpPost(host + path);
+        StringEntity entity = null;
+        if (paramObject != null) {
+            String sParam = JSON.toJSONString(paramObject);
+            entity = new StringEntity(sParam, ContentType.APPLICATION_JSON);
+        }
+
+        entity = buildEntity(entity, paramObject);
+        if (entity != null) {
+            httpPost.setEntity(entity);
+        }
+        Map<String, String> headers = Maps.newHashMap();
+
+        buildPostHeaders(headers, paramObject);
+        return wrapHttpExecute(returnType, httpClient, httpPost, headers);
+    }
+
+    @Override
+    public <T, K> K excuteGet(String host, String path, T paramObject, Class<K> returnType) throws IOException {
+
+        Args.notNull(returnType, "returnType");
+        Args.notNull(host, "host");
+        Args.notNull(path, "path");
+
+        CloseableHttpClient httpClient = initHttpClientInstance(paramObject);
+        HttpGet httpGet = new HttpGet(initGetUrl(host, path, paramObject));
+        Map<String, String> headers = Maps.newHashMap();
+
+        buildGetHeaders(headers, paramObject);
+        return wrapHttpExecute(returnType, httpClient, httpGet, headers);
+    }
+
+    private <T> CloseableHttpClient initHttpClientInstance(T paramObject) {
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+        buildClientEntity(httpClient, paramObject);
+        return httpClient;
+    }
+
+    protected abstract <T> void buildClientEntity(CloseableHttpClient httpClient, T paramObject);
+
+    private <K> K wrapHttpExecute(Class<K> returnType, CloseableHttpClient httpClient, HttpUriRequest httpUriRequest, Map<String, String> headers) throws IOException {
+        CloseableHttpResponse response;
+        String xid = RootContext.getXID();
+        if (xid != null) {
+            headers.put(RootContext.KEY_XID, xid);
+        }
+        if (!headers.isEmpty()) {
+            headers.keySet().forEach(key -> httpUriRequest.addHeader(key, headers.get(key)));
+        }
+        response = httpClient.execute(httpUriRequest);
+        if (response.getStatusLine().getStatusCode() != SUCCESS_CODE) {
+            throw new RuntimeException("Failed to invoke the http method "
+                    + httpUriRequest.getURI() + " in the service "
+                    + ". return status by: " + response.getStatusLine().getStatusCode());
+        }
+
+        return convertResult(response, returnType);
+    }
+
+    protected abstract <T> void buildGetHeaders(Map<String, String> headers, T paramObject);
+
+    protected abstract <T> String initGetUrl(String host, String path, T paramObject);
+
+
+    protected abstract <T> void buildPostHeaders(Map<String, String> headers, T t);
+
+    protected abstract <T> StringEntity buildEntity(StringEntity entity, T t);
+
+    protected abstract <K> K convertResult(HttpResponse response, Class<K> clazz);
+
+}
