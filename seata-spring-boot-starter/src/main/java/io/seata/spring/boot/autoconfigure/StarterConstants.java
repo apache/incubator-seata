@@ -15,6 +15,8 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import java.util.HashMap;
+
 import io.seata.spring.boot.autoconfigure.properties.file.ClientProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.ServiceProperties;
@@ -24,12 +26,22 @@ import io.seata.spring.boot.autoconfigure.properties.file.SupportProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.ThreadFactoryProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.TransactionProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.TransportProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.ConfigApolloProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.ConfigConsulProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.ConfigEtcd3Properties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigFileProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.ConfigNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.ConfigZooKeeperProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEecd3Properties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryFileProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryProperties;
-
-import java.util.HashMap;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -59,6 +71,8 @@ public class StarterConstants {
 
     public static final String CONFIG_PREFIX = SEATA_PREFIX + ".config";
     public static final String CONFIG_NACOS_PREFIX = CONFIG_PREFIX + ".nacos";
+    public static final String CONFIG_CONSUL_PREFIX = CONFIG_PREFIX + ".consul";
+    public static final String CONFIG_ETCD3_PREFIX = CONFIG_PREFIX + ".etcd3";
     public static final String CONFIG_APOLLO_PREFIX = CONFIG_PREFIX + ".apollo";
     public static final String CONFIG_ZK_PREFIX = CONFIG_PREFIX + ".zk";
     public static final String CONFIG_FILE_PREFIX = CONFIG_PREFIX + ".file";
@@ -80,6 +94,20 @@ public class StarterConstants {
             put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);
             put(REGISTRY_PREFIX, RegistryProperties.class);
             put(REGISTRY_FILE_PREFIX, RegistryFileProperties.class);
+
+            put(CONFIG_NACOS_PREFIX, ConfigNacosProperties.class);
+            put(CONFIG_CONSUL_PREFIX, ConfigConsulProperties.class);
+            put(CONFIG_ZK_PREFIX, ConfigZooKeeperProperties.class);
+            put(CONFIG_APOLLO_PREFIX, ConfigApolloProperties.class);
+            put(CONFIG_ETCD3_PREFIX, ConfigEtcd3Properties.class);
+
+            put(REGISTRY_CONSUL_PREFIX, RegistryConsulProperties.class);
+            put(REGISTRY_ETCD3_PREFIX, RegistryEecd3Properties.class);
+            put(REGISTRY_EUREKA_PREFIX, RegistryEurekaProperties.class);
+            put(REGISTRY_NACOS_PREFIX, RegistryNacosProperties.class);
+            put(REGISTRY_REDIS_PREFIX, RegistryRedisProperties.class);
+            put(REGISTRY_SOFA_PREFIX, RegistrySofaProperties.class);
+            put(REGISTRY_ZK_PREFIX, RegistryZooKeeperProperties.class);
         }
 
     };

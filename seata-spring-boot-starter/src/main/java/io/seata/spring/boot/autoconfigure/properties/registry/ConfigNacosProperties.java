@@ -28,8 +28,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_NACOS_P
 @ConfigurationProperties(prefix = CONFIG_NACOS_PREFIX)
 public class ConfigNacosProperties {
     private String serverAddr = "localhost";
-    private String namespace = "public";
-    private String cluster = "default";
+    private String namespace = "";
 
     public String getServerAddr() {
         return serverAddr;
@@ -46,15 +45,6 @@ public class ConfigNacosProperties {
 
     public ConfigNacosProperties setNamespace(String namespace) {
         this.namespace = namespace;
-        return this;
-    }
-
-    public String getCluster() {
-        return cluster;
-    }
-
-    public ConfigNacosProperties setCluster(String cluster) {
-        this.cluster = cluster;
         return this;
     }
 }

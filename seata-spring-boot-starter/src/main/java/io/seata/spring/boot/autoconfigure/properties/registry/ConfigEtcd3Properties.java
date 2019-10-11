@@ -18,43 +18,25 @@ package io.seata.spring.boot.autoconfigure.properties.registry;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_NACOS_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_ETCD3_PREFIX;
+
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/10/03
+ * @date 2019/10/11
  */
 @Component
-@ConfigurationProperties(prefix = REGISTRY_NACOS_PREFIX)
-public class RegistryNacosProperties {
-    private String serverAddr = "localhost";
-    private String namespace = "";
-    private String cluster = "default";
+@ConfigurationProperties(prefix = CONFIG_ETCD3_PREFIX)
+public class ConfigEtcd3Properties {
+    private String serverAddr = "http://localhost:2379";
 
     public String getServerAddr() {
         return serverAddr;
     }
 
-    public RegistryNacosProperties setServerAddr(String serverAddr) {
+    public ConfigEtcd3Properties setServerAddr(String serverAddr) {
         this.serverAddr = serverAddr;
         return this;
     }
 
-    public String getNamespace() {
-        return namespace;
-    }
-
-    public RegistryNacosProperties setNamespace(String namespace) {
-        this.namespace = namespace;
-        return this;
-    }
-
-    public String getCluster() {
-        return cluster;
-    }
-
-    public RegistryNacosProperties setCluster(String cluster) {
-        this.cluster = cluster;
-        return this;
-    }
 }
