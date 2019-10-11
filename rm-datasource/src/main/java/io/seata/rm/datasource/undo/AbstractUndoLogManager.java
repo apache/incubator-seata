@@ -15,7 +15,9 @@
  */
 package io.seata.rm.datasource.undo;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.Constants;
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.BlobUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.ConfigurationFactory;
@@ -28,6 +30,7 @@ import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -303,7 +306,14 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                             Collections.reverse(sqlUndoLogs);
                         }
                         for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
-                            TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
+                            TableMeta tableMeta;
+                            if (JdbcConstants.ORACLE.equalsIgnoreCase(dataSourceProxy.getDbType())) {
+                                tableMeta = TableMetaCacheOracle.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
+                            } else if (JdbcConstants.MYSQL.equalsIgnoreCase(dataSourceProxy.getDbType())) {
+                                tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
+                            } else {
+                                throw new NotSupportYetException("not support dbType[" + dataSourceProxy.getDbType() + "]");
+                            }
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
                                     dataSourceProxy.getDbType(),
