@@ -87,4 +87,13 @@ public interface TCInboundHandler {
      */
     GlobalStatusResponse handle(GlobalStatusRequest globalStatus, RpcContext rpcContext);
 
+    /**
+     * Handle global report request.
+     *
+     * @param globalReport the global report request
+     * @param rpcContext   the rpc context
+     * @return the global report response
+     */
+    GlobalReportResponse handle(GlobalReportRequest globalReport, RpcContext rpcContext);
+
 }

@@ -31,7 +31,12 @@ public enum BranchType {
     /**
      * The TCC.
      */
-    TCC;
+    TCC,
+
+    /**
+     * The SAGA.
+     */
+    SAGA;
 
     /**
      * Get branch type.

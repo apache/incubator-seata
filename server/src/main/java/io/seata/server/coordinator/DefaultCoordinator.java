@@ -55,6 +55,8 @@ import io.seata.core.protocol.transaction.GlobalCommitRequest;
 import io.seata.core.protocol.transaction.GlobalCommitResponse;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
+import io.seata.core.protocol.transaction.GlobalReportRequest;
+import io.seata.core.protocol.transaction.GlobalReportResponse;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
@@ -186,6 +188,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     }
 
     @Override
+    protected void doGlobalReport(GlobalReportRequest request, GlobalReportResponse response, RpcContext rpcContext)
+            throws TransactionException {
+        response.setGlobalStatus(core.globalReport(request.getXid(), request.getGlobalStatus()));
+
+    }
+
+    @Override
     protected void doBranchRegister(BranchRegisterRequest request, BranchRegisterResponse response,
                                     RpcContext rpcContext) throws TransactionException {
         response.setBranchId(
@@ -226,11 +235,31 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             if (globalSession == null) {
                 return BranchStatus.PhaseTwo_Committed;
             }
-            BranchSession branchSession = globalSession.getBranch(branchId);
 
-            BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
-                branchSession.getClientId(), request);
-            return response.getBranchStatus();
+            if(BranchType.SAGA.equals(branchType)){
+
+                Map<String,Channel> channels = ChannelManager.getRmChannels();
+                if(channels == null || channels.size() == 0){
+                    LOGGER.error("Failed to commit SAGA global[" + globalSession.getXid() + ", RM channels is empty.");
+                    return BranchStatus.PhaseTwo_CommitFailed_Retryable;
+                }
+                String sagaResourceId = globalSession.getApplicationId() + "#" + globalSession.getTransactionServiceGroup();
+                Channel sagaChannel = channels.get(sagaResourceId);
+                if(sagaChannel == null){
+                    LOGGER.error("Failed to commit SAGA global[" + globalSession.getXid() + ", cannot find channel by resourceId["+sagaResourceId+"]");
+                    return BranchStatus.PhaseTwo_CommitFailed_Retryable;
+                }
+                BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(sagaChannel, request);
+                return response.getBranchStatus();
+            }
+            else{
+
+                BranchSession branchSession = globalSession.getBranch(branchId);
+
+                BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
+                        branchSession.getClientId(), request);
+                return response.getBranchStatus();
+            }
         } catch (IOException | TimeoutException e) {
             throw new BranchTransactionException(FailedToSendBranchCommitRequest, String.format("Send branch commit failed, xid = %s branchId = %s", xid, branchId), e);
         }
@@ -253,11 +282,32 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             if (globalSession == null) {
                 return BranchStatus.PhaseTwo_Rollbacked;
             }
-            BranchSession branchSession = globalSession.getBranch(branchId);
 
-            BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSyncRequest(resourceId,
-                branchSession.getClientId(), request);
-            return response.getBranchStatus();
+            if(BranchType.SAGA.equals(branchType)){
+
+                Map<String,Channel> channels = ChannelManager.getRmChannels();
+                if(channels == null || channels.size() == 0){
+                    LOGGER.error("Failed to rollback SAGA global[" + globalSession.getXid() + ", RM channels is empty.");
+                    return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
+                }
+                String sagaResourceId = globalSession.getApplicationId() + "#" + globalSession.getTransactionServiceGroup();
+                Channel sagaChannel = channels.get(sagaResourceId);
+                if(sagaChannel == null){
+                    LOGGER.error("Failed to rollback SAGA global[" + globalSession.getXid() + ", cannot find channel by resourceId["+sagaResourceId+"]");
+                    return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
+                }
+                BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSyncRequest(sagaChannel, request);
+                return response.getBranchStatus();
+            }
+            else{
+
+                BranchSession branchSession = globalSession.getBranch(branchId);
+
+                BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSyncRequest(resourceId,
+                        branchSession.getClientId(), request);
+                return response.getBranchStatus();
+            }
+
         } catch (IOException | TimeoutException e) {
             throw new BranchTransactionException(FailedToSendBranchRollbackRequest, String.format("Send branch rollback failed, xid = %s branchId = %s", xid, branchId), e);
         }

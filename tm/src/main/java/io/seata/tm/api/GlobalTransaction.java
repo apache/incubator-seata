@@ -85,4 +85,14 @@ public interface GlobalTransaction {
      */
     String getXid();
 
+    /**
+     * report the global transaction status.
+     *
+     * @param globalStatus global status.
+     *
+     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
+     * out.
+     */
+    void globalReport(GlobalStatus globalStatus) throws TransactionException;
+
 }

@@ -1,0 +1,87 @@
+{
+    "Name": "simpleStatusMatchingStateMachine",
+    "Comment": "带Task执行状态匹配的测试状态机定义",
+    "StartState": "FirstState",
+    "Version": "0.0.1",
+    "States": {
+        "FirstState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
+            "Next": "ChoiceState",
+            "Input": [
+                {
+                    "fooInput": "$.[a]"
+                }
+            ],
+            "Output": {
+                "fooResult": "$.#root"
+            }
+        },
+        "ChoiceState":{
+            "Type": "Choice",
+            "Choices":[
+                {
+                    "Expression":"[a] == 1",
+                    "Next":"SecondState"
+                },
+                {
+                    "Expression":"[a] == 2",
+                    "Next":"ThirdState"
+                }
+            ],
+            "Default":"Fail"
+        },
+        "SecondState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "bar",
+            "Input": [
+                {
+                    "barInput": "$.[fooResult]",
+                    "throwException": "$.[barThrowException]"
+                }
+            ],
+            "Output": {
+                "barResult": "$.#root"
+            },
+            "Status": {
+                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN",
+                "$Exception{java.lang.Exception}": "FA",
+                "#root != null &&  #root.size() > 0": "SU",
+                "#root == null || #root.size() == 0": "FA"
+            },
+            "Catch": [
+                {
+                    "Exceptions": [
+                        "io.seata.common.exception.FrameworkException"
+                    ],
+                    "Next": "Fail"
+                }
+            ],
+            "Next": "Succeed"
+        },
+        "ThirdState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
+            "Input": [
+                {
+                    "fooInput": "$.[fooResult]"
+                }
+            ],
+            "Output": {
+                "fooResult": "$.#root"
+            },
+            "Next": "Succeed"
+        },
+        "Succeed": {
+            "Type":"Succeed"
+        },
+        "Fail": {
+            "Type":"Fail",
+            "ErrorCode": "NOT_FOUND",
+            "Message": "not found"
+        }
+    }
+}
