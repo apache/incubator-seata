@@ -15,6 +15,12 @@
  */
 package io.seata.spring.boot.autoconfigure.provider;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import io.seata.spring.boot.autoconfigure.StarterConstants;
@@ -24,12 +30,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
 import org.springframework.cglib.proxy.MethodProxy;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_CLIENT;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_CLIENT_LOCK;
@@ -147,15 +147,15 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_TRANSPORT_THREAD_FACTORY);
             return StarterConstants.THREAD_FACTORY_PREFIX + "." + StringFormatUtils.minusToCamel(suffix);
         }
-        if(rawDataId.startsWith(SPECIAL_KEY_REGISTRY_ZK)){
+        if (rawDataId.startsWith(SPECIAL_KEY_REGISTRY_ZK)) {
             String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_REGISTRY_ZK);
             return StarterConstants.REGISTRY_ZK_PREFIX + "." + StringFormatUtils.dotToCamel(suffix);
         }
-        if(rawDataId.startsWith(SPECIAL_KEY_CONFIG_ZK)){
+        if (rawDataId.startsWith(SPECIAL_KEY_CONFIG_ZK)) {
             String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_CONFIG_ZK);
             return StarterConstants.CONFIG_ZK_PREFIX + "." + StringFormatUtils.dotToCamel(suffix);
         }
-        if(rawDataId.startsWith(SPECIAL_KEY_CONFIG_APOLLO)){
+        if (rawDataId.startsWith(SPECIAL_KEY_CONFIG_APOLLO)) {
             String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_CONFIG_APOLLO);
             return StarterConstants.CONFIG_APOLLO_PREFIX + "." + StringFormatUtils.dotToCamel(suffix);
         }
@@ -165,6 +165,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     /**
      * Get property prefix
+     *
      * @param dataId
      * @return propertyPrefix
      */
@@ -174,6 +175,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     /**
      * Get property suffix
+     *
      * @param dataId
      * @return propertySuffix
      */
@@ -183,6 +185,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     /**
      * Get property class
+     *
      * @param propertyPrefix
      * @return propertyClass
      */
