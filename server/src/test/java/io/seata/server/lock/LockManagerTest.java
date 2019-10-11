@@ -142,7 +142,7 @@ public class LockManagerTest {
             }).start();
             // Assume execute more than 5 seconds means deadlock happened.
             if (countDownLatch.await(5, TimeUnit.SECONDS)) {
-                Assertions.assertTrue((first.get() && !second.get()) || (second.get() && !first.get()));
+                Assertions.assertTrue(!first.get() || !second.get());
             }
         } finally {
             lockManager.releaseLock(branchSession1);
