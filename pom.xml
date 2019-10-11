@@ -44,6 +44,7 @@
         <module>metrics</module>
         <module>codec</module>
         <module>compressor</module>
+        <module>saga</module>
     </modules>
     <packaging>pom</packaging>
 
