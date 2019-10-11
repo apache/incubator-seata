@@ -214,10 +214,9 @@ public class EnhancedServiceLoader {
                 loadFile(service, SEATA_DIRECTORY + activateName.toLowerCase() + "/", loader, extensions);
 
                 List<Class> activateExtensions = new ArrayList<Class>();
-                for (int i = 0; i < extensions.size(); i++) {
-                    Class clz = extensions.get(i);
+                for (Class clz : extensions) {
                     @SuppressWarnings("unchecked")
-                    LoadLevel activate = (LoadLevel)clz.getAnnotation(LoadLevel.class);
+                    LoadLevel activate = (LoadLevel) clz.getAnnotation(LoadLevel.class);
                     if (activate != null && activateName.equalsIgnoreCase(activate.name())) {
                         activateExtensions.add(clz);
                     }

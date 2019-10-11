@@ -39,6 +39,8 @@ import io.seata.codec.seata.protocol.transaction.GlobalCommitRequestCodec;
 import io.seata.codec.seata.protocol.transaction.GlobalCommitResponseCodec;
 import io.seata.codec.seata.protocol.transaction.GlobalLockQueryRequestCodec;
 import io.seata.codec.seata.protocol.transaction.GlobalLockQueryResponseCodec;
+import io.seata.codec.seata.protocol.transaction.GlobalReportRequestCodec;
+import io.seata.codec.seata.protocol.transaction.GlobalReportResponseCodec;
 import io.seata.codec.seata.protocol.transaction.GlobalRollbackRequestCodec;
 import io.seata.codec.seata.protocol.transaction.GlobalRollbackResponseCodec;
 import io.seata.codec.seata.protocol.transaction.GlobalStatusRequestCodec;
@@ -70,6 +72,8 @@ import io.seata.core.protocol.transaction.GlobalCommitRequest;
 import io.seata.core.protocol.transaction.GlobalCommitResponse;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
+import io.seata.core.protocol.transaction.GlobalReportRequest;
+import io.seata.core.protocol.transaction.GlobalReportResponse;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
@@ -131,6 +135,9 @@ public class MessageCodecFactory {
             case MessageType.TYPE_BRANCH_ROLLBACK:
                 msgCodec = new BranchRollbackRequestCodec();
                 break;
+            case MessageType.TYPE_GLOBAL_REPORT:
+                msgCodec = new GlobalReportRequestCodec();
+                break;
             default:
                 break;
         }
@@ -174,6 +181,8 @@ public class MessageCodecFactory {
                 return new BranchRegisterRequestCodec();
             case MessageType.TYPE_BRANCH_STATUS_REPORT:
                 return new BranchReportRequestCodec();
+            case MessageType.TYPE_GLOBAL_REPORT:
+                return new GlobalReportRequestCodec();
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
@@ -207,6 +216,8 @@ public class MessageCodecFactory {
                 return new BranchRollbackResponseCodec();
             case MessageType.TYPE_RM_DELETE_UNDOLOG:
                 return new UndoLogDeleteRequestCodec();
+            case MessageType.TYPE_GLOBAL_REPORT_RESULT:
+                return new GlobalReportResponseCodec();
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
@@ -247,6 +258,12 @@ public class MessageCodecFactory {
                 break;
             case MessageType.TYPE_RM_DELETE_UNDOLOG:
                 abstractMessage = new UndoLogDeleteRequest();
+                break;
+            case MessageType.TYPE_GLOBAL_REPORT:
+                abstractMessage = new GlobalReportRequest();
+                break;
+            case MessageType.TYPE_GLOBAL_REPORT_RESULT:
+                abstractMessage = new GlobalReportResponse();
                 break;
             default:
                 break;
@@ -289,6 +306,8 @@ public class MessageCodecFactory {
                 return new BranchRegisterRequest();
             case MessageType.TYPE_BRANCH_STATUS_REPORT:
                 return new BranchReportRequest();
+            case MessageType.TYPE_GLOBAL_REPORT:
+                return new GlobalReportRequest();
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
@@ -320,6 +339,8 @@ public class MessageCodecFactory {
                 return new BranchCommitResponse();
             case MessageType.TYPE_BRANCH_ROLLBACK_RESULT:
                 return new BranchRollbackResponse();
+            case MessageType.TYPE_GLOBAL_REPORT_RESULT:
+                return new GlobalReportResponse();
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }

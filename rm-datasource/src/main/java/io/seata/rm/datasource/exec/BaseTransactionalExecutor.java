@@ -351,4 +351,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         return afterImage;
     }
 
+    /**
+     * get db type
+     * @return
+     */
+    protected String getDbType() {
+        return statementProxy.getConnectionProxy().getDbType();
+    }
+
 }

@@ -16,6 +16,8 @@
 package io.seata.tm.api;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
@@ -44,6 +46,12 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     private GlobalStatus status;
 
     private GlobalTransactionRole role;
+
+    private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
+        ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, 1);
+
+    private static final int ROLLBACK_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
+        ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, 1);
 
     /**
      * Instantiates a new Default global transaction.
@@ -112,11 +120,25 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         if (xid == null) {
             throw new IllegalStateException();
         }
-
-        status = transactionManager.commit(xid);
-        if (RootContext.getXID() != null) {
-            if (xid.equals(RootContext.getXID())) {
-                RootContext.unbind();
+        int retry = COMMIT_RETRY_COUNT;
+        try {
+            while (retry > 0) {
+                try {
+                    status = transactionManager.commit(xid);
+                    break;
+                } catch (Throwable ex) {
+                    LOGGER.error("Failed to report global commit [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
+                    retry--;
+                    if (retry == 0) {
+                        throw new TransactionException("Failed to report global commit", ex);
+                    }
+                }
+            }
+        } finally {
+            if (RootContext.getXID() != null) {
+                if (xid.equals(RootContext.getXID())) {
+                    RootContext.unbind();
+                }
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -138,10 +160,25 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             throw new IllegalStateException();
         }
 
-        status = transactionManager.rollback(xid);
-        if (RootContext.getXID() != null) {
-            if (xid.equals(RootContext.getXID())) {
-                RootContext.unbind();
+        int retry = ROLLBACK_RETRY_COUNT;
+        try {
+            while (retry > 0) {
+                try {
+                    status = transactionManager.rollback(xid);
+                    break;
+                } catch (Throwable ex) {
+                    LOGGER.error("Failed to report global rollback [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
+                    retry--;
+                    if (retry == 0) {
+                        throw new TransactionException("Failed to report global rollback", ex);
+                    }
+                }
+            }
+        } finally {
+            if (RootContext.getXID() != null) {
+                if (xid.equals(RootContext.getXID())) {
+                    RootContext.unbind();
+                }
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -161,6 +198,27 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     @Override
     public String getXid() {
         return xid;
+    }
+
+    @Override
+    public void globalReport(GlobalStatus globalStatus) throws TransactionException {
+        if (xid == null) {
+            throw new IllegalStateException();
+        }
+        if (globalStatus == null) {
+            throw new IllegalStateException();
+        }
+
+        status = transactionManager.globalReport(xid, globalStatus);
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("[" + xid + "] report status:" + status);
+        }
+
+        if (RootContext.getXID() != null) {
+            if (xid.equals(RootContext.getXID())) {
+                RootContext.unbind();
+            }
+        }
     }
 
     private void check() {
