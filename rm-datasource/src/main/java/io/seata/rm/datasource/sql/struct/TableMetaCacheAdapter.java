@@ -95,7 +95,7 @@ public class TableMetaCacheAdapter {
             if (value.getIndexName() != null) {
                 value.setIndexName(ColumnUtils.addEscape(value.getIndexName(), dbType));
             }
-            adapter.getAllIndexes().put(entry.getKey(), value);
+            adapter.getAllIndexes().put(ColumnUtils.addEscape(entry.getKey(), dbType), value);
         }
 
         return adapter;
