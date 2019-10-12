@@ -72,15 +72,16 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
         Object message = request.getBody();
         RpcContext rpcContext = ChannelManager.getContextFromIdentified(ctx.channel());
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug(
-                "server received:{},clientIp:{},vgroup:{}", message, NetUtil.toIpAddress(ctx.channel().remoteAddress())
-                    ,rpcContext.getTransactionServiceGroup());
+            LOGGER.debug("server received:{},clientIp:{},vgroup:{}", message,
+                NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
         } else {
             logQueue.offer(
                 message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:" + rpcContext
                     .getTransactionServiceGroup());
         }
-        if (!(message instanceof AbstractMessage)) { return; }
+        if (!(message instanceof AbstractMessage)) {
+            return;
+        }
         if (message instanceof MergedWarpMessage) {
             AbstractResultMessage[] results = new AbstractResultMessage[((MergedWarpMessage)message).msgs.size()];
             for (int i = 0; i < results.length; i++) {
@@ -96,9 +97,9 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     }
 
     @Override
-    public void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx,
-                               ServerMessageSender sender, RegisterCheckAuthHandler checkAuthHandler) {
-        RegisterRMRequest message = (RegisterRMRequest) request.getBody();
+    public void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx, ServerMessageSender sender,
+                               RegisterCheckAuthHandler checkAuthHandler) {
+        RegisterRMRequest message = (RegisterRMRequest)request.getBody();
         boolean isSuccess = false;
         try {
             if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
@@ -117,9 +118,9 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     }
 
     @Override
-    public void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx,
-                               ServerMessageSender sender, RegisterCheckAuthHandler checkAuthHandler) {
-        RegisterTMRequest message = (RegisterTMRequest) request.getBody();
+    public void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx, ServerMessageSender sender,
+                               RegisterCheckAuthHandler checkAuthHandler) {
+        RegisterTMRequest message = (RegisterTMRequest)request.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         Version.putChannelVersion(ctx.channel(), message.getVersion());
         boolean isSuccess = false;
@@ -129,18 +130,15 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
                 Version.putChannelVersion(ctx.channel(), message.getVersion());
                 isSuccess = true;
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info(String
-                        .format("checkAuth for client:%s vgroup:%s ok", ipAndPort,
-                            message.getTransactionServiceGroup()));
+                    LOGGER.info(String.format("checkAuth for client:%s vgroup:%s ok", ipAndPort,
+                        message.getTransactionServiceGroup()));
                 }
             }
         } catch (Exception exx) {
             isSuccess = false;
             LOGGER.error(exx.getMessage());
         }
-        //FIXME please add success or fail
-        sender.sendResponse(request, ctx.channel(),
-            new RegisterTMResponse(isSuccess));
+        sender.sendResponse(request, ctx.channel(), new RegisterTMResponse(isSuccess));
     }
 
     @Override
@@ -203,7 +201,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
                     logList.clear();
                     TimeUnit.MILLISECONDS.sleep(BUSY_SLEEP_MILLS);
                 } catch (InterruptedException exx) {
-                    LOGGER.error("batch log busy sleep error:{}", exx.getMessage());
+                    LOGGER.error("batch log busy sleep error:{}", exx.getMessage(), exx);
                 }
 
             }
