@@ -18,6 +18,8 @@ package io.seata.spring.boot.autoconfigure.properties.file;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import static io.seata.core.constants.ConfigurationKeys.TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
+import static io.seata.core.protocol.transaction.UndoLogDeleteRequest.DEFAULT_SAVE_DAYS;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSACTION_PREFIX;
 
 /**
@@ -29,12 +31,12 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSACTION_PR
 public class TransactionProperties {
     private boolean undoDataValidation = true;
     private String undoLogSerialization = "jackson";
-    private int undoLogSaveDays = 7;
+    private int undoLogSaveDays = DEFAULT_SAVE_DAYS;
     /**
      * schedule delete expired undo_log in milliseconds
      */
     private long undoLogDeletePeriod = 86400000L;
-    private String undoLogTable = "undo_log";
+    private String undoLogTable = TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
 
     public boolean isUndoDataValidation() {
         return undoDataValidation;
