@@ -101,7 +101,7 @@ class HttpTransactionFilterTest {
         json.put("name", "zhangsan");
         json.put("age", 15);
 
-        //The body parameter of post supports the above types (param,person,map,json)
+        //The body parameter of post supports the above types (str,person,map,json)
         try {
             HttpResponse response = httpExecuter.excutePost(host, postPath, map, HttpResponse.class);
             String content = readStreamAsStr(response.getEntity().getContent());
