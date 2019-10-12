@@ -13,11 +13,10 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.integration.motan;
+package io.seata.integration.http;
 
 import com.google.common.collect.Maps;
 import io.seata.core.context.RootContext;
-import io.seata.integration.http.DefaultHttpExecutor;
 import org.apache.http.HttpResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -32,20 +31,28 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Map;
 
 /**
- * @author jimin.jm@alibaba-inc.com
- * @date 2019/05/27
+ * @author wangxb
  */
 class HttpTransactionFilterTest {
 
-    private static final String host = "http://127.0.0.1:8081";
-    private static final String path = "/index";
+    private static final String host = "http://127.0.0.1:8080";
+    private static final String getPath = "/index";
+    private static final String postPath = "/testPost";
     private static final String XID = "127.0.0.1:8081:87654321";
 
     @Test
     void testGetProviderXID() {
         RootContext.bind(XID);
         providerStart();
-        consumerStart();
+        consumerGetStart();
+        RootContext.unbind();
+    }
+
+    @Test
+    void testPostProviderXID() {
+        RootContext.bind(XID);
+        providerStart();
+        consumerPostStart();
         RootContext.unbind();
     }
 
@@ -53,12 +60,49 @@ class HttpTransactionFilterTest {
 
     }
 
-    private void consumerStart() {
+    class Person {
+        private String name;
+        private int age;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
+
+    }
+
+    private void consumerPostStart() {
+        DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
+        Person person = new Person();
+        person.setName("zhangsan");
+        person.setAge(15);
+        try {
+            HttpResponse response = httpExecuter.excutePost(host, postPath, person, HttpResponse.class);
+            String content = readStreamAsStr(response.getEntity().getContent());
+            System.out.println("return content =" + content);
+            Assertions.assertTrue(content.contains("zhangsan")&&content.contains("15"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void consumerGetStart() {
         DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
         Map<String, String> params = Maps.newHashMap();
         params.put("name", "zhangsan");
         try {
-            HttpResponse response = httpExecuter.excuteGet(host, path, params, HttpResponse.class);
+            HttpResponse response = httpExecuter.excuteGet(host, getPath, params, HttpResponse.class);
             String content = readStreamAsStr(response.getEntity().getContent());
             Assertions.assertEquals(content, "hello world!");
         } catch (IOException e) {
