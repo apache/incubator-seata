@@ -16,6 +16,8 @@
 package io.seata.integration.http;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONException;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import io.seata.core.context.RootContext;
 import org.apache.http.HttpResponse;
@@ -28,6 +30,8 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.Args;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
@@ -39,7 +43,7 @@ import java.util.Map;
  */
 public abstract class AbstractHttpExecutor implements HttpExecutor {
 
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHttpExecutor.class);
     private static final int SUCCESS_CODE = 200;
 
 
@@ -54,8 +58,25 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
         HttpPost httpPost = new HttpPost(host + path);
         StringEntity entity = null;
         if (paramObject != null) {
-            String sParam = JSON.toJSONString(paramObject);
-            entity = new StringEntity(sParam, ContentType.APPLICATION_JSON);
+            String content;
+            if (paramObject instanceof String) {
+                String sParam = (String) paramObject;
+                JSONObject jsonObject = null;
+                try {
+                    jsonObject = JSON.parseObject(sParam);
+                    content = jsonObject.toJSONString();
+                } catch (JSONException e) {
+                    //Interface provider process parse exception
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn(e.getMessage());
+                    }
+                    content = sParam;
+                }
+
+            } else {
+                content = JSON.toJSONString(paramObject);
+            }
+            entity = new StringEntity(content, ContentType.APPLICATION_JSON);
         }
 
         entity = buildEntity(entity, paramObject);

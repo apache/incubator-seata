@@ -13,10 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.integration.http;
+package io.seata.integration.motan;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import io.seata.core.context.RootContext;
+import io.seata.integration.http.DefaultHttpExecutor;
 import org.apache.http.HttpResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -35,7 +38,7 @@ import java.util.Map;
  */
 class HttpTransactionFilterTest {
 
-    private static final String host = "http://127.0.0.1:8080";
+    private static final String host = "http://127.0.0.1:8081";
     private static final String getPath = "/index";
     private static final String postPath = "/testPost";
     private static final String XID = "127.0.0.1:8081:87654321";
@@ -60,7 +63,7 @@ class HttpTransactionFilterTest {
 
     }
 
-    class Person {
+    public static class Person {
         private String name;
         private int age;
 
@@ -84,14 +87,26 @@ class HttpTransactionFilterTest {
 
     private void consumerPostStart() {
         DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
-        Person person = new Person();
-        person.setName("zhangsan");
-        person.setAge(15);
+        String str = "{\n" +
+                "    \"name\":\"zhangsan\",\n" +
+                "    \"age\":15\n" +
+                "}";
+        Person person = JSON.parseObject(str, Person.class);
+
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("name", "zhangsan");
+        map.put("age", 15);
+
+        JSONObject json = new JSONObject();
+        json.put("name", "zhangsan");
+        json.put("age", 15);
+
+        //The body parameter of post supports the above types (param,person,map,json)
         try {
-            HttpResponse response = httpExecuter.excutePost(host, postPath, person, HttpResponse.class);
+            HttpResponse response = httpExecuter.excutePost(host, postPath, map, HttpResponse.class);
             String content = readStreamAsStr(response.getEntity().getContent());
             System.out.println("return content =" + content);
-            Assertions.assertTrue(content.contains("zhangsan")&&content.contains("15"));
+            Assertions.assertTrue(content.contains("zhangsan") && content.contains("15"));
         } catch (IOException e) {
             e.printStackTrace();
         }
