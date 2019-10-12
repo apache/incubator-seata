@@ -20,9 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author : sp0108
- * @Description: TODO
- * @date Date : 2019年10月12日 10:49
+ * Xid handler.
+ *
+ * @author wangxb
  */
 public class XidResource {
 
