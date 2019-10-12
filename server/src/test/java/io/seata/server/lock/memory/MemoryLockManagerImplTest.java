@@ -36,7 +36,7 @@ import java.util.stream.Stream;
  */
 public class MemoryLockManagerImplTest {
 
-    private LockManager lockManager = new MemoryLockManagerForTest();;
+    private LockManager lockManager = new MemoryLockManagerForTest();
 
     private static final long transactionId = UUIDGenerator.generateUUID();
 
