@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * @author jsbxyyx
  */
-public class TableMetaAdapter extends TableMeta {
+public class TableMetaDecorator extends TableMeta {
 
     private String dbType;
 
@@ -53,7 +53,7 @@ public class TableMetaAdapter extends TableMeta {
     }
 
     @Override
-    public boolean containsPK(List<String> cols) {
+    public boolean containsPK(final List<String> cols) {
         if (cols == null) {
             return false;
         }
@@ -63,12 +63,13 @@ public class TableMetaAdapter extends TableMeta {
             return false;
         }
 
-        ColumnUtils.addEscape(cols, dbType);
+        List<String> newPks = ColumnUtils.addEscape(pk, dbType);
+        List<String> newCols = ColumnUtils.addEscape(cols, dbType);
 
-        if (cols.containsAll(pk)) {
+        if (newCols.containsAll(newPks)) {
             return true;
         } else {
-            return CollectionUtils.toUpperList(cols).containsAll(CollectionUtils.toUpperList(pk));
+            return CollectionUtils.toUpperList(newCols).containsAll(CollectionUtils.toUpperList(newPks));
         }
     }
 

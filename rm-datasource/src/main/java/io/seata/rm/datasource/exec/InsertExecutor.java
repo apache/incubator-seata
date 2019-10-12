@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.ColumnUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
@@ -224,15 +223,12 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      */
     protected int getPkIndex() {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        String pkName = getTableMeta().getPkName();
         List<String> insertColumns = recognizer.getInsertColumns();
         if (insertColumns != null && !insertColumns.isEmpty()) {
-            // add escape
-            ColumnUtils.addEscape(insertColumns, getDbType());
             final int insertColumnsSize = insertColumns.size();
             int pkIndex = -1;
             for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
-                if (insertColumns.get(paramIdx).equalsIgnoreCase(pkName)) {
+                if (equalsPK(insertColumns.get(paramIdx))) {
                     pkIndex = paramIdx;
                     break;
                 }
@@ -243,7 +239,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         Map<String, ColumnMeta> allColumns = getTableMeta().getAllColumns();
         for (Map.Entry<String, ColumnMeta> entry : allColumns.entrySet()) {
             pkIndex++;
-            if (entry.getValue().getColumnName().equalsIgnoreCase(pkName)) {
+            if (equalsPK(entry.getValue().getColumnName())) {
                 break;
             }
         }

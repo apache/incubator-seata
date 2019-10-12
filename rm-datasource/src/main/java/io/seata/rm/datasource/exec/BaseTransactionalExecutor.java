@@ -34,7 +34,7 @@ import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.WhereRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCacheAdapter;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheDecorator;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
@@ -186,8 +186,17 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (tableMeta != null) {
             return tableMeta;
         }
-        tableMeta = TableMetaCacheAdapter.getTableMeta(getDbType(), statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
+        tableMeta = TableMetaCacheDecorator.getTableMeta(getDbType(), statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
         return tableMeta;
+    }
+
+    /**
+     * compare column name and primary key name
+     * @param columnName the primary key column name
+     * @return true: equal false: not equal
+     */
+    protected boolean equalsPK(String columnName) {
+        return TableMetaCacheDecorator.equalsPK(getTableMeta(), columnName, getDbType());
     }
 
     /**

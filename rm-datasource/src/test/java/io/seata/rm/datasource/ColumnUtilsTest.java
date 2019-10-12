@@ -33,13 +33,13 @@ public class ColumnUtilsTest {
         List<String> cols = new ArrayList<>();
         cols.add("`id`");
         cols.add("name");
-        ColumnUtils.delEscape(cols, ColumnUtils.Escape.MYSQL);
+        cols = ColumnUtils.delEscape(cols, ColumnUtils.Escape.MYSQL);
         Assertions.assertEquals("id", cols.get(0));
         Assertions.assertEquals("name", cols.get(1));
 
         List<String> cols2 = new ArrayList<>();
         cols2.add("\"id\"");
-        ColumnUtils.delEscape(cols2, ColumnUtils.Escape.STANDARD);
+        cols2 = ColumnUtils.delEscape(cols2, ColumnUtils.Escape.STANDARD);
         Assertions.assertEquals("id", cols2.get(0));
 
         Assertions.assertThrows(NullPointerException.class, () -> {
@@ -53,12 +53,12 @@ public class ColumnUtilsTest {
 
         List<String> cols3 = new ArrayList<>();
         cols3.add("\"id\"");
-        ColumnUtils.delEscape(cols3, JdbcConstants.ORACLE);
+        cols3 = ColumnUtils.delEscape(cols3, JdbcConstants.ORACLE);
         Assertions.assertEquals("id", cols3.get(0));
 
         List<String> cols4 = new ArrayList<>();
         cols4.add("`id`");
-        ColumnUtils.delEscape(cols4, JdbcConstants.MYSQL);
+        cols4 = ColumnUtils.delEscape(cols4, JdbcConstants.MYSQL);
         Assertions.assertEquals("id", cols4.get(0));
 
         Assertions.assertEquals("id", ColumnUtils.delEscape("`id`", JdbcConstants.MYSQL));
@@ -97,22 +97,22 @@ public class ColumnUtilsTest {
     public void test_addEscape_byDbType() throws Exception {
         List<String> cols1 = new ArrayList<>();
         cols1.add("id");
-        ColumnUtils.addEscape(cols1, JdbcConstants.MYSQL);
+        cols1 = ColumnUtils.addEscape(cols1, JdbcConstants.MYSQL);
         Assertions.assertEquals("`id`", cols1.get(0));
 
         List<String> cols2 = new ArrayList<>();
         cols2.add("`id`");
-        ColumnUtils.addEscape(cols2, JdbcConstants.MYSQL);
+        cols2 = ColumnUtils.addEscape(cols2, JdbcConstants.MYSQL);
         Assertions.assertEquals("`id`", cols2.get(0));
 
         List<String> cols3 = new ArrayList<>();
         cols3.add("id");
-        ColumnUtils.addEscape(cols3, JdbcConstants.ORACLE);
+        cols3 = ColumnUtils.addEscape(cols3, JdbcConstants.ORACLE);
         Assertions.assertEquals("\"id\"", cols3.get(0));
 
         List<String> cols4 = new ArrayList<>();
         cols4.add("\"id\"");
-        ColumnUtils.addEscape(cols4, JdbcConstants.ORACLE);
+        cols4 = ColumnUtils.addEscape(cols4, JdbcConstants.ORACLE);
         Assertions.assertEquals("\"id\"", cols4.get(0));
 
     }

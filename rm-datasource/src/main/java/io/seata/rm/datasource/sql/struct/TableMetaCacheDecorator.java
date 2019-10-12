@@ -16,17 +16,45 @@
 package io.seata.rm.datasource.sql.struct;
 
 import com.alibaba.druid.util.JdbcConstants;
+import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.DataSourceProxy;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author jsbxyyx
  */
-public class TableMetaCacheAdapter {
+public class TableMetaCacheDecorator {
+
+    /**
+     * compare primary key and column name
+     * @param tableMeta the table meta
+     * @param columnName the column name
+     * @param dbType the database type
+     * @return true: equal false: not equal
+     */
+    public static boolean equalsPK(TableMeta tableMeta, String columnName, String dbType) {
+        return equalsPK(tableMeta, columnName, dbType, true);
+    }
+
+    /**
+     * compare primary key and column name
+     * @param tableMeta the table meta
+     * @param columnName the column name
+     * @param dbType the database type
+     * @param escape true: add escape on column name false: not add escape on column name
+     * @return true: equal false: not equal
+     */
+    public static boolean equalsPK(TableMeta tableMeta, String columnName, String dbType, boolean escape) {
+        String newColumnName = columnName;
+        if (escape) {
+            newColumnName = ColumnUtils.addEscape(columnName, dbType);
+        }
+        String pkName = tableMeta.getPkName();
+        return StringUtils.equalsIgnoreCase(pkName, newColumnName);
+    }
 
     /**
      * adapter table meta add escape
@@ -59,10 +87,10 @@ public class TableMetaCacheAdapter {
             return tableMeta;
         }
 
-        TableMetaAdapter adapter = new TableMetaAdapter();
+        TableMetaDecorator decorator = new TableMetaDecorator();
 
-        adapter.setDbType(dbType);
-        adapter.setTableName(ColumnUtils.addEscape(tableMeta.getTableName(), dbType));
+        decorator.setDbType(dbType);
+        decorator.setTableName(ColumnUtils.addEscape(tableMeta.getTableName(), dbType));
 
         for (Map.Entry<String, ColumnMeta> entry : tableMeta.getAllColumns().entrySet()) {
             ColumnMeta value = copyColumnMeta(entry.getValue());
@@ -72,7 +100,7 @@ public class TableMetaCacheAdapter {
             if (value.getTableName() != null) {
                 value.setTableName(ColumnUtils.addEscape(value.getTableName(), dbType));
             }
-            adapter.getAllColumns().put(ColumnUtils.addEscape(entry.getKey(), dbType), value);
+            decorator.getAllColumns().put(ColumnUtils.addEscape(entry.getKey(), dbType), value);
         }
 
         for (Map.Entry<String, IndexMeta> entry : tableMeta.getAllIndexes().entrySet()) {
@@ -95,10 +123,10 @@ public class TableMetaCacheAdapter {
             if (value.getIndexName() != null) {
                 value.setIndexName(ColumnUtils.addEscape(value.getIndexName(), dbType));
             }
-            adapter.getAllIndexes().put(ColumnUtils.addEscape(entry.getKey(), dbType), value);
+            decorator.getAllIndexes().put(ColumnUtils.addEscape(entry.getKey(), dbType), value);
         }
 
-        return adapter;
+        return decorator;
     }
 
     private static IndexMeta copyIndexMeta(IndexMeta src) {
