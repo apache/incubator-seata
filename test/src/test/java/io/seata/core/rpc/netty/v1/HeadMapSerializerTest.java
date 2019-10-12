@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -74,7 +75,7 @@ class HeadMapSerializerTest {
         HeadMapSerializer mapSerializer = HeadMapSerializer.getInstance();
         String s = "test";
         // utf-8 and gbk same in English
-        Assertions.assertArrayEquals(s.getBytes("UTF-8"), s.getBytes("GBK"));
+        Assertions.assertArrayEquals(s.getBytes(StandardCharsets.UTF_8), s.getBytes("GBK"));
 
         Map<String, String> map = new HashMap<String, String>();
         map.put("11", "22");

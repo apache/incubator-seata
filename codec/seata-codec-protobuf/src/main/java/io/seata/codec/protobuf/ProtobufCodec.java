@@ -17,6 +17,7 @@ package io.seata.codec.protobuf;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import com.google.protobuf.GeneratedMessageV3;
 import io.seata.codec.protobuf.convertor.PbConvertor;
@@ -33,7 +34,7 @@ import io.seata.core.codec.Codec;
 @LoadLevel(name = "PROTOBUF", order = 0)
 public class ProtobufCodec implements Codec {
 
-    protected static final Charset UTF8 = Charset.forName("utf-8");
+    protected static final Charset UTF8 = StandardCharsets.UTF_8;
 
     @Override
     public <T> byte[] encode(T t) {
