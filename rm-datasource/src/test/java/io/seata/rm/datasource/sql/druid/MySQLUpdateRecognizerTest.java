@@ -20,9 +20,18 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
+import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
+import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlCharExpr;
+import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOrderingExpr;
+import com.alibaba.druid.util.JdbcConstants;
+
 import io.seata.rm.datasource.ParametersHolder;
 
+import io.seata.rm.datasource.sql.SQLParsingException;
+import io.seata.rm.datasource.sql.SQLType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -218,5 +227,83 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
 
         Assertions.assertEquals(Arrays.asList(Arrays.asList("id1", "id2")), paramAppenderList);
         Assertions.assertEquals("id BETWEEN ? AND ?", whereCondition);
+    }
+
+    @Test
+    public void testGetSqlType() {
+        String sql = "update t set n = ?";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        Assertions.assertEquals(recognizer.getSQLType(), SQLType.UPDATE);
+    }
+
+    @Test
+    public void testGetUpdateColumns() {
+        // test with normal
+        String sql = "update t set a = ?, b = ?, c = ?";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        List<String> updateColumns = recognizer.getUpdateColumns();
+        Assertions.assertEquals(updateColumns.size(), 3);
+
+        // test with alias
+        sql = "update t set a.a = ?, a.b = ?, a.c = ?";
+        asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateColumns = recognizer.getUpdateColumns();
+        Assertions.assertEquals(updateColumns.size(), 3);
+
+        //test with error
+        Assertions.assertThrows(SQLParsingException.class, () -> {
+            String s = "update t set a = a";
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.MYSQL);
+            SQLUpdateStatement sqlUpdateStatement = (SQLUpdateStatement) sqlStatements.get(0);
+            List<SQLUpdateSetItem> updateSetItems = sqlUpdateStatement.getItems();
+            for (SQLUpdateSetItem updateSetItem : updateSetItems) {
+                updateSetItem.setColumn(new MySqlCharExpr());
+            }
+            MySQLUpdateRecognizer oracleUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
+            oracleUpdateRecognizer.getUpdateColumns();
+        });
+    }
+
+    @Test
+    public void testGetUpdateValues() {
+        // test with normal
+        String sql = "update t set a = ?, b = ?, c = ?";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        List<Object> updateValues = recognizer.getUpdateValues();
+        Assertions.assertEquals(updateValues.size(), 3);
+
+        // test with values
+        sql = "update t set a = 1, b = 2, c = 3";
+        asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateValues = recognizer.getUpdateValues();
+        Assertions.assertEquals(updateValues.size(), 3);
+
+        // test with error
+        Assertions.assertThrows(SQLParsingException.class, () -> {
+            String s = "update t set a = ?";
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.MYSQL);
+            SQLUpdateStatement sqlUpdateStatement = (SQLUpdateStatement)sqlStatements.get(0);
+            List<SQLUpdateSetItem> updateSetItems = sqlUpdateStatement.getItems();
+            for (SQLUpdateSetItem updateSetItem : updateSetItems) {
+                updateSetItem.setValue(new MySqlOrderingExpr());
+            }
+            MySQLUpdateRecognizer oracleUpdateRecognizer = new MySQLUpdateRecognizer(s, sqlUpdateStatement);
+            oracleUpdateRecognizer.getUpdateValues();
+        });
+    }
+
+    @Test
+    public void testGetTableAlias() {
+        String sql = "update t set a = ?, b = ?, c = ?";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        Assertions.assertNull(recognizer.getTableAlias());
     }
 }
