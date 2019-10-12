@@ -17,6 +17,7 @@ package io.seata.codec.seata;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import io.seata.codec.seata.protocol.MergeResultMessageCodec;
 import io.seata.codec.seata.protocol.MergedWarpMessageCodec;
@@ -89,7 +90,7 @@ public class MessageCodecFactory {
     /**
      * The constant UTF8.
      */
-    protected static final Charset UTF8 = Charset.forName("utf-8");
+    protected static final Charset UTF8 = StandardCharsets.UTF_8;
 
     /**
      * Get message codec message codec.
