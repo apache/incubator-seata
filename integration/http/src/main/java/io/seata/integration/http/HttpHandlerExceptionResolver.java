@@ -15,10 +15,7 @@
  */
 package io.seata.integration.http;
 
-import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.AbstractHandlerExceptionResolver;
 
@@ -32,18 +29,11 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class HttpHandlerExceptionResolver extends AbstractHandlerExceptionResolver {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TransactionPropagationIntercepter.class);
 
     @Override
-    protected ModelAndView doResolveException(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, Object o, Exception e) {
+    protected ModelAndView doResolveException(HttpServletRequest request, HttpServletResponse httpServletResponse, Object o, Exception e) {
 
-        if (StringUtils.isNotBlank(RootContext.getXID())) {
-            String unbindXid = RootContext.unbind();
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("unbind[" + unbindXid + "] from RootContext");
-            }
-
-        }
+        XidResource.cleanXid(request.getHeader(RootContext.KEY_XID));
         return null;
     }
 }
