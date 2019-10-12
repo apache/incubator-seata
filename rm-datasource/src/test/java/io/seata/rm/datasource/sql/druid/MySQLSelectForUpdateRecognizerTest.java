@@ -20,9 +20,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
+import com.alibaba.druid.util.JdbcConstants;
+
 import io.seata.rm.datasource.ParametersHolder;
 
+import io.seata.rm.datasource.sql.SQLParsingException;
+import io.seata.rm.datasource.sql.SQLType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -169,5 +175,52 @@ public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerT
 
         Assertions.assertEquals(Arrays.asList(Arrays.asList("id1", "id2")), paramAppenderList);
         Assertions.assertEquals("id BETWEEN ? AND ?", whereCondition);
+    }
+
+    @Test
+    public void testGetWhereCondition_1() {
+        String sql = "select * from t for update";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+
+        MySQLSelectForUpdateRecognizer recognizer = new MySQLSelectForUpdateRecognizer(sql, asts.get(0));
+        String whereCondition = recognizer.getWhereCondition();
+
+        Assertions.assertEquals("", whereCondition);
+
+        //test for select was null
+        Assertions.assertThrows(SQLParsingException.class, () -> {
+            String s = "select * from t for update";
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.MYSQL);
+            SQLSelectStatement selectAst = (SQLSelectStatement) sqlStatements.get(0);
+            selectAst.setSelect(null);
+            new MySQLSelectForUpdateRecognizer(s, selectAst).getWhereCondition();
+        });
+
+        //test for query was null
+        Assertions.assertThrows(SQLParsingException.class, () -> {
+            String s = "select * from t";
+            List<SQLStatement> sqlStatements = SQLUtils.parseStatements(s, JdbcConstants.MYSQL);
+            SQLSelectStatement selectAst = (SQLSelectStatement) sqlStatements.get(0);
+            selectAst.getSelect().setQuery(null);
+            new MySQLSelectForUpdateRecognizer(s, selectAst).getWhereCondition();
+        });
+    }
+
+    @Test
+    public void testGetSqlType() {
+        String sql = "select * from t where id = ? for update";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+
+        MySQLSelectForUpdateRecognizer recognizer = new MySQLSelectForUpdateRecognizer(sql, asts.get(0));
+        Assertions.assertEquals(recognizer.getSQLType(), SQLType.SELECT_FOR_UPDATE);
+    }
+
+    @Test
+    public void testGetTableAlias() {
+        String sql = "select * from t where id = ? for update";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+
+        MySQLSelectForUpdateRecognizer recognizer = new MySQLSelectForUpdateRecognizer(sql, asts.get(0));
+        Assertions.assertNull(recognizer.getTableAlias());
     }
 }
