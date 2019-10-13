@@ -80,7 +80,7 @@ public class RootContext {
      */
     public static void bindType(String xidType) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("bind type " + xidType);
+            LOGGER.debug("bind type {}", xidType);
         }
         CONTEXT_HOLDER.put(KEY_XID_TYPE, xidType);
     }
@@ -119,7 +119,7 @@ public class RootContext {
     public static String unbindType() {
         String xidType = CONTEXT_HOLDER.remove(KEY_XID_TYPE);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind type " + xidType);
+            LOGGER.debug("unbind type {}", xidType);
         }
         return xidType;
     }
