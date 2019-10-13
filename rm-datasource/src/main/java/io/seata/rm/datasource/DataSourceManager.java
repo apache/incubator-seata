@@ -15,6 +15,12 @@
  */
 package io.seata.rm.datasource;
 
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
+
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -40,11 +46,6 @@ import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
 
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
@@ -144,6 +145,9 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     public void registerResource(Resource resource) {
         DataSourceProxy dataSourceProxy = (DataSourceProxy)resource;
         dataSourceCache.put(dataSourceProxy.getResourceId(), dataSourceProxy);
+        synchronized (RESOURCE_LOCK) {
+            RESOURCE_LOCK.notifyAll();
+        }
         super.registerResource(dataSourceProxy);
     }
 
