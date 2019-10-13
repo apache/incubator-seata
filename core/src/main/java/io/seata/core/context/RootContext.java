@@ -58,6 +58,15 @@ public class RootContext {
         }
         return null;
     }
+
+    /**
+     * Gets xid.
+     *
+     * @return the xid
+     */
+    public static String getXIDType() {
+        return CONTEXT_HOLDER.get(KEY_XID_TYPE);
+    }
     
     /**
      * Bind.
