@@ -15,6 +15,8 @@
  */
 package io.seata.core.context;
 
+import java.util.Map;
+
 /**
  * The interface Context core.
  *
@@ -46,4 +48,11 @@ public interface ContextCore {
      * @return the string
      */
     String remove(String key);
+
+    /**
+     * entries
+     *
+     * @return
+     */
+    Map<String, String> entries();
 }
