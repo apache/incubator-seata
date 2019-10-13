@@ -255,7 +255,7 @@ public abstract class AbstractUndoExecutor {
         if (pkValues.length == 0) {
             return TableRecords.empty(tableMeta);
         }
-        StringBuffer replace = new StringBuffer();
+        StringBuilder replace = new StringBuilder();
         for (int i = 0; i < pkValues.length; i++) {
             replace.append("?,");
         }
