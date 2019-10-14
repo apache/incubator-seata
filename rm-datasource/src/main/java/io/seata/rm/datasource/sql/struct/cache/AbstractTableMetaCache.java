@@ -59,7 +59,7 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
         final String key = getCacheKey(dataSourceProxy, tableName);
         tmeta = TABLE_META_CACHE.get(key, mappingFunction -> {
             try {
-                return fetchScheme(dataSourceProxy.getTargetDataSource(), tableName);
+                return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
                 LOGGER.error("get cache error:{}", e.getMessage(), e);
                 return null;
@@ -68,7 +68,7 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
 
         if (tmeta == null) {
             try {
-                tmeta = fetchScheme(dataSourceProxy.getTargetDataSource(), tableName);
+                tmeta = fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
             } catch (SQLException e) {
                 LOGGER.error("get table meta error:{}", e.getMessage(), e);
             }
@@ -87,7 +87,7 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
             String key = getCacheKey(dataSourceProxy, entry.getValue().getTableName());
             if (entry.getKey().equals(key)) {
                 try {
-                    TableMeta tableMeta = fetchScheme(dataSourceProxy, entry.getValue().getTableName());
+                    TableMeta tableMeta = fetchSchema(dataSourceProxy, entry.getValue().getTableName());
                     if (!tableMeta.equals(entry.getValue())) {
                         TABLE_META_CACHE.put(entry.getKey(), tableMeta);
                         LOGGER.info("table meta change was found, update table meta cache automatically.");
@@ -119,6 +119,6 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
      * @return
      * @throws SQLException
      */
-    protected abstract TableMeta fetchScheme(DataSource dataSource, String tableName) throws SQLException;
+    protected abstract TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException;
 
 }

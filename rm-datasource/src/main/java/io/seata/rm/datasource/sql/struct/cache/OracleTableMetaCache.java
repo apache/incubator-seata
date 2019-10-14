@@ -58,14 +58,14 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
     }
 
     @Override
-    protected TableMeta fetchScheme(DataSource dataSource, String tableName) throws SQLException {
+    protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
         Connection conn = null;
         java.sql.Statement stmt = null;
         try {
             conn = dataSource.getConnection();
             stmt = conn.createStatement();
             DatabaseMetaData dbmd = conn.getMetaData();
-            return resultSetMetaToScheme(dbmd, tableName);
+            return resultSetMetaToSchema(dbmd, tableName);
         } catch (Exception e) {
             if (e instanceof SQLException) {
                 throw e;
@@ -82,7 +82,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
         }
     }
 
-    private TableMeta resultSetMetaToScheme(DatabaseMetaData dbmd, String tableName) throws SQLException {
+    private TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");

@@ -64,7 +64,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
     }
 
     @Override
-    protected TableMeta fetchScheme(DataSource dataSource, String tableName) throws SQLException {
+    protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
         Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
@@ -78,7 +78,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             ResultSetMetaData rsmd = rs.getMetaData();
             DatabaseMetaData dbmd = conn.getMetaData();
 
-            return resultSetMetaToScheme(rsmd, dbmd, tableName);
+            return resultSetMetaToSchema(rsmd, dbmd, tableName);
         } catch (Exception e) {
             if (e instanceof SQLException) {
                 throw e;
@@ -98,7 +98,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         }
     }
 
-    private TableMeta resultSetMetaToScheme(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
+    private TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
         throws SQLException {
         String schemaName = rsmd.getSchemaName(1);
         String catalogName = rsmd.getCatalogName(1);
