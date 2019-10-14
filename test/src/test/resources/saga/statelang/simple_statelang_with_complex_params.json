@@ -15,56 +15,56 @@
                 "$.[people].age",
                 {
                     "name": "$.[people].name",
-                    "arg": "$.[people].age",
+                    "age": "$.[people].age",
                     "childrenArray": [
                         {
                             "name": "$.[people].name",
-                            "arg": "$.[people].age"
+                            "age": "$.[people].age"
                         },
                         {
                             "name": "$.[people].name",
-                            "arg": "$.[people].age"
+                            "age": "$.[people].age"
                         }
                     ],
                     "childrenList": [
                         {
                             "name": "$.[people].name",
-                            "arg": "$.[people].age"
+                            "age": "$.[people].age"
                         },
                         {
                             "name": "$.[people].name",
-                            "arg": "$.[people].age"
+                            "age": "$.[people].age"
                         }
                     ],
                     "childrenMap": {
                         "lilei": {
                             "name": "$.[people].name",
-                            "arg": "$.[people].age"
+                            "age": "$.[people].age"
                         }
                     }
                 },
                 [
                     {
                         "name": "$.[people].name",
-                        "arg": "$.[people].age"
+                        "age": "$.[people].age"
                     },
                     {
                         "name": "$.[people].name",
-                        "arg": "$.[people].age"
+                        "age": "$.[people].age"
                     }
                 ],
                 [
                     {
                         "@type": "io.seata.saga.engine.mock.DemoService$People",
                         "name": "$.[people].name",
-                        "arg": "$.[people].age"
+                        "age": "$.[people].age"
                     }
                 ],
                 {
                     "lilei": {
                         "@type": "io.seata.saga.engine.mock.DemoService$People",
                         "name": "$.[people].name",
-                        "arg": "$.[people].age"
+                        "age": "$.[people].age"
                     }
                 }
             ],
@@ -89,23 +89,21 @@
         "SecondState": {
             "Type": "ServiceTask",
             "ServiceName": "demoService",
-            "ServiceMethod": "bar",
+            "ServiceMethod": "interfaceParameterMethod",
             "Input": [
-                {
-                    "barInput" : "$.[complexParameterMethodResult]"
-                }
+                "$.[career]"
             ],
-            "Next": "Succeed"
+            "Output": {
+                "secondStateResult": "$.#root"
+            },
+            "Next": "ThirdState"
         },
         "ThirdState": {
             "Type": "ServiceTask",
             "ServiceName": "demoService",
-            "ServiceMethod": "foo",
-            "listener":"",
+            "ServiceMethod": "interfaceParameterMethod",
             "Input": [
-                {
-                    "fooInput" : "$.[complexParameterMethodResult]"
-                }
+                "$.[secondStateResult]"
             ],
             "Next": "Succeed"
         },
