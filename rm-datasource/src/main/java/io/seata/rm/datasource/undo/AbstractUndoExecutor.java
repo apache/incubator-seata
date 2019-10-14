@@ -155,14 +155,21 @@ public abstract class AbstractUndoExecutor {
             undoIndex++;
             if (undoValue.getType() == JDBCType.BLOB.getVendorTypeNumber()) {
                 SerialBlob serialBlob = (SerialBlob) undoValue.getValue();
-                undoPST.setBlob(undoIndex, serialBlob.getBinaryStream());
+                if (serialBlob != null) {
+                    undoPST.setBlob(undoIndex, serialBlob.getBinaryStream());
+                } else {
+                    undoPST.setObject(undoIndex, null);
+                }
             } else if (undoValue.getType() == JDBCType.CLOB.getVendorTypeNumber()) {
                 SerialClob serialClob = (SerialClob) undoValue.getValue();
-                undoPST.setClob(undoIndex, serialClob.getCharacterStream());
+                if (serialClob != null) {
+                    undoPST.setClob(undoIndex, serialClob.getCharacterStream());
+                } else {
+                    undoPST.setObject(undoIndex, null);
+                }
             } else {
                 undoPST.setObject(undoIndex, undoValue.getValue(), undoValue.getType());
             }
-
         }
         // PK is at last one.
         // INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)
