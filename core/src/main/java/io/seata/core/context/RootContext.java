@@ -58,6 +58,16 @@ public class RootContext {
         }
         return null;
     }
+
+
+    /**
+     * Gets xid.
+     *
+     * @return the xid
+     */
+    public static String getXIDType() {
+        return CONTEXT_HOLDER.get(KEY_XID_TYPE);
+    }
     
     /**
      * Bind.
@@ -66,7 +76,7 @@ public class RootContext {
      */
     public static void bind(String xid) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("bind " + xid);
+            LOGGER.debug("bind {}", xid);
         }
         CONTEXT_HOLDER.put(KEY_XID, xid);
     }
@@ -78,7 +88,7 @@ public class RootContext {
      */
     public static void bindType(String xidType) {
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("bind type " + xidType);
+            LOGGER.debug("bind type {}", xidType);
         }
         CONTEXT_HOLDER.put(KEY_XID_TYPE, xidType);
     }
@@ -104,7 +114,7 @@ public class RootContext {
     public static String unbind() {
         String xid = CONTEXT_HOLDER.remove(KEY_XID);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind " + xid);
+            LOGGER.debug("unbind {}", xid);
         }
         return xid;
     }
@@ -117,7 +127,7 @@ public class RootContext {
     public static String unbindType() {
         String xidType = CONTEXT_HOLDER.remove(KEY_XID_TYPE);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind type " + xidType);
+            LOGGER.debug("unbind type {}", xidType);
         }
         return xidType;
     }
