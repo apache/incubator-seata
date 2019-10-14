@@ -154,8 +154,14 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
     }
 
     protected Object toJavaObject(Object value, Class paramType){
+        if(value == null){
+            return value;
+        }
 
-        if(isPrimitive(paramType)){
+        if(paramType.isAssignableFrom(value.getClass())){
+            return value;
+        }
+        else if(isPrimitive(paramType)){
             return value;
         }
         else{

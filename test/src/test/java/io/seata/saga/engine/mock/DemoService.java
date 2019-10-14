@@ -90,6 +90,10 @@ public class DemoService {
         return people;
     }
 
+    public Career interfaceParameterMethod(Career career){
+        return career;
+    }
+
     public static class People {
 
         private String name;
@@ -137,6 +141,22 @@ public class DemoService {
 
         public void setChildrenMap(Map<String, People> childrenMap) {
             this.childrenMap = childrenMap;
+        }
+    }
+
+    public interface Career {
+
+    }
+
+    public static class Engineer implements Career {
+        private String name;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
         }
     }
 }
