@@ -96,8 +96,8 @@ public class TccActionInterceptor implements MethodInterceptor {
                 return ret.get(Constants.TCC_METHOD_RESULT);
             } finally {
                 //recovery the context
-                RootContext.bind(xid);
                 RootContext.unbindType();
+                RootContext.bind(xid);
             }
         }
         return invocation.proceed();
