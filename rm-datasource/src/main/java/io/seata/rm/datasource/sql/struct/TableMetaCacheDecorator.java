@@ -89,12 +89,7 @@ public class TableMetaCacheDecorator {
      * @return the table meta
      */
     public static TableMeta getTableMeta(final String dbType, final DataSourceProxy dataSourceProxy, final String tableName, boolean escape) {
-        TableMeta tableMeta;
-        if (JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
-            tableMeta = TableMetaCacheOracle.getTableMeta(dataSourceProxy, tableName);
-        } else {
-            tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, tableName);
-        }
+        TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dbType).getTableMeta(dataSourceProxy, tableName);
 
         if (!escape) {
             return tableMeta;
