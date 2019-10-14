@@ -15,11 +15,12 @@
  */
 package io.seata.core.context;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Map;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Root context.
@@ -163,5 +164,14 @@ public class RootContext {
         if (inGlobalTransaction()) {
             throw new ShouldNeverHappenException();
         }
+    }
+
+    /**
+     * entry map
+     *
+     * @return
+     */
+    public static Map<String, String> entries(){
+        return CONTEXT_HOLDER.entries();
     }
 }

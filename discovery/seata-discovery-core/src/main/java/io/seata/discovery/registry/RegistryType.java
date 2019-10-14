@@ -55,7 +55,11 @@ public enum RegistryType {
     /**
      * Sofa registry type
      */
-    Sofa;
+    Sofa,
+    /**
+     * Sofa registry type
+     */
+    Custom;
 
     /**
      * Gets type.
@@ -80,6 +84,8 @@ public enum RegistryType {
             return Etcd3;
         } else if (Sofa.name().equalsIgnoreCase(name)) {
             return Sofa;
+        } else if (Custom.name().equalsIgnoreCase(name)) {
+            return Custom;
         } else {
             throw new NotSupportYetException("unsupported type:" + name);
         }
