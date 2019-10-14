@@ -15,14 +15,6 @@
  */
 package io.seata.rm.datasource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import javax.sql.DataSource;
-
-import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.druid.util.JdbcUtils;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
@@ -30,10 +22,16 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
-import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Data source proxy.
@@ -95,13 +93,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         DefaultResourceManager.get().registerResource(this);
         if(ENABLE_TABLE_META_CHECKER_ENABLE){
             tableMetaExcutor.scheduleAtFixedRate(() -> {
-                if (DataSourceProxy.this.getDbType().equalsIgnoreCase(JdbcConstants.MYSQL)) {
-                    TableMetaCache.refresh(DataSourceProxy.this);
-                } else if (DataSourceProxy.this.getDbType().equalsIgnoreCase(JdbcConstants.ORACLE)) {
-                    TableMetaCacheOracle.refresh(DataSourceProxy.this);
-                } else {
-                    LOGGER.error("refresh table meta failed, {} does not support.", DataSourceProxy.this.getDbType());
-                }
+                TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType()).refresh(DataSourceProxy.this);
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }
     }
