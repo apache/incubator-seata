@@ -107,7 +107,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         tm.setTableName(tableName);
 
         //when set the useInformationSchema true just like jdbc:mysql://127.0.0.1:3306/xxx?useInformationSchema=true
-        //mysql will use JDBC4DatabaseMetaDataUsingInfoSchema instead of JDBC4DatabaseMetaData
+        //mysql will use DatabaseMetaDataUsingInfoSchema instead of DatabaseMetaData
         //so
         //the type of get table meta will change from
         //show full columns from xxx from xxx
