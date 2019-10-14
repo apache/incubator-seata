@@ -129,7 +129,8 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                     pkValues = new ArrayList<>(rowSize);
                     for (int i = 0; i < rowSize; i++) {
                         List<Object> row = insertRows.get(i);
-                        // oracle insert parameter count may be than the actual +1
+                        // oracle insert sql statement specify RETURN_GENERATED_KEYS will append :rowid on sql end
+                        // insert parameter count will than the actual +1
                         if (row.isEmpty()) {
                             continue;
                         }

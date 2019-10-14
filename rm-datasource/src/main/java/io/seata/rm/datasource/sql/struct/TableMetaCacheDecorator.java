@@ -16,17 +16,30 @@
 package io.seata.rm.datasource.sql.struct;
 
 import com.alibaba.druid.util.JdbcConstants;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.DataSourceProxy;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author jsbxyyx
  */
 public class TableMetaCacheDecorator {
+
+    private static final long CACHE_SIZE = 100000;
+
+    private static final long EXPIRE_TIME = 900 * 1000;
+
+    private static final Cache<String, TableMetaDecorator> TABLE_META_DECORATOR_CACHE = Caffeine.newBuilder()
+        .maximumSize(CACHE_SIZE)
+        .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS)
+        .softValues()
+        .build();
 
     /**
      * compare primary key and column name
@@ -87,8 +100,12 @@ public class TableMetaCacheDecorator {
             return tableMeta;
         }
 
-        TableMetaDecorator decorator = new TableMetaDecorator();
+        final String key = getCacheKey(dataSourceProxy, ColumnUtils.addEscape(tableName, dbType));
+        return TABLE_META_DECORATOR_CACHE.get(key, (mappingFunction) -> copyFromTableMeta(tableMeta, dbType));
+    }
 
+    private static TableMetaDecorator copyFromTableMeta(TableMeta tableMeta, String dbType) {
+        TableMetaDecorator decorator = new TableMetaDecorator();
         decorator.setDbType(dbType);
         decorator.setTableName(ColumnUtils.addEscape(tableMeta.getTableName(), dbType));
 
@@ -166,6 +183,10 @@ public class TableMetaCacheDecorator {
         dest.setTableCat(src.getTableCat());
         dest.setTableSchemaName(src.getTableSchemaName());
         return dest;
+    }
+
+    private static String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
+        return dataSourceProxy.getResourceId() + "." + tableName;
     }
 
 }
