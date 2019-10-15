@@ -183,7 +183,11 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
             UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).undo(dataSourceProxy, xid, branchId);
         } catch (TransactionException te) {
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("branchRollback failed reason [{}]", te.getMessage());
+                if (System.currentTimeMillis() % 10000 == 0) {
+                    LOGGER.info("branchRollback failed reason [{}]", te.getMessage(), te);
+                } else {
+                    LOGGER.info("branchRollback failed reason [{}]", te.getMessage());
+                }
             }
             if (te.getCode() == TransactionExceptionCode.BranchRollbackFailed_Unretriable) {
                 return BranchStatus.PhaseTwo_RollbackFailed_Unretryable;
