@@ -1,0 +1,119 @@
+{
+    "Name": "simpleStateMachineWithComplexParams",
+    "Comment": "带复杂参数的测试状态机定义",
+    "StartState": "FirstState",
+    "Version": "0.0.1",
+    "States": {
+        "FirstState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "complexParameterMethod",
+            "Next": "ChoiceState",
+            "ParameterTypes" : ["java.lang.String", "int", "io.seata.saga.engine.mock.DemoService$People", "[Lio.seata.saga.engine.mock.DemoService$People;", "java.util.List", "java.util.Map"],
+            "Input": [
+                "$.[people].name",
+                "$.[people].age",
+                {
+                    "name": "$.[people].name",
+                    "age": "$.[people].age",
+                    "childrenArray": [
+                        {
+                            "name": "$.[people].name",
+                            "age": "$.[people].age"
+                        },
+                        {
+                            "name": "$.[people].name",
+                            "age": "$.[people].age"
+                        }
+                    ],
+                    "childrenList": [
+                        {
+                            "name": "$.[people].name",
+                            "age": "$.[people].age"
+                        },
+                        {
+                            "name": "$.[people].name",
+                            "age": "$.[people].age"
+                        }
+                    ],
+                    "childrenMap": {
+                        "lilei": {
+                            "name": "$.[people].name",
+                            "age": "$.[people].age"
+                        }
+                    }
+                },
+                [
+                    {
+                        "name": "$.[people].name",
+                        "age": "$.[people].age"
+                    },
+                    {
+                        "name": "$.[people].name",
+                        "age": "$.[people].age"
+                    }
+                ],
+                [
+                    {
+                        "@type": "io.seata.saga.engine.mock.DemoService$People",
+                        "name": "$.[people].name",
+                        "age": "$.[people].age"
+                    }
+                ],
+                {
+                    "lilei": {
+                        "@type": "io.seata.saga.engine.mock.DemoService$People",
+                        "name": "$.[people].name",
+                        "age": "$.[people].age"
+                    }
+                }
+            ],
+            "Output": {
+                "complexParameterMethodResult": "$.#root"
+            }
+        },
+        "ChoiceState":{
+            "Type": "Choice",
+            "Choices":[
+                {
+                    "Expression":"[complexParameterMethodResult].age > 0",
+                    "Next":"SecondState"
+                },
+                {
+                    "Expression":"[complexParameterMethodResult].age <= 0",
+                    "Next":"ThirdState"
+                }
+            ],
+            "Default":"Fail"
+        },
+        "SecondState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "interfaceParameterMethod",
+            "Input": [
+                "$.[career]"
+            ],
+            "Output": {
+                "secondStateResult": "$.#root"
+            },
+            "Next": "ThirdState"
+        },
+        "ThirdState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "interfaceParameterMethod",
+            "Input": [
+                "$.[secondStateResult]"
+            ],
+            "Next": "Succeed"
+        },
+        "Succeed": {
+            "Type":"Succeed"
+        },
+        "Fail": {
+            "Type":"Fail",
+            "ErrorCode": "NOT_FOUND",
+            "Message": "not found"
+        }
+    }
+}

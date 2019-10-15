@@ -17,7 +17,6 @@ package io.seata.rm.datasource.sql.druid.oracle;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
@@ -28,7 +27,6 @@ import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLSelectRecognizer;
 import io.seata.rm.datasource.sql.SQLType;
-import io.seata.rm.datasource.sql.druid.BaseRecognizer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +38,7 @@ import java.util.List;
  * @date 2019/3/25
  */
 
-public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements SQLSelectRecognizer {
+public class OracleSelectForUpdateRecognizer extends BaseOracleRecognizer implements SQLSelectRecognizer {
 
     private final SQLSelectStatement ast;
 
@@ -64,26 +62,14 @@ public class OracleSelectForUpdateRecognizer extends BaseRecognizer implements S
     public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
-        if (where == null) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        OracleOutputVisitor visitor = super.createOracleOutputVisitor(parametersHolder, paramAppenderList, sb);
-        visitor.visit((SQLBinaryOpExpr) where);
-        return sb.toString();
+        return super.getWhereCondition(where, parametersHolder, paramAppenderList);
     }
 
     @Override
     public String getWhereCondition() {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
-        if (where == null) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        OracleOutputVisitor visitor = new OracleOutputVisitor(sb);
-        visitor.visit((SQLBinaryOpExpr) where);
-        return sb.toString();
+        return super.getWhereCondition(where);
     }
 
     private SQLSelectQueryBlock getSelect() {
