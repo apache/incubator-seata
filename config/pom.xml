@@ -28,11 +28,13 @@
     <name>seata-config ${project.version}</name>
     <modules>
         <module>seata-config-core</module>
+        <module>seata-config-custom</module>
         <module>seata-config-apollo</module>
         <module>seata-config-nacos</module>
         <module>seata-config-zk</module>
         <module>seata-config-all</module>
         <module>seata-config-etcd3</module>
         <module>seata-config-consul</module>
+        <module>seata-config-spring-cloud</module>
     </modules>
 </project>

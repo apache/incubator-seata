@@ -13,81 +13,52 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.sql.struct;
+package io.seata.rm.datasource.sql.struct.cache;
 
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import io.seata.rm.datasource.sql.struct.IndexMeta;
+import io.seata.rm.datasource.sql.struct.IndexType;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableMetaCache;
+
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.TimeUnit;
-
-import javax.sql.DataSource;
-
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.util.StringUtils;
-import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.DataSourceProxy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Table meta cache.
+ *
+ * @author ygy
  */
-public class TableMetaCacheOracle {
+public class OracleTableMetaCache extends AbstractTableMetaCache {
 
-    private static final long CACHE_SIZE = 100000;
+    private static volatile TableMetaCache tableMetaCache = null;
 
-    private static final long EXPIRE_TIME = 900 * 1000;
-
-    private static final Cache<String, TableMeta> TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
-        .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
-
-    private static Logger logger = LoggerFactory.getLogger(TableMetaCacheOracle.class);
+    private OracleTableMetaCache() {
+    }
 
     /**
-     * Gets table meta.
+     * get instance of type MySQL keyword checker
      *
-     * @param dataSourceProxy the druid data source
-     * @param tableName       the table name
-     * @return the table meta
+     * @return instance
      */
-    public static TableMeta getTableMeta(final DataSourceProxy dataSourceProxy, final String tableName) {
-        if (StringUtils.isNullOrEmpty(tableName)) {
-            throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
-        }
-
-        String dataSourceKey = dataSourceProxy.getResourceId();
-
-        TableMeta tmeta = null;
-        final String key = dataSourceKey + "." + tableName;
-        tmeta = TABLE_META_CACHE.get(key, mappingFunction -> {
-            try {
-                return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
-            } catch (SQLException e) {
-                logger.error("get cache error !", e);
-                return null;
-            }
-        });
-        if (tmeta == null) {
-            try {
-                tmeta = fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
-            } catch (SQLException e) {
+    public static TableMetaCache getInstance() {
+        if (tableMetaCache == null) {
+            synchronized (OracleTableMetaCache.class) {
+                if (tableMetaCache == null) {
+                    tableMetaCache = new OracleTableMetaCache();
+                }
             }
         }
-
-        if (tmeta == null) {
-            throw new ShouldNeverHappenException(String.format("[xid:%s]get tablemeta failed", RootContext.getXID()));
-        }
-        return tmeta;
+        return tableMetaCache;
     }
 
-    private static TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
-        return fetchSchemeInDefaultWay(dataSource, tableName);
-    }
-
-    private static TableMeta fetchSchemeInDefaultWay(DataSource dataSource, String tableName) throws SQLException {
+    @Override
+    protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
         Connection conn = null;
         java.sql.Statement stmt = null;
         try {
@@ -111,13 +82,13 @@ public class TableMetaCacheOracle {
         }
     }
 
-    private static TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
+    private TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
-        if(tableName.indexOf("\"") != -1){
+        if(tableName.contains("\"")){
             tableName = tableName.replace("\"", "");
             schemaName = schemaName.replace("\"", "");
         }else{
@@ -207,4 +178,5 @@ public class TableMetaCacheOracle {
 
         return tm;
     }
+
 }

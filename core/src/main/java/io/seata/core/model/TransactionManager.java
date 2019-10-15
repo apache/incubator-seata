@@ -69,4 +69,15 @@ public interface TransactionManager {
      * out.
      */
     GlobalStatus getStatus(String xid) throws TransactionException;
+
+    /**
+     * Global report.
+     *
+     * @param xid XID of the global transaction.
+     * @param globalStatus Status of the global transaction.
+     * @return Status of the global transaction.
+     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
+     * out.
+     */
+    GlobalStatus globalReport(String xid, GlobalStatus globalStatus) throws TransactionException;
 }
