@@ -45,6 +45,8 @@ public class DeleteExecutorTest {
 
     private DeleteExecutor deleteExecutor;
 
+    private StatementProxy statementProxy;
+
     @BeforeEach
     public void init() throws SQLException, NoSuchFieldException, IllegalAccessException {
         List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
@@ -71,7 +73,7 @@ public class DeleteExecutorTest {
         field.set(dataSourceProxy, "mysql");
         ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
         MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
-        StatementProxy statementProxy = new StatementProxy(connectionProxy, mockStatement);
+        statementProxy = new StatementProxy(connectionProxy, mockStatement);
         String sql = "delete from t where id = 1";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
@@ -82,6 +84,12 @@ public class DeleteExecutorTest {
 
     @Test
     public void testBeforeImage() throws SQLException {
+        Assertions.assertNotNull(deleteExecutor.beforeImage());
+
+        String sql = "delete from t";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLDeleteRecognizer recognizer = new MySQLDeleteRecognizer(sql, asts.get(0));
+        deleteExecutor = new DeleteExecutor(statementProxy, (statement, args) -> null, recognizer);
         Assertions.assertNotNull(deleteExecutor.beforeImage());
     }
 
