@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLDeleteRecognizer;
 import io.seata.rm.datasource.sql.SQLRecognizer;
@@ -63,7 +62,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(getDbType());
         String whereCondition = buildWhereCondition(visitor, paramAppenderList);
         StringBuilder suffix = new StringBuilder(" FROM " + keywordChecker.checkAndReplace(getFromTableInSQL()));
         if (StringUtils.isNotBlank(whereCondition)) {
