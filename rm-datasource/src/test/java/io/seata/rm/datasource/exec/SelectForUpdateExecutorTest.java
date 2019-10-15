@@ -81,7 +81,7 @@ public class SelectForUpdateExecutorTest {
         field.set(dataSourceProxy, "mysql");
         connectionProxy = new MockConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
         connectionProxy.bind("xid");
-        MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
+        MockStatement mockStatement = new MockStatement(dataSource.getConnection().getConnection());
         statementProxy = new StatementProxy(connectionProxy, mockStatement);
         String sql = "select * from table_select_for_update_executor_test where id = 1";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
@@ -110,7 +110,12 @@ public class SelectForUpdateExecutorTest {
 
         connectionProxy = new MockLockConflictConnectionProxy(connectionProxy.getDataSourceProxy(), connectionProxy.getTargetConnection());
         statementProxy = new StatementProxy(connectionProxy, statementProxy.getTargetStatement());
-        selectForUpdateExecutor = new SelectForUpdateExecutor(statementProxy, (statement, args) -> null, selectForUpdateExecutor.sqlRecognizer);
+        statementProxy.getTargetStatement().getConnection().setAutoCommit(false);
+        String sql = "select * from dual";
+        List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        MySQLSelectForUpdateRecognizer recognizer = new MySQLSelectForUpdateRecognizer(sql, asts.get(0));
+        selectForUpdateExecutor = new SelectForUpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+
         RootContext.bind("xid");
         Assertions.assertThrows(LockWaitTimeoutException.class, () -> {
             selectForUpdateExecutor.doExecute(null);
