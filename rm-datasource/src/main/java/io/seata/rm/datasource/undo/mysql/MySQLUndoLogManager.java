@@ -64,7 +64,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
             deletePST.setInt(2, limitRows);
             int deleteRows = deletePST.executeUpdate();
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("batch delete undo log size " + deleteRows);
+                LOGGER.debug("batch delete undo log size {}", deleteRows);
             }
             return deleteRows;
         } catch (Exception e) {

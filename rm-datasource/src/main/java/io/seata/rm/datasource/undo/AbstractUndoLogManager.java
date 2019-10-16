@@ -159,7 +159,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             }
             int deleteRows = deletePST.executeUpdate();
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("batch delete undo log size " + deleteRows);
+                LOGGER.debug("batch delete undo log size {}", deleteRows);
             }
         }catch (Exception e){
             if (!(e instanceof SQLException)) {
@@ -178,9 +178,9 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         StringBuilder sqlBuilder = new StringBuilder(64);
         sqlBuilder.append("DELETE FROM ")
                 .append(UNDO_LOG_TABLE_NAME)
-                .append(" WHERE  " + ClientTableColumnsName.UNDO_LOG_BRANCH_XID + " IN ");
+                .append(" WHERE  ").append(ClientTableColumnsName.UNDO_LOG_BRANCH_XID).append(" IN ");
         appendInParam(branchIdSize, sqlBuilder);
-        sqlBuilder.append(" AND " + ClientTableColumnsName.UNDO_LOG_XID + " IN ");
+        sqlBuilder.append(" AND ").append(ClientTableColumnsName.UNDO_LOG_XID).append(" IN ");
         appendInParam(xidSize, sqlBuilder);
         return sqlBuilder.toString();
     }

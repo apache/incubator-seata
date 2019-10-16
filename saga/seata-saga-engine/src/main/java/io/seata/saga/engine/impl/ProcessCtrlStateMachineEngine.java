@@ -579,7 +579,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
     private String buildExceptionMessage(StateMachineInstance stateMachineInstance, ExecutionStatus[] acceptStatus, ExecutionStatus[] denyStatus,
                                          ExecutionStatus status, ExecutionStatus compenStatus, String operation) {
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("StateMachineInstance[id:" + stateMachineInstance.getId() + "]");
+        stringBuilder.append("StateMachineInstance[id:").append(stateMachineInstance.getId()).append("]");
         if (acceptStatus != null) {
             stringBuilder.append(",acceptable status :");
             for (ExecutionStatus tempStatus : acceptStatus) {
@@ -602,7 +602,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             stringBuilder.append(",current compensation status:");
             stringBuilder.append(compenStatus.toString());
         }
-        stringBuilder.append(",so operation [" + operation + "] denied");
+        stringBuilder.append(",so operation [").append(operation).append("] denied");
         return stringBuilder.toString();
     }
 
