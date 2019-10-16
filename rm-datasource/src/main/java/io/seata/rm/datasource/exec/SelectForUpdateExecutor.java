@@ -53,7 +53,6 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
     public T doExecute(Object... args) throws Throwable {
         Connection conn = statementProxy.getConnection();
         T rs = null;
-        Savepoint sp = null;
         LockRetryController lockRetryController = new LockRetryController();
         boolean originalAutoCommit = conn.getAutoCommit();
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
@@ -62,7 +61,6 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
             if (originalAutoCommit) {
                 conn.setAutoCommit(false);
             }
-            sp = conn.setSavepoint();
 
             while (true) {
                 try {
@@ -90,14 +88,11 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     }
                     break;
                 } catch (LockConflictException lce) {
-                    conn.rollback(sp);
+                    conn.rollback();
                     lockRetryController.sleep(lce);
                 }
             }
         } finally {
-            if (sp != null) {
-                conn.releaseSavepoint(sp);
-            }
             if (originalAutoCommit) {
                 conn.setAutoCommit(true);
             }
