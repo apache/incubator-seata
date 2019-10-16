@@ -214,10 +214,9 @@ public class EnhancedServiceLoader {
                 loadFile(service, SEATA_DIRECTORY + activateName.toLowerCase() + "/", loader, extensions);
 
                 List<Class> activateExtensions = new ArrayList<Class>();
-                for (int i = 0; i < extensions.size(); i++) {
-                    Class clz = extensions.get(i);
+                for (Class clz : extensions) {
                     @SuppressWarnings("unchecked")
-                    LoadLevel activate = (LoadLevel)clz.getAnnotation(LoadLevel.class);
+                    LoadLevel activate = (LoadLevel) clz.getAnnotation(LoadLevel.class);
                     if (activate != null && activateName.equalsIgnoreCase(activate.name())) {
                         activateExtensions.add(clz);
                     }
@@ -265,8 +264,8 @@ public class EnhancedServiceLoader {
         Collections.sort(extensions, new Comparator<Class>() {
             @Override
             public int compare(Class c1, Class c2) {
-                Integer o1 = 0;
-                Integer o2 = 0;
+                int o1 = 0;
+                int o2 = 0;
                 @SuppressWarnings("unchecked")
                 LoadLevel a1 = (LoadLevel)c1.getAnnotation(LoadLevel.class);
                 @SuppressWarnings("unchecked")
@@ -280,7 +279,7 @@ public class EnhancedServiceLoader {
                     o2 = a2.order();
                 }
 
-                return o1.compareTo(o2);
+                return Integer.compare(o1, o2);
 
             }
         });
@@ -313,10 +312,13 @@ public class EnhancedServiceLoader {
                         }
                         line = line.trim();
                         if (line.length() > 0) {
-                            extensions.add(Class.forName(line, true, classLoader));
+                            try {
+                                extensions.add(Class.forName(line, true, classLoader));
+                            } catch (LinkageError | ClassNotFoundException e) {
+                                LOGGER.warn("load [{}] class fail. {}", line, e.getMessage());
+                            }
                         }
                     }
-                } catch (ClassNotFoundException e) {
                 } catch (Throwable e) {
                     LOGGER.warn(e.getMessage());
                 } finally {

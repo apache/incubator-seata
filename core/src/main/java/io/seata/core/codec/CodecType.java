@@ -34,7 +34,15 @@ public enum CodecType {
      * <p>
      * Math.pow(2, 1)
      */
-    PROTOBUF((byte)0x2);
+    PROTOBUF((byte)0x2),
+
+    /**
+     * The kryo.
+     * <p>
+     * Math.pow(2, 2)
+     */
+    KRYO((byte)0x4),
+    ;
 
     private final byte code;
 
@@ -60,16 +68,16 @@ public enum CodecType {
     /**
      * Gets result code.
      *
-     * @param code the code
+     * @param name the name
      * @return the result code
      */
-    public static CodecType getByCode(String code) {
+    public static CodecType getByName(String name) {
         for (CodecType b : CodecType.values()) {
-            if (b.name().equalsIgnoreCase(code)) {
+            if (b.name().equalsIgnoreCase(name)) {
                 return b;
             }
         }
-        throw new IllegalArgumentException("unknown codec:" + code);
+        throw new IllegalArgumentException("unknown codec:" + name);
     }
 
     /**

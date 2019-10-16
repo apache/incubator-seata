@@ -15,32 +15,43 @@
  */
 package io.seata.core.store.db;
 
-import io.seata.common.exception.StoreException;
-import io.seata.common.executor.Initialize;
-import io.seata.common.loader.LoadLevel;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.store.LockDO;
-import io.seata.core.store.LockStore;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.sql.DataSource;
+
+import io.seata.common.exception.DataAccessException;
+import io.seata.common.exception.StoreException;
+import io.seata.common.executor.Initialize;
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.ServerTableColumnsName;
+import io.seata.core.store.LockDO;
+import io.seata.core.store.LockStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Data base lock store.
  *
  * @author zhangsen
- * @data 2019 /4/25
+ * @date 2019 /4/25
  */
 @LoadLevel(name = "db")
 public class LockStoreDataBaseDAO implements LockStore, Initialize {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LockStoreDataBaseDAO.class);
 
     /**
      * The constant CONFIG.
@@ -93,10 +104,14 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
+        List<LockDO> unrepeatedLockDOs = null;
+        Set<String> dbExistedRowKeys = new HashSet<>();
+        boolean originalAutoCommit = true;
         try {
             conn = logStoreDataSource.getConnection();
-            conn.setAutoCommit(false);
-
+            if (originalAutoCommit = conn.getAutoCommit()) {
+                conn.setAutoCommit(false);
+            }
             //check lock
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < lockDOs.size(); i++) {
@@ -105,7 +120,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
                     sb.append(", ");
                 }
             }
-            boolean canLock = true, isReLock = false;
+            boolean canLock = true;
             //query
             String checkLockSQL = LockStoreSqls.getCheckLockableSql(lockTable, sb.toString(), dbType);
             ps = conn.prepareStatement(checkLockSQL);
@@ -113,27 +128,45 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
                 ps.setString(i + 1, lockDOs.get(i).getRowKey());
             }
             rs = ps.executeQuery();
+            String currentXID = lockDOs.get(0).getXid();
             while (rs.next()) {
-                if (StringUtils.equals(rs.getString("xid"), lockDOs.get(0).getXid())) {
-                    isReLock = true;
-                } else {
+                String dbXID = rs.getString(ServerTableColumnsName.LOCK_TABLE_XID);
+                if (!StringUtils.equals(dbXID, currentXID)) {
+                    if (LOGGER.isInfoEnabled()) {
+                        String dbPk = rs.getString(ServerTableColumnsName.LOCK_TABLE_PK);
+                        String dbTableName = rs.getString(ServerTableColumnsName.LOCK_TABLE_TABLE_NAME);
+                        Long dbBranchId = rs.getLong(ServerTableColumnsName.LOCK_TABLE_BRANCH_ID);
+                        LOGGER.info("Global lock on [{}:{}] is holding by xid {} branchId {}", dbTableName, dbPk, dbXID,
+                            dbBranchId);
+                    }
                     canLock &= false;
+                    break;
                 }
+                dbExistedRowKeys.add(rs.getString(ServerTableColumnsName.LOCK_TABLE_ROW_KEY));
             }
 
             if (!canLock) {
                 conn.rollback();
                 return false;
             }
-
-            if (isReLock) {
+            if (CollectionUtils.isNotEmpty(dbExistedRowKeys)) {
+                unrepeatedLockDOs = lockDOs.stream().filter(lockDO -> !dbExistedRowKeys.contains(lockDO.getRowKey()))
+                    .collect(Collectors.toList());
+            } else {
+                unrepeatedLockDOs = lockDOs;
+            }
+            if (CollectionUtils.isEmpty(unrepeatedLockDOs)) {
                 conn.rollback();
                 return true;
             }
 
             //lock
-            for (LockDO lockDO : lockDOs) {
+            for (LockDO lockDO : unrepeatedLockDOs) {
                 if (!doAcquireLock(conn, lockDO)) {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("Global lock acquire failed, xid {} branchId {} pk {}", lockDO.getXid(),
+                            lockDO.getBranchId(), lockDO.getPk());
+                    }
                     conn.rollback();
                     return false;
                 }
@@ -157,6 +190,9 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             }
             if (conn != null) {
                 try {
+                    if (originalAutoCommit) {
+                        conn.setAutoCommit(true);
+                    }
                     conn.close();
                 } catch (SQLException e) {
                 }
@@ -221,7 +257,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             }
             return true;
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
             if (conn != null) {
                 try {
@@ -299,7 +335,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             }
             return true;
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
             if (rs != null) {
                 try {

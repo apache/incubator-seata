@@ -15,6 +15,7 @@
  */
 package io.seata.config;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +30,6 @@ import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigFuture.ConfigOperation;
-
 import org.apache.commons.lang.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfiguration.class);
 
-    private final Config CONFIG;
+    private final Config fileConfig;
 
     private ExecutorService configOperateExecutor;
 
@@ -59,6 +59,8 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
     private static final long LISTENER_CONFIG_INTERNAL = 1 * 1000;
 
     private static final String REGISTRY_TYPE = "file";
+    
+    private static final String SYS_FILE_RESOURCE_PREFIX = "file:";
 
     private final ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = new ConcurrentHashMap<>(8);
 
@@ -78,9 +80,13 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
      */
     public FileConfiguration(String name) {
         if (null == name) {
-            CONFIG = ConfigFactory.load();
+            fileConfig = ConfigFactory.load();
+        }
+        else if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
+            Config appConfig = ConfigFactory.parseFileAnySyntax(new File(name.substring(SYS_FILE_RESOURCE_PREFIX.length())));
+            fileConfig = ConfigFactory.load(appConfig);
         } else {
-            CONFIG = ConfigFactory.load(name);
+            fileConfig = ConfigFactory.load(name);
         }
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
@@ -93,30 +99,34 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
+        String value;
+        if ((value = getConfigFromSysPro(dataId)) != null) {
+            return value;
+        }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigOperation.GET, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (String) configFuture.get();
+        return (String)configFuture.get();
     }
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigOperation.PUT, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean) configFuture.get();
+        return (Boolean)configFuture.get();
     }
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigOperation.PUTIFABSENT, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean) configFuture.get();
+        return (Boolean)configFuture.get();
     }
 
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigOperation.REMOVE, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean) configFuture.get();
+        return (Boolean)configFuture.get();
     }
 
     @Override
@@ -187,7 +197,7 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
                 }
                 try {
                     if (configFuture.getOperation() == ConfigOperation.GET) {
-                        String result = CONFIG.getString(configFuture.getDataId());
+                        String result = fileConfig.getString(configFuture.getDataId());
                         configFuture.setResult(result);
                     } else if (configFuture.getOperation() == ConfigOperation.PUT) {
                         //todo
@@ -199,9 +209,10 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
                         //todo
                         configFuture.setResult(Boolean.TRUE);
                     }
-                } catch (Exception e){
+                } catch (Exception e) {
                     setFailResult(configFuture);
-                    LOGGER.warn("Could not found property {}, try to use default value instead.", configFuture.getDataId());
+                    LOGGER.warn("Could not found property {}, try to use default value instead.",
+                        configFuture.getDataId());
                 }
             }
         }

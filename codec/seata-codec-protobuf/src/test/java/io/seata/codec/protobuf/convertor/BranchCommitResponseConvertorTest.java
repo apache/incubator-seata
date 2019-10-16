@@ -15,10 +15,10 @@
  */
 package io.seata.codec.protobuf.convertor;
 
+import io.seata.codec.protobuf.generated.BranchCommitResponseProto;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.protocol.ResultCode;
-import io.seata.codec.protobuf.generated.BranchCommitResponseProto;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import org.junit.jupiter.api.Test;
 

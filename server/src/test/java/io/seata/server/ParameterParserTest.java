@@ -15,9 +15,9 @@
  */
 package io.seata.server;
 
-import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -32,10 +32,21 @@ public class ParameterParserTest {
     /**
      * init
      */
-    @BeforeAll
-    private static void init() {
-        String[] args = new String[]{"-h", "127.0.0.1", "-p", "8088", "-m", "file"};
+    @BeforeEach
+    private void init() {
+        String[] args = new String[] {"-h", "127.0.0.1", "-p", "8088", "-m", "file","-e","test"};
         parameterParser = new ParameterParser(args);
+    }
+
+    /**
+     * Test empty mode.
+     */
+    @Test
+    public void testEmptyMode() {
+        String[] args = new String[] {"-h", "127.0.0.1", "-p", "8088"};
+        parameterParser = new ParameterParser(args);
+        //always set store.mode=file in test/resource/file.conf, if not will cause SessionStoreTest's case fail.
+        Assertions.assertEquals("file", parameterParser.getStoreMode());
     }
 
     /**
@@ -63,12 +74,19 @@ public class ParameterParserTest {
     }
 
     /**
-     * clean up
+     * test get seata env
      */
-    @AfterAll
-    public static void cleanUp() {
-        parameterParser = null;
+    @Test
+    public void testGetSeataEnv() {
+        Assertions.assertEquals("test", parameterParser.getSeataEnv());
     }
 
+    /**
+     * clean up
+     */
+    @AfterEach
+    public void cleanUp() {
+        parameterParser = null;
+    }
 
 }

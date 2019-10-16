@@ -15,6 +15,11 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.net.InetSocketAddress;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -29,16 +34,12 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.seata.common.XID;
 import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.NetUtil;
 import io.seata.core.rpc.RemotingServer;
+import io.seata.core.rpc.netty.v1.ProtocolV1Decoder;
+import io.seata.core.rpc.netty.v1.ProtocolV1Encoder;
 import io.seata.discovery.registry.RegistryFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetSocketAddress;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The type Rpc remoting server.
@@ -54,7 +55,6 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     private final EventLoopGroup eventLoopGroupBoss;
     private final NettyServerConfig nettyServerConfig;
     private int listenPort;
-    private String host;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
 
     /**
@@ -77,27 +77,6 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
      */
     public int getListenPort() {
         return listenPort;
-    }
-
-    /**
-     * Gets the host
-     *
-     * @return
-     */
-    public String getHost() {
-        return this.host;
-    }
-
-    /**
-     * Sets the host
-     *
-     * @param host
-     */
-    public void setHost(String host) {
-        if (!NetUtil.isValidIp(host, true)) {
-            throw new IllegalArgumentException("host: " + host + " is invalid!");
-        }
-        this.host = host;
     }
 
     /**
@@ -159,7 +138,8 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
                 @Override
                 public void initChannel(SocketChannel ch) {
                     ch.pipeline().addLast(new IdleStateHandler(nettyServerConfig.getChannelMaxReadIdleSeconds(), 0, 0))
-                        .addLast(new MessageCodecHandler());
+                            .addLast(new ProtocolV1Decoder())
+                            .addLast(new ProtocolV1Encoder());
                     if (null != channelHandlers) {
                         addChannelPipelineLast(ch, channelHandlers);
                     }
@@ -172,7 +152,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
         }
 
         try {
-            ChannelFuture future = this.serverBootstrap.bind(host, listenPort).sync();
+            ChannelFuture future = this.serverBootstrap.bind(listenPort).sync();
             LOGGER.info("Server started ... ");
             RegistryFactory.getInstance().register(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
             initialized.set(true);
@@ -187,7 +167,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     public void shutdown() {
         try {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Shuting server down. ");
+                LOGGER.debug("Shutting server down. ");
             }
             if (initialized.get()) {
                 RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));

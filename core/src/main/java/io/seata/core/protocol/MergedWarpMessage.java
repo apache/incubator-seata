@@ -30,11 +30,11 @@ public class MergedWarpMessage extends AbstractMessage implements Serializable, 
     /**
      * The Msgs.
      */
-    public List<AbstractMessage> msgs = new ArrayList<AbstractMessage>();
+    public List<AbstractMessage> msgs = new ArrayList<>();
     /**
      * The Msg ids.
      */
-    public List<Long> msgIds = new ArrayList<Long>();
+    public List<Integer> msgIds = new ArrayList<>();
 
     @Override
     public short getTypeCode() {

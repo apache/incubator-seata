@@ -15,11 +15,11 @@
  */
 package io.seata.codec.seata.protocol.transaction;
 
-
-import io.seata.core.protocol.transaction.BranchRegisterResponse;
-
 import java.io.Serializable;
 import java.nio.ByteBuffer;
+
+import io.netty.buffer.ByteBuf;
+import io.seata.core.protocol.transaction.BranchRegisterResponse;
 
 /**
  * The type Branch register response codec.
@@ -34,19 +34,19 @@ public class BranchRegisterResponseCodec extends AbstractTransactionResponseCode
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer out) {
+    public <T> void encode(T t, ByteBuf out) {
         super.encode(t, out);
 
-        BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse) t;
-        long branchId  = branchRegisterResponse.getBranchId();
-        out.putLong(branchId);
+        BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse)t;
+        long branchId = branchRegisterResponse.getBranchId();
+        out.writeLong(branchId);
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
         super.decode(t, in);
 
-        BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse) t;
+        BranchRegisterResponse branchRegisterResponse = (BranchRegisterResponse)t;
         branchRegisterResponse.setBranchId(in.getLong());
     }
 

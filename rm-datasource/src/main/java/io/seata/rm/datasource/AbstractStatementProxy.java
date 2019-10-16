@@ -21,9 +21,6 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.core.context.RootContext;
-
 /**
  * The type Abstract statement proxy.
  *
@@ -230,9 +227,6 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
 
     @Override
     public int[] executeBatch() throws SQLException {
-        if (RootContext.inGlobalTransaction()) {
-            throw new NotSupportYetException();
-        }
         return targetStatement.executeBatch();
     }
 

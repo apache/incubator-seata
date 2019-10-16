@@ -17,9 +17,11 @@ package io.seata.rm.datasource.sql.struct;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
@@ -32,8 +34,8 @@ import io.seata.common.util.CollectionUtils;
 public class TableMeta {
     private String tableName;
 
-    private Map<String, ColumnMeta> allColumns = new HashMap<String, ColumnMeta>();
-    private Map<String, IndexMeta> allIndexes = new HashMap<String, IndexMeta>();
+    private Map<String, ColumnMeta> allColumns = new LinkedHashMap<String, ColumnMeta>();
+    private Map<String, IndexMeta> allIndexes = new LinkedHashMap<String, IndexMeta>();
 
     /**
      * Gets table name.
@@ -64,7 +66,9 @@ public class TableMeta {
         if (col == null) {
             if (colName.charAt(0) == '`') {
                 col = allColumns.get(colName.substring(1, colName.length() - 1));
-            } else { col = allColumns.get("`" + colName + "`"); }
+            } else {
+                col = allColumns.get("`" + colName + "`");
+            }
         }
         return col;
     }
@@ -245,5 +249,34 @@ public class TableMeta {
         sb.append(")");
 
         return sb.toString();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof TableMeta)) {
+            return false;
+        }
+        TableMeta tableMeta = (TableMeta) o;
+        if (!Objects.equals(tableMeta.tableName, this.tableName)) {
+            return false;
+        }
+        if (!Objects.equals(tableMeta.allColumns, this.allColumns)) {
+            return false;
+        }
+        if (!Objects.equals(tableMeta.allIndexes, this.allIndexes)) {
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = Objects.hashCode(tableName);
+        hash += Objects.hashCode(allColumns);
+        hash += Objects.hashCode(allIndexes);
+        return hash;
     }
 }

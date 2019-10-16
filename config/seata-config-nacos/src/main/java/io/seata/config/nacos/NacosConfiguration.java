@@ -18,16 +18,16 @@ package io.seata.config.nacos;
 import java.util.List;
 import java.util.Properties;
 
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.config.AbstractConfiguration;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationKeys;
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.config.listener.Listener;
 import com.alibaba.nacos.api.exception.NacosException;
 
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.config.AbstractConfiguration;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,33 +38,56 @@ import org.slf4j.LoggerFactory;
  * @date 2019 /2/1
  */
 public class NacosConfiguration extends AbstractConfiguration<Listener> {
+    private static volatile NacosConfiguration instance;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosConfiguration.class);
     private static final String SEATA_GROUP = "SEATA_GROUP";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
-    private static final String REGISTRY_TYPE = "nacos";
+    private static final String CONFIG_TYPE = "nacos";
+    private static final String DEFAULT_NAMESPACE = "";
+    private static final String PRO_NAMESPACE_KEY = "namespace";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
 
     /**
-     * Instantiates a new Nacos configuration.
+     * Get instance of NacosConfiguration
      *
-     * @throws NacosException the nacos exception
+     * @return
      */
-    public NacosConfiguration() throws NacosException {
+    public static NacosConfiguration getInstance() {
+        if (null == instance) {
+            synchronized (NacosConfiguration.class) {
+                if (null == instance) {
+                    instance = new NacosConfiguration();
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
+     * Instantiates a new Nacos configuration.
+     */
+    public NacosConfiguration() {
         if (null == configService) {
-            configService = NacosFactory.createConfigService(getConfigProperties());
+            try {
+                configService = NacosFactory.createConfigService(getConfigProperties());
+            } catch (NacosException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
         String value;
+        if ((value = getConfigFromSysPro(dataId)) != null) {
+            return value;
+        }
         try {
             value = configService.getConfig(dataId, SEATA_GROUP, timeoutMills);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
-            value = defaultValue;
         }
         return value == null ? defaultValue : value;
     }
@@ -125,17 +148,33 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
                 properties.setProperty(PRO_SERVER_ADDR_KEY, address);
             }
         }
+
+        if (null != System.getProperty(PRO_NAMESPACE_KEY)) {
+            properties.setProperty(PRO_NAMESPACE_KEY, System.getProperty(PRO_NAMESPACE_KEY));
+        } else {
+            String namespace = FILE_CONFIG.getConfig(getNacosNameSpaceFileKey());
+            if (null == namespace) {
+                namespace = DEFAULT_NAMESPACE;
+            }
+            properties.setProperty(PRO_NAMESPACE_KEY, namespace);
+        }
         return properties;
     }
 
+    private static String getNacosNameSpaceFileKey() {
+        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
+                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                + PRO_NAMESPACE_KEY;
+    }
+
     private static String getNacosAddrFileKey() {
-        return ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
+        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
             + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
             + PRO_SERVER_ADDR_KEY;
     }
 
     @Override
     public String getTypeName() {
-        return REGISTRY_TYPE;
+        return CONFIG_TYPE;
     }
 }
