@@ -106,14 +106,16 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
 
-        //when set the useInformationSchema true just like jdbc:mysql://127.0.0.1:3306/xxx?useInformationSchema=true
-        //mysql will use DatabaseMetaDataUsingInfoSchema instead of DatabaseMetaData
-        //so
-        //the type of get table meta will change from
-        //show full columns from xxx from xxx
-        //to
-        //select xxx from xxx where catalog_name like ? and table_name like ?
-        //in the second type we have to remove the "`"
+        /*
+         * when set the useInformationSchema true just like jdbc:mysql://127.0.0.1:3306/xxx?useInformationSchema=true
+         * mysql will use DatabaseMetaDataUsingInfoSchema instead of DatabaseMetaData
+         * so
+         * the type of get table meta will change from
+         * show full columns from xxx from xxx
+         * to
+         * select xxx from xxx where catalog_name like ? and table_name like ?
+         * in the second type we have to remove the "`"
+         */
         if(tableName.contains("`")){
             tableName = tableName.replace("`", "");
         }
