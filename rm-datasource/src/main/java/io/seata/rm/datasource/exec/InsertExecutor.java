@@ -35,7 +35,6 @@ import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Null;
 import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
 import io.seata.rm.datasource.sql.struct.SqlSequenceExpr;
-import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -90,8 +89,10 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected boolean containsPK() {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();
-        TableMeta tmeta = getTableMeta();
-        return tmeta.containsPK(insertColumns);
+        if (insertColumns == null || insertColumns.isEmpty()) {
+            return false;
+        }
+        return containsPK(insertColumns);
     }
 
     protected boolean containsColumns() {

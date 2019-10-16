@@ -34,7 +34,7 @@ public final class ColumnUtils {
     public enum Escape {
         /** standard escape */
         STANDARD('"'),
-        /** mysql escape */
+        /** mysql series escape */
         MYSQL('`')
         ;
         public final char value;
@@ -55,7 +55,7 @@ public final class ColumnUtils {
         // https://docs.oracle.com/javadb/10.8.3.0/ref/crefsqlj1003454.html
         // https://www.informit.com/articles/article.aspx?p=2036581&seqNum=2
         List<String> newCols = delEscape(cols, Escape.STANDARD);
-        if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL)) {
+        if (isMysqlSeries(dbType)) {
             newCols = delEscape(newCols, Escape.MYSQL);
         }
         return newCols;
@@ -94,7 +94,7 @@ public final class ColumnUtils {
      */
     public static String delEscape(String colName, String dbType) {
         String newColName = delEscape(colName, Escape.STANDARD);
-        if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL)) {
+        if (isMysqlSeries(dbType)) {
             newColName = delEscape(newColName, Escape.MYSQL);
         }
         return newColName;
@@ -150,7 +150,7 @@ public final class ColumnUtils {
      * @return the colName left and right add escape
      */
     public static String addEscape(String colName, String dbType) {
-        if (StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL)) {
+        if (isMysqlSeries(dbType)) {
             return addEscape(colName, ColumnUtils.Escape.MYSQL);
         }
         return addEscape(colName, ColumnUtils.Escape.STANDARD);
@@ -175,4 +175,9 @@ public final class ColumnUtils {
         return String.format("%s%s%s", escape.value, colName, escape.value);
     }
 
+    private static boolean isMysqlSeries(String dbType) {
+        return StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL) ||
+            StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
+            StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
+    }
 }

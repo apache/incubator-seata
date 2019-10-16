@@ -26,6 +26,7 @@ import java.util.StringJoiner;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
@@ -34,7 +35,7 @@ import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.WhereRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCacheDecorator;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
@@ -186,8 +187,21 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (tableMeta != null) {
             return tableMeta;
         }
-        tableMeta = TableMetaCacheDecorator.getTableMeta(getDbType(), statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
+        tableMeta = TableMetaCacheFactory.getTableMetaCache(getDbType()).getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
         return tableMeta;
+    }
+
+    /**
+     * the columns contains table meta pk
+     * @param columns the column name list
+     * @return true: contains pk false: not contains pk
+     */
+    protected boolean containsPK(List<String> columns) {
+        if (columns == null || columns.isEmpty()) {
+            return false;
+        }
+        List<String> newColumns = ColumnUtils.delEscape(columns, getDbType());
+        return getTableMeta().containsPK(newColumns);
     }
 
     /**
@@ -196,7 +210,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @return true: equal false: not equal
      */
     protected boolean equalsPK(String columnName) {
-        return TableMetaCacheDecorator.equalsPK(getTableMeta(), columnName, getDbType());
+        String newColumnName = ColumnUtils.delEscape(columnName, getDbType());
+        return StringUtils.equalsIgnoreCase(getTableMeta().getPkName(), newColumnName);
     }
 
     /**
@@ -326,7 +341,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected TableRecords buildTableRecords(List<Object> pkValues) throws SQLException {
         TableRecords afterImage;
-        String pk = getTableMeta().getPkName();
+        String pk = getTableMeta().getEscapePkName(getDbType());
         StringJoiner pkValuesJoiner = new StringJoiner(" OR ", "SELECT * FROM " + getTableMeta().getTableName() + " WHERE ", "");
         for (Object pkValue : pkValues) {
             pkValuesJoiner.add(pk + "=?");

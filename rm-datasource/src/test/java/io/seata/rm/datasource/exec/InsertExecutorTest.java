@@ -317,7 +317,7 @@ public class InsertExecutorTest {
         mockInsertColumns();
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
-        Assertions.assertEquals(-1, insertExecutor.getPkIndex());
+        Assertions.assertEquals(0, insertExecutor.getPkIndex());
     }
 
     private List<String> mockInsertColumns() {

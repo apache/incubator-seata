@@ -68,7 +68,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         List<String> updateColumns = recognizer.getUpdateColumns();
         StringBuilder prefix = new StringBuilder("SELECT ");
         if (!tableMeta.containsPK(updateColumns)) {
-            prefix.append(getColumnNameInSQL(tableMeta.getPkName()) + ", ");
+            prefix.append(getColumnNameInSQL(tableMeta.getEscapePkName(getDbType())) + ", ");
         }
         StringBuilder suffix = new StringBuilder(" FROM " + getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
