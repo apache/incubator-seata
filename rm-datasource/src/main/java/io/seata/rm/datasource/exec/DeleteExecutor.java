@@ -64,7 +64,7 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(getDbType());
         String whereCondition = buildWhereCondition(visitor, paramAppenderList);
-        StringBuilder suffix = new StringBuilder(" FROM " + keywordChecker.checkAndReplace(getFromTableInSQL()));
+        StringBuilder suffix = new StringBuilder(" FROM " + getFromTableInSQL());
         if (StringUtils.isNotBlank(whereCondition)) {
             suffix.append(" WHERE " + whereCondition);
         }
