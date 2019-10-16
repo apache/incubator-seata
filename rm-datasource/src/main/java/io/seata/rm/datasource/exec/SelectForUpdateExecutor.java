@@ -19,6 +19,7 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +29,8 @@ import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLSelectRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Select for update executor.
@@ -37,6 +40,8 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
  * @param <S> the type parameter
  */
 public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SelectForUpdateExecutor.class);
 
     /**
      * Instantiates a new Select for update executor.
@@ -101,6 +106,15 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                 }
             }
         } finally {
+            if (sp != null) {
+                try {
+                    conn.releaseSavepoint(sp);
+                } catch (SQLException e) {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("{} does not support release save point, but this is not a error.", getDbType());
+                    }
+                }
+            }
         }
         return rs;
     }
