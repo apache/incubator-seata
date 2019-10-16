@@ -82,7 +82,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         this.transactionRole = transactionRole;
         clientBootstrap = new RpcClientBootstrap(nettyClientConfig, eventExecutorGroup, transactionRole);
         clientChannelManager = new NettyClientChannelManager(
-            new NettyPoolableFactory(this, clientBootstrap), getPoolKeyFunction(), nettyClientConfig);
+            new NettyPoolableFactory(clientBootstrap), getPoolKeyFunction(), this, nettyClientConfig);
     }
 
     public NettyClientChannelManager getClientChannelManager() {
@@ -177,7 +177,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
 
     @Override
     public void destroyChannel(String serverAddress, Channel channel) {
-        clientChannelManager.destroyChannel(serverAddress, channel);
+        clientChannelManager.releaseChannel(channel, serverAddress);
     }
 
     private String loadBalance(String transactionServiceGroup) {
@@ -335,11 +335,9 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                     }
                     try {
                         String serverAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
-                        clientChannelManager.invalidateObject(serverAddress, ctx.channel());
+                        clientChannelManager.releaseChannel(ctx.channel(), serverAddress);
                     } catch (Exception exx) {
                         LOGGER.error(exx.getMessage());
-                    } finally {
-                        clientChannelManager.releaseChannel(ctx.channel(), getAddressFromContext(ctx));
                     }
                 }
                 if (idleStateEvent == IdleStateEvent.WRITER_IDLE_STATE_EVENT) {
