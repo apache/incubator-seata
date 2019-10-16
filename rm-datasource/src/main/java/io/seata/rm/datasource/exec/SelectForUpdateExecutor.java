@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.exec;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
     @Override
     public T doExecute(Object... args) throws Throwable {
         Connection conn = statementProxy.getConnection();
+        DatabaseMetaData dbmd = conn.getMetaData();
         T rs = null;
         Savepoint sp = null;
         LockRetryController lockRetryController = new LockRetryController();
@@ -59,10 +61,10 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         String selectPKSQL = buildSelectSQL(paramAppenderList);
         try {
-            if (originalAutoCommit) {
-                conn.setAutoCommit(false);
+            if (!originalAutoCommit && dbmd.supportsSavepoints()) {
+                sp = conn.setSavepoint();
             }
-            sp = conn.setSavepoint();
+
 
             while (true) {
                 try {
@@ -90,14 +92,15 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     }
                     break;
                 } catch (LockConflictException lce) {
-                    conn.rollback(sp);
+                    if (sp != null) {
+                       conn.rollback(sp);
+                    } else {
+                        conn.rollback();
+                    }
                     lockRetryController.sleep(lce);
                 }
             }
         } finally {
-            if (originalAutoCommit) {
-                conn.setAutoCommit(true);
-            }
         }
         return rs;
     }
