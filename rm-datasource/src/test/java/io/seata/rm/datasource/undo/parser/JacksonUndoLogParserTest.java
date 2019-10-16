@@ -47,7 +47,7 @@ public class JacksonUndoLogParserTest extends BaseUndoLogParserTest {
         ObjectMapper mapper = (ObjectMapper)reflectField.get(null);
 
         //bigint type
-        Field field = new Field("bigint_type", JDBCType.BIGINT.getVendorTypeNumber(), new Long(9223372036854775807L));
+        Field field = new Field("bigint_type", JDBCType.BIGINT.getVendorTypeNumber(), 9223372036854775807L);
         byte[] bytes = mapper.writeValueAsBytes(field);
         Field sameField = mapper.readValue(bytes, Field.class);
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field, sameField).getResult());

@@ -29,6 +29,8 @@ import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.protocol.transaction.GlobalBeginResponse;
 import io.seata.core.protocol.transaction.GlobalCommitRequest;
 import io.seata.core.protocol.transaction.GlobalCommitResponse;
+import io.seata.core.protocol.transaction.GlobalReportRequest;
+import io.seata.core.protocol.transaction.GlobalReportResponse;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
@@ -76,6 +78,15 @@ public class DefaultTransactionManager implements TransactionManager {
         GlobalStatusRequest queryGlobalStatus = new GlobalStatusRequest();
         queryGlobalStatus.setXid(xid);
         GlobalStatusResponse response = (GlobalStatusResponse)syncCall(queryGlobalStatus);
+        return response.getGlobalStatus();
+    }
+
+    @Override
+    public GlobalStatus globalReport(String xid, GlobalStatus globalStatus) throws TransactionException {
+        GlobalReportRequest globalReport = new GlobalReportRequest();
+        globalReport.setXid(xid);
+        globalReport.setGlobalStatus(globalStatus);
+        GlobalReportResponse response = (GlobalReportResponse) syncCall(globalReport);
         return response.getGlobalStatus();
     }
 
