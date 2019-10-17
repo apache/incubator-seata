@@ -72,7 +72,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                  * dose not need the savepoint if original auto commit was true
                  */
                 conn.setAutoCommit(false);
-            } else if (!originalAutoCommit && dbmd.supportsSavepoints()) {
+            } else if (dbmd.supportsSavepoints()) {
                 // need the savepoint if original auto commit was false
                 sp = conn.setSavepoint();
             } else {
@@ -118,7 +118,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                 try {
                     conn.releaseSavepoint(sp);
                 } catch (SQLException e) {
-                    if (LOGGER.isInfoEnabled()) {
+                    if (LOGGER.isWarnEnabled()) {
                         LOGGER.warn("{} does not support release save point, but this is not a error.", getDbType());
                     }
                 }
