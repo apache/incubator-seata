@@ -111,7 +111,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     conn.releaseSavepoint(sp);
                 } catch (SQLException e) {
                     if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("{} does not support release save point, but this is not a error.", getDbType());
+                        LOGGER.warn("{} does not support release save point, but this is not a error.", getDbType());
                     }
                 }
             }
