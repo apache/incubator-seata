@@ -245,7 +245,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     private void recover() throws Exception {
         // recover Server
         if (!REGISTERED_PATH_SET.isEmpty()) {
-            REGISTERED_PATH_SET.forEach(path -> doRegister(path));
+            REGISTERED_PATH_SET.forEach(this::doRegister);
         }
         // recover client
         if (!LISTENER_SERVICE_MAP.isEmpty()) {
@@ -262,16 +262,13 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         }
     }
 
-    private void subscribeCluster(String clusterName) throws Exception {
-        subscribe(clusterName, new IZkChildListener() {
-            @Override
-            public void handleChildChange(String parentPath, List<String> currentChilds) throws Exception {
-                String clusterName = parentPath.replace(ROOT_PATH, "");
-                if (CollectionUtils.isEmpty(currentChilds) && CLUSTER_ADDRESS_MAP.get(clusterName) != null) {
-                    CLUSTER_ADDRESS_MAP.remove(clusterName);
-                } else if (!CollectionUtils.isEmpty(currentChilds)) {
-                    refreshClusterAddressMap(clusterName, currentChilds);
-                }
+    private void subscribeCluster(String cluster) throws Exception {
+        subscribe(cluster, (parentPath, currentChilds) -> {
+            String clusterName = parentPath.replace(ROOT_PATH, "");
+            if (CollectionUtils.isEmpty(currentChilds) && CLUSTER_ADDRESS_MAP.get(clusterName) != null) {
+                CLUSTER_ADDRESS_MAP.remove(clusterName);
+            } else if (!CollectionUtils.isEmpty(currentChilds)) {
+                refreshClusterAddressMap(clusterName, currentChilds);
             }
         });
     }
