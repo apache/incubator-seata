@@ -15,15 +15,16 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import java.sql.Types;
-import java.util.Collections;
 import com.alibaba.druid.pool.DruidDataSource;
-
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.sql.Types;
+import java.util.Collections;
 
 /**
  * The table meta fetch test.
@@ -52,11 +53,15 @@ public class TableMetaCacheTest {
 
     @Test
     public void testTableMeta() {
-        TableMetaCache tableMetaCache = new TableMetaCache();
+        TableMetaCache tableMetaCache = getTableMetaCache();
         Assertions.assertNotNull(tableMetaCache);
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            TableMetaCache.getTableMeta(null, null);
+            tableMetaCache.getTableMeta(null, null);
         });
+    }
+
+    private TableMetaCache getTableMetaCache() {
+        return TableMetaCacheFactory.getTableMetaCache(JdbcConstants.MYSQL);
     }
 
     /**
@@ -72,7 +77,7 @@ public class TableMetaCacheTest {
 
         DataSourceProxy proxy = new DataSourceProxy(dataSource);
 
-        TableMeta tableMeta = TableMetaCache.getTableMeta(proxy, "t1");
+        TableMeta tableMeta = getTableMetaCache().getTableMeta(proxy, "t1");
 
         Assertions.assertEquals("t1", tableMeta.getTableName());
         Assertions.assertEquals("id", tableMeta.getPkName());
@@ -101,12 +106,12 @@ public class TableMetaCacheTest {
             };
         mockDriver.setMockIndexMetasReturnValue(indexMetas);
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
-            TableMetaCache.getTableMeta(proxy, "t2");
+            getTableMetaCache().getTableMeta(proxy, "t2");
         });
 
         mockDriver.setMockColumnsMetasReturnValue(null);
         Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
-            TableMetaCache.getTableMeta(proxy, "t2");
+            getTableMetaCache().getTableMeta(proxy, "t2");
         });
 
     }
@@ -121,7 +126,7 @@ public class TableMetaCacheTest {
 
         DataSourceProxy dataSourceProxy = new DataSourceProxy(druidDataSource);
 
-        TableMeta tableMeta = TableMetaCache.getTableMeta(dataSourceProxy, "t1");
+        TableMeta tableMeta = getTableMetaCache().getTableMeta(dataSourceProxy, "t1");
         //change the columns meta
         columnMetas =
             new Object[][] {
@@ -134,11 +139,11 @@ public class TableMetaCacheTest {
                     "NO"}
             };
         mockDriver.setMockColumnsMetasReturnValue(columnMetas);
-        TableMetaCache.refresh(dataSourceProxy);
+        getTableMetaCache().refresh(dataSourceProxy);
 
         //test exception
         mockDriver.setMockColumnsMetasReturnValue(null);
-        TableMetaCache.refresh(dataSourceProxy);
+        getTableMetaCache().refresh(dataSourceProxy);
 
     }
 

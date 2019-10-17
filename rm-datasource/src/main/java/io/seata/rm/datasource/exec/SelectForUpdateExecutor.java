@@ -100,10 +100,10 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
         StringBuilder selectSQLAppender = new StringBuilder("SELECT ");
         selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
-        selectSQLAppender.append(" FROM " + getFromTableInSQL());
+        selectSQLAppender.append(" FROM ").append(getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
         if (StringUtils.isNotBlank(whereCondition)) {
-            selectSQLAppender.append(" WHERE " + whereCondition);
+            selectSQLAppender.append(" WHERE ").append(whereCondition);
         }
         selectSQLAppender.append(" FOR UPDATE");
         return selectSQLAppender.toString();
