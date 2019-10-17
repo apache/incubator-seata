@@ -561,6 +561,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             ((RpcServer)messageSender).destroy();
         }
         // 3. last destroy SessionHolder
-        SessionHolder.destory();
+        SessionHolder.destroy();
     }
 }
