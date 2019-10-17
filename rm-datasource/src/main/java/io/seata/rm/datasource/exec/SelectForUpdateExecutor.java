@@ -67,7 +67,10 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         String selectPKSQL = buildSelectSQL(paramAppenderList);
         try {
             if (originalAutoCommit) {
-                //dose not need the savepoint if original auto commit was true
+                /*
+                 * prevent release local lock before get global lock
+                 * dose not need the savepoint if original auto commit was true
+                 */
                 conn.setAutoCommit(false);
             } else if (!originalAutoCommit && dbmd.supportsSavepoints()) {
                 //need the savepoint if original auto commit was false
