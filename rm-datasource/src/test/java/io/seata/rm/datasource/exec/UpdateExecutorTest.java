@@ -92,12 +92,6 @@ public class UpdateExecutorTest {
         MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
         updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
         Assertions.assertNotNull(updateExecutor.beforeImage());
-
-        sql = "update table_update_executor_test where id = 1";
-        asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
-        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
-        Assertions.assertNotNull(updateExecutor.beforeImage());
     }
 
     @Test
