@@ -93,6 +93,10 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
         return this.mockExecuteHandler.executeQuery(stmt, sql);
     }
 
+    public MockPreparedStatement createSeataMockPreparedStatement(MockConnection conn, String sql) {
+        return new MockPreparedStatement(conn, sql);
+    }
+
     /**
      * mock the return value
      * @return
