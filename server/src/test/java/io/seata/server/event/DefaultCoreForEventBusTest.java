@@ -57,49 +57,52 @@ public class DefaultCoreForEventBusTest {
                 counter.addAndGet(1);
             }
         }
-
         SessionHolder.init(null);
         DefaultCoordinator coordinator = new DefaultCoordinator(null);
         coordinator.init();
+        try {
+            Core core = CoreFactory.get();
 
-        Core core = CoreFactory.get();
+            GlobalTransactionEventSubscriber subscriber = new GlobalTransactionEventSubscriber();
+            EventBusManager.get().register(subscriber);
 
-        GlobalTransactionEventSubscriber subscriber = new GlobalTransactionEventSubscriber();
-        EventBusManager.get().register(subscriber);
+            //start a transaction
+            String xid = core.begin("test_app_id", "default_group", "test_tran_name", 30000);
 
-        //start a transaction
-        String xid = core.begin("test_app_id", "default_group", "test_tran_name", 30000);
+            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
 
-        Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
+            //commit this transaction
+            core.commit(xid);
 
-        //commit this transaction
-        core.commit(xid);
+            //we need sleep for a short while because default canBeCommittedAsync() is true
+            Thread.sleep(1000);
 
-        //we need sleep for a short while because default canBeCommittedAsync() is true
-        Thread.sleep(1000);
+            //check
+            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.AsyncCommitting).get());
+            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Committed).get());
 
-        //check
-        Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.AsyncCommitting).get());
-        Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Committed).get());
+            //start another new transaction
+            xid = core.begin("test_app_id", "default_group", "test_tran_name2", 30000);
 
-        //start another new transaction
-        xid = core.begin("test_app_id", "default_group", "test_tran_name2", 30000);
+            Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
 
-        Assertions.assertEquals(2, subscriber.getEventCounters().get(GlobalStatus.Begin).get());
+            core.rollback(xid);
 
-        core.rollback(xid);
+            //check
+            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacking).get());
+            Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacked).get());
 
-        //check
-        Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacking).get());
-        Assertions.assertEquals(1, subscriber.getEventCounters().get(GlobalStatus.Rollbacked).get());
+            //start more one new transaction for test timeout and let this transaction immediately timeout
+            xid = core.begin("test_app_id", "default_group", "test_tran_name3", 0);
 
-        //start more one new transaction for test timeout and let this transaction immediately timeout
-        xid = core.begin("test_app_id", "default_group", "test_tran_name3", 0);
+            //sleep for check ->  DefaultCoordinator.timeoutCheck
+            Thread.sleep(1000);
 
-        //sleep for check ->  DefaultCoordinator.timeoutCheck
-        Thread.sleep(1000);
-
-        //at lease retry once because DefaultCoordinator.timeoutCheck is 1 second
-        Assertions.assertTrue(subscriber.getEventCounters().get(GlobalStatus.TimeoutRollbacking).get() >= 1);
+            //at lease retry once because DefaultCoordinator.timeoutCheck is 1 second
+            Assertions.assertTrue(subscriber.getEventCounters().get(GlobalStatus.TimeoutRollbacking).get() >= 1);
+        } finally {
+            coordinator.destroy();
+            SessionHolder.destroy();
+        }
     }
 }
