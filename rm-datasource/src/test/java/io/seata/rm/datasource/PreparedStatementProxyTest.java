@@ -73,16 +73,13 @@ public class PreparedStatementProxyTest {
     private PreparedStatementProxy preparedStatementProxy;
 
     @BeforeEach
-    public void init() throws NoSuchFieldException, IllegalAccessException, SQLException {
+    public void init() throws SQLException {
         MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas);
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
         DataSourceProxy dataSourceProxy = new DataSourceProxy(dataSource);
-        Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
-        field.setAccessible(true);
-        field.set(dataSourceProxy, "mysql");
 
         ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
 
