@@ -28,16 +28,11 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.util.JdbcConstants;
 
 import com.google.common.collect.Lists;
-import io.seata.core.context.RootContext;
-import io.seata.core.exception.RmTransactionException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.mock.MockConnectionProxy;
 import io.seata.rm.datasource.mock.MockDriver;
-import io.seata.rm.datasource.mock.MockLockConflictConnectionProxy;
-import io.seata.rm.datasource.sql.druid.MySQLDeleteRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
+import io.seata.rm.datasource.sql.druid.MySQLUpdateRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,13 +40,11 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author will
- * @date 2019/10/15
+ * @date 2019/10/17
  */
-public class SelectForUpdateExecutorTest {
+public class UpdateExecutorTest {
 
-    private SelectForUpdateExecutor selectForUpdateExecutor;
-
-    private ConnectionProxy connectionProxy;
+    private UpdateExecutor updateExecutor;
 
     private StatementProxy statementProxy;
 
@@ -63,8 +56,8 @@ public class SelectForUpdateExecutorTest {
             new Object[] {2, "Jack"},
         };
         Object[][] columnMetas = new Object[][] {
-            new Object[] {"", "", "table_select_for_update_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
-            new Object[] {"", "", "table_select_for_update_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
+            new Object[] {"", "", "table_update_executor_test", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
+            new Object[] {"", "", "table_update_executor_test", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
         };
         Object[][] indexMetas = new Object[][] {
             new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
@@ -79,47 +72,44 @@ public class SelectForUpdateExecutorTest {
         Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
         field.setAccessible(true);
         field.set(dataSourceProxy, "mysql");
-        connectionProxy = new MockConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
-        connectionProxy.bind("xid");
-        MockStatement mockStatement = new MockStatement(dataSource.getConnection().getConnection());
+        ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
+        MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
         statementProxy = new StatementProxy(connectionProxy, mockStatement);
-        String sql = "select * from table_select_for_update_executor_test where id = 1";
+        String sql = "update table_update_executor_test set name = 'WILL'";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLSelectForUpdateRecognizer recognizer = new MySQLSelectForUpdateRecognizer(sql, asts.get(0));
-        selectForUpdateExecutor = new SelectForUpdateExecutor(statementProxy, (statement, args) -> {
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> {
             return null;
         }, recognizer);
     }
 
     @Test
-    public void testDoExecute() throws Throwable {
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            selectForUpdateExecutor.doExecute(null);
-        });
-        RootContext.bind("xid");
-        Assertions.assertDoesNotThrow(() -> {
-            selectForUpdateExecutor.doExecute(null);
-        });
-        RootContext.unbind();
+    public void testBeforeImage() throws SQLException {
+        Assertions.assertNotNull(updateExecutor.beforeImage());
 
-        RootContext.bindGlobalLockFlag();
-        Assertions.assertDoesNotThrow(() -> {
-            selectForUpdateExecutor.doExecute(null);
-        });
-        RootContext.unbindGlobalLockFlag();
-
-        connectionProxy = new MockLockConflictConnectionProxy(connectionProxy.getDataSourceProxy(), connectionProxy.getTargetConnection());
-        statementProxy = new StatementProxy(connectionProxy, statementProxy.getTargetStatement());
-        statementProxy.getTargetStatement().getConnection().setAutoCommit(false);
-        String sql = "select * from dual";
+        String sql = "update table_update_executor_test set name = 'WILL' where id = 1";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
-        MySQLSelectForUpdateRecognizer recognizer = new MySQLSelectForUpdateRecognizer(sql, asts.get(0));
-        selectForUpdateExecutor = new SelectForUpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+        MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+        Assertions.assertNotNull(updateExecutor.beforeImage());
 
-        RootContext.bind("xid");
-        Assertions.assertThrows(LockWaitTimeoutException.class, () -> {
-            selectForUpdateExecutor.doExecute(null);
-        });
-        RootContext.unbind();
+        sql = "update table_update_executor_test where id = 1";
+        asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
+        recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));
+        updateExecutor = new UpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
+        Assertions.assertNotNull(updateExecutor.beforeImage());
+    }
+
+    @Test
+    public void testAfterImage() throws SQLException {
+        TableRecords beforeImage = updateExecutor.beforeImage();
+        TableRecords afterImage = updateExecutor.afterImage(beforeImage);
+        Assertions.assertNotNull(afterImage);
+
+        afterImage = updateExecutor.afterImage(new TableRecords());
+        Assertions.assertNotNull(afterImage);
+
+        afterImage = updateExecutor.afterImage(null);
+        Assertions.assertNotNull(afterImage);
     }
 }
