@@ -66,10 +66,15 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
         String selectPKSQL = buildSelectSQL(paramAppenderList);
         try {
-            if (!originalAutoCommit && dbmd.supportsSavepoints()) {
+            if (originalAutoCommit) {
+                //dose not need the savepoint if original auto commit was true
+                conn.setAutoCommit(false);
+            } else if (!originalAutoCommit && dbmd.supportsSavepoints()) {
+                //need the savepoint if original auto commit was false
                 sp = conn.setSavepoint();
+            } else {
+                throw new SQLException("not support savepoint. please check your db version");
             }
-
 
             while (true) {
                 try {
@@ -97,10 +102,12 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     }
                     break;
                 } catch (LockConflictException lce) {
-                    if (sp != null) {
-                       conn.rollback(sp);
-                    } else {
+                    //keep same logic as above
+                    if (originalAutoCommit) {
+                        conn.setAutoCommit(true);
                         conn.rollback();
+                    } else if (!originalAutoCommit && dbmd.supportsSavepoints()) {
+                        conn.rollback(sp);
                     }
                     lockRetryController.sleep(lce);
                 }
