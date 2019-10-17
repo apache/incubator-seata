@@ -105,12 +105,10 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     }
                     break;
                 } catch (LockConflictException lce) {
-                    // keep same logic as above
-                    if (originalAutoCommit) {
-                        conn.setAutoCommit(true);
-                        conn.rollback();
-                    } else if (!originalAutoCommit && dbmd.supportsSavepoints()) {
+                    if (sp != null) {
                         conn.rollback(sp);
+                    } else {
+                        conn.rollback();
                     }
                     lockRetryController.sleep(lce);
                 }
@@ -124,6 +122,9 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                         LOGGER.warn("{} does not support release save point, but this is not a error.", getDbType());
                     }
                 }
+            }
+            if (originalAutoCommit) {
+                conn.setAutoCommit(true);
             }
         }
         return rs;
