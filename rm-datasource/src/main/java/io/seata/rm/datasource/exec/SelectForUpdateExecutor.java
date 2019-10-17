@@ -105,7 +105,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     }
                     break;
                 } catch (LockConflictException lce) {
-                    //keep same logic as above
+                    // keep same logic as above
                     if (originalAutoCommit) {
                         conn.setAutoCommit(true);
                         conn.rollback();
