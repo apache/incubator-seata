@@ -73,7 +73,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                  */
                 conn.setAutoCommit(false);
             } else if (!originalAutoCommit && dbmd.supportsSavepoints()) {
-                //need the savepoint if original auto commit was false
+                // need the savepoint if original auto commit was false
                 sp = conn.setSavepoint();
             } else {
                 throw new SQLException("not support savepoint. please check your db version");
