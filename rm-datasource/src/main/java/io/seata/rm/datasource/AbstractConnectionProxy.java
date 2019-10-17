@@ -15,15 +15,12 @@
  */
 package io.seata.rm.datasource;
 
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
-import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 
 import java.sql.Array;
 import java.sql.Blob;
@@ -112,14 +109,8 @@ public abstract class AbstractConnectionProxy implements Connection {
         PreparedStatement targetPreparedStatement;
         SQLRecognizer sqlRecognizer = SQLVisitorFactory.get(sql, dbType);
         if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
-            final boolean oracle = StringUtils.equalsIgnoreCase(JdbcConstants.ORACLE, dbType);
             final String tableName = sqlRecognizer.getTableName();
-            TableMeta tableMeta;
-            if (oracle) {
-                tableMeta = TableMetaCacheOracle.getTableMeta(getDataSourceProxy(), tableName);
-            } else {
-                tableMeta = TableMetaCache.getTableMeta(getDataSourceProxy(), tableName);
-            }
+            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(getDataSourceProxy()).getTableMeta(getDataSourceProxy(), tableName);
             targetPreparedStatement = getTargetConnection().prepareStatement(sql, new String[]{ tableMeta.getPkName() });
         } else {
             targetPreparedStatement = getTargetConnection().prepareStatement(sql);
