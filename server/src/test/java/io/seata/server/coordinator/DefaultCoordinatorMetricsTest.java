@@ -44,91 +44,95 @@ public class DefaultCoordinatorMetricsTest {
         SessionHolder.init(null);
         DefaultCoordinator coordinator = new DefaultCoordinator(null);
         coordinator.init();
+        try {
+            MetricsManager.get().init();
 
-        MetricsManager.get().init();
+            //start a transaction
+            GlobalBeginRequest request = new GlobalBeginRequest();
+            request.setTransactionName("test_transaction");
+            GlobalBeginResponse response = new GlobalBeginResponse();
+            coordinator.doGlobalBegin(request, response, new RpcContext());
 
-        //start a transaction
-        GlobalBeginRequest request = new GlobalBeginRequest();
-        request.setTransactionName("test_transaction");
-        GlobalBeginResponse response = new GlobalBeginResponse();
-        coordinator.doGlobalBegin(request, response, new RpcContext());
+            Map<String, Measurement> measurements = new HashMap<>();
+            MetricsManager.get().getRegistry().measure().forEach(
+                    measurement -> measurements.put(measurement.getId().toString(), measurement));
 
-        Map<String, Measurement> measurements = new HashMap<>();
-        MetricsManager.get().getRegistry().measure().forEach(
-            measurement -> measurements.put(measurement.getId().toString(), measurement));
+            Assertions.assertEquals(1, measurements.size());
+            Assertions.assertEquals(1,
+                    measurements.get("seata.transaction(meter=counter,role=tc,status=active)").getValue(), 0);
 
-        Assertions.assertEquals(1, measurements.size());
-        Assertions.assertEquals(1,
-            measurements.get("seata.transaction(meter=counter,role=tc,status=active)").getValue(), 0);
+            //commit this transaction
+            GlobalCommitRequest commitRequest = new GlobalCommitRequest();
+            commitRequest.setXid(response.getXid());
+            coordinator.doGlobalCommit(commitRequest, new GlobalCommitResponse(), new RpcContext());
 
-        //commit this transaction
-        GlobalCommitRequest commitRequest = new GlobalCommitRequest();
-        commitRequest.setXid(response.getXid());
-        coordinator.doGlobalCommit(commitRequest, new GlobalCommitResponse(), new RpcContext());
+            //we need sleep for a short while because default canBeCommittedAsync() is true
+            Thread.sleep(200);
 
-        //we need sleep for a short while because default canBeCommittedAsync() is true
-        Thread.sleep(200);
+            measurements.clear();
+            MetricsManager.get().getRegistry().measure().forEach(
+                    measurement -> measurements.put(measurement.getId().toString(), measurement));
+            Assertions.assertEquals(9, measurements.size());
+            Assertions.assertEquals(0,
+                    measurements.get("seata.transaction(meter=counter,role=tc,status=active)").getValue(), 0);
+            Assertions
+                    .assertEquals(1, measurements.get("seata.transaction(meter=counter,role=tc,status=committed)").getValue(),
+                            0);
+            Assertions.assertEquals(1,
+                    measurements.get("seata.transaction(meter=summary,role=tc,statistic=count,status=committed)").getValue(),
+                    0);
+            Assertions.assertEquals(1,
+                    measurements.get("seata.transaction(meter=summary,role=tc,statistic=total,status=committed)").getValue(),
+                    0);
+            Assertions.assertEquals(1,
+                    measurements.get("seata.transaction(meter=timer,role=tc,statistic=count,status=committed)").getValue(), 0);
 
-        measurements.clear();
-        MetricsManager.get().getRegistry().measure().forEach(
-            measurement -> measurements.put(measurement.getId().toString(), measurement));
-        Assertions.assertEquals(9, measurements.size());
-        Assertions.assertEquals(0,
-            measurements.get("seata.transaction(meter=counter,role=tc,status=active)").getValue(), 0);
-        Assertions
-            .assertEquals(1, measurements.get("seata.transaction(meter=counter,role=tc,status=committed)").getValue(),
-                0);
-        Assertions.assertEquals(1,
-            measurements.get("seata.transaction(meter=summary,role=tc,statistic=count,status=committed)").getValue(),
-            0);
-        Assertions.assertEquals(1,
-            measurements.get("seata.transaction(meter=summary,role=tc,statistic=total,status=committed)").getValue(),
-            0);
-        Assertions.assertEquals(1,
-            measurements.get("seata.transaction(meter=timer,role=tc,statistic=count,status=committed)").getValue(), 0);
+            //start another new transaction
+            request = new GlobalBeginRequest();
+            request.setTransactionName("test_transaction_2");
+            response = new GlobalBeginResponse();
+            coordinator.doGlobalBegin(request, response, new RpcContext());
 
-        //start another new transaction
-        request = new GlobalBeginRequest();
-        request.setTransactionName("test_transaction_2");
-        response = new GlobalBeginResponse();
-        coordinator.doGlobalBegin(request, response, new RpcContext());
+            //rollback this transaction
+            GlobalRollbackRequest rollbackRequest = new GlobalRollbackRequest();
+            rollbackRequest.setXid(response.getXid());
+            coordinator.doGlobalRollback(rollbackRequest, new GlobalRollbackResponse(), new RpcContext());
 
-        //rollback this transaction
-        GlobalRollbackRequest rollbackRequest = new GlobalRollbackRequest();
-        rollbackRequest.setXid(response.getXid());
-        coordinator.doGlobalRollback(rollbackRequest, new GlobalRollbackResponse(), new RpcContext());
+            Thread.sleep(200);
 
-        Thread.sleep(200);
+            measurements.clear();
+            MetricsManager.get().getRegistry().measure().forEach(
+                    measurement -> measurements.put(measurement.getId().toString(), measurement));
+            Assertions.assertEquals(17, measurements.size());
+            Assertions.assertEquals(0,
+                    measurements.get("seata.transaction(meter=counter,role=tc,status=active)").getValue(), 0);
 
-        measurements.clear();
-        MetricsManager.get().getRegistry().measure().forEach(
-            measurement -> measurements.put(measurement.getId().toString(), measurement));
-        Assertions.assertEquals(17, measurements.size());
-        Assertions.assertEquals(0,
-            measurements.get("seata.transaction(meter=counter,role=tc,status=active)").getValue(), 0);
+            Assertions
+                    .assertEquals(1, measurements.get("seata.transaction(meter=counter,role=tc,status=committed)").getValue(),
+                            0);
+            Assertions.assertEquals(0,
+                    measurements.get("seata.transaction(meter=summary,role=tc,statistic=count,status=committed)").getValue(),
+                    0);
+            Assertions.assertEquals(0,
+                    measurements.get("seata.transaction(meter=summary,role=tc,statistic=total,status=committed)").getValue(),
+                    0);
+            Assertions.assertEquals(0,
+                    measurements.get("seata.transaction(meter=timer,role=tc,statistic=count,status=committed)").getValue(), 0);
 
-        Assertions
-            .assertEquals(1, measurements.get("seata.transaction(meter=counter,role=tc,status=committed)").getValue(),
-                0);
-        Assertions.assertEquals(0,
-            measurements.get("seata.transaction(meter=summary,role=tc,statistic=count,status=committed)").getValue(),
-            0);
-        Assertions.assertEquals(0,
-            measurements.get("seata.transaction(meter=summary,role=tc,statistic=total,status=committed)").getValue(),
-            0);
-        Assertions.assertEquals(0,
-            measurements.get("seata.transaction(meter=timer,role=tc,statistic=count,status=committed)").getValue(), 0);
-
-        Assertions.assertEquals(1,
-            measurements.get("seata.transaction(meter=counter,role=tc,status=rollbacked)").getValue(), 0);
-        Assertions.assertEquals(1,
-            measurements.get("seata.transaction(meter=summary,role=tc,statistic=count,status=rollbacked)").getValue(),
-            0);
-        Assertions.assertEquals(1,
-            measurements.get("seata.transaction(meter=summary,role=tc,statistic=total,status=rollbacked)").getValue(),
-            0);
-        Assertions.assertEquals(1,
-            measurements.get("seata.transaction(meter=timer,role=tc,statistic=count,status=rollbacked)").getValue(), 0);
+            Assertions.assertEquals(1,
+                    measurements.get("seata.transaction(meter=counter,role=tc,status=rollbacked)").getValue(), 0);
+            Assertions.assertEquals(1,
+                    measurements.get("seata.transaction(meter=summary,role=tc,statistic=count,status=rollbacked)").getValue(),
+                    0);
+            Assertions.assertEquals(1,
+                    measurements.get("seata.transaction(meter=summary,role=tc,statistic=total,status=rollbacked)").getValue(),
+                    0);
+            Assertions.assertEquals(1,
+                    measurements.get("seata.transaction(meter=timer,role=tc,statistic=count,status=rollbacked)").getValue(), 0);
+        } finally {
+            coordinator.destroy();
+            SessionHolder.destroy();
+        }
     }
 
 }
