@@ -1,0 +1,19 @@
+{
+    "Name": "simpleTestStateMachine",
+    "Comment": "测试状态机定义",
+    "StartState": "FirstState",
+    "Version": "0.0.2",
+    "States": {
+        "FirstState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
+            "Next": "SecondState"
+        },
+        "SecondState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "bar"
+        }
+    }
+}

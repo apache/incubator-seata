@@ -165,7 +165,7 @@ public class EtcdRegistryServiceImplTest {
     /**
      * etcd listener
      */
-    private class EtcdListener implements Watch.Listener {
+    private static class EtcdListener implements Watch.Listener {
         private boolean notified = false;
 
         @Override
