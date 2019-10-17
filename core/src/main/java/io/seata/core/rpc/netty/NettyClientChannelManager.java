@@ -120,7 +120,7 @@ class NettyClientChannelManager {
                 }
                 if (ch.compareTo(channel) == 0) {
                     if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("return to pool, rm channel:" + channel);
+                        LOGGER.info("return to pool, rm channel:{}", channel);
                     }
                     destroyChannel(serverAddress, channel);
                 } else {
@@ -146,7 +146,7 @@ class NettyClientChannelManager {
             }
             nettyClientKeyPool.returnObject(poolKeyMap.get(serverAddress), channel);
         } catch (Exception exx) {
-            LOGGER.error("return channel to rmPool error:" + exx.getMessage());
+            LOGGER.error("return channel to rmPool error:{}", exx.getMessage());
         }
     }
     
@@ -170,8 +170,7 @@ class NettyClientChannelManager {
             try {
                 acquireChannel(serverAddress);
             } catch (Exception e) {
-                LOGGER.error(FrameworkErrorCode.NetConnect.getErrCode(),
-                    "can not connect to " + serverAddress + " cause:" + e.getMessage(), e);
+                LOGGER.error("{} can not connect to {} cause:{}",FrameworkErrorCode.NetConnect.getErrCode(), serverAddress, e.getMessage(), e);
             }
         }
     }
@@ -203,7 +202,7 @@ class NettyClientChannelManager {
             channelFromPool = nettyClientKeyPool.borrowObject(poolKeyMap.get(serverAddress));
             channels.put(serverAddress, channelFromPool);
         } catch (Exception exx) {
-            LOGGER.error(FrameworkErrorCode.RegisterRM.getErrCode(), "register RM failed.", exx);
+            LOGGER.error("{} register RM failed.",FrameworkErrorCode.RegisterRM.getErrCode(), exx);
             throw new FrameworkException("can not register RM,err:" + exx.getMessage());
         }
         return channelFromPool;
@@ -238,7 +237,7 @@ class NettyClientChannelManager {
                 }
             }
             if (i == NettyClientConfig.getMaxCheckAliveRetry()) {
-                LOGGER.warn("channel " + rmChannel + " is not active after long wait, close it.");
+                LOGGER.warn("channel {} is not active after long wait, close it.", rmChannel);
                 releaseChannel(rmChannel, serverAddress);
                 return null;
             }
