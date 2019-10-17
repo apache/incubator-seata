@@ -122,6 +122,10 @@ public class MemoryLocker extends AbstractLocker {
 
     @Override
     public boolean releaseLock(List<RowLock> rowLock) {
+        if (CollectionUtils.isEmpty(rowLock)) {
+            //no lock
+            return true;
+        }
         ConcurrentMap<BucketLockMap, Set<String>> lockHolder = branchSession.getLockHolder();
         if (lockHolder == null || lockHolder.size() == 0) {
             return true;

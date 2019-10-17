@@ -27,9 +27,10 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -70,9 +71,17 @@ public class DefaultCoreTest {
      *
      * @throws Exception the exception
      */
-    @BeforeEach
-    public void initSessionManager() throws Exception {
+    @BeforeAll
+    public static void initSessionManager() throws Exception {
         SessionHolder.init(null);
+    }
+
+    /**
+     * Destroy session manager.
+     */
+    @AfterAll
+    public static void destroySessionManager() {
+        SessionHolder.destroy();
     }
 
     /**
