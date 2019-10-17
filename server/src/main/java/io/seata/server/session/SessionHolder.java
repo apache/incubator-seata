@@ -260,7 +260,7 @@ public class SessionHolder {
         return getRootSessionManager().findGlobalSession(xid);
     }
 
-    public static void destory() {
+    public static void destroy() {
         ROOT_SESSION_MANAGER.destroy();
         ASYNC_COMMITTING_SESSION_MANAGER.destroy();
         RETRY_COMMITTING_SESSION_MANAGER.destroy();
