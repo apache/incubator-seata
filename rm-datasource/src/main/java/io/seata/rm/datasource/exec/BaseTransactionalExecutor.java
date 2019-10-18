@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
@@ -27,9 +26,7 @@ import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.WhereRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
-import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
-import io.seata.rm.datasource.sql.struct.TableMetaCachePostgresql;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import java.sql.PreparedStatement;
@@ -187,13 +184,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (tableMeta != null) {
             return tableMeta;
         }
-        if (JdbcConstants.ORACLE.equalsIgnoreCase(statementProxy.getConnectionProxy().getDbType())) {
-            tableMeta = TableMetaCacheOracle.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
-        } else if (JdbcConstants.POSTGRESQL.equalsIgnoreCase(statementProxy.getConnectionProxy().getDbType())) {
-            tableMeta = TableMetaCachePostgresql.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
-        } else {
-            tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
-        }
+        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+        tableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
+            .getTableMeta(connectionProxy.getDataSourceProxy(), tableName);
         return tableMeta;
     }
 
@@ -350,6 +343,15 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             }
         }
         return afterImage;
+    }
+
+    /**
+     * get db type
+     *
+     * @return
+     */
+    protected String getDbType() {
+        return statementProxy.getConnectionProxy().getDbType();
     }
 
 }

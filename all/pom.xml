@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>0.9.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -120,6 +120,11 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-config-etcd3</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-config-spring-cloud</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -230,6 +235,38 @@
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-codec-kryo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- saga -->
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-saga-processctrl</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-saga-statelang</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-saga-engine</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-saga-rm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-saga-tm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-saga-engine-store</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -415,6 +452,7 @@
             <artifactId>protostuff-runtime</artifactId>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -519,6 +557,7 @@
                                     <include>io.seata:seata-config-zk</include>
                                     <include>io.seata:seata-config-consul</include>
                                     <include>io.seata:seata-config-etcd3</include>
+                                    <include>io.seata:seata-config-spring-cloud</include>
                                     <include>io.seata:seata-discovery-core</include>
                                     <include>io.seata:seata-discovery-custom</include>
                                     <include>io.seata:seata-discovery-consul</include>
@@ -539,6 +578,14 @@
                                     <include>io.seata:seata-tm</include>
                                     <include>io.seata:seata-codec-seata</include>
                                     <include>io.seata:seata-codec-protobuf</include>
+                                    <!-- saga -->
+                                    <include>io.seata:seata-saga-processctrl</include>
+                                    <include>io.seata:seata-saga-statelang</include>
+                                    <include>io.seata:seata-saga-engine</include>
+                                    <include>io.seata:seata-saga-rm</include>
+                                    <include>io.seata:seata-saga-tm</include>
+                                    <include>io.seata:seata-saga-engine-store</include>
+
                                     <include>io.seata:seata-codec-kryo</include>
                                 </includes>
                             </artifactSet>
