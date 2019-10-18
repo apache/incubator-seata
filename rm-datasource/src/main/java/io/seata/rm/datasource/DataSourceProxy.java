@@ -22,7 +22,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ScheduledExecutorService;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataSourceProxy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProxy.class);
 
     private String resourceGroupId;
 
@@ -91,11 +91,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         }
         DefaultResourceManager.get().registerResource(this);
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
-            tableMetaExcutor.scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    TableMetaCache.refresh(DataSourceProxy.this);
-                }
+            tableMetaExcutor.scheduleAtFixedRate(() -> {
+                TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType()).refresh(DataSourceProxy.this);
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }
     }
