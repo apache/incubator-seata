@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
+import com.alibaba.druid.util.JdbcConstants;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
@@ -53,12 +54,12 @@ public class UndoLogManagerTest {
         }
         Set<Long> branchIds = new HashSet<>();
         for (int i = 0;i < APPEND_IN_SIZE;i++){
-            branchIds.add(Long.valueOf(i));
+            branchIds.add((long) i);
         }
         Connection connection = mock(Connection.class);
         PreparedStatement preparedStatement = mock(PreparedStatement.class);
         when(connection.prepareStatement(anyString())).thenReturn(preparedStatement);
-        UndoLogManager.batchDeleteUndoLog(xids, branchIds, connection);
+        UndoLogManagerFactory.getUndoLogManager(JdbcConstants.MYSQL).batchDeleteUndoLog(xids, branchIds, connection);
 
         //verify
         for (int i = 1;i <= APPEND_IN_SIZE;i++){
@@ -76,7 +77,7 @@ public class UndoLogManagerTest {
                 THE_APPEND_IN_SIZE_PARAM_STRING +
                 " AND xid IN " +
                 THE_DOUBLE_APPEND_IN_SIZE_PARAM_STRING;
-        String batchDeleteUndoLogSql = UndoLogManager.toBatchDeleteUndoLogSql(APPEND_IN_SIZE * 2, APPEND_IN_SIZE);
+        String batchDeleteUndoLogSql = AbstractUndoLogManager.toBatchDeleteUndoLogSql(APPEND_IN_SIZE * 2, APPEND_IN_SIZE);
         System.out.println(batchDeleteUndoLogSql);
         assertThat(batchDeleteUndoLogSql).isEqualTo(expectedSqlString);
     }
@@ -84,7 +85,7 @@ public class UndoLogManagerTest {
     @Test
     public void testAppendInParam() {
         StringBuilder sqlBuilder = new StringBuilder();
-        UndoLogManager.appendInParam(APPEND_IN_SIZE, sqlBuilder);
+        AbstractUndoLogManager.appendInParam(APPEND_IN_SIZE, sqlBuilder);
         assertThat(sqlBuilder.toString()).isEqualTo(THE_APPEND_IN_SIZE_PARAM_STRING);
     }
 

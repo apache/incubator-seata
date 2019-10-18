@@ -28,7 +28,6 @@ public enum TransactionExceptionCode {
     /**
      * Unknown transaction exception code.
      */
-    //
     Unknown,
 
     /**
@@ -39,86 +38,73 @@ public enum TransactionExceptionCode {
     /**
      * Lock key conflict transaction exception code.
      */
-    //
     LockKeyConflict,
 
     /**
      * Io transaction exception code.
      */
-    //
     IO,
 
     /**
      * Branch rollback failed retriable transaction exception code.
      */
-    //
     BranchRollbackFailed_Retriable,
 
     /**
      * Branch rollback failed unretriable transaction exception code.
      */
-    //
     BranchRollbackFailed_Unretriable,
 
     /**
      * Branch register failed transaction exception code.
      */
-    //
     BranchRegisterFailed,
 
     /**
      * Branch report failed transaction exception code.
      */
-    //
     BranchReportFailed,
 
     /**
      * Lockable check failed transaction exception code.
      */
-    //
     LockableCheckFailed,
 
     /**
      * Branch transaction not exist transaction exception code.
      */
-    //
     BranchTransactionNotExist,
 
     /**
      * Global transaction not exist transaction exception code.
      */
-    //
     GlobalTransactionNotExist,
 
     /**
      * Global transaction not active transaction exception code.
      */
-    //
     GlobalTransactionNotActive,
 
     /**
      * Global transaction status invalid transaction exception code.
      */
-    //
     GlobalTransactionStatusInvalid,
 
     /**
      * Failed to send branch commit request transaction exception code.
      */
-    //
     FailedToSendBranchCommitRequest,
 
     /**
      * Failed to send branch rollback request transaction exception code.
      */
-    //
     FailedToSendBranchRollbackRequest,
 
     /**
      * Failed to add branch transaction exception code.
      */
-    //
     FailedToAddBranch,
+
     /**
      * Failed to lock global transaction exception code.
      */
@@ -128,9 +114,14 @@ public enum TransactionExceptionCode {
      * FailedWriteSession
      */
     FailedWriteSession,
+
+    /**
+     * Failed to store exception code
+     */
+    FailedStore
     ;
 
-    private static final Map<Integer, TransactionExceptionCode> MAP = new HashMap<>(values().length);
+    private static final Map<Integer, TransactionExceptionCode> MAP = new HashMap<>(values().length * 2);
 
     static {
         for (TransactionExceptionCode code : values()) {

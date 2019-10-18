@@ -185,7 +185,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             IdleStateEvent idleStateEvent = (IdleStateEvent)evt;
             if (idleStateEvent.state() == IdleState.READER_IDLE) {
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("channel:{} read idle.", ctx.channel());
+                    LOGGER.info("channel {} read idle.", ctx.channel());
                 }
                 try {
                     String serverAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
@@ -199,11 +199,11 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             if (idleStateEvent == IdleStateEvent.WRITER_IDLE_STATE_EVENT) {
                 try {
                     if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("will send ping msg,channel:{}", ctx.channel());
+                        LOGGER.debug("will send ping msg,channel {}", ctx.channel());
                     }
                     sendRequest(ctx.channel(), HeartbeatMessage.PING);
                 } catch (Throwable throwable) {
-                    LOGGER.error("", "send request error", throwable);
+                    LOGGER.error("send request error: {}", throwable.getMessage(), throwable);
                 }
             }
         }
@@ -330,7 +330,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                                 messageFuture.setResultMessage(null);
                             }
                         }
-                        LOGGER.error("", "client merge call failed", e);
+                        LOGGER.error("client merge call failed: {}", e.getMessage(), e);
                     }
                 }
                 isSending = false;
