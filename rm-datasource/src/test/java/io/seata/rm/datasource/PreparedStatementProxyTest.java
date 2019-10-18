@@ -17,7 +17,6 @@ package io.seata.rm.datasource;
 
 import java.io.ByteArrayInputStream;
 import java.io.CharArrayReader;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -28,6 +27,7 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Objects;
@@ -72,17 +72,16 @@ public class PreparedStatementProxyTest {
 
     private PreparedStatementProxy preparedStatementProxy;
 
+    private TestUnusedConstructorPreparedStatementProxy unusedConstrcutPreparedStatementProxy;
+
     @BeforeEach
-    public void init() throws NoSuchFieldException, IllegalAccessException, SQLException {
+    public void init() throws SQLException {
         MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas);
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
         dataSource.setDriver(mockDriver);
 
         DataSourceProxy dataSourceProxy = new DataSourceProxy(dataSource);
-        Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
-        field.setAccessible(true);
-        field.set(dataSourceProxy, "mysql");
 
         ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
 
@@ -92,11 +91,13 @@ public class PreparedStatementProxyTest {
             (MockConnection)connectionProxy.getTargetConnection(), sql);
 
         preparedStatementProxy = new PreparedStatementProxy(connectionProxy, preparedStatement, sql);
+        unusedConstrcutPreparedStatementProxy = new TestUnusedConstructorPreparedStatementProxy(connectionProxy, preparedStatement);
     }
 
     @Test
     public void testPreparedStatementProxy() {
         Assertions.assertNotNull(preparedStatementProxy);
+        Assertions.assertNotNull(unusedConstrcutPreparedStatementProxy);
     }
 
     @Test
@@ -329,5 +330,31 @@ public class PreparedStatementProxyTest {
         Assertions.assertEquals(sqlxml, preparedStatementProxy.getParamsByIndex(0).get(0));
         preparedStatementProxy.clearParameters();
 
+        Assertions.assertNotNull(preparedStatementProxy.getParameters());
+    }
+
+    /**
+     * This class use for test the unused constructor in AbstractPreparedStatementProxy
+     */
+    private class TestUnusedConstructorPreparedStatementProxy extends AbstractPreparedStatementProxy {
+
+        public TestUnusedConstructorPreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement) throws SQLException {
+            super(connectionProxy, targetStatement);
+        }
+
+        @Override
+        public ResultSet executeQuery() throws SQLException {
+            return null;
+        }
+
+        @Override
+        public int executeUpdate() throws SQLException {
+            return 0;
+        }
+
+        @Override
+        public boolean execute() throws SQLException {
+            return false;
+        }
     }
 }
