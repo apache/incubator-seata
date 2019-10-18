@@ -34,9 +34,9 @@ public class RootContext {
     /**
      * The constant KEY_XID.
      */
-    public static final String KEY_XID = "TX_XID";
+    public static final String KEY_XID = "tx-xid";
 
-    public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
+    public static final String KEY_GLOBAL_LOCK_FLAG = "tx-lock";
 
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
 
