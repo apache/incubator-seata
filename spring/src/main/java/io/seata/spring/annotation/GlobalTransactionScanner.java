@@ -46,7 +46,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
@@ -62,7 +61,7 @@ import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_AUTOPROXY;
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     implements InitializingBean, ApplicationContextAware,
-    DisposableBean, BeanPostProcessor {
+    DisposableBean {
 
     /**
      *
@@ -317,7 +316,14 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 if (null != m) {
                     return m.invoke(dataSourceProxy, args);
                 } else {
-                    return method.invoke(bean, args);
+                    boolean oldAccessible = method.isAccessible();
+                    try {
+                        method.setAccessible(true);
+                        return method.invoke(bean, args);
+                    } finally {
+                        //recover the original accessible for security reason
+                        method.setAccessible(oldAccessible);
+                    }
                 }
             });
         }

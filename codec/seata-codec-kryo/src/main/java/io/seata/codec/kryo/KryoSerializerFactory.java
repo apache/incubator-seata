@@ -46,6 +46,8 @@ import io.seata.core.protocol.transaction.GlobalCommitRequest;
 import io.seata.core.protocol.transaction.GlobalCommitResponse;
 import io.seata.core.protocol.transaction.GlobalLockQueryRequest;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
+import io.seata.core.protocol.transaction.GlobalReportRequest;
+import io.seata.core.protocol.transaction.GlobalReportResponse;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
@@ -160,6 +162,8 @@ public class KryoSerializerFactory implements KryoFactory {
         kryo.register(GlobalStatusRequest.class);
         kryo.register(GlobalStatusResponse.class);
         kryo.register(UndoLogDeleteRequest.class);
+        kryo.register(GlobalReportRequest.class);
+        kryo.register(GlobalReportResponse.class);
 
         kryo.register(MergedWarpMessage.class);
         kryo.register(MergeResultMessage.class);
