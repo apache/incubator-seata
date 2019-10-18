@@ -89,7 +89,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         if (role != GlobalTransactionRole.Launcher) {
             check();
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Ignore Begin(): just involved in global transaction [" + xid + "]");
+                LOGGER.debug("Ignore Begin(): just involved in global transaction [{}]", xid);
             }
             return;
         }
@@ -103,7 +103,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         status = GlobalStatus.Begin;
         RootContext.bind(xid);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Begin new global transaction [" + xid + "]");
+            LOGGER.info("Begin new global transaction [{}]", xid);
         }
 
     }
@@ -113,7 +113,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         if (role == GlobalTransactionRole.Participant) {
             // Participant has no responsibility of committing
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Ignore Commit(): just involved in global transaction [" + xid + "]");
+                LOGGER.debug("Ignore Commit(): just involved in global transaction [{}]", xid);
             }
             return;
         }
@@ -142,7 +142,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
         }
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("[" + xid + "] commit status:" + status);
+            LOGGER.info("[{}] commit status: {}", xid, status);
         }
 
     }
@@ -150,9 +150,9 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     @Override
     public void rollback() throws TransactionException {
         if (role == GlobalTransactionRole.Participant) {
-            // Participant has no responsibility of committing
+            // Participant has no responsibility of rollback
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Ignore Rollback(): just involved in global transaction [" + xid + "]");
+                LOGGER.debug("Ignore Rollback(): just involved in global transaction [{}]", xid);
             }
             return;
         }
@@ -182,7 +182,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
         }
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("[" + xid + "] rollback status:" + status);
+            LOGGER.info("[{}] rollback status: {}", xid, status);
         }
     }
 
@@ -211,7 +211,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
         status = transactionManager.globalReport(xid, globalStatus);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("[" + xid + "] report status:" + status);
+            LOGGER.info("[{}] report status: {}", xid, status);
         }
 
         if (RootContext.getXID() != null) {

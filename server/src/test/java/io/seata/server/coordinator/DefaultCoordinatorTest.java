@@ -140,6 +140,8 @@ public class DefaultCoordinatorTest {
         for (GlobalSession globalSession : globalSessions) {
             globalSession.closeAndClean();
         }
+
+        SessionHolder.destroy();
     }
 
     static Stream<Arguments> xidAndBranchIdProviderForCommit() throws Exception {
