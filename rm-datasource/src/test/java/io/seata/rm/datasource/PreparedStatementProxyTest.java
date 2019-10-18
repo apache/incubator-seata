@@ -45,7 +45,7 @@ import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.sql.struct.Null;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -54,28 +54,28 @@ import org.junit.jupiter.api.Test;
  */
 public class PreparedStatementProxyTest {
 
-    private List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
+    private static List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
 
-    private Object[][] returnValue = new Object[][] {
+    private static Object[][] returnValue = new Object[][] {
         new Object[] {1, "Tom"},
         new Object[] {2, "Jack"},
     };
 
-    private Object[][] columnMetas = new Object[][] {
+    private static Object[][] columnMetas = new Object[][] {
         new Object[] {"", "", "table_prepared_statement_proxy", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64, 1, "NO", "YES"},
         new Object[] {"", "", "table_prepared_statement_proxy", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64, 2, "YES", "NO"},
     };
 
-    private Object[][] indexMetas = new Object[][] {
+    private static Object[][] indexMetas = new Object[][] {
         new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
     };
 
-    private PreparedStatementProxy preparedStatementProxy;
+    private static PreparedStatementProxy preparedStatementProxy;
 
-    private TestUnusedConstructorPreparedStatementProxy unusedConstrcutPreparedStatementProxy;
+    private static TestUnusedConstructorPreparedStatementProxy unusedConstructorPreparedStatementProxy;
 
-    @BeforeEach
-    public void init() throws SQLException {
+    @BeforeAll
+    public static void init() throws SQLException {
         MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas);
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
@@ -91,13 +91,13 @@ public class PreparedStatementProxyTest {
             (MockConnection)connectionProxy.getTargetConnection(), sql);
 
         preparedStatementProxy = new PreparedStatementProxy(connectionProxy, preparedStatement, sql);
-        unusedConstrcutPreparedStatementProxy = new TestUnusedConstructorPreparedStatementProxy(connectionProxy, preparedStatement);
+        unusedConstructorPreparedStatementProxy = new TestUnusedConstructorPreparedStatementProxy(connectionProxy, preparedStatement);
     }
 
     @Test
     public void testPreparedStatementProxy() {
         Assertions.assertNotNull(preparedStatementProxy);
-        Assertions.assertNotNull(unusedConstrcutPreparedStatementProxy);
+        Assertions.assertNotNull(unusedConstructorPreparedStatementProxy);
     }
 
     @Test
@@ -123,6 +123,7 @@ public class PreparedStatementProxyTest {
 
     @Test
     public void testSetParam() throws SQLException, MalformedURLException {
+        preparedStatementProxy.clearParameters();
         preparedStatementProxy.setNull(1, JDBCType.DECIMAL.getVendorTypeNumber());
         Assertions.assertEquals(Null.get(), preparedStatementProxy.getParamsByIndex(0).get(0));
         preparedStatementProxy.clearParameters();
@@ -336,7 +337,7 @@ public class PreparedStatementProxyTest {
     /**
      * This class use for test the unused constructor in AbstractPreparedStatementProxy
      */
-    private class TestUnusedConstructorPreparedStatementProxy extends AbstractPreparedStatementProxy {
+    private static class TestUnusedConstructorPreparedStatementProxy extends AbstractPreparedStatementProxy {
 
         public TestUnusedConstructorPreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement) throws SQLException {
             super(connectionProxy, targetStatement);

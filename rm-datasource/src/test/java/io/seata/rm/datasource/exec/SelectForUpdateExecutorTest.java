@@ -16,12 +16,9 @@
 package io.seata.rm.datasource.exec;
 
 import java.lang.reflect.Field;
-import java.sql.SQLException;
 import java.sql.Types;
 import java.util.List;
-
 import com.alibaba.druid.mock.MockStatement;
-import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -29,18 +26,15 @@ import com.alibaba.druid.util.JdbcConstants;
 
 import com.google.common.collect.Lists;
 import io.seata.core.context.RootContext;
-import io.seata.core.exception.RmTransactionException;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.mock.MockConnectionProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.mock.MockLockConflictConnectionProxy;
-import io.seata.rm.datasource.sql.druid.MySQLDeleteRecognizer;
 import io.seata.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
-import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -49,14 +43,14 @@ import org.junit.jupiter.api.Test;
  */
 public class SelectForUpdateExecutorTest {
 
-    private SelectForUpdateExecutor selectForUpdateExecutor;
+    private static SelectForUpdateExecutor selectForUpdateExecutor;
 
-    private ConnectionProxy connectionProxy;
+    private static ConnectionProxy connectionProxy;
 
-    private StatementProxy statementProxy;
+    private static StatementProxy statementProxy;
 
-    @BeforeEach
-    public void init() throws SQLException, NoSuchFieldException, IllegalAccessException {
+    @BeforeAll
+    public static void init() {
         List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
         Object[][] returnValue = new Object[][] {
             new Object[] {1, "Tom"},
@@ -76,13 +70,18 @@ public class SelectForUpdateExecutorTest {
         dataSource.setDriver(mockDriver);
 
         DataSourceProxy dataSourceProxy = new DataSourceProxy(dataSource);
-        Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
-        field.setAccessible(true);
-        field.set(dataSourceProxy, "mysql");
-        connectionProxy = new MockConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
-        connectionProxy.bind("xid");
-        MockStatement mockStatement = new MockStatement(dataSource.getConnection().getConnection());
-        statementProxy = new StatementProxy(connectionProxy, mockStatement);
+        try {
+            Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
+            field.setAccessible(true);
+            field.set(dataSourceProxy, "mysql");
+            connectionProxy = new MockConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
+            connectionProxy.bind("xid");
+            MockStatement mockStatement = new MockStatement(dataSource.getConnection().getConnection());
+            statementProxy = new StatementProxy(connectionProxy, mockStatement);
+        } catch (Exception e) {
+            throw new RuntimeException("init failed");
+        }
+
         String sql = "select * from table_select_for_update_executor_test where id = 1";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLSelectForUpdateRecognizer recognizer = new MySQLSelectForUpdateRecognizer(sql, asts.get(0));

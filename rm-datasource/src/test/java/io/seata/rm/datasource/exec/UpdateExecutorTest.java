@@ -35,6 +35,7 @@ import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.sql.druid.MySQLUpdateRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -44,12 +45,12 @@ import org.junit.jupiter.api.Test;
  */
 public class UpdateExecutorTest {
 
-    private UpdateExecutor updateExecutor;
+    private static UpdateExecutor updateExecutor;
 
-    private StatementProxy statementProxy;
+    private static StatementProxy statementProxy;
 
-    @BeforeEach
-    public void init() throws SQLException, NoSuchFieldException, IllegalAccessException {
+    @BeforeAll
+    public static void init() {
         List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
         Object[][] returnValue = new Object[][] {
             new Object[] {1, "Tom"},
@@ -69,12 +70,16 @@ public class UpdateExecutorTest {
         dataSource.setDriver(mockDriver);
 
         DataSourceProxy dataSourceProxy = new DataSourceProxy(dataSource);
-        Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
-        field.setAccessible(true);
-        field.set(dataSourceProxy, "mysql");
-        ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
-        MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
-        statementProxy = new StatementProxy(connectionProxy, mockStatement);
+        try {
+            Field field = dataSourceProxy.getClass().getDeclaredField("dbType");
+            field.setAccessible(true);
+            field.set(dataSourceProxy, "mysql");
+            ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy, dataSource.getConnection().getConnection());
+            MockStatementBase mockStatement = new MockStatement(dataSource.getConnection().getConnection());
+            statementProxy = new StatementProxy(connectionProxy, mockStatement);
+        } catch (Exception e) {
+            throw new RuntimeException("init failed");
+        }
         String sql = "update table_update_executor_test set name = 'WILL'";
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, JdbcConstants.MYSQL);
         MySQLUpdateRecognizer recognizer = new MySQLUpdateRecognizer(sql, asts.get(0));

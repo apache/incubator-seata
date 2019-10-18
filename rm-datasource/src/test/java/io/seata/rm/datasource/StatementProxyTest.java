@@ -15,39 +15,17 @@
  */
 package io.seata.rm.datasource;
 
-import java.io.ByteArrayInputStream;
-import java.io.CharArrayReader;
-import java.lang.reflect.Field;
-import java.math.BigDecimal;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.sql.Date;
-import java.sql.JDBCType;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
 import java.sql.Statement;
-import java.sql.Time;
-import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.Calendar;
 import java.util.List;
-import java.util.Objects;
-
-import com.alibaba.druid.mock.MockArray;
-import com.alibaba.druid.mock.MockNClob;
-import com.alibaba.druid.mock.MockRef;
-import com.alibaba.druid.mock.MockSQLXML;
 import com.alibaba.druid.pool.DruidDataSource;
-
 import com.google.common.collect.Lists;
-import io.seata.rm.datasource.mock.MockBlob;
-import io.seata.rm.datasource.mock.MockClob;
 import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.rm.datasource.mock.MockDriver;
-import io.seata.rm.datasource.sql.struct.Null;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -56,28 +34,28 @@ import org.junit.jupiter.api.Test;
  */
 public class StatementProxyTest {
 
-    private List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
+    private static List<String> returnValueColumnLabels = Lists.newArrayList("id", "name");
 
-    private Object[][] returnValue = new Object[][] {
+    private static Object[][] returnValue = new Object[][] {
         new Object[] {1, "Tom"},
         new Object[] {2, "Jack"},
     };
 
-    private Object[][] columnMetas = new Object[][] {
+    private static Object[][] columnMetas = new Object[][] {
         new Object[] {"", "", "table_statement_proxy", "id", Types.INTEGER, "INTEGER", 64, 0, 10, 1, "", "", 0, 0, 64,
             1, "NO", "YES"},
         new Object[] {"", "", "table_statement_proxy", "name", Types.VARCHAR, "VARCHAR", 64, 0, 10, 0, "", "", 0, 0, 64,
             2, "YES", "NO"},
     };
 
-    private Object[][] indexMetas = new Object[][] {
+    private static Object[][] indexMetas = new Object[][] {
         new Object[] {"PRIMARY", "id", false, "", 3, 1, "A", 34},
     };
 
-    private StatementProxy statementProxy;
+    private static StatementProxy statementProxy;
 
-    @BeforeEach
-    public void init() throws NoSuchFieldException, IllegalAccessException, SQLException {
+    @BeforeAll
+    public static void init() throws SQLException {
         MockDriver mockDriver = new MockDriver(returnValueColumnLabels, returnValue, columnMetas, indexMetas);
         DruidDataSource dataSource = new DruidDataSource();
         dataSource.setUrl("jdbc:mock:xxx");
@@ -87,8 +65,6 @@ public class StatementProxyTest {
 
         ConnectionProxy connectionProxy = new ConnectionProxy(dataSourceProxy,
             dataSource.getConnection().getConnection());
-
-        String sql = "update from table_statement_proxy set name = ?";
 
         Statement statement = mockDriver.createMockStatement((MockConnection)connectionProxy.getTargetConnection());
 
@@ -127,7 +103,7 @@ public class StatementProxyTest {
 
     @Test
     public void testGetTargetSQL() {
-        Assertions.assertNull(statementProxy.getTargetSQL());
+        Assertions.assertNotNull(statementProxy.getTargetSQL());
     }
 
     @Test
