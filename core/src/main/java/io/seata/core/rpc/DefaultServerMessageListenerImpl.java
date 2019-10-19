@@ -75,9 +75,13 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
             LOGGER.debug("server received:{},clientIp:{},vgroup:{}", message,
                 NetUtil.toIpAddress(ctx.channel().remoteAddress()), rpcContext.getTransactionServiceGroup());
         } else {
-            logQueue.offer(
-                message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:" + rpcContext
-                    .getTransactionServiceGroup());
+            try {
+                logQueue.put(
+                    message + ",clientIp:" + NetUtil.toIpAddress(ctx.channel().remoteAddress()) + ",vgroup:" + rpcContext
+                        .getTransactionServiceGroup());
+            } catch (InterruptedException e) {
+               LOGGER.error("put message to logQueue error: {}", e.getMessage(), e);
+            }
         }
         if (!(message instanceof AbstractMessage)) {
             return;
