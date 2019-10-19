@@ -244,7 +244,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     }
 
     private String getInstanceId() {
-        return String.format("%s:%s:%d", instanceConfig.getAppname(), instanceConfig.getIpAddress(),
+        return String.format("%s:%s:%d", instanceConfig.getIpAddress(), instanceConfig.getAppname(),
             instanceConfig.getNonSecurePort());
     }
 
