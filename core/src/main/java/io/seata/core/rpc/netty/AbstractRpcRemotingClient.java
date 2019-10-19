@@ -215,7 +215,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             NetUtil.toStringAddress(ctx.channel().remoteAddress()) + "connect exception. " + cause.getMessage(), cause);
         clientChannelManager.releaseChannel(ctx.channel(), getAddressFromChannel(ctx.channel()));
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("remove exception rm channel:" + ctx.channel());
+            LOGGER.info("remove exception rm channel:{}", ctx.channel());
         }
         super.exceptionCaught(ctx, cause);
     }
