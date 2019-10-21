@@ -15,53 +15,37 @@
  */
 package io.seata.rm.datasource.mock;
 
-import java.sql.DatabaseMetaData;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.util.Properties;
+
+import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.rm.datasource.exec.LockConflictException;
 
 /**
- * Mock connection
  * @author will
- * @date 2019/8/14
+ * @date 2019/9/18
  */
-public class MockConnection extends com.alibaba.druid.mock.MockConnection {
-
-    private MockDriver mockDriver;
-
+public class MockLockConflictConnectionProxy extends ConnectionProxy {
     /**
-     * Instantiate a new MockConnection
-     * @param driver
-     * @param url
-     * @param connectProperties
+     * Instantiates a new Connection proxy.
+     *
+     * @param dataSourceProxy  the data source proxy
+     * @param targetConnection the target connection
      */
-    public MockConnection(MockDriver driver, String url, Properties connectProperties) {
-        super(driver, url, connectProperties);
-        this.mockDriver = driver;
-    }
-
-    @Override
-    public DatabaseMetaData getMetaData() throws SQLException {
-        return new MockDatabaseMetaData(this);
+    public MockLockConflictConnectionProxy(DataSourceProxy dataSourceProxy,
+                                           Connection targetConnection) {
+        super(dataSourceProxy, targetConnection);
     }
 
     @Override
     public void releaseSavepoint(Savepoint savepoint) throws SQLException {
-
+        super.releaseSavepoint(savepoint);
     }
 
     @Override
-    public void rollback() {
-
-    }
-
-    @Override
-    public void rollback(Savepoint savepoint) {
-
-    }
-
-    @Override
-    public MockDriver getDriver() {
-        return mockDriver;
+    public void checkLock(String lockKeys) throws SQLException {
+        throw new LockConflictException("mock lock conflict");
     }
 }
