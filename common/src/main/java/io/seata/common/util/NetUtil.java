@@ -48,6 +48,9 @@ public class NetUtil {
      * @return the string
      */
     public static String toStringAddress(SocketAddress address) {
+        if(null == address){
+            return StringUtils.EMPTY;
+        }
         return toStringAddress((InetSocketAddress) address);
     }
 
