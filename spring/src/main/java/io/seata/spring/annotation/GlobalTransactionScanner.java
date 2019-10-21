@@ -308,7 +308,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof DataSource && !(bean instanceof DataSourceProxy) && ConfigurationFactory.getInstance().getBoolean(DATASOURCE_AUTOPROXY, false)) {
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Auto proxy of  [" + beanName + "]");
+                LOGGER.info("Auto proxy of [{}]", beanName);
             }
             DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
             return Enhancer.create(bean.getClass(), (org.springframework.cglib.proxy.MethodInterceptor) (o, method, args, methodProxy) -> {
