@@ -68,12 +68,15 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         try {
             if (originalAutoCommit) {
                 /*
-                 * prevent release local lock before get global lock
-                 * dose not need the savepoint if original auto commit was true
+                 * In order to hold the local db lock during global lock checking
+                 * set auto commit value to false first if original auto commit was true
                  */
                 conn.setAutoCommit(false);
             } else if (dbmd.supportsSavepoints()) {
-                // need the savepoint if original auto commit was false
+                /*
+                 * In order to release the local db lock when global lock conflict
+                 * create a save point if original auto commit was false, then use the save point here to release db lock during global lock checking if necessary
+                 */
                 sp = conn.setSavepoint();
             } else {
                 throw new SQLException("not support savepoint. please check your db version");
