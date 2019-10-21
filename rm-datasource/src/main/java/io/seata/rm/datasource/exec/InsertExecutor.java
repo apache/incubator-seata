@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
@@ -89,7 +90,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected boolean containsPK() {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();
-        if (insertColumns == null || insertColumns.isEmpty()) {
+        if (CollectionUtils.isEmpty(insertColumns)) {
             return false;
         }
         return containsPK(insertColumns);
@@ -226,7 +227,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected int getPkIndex() {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();
-        if (insertColumns != null && !insertColumns.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(insertColumns)) {
             final int insertColumnsSize = insertColumns.size();
             int pkIndex = -1;
             for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
