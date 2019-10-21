@@ -314,6 +314,11 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             Object v = genKeys.getObject(1);
             pkValues.add(v);
         }
+        try {
+            genKeys.beforeFirst();
+        } catch (SQLException e) {
+            LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
+        }
         return pkValues;
     }
 
