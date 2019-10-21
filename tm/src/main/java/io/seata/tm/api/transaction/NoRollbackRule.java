@@ -22,6 +22,8 @@ package io.seata.tm.api.transaction;
  */
 public class NoRollbackRule extends RollbackRule {
 
+    public static final NoRollbackRule DEFAUL_NO_ROLLBACK_RULE = new NoRollbackRule(Throwable.class);
+
 
     public NoRollbackRule(Class<?> clazz) {
         super(clazz);

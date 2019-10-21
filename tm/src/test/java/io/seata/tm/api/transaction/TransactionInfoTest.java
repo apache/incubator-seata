@@ -16,9 +16,6 @@
 package io.seata.tm.api.transaction;
 
 import com.alibaba.fastjson.JSON;
-import io.seata.tm.api.transaction.NoRollbackRule;
-import io.seata.tm.api.transaction.RollbackRule;
-import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -84,17 +81,19 @@ public class TransactionInfoTest {
         txInfo.setRollbackRules(sets);
 
         assertThat(txInfo.rollbackOn(new IllegalArgumentException())).isTrue();
-        assertThat(txInfo.rollbackOn(new Exception())).isTrue();
+        assertThat(txInfo.rollbackOn(new IllegalStateException())).isTrue();
         assertThat(txInfo.rollbackOn(new IOException())).isFalse();
         assertThat(txInfo.rollbackOn(new NullPointerException())).isFalse();
 
-        // not found return true
-        assertThat(txInfo.rollbackOn(new RuntimeException())).isTrue();
+        // not found return false
+        assertThat(txInfo.rollbackOn(new MyRuntimeException("test"))).isFalse();
+        assertThat(txInfo.rollbackOn(new RuntimeException())).isFalse();
+        assertThat(txInfo.rollbackOn(new Throwable())).isFalse();
     }
 
     private Set<RollbackRule> getRollbackRules() {
         Set<RollbackRule> sets = new LinkedHashSet<>();
-        sets.add(new RollbackRule(Exception.class.getName()));
+        sets.add(new RollbackRule(IllegalStateException.class.getName()));
         sets.add(new RollbackRule(IllegalArgumentException.class));
         sets.add(new NoRollbackRule(IO_EXCEPTION_SHORT_NAME));
         sets.add(new NoRollbackRule(NullPointerException.class));
