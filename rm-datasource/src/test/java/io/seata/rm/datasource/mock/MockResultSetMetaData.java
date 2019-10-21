@@ -26,7 +26,11 @@ import java.util.List;
  */
 public class MockResultSetMetaData implements ResultSetMetaData {
 
-    private final List<ColumnMeta> columns = new ArrayList<ColumnMeta>();
+    private List<ColumnMeta> columns;
+
+    public MockResultSetMetaData(List<ColumnMeta> columns) {
+        this.columns = columns;
+    }
 
     public List<ColumnMeta> getColumns() {
         return columns;
