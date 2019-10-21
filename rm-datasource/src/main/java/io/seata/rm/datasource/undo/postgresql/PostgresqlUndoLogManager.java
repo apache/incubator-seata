@@ -16,15 +16,12 @@
 package io.seata.rm.datasource.undo.postgresql;
 
 import com.alibaba.druid.util.JdbcConstants;
-import io.seata.common.Constants;
-import io.seata.common.exception.NotSupportYetException;
+import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.TransactionException;
-import io.seata.rm.datasource.ConnectionContext;
-import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCachePostgresql;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.BranchUndoLog;
@@ -33,14 +30,14 @@ import io.seata.rm.datasource.undo.UndoExecutorFactory;
 import io.seata.rm.datasource.undo.UndoLogConstants;
 import io.seata.rm.datasource.undo.UndoLogParser;
 import io.seata.rm.datasource.undo.UndoLogParserFactory;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,35 +64,6 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
     }
 
     /**
-     * Flush undo logs.
-     *
-     * @param cp the cp
-     * @throws SQLException the sql exception
-     */
-    @Override
-    public void flushUndoLogs(ConnectionProxy cp) throws SQLException {
-        assertDbSupport(cp.getDbType());
-
-        ConnectionContext connectionContext = cp.getContext();
-        String xid = connectionContext.getXid();
-        long branchID = connectionContext.getBranchId();
-
-        BranchUndoLog branchUndoLog = new BranchUndoLog();
-        branchUndoLog.setXid(xid);
-        branchUndoLog.setBranchId(branchID);
-        branchUndoLog.setSqlUndoLogs(connectionContext.getUndoItems());
-
-        UndoLogParser parser = UndoLogParserFactory.getInstance();
-        byte[] undoLogContent = parser.encode(branchUndoLog);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Flushing UNDO LOG: {}", new String(undoLogContent, Constants.DEFAULT_CHARSET));
-        }
-
-        insertUndoLogWithNormal(xid, branchID, buildContext(parser.getName()), undoLogContent, cp.getTargetConnection());
-    }
-
-    /**
      * Undo.
      *
      * @param dataSourceProxy the data source proxy
@@ -105,31 +73,34 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
      */
     @Override
     public void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {
-        assertDbSupport(dataSourceProxy.getDbType());
-
         Connection conn = null;
         ResultSet rs = null;
         PreparedStatement selectPST = null;
+        boolean originalAutoCommit = true;
 
         for (; ; ) {
             try {
                 conn = dataSourceProxy.getPlainConnection();
 
                 // The entire undo process should run in a local transaction.
-                conn.setAutoCommit(false);
+                if (originalAutoCommit = conn.getAutoCommit()) {
+                    conn.setAutoCommit(false);
+                }
 
                 // Find UNDO LOG
                 selectPST = conn.prepareStatement(SELECT_UNDO_LOG_SQL);
                 selectPST.setLong(1, branchId);
                 selectPST.setString(2, xid);
                 rs = selectPST.executeQuery();
+
                 boolean exists = false;
                 while (rs.next()) {
                     exists = true;
+
                     // It is possible that the server repeatedly sends a rollback request to roll back
                     // the same branch transaction to multiple processes,
                     // ensuring that only the undo_log in the normal state is processed.
-                    int state = rs.getInt("log_status");
+                    int state = rs.getInt(ClientTableColumnsName.UNDO_LOG_LOG_STATUS);
                     if (!canUndo(state)) {
                         if (LOGGER.isInfoEnabled()) {
                             LOGGER.info("xid {} branch {}, ignore {} undo_log",
@@ -138,12 +109,10 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
                         return;
                     }
 
-                    String contextString = rs.getString("context");
+                    String contextString = rs.getString(ClientTableColumnsName.UNDO_LOG_CONTEXT);
                     Map<String, String> context = parseContext(contextString);
-                    byte[] rollbackInfo;
-                    try (InputStream inputStream = rs.getBinaryStream("rollback_info")) {
-                        rollbackInfo = readInputStream(inputStream);
-                    }
+                    byte[] rollbackInfo = rs.getBytes(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
+
                     String serializer = context == null ? null : context.get(UndoLogConstants.SERIALIZER_KEY);
                     UndoLogParser parser = serializer == null ? UndoLogParserFactory.getInstance() :
                         UndoLogParserFactory.getInstance(serializer);
@@ -152,11 +121,15 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
                     try {
                         // put serializer name to local
                         setCurrentSerializer(parser.getName());
-
-                        for (SQLUndoLog sqlUndoLog : branchUndoLog.getSqlUndoLogs()) {
-                            TableMeta tableMeta = TableMetaCachePostgresql.getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
+                        List<SQLUndoLog> sqlUndoLogs = branchUndoLog.getSqlUndoLogs();
+                        if (sqlUndoLogs.size() > 1) {
+                            Collections.reverse(sqlUndoLogs);
+                        }
+                        for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
+                            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy).getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
                             sqlUndoLog.setTableMeta(tableMeta);
-                            AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(dataSourceProxy.getDbType(),
+                            AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
+                                dataSourceProxy.getDbType(),
                                 sqlUndoLog);
                             undoExecutor.executeOn(conn);
                         }
@@ -165,6 +138,7 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
                         removeCurrentSerializer();
                     }
                 }
+
                 // If undo_log exists, it means that the branch transaction has completed the first phase,
                 // we can directly roll back and clean the undo_log
                 // Otherwise, it indicates that there is an exception in the branch transaction,
@@ -217,6 +191,9 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
                         selectPST.close();
                     }
                     if (conn != null) {
+                        if (originalAutoCommit) {
+                            conn.setAutoCommit(true);
+                        }
                         conn.close();
                     }
                 } catch (SQLException closeEx) {
@@ -224,12 +201,6 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
                 }
             }
         }
-    }
-
-    private byte[] readInputStream(InputStream inputStream) throws Exception {
-        byte[] bytes = new byte[inputStream.available()];
-        inputStream.read(bytes);
-        return bytes;
     }
 
     @Override
@@ -256,27 +227,34 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
         }
     }
 
-    private static void insertUndoLogWithNormal(String xid, long branchID, String rollbackCtx, byte[] undoLogContent,
-        Connection conn) throws SQLException {
+    @Override
+    protected void insertUndoLogWithNormal(String xid, long branchID, String rollbackCtx,
+        byte[] undoLogContent, Connection conn) throws SQLException {
         insertUndoLog(xid, branchID, rollbackCtx, undoLogContent, State.Normal, conn);
     }
 
-    private static void insertUndoLogWithGlobalFinished(String xid, long branchID, UndoLogParser parser,
+    @Override
+    protected byte[] getRollbackInfo(ResultSet rs) throws SQLException {
+        byte[] rollbackInfo = rs.getBytes(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
+        return rollbackInfo;
+    }
+
+    @Override
+    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser,
         Connection conn) throws SQLException {
-        insertUndoLog(xid, branchID, buildContext(parser.getName()),
+        insertUndoLog(xid, branchId, buildContext(parser.getName()),
             parser.getDefaultContent(), State.GlobalFinished, conn);
     }
 
-    private static void insertUndoLog(String xid, long branchID, String rollbackCtx, byte[] undoLogContent, State state,
-        Connection conn) throws SQLException {
+    private void insertUndoLog(String xid, long branchID, String rollbackCtx,
+        byte[] undoLogContent, State state, Connection conn) throws SQLException {
         PreparedStatement pst = null;
         try {
             pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL);
             pst.setLong(1, branchID);
             pst.setString(2, xid);
             pst.setString(3, rollbackCtx);
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(undoLogContent);
-            pst.setBinaryStream(4, inputStream);
+            pst.setBytes(4, undoLogContent);
             pst.setInt(5, state.getValue());
             pst.executeUpdate();
         } catch (Exception e) {
@@ -290,11 +268,4 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
             }
         }
     }
-
-    private static void assertDbSupport(String dbType) {
-        if (!JdbcConstants.POSTGRESQL.equalsIgnoreCase(dbType)) {
-            throw new NotSupportYetException("DbType[" + dbType + "] is not support yet!");
-        }
-    }
-
 }

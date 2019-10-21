@@ -17,22 +17,19 @@ package io.seata.rm.datasource.sql.druid.postgresql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGDeleteStatement;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.SQLDeleteRecognizer;
 import io.seata.rm.datasource.sql.SQLType;
-import io.seata.rm.datasource.sql.druid.BaseRecognizer;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author japsercloud
  */
-public class PostgresqlDeleteRecognizer extends BaseRecognizer implements SQLDeleteRecognizer {
+public class PostgresqlDeleteRecognizer extends BasePostgresqlRecognizer implements SQLDeleteRecognizer {
 
     private final PGDeleteStatement ast;
 
@@ -76,25 +73,12 @@ public class PostgresqlDeleteRecognizer extends BaseRecognizer implements SQLDel
     public String getWhereCondition(final ParametersHolder parametersHolder,
         final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
-        if (where == null) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        PGOutputVisitor visitor = super.createPGOutputVisitor(parametersHolder, paramAppenderList, sb);
-        visitor.visit((SQLBinaryOpExpr) where);
-        return sb.toString();
+        return super.getWhereCondition(where, parametersHolder, paramAppenderList);
     }
 
     @Override
     public String getWhereCondition() {
         SQLExpr where = ast.getWhere();
-        if (where == null) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        PGOutputVisitor visitor = new PGOutputVisitor(sb);
-        visitor.visit((SQLBinaryOpExpr) where);
-        return sb.toString();
+        return super.getWhereCondition(where);
     }
-
 }

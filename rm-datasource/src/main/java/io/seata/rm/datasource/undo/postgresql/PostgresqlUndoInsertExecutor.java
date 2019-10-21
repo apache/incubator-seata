@@ -25,7 +25,6 @@ import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -40,31 +39,32 @@ public class PostgresqlUndoInsertExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
+        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
         TableRecords afterImage = sqlUndoLog.getAfterImage();
         List<Row> afterImageRows = afterImage.getRows();
         if (afterImageRows == null || afterImageRows.size() == 0) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = afterImageRows.get(0);
-        StringBuilder mainSQL = new StringBuilder("DELETE FROM " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()));
+        StringBuilder mainSQL = new StringBuilder("DELETE FROM ").append(keywordChecker.checkAndReplace(sqlUndoLog.getTableName()));
         StringBuilder where = new StringBuilder(" WHERE ");
+        // For a row, there's only one primary key now
         for (Field field : row.getFields()) {
             if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
+                where.append(keywordChecker.checkAndReplace(field.getName())).append(" = ?");
             }
+
         }
         return mainSQL.append(where).toString();
     }
 
     @Override
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues,
-        Field pkValue) throws SQLException {
+    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue) throws SQLException {
         undoPST.setObject(1, pkValue.getValue(), pkValue.getType());
     }
 
     /**
-     * Instantiates a new My sql undo insert executor.
+     * Instantiates a new postgresql undo insert executor.
      *
      * @param sqlUndoLog the sql undo log
      */

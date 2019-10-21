@@ -17,22 +17,23 @@ package io.seata.rm.datasource.sql.druid.postgresql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.statement.*;
+import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLSelect;
+import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
+import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
+import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLSelectRecognizer;
 import io.seata.rm.datasource.sql.SQLType;
-import io.seata.rm.datasource.sql.druid.BaseRecognizer;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author japsercloud
  */
-public class PostgresqlSelectForUpdateRecognizer extends BaseRecognizer implements SQLSelectRecognizer {
+public class PostgresqlSelectForUpdateRecognizer extends BasePostgresqlRecognizer implements SQLSelectRecognizer {
 
     private final SQLSelectStatement ast;
 
@@ -57,26 +58,14 @@ public class PostgresqlSelectForUpdateRecognizer extends BaseRecognizer implemen
         final ArrayList<List<Object>> paramAppenderList) {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
-        if (where == null) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        PGOutputVisitor visitor = super.createPGOutputVisitor(parametersHolder, paramAppenderList, sb);
-        visitor.visit((SQLBinaryOpExpr) where);
-        return sb.toString();
+        return super.getWhereCondition(where, parametersHolder, paramAppenderList);
     }
 
     @Override
     public String getWhereCondition() {
         SQLSelectQueryBlock selectQueryBlock = getSelect();
         SQLExpr where = selectQueryBlock.getWhere();
-        if (where == null) {
-            return "";
-        }
-        StringBuilder sb = new StringBuilder();
-        PGOutputVisitor visitor = new PGOutputVisitor(sb);
-        visitor.visit((SQLBinaryOpExpr) where);
-        return sb.toString();
+        return super.getWhereCondition(where);
     }
 
     private SQLSelectQueryBlock getSelect() {

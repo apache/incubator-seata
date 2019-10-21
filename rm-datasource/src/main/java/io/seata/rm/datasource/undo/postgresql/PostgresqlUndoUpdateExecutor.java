@@ -25,7 +25,6 @@ import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-
 import java.util.List;
 
 /**
@@ -35,26 +34,26 @@ public class PostgresqlUndoUpdateExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
+        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (beforeImageRows == null || beforeImageRows.size() == 0) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG"); // TODO
         }
         Row row = beforeImageRows.get(0);
-        StringBuilder mainSQL = new StringBuilder("UPDATE " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()) + " SET ");
+        StringBuilder mainSQL = new StringBuilder("UPDATE ").append(keywordChecker.checkAndReplace(sqlUndoLog.getTableName())).append(" SET ");
         StringBuilder where = new StringBuilder(" WHERE ");
         boolean first = true;
         for (Field field : row.getFields()) {
             if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
+                where.append(keywordChecker.checkAndReplace(field.getName())).append(" = ?");
             } else {
                 if (first) {
                     first = false;
                 } else {
                     mainSQL.append(", ");
                 }
-                mainSQL.append(keywordChecker.checkAndReplace(field.getName()) + " = ?");
+                mainSQL.append(keywordChecker.checkAndReplace(field.getName())).append(" = ?");
             }
 
         }
@@ -62,7 +61,7 @@ public class PostgresqlUndoUpdateExecutor extends AbstractUndoExecutor {
     }
 
     /**
-     * Instantiates a new My sql undo update executor.
+     * Instantiates a new postgresql undo update executor.
      *
      * @param sqlUndoLog the sql undo log
      */

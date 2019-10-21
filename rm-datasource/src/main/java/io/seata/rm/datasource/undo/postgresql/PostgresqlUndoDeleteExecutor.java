@@ -25,7 +25,6 @@ import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-
 import java.util.List;
 
 /**
@@ -46,7 +45,7 @@ public class PostgresqlUndoDeleteExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
+        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.POSTGRESQL);
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (beforeImageRows == null || beforeImageRows.size() == 0) {

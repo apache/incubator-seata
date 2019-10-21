@@ -20,6 +20,7 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
 import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
+import com.alibaba.druid.sql.ast.expr.SQLSequenceExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
@@ -29,16 +30,16 @@ import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLType;
-import io.seata.rm.datasource.sql.druid.BaseRecognizer;
 import io.seata.rm.datasource.sql.struct.Null;
 import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
+import io.seata.rm.datasource.sql.struct.SqlSequenceExpr;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * @author japsercloud
  */
-public class PostgresqlInsertRecognizer extends BaseRecognizer implements SQLInsertRecognizer {
+public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer implements SQLInsertRecognizer {
 
     private final PGInsertStatement ast;
 
@@ -113,6 +114,11 @@ public class PostgresqlInsertRecognizer extends BaseRecognizer implements SQLIns
                     row.add(((SQLVariantRefExpr) expr).getName());
                 } else if (expr instanceof SQLMethodInvokeExpr) {
                     row.add(new SqlMethodExpr());
+                } else if (expr instanceof SQLSequenceExpr) {
+                    SQLSequenceExpr sequenceExpr = ((SQLSequenceExpr) expr);
+                    String sequence = sequenceExpr.getSequence().getSimpleName();
+                    String function = sequenceExpr.getFunction().name;
+                    row.add(new SqlSequenceExpr(sequence, function));
                 } else {
                     throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                 }

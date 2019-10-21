@@ -13,113 +13,90 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.sql.struct;
+package io.seata.rm.datasource.sql.struct.cache;
 
-import com.alibaba.druid.util.StringUtils;
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.common.util.StringUtils;
+import io.seata.rm.datasource.sql.struct.ColumnMeta;
+import io.seata.rm.datasource.sql.struct.IndexMeta;
+import io.seata.rm.datasource.sql.struct.IndexType;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.concurrent.TimeUnit;
 import javax.sql.DataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Table meta cache.
+ *
+ * @author jaspercloud
  */
-public class TableMetaCachePostgresql {
+public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
 
-    private static final long CACHE_SIZE = 100000;
+    private static volatile TableMetaCache tableMetaCache = null;
 
-    private static final long EXPIRE_TIME = 900 * 1000;
-
-    private static final Cache<String, TableMeta> TABLE_META_CACHE = Caffeine.newBuilder().maximumSize(CACHE_SIZE)
-        .expireAfterWrite(EXPIRE_TIME, TimeUnit.MILLISECONDS).softValues().build();
-
-    private static Logger logger = LoggerFactory.getLogger(TableMetaCachePostgresql.class);
+    private PostgresqlTableMetaCache() {
+    }
 
     /**
-     * Gets table meta.
+     * get instance of type Postgresql keyword checker
      *
-     * @param dataSourceProxy the druid data source
-     * @param tableName the table name
-     * @return the table meta
+     * @return instance
      */
-    public static TableMeta getTableMeta(final DataSourceProxy dataSourceProxy, final String tableName) {
-        if (StringUtils.isEmpty(tableName)) {
-            throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
-        }
-
-        String dataSourceKey = dataSourceProxy.getResourceId();
-
-        TableMeta tmeta = null;
-        final String key = dataSourceKey + "." + tableName;
-        tmeta = TABLE_META_CACHE.get(key, mappingFunction -> {
-            try {
-                return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
-            } catch (SQLException e) {
-                logger.error("get cache error !", e);
-                return null;
-            }
-        });
-        if (tmeta == null) {
-            try {
-                tmeta = fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
-            } catch (SQLException e) {
+    public static TableMetaCache getInstance() {
+        if (tableMetaCache == null) {
+            synchronized (PostgresqlTableMetaCache.class) {
+                if (tableMetaCache == null) {
+                    tableMetaCache = new PostgresqlTableMetaCache();
+                }
             }
         }
-
-        if (tmeta == null) {
-            throw new ShouldNeverHappenException(String.format("[xid:%s]get tablemeta failed", RootContext.getXID()));
-        }
-        return tmeta;
+        return tableMetaCache;
     }
 
-    private static TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
-        return fetchSchemeInDefaultWay(dataSource, tableName);
-    }
-
-    private static TableMeta fetchSchemeInDefaultWay(DataSource dataSource, String tableName)
-        throws SQLException {
+    @Override
+    protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
         Connection conn = null;
         java.sql.Statement stmt = null;
         try {
             conn = dataSource.getConnection();
             stmt = conn.createStatement();
             DatabaseMetaData dbmd = conn.getMetaData();
-            return resultSetMetaToSchema(null, dbmd, tableName);
+            return resultSetMetaToSchema(dbmd, tableName);
         } catch (Exception e) {
             if (e instanceof SQLException) {
-                throw ((SQLException) e);
+                throw e;
             }
             throw new SQLException("Failed to fetch schema of " + tableName, e);
 
         } finally {
-            if (null != stmt) {
+            if (stmt != null) {
                 stmt.close();
             }
-            if (null != conn) {
+            if (conn != null) {
                 conn.close();
             }
         }
     }
 
-    private static TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
-        throws SQLException {
+    private TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
-        String schemaName = schemaTable.length > 1 ? schemaTable[0] : "public";
+        String schemaName = schemaTable.length > 1 ? schemaTable[0] : null;
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
+        if (null != schemaName) {
+            schemaName = schemaName.replace("\"", "").toLowerCase();
+        }
+        tableName = tableName.replace("\"", "").toLowerCase();
 
-        try (ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%")) {
+        ResultSet rsColumns = dbmd.getColumns(null, schemaName, tableName, "%");
+        ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
+        ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName);
+
+        try {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -140,21 +117,16 @@ public class TableMetaCachePostgresql {
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
                 col.setIsAutoincrement(rsColumns.getString("IS_AUTOINCREMENT"));
-
                 tm.getAllColumns().put(col.getColumnName(), col);
             }
-        }
 
-        String indexName = "";
-        try (ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true)) {
             while (rsIndex.next()) {
-                indexName = rsIndex.getString("INDEX_NAME");
-                if (StringUtils.isEmpty(indexName)) {
+                String indexName = rsIndex.getString("INDEX_NAME");
+                if (StringUtils.isNullOrEmpty(indexName)) {
                     continue;
                 }
                 String colName = rsIndex.getString("COLUMN_NAME");
                 ColumnMeta col = tm.getAllColumns().get(colName);
-
                 if (tm.getAllIndexes().containsKey(indexName)) {
                     IndexMeta index = tm.getAllIndexes().get(indexName);
                     index.getValues().add(col);
@@ -169,10 +141,7 @@ public class TableMetaCachePostgresql {
                     index.setAscOrDesc(rsIndex.getString("ASC_OR_DESC"));
                     index.setCardinality(rsIndex.getInt("CARDINALITY"));
                     index.getValues().add(col);
-                    if ("PRIMARY".equalsIgnoreCase(indexName) || (
-                        tableName + "_pkey").equalsIgnoreCase(indexName)) {
-                        index.setIndextype(IndexType.PRIMARY);
-                    } else if (index.isNonUnique() == false) {
+                    if (!index.isNonUnique()) {
                         index.setIndextype(IndexType.Unique);
                     } else {
                         index.setIndextype(IndexType.Normal);
@@ -181,30 +150,30 @@ public class TableMetaCachePostgresql {
 
                 }
             }
-        }
 
-        try (ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
             while (rsPrimary.next()) {
-                String pkIndexName = rsPrimary.getObject(6).toString();
+                String pkIndexName = rsPrimary.getString("PK_NAME");
                 if (tm.getAllIndexes().containsKey(pkIndexName)) {
                     IndexMeta index = tm.getAllIndexes().get(pkIndexName);
                     index.setIndextype(IndexType.PRIMARY);
                 }
             }
-            IndexMeta index = tm.getAllIndexes().get(indexName);
-            if (index.getIndextype().value() != 0) {
-                if ("H2 JDBC Driver".equals(dbmd.getDriverName())) {
-                    if (indexName.length() > 11 && "PRIMARY_KEY".equalsIgnoreCase(indexName.substring(0, 11))) {
-                        index.setIndextype(IndexType.PRIMARY);
-                    }
-                } else if (dbmd.getDriverName() != null && dbmd.getDriverName().toLowerCase().indexOf("postgresql") >= 0) {
-                    if ((tableName + "_pkey").equalsIgnoreCase(indexName)) {
-                        index.setIndextype(IndexType.PRIMARY);
-                    }
-                }
+            if (tm.getAllIndexes().isEmpty()) {
+                throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
+            }
+        } finally {
+            if (rsColumns != null) {
+                rsColumns.close();
+            }
+            if (rsIndex != null) {
+                rsIndex.close();
+            }
+            if (rsPrimary != null) {
+                rsPrimary.close();
             }
         }
 
         return tm;
     }
+
 }
