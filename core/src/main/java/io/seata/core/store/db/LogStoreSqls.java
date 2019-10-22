@@ -124,16 +124,22 @@ public class LogStoreSqls {
      * The constant QUERY_GLOBAL_TRANSACTION_BY_STATUS.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_MYSQL =
-            "select " + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD
-                    + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
-                    + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
+        "select " + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
 
     public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE =
-            "select t.* from ("
-                    + "  select " + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD
-                    + "  where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
-                    + "  order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + ") t"
-                    + " where ROWNUM <= ?";
+        "select t.* from ("
+            + "  select " + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD
+            + "  where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+            + "  order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + ") t"
+            + " where ROWNUM <= ?";
+
+    public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_POSTGRESQL =
+        "select " + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
+
     /**
      * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_MYSQL.
      */
@@ -150,9 +156,9 @@ public class LogStoreSqls {
     /**
      * The constant QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_POSTGRESQL.
      */
-    public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_POSTGRESQL = "select A.* from ( select "
-        + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" +
-        "0, 2, 3, 4, 5, 6, 7, 8, 10 ,12, 14) order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " ) A where ROWNUM <= ?";
+    public static final String QUERY_GLOBAL_TRANSACTION_FOR_RECOVERY_POSTGRESQL = "select " + ALL_GLOBAL_COLUMNS + " from "
+        + GLOBAL_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" +
+        "0, 2, 3, 4, 5, 6, 7, 8, 10 ,12, 14) order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
 
     /**
      * The constant INSERT_BRANCH_TRANSACTION_MYSQL.
@@ -302,10 +308,13 @@ public class LogStoreSqls {
             || DBType.OCEANBASE.name().equalsIgnoreCase(dbType)
             || DBType.H2.name().equalsIgnoreCase(dbType)) {
             return QUERY_GLOBAL_TRANSACTION_BY_STATUS_MYSQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(
-                    PRAMETER_PLACEHOLD, paramsPlaceHolder);
+                PRAMETER_PLACEHOLD, paramsPlaceHolder);
         } else if (DBType.ORACLE.name().equalsIgnoreCase(dbType)) {
             return QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE.replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(
-                    PRAMETER_PLACEHOLD, paramsPlaceHolder);
+                PRAMETER_PLACEHOLD, paramsPlaceHolder);
+        } else if (DBType.POSTGRESQL.name().equalsIgnoreCase(dbType)) {
+            return QUERY_GLOBAL_TRANSACTION_BY_STATUS_POSTGRESQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(
+                PRAMETER_PLACEHOLD, paramsPlaceHolder);
         } else {
             throw new IllegalArgumentException("unknown database type");
         }
@@ -346,7 +355,7 @@ public class LogStoreSqls {
             return INSERT_BRANCH_TRANSACTION_MYSQL.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
         } else if (DBType.ORACLE.name().equalsIgnoreCase(dbType)) {
             return INSERT_BRANCH_TRANSACTION_ORACLE.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
-        } else if (DBType.ORACLE.name().equalsIgnoreCase(dbType)) {
+        } else if (DBType.POSTGRESQL.name().equalsIgnoreCase(dbType)) {
             return INSERT_BRANCH_TRANSACTION_POSTGRESQL.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
         } else {
             throw new NotSupportYetException("unknown dbType:" + dbType);

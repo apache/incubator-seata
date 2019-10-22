@@ -15,12 +15,6 @@
  */
 package io.seata.rm.datasource;
 
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
-
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -45,16 +39,13 @@ import io.seata.discovery.registry.RegistryFactory;
 import io.seata.rm.AbstractResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 

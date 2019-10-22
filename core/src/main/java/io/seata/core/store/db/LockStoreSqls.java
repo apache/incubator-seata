@@ -61,7 +61,7 @@ public class LockStoreSqls {
         "values (?, ?, ?, ?, ?, ?, ?, sysdate, sysdate)";
 
     /**
-     * The constant INSERT_LOCK_SQL_ORACLE.
+     * The constant INSERT_LOCK_SQL_POSTGRESQL.
      */
     public static final String INSERT_LOCK_SQL_POSTGRESQL = "insert into " + LOCK_TABLE_PLACEHOLD + "(" + ALL_COLUMNS + ")"
         +

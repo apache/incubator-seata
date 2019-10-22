@@ -17,32 +17,15 @@ package io.seata.rm.datasource.undo.postgresql;
 
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.core.constants.ClientTableColumnsName;
-import io.seata.core.exception.BranchTransactionException;
-import io.seata.core.exception.TransactionException;
-import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
-import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
-import io.seata.rm.datasource.undo.BranchUndoLog;
-import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.rm.datasource.undo.UndoExecutorFactory;
-import io.seata.rm.datasource.undo.UndoLogConstants;
 import io.seata.rm.datasource.undo.UndoLogParser;
-import io.seata.rm.datasource.undo.UndoLogParserFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Collections;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFailed_Retriable;
 
 /**
  * @author japsercloud
@@ -61,146 +44,6 @@ public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
     @Override
     public String getDbType() {
         return JdbcConstants.POSTGRESQL;
-    }
-
-    /**
-     * Undo.
-     *
-     * @param dataSourceProxy the data source proxy
-     * @param xid the xid
-     * @param branchId the branch id
-     * @throws TransactionException the transaction exception
-     */
-    @Override
-    public void undo(DataSourceProxy dataSourceProxy, String xid, long branchId) throws TransactionException {
-        Connection conn = null;
-        ResultSet rs = null;
-        PreparedStatement selectPST = null;
-        boolean originalAutoCommit = true;
-
-        for (; ; ) {
-            try {
-                conn = dataSourceProxy.getPlainConnection();
-
-                // The entire undo process should run in a local transaction.
-                if (originalAutoCommit = conn.getAutoCommit()) {
-                    conn.setAutoCommit(false);
-                }
-
-                // Find UNDO LOG
-                selectPST = conn.prepareStatement(SELECT_UNDO_LOG_SQL);
-                selectPST.setLong(1, branchId);
-                selectPST.setString(2, xid);
-                rs = selectPST.executeQuery();
-
-                boolean exists = false;
-                while (rs.next()) {
-                    exists = true;
-
-                    // It is possible that the server repeatedly sends a rollback request to roll back
-                    // the same branch transaction to multiple processes,
-                    // ensuring that only the undo_log in the normal state is processed.
-                    int state = rs.getInt(ClientTableColumnsName.UNDO_LOG_LOG_STATUS);
-                    if (!canUndo(state)) {
-                        if (LOGGER.isInfoEnabled()) {
-                            LOGGER.info("xid {} branch {}, ignore {} undo_log",
-                                xid, branchId, state);
-                        }
-                        return;
-                    }
-
-                    String contextString = rs.getString(ClientTableColumnsName.UNDO_LOG_CONTEXT);
-                    Map<String, String> context = parseContext(contextString);
-                    byte[] rollbackInfo = rs.getBytes(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
-
-                    String serializer = context == null ? null : context.get(UndoLogConstants.SERIALIZER_KEY);
-                    UndoLogParser parser = serializer == null ? UndoLogParserFactory.getInstance() :
-                        UndoLogParserFactory.getInstance(serializer);
-                    BranchUndoLog branchUndoLog = parser.decode(rollbackInfo);
-
-                    try {
-                        // put serializer name to local
-                        setCurrentSerializer(parser.getName());
-                        List<SQLUndoLog> sqlUndoLogs = branchUndoLog.getSqlUndoLogs();
-                        if (sqlUndoLogs.size() > 1) {
-                            Collections.reverse(sqlUndoLogs);
-                        }
-                        for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
-                            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy).getTableMeta(dataSourceProxy, sqlUndoLog.getTableName());
-                            sqlUndoLog.setTableMeta(tableMeta);
-                            AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
-                                dataSourceProxy.getDbType(),
-                                sqlUndoLog);
-                            undoExecutor.executeOn(conn);
-                        }
-                    } finally {
-                        // remove serializer name
-                        removeCurrentSerializer();
-                    }
-                }
-
-                // If undo_log exists, it means that the branch transaction has completed the first phase,
-                // we can directly roll back and clean the undo_log
-                // Otherwise, it indicates that there is an exception in the branch transaction,
-                // causing undo_log not to be written to the database.
-                // For example, the business processing timeout, the global transaction is the initiator rolls back.
-                // To ensure data consistency, we can insert an undo_log with GlobalFinished state
-                // to prevent the local transaction of the first phase of other programs from being correctly submitted.
-                // See https://github.com/seata/seata/issues/489
-
-                if (exists) {
-                    deleteUndoLog(xid, branchId, conn);
-                    conn.commit();
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("xid {} branch {}, undo_log deleted with {}",
-                            xid, branchId, State.GlobalFinished.name());
-                    }
-                } else {
-                    insertUndoLogWithGlobalFinished(xid, branchId, UndoLogParserFactory.getInstance(), conn);
-                    conn.commit();
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("xid {} branch {}, undo_log added with {}",
-                            xid, branchId, State.GlobalFinished.name());
-                    }
-                }
-
-                return;
-            } catch (SQLIntegrityConstraintViolationException e) {
-                // Possible undo_log has been inserted into the database by other processes, retrying rollback undo_log
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("xid {} branch {}, undo_log inserted, retry rollback",
-                        xid, branchId);
-                }
-            } catch (Throwable e) {
-                if (conn != null) {
-                    try {
-                        conn.rollback();
-                    } catch (SQLException rollbackEx) {
-                        LOGGER.warn("Failed to close JDBC resource while undo ... ", rollbackEx);
-                    }
-                }
-                throw new BranchTransactionException(BranchRollbackFailed_Retriable,
-                    String.format("Branch session rollback failed and try again later xid = %s branchId = %s %s", xid, branchId, e.getMessage()), e);
-
-            } finally {
-                try {
-                    if (rs != null) {
-                        rs.close();
-                    }
-                    if (selectPST != null) {
-                        selectPST.close();
-                    }
-                    if (conn != null) {
-                        if (originalAutoCommit) {
-                            conn.setAutoCommit(true);
-                        }
-                        conn.close();
-                    }
-                } catch (SQLException closeEx) {
-                    LOGGER.warn("Failed to close JDBC resource while undo ... ", closeEx);
-                }
-            }
-        }
     }
 
     @Override
