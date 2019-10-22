@@ -17,7 +17,7 @@ package io.seata.core.protocol;
 
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.codec.CodecType;
-import io.seata.core.codec.CompressorType;
+import io.seata.core.compressor.CompressorType;
 import io.seata.core.constants.ConfigurationKeys;
 
 /**

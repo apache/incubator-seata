@@ -20,6 +20,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.seata.core.codec.Codec;
 import io.seata.core.codec.CodecFactory;
+import io.seata.core.compressor.Compressor;
+import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
@@ -106,13 +108,13 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
         short headLength = frame.readShort();
         byte messageType = frame.readByte();
         byte codecType = frame.readByte();
-        byte compressor = frame.readByte();
+        byte compressorType = frame.readByte();
         int requestId = frame.readInt();
 
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setCodec(codecType);
         rpcMessage.setId(requestId);
-        rpcMessage.setCompressor(compressor);
+        rpcMessage.setCompressor(compressorType);
         rpcMessage.setMessageType(messageType);
 
         // direct read head with zero-copy
@@ -132,6 +134,8 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
             if (bodyLength > 0) {
                 byte[] bs = new byte[bodyLength];
                 frame.readBytes(bs);
+                Compressor compressor = CompressorFactory.getCompressor(compressorType);
+                bs = compressor.decompress(bs);
                 Codec codec = CodecFactory.getCodec(codecType);
                 rpcMessage.setBody(codec.decode(bs));
             }
