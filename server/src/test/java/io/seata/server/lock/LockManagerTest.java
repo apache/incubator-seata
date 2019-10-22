@@ -15,6 +15,7 @@
  */
 package io.seata.server.lock;
 
+import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -142,7 +143,7 @@ public class LockManagerTest {
             }).start();
             // Assume execute more than 5 seconds means deadlock happened.
             if (countDownLatch.await(5, TimeUnit.SECONDS)) {
-                Assertions.assertTrue((first.get() && !second.get()) || (second.get() && !first.get()));
+                Assertions.assertTrue(!first.get() || !second.get());
             }
         } finally {
             lockManager.releaseLock(branchSession1);
@@ -167,6 +168,20 @@ public class LockManagerTest {
         branchSession.setTransactionId(UUIDGenerator.generateUUID());
         Assertions.assertFalse(lockManager
                 .isLockable(branchSession.getXid(), branchSession.getResourceId(), branchSession.getLockKey()));
+    }
+
+    @ParameterizedTest
+    @MethodSource("duplicatePkBranchSessionsProvider")
+    public void duplicatePkBranchSessionHolderTest(BranchSession branchSession1, BranchSession branchSession2) throws Exception {
+        LockManager lockManager = new MemoryLockManagerForTest();
+        Assertions.assertTrue(lockManager.acquireLock(branchSession1));
+        Assertions.assertEquals(4, branchSession1.getLockHolder().values().stream().map(Set::size).count());
+        Assertions.assertTrue(lockManager.releaseLock(branchSession1));
+        Assertions.assertEquals(0, branchSession1.getLockHolder().values().stream().map(Set::size).count());
+        Assertions.assertTrue(lockManager.acquireLock(branchSession2));
+        Assertions.assertEquals(4, branchSession2.getLockHolder().values().stream().map(Set::size).count());
+        Assertions.assertTrue(lockManager.releaseLock(branchSession2));
+        Assertions.assertEquals(0, branchSession2.getLockHolder().values().stream().map(Set::size).count());
     }
 
     /**
@@ -231,5 +246,9 @@ public class LockManagerTest {
 
     static Stream<Arguments> deadlockBranchSessionsProvider() {
         return baseBranchSessionsProvider("tb_2", "t:1,2,3,4,5", "t:5,4,3,2,1");
+    }
+
+    static Stream<Arguments> duplicatePkBranchSessionsProvider() {
+        return baseBranchSessionsProvider("tb_2", "t:1,2;t1:1;t2:2", "t:1,2;t1:1;t2:2");
     }
 }

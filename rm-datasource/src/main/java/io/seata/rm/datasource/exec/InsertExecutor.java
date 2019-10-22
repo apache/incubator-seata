@@ -23,8 +23,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
@@ -161,7 +163,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (!b) {
             throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
         }
-        if (pkValues.size() == 1 && pkValues.get(0) instanceof SqlSequenceExpr) {
+        if (pkValues.size() > 0 && pkValues.get(0) instanceof SqlSequenceExpr) {
             pkValues = getPkValuesBySequence(pkValues.get(0));
         }
         // pk auto generated while single insert primary key is expression
@@ -176,6 +178,13 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     protected List<Object> getPkValuesBySequence(Object expr) throws SQLException {
+
+        // priority use getGeneratedKeys
+        try {
+            return oracleByAuto();
+        } catch (NotSupportYetException | SQLException ignore) {
+        }
+
         ResultSet genKeys = null;
         if (expr instanceof SqlSequenceExpr) {
             SqlSequenceExpr sequenceExpr = (SqlSequenceExpr) expr;
@@ -194,36 +203,11 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     }
 
     protected List<Object> getPkValuesByAuto() throws SQLException {
-        // PK is just auto generated
-        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
-        if (pkMetaMap.size() != 1) {
-            throw new NotSupportYetException();
+        boolean oracle = StringUtils.equalsIgnoreCase(JdbcConstants.ORACLE, getDbType());
+        if (oracle) {
+            return oracleByAuto();
         }
-        ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
-        if (!pkMeta.isAutoincrement()) {
-            throw new ShouldNeverHappenException();
-        }
-
-        ResultSet genKeys = null;
-        try {
-            genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
-        } catch (SQLException e) {
-            // java.sql.SQLException: Generated keys not requested. You need to
-            // specify Statement.RETURN_GENERATED_KEYS to
-            // Statement.executeUpdate() or Connection.prepareStatement().
-            if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
-                LOGGER.warn("Fail to get auto-generated keys, use \'SELECT LAST_INSERT_ID()\' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
-                genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
-            } else {
-                throw e;
-            }
-        }
-        List<Object> pkValues = new ArrayList<>();
-        while (genKeys.next()) {
-            Object v = genKeys.getObject(1);
-            pkValues.add(v);
-        }
-        return pkValues;
+        return defaultByAuto();
     }
 
     /**
@@ -285,6 +269,76 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             return false;
         }
         return true;
+    }
+
+    /**
+     * default auto increment
+     * @return the primary key value
+     * @throws SQLException the SQL exception
+     */
+    private List<Object> defaultByAuto() throws SQLException {
+        // PK is just auto generated
+        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
+        if (pkMetaMap.size() != 1) {
+            throw new NotSupportYetException();
+        }
+        ColumnMeta pkMeta = pkMetaMap.values().iterator().next();
+        if (!pkMeta.isAutoincrement()) {
+            throw new ShouldNeverHappenException();
+        }
+
+        ResultSet genKeys = null;
+        try {
+            genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
+        } catch (SQLException e) {
+            // java.sql.SQLException: Generated keys not requested. You need to
+            // specify Statement.RETURN_GENERATED_KEYS to
+            // Statement.executeUpdate() or Connection.prepareStatement().
+            if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
+                LOGGER.warn("Fail to get auto-generated keys, use \'SELECT LAST_INSERT_ID()\' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
+                genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
+            } else {
+                throw e;
+            }
+        }
+        List<Object> pkValues = new ArrayList<>();
+        while (genKeys.next()) {
+            Object v = genKeys.getObject(1);
+            pkValues.add(v);
+        }
+        try {
+            genKeys.beforeFirst();
+        } catch (SQLException e) {
+            LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
+        }
+        return pkValues;
+    }
+
+    /**
+     * oracle auto increment sequence
+     * @return the primary key value
+     * @throws SQLException the SQL exception
+     */
+    private List<Object> oracleByAuto() throws SQLException {
+        Map<String, ColumnMeta> pkMetaMap = getTableMeta().getPrimaryKeyMap();
+        if (pkMetaMap.size() != 1) {
+            throw new NotSupportYetException();
+        }
+        ResultSet genKeys = null;
+        try {
+            genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
+        } catch (SQLException e) {
+            throw e;
+        }
+        List<Object> pkValues = new ArrayList<>();
+        while (genKeys.next()) {
+            Object v = genKeys.getObject(1);
+            pkValues.add(v);
+        }
+        if (pkValues.isEmpty()) {
+            throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+        }
+        return pkValues;
     }
 
 }

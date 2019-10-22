@@ -167,7 +167,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     public void shutdown() {
         try {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Shuting server down. ");
+                LOGGER.debug("Shutting server down. ");
             }
             if (initialized.get()) {
                 RegistryFactory.getInstance().unregister(new InetSocketAddress(XID.getIpAddress(), XID.getPort()));
@@ -186,7 +186,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     @Override
     public void destroyChannel(String serverAddress, Channel channel) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("will destroy channel:" + channel + ",address:" + serverAddress);
+            LOGGER.info("will destroy channel:{},address:{}", channel, serverAddress);
         }
         channel.disconnect();
         channel.close();
