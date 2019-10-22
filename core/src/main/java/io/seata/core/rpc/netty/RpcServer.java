@@ -223,6 +223,39 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
 
     /**
      * Send request with response object.
+     * send syn request for rm
+     *
+     * @param clientChannel the client channel
+     * @param message       the message
+     * @return the object
+     * @throws TimeoutException the timeout exception
+     */
+    @Override
+    public Object sendSyncRequest(Channel clientChannel, Object message) throws TimeoutException {
+        return sendSyncRequest(clientChannel, message, NettyServerConfig.getRpcRequestTimeout());
+    }
+
+    /**
+     * Send request with response object.
+     * send syn request for rm
+     *
+     * @param clientChannel the client channel
+     * @param message       the message
+     * @param timeout       the timeout
+     * @return the object
+     * @throws TimeoutException the timeout exception
+     */
+    @Override
+    public Object sendSyncRequest(Channel clientChannel, Object message, long timeout) throws TimeoutException {
+        if (clientChannel == null) {
+            throw new RuntimeException("rm client is not connected");
+
+        }
+        return sendAsyncRequestWithResponse(null, clientChannel, message, timeout);
+    }
+
+    /**
+     * Send request with response object.
      *
      * @param resourceId the db key
      * @param clientId   the client ip
@@ -322,7 +355,7 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof RpcMessage) {
             RpcMessage rpcMessage = (RpcMessage) msg;
-            debugLog("read:" + rpcMessage.getBody().toString());
+            debugLog("read:" + rpcMessage.getBody());
             if (rpcMessage.getBody() instanceof RegisterTMRequest) {
                 serverMessageListener.onRegTmMessage(rpcMessage, ctx, this, checkAuthHandler);
                 return;

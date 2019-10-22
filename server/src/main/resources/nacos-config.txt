@@ -19,6 +19,11 @@ service.max.rollback.retry.timeout=-1
 client.async.commit.buffer.limit=10000
 client.lock.retry.internal=10
 client.lock.retry.times=30
+client.lock.retry.policy.branch-rollback-on-conflict=true
+client.table.meta.check.enable=true
+client.report.retry.count=5
+client.tm.commit.retry.count=1
+client.tm.rollback.retry.count=1
 store.mode=file
 store.file.dir=file_store/data
 store.file.max-branch-session-size=16384
@@ -28,6 +33,7 @@ store.file.flush-disk-mode=async
 store.file.session.reload.read_size=100
 store.db.datasource=dbcp
 store.db.db-type=mysql
+store.db.driver-class-name=com.mysql.jdbc.Driver
 store.db.url=jdbc:mysql://127.0.0.1:3306/seata?useUnicode=true
 store.db.user=mysql
 store.db.password=mysql
@@ -52,4 +58,4 @@ metrics.enabled=false
 metrics.registry-type=compact
 metrics.exporter-list=prometheus
 metrics.exporter-prometheus-port=9898
-
+support.spring.datasource.autoproxy=false

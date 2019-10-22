@@ -20,6 +20,7 @@ import io.netty.buffer.ByteBufAllocator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -73,8 +74,8 @@ class HeadMapSerializerTest {
     public void testUTF8() throws Exception {
         HeadMapSerializer mapSerializer = HeadMapSerializer.getInstance();
         String s = "test";
-        // utf-8 和 gbk  英文是一样的
-        Assertions.assertArrayEquals(s.getBytes("UTF-8"), s.getBytes("GBK"));
+        // utf-8 and gbk same in English
+        Assertions.assertArrayEquals(s.getBytes(StandardCharsets.UTF_8), s.getBytes("GBK"));
 
         Map<String, String> map = new HashMap<String, String>();
         map.put("11", "22");
@@ -84,8 +85,8 @@ class HeadMapSerializerTest {
         Map newmap = mapSerializer.decode(byteBuf, bs);
         Assertions.assertEquals(map, newmap);
 
-        // 支持中文
-        map.put("弄啥呢", "咋弄呢？");
+        // support chinese
+        map.put("你好", "你好？");
         bs = mapSerializer.encode(map, byteBuf);
         newmap = mapSerializer.decode(byteBuf, bs);
         Assertions.assertEquals(map, newmap);

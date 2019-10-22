@@ -98,6 +98,25 @@ public class ConfigurationKeys {
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_PREFIX + "report.retry.count";
 
+    /**
+     * The constant CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT.
+     */
+    public static final String CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = CLIENT_PREFIX + "lock.retry.policy.branch-rollback-on-conflict";
+
+    /**
+     * The constant CLIENT_TABLE_META_CHECK_ENABLE.
+     */
+    public static final String CLIENT_TABLE_META_CHECK_ENABLE  = CLIENT_PREFIX + "table.meta.check.enable";
+
+    /**
+     * The constant CLIENT_TM_COMMIT_RETRY_TIMES.
+     */
+    public static final String CLIENT_TM_COMMIT_RETRY_COUNT = CLIENT_PREFIX + "tm.commit.retry.count";
+
+    /**
+     * The constant CLIENT_TM_ROLLBACK_RETRY_TIMES.
+     */
+    public static final String CLIENT_TM_ROLLBACK_RETRY_COUNT = CLIENT_PREFIX + "tm.rollback.retry.count";
 
     /**
      * The constant SERIALIZE_FOR_RPC.
@@ -264,4 +283,21 @@ public class ConfigurationKeys {
      * The constant TRANSACTION_UNDO_LOG_DEFAULT_TABLE.
      */
     public static final String TRANSACTION_UNDO_LOG_DEFAULT_TABLE  = "undo_log";
+
+    /**
+     * The constant SUPPORT_PREFIX.
+     */
+    public static final String SUPPORT_PREFIX = "support.";
+    /**
+     * The constant SPRING_PREFIX.
+     */
+    public static final String SPRING_PREFIX = "spring.";
+    /**
+     * The constant DATASOURCE_PREFIX.
+     */
+    public static final String DATASOURCE_PREFIX = "datasource.";
+    /**
+     * The constant DATASOURCE_AUTOPROXY.
+     */
+    public static final String DATASOURCE_AUTOPROXY = SUPPORT_PREFIX + SPRING_PREFIX + DATASOURCE_PREFIX + "autoproxy";
 }

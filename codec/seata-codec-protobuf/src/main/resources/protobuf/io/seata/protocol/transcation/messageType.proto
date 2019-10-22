@@ -39,6 +39,14 @@ enum MessageTypeProto {
      */
     TYPE_GLOBAL_STATUS_RESULT = 16;
     /**
+     * The constant TYPE_GLOBAL_REPORT.
+     */
+    TYPE_GLOBAL_REPORT = 17;
+    /**
+     * The constant TYPE_GLOBAL_REPORT_RESULT.
+     */
+    TYPE_GLOBAL_REPORT_RESULT = 18;
+    /**
      * The constant TYPE_GLOBAL_LOCK_QUERY.
      */
     TYPE_GLOBAL_LOCK_QUERY = 21;
@@ -105,5 +113,10 @@ enum MessageTypeProto {
      * The constant TYPE_REG_RM_RESULT.
      */
     TYPE_REG_RM_RESULT = 104;
+
+    /**
+     * The constant TYPE_UNDO_LOG_DELETE.
+     */
+    TYPE_UNDO_LOG_DELETE = 111;
 
 }
