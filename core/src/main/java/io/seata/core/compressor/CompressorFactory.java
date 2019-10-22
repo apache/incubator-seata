@@ -42,13 +42,13 @@ public class CompressorFactory {
      * @param code the code
      * @return the compressor
      */
-    public static synchronized Compressor getCompressor(byte code) {
+    public static Compressor getCompressor(byte code) {
         CompressorType type = CompressorType.getByCode(code);
         if (COMPRESSOR_MAP.get(type) != null) {
             return COMPRESSOR_MAP.get(type);
         }
         Compressor impl = EnhancedServiceLoader.load(Compressor.class, type.name());
-        COMPRESSOR_MAP.put(type, impl);
+        COMPRESSOR_MAP.putIfAbsent(type, impl);
         return impl;
     }
 
