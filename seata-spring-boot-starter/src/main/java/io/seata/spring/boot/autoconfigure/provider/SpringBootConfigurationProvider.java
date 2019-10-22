@@ -137,7 +137,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         }
         if (rawDataId.startsWith(SPECIAL_KEY_CLIENT_LOCK)) {
             String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_CLIENT_LOCK);
-            return StarterConstants.LOCK_PREFIX + "." + StringFormatUtils.dotToCamel(suffix);
+            return StarterConstants.LOCK_PREFIX + "." + StringFormatUtils.minusToCamel(StringFormatUtils.dotToCamel(suffix));
         }
         if (rawDataId.startsWith(SPECIAL_KEY_CLIENT)) {
             String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_CLIENT);

@@ -26,7 +26,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_ETCD3
  */
 @Component
 @ConfigurationProperties(prefix = REGISTRY_ETCD3_PREFIX)
-public class RegistryEecd3Properties {
+public class RegistryEtcd3Properties {
     private String cluster = "default";
     private String serverAddr = "http://localhost:2379";
 
@@ -34,7 +34,7 @@ public class RegistryEecd3Properties {
         return cluster;
     }
 
-    public RegistryEecd3Properties setCluster(String cluster) {
+    public RegistryEtcd3Properties setCluster(String cluster) {
         this.cluster = cluster;
         return this;
     }
@@ -43,7 +43,7 @@ public class RegistryEecd3Properties {
         return serverAddr;
     }
 
-    public RegistryEecd3Properties setServerAddr(String serverAddr) {
+    public RegistryEtcd3Properties setServerAddr(String serverAddr) {
         this.serverAddr = serverAddr;
         return this;
     }

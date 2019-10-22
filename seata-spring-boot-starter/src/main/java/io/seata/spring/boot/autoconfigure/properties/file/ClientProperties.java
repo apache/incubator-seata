@@ -29,6 +29,9 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_PREFIX;
 public class ClientProperties {
     private int asyncCommitBufferLimit = 10000;
     private int reportRetryCount = 5;
+    private int tmCommitRetryCount = 5;
+    private int tmRollbackRetryCount = 1;
+    private boolean tableMetaCheckEnable = true;
 
     public int getAsyncCommitBufferLimit() {
         return asyncCommitBufferLimit;
@@ -48,5 +51,30 @@ public class ClientProperties {
         return this;
     }
 
+    public int getTmCommitRetryCount() {
+        return tmCommitRetryCount;
+    }
 
+    public ClientProperties setTmCommitRetryCount(int tmCommitRetryCount) {
+        this.tmCommitRetryCount = tmCommitRetryCount;
+        return this;
+    }
+
+    public int getTmRollbackRetryCount() {
+        return tmRollbackRetryCount;
+    }
+
+    public ClientProperties setTmRollbackRetryCount(int tmRollbackRetryCount) {
+        this.tmRollbackRetryCount = tmRollbackRetryCount;
+        return this;
+    }
+
+    public boolean isTableMetaCheckEnable() {
+        return tableMetaCheckEnable;
+    }
+
+    public ClientProperties setTableMetaCheckEnable(boolean tableMetaCheckEnable) {
+        this.tableMetaCheckEnable = tableMetaCheckEnable;
+        return this;
+    }
 }

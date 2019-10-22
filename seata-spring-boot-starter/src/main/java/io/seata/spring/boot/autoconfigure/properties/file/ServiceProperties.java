@@ -40,9 +40,9 @@ public class ServiceProperties {
      */
     private boolean enableDegrade = false;
     /**
-     * disable
+     * disable globalTransaction
      */
-    private boolean disable = false;
+    private boolean disableGlobalTransaction = false;
 
     public String getVgroupMapping() {
         return vgroupMapping;
@@ -71,13 +71,12 @@ public class ServiceProperties {
         return this;
     }
 
-    public boolean isDisable() {
-        return disable;
+    public boolean isDisableGlobalTransaction() {
+        return disableGlobalTransaction;
     }
 
-    public ServiceProperties setDisable(boolean disable) {
-        this.disable = disable;
+    public ServiceProperties setDisableGlobalTransaction(boolean disableGlobalTransaction) {
+        this.disableGlobalTransaction = disableGlobalTransaction;
         return this;
     }
-
 }

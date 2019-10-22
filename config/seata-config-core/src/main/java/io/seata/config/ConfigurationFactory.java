@@ -100,10 +100,10 @@ public final class ConfigurationFactory {
                 + NAME_KEY;
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             Configuration configuration = new FileConfiguration(name);
-            Configuration extConfiguration=null;
+            Configuration extConfiguration = null;
             try {
-                extConfiguration=EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
-            }catch (Exception ignore){
+                extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+            } catch (Exception ignore) {
 
             }
             

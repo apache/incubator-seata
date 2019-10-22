@@ -34,7 +34,7 @@ import io.seata.spring.boot.autoconfigure.properties.registry.ConfigNacosPropert
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigZooKeeperProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryConsulProperties;
-import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEecd3Properties;
+import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEtcd3Properties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryEurekaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryFileProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryNacosProperties;
@@ -103,7 +103,7 @@ public class StarterConstants {
             put(CONFIG_ETCD3_PREFIX, ConfigEtcd3Properties.class);
 
             put(REGISTRY_CONSUL_PREFIX, RegistryConsulProperties.class);
-            put(REGISTRY_ETCD3_PREFIX, RegistryEecd3Properties.class);
+            put(REGISTRY_ETCD3_PREFIX, RegistryEtcd3Properties.class);
             put(REGISTRY_EUREKA_PREFIX, RegistryEurekaProperties.class);
             put(REGISTRY_NACOS_PREFIX, RegistryNacosProperties.class);
             put(REGISTRY_REDIS_PREFIX, RegistryRedisProperties.class);

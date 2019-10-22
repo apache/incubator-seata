@@ -29,6 +29,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.LOCK_PREFIX;
 public class LockProperties {
     private int lockRetryInterval = 10;
     private int lockRetryTimes = 30;
+    private boolean lockRetryPolicyBranchRollbackOnConflict = true;
 
     public int getLockRetryInterval() {
         return lockRetryInterval;
@@ -45,6 +46,15 @@ public class LockProperties {
 
     public LockProperties setLockRetryTimes(int lockRetryTimes) {
         this.lockRetryTimes = lockRetryTimes;
+        return this;
+    }
+
+    public boolean isLockRetryPolicyBranchRollbackOnConflict() {
+        return lockRetryPolicyBranchRollbackOnConflict;
+    }
+
+    public LockProperties setLockRetryPolicyBranchRollbackOnConflict(boolean lockRetryPolicyBranchRollbackOnConflict) {
+        this.lockRetryPolicyBranchRollbackOnConflict = lockRetryPolicyBranchRollbackOnConflict;
         return this;
     }
 }
