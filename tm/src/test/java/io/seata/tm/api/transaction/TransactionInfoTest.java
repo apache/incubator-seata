@@ -43,7 +43,7 @@ public class TransactionInfoTest {
         String fromJson = "{\n" +
                 "\t\"name\":\""+ NAME +"\",\n" +
                 "\t\"rollbackRules\":[{\n" +
-                "\t\t\"exceptionName\":\""+ Exception.class.getName() +"\"\n" +
+                "\t\t\"exceptionName\":\""+ IllegalStateException.class.getName() +"\"\n" +
                 "\t},{\n" +
                 "\t\t\"exceptionName\":\""+ IllegalArgumentException.class.getName() +"\"\n" +
                 "\t},{\n" +
