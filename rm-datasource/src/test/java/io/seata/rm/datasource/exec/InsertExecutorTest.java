@@ -367,6 +367,7 @@ public class InsertExecutorTest {
         ArrayList<Object>[] paramters = new ArrayList[1];
         ArrayList arrayList1 = new ArrayList<>();
         arrayList1.add(PK_VALUE);
+        arrayList1.add(PK_VALUE1);
         paramters[0] = arrayList1;
         PreparedStatementProxy psp = (PreparedStatementProxy) this.statementProxy;
         when(psp.getParameters()).thenReturn(paramters);
