@@ -67,7 +67,7 @@ public class LockerFactory {
      *
      * @return the lock manager
      */
-    public static synchronized final LockManager getLockManager() {
+    public static final LockManager getLockManager() {
         return lockManager;
     }
 
