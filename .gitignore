@@ -39,3 +39,6 @@ dependency-reduced-pom.xml
 .DS_Store
 Thumbs.db
 *.orig
+
+#h2
+*.db

@@ -16,7 +16,6 @@
 package io.seata.spring.tcc;
 
 import io.seata.common.Constants;
-import io.seata.common.executor.Callback;
 import io.seata.core.context.RootContext;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.interceptor.ActionInterceptorHandler;
@@ -83,12 +82,7 @@ public class TccActionInterceptor implements MethodInterceptor {
                 Object[] methodArgs = invocation.getArguments();
                 //Handler the TCC Aspect
                 Map<String, Object> ret = actionInterceptorHandler.proceed(method, methodArgs, xid, businessAction,
-                        new Callback<Object>() {
-                            @Override
-                            public Object execute() throws Throwable {
-                                return invocation.proceed();
-                            }
-                        });
+                        invocation::proceed);
                 //return the final result
                 return ret.get(Constants.TCC_METHOD_RESULT);
             } finally {
