@@ -84,7 +84,7 @@ public class TccReferenceAnnotationFilter implements Filter {
                 }
             }
         } catch (Throwable e) {
-            LOGGER.error("Tcc dubbo invokes service to register branch transaction exception: {}", e);
+            LOGGER.error("Tcc dubbo invokes service to register branch transaction exception: {}", e.getMessage(), e);
         }
         return invoker.invoke(invocation);
     }
