@@ -106,13 +106,16 @@ public abstract class AbstractConnectionProxy implements Connection {
     public PreparedStatement prepareStatement(String sql) throws SQLException {
         String dbType = getDbType();
         // support oracle 10.2+
-        PreparedStatement targetPreparedStatement;
-        SQLRecognizer sqlRecognizer = SQLVisitorFactory.get(sql, dbType);
-        if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
-            final String tableName = sqlRecognizer.getTableName();
-            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(getDataSourceProxy()).getTableMeta(getDataSourceProxy(), tableName);
-            targetPreparedStatement = getTargetConnection().prepareStatement(sql, new String[]{ tableMeta.getPkName() });
-        } else {
+        PreparedStatement targetPreparedStatement = null;
+        if (RootContext.inGlobalTransaction()) {
+            SQLRecognizer sqlRecognizer = SQLVisitorFactory.get(sql, dbType);
+            if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
+                final String tableName = sqlRecognizer.getTableName();
+                TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(getDataSourceProxy()).getTableMeta(getDataSourceProxy(), tableName);
+                targetPreparedStatement = getTargetConnection().prepareStatement(sql, new String[]{tableMeta.getPkName()});
+            }
+        }
+        if (targetPreparedStatement == null) {
             targetPreparedStatement = getTargetConnection().prepareStatement(sql);
         }
         return new PreparedStatementProxy(this, targetPreparedStatement, sql);
