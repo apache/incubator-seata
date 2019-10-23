@@ -51,9 +51,13 @@ public class SessionHolderTest {
         }
         final String mode = StoreMode.FILE.toString();
         SessionHolder.init(mode);
-        final File actual = new File(pathname);
-        Assertions.assertTrue(actual.exists());
-        Assertions.assertTrue(actual.isFile());
+        try {
+            final File actual = new File(pathname);
+            Assertions.assertTrue(actual.exists());
+            Assertions.assertTrue(actual.isFile());
+        } finally {
+            SessionHolder.destroy();
+        }
     }
 
     @AfterEach
