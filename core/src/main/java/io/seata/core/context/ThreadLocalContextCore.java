@@ -50,4 +50,9 @@ public class ThreadLocalContextCore implements ContextCore {
     public String remove(String key) {
         return threadLocal.get().remove(key);
     }
+
+    @Override
+    public Map<String, String> entries() {
+        return threadLocal.get();
+    }
 }

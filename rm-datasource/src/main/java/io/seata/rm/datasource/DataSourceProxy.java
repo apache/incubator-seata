@@ -15,12 +15,6 @@
  */
 package io.seata.rm.datasource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import javax.sql.DataSource;
 import com.alibaba.druid.util.JdbcUtils;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
@@ -28,9 +22,16 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Data source proxy.
@@ -39,7 +40,7 @@ import org.slf4j.LoggerFactory;
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
 
-    private static final Logger logger = LoggerFactory.getLogger(DataSourceProxy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProxy.class);
 
     private String resourceGroupId;
 
@@ -91,11 +92,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         }
         DefaultResourceManager.get().registerResource(this);
         if(ENABLE_TABLE_META_CHECKER_ENABLE){
-            tableMetaExcutor.scheduleAtFixedRate(new Runnable() {
-                @Override
-                public void run() {
-                    TableMetaCache.refresh(DataSourceProxy.this);
-                }
+            tableMetaExcutor.scheduleAtFixedRate(() -> {
+                TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType()).refresh(DataSourceProxy.this);
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }
     }

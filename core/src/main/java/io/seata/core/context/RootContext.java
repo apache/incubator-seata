@@ -21,6 +21,8 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
+
 /**
  * The type Root context.
  *
@@ -176,5 +178,14 @@ public class RootContext {
         if (inGlobalTransaction()) {
             throw new ShouldNeverHappenException();
         }
+    }
+
+    /**
+     * entry map
+     *
+     * @return
+     */
+    public static Map<String, String> entries(){
+        return CONTEXT_HOLDER.entries();
     }
 }

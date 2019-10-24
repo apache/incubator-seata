@@ -20,7 +20,6 @@ import java.sql.SQLException;
 import java.util.List;
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.mock.handler.MockExecuteHandler;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
 
 /**
   * @author will
@@ -31,13 +30,19 @@ public class MockExecuteHandlerImpl implements MockExecuteHandler {
     /**
      * the mock value of return value
      */
-    private Object[][] mockReturnValue = null;
+    private Object[][] mockReturnValue;
+
+    /**
+     * the mock column labels of return value
+     */
+    private List<String> mockReturnValueColumnLabels;
 
     /**
      * Instantiate MockExecuteHandlerImpl
      * @param mockReturnValue
      */
-    public MockExecuteHandlerImpl(Object[][] mockReturnValue) {
+    public MockExecuteHandlerImpl(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue) {
+        this.mockReturnValueColumnLabels = mockReturnValueColumnLabels;
         this.mockReturnValue = mockReturnValue;
     }
 
@@ -46,7 +51,7 @@ public class MockExecuteHandlerImpl implements MockExecuteHandler {
         MockResultSet resultSet = new MockResultSet(statement);
 
         //mock the return value
-        resultSet.mockResultSet(mockReturnValue);
+        resultSet.mockResultSet(mockReturnValueColumnLabels, mockReturnValue);
 
         return resultSet;
     }

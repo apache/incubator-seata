@@ -81,7 +81,7 @@ public abstract class AbstractExceptionHandler {
 
     }
 
-    public abstract class AbstractCallback<T extends AbstractTransactionRequest, S extends AbstractTransactionResponse>
+    public abstract static class AbstractCallback<T extends AbstractTransactionRequest, S extends AbstractTransactionResponse>
         implements Callback<T, S> {
 
         @Override

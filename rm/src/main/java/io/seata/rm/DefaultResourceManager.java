@@ -121,7 +121,7 @@ public class DefaultResourceManager implements ResourceManager {
 
     @Override
     public Map<String, Resource> getManagedResources() {
-        Map<String, Resource> allResource = new HashMap<String, Resource>();
+        Map<String, Resource> allResource = new HashMap<>();
         for (ResourceManager rm : resourceManagers.values()) {
             Map<String, Resource> tempResources = rm.getManagedResources();
             if (tempResources != null) {
