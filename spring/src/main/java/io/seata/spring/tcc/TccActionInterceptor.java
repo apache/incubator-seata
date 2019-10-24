@@ -77,8 +77,10 @@ public class TccActionInterceptor implements MethodInterceptor {
         if (businessAction != null) {
             //save the xid
             String xid = RootContext.getXID();
+            String xidType = String.format("%s_%s", xid, BranchType.TCC.name());
             //clear the context
             RootContext.unbind();
+            RootContext.bindInterceptorType(xidType);
             try {
                 Object[] methodArgs = invocation.getArguments();
                 //Handler the TCC Aspect
@@ -94,6 +96,7 @@ public class TccActionInterceptor implements MethodInterceptor {
             } finally {
                 //recovery the context
                 RootContext.bind(xid);
+                RootContext.unbindInterceptorType();
             }
         }
         return invocation.proceed();
