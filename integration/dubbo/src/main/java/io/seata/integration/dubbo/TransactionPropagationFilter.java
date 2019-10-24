@@ -45,7 +45,7 @@ public class TransactionPropagationFilter implements Filter {
         String rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID);
         String rpcXidFilterType = RpcContext.getContext().getAttachment(RootContext.KEY_XID_FILTER_TYPE);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("xid in RootContext[{}}] xid in RpcContext[{}}", xid, rpcXid);
+            LOGGER.debug("xid in RootContext[{}] xid in RpcContext[{}]", xid, rpcXid);
         }
         boolean bind = false;
         if (xid != null) {
@@ -57,8 +57,8 @@ public class TransactionPropagationFilter implements Filter {
                 RootContext.bindFilterType(rpcXidFilterType);
                 bind = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("bind[{}}] to RootContext", rpcXid);
-                    LOGGER.debug("bind filterType[{}}] to RootContext", rpcXidFilterType);
+                    LOGGER.debug("bind[{}] to RootContext", rpcXid);
+                    LOGGER.debug("bind filterType[{}] to RootContext", rpcXidFilterType);
                 }
             }
         }
@@ -70,8 +70,8 @@ public class TransactionPropagationFilter implements Filter {
                 String unbindXid = RootContext.unbind();
                 String unbindFilterType = RootContext.unbindFilterType();
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("unbind[{}}] from RootContext", unbindXid);
-                    LOGGER.debug("unbind filterType[{}}] from RootContext", unbindFilterType);
+                    LOGGER.debug("unbind[{}] from RootContext", unbindXid);
+                    LOGGER.debug("unbind filterType[{}] from RootContext", unbindFilterType);
                 }
                 if (!rpcXid.equalsIgnoreCase(unbindXid)) {
                     LOGGER.warn("xid in change during RPC from {} to {}", rpcXid, unbindXid);
@@ -79,8 +79,8 @@ public class TransactionPropagationFilter implements Filter {
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
                         RootContext.bindFilterType(unbindFilterType);
-                        LOGGER.warn("bind [{}}] back to RootContext", unbindXid);
-                        LOGGER.warn("bind filterType [{}}] back to RootContext", unbindFilterType);
+                        LOGGER.warn("bind [{}] back to RootContext", unbindXid);
+                        LOGGER.warn("bind filterType [{}] back to RootContext", unbindFilterType);
                     }
                 }
             }
