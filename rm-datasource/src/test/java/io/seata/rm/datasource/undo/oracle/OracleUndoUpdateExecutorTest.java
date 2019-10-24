@@ -21,7 +21,6 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BaseExecutorTest;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
