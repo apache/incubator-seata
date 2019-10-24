@@ -71,7 +71,7 @@ public class DefaultLockManager extends AbstractLockManager {
         }
         List<RowLock> locks = collectRowLocks(branchSession);
         try {
-            return this.doReleaseLock(locks, branchSession);
+            return getLocker(branchSession).releaseLock(locks);
         } catch (Exception t) {
             LOGGER.error("unLock error, branchSession:" + branchSession, t);
             return false;
@@ -88,7 +88,7 @@ public class DefaultLockManager extends AbstractLockManager {
                 locks.addAll(collectRowLocks(branchSession));
             }
             try {
-                return this.doReleaseLock(locks, null);
+                return getLocker(null).releaseLock(locks);
             } catch (Exception t) {
                 LOGGER.error("unLock globalSession error, xid:{}", globalSession.getXid(), t);
                 return false;
@@ -102,14 +102,6 @@ public class DefaultLockManager extends AbstractLockManager {
             }
             return releaseLockResult;
         }
-    }
-
-    private boolean doReleaseLock(List<RowLock> locks, BranchSession branchSession) {
-        if (CollectionUtils.isEmpty(locks)) {
-            //no lock
-            return true;
-        }
-        return getLocker(branchSession).releaseLock(locks);
     }
 
     @Override

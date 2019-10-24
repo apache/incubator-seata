@@ -15,11 +15,14 @@
  */
 package io.seata.rm.datasource.mock;
 
-import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.util.jdbc.ResultSetBase;
+
+import com.google.common.collect.Lists;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.sql.Blob;
+import java.sql.Clob;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -31,50 +34,61 @@ import java.util.List;
  */
 public class MockResultSet extends ResultSetBase {
 
-    private List<String> columnLabels;
+    private List<ColumnMeta> columnMetas;
 
     private int rowIndex = -1;
 
+    /**
+     * the column label
+     */
+    private List<String> columnLabels;
+
+    /**
+     * the return value
+     */
     private List<Object[]> rows;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockResultSet.class);
 
-    public MockResultSet(Statement statement) {
-        this(statement, null);
-    }
-
     /**
      * Instantiates a new Mock result set.
-     *
-     * @param statement    the statement
-     * @param columnLabels the column labels
+     * @param statement
      */
-    public MockResultSet(Statement statement, List<String> columnLabels) {
+    public MockResultSet(Statement statement) {
         super(statement);
-        this.columnLabels = columnLabels;
         this.rows = new ArrayList<Object[]>();
-        super.metaData = new MockResultSetMetaData();
     }
 
     /**
      * mock result set
-     * @param metas
+     * @param mockColumnLables
+     * @param mockReturnValue
      * @return
      */
-    public MockResultSet mockResultSet(Object[][] metas){
-        if(metas.length < 1){
-            return this;
+    public MockResultSet mockResultSet(List<String> mockColumnLables, Object[][] mockReturnValue){
+
+        this.columnLabels = mockColumnLables;
+        this.columnMetas = Lists.newArrayList();
+
+        for (int i = 0; i < mockReturnValue.length; i++) {
+            Object[] row = mockReturnValue[i];
+            this.getRows().add(row);
         }
 
-        for (Object[] columnMeta : metas) {
-            this.getRows().add(columnMeta);
+        for (int i = 0; i < mockColumnLables.size(); i++) {
+            ColumnMeta columnMeta = new ColumnMeta();
+            columnMeta.setColumnName(mockColumnLables.get(i));
+            this.columnMetas.add(columnMeta);
         }
+
+        //init mock result set meta data
+        metaData = new MockResultSetMetaData(columnMetas);
 
         return this;
     }
 
     public MockResultSetMetaData getMockMetaData() {
-        return (MockResultSetMetaData) metaData;
+        return (MockResultSetMetaData)metaData;
     }
 
     @Override
@@ -93,6 +107,28 @@ public class MockResultSet extends ResultSetBase {
     @Override
     public int findColumn(String columnLabel) throws SQLException {
         return columnLabels.indexOf(columnLabel) + 1;
+    }
+
+    @Override
+    public Blob getBlob(String columnLabel) throws SQLException {
+        return getBlob(findColumn(columnLabel));
+    }
+
+    @Override
+    public Blob getBlob(int columnIndex) throws SQLException {
+        byte[] bytes = getObjectInternal(columnIndex).toString().getBytes();
+        return new MockBlob();
+    }
+
+    @Override
+    public Clob getClob(String columnLabel) throws SQLException {
+        return getClob(findColumn(columnLabel));
+    }
+
+    @Override
+    public Clob getClob(int columnIndex) throws SQLException {
+        char[] chars = getObjectInternal(columnIndex).toString().toCharArray();
+        return new MockClob();
     }
 
     public Object getObjectInternal(int columnIndex) {

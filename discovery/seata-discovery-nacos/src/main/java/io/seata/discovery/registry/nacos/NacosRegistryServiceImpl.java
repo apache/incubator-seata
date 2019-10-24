@@ -28,7 +28,6 @@ import io.seata.config.ConfigurationKeys;
 import io.seata.discovery.registry.RegistryService;
 import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
-import com.alibaba.nacos.api.naming.listener.Event;
 import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
@@ -130,21 +129,18 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                 }
                 CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
             }
-            subscribe(clusterName, new EventListener() {
-                @Override
-                public void onEvent(Event event) {
-                    List<Instance> instances = ((NamingEvent) event).getInstances();
-                    if (null == instances && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
-                        CLUSTER_ADDRESS_MAP.remove(clusterName);
-                    } else if (!CollectionUtils.isEmpty(instances)) {
-                        List<InetSocketAddress> newAddressList = new ArrayList<>();
-                        for (Instance instance : instances) {
-                            if (instance.isEnabled() && instance.isHealthy()) {
-                                newAddressList.add(new InetSocketAddress(instance.getIp(), instance.getPort()));
-                            }
+            subscribe(clusterName, event -> {
+                List<Instance> instances = ((NamingEvent) event).getInstances();
+                if (null == instances && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
+                    CLUSTER_ADDRESS_MAP.remove(clusterName);
+                } else if (!CollectionUtils.isEmpty(instances)) {
+                    List<InetSocketAddress> newAddressList = new ArrayList<>();
+                    for (Instance instance : instances) {
+                        if (instance.isEnabled() && instance.isHealthy()) {
+                            newAddressList.add(new InetSocketAddress(instance.getIp(), instance.getPort()));
                         }
-                        CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
                     }
+                    CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
                 }
             });
         }

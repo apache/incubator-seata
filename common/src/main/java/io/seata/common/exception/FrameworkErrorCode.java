@@ -100,6 +100,108 @@ public enum FrameworkErrorCode {
      */
     RegisterRM("0304", "Register RM failed", "Register RM failed"),
 
+    /** 0400~0499 Saga相关错误 **/
+
+    /**
+     * Process type not found
+     */
+    ProcessTypeNotFound("0401", "Process type not found", "Process type not found"),
+
+    /**
+     * Process handler not found
+     */
+    ProcessHandlerNotFound("0402", "Process handler not found", "Process handler not found"),
+
+    /**
+     * Process router not found
+     */
+    ProcessRouterNotFound("0403", "Process router not found", "Process router not found"),
+
+    /**
+     * method not public
+     */
+    MethodNotPublic("0404", "method not public", "method not public"),
+
+    /**
+     * method invoke error
+     */
+    MethodInvokeError("0405", "method invoke error", "method invoke error"),
+
+    /**
+     * CompensationState not found
+     */
+    CompensationStateNotFound("0406", "CompensationState not found", "CompensationState not found"),
+
+    /**
+     * Evaluation returns null
+     */
+    EvaluationReturnsNull("0407", "Evaluation returns null", "Evaluation returns null"),
+
+    /**
+     * Evaluation returns non-Boolean
+     */
+    EvaluationReturnsNonBoolean("0408", "Evaluation returns non-Boolean", "Evaluation returns non-Boolean"),
+
+    /**
+     * Not a exception class
+     */
+    NotExceptionClass("0409", "Not a exception class", "Not a exception class"),
+
+    /**
+     * No such method
+     */
+    NoSuchMethod("0410", "No such method", "No such method"),
+
+    /**
+     * Object not exists
+     */
+    ObjectNotExists("0411", "Object not exists", "Object not exists"),
+
+    /**
+     * Parameter required
+     */
+    ParameterRequired("0412", "Parameter required", "Parameter required"),
+
+    /**
+     * Variables assign error
+     */
+    VariablesAssignError("0413", "Variables assign error", "Variables assign error"),
+
+    /**
+     * No matched status
+     */
+    NoMatchedStatus("0414", "No matched status", "No matched status"),
+
+    /**
+     * Asynchronous start disabled
+     */
+    AsynchronousStartDisabled("0415", "Asynchronous start disabled", "Asynchronous start disabled"),
+
+    /**
+     * Operation denied
+     */
+    OperationDenied("0416", "Operation denied", "Operation denied"),
+
+    /**
+     * Context variable replay failed
+     */
+    ContextVariableReplayFailed("0417", "Context variable replay failed", "Context variable replay failed"),
+
+    /**
+     * Context variable replay failed
+     */
+    InvalidParameter("0418", "Invalid parameter", "Invalid parameter"),
+
+    /**
+     * Invoke transaction manager error
+     */
+    TransactionManagerError("0419", "Invoke transaction manager error", "Invoke transaction manager error"),
+
+    /**
+     * State machine instance not exists
+     */
+    StateMachineInstanceNotExists("0420", "State machine instance not exists", "State machine instance not exists"),
+
     /**
      * Undefined error
      */

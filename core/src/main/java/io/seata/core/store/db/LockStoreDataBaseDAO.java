@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
+import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
@@ -256,7 +257,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             }
             return true;
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
             if (conn != null) {
                 try {
@@ -334,7 +335,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             }
             return true;
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
             if (rs != null) {
                 try {
