@@ -1,1 +1,2 @@
 io.seata.integration.dubbo.TransactionPropagationFilter
+io.seata.integration.dubbo.TccReferenceAnnotationFilter
