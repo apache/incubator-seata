@@ -130,7 +130,6 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
                     for (String rbRule : globalTrxAnno.noRollbackForClassName()) {
                         rollbackRules.add(new NoRollbackRule(rbRule));
                     }
-
                     transactionInfo.setRollbackRules(rollbackRules);
                     return transactionInfo;
                 }
