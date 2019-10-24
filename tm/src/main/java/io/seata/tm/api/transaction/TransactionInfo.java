@@ -15,6 +15,8 @@
  */
 package io.seata.tm.api.transaction;
 
+import io.seata.common.util.CollectionUtils;
+
 import java.io.Serializable;
 import java.util.Set;
 
@@ -61,7 +63,8 @@ public final class TransactionInfo implements Serializable {
         RollbackRule winner = null;
         int deepest = Integer.MAX_VALUE;
 
-        if (this.rollbackRules != null) {
+        if (CollectionUtils.isNotEmpty(rollbackRules)) {
+            winner = NoRollbackRule.DEFAULT_NO_ROLLBACK_RULE;
             for (RollbackRule rule : this.rollbackRules) {
                 int depth = rule.getDepth(ex);
                 if (depth >= 0 && depth < deepest) {
