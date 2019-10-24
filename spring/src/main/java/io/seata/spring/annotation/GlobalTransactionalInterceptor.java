@@ -16,6 +16,7 @@
 package io.seata.spring.annotation;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.GlobalLockTemplate;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
@@ -130,7 +131,9 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
                     for (String rbRule : globalTrxAnno.noRollbackForClassName()) {
                         rollbackRules.add(new NoRollbackRule(rbRule));
                     }
-                    transactionInfo.setRollbackRules(rollbackRules);
+                    if (CollectionUtils.isNotEmpty(rollbackRules)) {
+                        transactionInfo.setRollbackRules(rollbackRules);
+                    }
                     return transactionInfo;
                 }
             });
