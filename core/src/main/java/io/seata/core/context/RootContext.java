@@ -16,7 +16,8 @@
 package io.seata.core.context;
 
 import io.seata.common.exception.ShouldNeverHappenException;
-
+import io.seata.core.model.BranchType;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,8 @@ public class RootContext {
      */
     public static final String KEY_XID = "TX_XID";
 
+    public static final String KEY_XID_FILTER_TYPE = "TX_XID_FILTER_TYPE";
+
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
@@ -44,7 +47,25 @@ public class RootContext {
      * @return the xid
      */
     public static String getXID() {
-        return CONTEXT_HOLDER.get(KEY_XID);
+        String xid = CONTEXT_HOLDER.get(KEY_XID);
+        if (StringUtils.isNotBlank(xid)) {
+            return xid;
+        }
+
+        String xidType = CONTEXT_HOLDER.get(KEY_XID_FILTER_TYPE);
+        if (StringUtils.isNotBlank(xidType)) {
+            return xidType.split("_")[0];
+        }
+        return null;
+    }
+
+    /**
+     * Gets xid.
+     *
+     * @return the xid
+     */
+    public static String getXIDFilterType() {
+        return CONTEXT_HOLDER.get(KEY_XID_FILTER_TYPE);
     }
 
     /**
@@ -57,6 +78,30 @@ public class RootContext {
             LOGGER.debug("bind " + xid);
         }
         CONTEXT_HOLDER.put(KEY_XID, xid);
+    }
+
+    /**
+     * Bind filter type
+     *
+     * @param xidType
+     */
+    public static void bindFilterType(String xidType) {
+        String[] xidTypes = xidType.split("_");
+        bindFilterType(xidTypes[0], BranchType.valueOf(xidTypes[1]));
+    }
+
+    /**
+     * Bind filter type
+     *
+     * @param xid
+     * @param branchType
+     */
+    public static void bindFilterType(String xid, BranchType branchType) {
+        String xidType = String.format("%s_%s", xid, branchType.name());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("bind filter type xid={} branchType={}", xid, branchType);
+        }
+        CONTEXT_HOLDER.put(KEY_XID_FILTER_TYPE, xidType);
     }
 
     /**
@@ -80,9 +125,22 @@ public class RootContext {
     public static String unbind() {
         String xid = CONTEXT_HOLDER.remove(KEY_XID);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind " + xid);
+            LOGGER.debug("unbind {} ", xid);
         }
         return xid;
+    }
+
+    /**
+     * Unbind temporary string
+     *
+     * @return the string
+     */
+    public static String unbindFilterType() {
+        String xidType = CONTEXT_HOLDER.remove(KEY_XID_FILTER_TYPE);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("unbind filter type {}", xidType);
+        }
+        return xidType;
     }
 
     public static void unbindGlobalLockFlag() {

@@ -40,19 +40,25 @@ public class TransactionPropagationFilter implements Filter {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         String xid = RootContext.getXID();
+        String xidFilterType = RootContext.getXIDFilterType();
+
         String rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID);
+        String rpcXidFilterType = RpcContext.getContext().getAttachment(RootContext.KEY_XID_FILTER_TYPE);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("xid in RootContext[" + xid + "] xid in RpcContext[" + rpcXid + "]");
+            LOGGER.debug("xid in RootContext[{}}] xid in RpcContext[{}}", xid, rpcXid);
         }
         boolean bind = false;
         if (xid != null) {
             RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid);
+            RpcContext.getContext().setAttachment(RootContext.KEY_XID_FILTER_TYPE, xidFilterType);
         } else {
             if (rpcXid != null) {
                 RootContext.bind(rpcXid);
+                RootContext.bindFilterType(rpcXidFilterType);
                 bind = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("bind[" + rpcXid + "] to RootContext");
+                    LOGGER.debug("bind[{}}] to RootContext", rpcXid);
+                    LOGGER.debug("bind filterType[{}}] to RootContext", rpcXidFilterType);
                 }
             }
         }
@@ -62,14 +68,19 @@ public class TransactionPropagationFilter implements Filter {
         } finally {
             if (bind) {
                 String unbindXid = RootContext.unbind();
+                String unbindFilterType = RootContext.unbindFilterType();
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("unbind[" + unbindXid + "] from RootContext");
+                    LOGGER.debug("unbind[{}}] from RootContext", unbindXid);
+                    LOGGER.debug("unbind filterType[{}}] from RootContext", unbindFilterType);
                 }
                 if (!rpcXid.equalsIgnoreCase(unbindXid)) {
-                    LOGGER.warn("xid in change during RPC from " + rpcXid + " to " + unbindXid);
+                    LOGGER.warn("xid in change during RPC from {} to {}", rpcXid, unbindXid);
+                    LOGGER.warn("xidFilterType in change during RPC from {} to {}", rpcXidFilterType, unbindFilterType);
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
-                        LOGGER.warn("bind [" + unbindXid + "] back to RootContext");
+                        RootContext.bindFilterType(unbindFilterType);
+                        LOGGER.warn("bind [{}}] back to RootContext", unbindXid);
+                        LOGGER.warn("bind filterType [{}}] back to RootContext", unbindFilterType);
                     }
                 }
             }

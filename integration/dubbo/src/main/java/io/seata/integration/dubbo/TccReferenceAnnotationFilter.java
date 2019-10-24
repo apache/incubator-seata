@@ -29,20 +29,19 @@ import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.RpcInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.Map;
 
-@Activate(group = {Constants.CONSUMER }, order = 95)
+@Activate(group = {Constants.CONSUMER}, order = 95)
 public class TccReferenceAnnotationFilter implements Filter {
-    
-    private static final Logger      LOGGER                       = LoggerFactory.getLogger(TccReferenceAnnotationFilter.class);
-    
-    private ActionInterceptorHandler actionInterceptorHandler     = new ActionInterceptorHandler();
-    
-    private final static String      DUBBO_GENERIC_SERVICE_INVOKE = "$invoke";
-    
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TccReferenceAnnotationFilter.class);
+
+    private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
+
+    private final static String DUBBO_GENERIC_SERVICE_INVOKE = "$invoke";
+
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         try {
@@ -50,30 +49,28 @@ public class TccReferenceAnnotationFilter implements Filter {
             String methodName = rpcInvocation.getMethodName();
             Class<?>[] parameterTypes = rpcInvocation.getParameterTypes();
             Object[] arguments = rpcInvocation.getArguments();
-            Class interfaceClass = Class.forName(invoker.getUrl().getServiceInterface());
+            Class interfaceClass = invoker.getInterface();
             if (DUBBO_GENERIC_SERVICE_INVOKE.equals(methodName)) {
                 return invoker.invoke(invocation);
             }
-            
-            Method method = interfaceClass.getMethod(methodName, parameterTypes);
 
+            Method method = interfaceClass.getMethod(methodName, parameterTypes);
             //not in transaction
             if (!RootContext.inGlobalTransaction()) {
                 return invoker.invoke(invocation);
             }
-            
+
             TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
             //try method
-            if (businessAction != null && StringUtils.isEmpty(RootContext.getXIDInterceptorType())) {
+            if (businessAction != null) {
                 //save the xid
                 String xid = RootContext.getXID();
-                String xidType = String.format("%s_%s", xid, BranchType.TCC.name());
                 //clear the context
                 RootContext.unbind();
-                RootContext.bindFilterType(xidType);
+                RootContext.bindFilterType(xid, BranchType.TCC);
                 try {
                     Map<String, Object> ret = actionInterceptorHandler.proceed(method, arguments, xid, businessAction,
-                        () -> invoker.invoke(invocation));
+                            () -> invoker.invoke(invocation));
                     return (Result) ret.get(io.seata.common.Constants.TCC_METHOD_RESULT);
                 } catch (Throwable throwable) {
                     throw throwable;
@@ -84,7 +81,7 @@ public class TccReferenceAnnotationFilter implements Filter {
                 }
             }
         } catch (Throwable e) {
-            LOGGER.error("Tcc dubbo invokes service to register branch transaction exception:{}", e);
+            LOGGER.error("Tcc dubbo invokes service to register branch transaction exception:{}", e.getMessage(), e);
         }
         return invoker.invoke(invocation);
     }
