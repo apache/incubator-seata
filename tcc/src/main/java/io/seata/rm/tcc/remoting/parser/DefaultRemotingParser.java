@@ -193,11 +193,11 @@ public class DefaultRemotingParser {
                     }
                 }
             } catch (Throwable t) {
-                throw new FrameworkException(t, "parser remting service error");
+                throw new FrameworkException(t, "parser remoting service error");
             }
         }
         if (isReference(bean, beanName)) {
-            //reference bean， TCC proxy
+            //reference bean, TCC proxy
             remotingBeanDesc.setReference(true);
         }
         return remotingBeanDesc;
