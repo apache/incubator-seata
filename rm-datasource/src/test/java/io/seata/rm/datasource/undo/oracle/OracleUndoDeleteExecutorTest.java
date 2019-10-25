@@ -58,7 +58,7 @@ public class OracleUndoDeleteExecutorTest extends BaseExecutorTest {
         SQLUndoLog sqlUndoLog = new SQLUndoLog();
         sqlUndoLog.setSqlType(SQLType.DELETE);
         sqlUndoLog.setTableMeta(tableMeta);
-        sqlUndoLog.setTableName("table_name");
+        sqlUndoLog.setTableName("TABLE_NAME");
         sqlUndoLog.setBeforeImage(beforeImage);
         sqlUndoLog.setAfterImage(afterImage);
 
