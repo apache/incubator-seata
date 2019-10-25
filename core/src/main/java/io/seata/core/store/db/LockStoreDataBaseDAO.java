@@ -114,7 +114,9 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         String queryGlobalSql = LogStoreSqls.getQueryGlobalTransactionSQL("global_table", dbType);
         try {
             conn = logStoreDataSource.getConnection();
-            conn.setAutoCommit(false);
+            if (originalAutoCommit = conn.getAutoCommit()) {
+                conn.setAutoCommit(false);
+            }
             queryGlobalPS = conn.prepareStatement(queryGlobalSql);
             queryGlobalPS.setString(1, lockDOs.get(0).getXid());
             queryGlobalRS = queryGlobalPS.executeQuery();
@@ -127,10 +129,6 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
                 return false;
             }
 
-            conn = logStoreDataSource.getConnection();
-            if (originalAutoCommit = conn.getAutoCommit()) {
-                conn.setAutoCommit(false);
-            }
             //check lock
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < lockDOs.size(); i++) {
