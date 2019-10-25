@@ -95,9 +95,9 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                 }
             }
         } finally {
-            if (sp != null) {
-                conn.releaseSavepoint(sp);
-            }
+//            if (sp != null) {
+//                conn.releaseSavepoint(sp);
+//            }
             if (originalAutoCommit) {
                 conn.setAutoCommit(true);
             }

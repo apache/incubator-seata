@@ -132,6 +132,7 @@ public class TableMetaCacheOracle {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
+
                 col.setTableSchemaName(rsColumns.getString("TABLE_SCHEM"));
                 col.setTableName(rsColumns.getString("TABLE_NAME"));
                 col.setColumnName(rsColumns.getString("COLUMN_NAME"));
@@ -142,13 +143,13 @@ public class TableMetaCacheOracle {
                 col.setNumPrecRadix(rsColumns.getInt("NUM_PREC_RADIX"));
                 col.setNullAble(rsColumns.getInt("NULLABLE"));
                 col.setRemarks(rsColumns.getString("REMARKS"));
-                col.setColumnDef(rsColumns.getString("COLUMN_DEF"));
                 col.setSqlDataType(rsColumns.getInt("SQL_DATA_TYPE"));
                 col.setSqlDatetimeSub(rsColumns.getInt("SQL_DATETIME_SUB"));
                 col.setCharOctetLength(rsColumns.getInt("CHAR_OCTET_LENGTH"));
                 col.setOrdinalPosition(rsColumns.getInt("ORDINAL_POSITION"));
                 col.setIsNullAble(rsColumns.getString("IS_NULLABLE"));
-
+//                System.out.println("col======="+col.toString());
+//                col.setColumnDef(rsColumns.getString("COLUMN_DEF"));
                 tm.getAllColumns().put(col.getColumnName(), col);
             }
 

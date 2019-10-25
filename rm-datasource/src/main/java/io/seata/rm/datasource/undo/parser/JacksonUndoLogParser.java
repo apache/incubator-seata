@@ -85,6 +85,15 @@ public class JacksonUndoLogParser implements UndoLogParser {
      * customize deserializer for java.sql.Timestamp
      */
     private static final JsonDeserializer TIMESTAMP_DESERIALIZER = new TimestampDeserializer();
+    /**
+     * customize serializer for oracle.sql.Timestamp
+     */
+    private static final JsonSerializer ORACLE_TIMESTAMP_SERIALIZER = new OracleTimestampSerializer();
+
+    /**
+     * customize deserializer for oracle.sql.Timestamp
+     */
+    private static final JsonDeserializer ORACLE_TIMESTAMP_DESERIALIZER = new OracleTimestampDeserializer();
 
     /**
      * customize serializer of java.sql.Blob
@@ -109,6 +118,8 @@ public class JacksonUndoLogParser implements UndoLogParser {
     static {
         MODULE.addSerializer(Timestamp.class, TIMESTAMP_SERIALIZER);
         MODULE.addDeserializer(Timestamp.class, TIMESTAMP_DESERIALIZER);
+        MODULE.addSerializer(oracle.sql.TIMESTAMP.class, ORACLE_TIMESTAMP_SERIALIZER);
+        MODULE.addDeserializer(oracle.sql.TIMESTAMP.class, ORACLE_TIMESTAMP_DESERIALIZER);
         MODULE.addSerializer(SerialBlob.class, BLOB_SERIALIZER);
         MODULE.addDeserializer(SerialBlob.class, BLOB_DESERIALIZER);
         MODULE.addSerializer(SerialClob.class, CLOB_SERIALIZER);
@@ -180,6 +191,48 @@ public class JacksonUndoLogParser implements UndoLogParser {
 
     public static void main(String[] args) {
 
+    }
+
+    /**
+     * if necessary
+     * extend {@link ArraySerializerBase}
+     */
+    private static class OracleTimestampSerializer extends JsonSerializer<oracle.sql.TIMESTAMP> {
+
+        @Override
+        public void serializeWithType(oracle.sql.TIMESTAMP timestamp, JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSerializer) throws IOException {
+            WritableTypeId typeId = typeSerializer.writeTypePrefix(gen, typeSerializer.typeId(timestamp, JsonToken.VALUE_EMBEDDED_OBJECT));
+            serialize(timestamp, gen, serializers);
+            gen.writeTypeSuffix(typeId);
+        }
+
+        @Override
+        public void serialize(oracle.sql.TIMESTAMP timestamp, JsonGenerator gen, SerializerProvider serializers) {
+            try {
+                gen.writeBinary(timestamp.getBytes());
+            } catch (IOException e) {
+                LOGGER.error("serialize oralce.sql.Timestamp error : {}", e.getMessage(), e);
+            }
+
+        }
+    }
+
+    /**
+     * if necessary
+     * extend {@link JsonNodeDeserializer}
+     */
+    private static class OracleTimestampDeserializer extends JsonDeserializer<oracle.sql.TIMESTAMP> {
+
+        @Override
+        public oracle.sql.TIMESTAMP deserialize(JsonParser p, DeserializationContext ctxt) {
+                try {
+                    oracle.sql.TIMESTAMP timestamp = new oracle.sql.TIMESTAMP(p.getBinaryValue());
+                    return timestamp;
+                } catch (IOException e) {
+                    LOGGER.error("deserialize oracle.sql.Timestamp error : {}", e.getMessage(), e);
+                }
+            return null;
+        }
     }
 
     /**

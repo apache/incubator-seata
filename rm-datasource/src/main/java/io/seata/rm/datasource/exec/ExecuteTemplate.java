@@ -23,6 +23,7 @@ import java.util.Arrays;
 import co.faao.plugin.starter.dubbo.util.ThreadLocalTools;
 import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
 import co.faao.plugin.starter.seata.util.SeataXidWorker;
+import io.seata.config.ConfigurationFactory;
 import io.seata.rm.datasource.exec.noseata.NoSeata;
 import io.seata.rm.datasource.exec.noseata.DeleteExecutorNoSeata;
 import io.seata.rm.datasource.exec.noseata.InsertExecutorNoSeata;
@@ -84,6 +85,7 @@ public class ExecuteTemplate {
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
 
+       //如果配置是seata.enabled=false则关闭分布式事务
         if (!Seata.EWELL_SEATA_STATE_IS_ON||(!RootContext.inGlobalTransaction() && !RootContext.requireGlobalLock())) {
             if (sqlRecognizer == null) {
                 try {

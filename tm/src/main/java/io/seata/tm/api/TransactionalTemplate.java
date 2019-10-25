@@ -18,6 +18,7 @@ package io.seata.tm.api;
 
 import co.faao.plugin.transmission.response.MessageCoreResult;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.core.constants.Seata;
 import io.seata.core.exception.TransactionException;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
@@ -47,6 +48,9 @@ public class TransactionalTemplate {
      * @throws TransactionalExecutor.ExecutionException the execution exception
      */
     public Object execute(TransactionalExecutor business) throws Throwable {
+        if(!Seata.EWELL_SEATA_STATE_IS_ON) {//分布式事务关闭
+            return business.execute();
+        }
         // 1. get or create a transaction
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
 

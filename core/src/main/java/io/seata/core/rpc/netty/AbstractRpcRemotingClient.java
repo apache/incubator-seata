@@ -34,6 +34,7 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
+import io.seata.core.constants.Seata;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeResultMessage;
@@ -110,7 +111,9 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                clientChannelManager.reconnect(getTransactionServiceGroup());
+                if(Seata.EWELL_SEATA_STATE_IS_ON) {
+                    clientChannelManager.reconnect(getTransactionServiceGroup());
+                }
             }
         }, SCHEDULE_INTERVAL_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.SECONDS);
         mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,

@@ -18,7 +18,7 @@ package io.seata.core.constants;
 public class Seata {
 
     /**
-     * seata是否启用
+     * ewellSeata注解是否启用
      */
     public static  boolean EWELL_SEATA_STATE_IS_ON = false;
 
