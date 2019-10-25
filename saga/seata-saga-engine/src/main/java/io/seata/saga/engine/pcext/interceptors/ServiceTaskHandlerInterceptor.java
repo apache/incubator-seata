@@ -119,7 +119,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                 stateInstance.setStateIdCompensatedFor(stateToBeCompensated.getId());
             }
             else{
-                LOGGER.error("Compensation State["+state.getName()+"] has no state to compensate, maybe this is a bug.");
+                LOGGER.error("Compensation State[{}] has no state to compensate, maybe this is a bug.",state.getName());
             }
             CompensationHolder.getCurrent(context, true).addForCompensationState(stateInstance.getName(), stateInstance);
         }
