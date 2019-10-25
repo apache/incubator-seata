@@ -37,8 +37,6 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.LockDO;
 import io.seata.core.store.LockStore;
 import org.slf4j.Logger;
@@ -109,26 +107,11 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         List<LockDO> unrepeatedLockDOs = null;
         Set<String> dbExistedRowKeys = new HashSet<>();
         boolean originalAutoCommit = true;
-        PreparedStatement queryGlobalPS = null;
-        ResultSet queryGlobalRS = null;
-        String queryGlobalSql = LogStoreSqls.getQueryGlobalTransactionSQL("global_table", dbType);
         try {
             conn = logStoreDataSource.getConnection();
             if (originalAutoCommit = conn.getAutoCommit()) {
                 conn.setAutoCommit(false);
             }
-            queryGlobalPS = conn.prepareStatement(queryGlobalSql);
-            queryGlobalPS.setString(1, lockDOs.get(0).getXid());
-            queryGlobalRS = queryGlobalPS.executeQuery();
-            if (queryGlobalRS.next()) {
-                GlobalStatus globalStatus = GlobalStatus.get(queryGlobalRS.getInt(ServerTableColumnsName.GLOBAL_TABLE_STATUS));
-                if (globalStatus != GlobalStatus.Begin) {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-
             //check lock
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < lockDOs.size(); i++) {
@@ -202,18 +185,6 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             if (ps != null) {
                 try {
                     ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (queryGlobalRS != null) {
-                try {
-                    queryGlobalRS.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (queryGlobalPS != null) {
-                try {
-                    queryGlobalPS.close();
                 } catch (SQLException e) {
                 }
             }
