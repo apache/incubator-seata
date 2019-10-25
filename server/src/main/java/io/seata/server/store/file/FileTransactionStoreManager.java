@@ -162,7 +162,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             currRaf.seek(currDataFile.length());
             currFileChannel = currRaf.getChannel();
         } catch (IOException exx) {
-            LOGGER.error("init file error," + exx.getMessage());
+            LOGGER.error("init file error,{}",exx.getMessage(),exx);
             throw exx;
         }
     }
@@ -327,7 +327,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         try {
             currFileChannel.force(true);
         } catch (IOException e) {
-            LOGGER.error("filechannel force error", e);
+            LOGGER.error("fileChannel force error{}",e.getMessage(),e);
         }
         closeFile(currRaf);
     }
@@ -405,13 +405,13 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                         break;
                     }
                 } catch (Exception ex) {
-                    LOGGER.error("decode data file error:" + ex.getMessage());
+                    LOGGER.error("decode data file error:{}",ex.getMessage(),ex);
                     break;
                 }
             }
             return transactionWriteStores;
         } catch (IOException exx) {
-            LOGGER.error("parse data file error:" + exx.getMessage() + ",file:" + file.getName());
+            LOGGER.error("parse data file error:{},file:{}",exx.getMessage(),file.getName(),exx);
             return null;
         } finally {
             try {
@@ -424,7 +424,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                 }
                 closeFile(raf);
             } catch (IOException exx) {
-                LOGGER.error("file close error," + exx.getMessage());
+                LOGGER.error("file close error{}",exx.getMessage(),exx);
             }
         }
 
@@ -442,7 +442,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                 raf = null;
             }
         } catch (IOException exx) {
-            LOGGER.error("file close error," + exx.getMessage());
+            LOGGER.error("file close error,{}",exx.getMessage(),exx);
         }
     }
 
@@ -464,10 +464,10 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                 }
                 return true;
             } catch (IOException exx) {
-                LOGGER.error("write data file error:" + exx.getMessage());
+                LOGGER.error("write data file error:{}",exx.getMessage(),exx);
             }
         }
-        LOGGER.error("write dataFile failed,retry more than :" + MAX_WRITE_RETRY);
+        LOGGER.error("write dataFile failed,retry more than :{}",MAX_WRITE_RETRY);
         return false;
     }
 
@@ -632,7 +632,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             try {
                 fileChannel.force(false);
             } catch (IOException exx) {
-                LOGGER.error("flush error:" + exx.getMessage());
+                LOGGER.error("flush error: {}",exx.getMessage(),exx);
             }
         }
     }

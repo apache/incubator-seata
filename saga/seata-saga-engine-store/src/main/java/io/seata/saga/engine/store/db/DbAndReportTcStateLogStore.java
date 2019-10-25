@@ -319,13 +319,15 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
                 sagaTransactionalTemplate.branchReport(globalTransaction.getXid(), Long.parseLong(stateInstance.getId()), branchStatus, null);
             } catch (TransactionException e) {
-                LOGGER.error("Report branch status to server error: " + e.getCode() +
-                        ", StateMachine:" + stateInstance.getStateMachineInstance().getStateMachine().getName() +
-                        ", StateName:" + stateInstance.getName() +
-                        ", XID: "+stateInstance.getStateMachineInstance().getId() +
-                        ", branchId: " + stateInstance.getId() +
-                        ", branchStatus:" + branchStatus +
-                        ", Reason: " + e.getMessage(), e);
+                LOGGER.error("Report branch status to server error: {}, StateMachine:{}, StateName:{}, XID: {}, branchId: {}, branchStatus:{}, Reason:{} "
+                        ,e.getCode()
+                        ,stateInstance.getStateMachineInstance().getStateMachine().getName()
+                        ,stateInstance.getName()
+                        ,stateInstance.getStateMachineInstance().getId()
+                        ,stateInstance.getId()
+                        ,branchStatus
+                        ,e.getMessage()
+                        ,e);
             }
         }
     }

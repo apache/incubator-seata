@@ -93,7 +93,7 @@ public class SubStateMachineHandler implements StateHandler, InterceptibleStateH
 
         } catch (Exception e) {
 
-            LOGGER.error("SubStateMachine["+subStateMachine.getStateMachineName()+"] execute failed by state[name:"+subStateMachine.getName()+"]", e);
+            LOGGER.error("SubStateMachine[{}] execute failed by state[name:{}]",subStateMachine.getStateMachineName(),subStateMachine.getName(),e);
 
             if(e instanceof ForwardInvalidException) {
 

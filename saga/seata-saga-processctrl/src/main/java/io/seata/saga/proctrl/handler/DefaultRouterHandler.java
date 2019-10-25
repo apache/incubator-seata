@@ -40,26 +40,27 @@ public class DefaultRouterHandler implements RouterHandler {
     private Map<String, ProcessRouter>     processRouters;
 
 
+    @Override
     public void route(ProcessContext context) throws FrameworkException {
 
         try {
             ProcessType processType = matchProcessType(context);
             if (processType == null) {
                 if(LOGGER.isWarnEnabled()){
-                    LOGGER.warn("Process type not found, context=" + context);
+                    LOGGER.warn("Process type not found, context= {}", context);
                 }
                 throw new FrameworkException(FrameworkErrorCode.ProcessTypeNotFound);
             }
 
             ProcessRouter processRouter = processRouters.get(processType.getCode());
             if (processRouter == null) {
-                LOGGER.error("Cannot find process router by type "+ processType.getCode() +", context=" + context);
+                LOGGER.error("Cannot find process router by type {}, context = {}",processType.getCode(),context);
                 throw new FrameworkException(FrameworkErrorCode.ProcessRouterNotFound);
             }
 
             Instruction instruction = processRouter.route(context);
             if (instruction == null) {
-                LOGGER.warn("route instruction is null, process end:" + context);
+                LOGGER.warn("route instruction is null, process end: {}",context);
             } else {
                 context.setInstruction(instruction);
 

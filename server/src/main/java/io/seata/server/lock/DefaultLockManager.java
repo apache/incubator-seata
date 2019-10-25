@@ -73,7 +73,7 @@ public class DefaultLockManager extends AbstractLockManager {
         try {
             return getLocker(branchSession).releaseLock(locks);
         } catch (Exception t) {
-            LOGGER.error("unLock error, branchSession:" + branchSession, t);
+            LOGGER.error("unLock error, branchSession:{}",branchSession, t);
             return false;
         }
     }
@@ -110,7 +110,7 @@ public class DefaultLockManager extends AbstractLockManager {
         try {
             return getLocker().isLockable(locks);
         } catch (Exception t) {
-            LOGGER.error("isLockable error, xid:" + xid + ", resourceId:" + resourceId + ", lockKey:" + lockKey, t);
+            LOGGER.error("isLockable error, xid:{} resourceId:{}, lockKey:{}", xid,resourceId,lockKey,t);
             return false;
         }
     }
