@@ -365,21 +365,21 @@ public class DefaultCore implements Core {
 
                 switch (branchStatus) {
                     case PhaseTwo_Rollbacked:
-                        LOGGER.info("Successfully rollbacked SAGA global[" + globalSession.getXid() + "]");
+                        LOGGER.info("Successfully rollbacked SAGA global[{}]",globalSession.getXid());
                         break;
                     case PhaseTwo_RollbackFailed_Unretryable:
                         SessionHelper.endRollbackFailed(globalSession);
-                        LOGGER.error("Failed to rollback SAGA global[" + globalSession.getXid() + "]");
+                        LOGGER.error("Failed to rollback SAGA global[{}]",globalSession.getXid());
                         return;
                     default:
-                        LOGGER.error("Failed to rollback SAGA global[" + globalSession.getXid() + "]");
+                        LOGGER.error("Failed to rollback SAGA global[{}]",globalSession.getXid());
                         if (!retrying) {
                             queueToRetryRollback(globalSession);
                         }
                         return;
                 }
             } catch (Exception ex) {
-                LOGGER.error("Failed to rollback global[" + globalSession.getXid() + "]", ex);
+                LOGGER.error("Failed to rollback global[{}]",globalSession.getXid(), ex);
                 if (!retrying) {
                     queueToRetryRollback(globalSession);
                 }
