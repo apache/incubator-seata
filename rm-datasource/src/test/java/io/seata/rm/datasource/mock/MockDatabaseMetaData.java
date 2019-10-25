@@ -838,7 +838,7 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public boolean supportsSavepoints() throws SQLException {
-        return false;
+        return true;
     }
 
     @Override
