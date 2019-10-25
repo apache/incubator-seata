@@ -13,39 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.tm.api.transaction;
+package io.seata.compressor.gzip;
 
+import io.seata.common.loader.LoadLevel;
+import io.seata.core.compressor.Compressor;
 
 /**
- * @author guoyao
- * @date 2019/4/17
+ * @author jsbxyyx
  */
-public class NoRollbackRule extends RollbackRule {
+@LoadLevel(name = "GZIP")
+public class GzipCompressor implements Compressor {
 
-    public static final NoRollbackRule DEFAULT_NO_ROLLBACK_RULE = new NoRollbackRule(Throwable.class);
-
-
-    public NoRollbackRule(Class<?> clazz) {
-        super(clazz);
-    }
-
-
-    public NoRollbackRule(String exceptionName) {
-        super(exceptionName);
+    @Override
+    public byte[] compress(byte[] bytes) {
+        return GzipUtil.compress(bytes);
     }
 
     @Override
-    public boolean equals(Object other) {
-        return super.equals(other);
+    public byte[] decompress(byte[] bytes) {
+        return GzipUtil.decompress(bytes);
     }
 
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public String toString() {
-        return "No" + super.toString();
-    }
 }
