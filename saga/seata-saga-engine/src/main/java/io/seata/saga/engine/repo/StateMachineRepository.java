@@ -22,6 +22,7 @@ import java.io.IOException;
 
 /**
  * StateMachineRepository
+ *
  * @author lorne.cl
  */
 public interface StateMachineRepository {
@@ -55,12 +56,14 @@ public interface StateMachineRepository {
 
     /**
      * Register the state machine to the repository (if the same version already exists, return the existing version)
+     *
      * @param stateMachine
      */
     StateMachine registryStateMachine(StateMachine stateMachine);
 
     /**
      * registry by resources
+     *
      * @param resources
      * @param tenantId
      */

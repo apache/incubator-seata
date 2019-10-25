@@ -49,7 +49,6 @@ public class CompensationHolder {
 
     /**
      * states used to compensation
-     *
      * key: stateName
      */
     private Map<String, StateInstance> statesForCompensation = new ConcurrentHashMap<>();
@@ -60,14 +59,14 @@ public class CompensationHolder {
     private Stack<StateInstance> stateStackNeedCompensation = new Stack<>();
 
 
-    public static CompensationHolder getCurrent(ProcessContext context, boolean forceCreate){
+    public static CompensationHolder getCurrent(ProcessContext context, boolean forceCreate) {
 
-        CompensationHolder compensationholder = (CompensationHolder)context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
-        if(compensationholder == null && forceCreate){
+        CompensationHolder compensationholder = (CompensationHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
+        if (compensationholder == null && forceCreate) {
             synchronized (context) {
 
-                compensationholder = (CompensationHolder)context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
-                if(compensationholder == null){
+                compensationholder = (CompensationHolder) context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
+                if (compensationholder == null) {
                     compensationholder = new CompensationHolder();
                     context.setVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER, compensationholder);
                 }
@@ -78,25 +77,25 @@ public class CompensationHolder {
 
     public static List<StateInstance> findStateInstListToBeCompensated(ProcessContext context, List<StateInstance> stateInstanceList) {
         List<StateInstance> stateListToBeCompensated = null;
-        if(stateInstanceList!=null && stateInstanceList.size()>0){
+        if (stateInstanceList != null && stateInstanceList.size() > 0) {
             stateListToBeCompensated = new ArrayList<>(stateInstanceList.size());
 
             StateMachine stateMachine = (StateMachine) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE);
             StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
 
-            for(StateInstance stateInstance : stateInstanceList){
+            for (StateInstance stateInstance : stateInstanceList) {
                 if (stateNeedToCompensate(stateInstance)) {
                     State state = stateMachine.getState(stateInstance.getName());
                     AbstractTaskState taskState = null;
-                    if(state instanceof AbstractTaskState){
-                        taskState = (AbstractTaskState)state;
+                    if (state instanceof AbstractTaskState) {
+                        taskState = (AbstractTaskState) state;
                     }
 
                     //The data update service is not configured with the compensation state,
                     // The state machine needs to exit directly without compensation.
-                    if(stateInstance.isForUpdate() && taskState != null && StringUtils.isBlank(taskState.getCompensateState())) {
+                    if (stateInstance.isForUpdate() && taskState != null && StringUtils.isBlank(taskState.getCompensateState())) {
 
-                        String message = "StateMachineInstance[" + stateMachineInstance.getId() + ":"  + stateMachine.getName() + "] have a state [" + stateInstance.getName() + "] is a service for update data，but no compensateState found.";
+                        String message = "StateMachineInstance[" + stateMachineInstance.getId() + ":" + stateMachine.getName() + "] have a state [" + stateInstance.getName() + "] is a service for update data，but no compensateState found.";
                         EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(FrameworkErrorCode.CompensationStateNotFound, message, stateMachineInstance, stateInstance);
 
                         EngineUtils.failStateMachine(context, exception);
@@ -104,7 +103,7 @@ public class CompensationHolder {
                         throw exception;
                     }
 
-                    if(taskState!=null && StringUtils.isNotBlank(taskState.getCompensateState())){
+                    if (taskState != null && StringUtils.isNotBlank(taskState.getCompensateState())) {
                         stateListToBeCompensated.add(stateInstance);
                     }
                 }
@@ -115,24 +114,23 @@ public class CompensationHolder {
 
     private static boolean stateNeedToCompensate(StateInstance stateInstance) {
         //If it has been retried, it will not be compensated
-        if(stateInstance.isIgnoreStatus()){
+        if (stateInstance.isIgnoreStatus()) {
             return false;
         }
-        if(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(stateInstance.getType())){
+        if (DomainConstants.STATE_TYPE_SUB_STATE_MACHINE.equals(stateInstance.getType())) {
 
             return (!ExecutionStatus.FA.equals(stateInstance.getStatus()))
-                    && (!ExecutionStatus.SU.equals(stateInstance.getCompensationStatus()));
-        }
-        else{
+                && (!ExecutionStatus.SU.equals(stateInstance.getCompensationStatus()));
+        } else {
 
             return DomainConstants.STATE_TYPE_SERVICE_TASK.equals(stateInstance.getType())
-                    && !stateInstance.isForCompensation()
-                    && (!ExecutionStatus.FA.equals(stateInstance.getStatus()))
-                    && (!ExecutionStatus.SU.equals(stateInstance.getCompensationStatus()));
+                && !stateInstance.isForCompensation()
+                && (!ExecutionStatus.FA.equals(stateInstance.getStatus()))
+                && (!ExecutionStatus.SU.equals(stateInstance.getCompensationStatus()));
         }
     }
 
-    public static void clearCurrent(ProcessContext context){
+    public static void clearCurrent(ProcessContext context) {
         context.removeVariable(DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
     }
 

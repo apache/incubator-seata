@@ -23,13 +23,14 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+
 import java.util.Date;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author lorne.cl
  */
 public class EngineUtils {
@@ -42,12 +43,13 @@ public class EngineUtils {
      * @param stateInstance
      * @return
      */
-    public static String generateParentId(StateInstance stateInstance){
+    public static String generateParentId(StateInstance stateInstance) {
         return stateInstance.getMachineInstanceId() + ":" + stateInstance.getId();
     }
 
     /**
      * end StateMachine
+     *
      * @param context
      */
     public static void endStateMachine(ProcessContext context) {
@@ -80,11 +82,10 @@ public class EngineUtils {
         }
 
         AsyncCallback callback = (AsyncCallback) context.getVariable(DomainConstants.VAR_NAME_ASYNC_CALLBACK);
-        if(callback != null){
-            if(exp != null){
+        if (callback != null) {
+            if (exp != null) {
                 callback.onError(context, stateMachineInstance, exp);
-            }
-            else{
+            } else {
                 callback.onFinished(context, stateMachineInstance);
             }
         }
@@ -92,6 +93,7 @@ public class EngineUtils {
 
     /**
      * fail StateMachine
+     *
      * @param context
      * @param exp
      */
@@ -99,7 +101,7 @@ public class EngineUtils {
 
         StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
 
-        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+        StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
         stateMachineConfig.getStatusDecisionStrategy().decideOnTaskStateFail(context, stateMachineInstance, exp);
 
@@ -108,12 +110,12 @@ public class EngineUtils {
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         instruction.setEnd(true);
 
-        if(stateMachineInstance.getStateMachine().isPersist() && stateMachineConfig.getStateLogStore() != null){
+        if (stateMachineInstance.getStateMachine().isPersist() && stateMachineConfig.getStateLogStore() != null) {
             stateMachineConfig.getStateLogStore().recordStateMachineFinished(stateMachineInstance, context);
         }
 
         AsyncCallback callback = (AsyncCallback) context.getVariable(DomainConstants.VAR_NAME_ASYNC_CALLBACK);
-        if(callback != null){
+        if (callback != null) {
             callback.onError(context, stateMachineInstance, exp);
         }
     }

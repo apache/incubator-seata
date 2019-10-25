@@ -43,6 +43,7 @@ import io.seata.saga.engine.repo.StateMachineRepository;
 import io.seata.saga.engine.repo.impl.StateMachineRepositoryImpl;
 import io.seata.saga.engine.sequence.SeqGenerator;
 import io.seata.saga.engine.sequence.SpringJvmUUIDSeqGenerator;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,29 +59,30 @@ import org.springframework.core.io.Resource;
 
 /**
  * Default state machine configuration
+ *
  * @author lorne.cl
  */
 public class DefaultStateMachineConfig implements StateMachineConfig, ApplicationContextAware, InitializingBean {
 
-    private static final Logger       LOGGER = LoggerFactory.getLogger(DefaultStateMachineConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStateMachineConfig.class);
 
-    private StateLogStore             stateLogStore;
-    private StateLangStore            stateLangStore;
-    private ExpressionFactoryManager  expressionFactoryManager;
-    private EvaluatorFactoryManager   evaluatorFactoryManager;
-    private StateMachineRepository    stateMachineRepository;
-    private StatusDecisionStrategy    statusDecisionStrategy;
-    private SeqGenerator              seqGenerator;
+    private StateLogStore stateLogStore;
+    private StateLangStore stateLangStore;
+    private ExpressionFactoryManager expressionFactoryManager;
+    private EvaluatorFactoryManager evaluatorFactoryManager;
+    private StateMachineRepository stateMachineRepository;
+    private StatusDecisionStrategy statusDecisionStrategy;
+    private SeqGenerator seqGenerator;
     private ProcessCtrlEventPublisher syncProcessCtrlEventPublisher;
     private ProcessCtrlEventPublisher asyncProcessCtrlEventPublisher;
-    private ApplicationContext        applicationContext;
-    private ThreadPoolExecutor        threadPoolExecutor;
-    private boolean                   enableAsync;
-    private ServiceInvokerManager     serviceInvokerManager;
+    private ApplicationContext applicationContext;
+    private ThreadPoolExecutor threadPoolExecutor;
+    private boolean enableAsync;
+    private ServiceInvokerManager serviceInvokerManager;
 
-    private Resource[]                resources = new Resource[0];
-    private String                    charset = "UTF-8";
-    private String                    defaultTenantId = "000001";
+    private Resource[] resources = new Resource[0];
+    private String charset = "UTF-8";
+    private String defaultTenantId = "000001";
 
     protected void init() throws Exception {
 
@@ -165,7 +167,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             asyncProcessCtrlEventPublisher = asyncEventPublisher;
         }
 
-        if(this.serviceInvokerManager == null){
+        if (this.serviceInvokerManager == null) {
             this.serviceInvokerManager = new ServiceInvokerManager();
         }
     }

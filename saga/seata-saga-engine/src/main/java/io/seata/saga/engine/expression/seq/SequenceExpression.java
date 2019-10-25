@@ -20,13 +20,14 @@ import io.seata.saga.engine.sequence.SeqGenerator;
 
 /**
  * Generate sequence expression
+ *
  * @author lorne.cl
  */
 public class SequenceExpression implements Expression {
 
     private SeqGenerator seqGenerator;
-    private String       entity;
-    private String       rule;
+    private String entity;
+    private String rule;
 
     @Override
     public Object getValue(Object elContext) {

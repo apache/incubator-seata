@@ -27,6 +27,7 @@ import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+
 import java.util.List;
 import java.util.Stack;
 
@@ -48,13 +49,12 @@ public class CompensationTriggerStateHandler implements StateHandler {
         List<StateInstance> stateInstanceList = null;
         if (stateMachineInstance != null) {
             stateInstanceList = stateMachineInstance.getStateList();
-        }
-        else if (stateMachineConfig.getStateLogStore() != null) {
+        } else if (stateMachineConfig.getStateLogStore() != null) {
             stateInstanceList = stateMachineConfig.getStateLogStore().queryStateInstanceListByMachineInstanceId(stateMachineInstance.getId());
         }
 
         List<StateInstance> stateListToBeCompensated = CompensationHolder.findStateInstListToBeCompensated(context, stateInstanceList);
-        if(stateListToBeCompensated != null && stateListToBeCompensated.size() > 0){
+        if (stateListToBeCompensated != null && stateListToBeCompensated.size() > 0) {
 
             //Clear exceptions that occur during forward execution
             context.removeVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
@@ -68,14 +68,13 @@ public class CompensationTriggerStateHandler implements StateHandler {
             // and the forward state needs to be changed to the UN state.
             //If the forward status is not the two states, then the compensation operation should be initiated by server recovery,
             // and the forward state should not be modified.
-            if(stateMachineInstance.getStatus() == null || ExecutionStatus.RU.equals(stateMachineInstance.getStatus())) {
+            if (stateMachineInstance.getStatus() == null || ExecutionStatus.RU.equals(stateMachineInstance.getStatus())) {
                 stateMachineInstance.setStatus(ExecutionStatus.UN);
             }
             //Record the status of the state machine as "compensating", and the subsequent routing logic will route to the compensation state
             stateMachineInstance.setCompensationStatus(ExecutionStatus.RU);
             context.setVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE, instruction.getState(context));
-        }
-        else{
+        } else {
             EngineUtils.endStateMachine(context);
         }
     }

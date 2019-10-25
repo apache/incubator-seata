@@ -28,14 +28,14 @@ import org.springframework.util.StringUtils;
 /**
  * State Instruction
  *
- * @see Instruction
  * @author lorne.cl
+ * @see Instruction
  */
 public class StateInstruction implements Instruction {
 
-    private String  stateName;
-    private String  stateMachineName;
-    private String  tenantId;
+    private String stateName;
+    private String stateMachineName;
+    private String tenantId;
     private boolean end;
 
     /**
@@ -51,9 +51,9 @@ public class StateInstruction implements Instruction {
         this.tenantId = tenantId;
     }
 
-    public State getState(ProcessContext context){
+    public State getState(ProcessContext context) {
 
-        if(getTemporaryState() != null){
+        if (getTemporaryState() != null) {
 
             return temporaryState;
         }
@@ -71,7 +71,6 @@ public class StateInstruction implements Instruction {
         if (stateMachine == null) {
             throw new EngineExecutionException("StateMachine[" + stateMachineName + "] is not exist", FrameworkErrorCode.ObjectNotExists);
         }
-
 
 
         if (StringUtils.isEmpty(stateName)) {

@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
  * Service Invoker Manager
  *
  * @author lorne.cl
@@ -32,18 +31,18 @@ public class ServiceInvokerManager {
 
     private Map<String, ServiceInvoker> serviceInvokerMap = new ConcurrentHashMap<>();
 
-    public ServiceInvokerManager(){
+    public ServiceInvokerManager() {
         serviceInvokerMap.put(DomainConstants.SERVICE_TYPE_SPRING_BEAN, new SpringBeanServiceInvoker());
     }
 
-    public ServiceInvoker getServiceInvoker(String serviceType){
-        if(StringUtils.isEmpty(serviceType)){
+    public ServiceInvoker getServiceInvoker(String serviceType) {
+        if (StringUtils.isEmpty(serviceType)) {
             serviceType = DomainConstants.SERVICE_TYPE_SPRING_BEAN;
         }
         return serviceInvokerMap.get(serviceType);
     }
 
-    public void putServiceInvoker(String serviceType, ServiceInvoker serviceInvoker){
+    public void putServiceInvoker(String serviceType, ServiceInvoker serviceInvoker) {
         serviceInvokerMap.put(serviceType, serviceInvoker);
     }
 

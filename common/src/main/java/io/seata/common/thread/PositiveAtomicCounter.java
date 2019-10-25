@@ -18,12 +18,12 @@ package io.seata.common.thread;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * 计数器，从0开始，保证正数。
+ * positive atomic counter, begin with 0, ensure the number is positive.
  *
  * @author Geng Zhang
  */
 public class PositiveAtomicCounter {
-    private static final int    MASK = 0x7FFFFFFF;
+    private static final int MASK = 0x7FFFFFFF;
     private final AtomicInteger atom;
 
     public PositiveAtomicCounter() {

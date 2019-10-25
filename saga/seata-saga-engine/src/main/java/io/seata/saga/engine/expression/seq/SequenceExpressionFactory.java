@@ -34,9 +34,9 @@ public class SequenceExpressionFactory implements ExpressionFactory {
 
         SequenceExpression sequenceExpression = new SequenceExpression();
         sequenceExpression.setSeqGenerator(this.seqGenerator);
-        if(StringUtils.hasLength(expressionString)){
+        if (StringUtils.hasLength(expressionString)) {
             String[] strings = expressionString.split("\\|");
-            if(strings.length >= 2){
+            if (strings.length >= 2) {
                 sequenceExpression.setEntity(strings[0]);
                 sequenceExpression.setRule(strings[1]);
             }

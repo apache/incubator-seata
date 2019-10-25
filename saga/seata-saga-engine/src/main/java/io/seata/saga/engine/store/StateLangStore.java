@@ -26,6 +26,7 @@ public interface StateLangStore {
 
     /**
      * Query the state machine definition by id
+     *
      * @param stateMachineId
      * @return
      */
@@ -33,6 +34,7 @@ public interface StateLangStore {
 
     /**
      * Get the latest version of the state machine by state machine name
+     *
      * @param stateMachineName
      * @param tenantId
      * @return
@@ -41,6 +43,7 @@ public interface StateLangStore {
 
     /**
      * Storage state machine definition
+     *
      * @param stateMachine
      * @return
      */

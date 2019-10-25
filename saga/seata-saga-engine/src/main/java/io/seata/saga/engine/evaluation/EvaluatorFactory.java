@@ -18,9 +18,8 @@ package io.seata.saga.engine.evaluation;
 /**
  * Evaluator Factory
  *
- * @see Evaluator
- *
  * @author lorne.cl
+ * @see Evaluator
  */
 public interface EvaluatorFactory {
 

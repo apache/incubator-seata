@@ -100,7 +100,7 @@ public enum FrameworkErrorCode {
      */
     RegisterRM("0304", "Register RM failed", "Register RM failed"),
 
-    /** 0400~0499 Saga相关错误 **/
+    /** 0400~0499 Saga related error **/
 
     /**
      * Process type not found
