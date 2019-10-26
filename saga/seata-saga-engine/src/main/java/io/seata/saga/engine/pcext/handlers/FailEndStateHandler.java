@@ -27,6 +27,7 @@ import java.util.Map;
 
 /**
  * FailEndState Handler
+ *
  * @author lorne.cl
  */
 public class FailEndStateHandler implements StateHandler {
