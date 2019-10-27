@@ -34,8 +34,6 @@ import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.constants.ServerTableColumnsName;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
@@ -202,7 +200,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public List<GlobalTransactionDO> queryGlobalTransactionDO(int[] statuses, int limit) {
-        List<GlobalTransactionDO> ret = new ArrayList<GlobalTransactionDO>();
+        List<GlobalTransactionDO> ret = new ArrayList<>();
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -270,7 +268,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps.setString(5, globalTransactionDO.getTransactionServiceGroup());
             String transactionName = globalTransactionDO.getTransactionName();
             transactionName = transactionName.length() > transactionNameColumnSize ?
-                    transactionName.substring(0, transactionNameColumnSize) : transactionName;
+                transactionName.substring(0, transactionNameColumnSize) : transactionName;
             ps.setString(6, transactionName);
             ps.setInt(7, globalTransactionDO.getTimeout());
             ps.setLong(8, globalTransactionDO.getBeginTime());
@@ -391,26 +389,12 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public boolean insertBranchTransactionDO(BranchTransactionDO branchTransactionDO) {
-        Connection conn = null;
-        PreparedStatement queryGlobalPS = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        String queryGlobalSql = LogStoreSqls.getQueryGlobalTransactionSQL(globalTable, dbType);
         String sql = LogStoreSqls.getInsertBranchTransactionSQL(brachTable, dbType);
+        Connection conn = null;
+        PreparedStatement ps = null;
         try {
             conn = logStoreDataSource.getConnection();
-            conn.setAutoCommit(false);
-            queryGlobalPS = conn.prepareStatement(queryGlobalSql);
-            queryGlobalPS.setString(1, branchTransactionDO.getXid());
-            rs = queryGlobalPS.executeQuery();
-            if (rs.next()) {
-                GlobalStatus globalStatus = GlobalStatus.get(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_STATUS));
-                if (globalStatus != GlobalStatus.Begin && !BranchType.SAGA.equals(branchTransactionDO.getBranchType())) {
-                    return false;
-                }
-            } else {
-                return false;
-            }
+            conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setString(1, branchTransactionDO.getXid());
             ps.setLong(2, branchTransactionDO.getTransactionId());
@@ -422,24 +406,10 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps.setInt(8, branchTransactionDO.getStatus());
             ps.setString(9, branchTransactionDO.getClientId());
             ps.setString(10, branchTransactionDO.getApplicationData());
-            boolean bool = ps.executeUpdate() > 0;
-            conn.setAutoCommit(true);
-            return bool;
+            return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (queryGlobalPS != null) {
-                try {
-                    queryGlobalPS.close();
-                } catch (SQLException e) {
-                }
-            }
             if (ps != null) {
                 try {
                     ps.close();
