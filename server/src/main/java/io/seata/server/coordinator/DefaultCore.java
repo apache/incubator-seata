@@ -427,10 +427,7 @@ public class DefaultCore implements Core {
 
             //fix global status inconsistent on db mode
             GlobalSession globalSessionTwice = SessionHolder.findGlobalSession(globalSession.getXid());
-            if (globalSessionTwice == null){
-                return;
-            }
-            if (globalSessionTwice.hasBranch()) {
+            if (globalSessionTwice != null && globalSessionTwice.hasBranch()) {
                 LOGGER.info("Global[{}] rollbacking is NOT done.", globalSession.getXid());
                 return;
             }
