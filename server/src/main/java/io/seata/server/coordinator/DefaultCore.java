@@ -423,7 +423,16 @@ public class DefaultCore implements Core {
                     }
                     throw new TransactionException(ex);
                 }
+            }
 
+            //fix global status inconsistent on db mode
+            GlobalSession globalSessionTwice = SessionHolder.findGlobalSession(globalSession.getXid());
+            if (globalSessionTwice == null){
+                return;
+            }
+            if (globalSessionTwice.hasBranch()) {
+                LOGGER.info("Global[{}] rollbacking is NOT done.", globalSession.getXid());
+                return;
             }
         }
 
