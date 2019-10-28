@@ -41,7 +41,7 @@ public class TransactionPropagationFilter implements Filter {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         String xid = RootContext.getXID();
-        String rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID);
+        String rpcXid = getRpcXid();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RootContext[" + xid + "] xid in RpcContext[" + rpcXid + "]");
         }
@@ -76,4 +76,20 @@ public class TransactionPropagationFilter implements Filter {
             }
         }
     }
+
+    /**
+     * get rpc xid
+     * @return
+     */
+    private String getRpcXid() {
+        String rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID);
+        if (rpcXid == null) {
+            rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID_OLD);
+            if (rpcXid == null) {
+                rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID_OLD.toLowerCase());
+            }
+        }
+        return rpcXid;
+    }
+
 }
