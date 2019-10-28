@@ -43,14 +43,14 @@ public class TransactionPropagationFilter implements Filter {
         String xidInterceptorType = RootContext.getXIDInterceptorType();
 
         String rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID);
-        String rpcXidInterceptorType = RpcContext.getContext().getAttachment(RootContext.KEY_XID_INTTERCEPTOR_TYPE);
+        String rpcXidInterceptorType = RpcContext.getContext().getAttachment(RootContext.KEY_XID_INTERCEPTOR_TYPE);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RootContext[{}] xid in RpcContext[{}]", xid, rpcXid);
         }
         boolean bind = false;
         if (xid != null) {
             RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid);
-            RpcContext.getContext().setAttachment(RootContext.KEY_XID_INTTERCEPTOR_TYPE, xidInterceptorType);
+            RpcContext.getContext().setAttachment(RootContext.KEY_XID_INTERCEPTOR_TYPE, xidInterceptorType);
         } else {
             if (rpcXid != null) {
                 RootContext.bind(rpcXid);
