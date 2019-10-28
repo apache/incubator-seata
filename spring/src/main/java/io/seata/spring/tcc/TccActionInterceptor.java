@@ -112,13 +112,13 @@ public class TccActionInterceptor implements MethodInterceptor {
             }
             if (interfaceType == null && remotingDesc.getInterfaceClassName() != null) {
                 interfaceType = Class.forName(remotingDesc.getInterfaceClassName(), true,
-                        Thread.currentThread().getContextClassLoader());
+                    Thread.currentThread().getContextClassLoader());
             }
             if (interfaceType == null) {
                 return invocation.getMethod();
             }
             Method method = interfaceType.getMethod(invocation.getMethod().getName(),
-                    invocation.getMethod().getParameterTypes());
+                invocation.getMethod().getParameterTypes());
             return method;
         } catch (Exception e) {
             LOGGER.warn("get Method from interface failed", e);
