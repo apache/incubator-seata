@@ -55,7 +55,7 @@ public class RootContext {
         }
 
         String xidType = CONTEXT_HOLDER.get(KEY_XID_INTTERCEPTOR_TYPE);
-        if (StringUtils.isNotBlank(xidType)) {
+        if (StringUtils.isNotBlank(xidType) && indexOf("_")>-1) {
             return xidType.split("_")[0];
         }
 
