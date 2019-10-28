@@ -37,7 +37,7 @@ public class RootContext {
      */
     public static final String KEY_XID = "TX_XID";
 
-    public static final String KEY_XID_INTTERCEPTOR_TYPE = "TX_XID_INTTERCEPTOR_TYPE";
+    public static final String KEY_XID_INTERCEPTOR_TYPE = "TX_XID_INTERCEPTOR_TYPE";
 
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
@@ -54,7 +54,7 @@ public class RootContext {
             return xid;
         }
 
-        String xidType = CONTEXT_HOLDER.get(KEY_XID_INTTERCEPTOR_TYPE);
+        String xidType = CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
         if (StringUtils.isNotBlank(xidType) && xidType.indexOf("_")>-1) {
             return xidType.split("_")[0];
         }
@@ -68,7 +68,7 @@ public class RootContext {
      * @return the xid
      */
     public static String getXIDInterceptorType() {
-        return CONTEXT_HOLDER.get(KEY_XID_INTTERCEPTOR_TYPE);
+        return CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
     }
 
     /**
@@ -104,7 +104,7 @@ public class RootContext {
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind interceptor type xid={} branchType={}", xid, branchType);
         }
-        CONTEXT_HOLDER.put(KEY_XID_INTTERCEPTOR_TYPE, xidType);
+        CONTEXT_HOLDER.put(KEY_XID_INTERCEPTOR_TYPE, xidType);
     }
 
     /**
@@ -139,7 +139,7 @@ public class RootContext {
      * @return the string
      */
     public static String unbindInterceptorType() {
-        String xidType = CONTEXT_HOLDER.remove(KEY_XID_INTTERCEPTOR_TYPE);
+        String xidType = CONTEXT_HOLDER.remove(KEY_XID_INTERCEPTOR_TYPE);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("unbind inteceptor type {}", xidType);
         }
