@@ -110,10 +110,14 @@
         </module>
         <module name="PackageName"/>
         <module name="ParameterName"/>
-        <module name="StaticVariableName"/>
+        <module name="StaticVariableName">
+            <property name="format" value="^[a-zA-Z0-9_]*$"/>
+        </module>
         <module name="TypeName"/>
         <!--Checks that there are no import statements that use the * notation-->
         <module name="AvoidStarImport"/>
+        <!-- unused imports -->
+        <module name="UnusedImports"/>
 
         <!--whitespace-->
         <module name="GenericWhitespace"/>

@@ -36,7 +36,7 @@ import java.math.BigInteger;
 import java.util.List;
 
 /**
- *  SpringBean Service Invoker
+ * SpringBean Service Invoker
  *
  * @author lorne.cl
  */
@@ -54,12 +54,12 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
         Object bean = applicationContext.getBean(state.getServiceName());
 
         Method method = state.getMethod();
-        if(method == null){
-            synchronized (state){
+        if (method == null) {
+            synchronized (state) {
                 method = state.getMethod();
-                if(method == null){
+                if (method == null) {
                     method = findMethod(bean.getClass(), state.getServiceMethod(), state.getParameterTypes());
-                    if(method != null){
+                    if (method != null) {
                         state.setMethod(method);
                     }
                 }
@@ -73,9 +73,9 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
         Object[] args = new Object[method.getParameterCount()];
         try {
             Class[] paramTypes = method.getParameterTypes();
-            if(input != null && input.length > 0) {
+            if (input != null && input.length > 0) {
                 int len = input.length < paramTypes.length ? input.length : paramTypes.length;
-                for(int i = 0; i < len; i++){
+                for (int i = 0; i < len; i++) {
                     args[i] = toJavaObject(input[i], paramTypes[i]);
                 }
             }
@@ -91,30 +91,29 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
         this.applicationContext = applicationContext;
     }
 
-    protected Method findMethod(Class<?> clazz, String methodName, List<String> parameterTypes){
+    protected Method findMethod(Class<?> clazz, String methodName, List<String> parameterTypes) {
 
-        if(parameterTypes == null || parameterTypes.size() == 0){
+        if (parameterTypes == null || parameterTypes.size() == 0) {
             return BeanUtils.findDeclaredMethodWithMinimalParameters(clazz, methodName);
-        }
-        else{
+        } else {
             Class[] paramClassTypes = new Class[parameterTypes.size()];
-            for(int i = 0; i < parameterTypes.size(); i++){
+            for (int i = 0; i < parameterTypes.size(); i++) {
                 paramClassTypes[i] = classForName(parameterTypes.get(i));
             }
             return BeanUtils.findDeclaredMethod(clazz, methodName, paramClassTypes);
         }
     }
 
-    protected Class classForName(String className){
+    protected Class classForName(String className) {
         Class clazz = getPrimitiveClass(className);
-        if(clazz == null) {
+        if (clazz == null) {
             try {
                 clazz = Class.forName(className);
             } catch (ClassNotFoundException e) {
                 LOGGER.error(e.getMessage(), e);
             }
         }
-        if(clazz == null){
+        if (clazz == null) {
             try {
                 clazz = Class.forName(className, true, Thread.currentThread().getContextClassLoader());
             } catch (ClassNotFoundException e) {
@@ -134,37 +133,32 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
         }
         try {
             return method.invoke(serviceBean, input);
-        }
-        catch (InvocationTargetException e) {
+        } catch (InvocationTargetException e) {
             Throwable targetExp = e.getTargetException();
-            if(targetExp==null){
-                throw new EngineExecutionException(e,  e.getMessage(), FrameworkErrorCode.MethodInvokeError);
+            if (targetExp == null) {
+                throw new EngineExecutionException(e, e.getMessage(), FrameworkErrorCode.MethodInvokeError);
             }
 
             if (targetExp instanceof RuntimeException) {
                 throw (RuntimeException) targetExp;
-            }
-            else {
+            } else {
                 throw new EngineExecutionException(targetExp, targetExp.getMessage(), FrameworkErrorCode.MethodInvokeError);
             }
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new EngineExecutionException(e, e.getMessage(), FrameworkErrorCode.MethodInvokeError);
         }
     }
 
-    protected Object toJavaObject(Object value, Class paramType){
-        if(value == null){
+    protected Object toJavaObject(Object value, Class paramType) {
+        if (value == null) {
             return value;
         }
 
-        if(paramType.isAssignableFrom(value.getClass())){
+        if (paramType.isAssignableFrom(value.getClass())) {
             return value;
-        }
-        else if(isPrimitive(paramType)){
+        } else if (isPrimitive(paramType)) {
             return value;
-        }
-        else{
+        } else {
             String jsonValue = JSON.toJSONString(value);
             return JSON.parseObject(jsonValue, paramType, Feature.SupportAutoType);
         }
@@ -172,52 +166,44 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
 
     protected boolean isPrimitive(Class<?> clazz) {
         return clazz.isPrimitive() //
-                || clazz == Boolean.class //
-                || clazz == Character.class //
-                || clazz == Byte.class //
-                || clazz == Short.class //
-                || clazz == Integer.class //
-                || clazz == Long.class //
-                || clazz == Float.class //
-                || clazz == Double.class //
-                || clazz == BigInteger.class //
-                || clazz == BigDecimal.class //
-                || clazz == String.class //
-                || clazz == java.util.Date.class //
-                || clazz == java.sql.Date.class //
-                || clazz == java.sql.Time.class //
-                || clazz == java.sql.Timestamp.class //
-                || clazz.isEnum() //
-                ;
+            || clazz == Boolean.class //
+            || clazz == Character.class //
+            || clazz == Byte.class //
+            || clazz == Short.class //
+            || clazz == Integer.class //
+            || clazz == Long.class //
+            || clazz == Float.class //
+            || clazz == Double.class //
+            || clazz == BigInteger.class //
+            || clazz == BigDecimal.class //
+            || clazz == String.class //
+            || clazz == java.util.Date.class //
+            || clazz == java.sql.Date.class //
+            || clazz == java.sql.Time.class //
+            || clazz == java.sql.Timestamp.class //
+            || clazz.isEnum() //
+            ;
     }
 
     protected Class getPrimitiveClass(String className) {
 
-        if(boolean.class.getName().equals(className)){
+        if (boolean.class.getName().equals(className)) {
             return boolean.class;
-        }
-        else if(char.class.getName().equals(className)){
+        } else if (char.class.getName().equals(className)) {
             return char.class;
-        }
-        else if(byte.class.getName().equals(className)){
+        } else if (byte.class.getName().equals(className)) {
             return byte.class;
-        }
-        else if(short.class.getName().equals(className)){
+        } else if (short.class.getName().equals(className)) {
             return short.class;
-        }
-        else if(int.class.getName().equals(className)){
+        } else if (int.class.getName().equals(className)) {
             return int.class;
-        }
-        else if(long.class.getName().equals(className)){
+        } else if (long.class.getName().equals(className)) {
             return long.class;
-        }
-        else if(float.class.getName().equals(className)){
+        } else if (float.class.getName().equals(className)) {
             return float.class;
-        }
-        else if(double.class.getName().equals(className)){
+        } else if (double.class.getName().equals(className)) {
             return double.class;
-        }
-        else {
+        } else {
             return null;
         }
     }
