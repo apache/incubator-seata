@@ -15,12 +15,11 @@
  */
 package io.seata.tm.api;
 
-import io.seata.common.XID;
+
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
-import io.seata.tm.api.transaction.RollbackRule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -31,8 +30,6 @@ import org.junit.jupiter.api.Test;
  */
 class GlobalTransactionContextTest {
     private static final String DEFAULT_XID = "1234567890";
-    private static final String TX_NAME = "test";
-    private static final int TIME_OUT = 30000;
 
     @BeforeAll
     public static void init() {

@@ -15,6 +15,7 @@
  */
 package io.seata.tm.api;
 
+
 import io.netty.util.HashedWheelTimer;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
@@ -22,16 +23,13 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.transaction.MyRuntimeException;
-import org.assertj.core.api.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.lang.reflect.Field;
-import java.util.concurrent.*;
 
 /**
  * @author wangwei
@@ -41,8 +39,6 @@ class DefaultFailureHandlerImplTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFailureHandlerImplTest.class);
 
     private static final String DEFAULT_XID = "1234567890";
-    private static final String TX_NAME = "test";
-    private static final int TIME_OUT = 30000;
     private static GlobalStatus globalStatus = GlobalStatus.Begin;
 
 //    private GlobalStatus globalStatus = null;

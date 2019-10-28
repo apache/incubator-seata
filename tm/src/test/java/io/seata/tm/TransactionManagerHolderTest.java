@@ -15,8 +15,8 @@
  */
 package io.seata.tm;
 
+
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.tm.api.transaction.RollbackRule;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
