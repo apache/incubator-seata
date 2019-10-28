@@ -17,7 +17,7 @@ package io.seata.core.context;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.model.BranchType;
-import org.apache.commons.lang.StringUtils;
+import io.seata.common.util.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
