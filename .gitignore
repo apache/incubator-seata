@@ -29,6 +29,7 @@ dependency-reduced-pom.xml
 /distribution/bin
 /distribution/conf
 /distribution/lib
+/distribution/logs
 /server/*root.*
 /server/.root.*
 /server/sessionStore/
