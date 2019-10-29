@@ -25,4 +25,9 @@ public class GrpcHeaderKey {
 
     public static final Metadata.Key<String> HEADER_KEY = Metadata.Key.of(RootContext.KEY_XID, Metadata.ASCII_STRING_MARSHALLER);
 
+    @Deprecated
+    public static final Metadata.Key<String> HEADER_KEY_OLD = Metadata.Key.of(RootContext.KEY_XID_OLD, Metadata.ASCII_STRING_MARSHALLER);
+    @Deprecated
+    public static final Metadata.Key<String> HEADER_KEY_OLD_LOWERCASE = Metadata.Key.of(RootContext.KEY_XID_OLD.toLowerCase(), Metadata.ASCII_STRING_MARSHALLER);
+
 }
