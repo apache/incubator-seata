@@ -56,7 +56,8 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     protected String getDriverClassName() {
         String driverClassName = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME);
         if (StringUtils.isBlank(driverClassName)) {
-            throw new StoreException("the {store.db.driver-class-name} can't be empty.");
+            throw new StoreException(
+                String.format("the {} can't be empty", ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME));
         }
         return driverClassName;
     }
@@ -69,7 +70,7 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     protected String getUrl() {
         String url = CONFIG.getConfig(ConfigurationKeys.STORE_DB_URL);
         if (StringUtils.isBlank(url)) {
-            throw new StoreException("the {store.db.url} can't be empty.");
+            throw new StoreException(String.format("the {} can't be empty", ConfigurationKeys.STORE_DB_URL));
         }
         return url;
     }
@@ -82,7 +83,7 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     protected String getUser() {
         String user = CONFIG.getConfig(ConfigurationKeys.STORE_DB_USER);
         if (StringUtils.isBlank(user)) {
-            throw new StoreException("the {store.db.user} can't be empty.");
+            throw new StoreException(String.format("the {} can't be empty", ConfigurationKeys.STORE_DB_USER));
         }
         return user;
     }
