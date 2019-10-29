@@ -43,7 +43,8 @@ public class StateMachineParserImpl implements StateMachineParser {
         stateMachine.setComment((String)node.get("Comment"));
         stateMachine.setVersion((String)node.get("Version"));
         stateMachine.setStartState((String)node.get("StartState"));
-        if("false".equals(node.get("IsPersist"))){
+        Object isPersist = node.get("IsPersist");
+        if(isPersist != null && Boolean.FALSE.equals(isPersist)){
             stateMachine.setPersist(false);
         }
 
