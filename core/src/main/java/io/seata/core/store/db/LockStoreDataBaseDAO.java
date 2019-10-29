@@ -15,6 +15,7 @@
  */
 package io.seata.core.store.db;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,13 +26,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.sql.DataSource;
-
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.LambdaUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -159,7 +159,9 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
                 conn.rollback();
                 return true;
             }
-
+            if (unrepeatedLockDOs.size() > 1) {
+                unrepeatedLockDOs = unrepeatedLockDOs.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
+            }
             //lock
             for (LockDO lockDO : unrepeatedLockDOs) {
                 if (!doAcquireLock(conn, lockDO)) {
