@@ -35,9 +35,6 @@ service {
   enableDegrade = false
   #disable seata
   disableGlobalTransaction = false
-  #unit ms,s,m,h,d represents milliseconds, seconds, minutes, hours, days, default permanent
-  max.commit.retry.timeout = "-1"
-  max.rollback.retry.timeout = "-1"
 }
 
 client {
@@ -49,7 +46,7 @@ client {
       retry.policy.branch-rollback-on-conflict = true
     }
     report.retry.count = 5
-    table.meta.check.enable=true
+    table.meta.check.enable = true
   }
   tm {
     commit.retry.count = 5
@@ -58,9 +55,6 @@ client {
   undo {
     data.validation = true
     log.serialization = "jackson"
-    log.save.days = 7
-    #schedule delete expired undo_log in milliseconds
-    log.delete.period = 86400000
     log.table = "undo_log"
   }
   support {
@@ -107,15 +101,25 @@ store {
     query-limit = 100
   }
 }
-recovery {
-  #schedule committing retry period in milliseconds
-  committing-retry-period = 1000
-  #schedule asyn committing retry period in milliseconds
-  asyn-committing-retry-period = 1000
-  #schedule rollbacking retry period in milliseconds
-  rollbacking-retry-period = 1000
-  #schedule timeout retry period in milliseconds
-  timeout-retry-period = 1000
+server {
+  recovery {
+    #schedule committing retry period in milliseconds
+    committing-retry-period = 1000
+    #schedule asyn committing retry period in milliseconds
+    asyn-committing-retry-period = 1000
+    #schedule rollbacking retry period in milliseconds
+    rollbacking-retry-period = 1000
+    #schedule timeout retry period in milliseconds
+    timeout-retry-period = 1000
+  }
+  undo {
+    log.save.days = 7
+    #schedule delete expired undo_log in milliseconds
+    log.delete.period = 86400000
+  }
+  #unit ms,s,m,h,d represents milliseconds, seconds, minutes, hours, days, default permanent
+  max.commit.retry.timeout = "-1"
+  max.rollback.retry.timeout = "-1"
 }
 
 ## metrics settings

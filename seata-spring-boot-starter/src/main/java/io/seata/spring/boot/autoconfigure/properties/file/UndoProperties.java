@@ -19,7 +19,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import static io.seata.core.constants.ConfigurationKeys.TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
-import static io.seata.core.protocol.transaction.UndoLogDeleteRequest.DEFAULT_SAVE_DAYS;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 
 /**
@@ -31,11 +30,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 public class UndoProperties {
     private boolean undoDataValidation = true;
     private String undoLogSerialization = "jackson";
-    private int undoLogSaveDays = DEFAULT_SAVE_DAYS;
-    /**
-     * schedule delete expired undo_log in milliseconds
-     */
-    private long undoLogDeletePeriod = 86400000L;
     private String undoLogTable = TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
 
     public boolean isUndoDataValidation() {
@@ -53,24 +47,6 @@ public class UndoProperties {
 
     public UndoProperties setUndoLogSerialization(String undoLogSerialization) {
         this.undoLogSerialization = undoLogSerialization;
-        return this;
-    }
-
-    public int getUndoLogSaveDays() {
-        return undoLogSaveDays;
-    }
-
-    public UndoProperties setUndoLogSaveDays(int undoLogSaveDays) {
-        this.undoLogSaveDays = undoLogSaveDays;
-        return this;
-    }
-
-    public long getUndoLogDeletePeriod() {
-        return undoLogDeletePeriod;
-    }
-
-    public UndoProperties setUndoLogDeletePeriod(long undoLogDeletePeriod) {
-        this.undoLogDeletePeriod = undoLogDeletePeriod;
         return this;
     }
 

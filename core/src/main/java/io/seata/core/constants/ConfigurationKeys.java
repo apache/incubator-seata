@@ -71,6 +71,11 @@ public class ConfigurationKeys {
     public static final String CLIENT_PREFIX = "client.";
 
     /**
+     * The constant SERVER_PREFIX.
+     */
+    public static final String SERVER_PREFIX = "server.";
+
+    /**
      * The constant TRANSPORT_PREFIX.
      */
     public static final String TRANSPORT_PREFIX = "transport.";
@@ -215,7 +220,10 @@ public class ConfigurationKeys {
      */
     public static final String LOCK_DB_DEFAULT_TABLE = "lock_table";
 
-    public static final String RECOVERY_PREFIX = "recovery.";
+    /**
+     * The constant RECOVERY_PREFIX.
+     */
+    public static final String RECOVERY_PREFIX = SERVER_PREFIX + "recovery.";
     /**
      * The constant COMMITING_RETRY_PERIOD.
      */
@@ -271,14 +279,19 @@ public class ConfigurationKeys {
     public static final String METRICS_EXPORTER_LIST = "exporter-list";
 
     /**
+     * The constant SERVER_UNDO_PREFIX.
+     */
+    public static final String SERVER_UNDO_PREFIX = SERVER_PREFIX + "undo.";
+
+    /**
      * The constant TRANSACTION_UNDO_LOG_SAVE_DAYS.
      */
-    public static final String TRANSACTION_UNDO_LOG_SAVE_DAYS = CLIENT_UNDO_PREFIX + "log.save.days";
+    public static final String TRANSACTION_UNDO_LOG_SAVE_DAYS = SERVER_UNDO_PREFIX + "log.save.days";
 
     /**
      * The constant TRANSACTION_UNDO_LOG_DELETE_PERIOD
      */
-    public static final String TRANSACTION_UNDO_LOG_DELETE_PERIOD = CLIENT_UNDO_PREFIX + "log.delete.period";
+    public static final String TRANSACTION_UNDO_LOG_DELETE_PERIOD = SERVER_UNDO_PREFIX + "log.delete.period";
 
     /**
      * The constant TRANSACTION_UNDO_LOG_TABLE
@@ -307,4 +320,14 @@ public class ConfigurationKeys {
      */
     public static final String DATASOURCE_AUTOPROXY = CLIENT_PREFIX + SUPPORT_PREFIX + SPRING_PREFIX + DATASOURCE_PREFIX
         + "autoproxy";
+
+    /**
+     * The constant MAX_COMMIT_RETRY_TIMEOUT.
+     */
+    public static final String MAX_COMMIT_RETRY_TIMEOUT = SERVER_PREFIX + "max.commit.retry.timeout";
+
+    /**
+     * The constant MAX_ROLLBACK_RETRY_TIMEOUT.
+     */
+    public static final String MAX_ROLLBACK_RETRY_TIMEOUT = SERVER_PREFIX + "max.rollback.retry.timeout";
 }
