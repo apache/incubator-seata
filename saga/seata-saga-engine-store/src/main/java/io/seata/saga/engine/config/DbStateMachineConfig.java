@@ -106,7 +106,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
                 try {
                     con.close();
                 } catch (SQLException e) {
-                    LOGGER.error("Get dbType from failed: " + e.getMessage(), e);
+                    LOGGER.error("Get dbType from failed: {}",e.getMessage(), e);
                 }
             }
         }

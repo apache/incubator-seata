@@ -24,16 +24,18 @@ import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 import io.seata.saga.engine.utils.ExceptionUtils.NetExceptionType;
+
 import java.util.Date;
 import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Default state machine execution status decision strategy
  *
- * @see StatusDecisionStrategy
  * @author lorne.cl
+ * @see StatusDecisionStrategy
  */
 public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
 
@@ -48,21 +50,21 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
             decideMachineCompensateStatus(stateMachineInstance, compensationHolder);
         } else {
             Object failEndStateFlag = context.getVariable(DomainConstants.VAR_NAME_FAIL_END_STATE_FLAG);
-            boolean isComeFromFailEndState = (failEndStateFlag!= null && (Boolean)failEndStateFlag);
+            boolean isComeFromFailEndState = (failEndStateFlag != null && (Boolean) failEndStateFlag);
             decideMachineForwardExecutionStatus(stateMachineInstance, exp, isComeFromFailEndState);
         }
 
-        if(stateMachineInstance.getCompensationStatus() != null
-                && DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))
-                && ExecutionStatus.SU.equals(stateMachineInstance.getStatus())){
+        if (stateMachineInstance.getCompensationStatus() != null
+            && DomainConstants.OPERATION_NAME_FORWARD.equals(context.getVariable(DomainConstants.VAR_NAME_OPERATION_NAME))
+            && ExecutionStatus.SU.equals(stateMachineInstance.getStatus())) {
 
             stateMachineInstance.setCompensationStatus(ExecutionStatus.FA);
         }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("StateMachine Instance[id:" + stateMachineInstance.getId() + ",name:" + stateMachineInstance.getStateMachine().getName()
-                    + "] execute finish with status[" + stateMachineInstance.getStatus() + "], compensation status ["
-                    + stateMachineInstance.getCompensationStatus() + "].");
+            LOGGER.debug("StateMachine Instance[id:{},name:{}] execute finish with status[{}], compensation status [{}].",
+                stateMachineInstance.getId(), stateMachineInstance.getStateMachine().getName(),
+                stateMachineInstance.getStatus(), stateMachineInstance.getCompensationStatus());
         }
     }
 
@@ -97,10 +99,9 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
                     break;
                 }
             }
-            if(hasCompensateSUorUN){
+            if (hasCompensateSUorUN) {
                 stateMachineInstance.setCompensationStatus(ExecutionStatus.UN);
-            }
-            else{
+            } else {
                 stateMachineInstance.setCompensationStatus(ExecutionStatus.FA);
             }
         } else {
@@ -123,6 +124,7 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
 
     /**
      * Determine the forward execution state of the state machine
+     *
      * @param stateMachineInstance
      * @param exp
      * @param specialPolicy
@@ -161,6 +163,7 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
 
     /**
      * set machine status based on state list
+     *
      * @param stateMachineInstance
      * @param stateList
      * @return
@@ -209,6 +212,7 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
 
     /**
      * set machine status based on net exception
+     *
      * @param stateMachineInstance
      * @param exp
      */
@@ -219,8 +223,8 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
             NetExceptionType t = ExceptionUtils.getNetExceptionType(exp);
             if (t != null) {
                 if (t.equals(NetExceptionType.CONNECT_EXCEPTION)
-                        || t.equals(NetExceptionType.CONNECT_TIMEOUT_EXCEPTION)
-                        || t.equals(NetExceptionType.NOT_NET_EXCEPTION)) {
+                    || t.equals(NetExceptionType.CONNECT_TIMEOUT_EXCEPTION)
+                    || t.equals(NetExceptionType.NOT_NET_EXCEPTION)) {
                     stateMachineInstance.setStatus(ExecutionStatus.FA);
                 } else if (t.equals(NetExceptionType.READ_TIMEOUT_EXCEPTION)) {
                     stateMachineInstance.setStatus(ExecutionStatus.UN);

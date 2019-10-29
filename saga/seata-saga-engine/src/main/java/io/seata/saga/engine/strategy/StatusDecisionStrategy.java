@@ -31,6 +31,7 @@ public interface StatusDecisionStrategy {
 
     /**
      * Determine state machine execution status when executing to EndState
+     *
      * @param context
      * @param stateMachineInstance
      * @param exp
@@ -39,6 +40,7 @@ public interface StatusDecisionStrategy {
 
     /**
      * Determine state machine execution status when executing TaskState error
+     *
      * @param context
      * @param stateMachineInstance
      * @param exp
@@ -47,11 +49,12 @@ public interface StatusDecisionStrategy {
 
     /**
      * Determine the forward execution state of the state machine
+     *
      * @param stateMachineInstance
      * @param exp
      * @param specialPolicy
      * @return
      */
     boolean decideMachineForwardExecutionStatus(StateMachineInstance stateMachineInstance, Exception exp,
-        boolean specialPolicy);
+                                                boolean specialPolicy);
 }
