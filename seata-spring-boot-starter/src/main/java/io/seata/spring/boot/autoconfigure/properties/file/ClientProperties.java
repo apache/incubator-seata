@@ -31,7 +31,7 @@ public class ClientProperties {
     private int rmReportRetryCount = 5;
     private int tmCommitRetryCount = 5;
     private int tmRollbackRetryCount = 5;
-    private boolean tableMetaCheckEnable = true;
+    private boolean rmTableMetaCheckEnable = true;
 
     public int getRmAsyncCommitBufferLimit() {
         return rmAsyncCommitBufferLimit;
@@ -69,12 +69,12 @@ public class ClientProperties {
         return this;
     }
 
-    public boolean isTableMetaCheckEnable() {
-        return tableMetaCheckEnable;
+    public boolean isRmTableMetaCheckEnable() {
+        return rmTableMetaCheckEnable;
     }
 
-    public ClientProperties setTableMetaCheckEnable(boolean tableMetaCheckEnable) {
-        this.tableMetaCheckEnable = tableMetaCheckEnable;
+    public ClientProperties setRmTableMetaCheckEnable(boolean rmTableMetaCheckEnable) {
+        this.rmTableMetaCheckEnable = rmTableMetaCheckEnable;
         return this;
     }
 }

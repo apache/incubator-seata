@@ -112,7 +112,7 @@ public class ConfigurationKeys {
     /**
      * The constant CLIENT_TABLE_META_CHECK_ENABLE.
      */
-    public static final String CLIENT_TABLE_META_CHECK_ENABLE = CLIENT_PREFIX + "table.meta.check.enable";
+    public static final String CLIENT_TABLE_META_CHECK_ENABLE = CLIENT_RM_PREFIX + "table.meta.check.enable";
 
     /**
      * The constant CLIENT_TM_COMMIT_RETRY_TIMES.
