@@ -20,15 +20,15 @@ import org.springframework.stereotype.Component;
 
 import static io.seata.core.constants.ConfigurationKeys.TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
 import static io.seata.core.protocol.transaction.UndoLogDeleteRequest.DEFAULT_SAVE_DAYS;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSACTION_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.UNDO_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
  * @date 2019/09/30
  */
 @Component
-@ConfigurationProperties(prefix = TRANSACTION_PREFIX)
-public class TransactionProperties {
+@ConfigurationProperties(prefix = UNDO_PREFIX)
+public class UndoProperties {
     private boolean undoDataValidation = true;
     private String undoLogSerialization = "jackson";
     private int undoLogSaveDays = DEFAULT_SAVE_DAYS;
@@ -42,7 +42,7 @@ public class TransactionProperties {
         return undoDataValidation;
     }
 
-    public TransactionProperties setUndoDataValidation(boolean undoDataValidation) {
+    public UndoProperties setUndoDataValidation(boolean undoDataValidation) {
         this.undoDataValidation = undoDataValidation;
         return this;
     }
@@ -51,7 +51,7 @@ public class TransactionProperties {
         return undoLogSerialization;
     }
 
-    public TransactionProperties setUndoLogSerialization(String undoLogSerialization) {
+    public UndoProperties setUndoLogSerialization(String undoLogSerialization) {
         this.undoLogSerialization = undoLogSerialization;
         return this;
     }
@@ -60,7 +60,7 @@ public class TransactionProperties {
         return undoLogSaveDays;
     }
 
-    public TransactionProperties setUndoLogSaveDays(int undoLogSaveDays) {
+    public UndoProperties setUndoLogSaveDays(int undoLogSaveDays) {
         this.undoLogSaveDays = undoLogSaveDays;
         return this;
     }
@@ -69,7 +69,7 @@ public class TransactionProperties {
         return undoLogDeletePeriod;
     }
 
-    public TransactionProperties setUndoLogDeletePeriod(long undoLogDeletePeriod) {
+    public UndoProperties setUndoLogDeletePeriod(long undoLogDeletePeriod) {
         this.undoLogDeletePeriod = undoLogDeletePeriod;
         return this;
     }
@@ -78,7 +78,7 @@ public class TransactionProperties {
         return undoLogTable;
     }
 
-    public TransactionProperties setUndoLogTable(String undoLogTable) {
+    public UndoProperties setUndoLogTable(String undoLogTable) {
         this.undoLogTable = undoLogTable;
         return this;
     }

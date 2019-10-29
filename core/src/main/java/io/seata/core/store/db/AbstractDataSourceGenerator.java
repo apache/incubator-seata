@@ -35,6 +35,10 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
+    private static final int DEFAULT_DB_MAX_CONN = 10;
+
+    private static final int DEFAULT_DB_MIN_CONN = 1;
+
     /**
      * Get db type db type.
      *
@@ -43,17 +47,20 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     protected DBType getDBType() {
         return DBType.valueof(CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE));
     }
+
     /**
      * get db driver class name
+     *
      * @return the db driver class name
      */
     protected String getDriverClassName() {
-		String driverClassName = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME);
-		if (StringUtils.isBlank(driverClassName)) {
-	            throw new StoreException("the {store.db.driver-class-name} can't be empty.");
-	        }
-	    return driverClassName;
-	}
+        String driverClassName = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME);
+        if (StringUtils.isBlank(driverClassName)) {
+            throw new StoreException("the {store.db.driver-class-name} can't be empty.");
+        }
+        return driverClassName;
+    }
+
     /**
      * Get url string.
      *
@@ -96,8 +103,8 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      * @return the int
      */
     protected int getMinConn() {
-        int minConn = CONFIG.getInt(ConfigurationKeys.STORE_DB_MIN_CONN);
-        return minConn < 0 ? 0 : minConn;
+        int minConn = CONFIG.getInt(ConfigurationKeys.STORE_DB_MIN_CONN, DEFAULT_DB_MIN_CONN);
+        return minConn < 0 ? DEFAULT_DB_MIN_CONN : minConn;
     }
 
     /**
@@ -106,8 +113,8 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      * @return the int
      */
     protected int getMaxConn() {
-        int maxConn = CONFIG.getInt(ConfigurationKeys.STORE_DB_MAX_CONN);
-        return maxConn < 0 ? 1 : maxConn;
+        int maxConn = CONFIG.getInt(ConfigurationKeys.STORE_DB_MAX_CONN, DEFAULT_DB_MAX_CONN);
+        return maxConn < 0 ? DEFAULT_DB_MAX_CONN : maxConn;
     }
 
     /**
