@@ -81,10 +81,7 @@ public class MotanTransactionFilter implements Filter {
     private String getRpcXid(Request request) {
         String rpcXid = request.getAttachments().get(RootContext.KEY_XID);
         if (rpcXid == null) {
-            rpcXid = request.getAttachments().get(RootContext.KEY_XID_OLD);
-            if (rpcXid == null) {
-                rpcXid = request.getAttachments().get(RootContext.KEY_XID_OLD.toLowerCase());
-            }
+            rpcXid = request.getAttachments().get(RootContext.KEY_XID.toLowerCase());
         }
         return rpcXid;
     }

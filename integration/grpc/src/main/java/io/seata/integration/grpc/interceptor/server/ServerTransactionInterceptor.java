@@ -35,13 +35,15 @@ public class ServerTransactionInterceptor implements ServerInterceptor {
         return new ServerListenerProxy<>(xid, serverCallHandler.startCall(serverCall, metadata));
     }
 
+    /**
+     * get rpc xid
+     * @param metadata
+     * @return
+     */
     private String getRpcXid(Metadata metadata) {
         String rpcXid = metadata.get(GrpcHeaderKey.HEADER_KEY);
         if (rpcXid == null) {
-            rpcXid = metadata.get(GrpcHeaderKey.HEADER_KEY_OLD);
-            if (rpcXid == null) {
-                rpcXid = metadata.get(GrpcHeaderKey.HEADER_KEY_OLD_LOWERCASE);
-            }
+            rpcXid = metadata.get(GrpcHeaderKey.HEADER_KEY_LOWERCASE);
         }
         return rpcXid;
     }

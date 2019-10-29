@@ -91,10 +91,7 @@ public class TransactionContextProviderFilter extends Filter {
     private String getRpcXid(SofaRequest sofaRequest) {
         String rpcXid = (String) sofaRequest.getRequestProp(RootContext.KEY_XID);
         if (rpcXid == null) {
-            rpcXid = (String) sofaRequest.getRequestProp(RootContext.KEY_XID_OLD);
-            if (rpcXid == null) {
-                rpcXid = (String) sofaRequest.getRequestProp(RootContext.KEY_XID_OLD.toLowerCase());
-            }
+            rpcXid = (String) sofaRequest.getRequestProp(RootContext.KEY_XID.toLowerCase());
         }
         return rpcXid;
     }

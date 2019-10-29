@@ -91,10 +91,7 @@ public class TransactionContextConsumerFilter extends Filter {
     private String getRpcXid() {
         String rpcXid = (String) RpcInternalContext.getContext().getAttachment(RootContext.KEY_XID);
         if (rpcXid == null) {
-            rpcXid = (String) RpcInternalContext.getContext().getAttachment(RootContext.KEY_XID_OLD);
-            if (rpcXid == null) {
-                rpcXid = (String) RpcInternalContext.getContext().getAttachment(RootContext.KEY_XID_OLD.toLowerCase());
-            }
+            rpcXid = (String) RpcInternalContext.getContext().getAttachment(RootContext.KEY_XID.toLowerCase());
         }
         return rpcXid;
     }

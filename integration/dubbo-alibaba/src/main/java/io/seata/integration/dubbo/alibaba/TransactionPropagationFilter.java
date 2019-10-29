@@ -84,10 +84,7 @@ public class TransactionPropagationFilter implements Filter {
     private String getRpcXid() {
         String rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID);
         if (rpcXid == null) {
-            rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID_OLD);
-            if (rpcXid == null) {
-                rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID_OLD.toLowerCase());
-            }
+            rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID.toLowerCase());
         }
         return rpcXid;
     }
