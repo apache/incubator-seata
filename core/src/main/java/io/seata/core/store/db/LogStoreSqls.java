@@ -185,6 +185,20 @@ public class LogStoreSqls {
         + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?";
 
     /**
+     * The constant CHECK_MAX_TRANS_ID.
+     */
+    public static final String QUERY_MAX_TRANS_ID = "select max(" + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID
+        + ") from " + GLOBAL_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID
+        + " < ? and " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + " > ?";
+
+    /**
+     * The constant CHECK_MAX_BTANCH_ID.
+     */
+    public static final String QUERY_MAX_BTANCH_ID = "select max(" + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID
+        + ") from " + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID + " < ? and "
+        + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID + " > ?";
+
+    /**
      * Get insert global transaction sql string.
      *
      * @param globalTable the global table
@@ -366,5 +380,27 @@ public class LogStoreSqls {
      */
     public static String getQureyBranchTransaction(String branchTable, String dbType) {
         return QUREY_BRANCH_TRANSACTION.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
+    }
+
+    /**
+     * Gets qurey global max.
+     *
+     * @param globalTable the global table
+     * @param dbType      the db type
+     * @return the qurey global max
+     */
+    public static String getQureyGlobalMax(String globalTable, String dbType) {
+        return QUERY_MAX_TRANS_ID.replace(GLOBAL_TABLE_PLACEHOLD, globalTable);
+    }
+
+    /**
+     * Gets qurey branch max.
+     *
+     * @param branchTable the branch table
+     * @param dbType      the db type
+     * @return the qurey branch max
+     */
+    public static String getQureyBranchMax(String branchTable, String dbType) {
+        return QUERY_MAX_BTANCH_ID.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
     }
 }

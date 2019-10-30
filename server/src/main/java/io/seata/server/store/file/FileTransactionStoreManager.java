@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.thread.NamedThreadFactory;
@@ -330,6 +331,11 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             LOGGER.error("fileChannel force error{}",e.getMessage(),e);
         }
         closeFile(currRaf);
+    }
+
+    @Override
+    public long getCurrentMaxSessionId() {
+        throw new NotSupportYetException("not support getCurrentMaxSessionId");
     }
 
     @Override
