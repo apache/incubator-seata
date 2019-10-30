@@ -60,7 +60,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
 
     @Override
     public byte[] getDefaultContent() {
-        return new byte[0];
+        return new byte[1];
     }
 
     @Override
