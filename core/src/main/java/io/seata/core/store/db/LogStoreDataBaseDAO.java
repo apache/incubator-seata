@@ -508,7 +508,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
-                max = rs.getLong(0);
+                max = rs.getLong(1);
             }
         } catch (SQLException e) {
             throw new DataAccessException(e);
