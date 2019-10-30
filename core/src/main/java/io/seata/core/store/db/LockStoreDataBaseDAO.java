@@ -104,9 +104,11 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        List<LockDO> unrepeatedLockDOs = null;
         Set<String> dbExistedRowKeys = new HashSet<>();
         boolean originalAutoCommit = true;
+        if (lockDOs.size() > 1) {
+            lockDOs = lockDOs.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
+        }
         try {
             conn = logStoreDataSource.getConnection();
             if (originalAutoCommit = conn.getAutoCommit()) {
@@ -149,6 +151,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
                 conn.rollback();
                 return false;
             }
+            List<LockDO> unrepeatedLockDOs = null;
             if (CollectionUtils.isNotEmpty(dbExistedRowKeys)) {
                 unrepeatedLockDOs = lockDOs.stream().filter(lockDO -> !dbExistedRowKeys.contains(lockDO.getRowKey()))
                     .collect(Collectors.toList());
@@ -158,9 +161,6 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             if (CollectionUtils.isEmpty(unrepeatedLockDOs)) {
                 conn.rollback();
                 return true;
-            }
-            if (unrepeatedLockDOs.size() > 1) {
-                unrepeatedLockDOs = unrepeatedLockDOs.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
             }
             //lock
             for (LockDO lockDO : unrepeatedLockDOs) {
