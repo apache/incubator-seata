@@ -23,6 +23,7 @@ import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.expression.seq.SequenceExpressionFactory;
 import io.seata.saga.engine.expression.spel.SpringELExpressionFactory;
 import io.seata.saga.engine.invoker.ServiceInvokerManager;
+import io.seata.saga.engine.invoker.impl.SpringBeanServiceInvoker;
 import io.seata.saga.engine.pcext.StateMachineProcessHandler;
 import io.seata.saga.engine.pcext.StateMachineProcessRouter;
 import io.seata.saga.engine.store.StateLangStore;
@@ -169,6 +170,11 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
         if (this.serviceInvokerManager == null) {
             this.serviceInvokerManager = new ServiceInvokerManager();
+
+            SpringBeanServiceInvoker springBeanServiceInvoker = new SpringBeanServiceInvoker();
+            springBeanServiceInvoker.setApplicationContext(getApplicationContext());
+            springBeanServiceInvoker.setThreadPoolExecutor(threadPoolExecutor);
+            this.serviceInvokerManager.putServiceInvoker(DomainConstants.SERVICE_TYPE_SPRING_BEAN, springBeanServiceInvoker);
         }
     }
 
