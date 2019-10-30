@@ -227,7 +227,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             for (int i = 0; i < lockDOs.size(); i++) {
                 ps.setString(i + 2, lockDOs.get(i).getRowKey());
             }
-            return ps.executeUpdate() > 0;
+            ps.executeUpdate();
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
@@ -244,6 +244,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
                 }
             }
         }
+        return true;
     }
 
     @Override
