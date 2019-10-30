@@ -15,9 +15,6 @@
  */
 package io.seata.core.message;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 
 import org.junit.jupiter.api.Assertions;

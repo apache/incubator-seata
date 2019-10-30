@@ -15,12 +15,11 @@
  */
 package io.seata.codec.seata.protocol.transaction;
 
-import io.seata.core.model.GlobalStatus;
-import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
-import io.seata.core.protocol.transaction.AbstractGlobalEndResponse;
-
 import java.nio.ByteBuffer;
+
+import io.netty.buffer.ByteBuf;
+import io.seata.core.model.GlobalStatus;
+import io.seata.core.protocol.transaction.AbstractGlobalEndResponse;
 
 /**
  * The type Abstract global end response codec.
@@ -35,19 +34,19 @@ public abstract class AbstractGlobalEndResponseCodec extends AbstractTransaction
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer in) {
+    public <T> void encode(T t, ByteBuf in) {
         super.encode(t, in);
 
-        AbstractGlobalEndResponse abstractGlobalEndResponse = (AbstractGlobalEndResponse) t;
+        AbstractGlobalEndResponse abstractGlobalEndResponse = (AbstractGlobalEndResponse)t;
         GlobalStatus globalStatus = abstractGlobalEndResponse.getGlobalStatus();
-        in.put((byte)globalStatus.getCode());
+        in.writeByte(globalStatus.getCode());
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
         super.decode(t, in);
 
-        AbstractGlobalEndResponse abstractGlobalEndResponse = (AbstractGlobalEndResponse) t;
+        AbstractGlobalEndResponse abstractGlobalEndResponse = (AbstractGlobalEndResponse)t;
 
         abstractGlobalEndResponse.setGlobalStatus(GlobalStatus.get(in.get()));
     }

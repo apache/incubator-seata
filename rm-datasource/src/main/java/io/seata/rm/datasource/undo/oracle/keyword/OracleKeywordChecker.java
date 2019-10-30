@@ -29,9 +29,10 @@ import java.util.stream.Collectors;
  */
 public class OracleKeywordChecker implements KeywordChecker {
     private static volatile KeywordChecker keywordChecker = null;
-    private static volatile Set<String> keywordSet = null;
+    private Set<String> keywordSet;
 
     private OracleKeywordChecker() {
+        keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
     }
 
     /**
@@ -44,7 +45,6 @@ public class OracleKeywordChecker implements KeywordChecker {
             synchronized (OracleKeywordChecker.class) {
                 if (keywordChecker == null) {
                     keywordChecker = new OracleKeywordChecker();
-                    keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
                 }
             }
         }
@@ -56,356 +56,445 @@ public class OracleKeywordChecker implements KeywordChecker {
      */
     private enum OracleKeyword {
         /**
-         * Select sql keyword.
+         * ACCESS is oracle keyword
          */
-        SELECT("SELECT"),
+        ACCESS("ACCESS"),
         /**
-         * Delete sql keyword.
+         * ADD is oracle keyword
          */
-        DELETE("DELETE"),
+        ADD("ADD"),
         /**
-         * Insert sql keyword.
-         */
-        INSERT("INSERT"),
-        /**
-         * Update sql keyword.
-         */
-        UPDATE("UPDATE"),
-
-        /**
-         * From sql keyword.
-         */
-        FROM("FROM"),
-        /**
-         * Having sql keyword.
-         */
-        HAVING("HAVING"),
-        /**
-         * Where sql keyword.
-         */
-        WHERE("WHERE"),
-        /**
-         * Order sql keyword.
-         */
-        ORDER("ORDER"),
-        /**
-         * By sql keyword.
-         */
-        BY("BY"),
-        /**
-         * Group sql keyword.
-         */
-        GROUP("GROUP"),
-        /**
-         * Into sql keyword.
-         */
-        INTO("INTO"),
-        /**
-         * As sql keyword.
-         */
-        AS("AS"),
-
-        /**
-         * Create sql keyword.
-         */
-        CREATE("CREATE"),
-        /**
-         * Alter sql keyword.
-         */
-        ALTER("ALTER"),
-        /**
-         * Drop sql keyword.
-         */
-        DROP("DROP"),
-        /**
-         * Set sql keyword.
-         */
-        SET("SET"),
-
-        /**
-         * Null sql keyword.
-         */
-        NULL("NULL"),
-        /**
-         * Not sql keyword.
-         */
-        NOT("NOT"),
-        /**
-         * Distinct sql keyword.
-         */
-        DISTINCT("DISTINCT"),
-
-        /**
-         * Table sql keyword.
-         */
-        TABLE("TABLE"),
-        /**
-         * Tablespace sql keyword.
-         */
-        TABLESPACE("TABLESPACE"),
-        /**
-         * View sql keyword.
-         */
-        VIEW("VIEW"),
-        /**
-         * Sequence sql keyword.
-         */
-        SEQUENCE("SEQUENCE"),
-        /**
-         * Trigger sql keyword.
-         */
-        TRIGGER("TRIGGER"),
-        /**
-         * User sql keyword.
-         */
-        USER("USER"),
-        /**
-         * Index sql keyword.
-         */
-        INDEX("INDEX"),
-        /**
-         * Session sql keyword.
-         */
-        SESSION("SESSION"),
-        /**
-         * Procedure sql keyword.
-         */
-        PROCEDURE("PROCEDURE"),
-        /**
-         * Function sql keyword.
-         */
-        FUNCTION("FUNCTION"),
-
-        /**
-         * Primary sql keyword.
-         */
-        PRIMARY("PRIMARY"),
-        /**
-         * Key sql keyword.
-         */
-        KEY("KEY"),
-        /**
-         * Default sql keyword.
-         */
-        DEFAULT("DEFAULT"),
-        /**
-         * Constraint sql keyword.
-         */
-        CONSTRAINT("CONSTRAINT"),
-        /**
-         * Check sql keyword.
-         */
-        CHECK("CHECK"),
-        /**
-         * Unique sql keyword.
-         */
-        UNIQUE("UNIQUE"),
-        /**
-         * Foreign sql keyword.
-         */
-        FOREIGN("FOREIGN"),
-        /**
-         * References sql keyword.
-         */
-        REFERENCES("REFERENCES"),
-
-        /**
-         * Explain sql keyword.
-         */
-        EXPLAIN("EXPLAIN"),
-        /**
-         * For sql keyword.
-         */
-        FOR("FOR"),
-        /**
-         * If sql keyword.
-         */
-        IF("IF"),
-        /**
-         * Sort sql keyword.
-         */
-        SORT("SORT"),
-
-        /**
-         * All sql keyword.
+         * ALL is oracle keyword
          */
         ALL("ALL"),
         /**
-         * Union sql keyword.
+         * ALTER is oracle keyword
          */
-        UNION("UNION"),
+        ALTER("ALTER"),
         /**
-         * Except sql keyword.
-         */
-        EXCEPT("EXCEPT"),
-        /**
-         * Intersect sql keyword.
-         */
-        INTERSECT("INTERSECT"),
-        /**
-         * Minus sql keyword.
-         */
-        MINUS("MINUS"),
-        /**
-         * Inner sql keyword.
-         */
-        INNER("INNER"),
-        /**
-         * Left sql keyword.
-         */
-        LEFT("LEFT"),
-        /**
-         * Right sql keyword.
-         */
-        RIGHT("RIGHT"),
-        /**
-         * Full sql keyword.
-         */
-        FULL("FULL"),
-        /**
-         * Outer sql keyword.
-         */
-        OUTER("OUTER"),
-        /**
-         * Join sql keyword.
-         */
-        JOIN("JOIN"),
-        /**
-         * On sql keyword.
-         */
-        ON("ON"),
-        /**
-         * Schema sql keyword.
-         */
-        SCHEMA("SCHEMA"),
-        /**
-         * Cast sql keyword.
-         */
-        CAST("CAST"),
-        /**
-         * Column sql keyword.
-         */
-        COLUMN("COLUMN"),
-        /**
-         * Use sql keyword.
-         */
-        USE("USE"),
-        /**
-         * Database sql keyword.
-         */
-        DATABASE("DATABASE"),
-        /**
-         * To sql keyword.
-         */
-        TO("TO"),
-
-        /**
-         * And sql keyword.
+         * AND is oracle keyword
          */
         AND("AND"),
         /**
-         * Or sql keyword.
+         * ANY is oracle keyword
          */
-        OR("OR"),
+        ANY("ANY"),
         /**
-         * Xor sql keyword.
+         * AS is oracle keyword
          */
-        XOR("XOR"),
+        AS("AS"),
         /**
-         * Case sql keyword.
-         */
-        CASE("CASE"),
-        /**
-         * When sql keyword.
-         */
-        WHEN("WHEN"),
-        /**
-         * Then sql keyword.
-         */
-        THEN("THEN"),
-        /**
-         * Else sql keyword.
-         */
-        ELSE("ELSE"),
-        /**
-         * Elsif sql keyword.
-         */
-        ELSIF("ELSIF"),
-        /**
-         * End sql keyword.
-         */
-        END("END"),
-        /**
-         * Exists sql keyword.
-         */
-        EXISTS("EXISTS"),
-        /**
-         * In sql keyword.
-         */
-        IN("IN"),
-        /**
-         * Contains sql keyword.
-         */
-        CONTAINS("CONTAINS"),
-        /**
-         * Rlike sql keyword.
-         */
-        RLIKE("RLIKE"),
-        /**
-         * Fulltext sql keyword.
-         */
-        FULLTEXT("FULLTEXT"),
-
-        /**
-         * New sql keyword.
-         */
-        NEW("NEW"),
-        /**
-         * Asc sql keyword.
+         * ASC is oracle keyword
          */
         ASC("ASC"),
         /**
-         * Desc sql keyword.
+         * AUDIT is oracle keyword
          */
-        DESC("DESC"),
+        AUDIT("AUDIT"),
         /**
-         * Is sql keyword.
-         */
-        IS("IS"),
-        /**
-         * Like sql keyword.
-         */
-        LIKE("LIKE"),
-        /**
-         * Escape sql keyword.
-         */
-        ESCAPE("ESCAPE"),
-        /**
-         * Between sql keyword.
+         * BETWEEN is oracle keyword
          */
         BETWEEN("BETWEEN"),
         /**
-         * Values sql keyword.
+         * BY is oracle keyword
+         */
+        BY("BY"),
+        /**
+         * CHAR is oracle keyword
+         */
+        CHAR("CHAR"),
+        /**
+         * CHECK is oracle keyword
+         */
+        CHECK("CHECK"),
+        /**
+         * CLUSTER is oracle keyword
+         */
+        CLUSTER("CLUSTER"),
+        /**
+         * COLUMN is oracle keyword
+         */
+        COLUMN("COLUMN"),
+        /**
+         * COLUMN_VALUE is oracle keyword
+         */
+        COLUMN_VALUE("COLUMN_VALUE"),
+        /**
+         * COMMENT is oracle keyword
+         */
+        COMMENT("COMMENT"),
+        /**
+         * COMPRESS is oracle keyword
+         */
+        COMPRESS("COMPRESS"),
+        /**
+         * CONNECT is oracle keyword
+         */
+        CONNECT("CONNECT"),
+        /**
+         * CREATE is oracle keyword
+         */
+        CREATE("CREATE"),
+        /**
+         * CURRENT is oracle keyword
+         */
+        CURRENT("CURRENT"),
+        /**
+         * DATE is oracle keyword
+         */
+        DATE("DATE"),
+        /**
+         * DECIMAL is oracle keyword
+         */
+        DECIMAL("DECIMAL"),
+        /**
+         * DEFAULT is oracle keyword
+         */
+        DEFAULT("DEFAULT"),
+        /**
+         * DELETE is oracle keyword
+         */
+        DELETE("DELETE"),
+        /**
+         * DESC is oracle keyword
+         */
+        DESC("DESC"),
+        /**
+         * DISTINCT is oracle keyword
+         */
+        DISTINCT("DISTINCT"),
+        /**
+         * DROP is oracle keyword
+         */
+        DROP("DROP"),
+        /**
+         * ELSE is oracle keyword
+         */
+        ELSE("ELSE"),
+        /**
+         * EXCLUSIVE is oracle keyword
+         */
+        EXCLUSIVE("EXCLUSIVE"),
+        /**
+         * EXISTS is oracle keyword
+         */
+        EXISTS("EXISTS"),
+        /**
+         * FILE is oracle keyword
+         */
+        FILE("FILE"),
+        /**
+         * FLOAT is oracle keyword
+         */
+        FLOAT("FLOAT"),
+        /**
+         * FOR is oracle keyword
+         */
+        FOR("FOR"),
+        /**
+         * FROM is oracle keyword
+         */
+        FROM("FROM"),
+        /**
+         * GRANT is oracle keyword
+         */
+        GRANT("GRANT"),
+        /**
+         * GROUP is oracle keyword
+         */
+        GROUP("GROUP"),
+        /**
+         * HAVING is oracle keyword
+         */
+        HAVING("HAVING"),
+        /**
+         * IDENTIFIED is oracle keyword
+         */
+        IDENTIFIED("IDENTIFIED"),
+        /**
+         * IMMEDIATE is oracle keyword
+         */
+        IMMEDIATE("IMMEDIATE"),
+        /**
+         * IN is oracle keyword
+         */
+        IN("IN"),
+        /**
+         * INCREMENT is oracle keyword
+         */
+        INCREMENT("INCREMENT"),
+        /**
+         * INDEX is oracle keyword
+         */
+        INDEX("INDEX"),
+        /**
+         * INITIAL is oracle keyword
+         */
+        INITIAL("INITIAL"),
+        /**
+         * INSERT is oracle keyword
+         */
+        INSERT("INSERT"),
+        /**
+         * INTEGER is oracle keyword
+         */
+        INTEGER("INTEGER"),
+        /**
+         * INTERSECT is oracle keyword
+         */
+        INTERSECT("INTERSECT"),
+        /**
+         * INTO is oracle keyword
+         */
+        INTO("INTO"),
+        /**
+         * IS is oracle keyword
+         */
+        IS("IS"),
+        /**
+         * LEVEL is oracle keyword
+         */
+        LEVEL("LEVEL"),
+        /**
+         * LIKE is oracle keyword
+         */
+        LIKE("LIKE"),
+        /**
+         * LOCK is oracle keyword
+         */
+        LOCK("LOCK"),
+        /**
+         * LONG is oracle keyword
+         */
+        LONG("LONG"),
+        /**
+         * MAXEXTENTS is oracle keyword
+         */
+        MAXEXTENTS("MAXEXTENTS"),
+        /**
+         * MINUS is oracle keyword
+         */
+        MINUS("MINUS"),
+        /**
+         * MLSLABEL is oracle keyword
+         */
+        MLSLABEL("MLSLABEL"),
+        /**
+         * MODE is oracle keyword
+         */
+        MODE("MODE"),
+        /**
+         * MODIFY is oracle keyword
+         */
+        MODIFY("MODIFY"),
+        /**
+         * NESTED_TABLE_ID is oracle keyword
+         */
+        NESTED_TABLE_ID("NESTED_TABLE_ID"),
+        /**
+         * NOAUDIT is oracle keyword
+         */
+        NOAUDIT("NOAUDIT"),
+        /**
+         * NOCOMPRESS is oracle keyword
+         */
+        NOCOMPRESS("NOCOMPRESS"),
+        /**
+         * NOT is oracle keyword
+         */
+        NOT("NOT"),
+        /**
+         * NOWAIT is oracle keyword
+         */
+        NOWAIT("NOWAIT"),
+        /**
+         * NULL is oracle keyword
+         */
+        NULL("NULL"),
+        /**
+         * NUMBER is oracle keyword
+         */
+        NUMBER("NUMBER"),
+        /**
+         * OF is oracle keyword
+         */
+        OF("OF"),
+        /**
+         * OFFLINE is oracle keyword
+         */
+        OFFLINE("OFFLINE"),
+        /**
+         * ON is oracle keyword
+         */
+        ON("ON"),
+        /**
+         * ONLINE is oracle keyword
+         */
+        ONLINE("ONLINE"),
+        /**
+         * OPTION is oracle keyword
+         */
+        OPTION("OPTION"),
+        /**
+         * OR is oracle keyword
+         */
+        OR("OR"),
+        /**
+         * ORDER is oracle keyword
+         */
+        ORDER("ORDER"),
+        /**
+         * PCTFREE is oracle keyword
+         */
+        PCTFREE("PCTFREE"),
+        /**
+         * PRIOR is oracle keyword
+         */
+        PRIOR("PRIOR"),
+        /**
+         * PUBLIC is oracle keyword
+         */
+        PUBLIC("PUBLIC"),
+        /**
+         * RAW is oracle keyword
+         */
+        RAW("RAW"),
+        /**
+         * RENAME is oracle keyword
+         */
+        RENAME("RENAME"),
+        /**
+         * RESOURCE is oracle keyword
+         */
+        RESOURCE("RESOURCE"),
+        /**
+         * REVOKE is oracle keyword
+         */
+        REVOKE("REVOKE"),
+        /**
+         * ROW is oracle keyword
+         */
+        ROW("ROW"),
+        /**
+         * ROWID is oracle keyword
+         */
+        ROWID("ROWID"),
+        /**
+         * ROWNUM is oracle keyword
+         */
+        ROWNUM("ROWNUM"),
+        /**
+         * ROWS is oracle keyword
+         */
+        ROWS("ROWS"),
+        /**
+         * SELECT is oracle keyword
+         */
+        SELECT("SELECT"),
+        /**
+         * SESSION is oracle keyword
+         */
+        SESSION("SESSION"),
+        /**
+         * SET is oracle keyword
+         */
+        SET("SET"),
+        /**
+         * SHARE is oracle keyword
+         */
+        SHARE("SHARE"),
+        /**
+         * SIZE is oracle keyword
+         */
+        SIZE("SIZE"),
+        /**
+         * SMALLINT is oracle keyword
+         */
+        SMALLINT("SMALLINT"),
+        /**
+         * START is oracle keyword
+         */
+        START("START"),
+        /**
+         * SUCCESSFUL is oracle keyword
+         */
+        SUCCESSFUL("SUCCESSFUL"),
+        /**
+         * SYNONYM is oracle keyword
+         */
+        SYNONYM("SYNONYM"),
+        /**
+         * SYSDATE is oracle keyword
+         */
+        SYSDATE("SYSDATE"),
+        /**
+         * TABLE is oracle keyword
+         */
+        TABLE("TABLE"),
+        /**
+         * THEN is oracle keyword
+         */
+        THEN("THEN"),
+        /**
+         * TO is oracle keyword
+         */
+        TO("TO"),
+        /**
+         * TRIGGER is oracle keyword
+         */
+        TRIGGER("TRIGGER"),
+        /**
+         * UID is oracle keyword
+         */
+        UID("UID"),
+        /**
+         * UNION is oracle keyword
+         */
+        UNION("UNION"),
+        /**
+         * UNIQUE is oracle keyword
+         */
+        UNIQUE("UNIQUE"),
+        /**
+         * UPDATE is oracle keyword
+         */
+        UPDATE("UPDATE"),
+        /**
+         * USER is oracle keyword
+         */
+        USER("USER"),
+        /**
+         * VALIDATE is oracle keyword
+         */
+        VALIDATE("VALIDATE"),
+        /**
+         * VALUES is oracle keyword
          */
         VALUES("VALUES"),
         /**
-         * Interval sql keyword.
+         * VARCHAR is oracle keyword
          */
-        INTERVAL("INTERVAL"),
-
+        VARCHAR("VARCHAR"),
         /**
-         * Lock sql keyword.
+         * VARCHAR2 is oracle keyword
          */
-        LOCK("LOCK"),
-       
+        VARCHAR2("VARCHAR2"),
         /**
-         * Some sql keyword.
+         * VIEW is oracle keyword
          */
-        
-
-        SOME("SOME");
-
-
+        VIEW("VIEW"),
+        /**
+         * WHENEVER is oracle keyword
+         */
+        WHENEVER("WHENEVER"),
+        /**
+         * WHERE is oracle keyword
+         */
+        WHERE("WHERE"),
+        /**
+         * WITH is oracle keyword
+         */
+        WITH("WITH");
         /**
          * The Name.
          */

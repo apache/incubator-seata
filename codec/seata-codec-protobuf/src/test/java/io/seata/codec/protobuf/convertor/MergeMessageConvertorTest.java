@@ -15,13 +15,13 @@
  */
 package io.seata.codec.protobuf.convertor;
 
-import java.util.ArrayList;
-
+import io.seata.codec.protobuf.generated.MergedWarpMessageProto;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.MergedWarpMessage;
-import io.seata.codec.protobuf.generated.MergedWarpMessageProto;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

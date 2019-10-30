@@ -15,11 +15,11 @@
  */
 package io.seata.codec.seata.protocol;
 
-import io.seata.core.protocol.AbstractIdentifyResponse;
+import java.nio.ByteBuffer;
+
+import io.netty.buffer.ByteBuf;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.ResultCode;
-
-import java.nio.ByteBuffer;
 
 /**
  * The type Abstract result message codec.
@@ -34,12 +34,12 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer out){
-        AbstractResultMessage abstractResultMessage = (AbstractResultMessage) t;
+    public <T> void encode(T t, ByteBuf out) {
+        AbstractResultMessage abstractResultMessage = (AbstractResultMessage)t;
         ResultCode resultCode = abstractResultMessage.getResultCode();
         String resultMsg = abstractResultMessage.getMsg();
 
-        out.put((byte)resultCode.ordinal());
+        out.writeByte(resultCode.ordinal());
         if (resultCode == ResultCode.Failed) {
             if (resultMsg != null) {
                 String msg;
@@ -53,21 +53,21 @@ public abstract class AbstractResultMessageCodec extends AbstractMessageCodec {
                     msg = resultMsg.substring(0, 64);
                     bs = msg.getBytes(UTF8);
                 }
-                out.putShort((short)bs.length);
+                out.writeShort((short)bs.length);
                 if (bs.length > 0) {
-                    out.put(bs);
+                    out.writeBytes(bs);
                 }
             } else {
-                out.putShort((short)0);
+                out.writeShort((short)0);
             }
         }
     }
 
     @Override
-    public <T> void decode(T t, ByteBuffer in){
-        AbstractResultMessage abstractResultMessage = (AbstractResultMessage) t;
+    public <T> void decode(T t, ByteBuffer in) {
+        AbstractResultMessage abstractResultMessage = (AbstractResultMessage)t;
 
-        ResultCode resultCode= ResultCode.get(in.get());
+        ResultCode resultCode = ResultCode.get(in.get());
         abstractResultMessage.setResultCode(resultCode);
         if (resultCode == ResultCode.Failed) {
             short len = in.getShort();

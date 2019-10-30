@@ -43,7 +43,9 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NacosConfiguration.class);
     private static final String SEATA_GROUP = "SEATA_GROUP";
     private static final String PRO_SERVER_ADDR_KEY = "serverAddr";
-    private static final String REGISTRY_TYPE = "nacos";
+    private static final String CONFIG_TYPE = "nacos";
+    private static final String DEFAULT_NAMESPACE = "";
+    private static final String PRO_NAMESPACE_KEY = "namespace";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile ConfigService configService;
 
@@ -86,7 +88,6 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
             value = configService.getConfig(dataId, SEATA_GROUP, timeoutMills);
         } catch (NacosException exx) {
             LOGGER.error(exx.getErrMsg());
-            value = defaultValue;
         }
         return value == null ? defaultValue : value;
     }
@@ -147,17 +148,33 @@ public class NacosConfiguration extends AbstractConfiguration<Listener> {
                 properties.setProperty(PRO_SERVER_ADDR_KEY, address);
             }
         }
+
+        if (null != System.getProperty(PRO_NAMESPACE_KEY)) {
+            properties.setProperty(PRO_NAMESPACE_KEY, System.getProperty(PRO_NAMESPACE_KEY));
+        } else {
+            String namespace = FILE_CONFIG.getConfig(getNacosNameSpaceFileKey());
+            if (null == namespace) {
+                namespace = DEFAULT_NAMESPACE;
+            }
+            properties.setProperty(PRO_NAMESPACE_KEY, namespace);
+        }
         return properties;
     }
 
+    private static String getNacosNameSpaceFileKey() {
+        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
+                + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
+                + PRO_NAMESPACE_KEY;
+    }
+
     private static String getNacosAddrFileKey() {
-        return ConfigurationKeys.FILE_ROOT_REGISTRY + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
+        return ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
             + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
             + PRO_SERVER_ADDR_KEY;
     }
 
     @Override
     public String getTypeName() {
-        return REGISTRY_TYPE;
+        return CONFIG_TYPE;
     }
 }

@@ -427,7 +427,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         try {
             destroyChannel(ctx.channel());
         } catch (Exception e) {
-            LOGGER.error("", "close channel" + ctx.channel() + " fail.", e);
+            LOGGER.error("failed to close channel {}: {}", ctx.channel(), e.getMessage(), e);
         }
     }
 

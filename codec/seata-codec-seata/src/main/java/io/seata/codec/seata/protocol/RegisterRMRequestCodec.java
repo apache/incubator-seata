@@ -15,10 +15,10 @@
  */
 package io.seata.codec.seata.protocol;
 
-import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.RegisterRMRequest;
-
 import java.nio.ByteBuffer;
+
+import io.netty.buffer.ByteBuf;
+import io.seata.core.protocol.RegisterRMRequest;
 
 /**
  * The type Register rm request codec.
@@ -33,49 +33,49 @@ public class RegisterRMRequestCodec extends AbstractIdentifyRequestCodec {
     }
 
     @Override
-    protected <T> void doEncode(T t, ByteBuffer out) {
+    protected <T> void doEncode(T t, ByteBuf out) {
         super.doEncode(t, out);
 
-        RegisterRMRequest registerRMRequest = (RegisterRMRequest) t;
+        RegisterRMRequest registerRMRequest = (RegisterRMRequest)t;
         String resourceIds = registerRMRequest.getResourceIds();
 
         if (resourceIds != null) {
             byte[] bs = resourceIds.getBytes(UTF8);
-            out.putInt(bs.length);
+            out.writeInt(bs.length);
             if (bs.length > 0) {
-                out.put(bs);
+                out.writeBytes(bs);
             }
         } else {
-            out.putInt(0);
+            out.writeInt(0);
         }
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        RegisterRMRequest registerRMRequest = (RegisterRMRequest) t;
+        RegisterRMRequest registerRMRequest = (RegisterRMRequest)t;
 
         if (in.remaining() < 2) {
-            return ;
+            return;
         }
         short len = in.getShort();
         if (len > 0) {
             if (in.remaining() < len) {
-                return ;
+                return;
             }
             byte[] bs = new byte[len];
             in.get(bs);
             registerRMRequest.setVersion(new String(bs, UTF8));
         } else {
-            return ;
+            return;
         }
         if (in.remaining() < 2) {
-            return ;
+            return;
         }
         len = in.getShort();
 
         if (len > 0) {
             if (in.remaining() < len) {
-                return ;
+                return;
             }
             byte[] bs = new byte[len];
             in.get(bs);
@@ -83,25 +83,25 @@ public class RegisterRMRequestCodec extends AbstractIdentifyRequestCodec {
         }
 
         if (in.remaining() < 2) {
-            return ;
+            return;
         }
         len = in.getShort();
 
         if (in.remaining() < len) {
-            return ;
+            return;
         }
         byte[] bs = new byte[len];
         in.get(bs);
         registerRMRequest.setTransactionServiceGroup(new String(bs, UTF8));
 
         if (in.remaining() < 2) {
-            return ;
+            return;
         }
         len = in.getShort();
 
         if (len > 0) {
             if (in.remaining() < len) {
-                return ;
+                return;
             }
             bs = new byte[len];
             in.get(bs);
@@ -110,13 +110,13 @@ public class RegisterRMRequestCodec extends AbstractIdentifyRequestCodec {
 
         int iLen;
         if (in.remaining() < 4) {
-            return ;
+            return;
         }
         iLen = in.getInt();
 
         if (iLen > 0) {
             if (in.remaining() < iLen) {
-                return ;
+                return;
             }
             bs = new byte[iLen];
             in.get(bs);

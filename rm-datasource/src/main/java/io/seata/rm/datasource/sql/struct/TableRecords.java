@@ -15,21 +15,25 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.seata.common.exception.ShouldNeverHappenException;
 
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.JDBCType;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+
 /**
  * The type Table records.
  *
  * @author sharajava
  */
-@JsonIgnoreProperties({"tableMeta"})
 public class TableRecords {
 
     private transient TableMeta tableMeta;
@@ -184,7 +188,23 @@ public class TableRecords {
                     field.setKeyType(KeyType.PrimaryKey);
                 }
                 field.setType(col.getDataType());
-                field.setValue(resultSet.getObject(i));
+                // mysql will not run in this code
+                // cause mysql does not use java.sql.Blob, java.sql.sql.Clob to process Blob and Clob column
+                if (col.getDataType() == JDBCType.BLOB.getVendorTypeNumber()) {
+                    Blob blob = resultSet.getBlob(i);
+                    if (blob != null) {
+                        field.setValue(new SerialBlob(blob));
+                    }
+
+                } else if (col.getDataType() == JDBCType.CLOB.getVendorTypeNumber()) {
+                    Clob clob = resultSet.getClob(i);
+                    if (clob != null){
+                        field.setValue(new SerialClob(clob));
+                    }
+                } else {
+                    field.setValue(resultSet.getObject(i));
+                }
+
                 fields.add(field);
             }
 

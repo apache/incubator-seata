@@ -15,6 +15,7 @@
  */
 package io.seata.config;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +59,8 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
     private static final long LISTENER_CONFIG_INTERNAL = 1 * 1000;
 
     private static final String REGISTRY_TYPE = "file";
+    
+    private static final String SYS_FILE_RESOURCE_PREFIX = "file:";
 
     private final ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = new ConcurrentHashMap<>(8);
 
@@ -78,6 +81,10 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
     public FileConfiguration(String name) {
         if (null == name) {
             fileConfig = ConfigFactory.load();
+        }
+        else if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
+            Config appConfig = ConfigFactory.parseFileAnySyntax(new File(name.substring(SYS_FILE_RESOURCE_PREFIX.length())));
+            fileConfig = ConfigFactory.load(appConfig);
         } else {
             fileConfig = ConfigFactory.load(name);
         }

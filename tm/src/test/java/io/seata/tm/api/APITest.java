@@ -61,6 +61,11 @@ public class APITest {
             public GlobalStatus getStatus(String xid) throws TransactionException {
                 return GlobalStatus.Begin;
             }
+
+            @Override
+            public GlobalStatus globalReport(String xid, GlobalStatus globalStatus) throws TransactionException {
+                return globalStatus;
+            }
         });
     }
 

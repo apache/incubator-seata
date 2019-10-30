@@ -31,6 +31,7 @@
         <module>seata-codec-all</module>
         <module>seata-codec-protobuf</module>
         <module>seata-codec-seata</module>
+        <module>seata-codec-kryo</module>
     </modules>
 
 </project>

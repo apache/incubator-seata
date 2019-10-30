@@ -20,7 +20,6 @@ import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.GlobalLockQueryResponse;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

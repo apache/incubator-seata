@@ -49,6 +49,11 @@
             <artifactId>seata-codec-all</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-compressor-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -109,6 +114,7 @@
                         <windows>.bat</windows>
                     </binFileExtensions>
                     <assembleDirectory>../distribution</assembleDirectory>
+                    <logsDirectory>logs</logsDirectory>
                     <programs>
                         <program>
                             <mainClass>io.seata.server.Server</mainClass>
@@ -116,7 +122,27 @@
                             <jvmSettings>
                                 <extraArguments>
                                     <extraArgument>-server</extraArgument>
-                                    <extraArgument>-XX:MaxDirectMemorySize=1024M</extraArgument>
+                                    <extraArgument>-Xmx2048m</extraArgument>
+                                    <extraArgument>-Xms2048m</extraArgument>
+                                    <extraArgument>-Xmn1024m</extraArgument>
+                                    <extraArgument>-Xss512k</extraArgument>
+                                    <extraArgument>-XX:SurvivorRatio=10</extraArgument>
+                                    <extraArgument>-XX:MetaspaceSize=128m</extraArgument>
+                                    <extraArgument>-XX:MaxMetaspaceSize=256m</extraArgument>
+                                    <extraArgument>-XX:MaxDirectMemorySize=1024m</extraArgument>
+                                    <extraArgument>-XX:-OmitStackTraceInFastThrow</extraArgument>
+                                    <extraArgument>-XX:-UseAdaptiveSizePolicy</extraArgument>
+                                    <extraArgument>-XX:+HeapDumpOnOutOfMemoryError</extraArgument>
+                                    <extraArgument>-XX:HeapDumpPath=@BASEDIR@/logs/java_heapdump.hprof</extraArgument>
+                                    <!--gc-->
+                                    <extraArgument>-XX:+DisableExplicitGC</extraArgument>
+                                    <extraArgument>-XX:+CMSParallelRemarkEnabled</extraArgument>
+                                    <extraArgument>-XX:+UseCMSInitiatingOccupancyOnly</extraArgument>
+                                    <extraArgument>-XX:CMSInitiatingOccupancyFraction=75</extraArgument>
+                                    <extraArgument>-Xloggc:@BASEDIR@/logs/seata_gc.log</extraArgument>
+                                    <extraArgument>-verbose:gc</extraArgument>
+                                    <!--netty-->
+                                    <extraArgument>-Dio.netty.leakDetectionLevel=advanced</extraArgument>
                                 </extraArguments>
                             </jvmSettings>
                             <platforms>

@@ -17,6 +17,8 @@ package io.seata.codec.seata;
 
 import java.nio.ByteBuffer;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.codec.Codec;
 import io.seata.core.protocol.AbstractMessage;
@@ -41,12 +43,11 @@ public class SeataCodec implements Codec {
         //msg codec
         MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typecode);
         //get empty ByteBuffer
-        ByteBuffer out = MessageCodecFactory.getByteBuffer(abstractMessage);
+        ByteBuf out = Unpooled.buffer(1024);
         //msg encode
         messageCodec.encode(t, out);
-        out.flip();
-        byte[] body = new byte[out.limit()];
-        out.get(body);
+        byte[] body = new byte[out.readableBytes()];
+        out.readBytes(body);
 
         //typecode + body
         ByteBuffer byteBuffer = ByteBuffer.allocate(2 + body.length);

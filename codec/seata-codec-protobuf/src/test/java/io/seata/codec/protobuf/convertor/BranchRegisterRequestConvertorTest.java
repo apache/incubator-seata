@@ -15,8 +15,8 @@
  */
 package io.seata.codec.protobuf.convertor;
 
-import io.seata.core.model.BranchType;
 import io.seata.codec.protobuf.generated.BranchRegisterRequestProto;
+import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 import org.junit.jupiter.api.Test;
 

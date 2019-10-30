@@ -94,7 +94,7 @@ public abstract class AbstractConfiguration<T> implements Configuration<T> {
 
     @Override
     public Duration getDuration(String dataId, Duration defaultValue, long timeoutMills) {
-        String result = getConfig(dataId, String.valueOf(defaultValue.toMillis() + "ms"), timeoutMills);
+        String result = getConfig(dataId, defaultValue.toMillis() + "ms", timeoutMills);
         return DurationUtil.parse(result);
     }
 

@@ -15,10 +15,11 @@
  */
 package io.seata.codec.seata.protocol.transaction;
 
+import java.nio.ByteBuffer;
+
+import io.netty.buffer.ByteBuf;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.AbstractBranchEndRequest;
-
-import java.nio.ByteBuffer;
 
 /**
  * The type Abstract branch end request codec.
@@ -33,10 +34,10 @@ public abstract class AbstractBranchEndRequestCodec extends AbstractTransactionR
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer out){
-        AbstractBranchEndRequest abstractBranchEndRequest = (AbstractBranchEndRequest) t;
-        String  xid = abstractBranchEndRequest.getXid();
-        long branchId =  abstractBranchEndRequest.getBranchId();
+    public <T> void encode(T t, ByteBuf out) {
+        AbstractBranchEndRequest abstractBranchEndRequest = (AbstractBranchEndRequest)t;
+        String xid = abstractBranchEndRequest.getXid();
+        long branchId = abstractBranchEndRequest.getBranchId();
         BranchType branchType = abstractBranchEndRequest.getBranchType();
         String resourceId = abstractBranchEndRequest.getResourceId();
         String applicationData = abstractBranchEndRequest.getApplicationData();
@@ -44,80 +45,80 @@ public abstract class AbstractBranchEndRequestCodec extends AbstractTransactionR
         // 1. xid
         if (xid != null) {
             byte[] bs = xid.getBytes(UTF8);
-            out.putShort((short)bs.length);
+            out.writeShort((short)bs.length);
             if (bs.length > 0) {
-                out.put(bs);
+                out.writeBytes(bs);
             }
         } else {
-            out.putShort((short)0);
+            out.writeShort((short)0);
         }
         // 2. Branch Id
-        out.putLong(branchId);
+        out.writeLong(branchId);
         // 3. Branch Type
-        out.put((byte)branchType.ordinal());
+        out.writeByte(branchType.ordinal());
         // 4. Resource Id
         if (resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
-            out.putShort((short)bs.length);
+            out.writeShort((short)bs.length);
             if (bs.length > 0) {
-                out.put(bs);
+                out.writeBytes(bs);
             }
         } else {
-            out.putShort((short)0);
+            out.writeShort((short)0);
         }
 
         // 5. Application Data
         byte[] applicationDataBytes = null;
         if (applicationData != null) {
             applicationDataBytes = applicationData.getBytes(UTF8);
-            out.putInt(applicationDataBytes.length);
+            out.writeInt(applicationDataBytes.length);
             if (applicationDataBytes.length > 0) {
-                out.put(applicationDataBytes);
+                out.writeBytes(applicationDataBytes);
             }
         } else {
-            out.putInt(0);
+            out.writeInt(0);
         }
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        AbstractBranchEndRequest abstractBranchEndRequest = (AbstractBranchEndRequest) t;
+        AbstractBranchEndRequest abstractBranchEndRequest = (AbstractBranchEndRequest)t;
 
         int xidLen = 0;
         if (in.remaining() >= 2) {
             xidLen = in.getShort();
         }
         if (xidLen <= 0) {
-            return ;
+            return;
         }
         if (in.remaining() < xidLen) {
-            return ;
+            return;
         }
         byte[] bs = new byte[xidLen];
         in.get(bs);
         abstractBranchEndRequest.setXid(new String(bs, UTF8));
 
         if (in.remaining() < 8) {
-            return ;
+            return;
         }
         abstractBranchEndRequest.setBranchId(in.getLong());
 
         if (in.remaining() < 1) {
-            return ;
+            return;
         }
         abstractBranchEndRequest.setBranchType(BranchType.get(in.get()));
 
         int resourceIdLen = 0;
         if (in.remaining() < 2) {
-            return ;
+            return;
         }
         resourceIdLen = in.getShort();
 
         if (resourceIdLen <= 0) {
-            return ;
+            return;
         }
         if (in.remaining() < resourceIdLen) {
-            return ;
+            return;
         }
         bs = new byte[resourceIdLen];
         in.get(bs);
@@ -125,19 +126,18 @@ public abstract class AbstractBranchEndRequestCodec extends AbstractTransactionR
 
         int applicationDataLen = 0;
         if (in.remaining() < 4) {
-            return ;
+            return;
         }
         applicationDataLen = in.getInt();
 
         if (applicationDataLen > 0) {
             if (in.remaining() < applicationDataLen) {
-                return ;
+                return;
             }
             bs = new byte[applicationDataLen];
             in.get(bs);
             abstractBranchEndRequest.setApplicationData(new String(bs, UTF8));
         }
     }
-
 
 }

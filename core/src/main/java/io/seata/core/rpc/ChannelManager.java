@@ -160,17 +160,11 @@ public class ChannelManager {
         }
         if (null == dbkeySet || dbkeySet.isEmpty()) { return; }
         for (String resourceId : dbkeySet) {
-            RM_CHANNELS.putIfAbsent(resourceId,
-                new ConcurrentHashMap<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>>());
-            ConcurrentMap<String, ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>>> applicationIdMap
-                = RM_CHANNELS.get(resourceId);
-            applicationIdMap.putIfAbsent(resourceManagerRequest.getApplicationId(),
-                new ConcurrentHashMap<String, ConcurrentMap<Integer, RpcContext>>());
-            ConcurrentMap<String, ConcurrentMap<Integer, RpcContext>> clientIpMap = applicationIdMap.get(
-                resourceManagerRequest.getApplicationId());
-            String clientIp = getClientIpFromChannel(channel);
-            clientIpMap.putIfAbsent(clientIp, new ConcurrentHashMap<Integer, RpcContext>());
-            ConcurrentMap<Integer, RpcContext> portMap = clientIpMap.get(clientIp);
+            String clientIp;
+            ConcurrentMap<Integer, RpcContext> portMap = RM_CHANNELS.computeIfAbsent(resourceId, resourceIdKey -> new ConcurrentHashMap<>())
+                    .computeIfAbsent(resourceManagerRequest.getApplicationId(), applicationId -> new ConcurrentHashMap<>())
+                    .computeIfAbsent(clientIp = getClientIpFromChannel(channel), clientIpKey -> new ConcurrentHashMap<>());
+
             rpcContext.holdInResourceManagerChannels(resourceId, portMap);
             updateChannelsResource(resourceId, clientIp, resourceManagerRequest.getApplicationId());
         }
@@ -266,7 +260,7 @@ public class ChannelManager {
         }
         RpcContext rpcContext = getContextFromIdentified(channel);
         if (null == rpcContext) {
-            LOGGER.error("rpcContext is null,channel:" + channel + ",active:" + channel.isActive());
+            LOGGER.error("rpcContext is null,channel:{},active:{}", channel, channel.isActive());
             return null;
         }
         if (rpcContext.getChannel().isActive()) {
@@ -298,7 +292,7 @@ public class ChannelManager {
     private static Channel getChannelFromSameClientMap(Map<Integer, RpcContext> clientChannelMap, int exclusivePort) {
         if (null != clientChannelMap && !clientChannelMap.isEmpty()) {
             for (ConcurrentMap.Entry<Integer, RpcContext> entry : clientChannelMap.entrySet()) {
-                if (entry.getKey().intValue() == exclusivePort) {
+                if (entry.getKey() == exclusivePort) {
                     clientChannelMap.remove(entry.getKey());
                     continue;
                 }
@@ -335,7 +329,7 @@ public class ChannelManager {
 
         if (targetApplicationId == null || applicationIdMap == null ||  applicationIdMap.isEmpty()) {
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("No channel is available for resource[" + resourceId + "]");
+                LOGGER.info("No channel is available for resource[{}]", resourceId);
             }
             return null;
         }
@@ -354,12 +348,12 @@ public class ChannelManager {
                     if (channel.isActive()) {
                         resultChannel = channel;
                         if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug("Just got exactly the one " + channel + " for " + clientId);
+                            LOGGER.debug("Just got exactly the one {} for {}", channel, clientId);
                         }
                     } else {
                         if (portMapOnTargetIP.remove(targetPort, exactRpcContext)) {
                             if (LOGGER.isInfoEnabled()) {
-                                LOGGER.info("Removed inactive " + channel);
+                                LOGGER.info("Removed inactive {}", channel);
                             }
                         }
                     }
@@ -375,15 +369,14 @@ public class ChannelManager {
                             resultChannel = channel;
                             if (LOGGER.isInfoEnabled()) {
                                 LOGGER.info(
-                                    "Choose " + channel + " on the same IP[" + targetIP + "]  as alternative of "
-                                        + clientId);
+                                    "Choose {} on the same IP[{}] as alternative of {}", channel, targetIP, clientId);
                             }
                             break;
                         } else {
                             if (portMapOnTargetIP.remove(portMapOnTargetIPEntry.getKey(),
                                 portMapOnTargetIPEntry.getValue())) {
                                 if (LOGGER.isInfoEnabled()) {
-                                    LOGGER.info("Removed inactive " + channel);
+                                    LOGGER.info("Removed inactive {}", channel);
                                 }
                             }
                         }
@@ -408,16 +401,14 @@ public class ChannelManager {
                         if (channel.isActive()) {
                             resultChannel = channel;
                             if (LOGGER.isInfoEnabled()) {
-                                LOGGER.info("Choose " + channel + " on the same application[" + targetApplicationId
-                                    + "] as alternative of "
-                                    + clientId);
+                                LOGGER.info("Choose {} on the same application[{}] as alternative of {}", channel, targetApplicationId, clientId);
                             }
                             break;
                         } else {
                             if (portMapOnOtherIP.remove(portMapOnOtherIPEntry.getKey(),
                                 portMapOnOtherIPEntry.getValue())) {
                                 if (LOGGER.isInfoEnabled()) {
-                                    LOGGER.info("Removed inactive " + channel);
+                                    LOGGER.info("Removed inactive {}", channel);
                                 }
                             }
                         }
@@ -432,15 +423,11 @@ public class ChannelManager {
 
             if (resultChannel == null) {
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("No channel is available for resource[" + resourceId
-                        + "]  as alternative of "
-                        + clientId);
+                    LOGGER.info("No channel is available for resource[{}] as alternative of {}", resourceId, clientId);
                 }
             } else {
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("Choose " + resultChannel + " on the same resource[" + resourceId
-                        + "]  as alternative of "
-                        + clientId);
+                    LOGGER.info("Choose {} on the same resource[{}] as alternative of {}", resultChannel, resourceId, clientId);
                 }
             }
         }
@@ -478,7 +465,7 @@ public class ChannelManager {
                     } else {
                         if (portMap.remove(portMapEntry.getKey(), portMapEntry.getValue())) {
                             if (LOGGER.isInfoEnabled()) {
-                                LOGGER.info("Removed inactive " + channel);
+                                LOGGER.info("Removed inactive {}", channel);
                             }
                         }
                     }

@@ -6,7 +6,7 @@ create table `global_table` (
   `status` tinyint not null,
   `application_id` varchar(32),
   `transaction_service_group` varchar(32),
-  `transaction_name` varchar(64),
+  `transaction_name` varchar(128),
   `timeout` int,
   `begin_time` bigint,
   `application_data` varchar(2000),
@@ -45,7 +45,7 @@ create table `lock_table` (
   `branch_id` long,
   `resource_id` varchar(256) ,
   `table_name` varchar(32) ,
-  `pk` varchar(32) ,
+  `pk` varchar(36) ,
   `gmt_create` datetime ,
   `gmt_modified` datetime,
   primary key(`row_key`)

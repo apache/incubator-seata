@@ -13,4 +13,5 @@ enum BranchTypeProto {
 
     TCC = 1;
 
+    SAGA = 2;
 }

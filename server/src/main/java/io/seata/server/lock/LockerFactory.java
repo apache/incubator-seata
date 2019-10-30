@@ -67,7 +67,7 @@ public class LockerFactory {
      *
      * @return the lock manager
      */
-    public static synchronized final LockManager getLockManager() {
+    public static final LockManager getLockManager() {
         return lockManager;
     }
 
@@ -77,7 +77,7 @@ public class LockerFactory {
      * @param branchSession the branch session
      * @return the lock manager
      */
-    public static synchronized final Locker get(BranchSession branchSession) {
+    public static final Locker get(BranchSession branchSession) {
         String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
         if (StoreMode.DB.name().equalsIgnoreCase(storeMode)) {
             if (lockerMap.get(storeMode) != null) {
@@ -90,11 +90,8 @@ public class LockerFactory {
             DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
             locker = EnhancedServiceLoader.load(Locker.class, storeMode, new Class[] {DataSource.class},
                 new Object[] {logStoreDataSource});
-            lockerMap.put(storeMode, locker);
+            lockerMap.putIfAbsent(storeMode, locker);
         } else if (StoreMode.FILE.name().equalsIgnoreCase(storeMode)) {
-            if (branchSession == null) {
-                throw new IllegalArgumentException("branchSession can be null for memory/file locker.");
-            }
             locker = EnhancedServiceLoader.load(Locker.class, storeMode,
                 new Class[] {BranchSession.class}, new Object[] {branchSession});
         } else {

@@ -15,10 +15,11 @@
  */
 package io.seata.codec.seata.protocol.transaction;
 
+import java.nio.ByteBuffer;
+
+import io.netty.buffer.ByteBuf;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.UndoLogDeleteRequest;
-
-import java.nio.ByteBuffer;
 
 /**
  * The type UndoLog Delete end request codec.
@@ -33,55 +34,54 @@ public class UndoLogDeleteRequestCodec extends AbstractTransactionRequestToRMCod
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer out){
-        UndoLogDeleteRequest undoLogDeleteRequest = (UndoLogDeleteRequest) t;
-        short saveDays =  undoLogDeleteRequest.getSaveDays();
+    public <T> void encode(T t, ByteBuf out) {
+        UndoLogDeleteRequest undoLogDeleteRequest = (UndoLogDeleteRequest)t;
+        short saveDays = undoLogDeleteRequest.getSaveDays();
         BranchType branchType = undoLogDeleteRequest.getBranchType();
         String resourceId = undoLogDeleteRequest.getResourceId();
 
         // 1. Branch Type
-        out.put((byte)branchType.ordinal());
+        out.writeByte((byte)branchType.ordinal());
 
         // 2. Resource Id
         if (resourceId != null) {
             byte[] bs = resourceId.getBytes(UTF8);
-            out.putShort((short)bs.length);
+            out.writeShort((short)bs.length);
             if (bs.length > 0) {
-                out.put(bs);
+                out.writeBytes(bs);
             }
         } else {
-            out.putShort((short)0);
+            out.writeShort((short)0);
         }
 
         //3.save days
-        out.putShort(saveDays);
+        out.writeShort(saveDays);
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        UndoLogDeleteRequest undoLogDeleteRequest = (UndoLogDeleteRequest) t;
+        UndoLogDeleteRequest undoLogDeleteRequest = (UndoLogDeleteRequest)t;
 
         if (in.remaining() < 1) {
-            return ;
+            return;
         }
         undoLogDeleteRequest.setBranchType(BranchType.get(in.get()));
 
         if (in.remaining() < 2) {
-            return ;
+            return;
         }
         int resourceIdLen = in.getShort();
         if (resourceIdLen <= 0 || in.remaining() < resourceIdLen) {
-            return ;
+            return;
         }
         byte[] bs = new byte[resourceIdLen];
         in.get(bs);
         undoLogDeleteRequest.setResourceId(new String(bs, UTF8));
 
         if (in.remaining() < 2) {
-            return ;
+            return;
         }
         undoLogDeleteRequest.setSaveDays(in.getShort());
     }
-
 
 }

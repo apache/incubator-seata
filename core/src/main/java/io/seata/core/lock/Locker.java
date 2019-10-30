@@ -21,7 +21,7 @@ import java.util.List;
  * The interface Locker.
  *
  * @author zhangsen
- * @data 2019 -05-15
+ * @date 2019 -05-15
  */
 public interface Locker {
 

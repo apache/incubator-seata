@@ -185,7 +185,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             IdleStateEvent idleStateEvent = (IdleStateEvent)evt;
             if (idleStateEvent.state() == IdleState.READER_IDLE) {
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("channel" + ctx.channel() + " read idle.");
+                    LOGGER.info("channel {} read idle.", ctx.channel());
                 }
                 try {
                     String serverAddress = NetUtil.toStringAddress(ctx.channel().remoteAddress());
@@ -199,11 +199,11 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             if (idleStateEvent == IdleStateEvent.WRITER_IDLE_STATE_EVENT) {
                 try {
                     if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("will send ping msg,channel" + ctx.channel());
+                        LOGGER.debug("will send ping msg,channel {}", ctx.channel());
                     }
                     sendRequest(ctx.channel(), HeartbeatMessage.PING);
                 } catch (Throwable throwable) {
-                    LOGGER.error("", "send request error", throwable);
+                    LOGGER.error("send request error: {}", throwable.getMessage(), throwable);
                 }
             }
         }
@@ -215,7 +215,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             NetUtil.toStringAddress(ctx.channel().remoteAddress()) + "connect exception. " + cause.getMessage(), cause);
         clientChannelManager.releaseChannel(ctx.channel(), getAddressFromChannel(ctx.channel()));
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("remove exception rm channel:" + ctx.channel());
+            LOGGER.info("remove exception rm channel:{}", ctx.channel());
         }
         super.exceptionCaught(ctx, cause);
     }
@@ -330,7 +330,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                                 messageFuture.setResultMessage(null);
                             }
                         }
-                        LOGGER.error("", "client merge call failed", e);
+                        LOGGER.error("client merge call failed: {}", e.getMessage(), e);
                     }
                 }
                 isSending = false;
@@ -339,7 +339,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
 
         private void printMergeMessageLog(MergedWarpMessage mergeMessage) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("merge msg size:" + mergeMessage.msgIds.size());
+                LOGGER.debug("merge msg size:{}", mergeMessage.msgIds.size());
                 for (AbstractMessage cm : mergeMessage.msgs) {
                     LOGGER.debug(cm.toString());
                 }

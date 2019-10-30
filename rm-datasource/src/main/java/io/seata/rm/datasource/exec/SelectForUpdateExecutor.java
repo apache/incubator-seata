@@ -16,19 +16,21 @@
 package io.seata.rm.datasource.exec;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.DatabaseMetaData;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLSelectRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Select for update executor.
@@ -38,6 +40,8 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
  * @param <S> the type parameter
  */
 public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SelectForUpdateExecutor.class);
 
     /**
      * Instantiates a new Select for update executor.
@@ -53,58 +57,40 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
 
     @Override
     public T doExecute(Object... args) throws Throwable {
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
-
         Connection conn = statementProxy.getConnection();
+        DatabaseMetaData dbmd = conn.getMetaData();
         T rs = null;
         Savepoint sp = null;
         LockRetryController lockRetryController = new LockRetryController();
         boolean originalAutoCommit = conn.getAutoCommit();
-
-        StringBuffer selectSQLAppender = new StringBuffer("SELECT ");
-        selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
-        selectSQLAppender.append(" FROM " + getFromTableInSQL());
-        String whereCondition = null;
-        ArrayList<Object> paramAppender = new ArrayList<>();
-        if (statementProxy instanceof ParametersHolder) {
-            whereCondition = recognizer.getWhereCondition((ParametersHolder)statementProxy, paramAppender);
-        } else {
-            whereCondition = recognizer.getWhereCondition();
-        }
-        if (!StringUtils.isNullOrEmpty(whereCondition)) {
-            selectSQLAppender.append(" WHERE " + whereCondition);
-        }
-        selectSQLAppender.append(" FOR UPDATE");
-        String selectPKSQL = selectSQLAppender.toString();
-
+        ArrayList<List<Object>> paramAppenderList = new ArrayList<>();
+        String selectPKSQL = buildSelectSQL(paramAppenderList);
         try {
             if (originalAutoCommit) {
+                /*
+                 * In order to hold the local db lock during global lock checking
+                 * set auto commit value to false first if original auto commit was true
+                 */
                 conn.setAutoCommit(false);
+            } else if (dbmd.supportsSavepoints()) {
+                /*
+                 * In order to release the local db lock when global lock conflict
+                 * create a save point if original auto commit was false, then use the save point here to release db lock during global lock checking if necessary
+                 */
+                sp = conn.setSavepoint();
+            } else {
+                throw new SQLException("not support savepoint. please check your db version");
             }
-            sp = conn.setSavepoint();
-            // #870
-            // execute return Boolean
-            // executeQuery return ResultSet
-            rs = statementCallback.execute(statementProxy.getTargetStatement(), args);
 
             while (true) {
-                // Try to get global lock of those rows selected
-                Statement stPK = null;
-                PreparedStatement pstPK = null;
-                ResultSet rsPK = null;
                 try {
-                    if (paramAppender.isEmpty()) {
-                        stPK = statementProxy.getConnection().createStatement();
-                        rsPK = stPK.executeQuery(selectPKSQL);
-                    } else {
-                        pstPK = statementProxy.getConnection().prepareStatement(selectPKSQL);
-                        for (int i = 0; i < paramAppender.size(); i++) {
-                            pstPK.setObject(i + 1, paramAppender.get(i));
-                        }
-                        rsPK = pstPK.executeQuery();
-                    }
+                    // #870
+                    // execute return Boolean
+                    // executeQuery return ResultSet
+                    rs = statementCallback.execute(statementProxy.getTargetStatement(), args);
 
-                    TableRecords selectPKRows = TableRecords.buildRecords(getTableMeta(), rsPK);
+                    // Try to get global lock of those rows selected
+                    TableRecords selectPKRows = buildTableRecords(getTableMeta(), selectPKSQL, paramAppenderList);
                     String lockKeys = buildLockKey(selectPKRows);
                     if (StringUtils.isNullOrEmpty(lockKeys)) {
                         break;
@@ -120,34 +106,43 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     } else {
                         throw new RuntimeException("Unknown situation!");
                     }
-                    
                     break;
-
                 } catch (LockConflictException lce) {
-                    conn.rollback(sp);
+                    if (sp != null) {
+                        conn.rollback(sp);
+                    } else {
+                        conn.rollback();
+                    }
                     lockRetryController.sleep(lce);
-
-                } finally {
-                    if (rsPK != null) {
-                        rsPK.close();
-                    }
-                    if (stPK != null) {
-                        stPK.close();
-                    }
-                    if (pstPK != null) {
-                        pstPK.close();
-                    }
                 }
             }
-
         } finally {
             if (sp != null) {
-                conn.releaseSavepoint(sp);
+                try {
+                    conn.releaseSavepoint(sp);
+                } catch (SQLException e) {
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("{} does not support release save point, but this is not a error.", getDbType());
+                    }
+                }
             }
             if (originalAutoCommit) {
                 conn.setAutoCommit(true);
             }
         }
         return rs;
+    }
+
+    private String buildSelectSQL(ArrayList<List<Object>> paramAppenderList){
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
+        StringBuilder selectSQLAppender = new StringBuilder("SELECT ");
+        selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
+        selectSQLAppender.append(" FROM ").append(getFromTableInSQL());
+        String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
+        if (StringUtils.isNotBlank(whereCondition)) {
+            selectSQLAppender.append(" WHERE ").append(whereCondition);
+        }
+        selectSQLAppender.append(" FOR UPDATE");
+        return selectSQLAppender.toString();
     }
 }

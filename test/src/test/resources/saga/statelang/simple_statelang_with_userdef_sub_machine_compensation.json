@@ -1,0 +1,118 @@
+{
+    "Name": "simpleStateMachineWithUseDefCompensationSubMachine",
+    "Comment": "自定义补偿子状态机",
+    "StartState": "FirstState",
+    "Version": "0.0.1",
+    "States": {
+        "FirstState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
+            "CompensateState": "CompensateFirstState",
+            "Next": "ChoiceState",
+            "Input": [
+                {
+                    "fooInput": "$.[a]"
+                }
+            ],
+            "Output": {
+                "fooResult": "$.#root"
+            },
+            "Status": {
+                "#root != null": "SU",
+                "#root == null": "FA",
+                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN"
+            }
+        },
+        "ChoiceState":{
+            "Type": "Choice",
+            "Choices":[
+                {
+                    "Expression":"[a] == 1",
+                    "Next":"SecondState"
+                },
+                {
+                    "Expression":"[a] == 2",
+                    "Next":"CallSubStateMachine"
+                }
+            ],
+            "Default":"Fail"
+        },
+        "SecondState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "bar",
+            "CompensateState": "CompensateSecondState",
+            "Input": [
+                {
+                    "barInput": "$.[fooResult]",
+                    "throwException": "$.[barThrowException]"
+                }
+            ],
+            "Output": {
+                "barResult": "$.#root"
+            },
+            "Status": {
+                "#root != null": "SU",
+                "#root == null": "FA",
+                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN"
+            },
+            "Catch": [
+                {
+                    "Exceptions": [
+                        "io.seata.common.exception.FrameworkException"
+                    ],
+                    "Next": "CompensationTrigger"
+                }
+            ],
+            "Next": "Succeed"
+        },
+        "CallSubStateMachine": {
+            "Type": "SubStateMachine",
+            "StateMachineName": "simpleCompensationStateMachine",
+            "CompensateState": "CompensateSubMachine",
+            "Input": [
+                {
+                    "a": "$.1",
+                    "barThrowException": "$.[barThrowException]",
+                    "fooThrowException": "$.[fooThrowException]",
+                    "compensateFooThrowException": "$.[compensateFooThrowException]"
+                }
+            ],
+            "Output": {
+                "fooResult": "$.#root"
+            },
+            "Next": "Succeed"
+        },
+        "CompensateFirstState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "compensateFoo",
+            "Input": [
+                {
+                    "compensateFooInput": "$.[fooResult]"
+                }
+            ]
+        },
+        "CompensateSubMachine": {
+            "Type": "CompensateSubMachine",
+            "Input": [
+                {
+                    "compensateFooThrowException": "$.[compensateFooThrowException]"
+                }
+            ]
+        },
+        "CompensationTrigger": {
+            "Type": "CompensationTrigger",
+            "Next": "Fail"
+        },
+        "Succeed": {
+            "Type":"Succeed"
+        },
+        "Fail": {
+            "Type":"Fail",
+            "ErrorCode": "NOT_FOUND",
+            "Message": "not found"
+        }
+    }
+}

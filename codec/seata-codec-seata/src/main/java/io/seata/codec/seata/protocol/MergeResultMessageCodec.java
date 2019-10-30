@@ -15,13 +15,14 @@
  */
 package io.seata.codec.seata.protocol;
 
+import java.nio.ByteBuffer;
+
+import io.netty.buffer.ByteBuf;
 import io.seata.codec.seata.MessageCodecFactory;
 import io.seata.codec.seata.MessageSeataCodec;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
-
-import java.nio.ByteBuffer;
 
 /**
  * The type Merge result message codec.
@@ -36,44 +37,40 @@ public class MergeResultMessageCodec extends AbstractMessageCodec {
     }
 
     @Override
-    public <T> void encode(T t, ByteBuffer out){
-        MergeResultMessage mergeResultMessage = (MergeResultMessage) t;
+    public <T> void encode(T t, ByteBuf out) {
+        MergeResultMessage mergeResultMessage = (MergeResultMessage)t;
         AbstractResultMessage[] msgs = mergeResultMessage.getMsgs();
-
-        ByteBuffer byteBuffer = ByteBuffer.allocate(msgs.length * 1024);
-        byteBuffer.putShort((short)msgs.length);
+        int writeIndex = out.writerIndex();
+        out.writeInt(0);
+        out.writeShort((short)msgs.length);
         for (AbstractMessage msg : msgs) {
             //get messageCodec
             short typeCode = msg.getTypeCode();
             //put typeCode
-            byteBuffer.putShort(typeCode);
+            out.writeShort(typeCode);
             MessageSeataCodec messageCodec = MessageCodecFactory.getMessageCodec(typeCode);
-            messageCodec.encode(msg, byteBuffer);
+            messageCodec.encode(msg, out);
         }
 
-        byteBuffer.flip();
-        int length = byteBuffer.limit();
-        byte[] content = new byte[length + 4];
-        intToBytes(length, content, 0);
-        byteBuffer.get(content, 4, length);
+        int length = out.readableBytes() - 4;
+        out.setInt(writeIndex,length);
         if (msgs.length > 20) {
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("msg in one services merge packet:" + msgs.length  + ",buffer size:" + content.length);
+                LOGGER.debug("msg in one services merge packet:" + msgs.length + ",buffer size:" + length);
             }
         }
-        out.put(content);
     }
 
     @Override
     public <T> void decode(T t, ByteBuffer in) {
-        MergeResultMessage mergeResultMessage = (MergeResultMessage) t;
+        MergeResultMessage mergeResultMessage = (MergeResultMessage)t;
 
         if (in.remaining() < 4) {
-            return ;
+            return;
         }
         int length = in.getInt();
         if (in.remaining() < length) {
-            return ;
+            return;
         }
         byte[] buffer = new byte[length];
         in.get(buffer);

@@ -36,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
+import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
 
 /**
  * @author crazier.huang
@@ -44,9 +45,8 @@ import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListener> {
     private final static Logger LOGGER = LoggerFactory.getLogger(ZookeeperConfiguration.class);
 
-    private static final String REGISTRY_TYPE = "zk";
+    private static final String CONFIG_TYPE = "zk";
     private static final String ZK_PATH_SPLIT_CHAR = "/";
-    private static final String FILE_ROOT_CONFIG = "config";
     private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_CONFIG;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String SERVER_ADDR_KEY = "serverAddr";
@@ -55,7 +55,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
     private static final int THREAD_POOL_NUM = 1;
     private static final int DEFAULT_SESSION_TIMEOUT = 6000;
     private static final int DEFAULT_CONNECT_TIMEOUT = 2000;
-    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
+    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
         + FILE_CONFIG_SPLIT_CHAR;
     private static final ExecutorService CONFIG_EXECUTOR = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
         Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
@@ -79,7 +79,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
 
     @Override
     public String getTypeName() {
-        return REGISTRY_TYPE;
+        return CONFIG_TYPE;
     }
 
     @Override
@@ -90,13 +90,10 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
         }
         FutureTask<String> future = new FutureTask<String>(new Callable<String>() {
             @Override
-            public String call() throws Exception {
+            public String call() {
                 String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
                 String value = zkClient.readData(path);
-                if (StringUtils.isNullOrEmpty(value)) {
-                    return defaultValue;
-                }
-                return value;
+                return StringUtils.isNullOrEmpty(value) ? defaultValue : value;
             }
         });
         CONFIG_EXECUTOR.execute(future);
@@ -112,7 +109,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
             @Override
-            public Boolean call() throws Exception {
+            public Boolean call() {
                 String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
                 if (!zkClient.exists(path)) {
                     zkClient.create(path, content, CreateMode.PERSISTENT);
@@ -140,7 +137,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
     public boolean removeConfig(String dataId, long timeoutMills) {
         FutureTask<Boolean> future = new FutureTask<Boolean>(new Callable<Boolean>() {
             @Override
-            public Boolean call() throws Exception {
+            public Boolean call() {
                 String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
                 return zkClient.delete(path);
             }
