@@ -15,6 +15,7 @@
  */
 package io.seata.core.store.db;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -25,13 +26,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.sql.DataSource;
-
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.LambdaUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -104,9 +104,11 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
-        List<LockDO> unrepeatedLockDOs = null;
         Set<String> dbExistedRowKeys = new HashSet<>();
         boolean originalAutoCommit = true;
+        if (lockDOs.size() > 1) {
+            lockDOs = lockDOs.stream().filter(LambdaUtils.distinctByKey(LockDO::getRowKey)).collect(Collectors.toList());
+        }
         try {
             conn = logStoreDataSource.getConnection();
             if (originalAutoCommit = conn.getAutoCommit()) {
@@ -149,6 +151,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
                 conn.rollback();
                 return false;
             }
+            List<LockDO> unrepeatedLockDOs = null;
             if (CollectionUtils.isNotEmpty(dbExistedRowKeys)) {
                 unrepeatedLockDOs = lockDOs.stream().filter(lockDO -> !dbExistedRowKeys.contains(lockDO.getRowKey()))
                     .collect(Collectors.toList());
@@ -159,7 +162,6 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
                 conn.rollback();
                 return true;
             }
-
             //lock
             for (LockDO lockDO : unrepeatedLockDOs) {
                 if (!doAcquireLock(conn, lockDO)) {

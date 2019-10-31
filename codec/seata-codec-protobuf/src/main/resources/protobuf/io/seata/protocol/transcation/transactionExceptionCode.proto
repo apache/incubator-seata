@@ -109,5 +109,9 @@ enum TransactionExceptionCodeProto {
      */
     FailedWriteSession = 16;
 
+    /**
+     * FailedStore
+     */
+    FailedStore = 17;
 
 }
