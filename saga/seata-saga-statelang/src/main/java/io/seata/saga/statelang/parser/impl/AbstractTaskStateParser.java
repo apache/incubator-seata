@@ -42,7 +42,7 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
         state.setForCompensation("true".equals(nodeMap.get("IsForCompensation")));
         state.setForUpdate("true".equals(nodeMap.get("IsForUpdate")));
         Object isPersist = nodeMap.get("IsPersist");
-        if(isPersist != null && Boolean.FALSE.equals(isPersist)){
+        if(Boolean.FALSE.equals(isPersist)){
             state.setPersist(false);
         }
 
