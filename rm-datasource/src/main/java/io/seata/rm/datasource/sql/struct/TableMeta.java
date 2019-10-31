@@ -124,7 +124,10 @@ public class TableMeta {
         }
 
         if (pk.size() > 1) {
-            throw new NotSupportYetException("Multi PK");
+            throw new NotSupportYetException(String.format("%s contains multi PK, but current not support.", tableName));
+        }
+        if (pk.size() < 1) {
+            throw new NotSupportYetException(String.format("%s needs to contain the primary key.", tableName));
         }
 
         return pk;
