@@ -327,6 +327,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 }
             });
         }
-        return bean;
+        return super.postProcessAfterInitialization(bean, beanName);
     }
 }
