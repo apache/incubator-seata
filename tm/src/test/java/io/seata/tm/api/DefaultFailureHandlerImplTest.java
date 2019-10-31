@@ -41,8 +41,6 @@ class DefaultFailureHandlerImplTest {
     private static final String DEFAULT_XID = "1234567890";
     private static GlobalStatus globalStatus = GlobalStatus.Begin;
 
-//    private GlobalStatus globalStatus = null;
-
     @BeforeAll
     public static void init() {
 
@@ -95,7 +93,6 @@ class DefaultFailureHandlerImplTest {
         Field field = c.getDeclaredField("timer");
         field.setAccessible(true);
         HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
-         field = c.getDeclaredField("timer");
         // assert timer pendingCount: first time is 1
         Long pendingTimeout = timer.pendingTimeouts();
         Assertions.assertEquals(pendingTimeout,1L);
@@ -122,7 +119,6 @@ class DefaultFailureHandlerImplTest {
         Field field = c.getDeclaredField("timer");
         field.setAccessible(true);
         HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
-        field = c.getDeclaredField("timer");
         // assert timer pendingCount: first time is 1
         Long pendingTimeout = timer.pendingTimeouts();
         Assertions.assertEquals(pendingTimeout,1L);
