@@ -467,7 +467,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps = conn.prepareStatement(sql);
             ps.setString(1, branchTransactionDO.getXid());
             ps.setLong(2, branchTransactionDO.getBranchId());
-            return ps.executeUpdate() > 0;
+            ps.executeUpdate();
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
@@ -484,6 +484,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
                 }
             }
         }
+        return true;
     }
 
     private GlobalTransactionDO convertGlobalTransactionDO(ResultSet rs) throws SQLException {

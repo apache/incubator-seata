@@ -236,29 +236,29 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 return BranchStatus.PhaseTwo_Committed;
             }
 
-            if(BranchType.SAGA.equals(branchType)){
-
+            if (BranchType.SAGA.equals(branchType)) {
                 Map<String,Channel> channels = ChannelManager.getRmChannels();
-                if(channels == null || channels.size() == 0){
+                if (channels == null || channels.size() == 0) {
                     LOGGER.error("Failed to commit SAGA global[" + globalSession.getXid() + ", RM channels is empty.");
                     return BranchStatus.PhaseTwo_CommitFailed_Retryable;
                 }
                 String sagaResourceId = globalSession.getApplicationId() + "#" + globalSession.getTransactionServiceGroup();
                 Channel sagaChannel = channels.get(sagaResourceId);
-                if(sagaChannel == null){
+                if (sagaChannel == null) {
                     LOGGER.error("Failed to commit SAGA global[" + globalSession.getXid() + ", cannot find channel by resourceId["+sagaResourceId+"]");
                     return BranchStatus.PhaseTwo_CommitFailed_Retryable;
                 }
                 BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(sagaChannel, request);
                 return response.getBranchStatus();
-            }
-            else{
-
+            } else {
                 BranchSession branchSession = globalSession.getBranch(branchId);
-
-                BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
+                if (null != branchSession) {
+                    BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
                         branchSession.getClientId(), request);
-                return response.getBranchStatus();
+                    return response.getBranchStatus();
+                } else {
+                    return BranchStatus.PhaseTwo_Committed;
+                }
             }
         } catch (IOException | TimeoutException e) {
             throw new BranchTransactionException(FailedToSendBranchCommitRequest, String.format("Send branch commit failed, xid = %s branchId = %s", xid, branchId), e);
