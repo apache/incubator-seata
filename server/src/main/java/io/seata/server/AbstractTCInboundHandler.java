@@ -126,7 +126,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
                 TransactionException tex) {
                 super.onTransactionException(request, response, tex);
                 // may be appears StoreException outer layer method catch
-                GlobalSession globalSession = SessionHolder.findGlobalSession(request.getXid());
+                GlobalSession globalSession = SessionHolder.findGlobalSession(request.getXid(), false);
                 if (globalSession != null) {
                     response.setGlobalStatus(globalSession.getStatus());
                 } else {
@@ -138,7 +138,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
             public void onException(GlobalRollbackRequest request, GlobalRollbackResponse response, Exception rex) {
                 super.onException(request, response, rex);
                 // may be appears StoreException outer layer method catch
-                GlobalSession globalSession = SessionHolder.findGlobalSession(request.getXid());
+                GlobalSession globalSession = SessionHolder.findGlobalSession(request.getXid(), false);
                 if (globalSession != null) {
                     response.setGlobalStatus(globalSession.getStatus());
                 } else {
