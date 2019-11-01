@@ -107,6 +107,11 @@ public class TableMetaTest {
         TableMeta tableMeta = new TableMeta();
         Assertions.assertFalse(tableMeta.containsPK(Lists.newArrayList("id")));
 
+        Throwable exception = Assertions.assertThrows(NotSupportYetException.class, () -> {
+            tableMeta.containsPK(Lists.newArrayList("id"));
+        });
+        Assertions.assertEquals(tableMeta.getTableName() + " needs to contain the primary key.",
+            exception.getMessage());
         IndexMeta primary = new IndexMeta();
         primary.setIndextype(IndexType.PRIMARY);
         ColumnMeta columnMeta = new ColumnMeta();

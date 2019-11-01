@@ -30,6 +30,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * @author zhangsen
@@ -96,6 +97,12 @@ public class DataBaseLockStoreDAOTest {
             lockDOs.add(lock);
         }
 
+        StringJoiner sj = new StringJoiner(",");
+        for (LockDO lockDO : lockDOs) {
+            sj.add("?");
+        }
+        System.out.println("result: "+ sj.toString());
+
         boolean ret = dataBaseLockStoreDAO.acquireLock(lockDOs);
         Assertions.assertTrue(ret);
 
@@ -119,8 +126,8 @@ public class DataBaseLockStoreDAOTest {
         }
 
         Assertions.assertTrue(dataBaseLockStoreDAO.unLock(lockDOs));
-
     }
+
 
 
     @Test

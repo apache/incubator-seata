@@ -34,6 +34,7 @@ import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * SpringBean Service Invoker
@@ -45,11 +46,36 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
     private static final Logger LOGGER = LoggerFactory.getLogger(SpringBeanServiceInvoker.class);
 
     private ApplicationContext applicationContext;
+    private ThreadPoolExecutor threadPoolExecutor;
 
     @Override
     public Object invoke(ServiceTaskState serviceTaskState, Object... input) {
-
         ServiceTaskStateImpl state = (ServiceTaskStateImpl) serviceTaskState;
+        if(state.isAsync()){
+            if(threadPoolExecutor == null){
+                if(LOGGER.isWarnEnabled()){
+                    LOGGER.warn("threadPoolExecutor is null, Service[{}.{}] cannot execute asynchronously, executing synchronously now. stateName: {}", state.getServiceName(), state.getServiceMethod(), state.getName());
+                }
+                return doInvoke(state, input);
+            }
+
+            if(LOGGER.isInfoEnabled()){
+                LOGGER.info("Submit Service[{}.{}] to asynchronously executing. stateName: {}", state.getServiceName(), state.getServiceMethod(), state.getName());
+            }
+            threadPoolExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
+                    doInvoke(state, input);
+                }
+            });
+            return null;
+        }
+        else{
+            return doInvoke(state, input);
+        }
+    }
+
+    protected Object doInvoke(ServiceTaskStateImpl state, Object[] input) {
 
         Object bean = applicationContext.getBean(state.getServiceName());
 
@@ -68,6 +94,7 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
 
         if (method == null) {
             throw new EngineExecutionException("No such method[" + state.getServiceMethod() + "] on BeanClass[" + bean.getClass() + "]", FrameworkErrorCode.NoSuchMethod);
+
         }
 
         Object[] args = new Object[method.getParameterCount()];
@@ -89,6 +116,10 @@ public class SpringBeanServiceInvoker implements ServiceInvoker, ApplicationCont
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext;
+    }
+
+    public void setThreadPoolExecutor(ThreadPoolExecutor threadPoolExecutor) {
+        this.threadPoolExecutor = threadPoolExecutor;
     }
 
     protected Method findMethod(Class<?> clazz, String methodName, List<String> parameterTypes) {
