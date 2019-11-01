@@ -13,9 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.engine.impl;
+package io.seata.saga.engine.strategy.impl;
 
-import io.seata.saga.engine.StatusDecisionStrategy;
+import io.seata.saga.engine.strategy.StatusDecisionStrategy;
 import io.seata.saga.engine.pcext.utils.CompensationHolder;
 import io.seata.saga.engine.utils.ExceptionUtils;
 import io.seata.saga.proctrl.ProcessContext;
