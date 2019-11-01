@@ -15,7 +15,7 @@ seata:
         lock-retry-policy-branch-rollback-on-conflict: true
     support:
       spring:
-        datasource-autoproxy: true
+        datasource-autoproxy: false
     undo:
       undo-data-validation: true
       undo-log-serialization: jackson
