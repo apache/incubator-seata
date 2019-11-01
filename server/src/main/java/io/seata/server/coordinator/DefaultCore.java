@@ -15,6 +15,8 @@
  */
 package io.seata.server.coordinator;
 
+import java.util.ArrayList;
+
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.BranchTransactionException;
@@ -34,8 +36,6 @@ import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
 
 import static io.seata.core.exception.TransactionExceptionCode.BranchTransactionNotExist;
 import static io.seata.core.exception.TransactionExceptionCode.FailedToAddBranch;
@@ -182,7 +182,7 @@ public class DefaultCore implements Core {
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
             globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
 
-        if(isSaga(globalSession)){
+        if (isSaga(globalSession)) {
             try {
                 String sagaResourceId = globalSession.getApplicationId() + "#" + globalSession.getTransactionServiceGroup();
                 BranchStatus branchStatus = resourceManagerInbound.branchCommit(BranchType.SAGA, globalSession.getXid(), -1, sagaResourceId, null);
@@ -232,9 +232,7 @@ public class DefaultCore implements Core {
                 }
                 throw new TransactionException(ex);
             }
-        }
-        else{
-
+        } else {
             for (BranchSession branchSession : globalSession.getSortedBranches()) {
                 BranchStatus currentStatus = branchSession.getStatus();
                 if (currentStatus == BranchStatus.PhaseOne_Failed) {
