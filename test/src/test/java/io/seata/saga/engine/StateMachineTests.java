@@ -228,4 +228,28 @@ public class StateMachineTests {
 
         Assertions.assertTrue(ExecutionStatus.SU.equals(instance.getStatus()));
     }
+
+    @Test
+    public void testSimpleStateMachineWithAsyncState() {
+
+        long start  = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+
+        String stateMachineName = "simpleStateMachineWithAsyncState";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
 }
