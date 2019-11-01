@@ -31,6 +31,17 @@ public class MockGlobalTransaction implements GlobalTransaction {
 
     private static SpringJvmUUIDSeqGenerator uuidSeqGenerator = new SpringJvmUUIDSeqGenerator();
 
+    public MockGlobalTransaction() {}
+
+    public MockGlobalTransaction(String xid) {
+        this.xid = xid;
+    }
+
+    public MockGlobalTransaction(String xid, GlobalStatus status) {
+        this.xid = xid;
+        this.status = status;
+    }
+
     @Override
     public void begin() throws TransactionException {
         begin(60000);

@@ -35,6 +35,8 @@ public interface SagaTransactionalTemplate {
 
     GlobalTransaction beginTransaction(TransactionInfo txInfo) throws TransactionalExecutor.ExecutionException;
 
+    GlobalTransaction reloadTransaction(String xid) throws TransactionalExecutor.ExecutionException, TransactionException;
+
     void reportTransaction(GlobalTransaction tx, GlobalStatus globalStatus) throws TransactionalExecutor.ExecutionException;
 
     long branchRegister(String resourceId, String clientId, String xid, String applicationData, String lockKeys)
