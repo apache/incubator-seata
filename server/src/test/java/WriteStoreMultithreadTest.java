@@ -59,6 +59,11 @@ public class WriteStoreMultithreadTest {
                         return null;
                     }
 
+                    @Override
+                    public GlobalSession findGlobalSession(String xid, boolean withBranchSessions) {
+                        return null;
+                    }
+
 
                     @Override
                     public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status)

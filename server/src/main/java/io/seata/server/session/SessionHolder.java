@@ -257,7 +257,18 @@ public class SessionHolder {
      * @return the global session
      */
     public static GlobalSession findGlobalSession(String xid) {
-        return getRootSessionManager().findGlobalSession(xid);
+        return findGlobalSession(xid, true);
+    }
+
+    /**
+     * Find global session.
+     *
+     * @param xid the xid
+     * @param withBranchSessions the withBranchSessions
+     * @return the global session
+     */
+    public static GlobalSession findGlobalSession(String xid, boolean withBranchSessions) {
+        return getRootSessionManager().findGlobalSession(xid, withBranchSessions);
     }
 
     public static void destroy() {

@@ -46,6 +46,15 @@ public interface TransactionStoreManager {
     GlobalSession readSession(String xid);
 
     /**
+     * Read session global session.
+     *
+     * @param xid the xid
+     * @param withBranchSessions the withBranchSessions
+     * @return the global session
+     */
+    GlobalSession readSession(String xid, boolean withBranchSessions);
+
+    /**
      * Read session by status list.
      *
      * @param sessionCondition the session condition

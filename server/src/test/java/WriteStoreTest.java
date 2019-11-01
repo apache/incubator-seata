@@ -78,6 +78,11 @@ public class WriteStoreTest {
                 }
 
                 @Override
+                public GlobalSession findGlobalSession(String xid, boolean withBranchSessions) {
+                    return null;
+                }
+
+                @Override
                 public void updateGlobalSessionStatus(GlobalSession session, GlobalStatus status)
                     throws TransactionException {
 
