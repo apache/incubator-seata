@@ -83,7 +83,7 @@ public interface StateMachine {
      * states
      * @return
      */
-    Map<String/** 状态机名称 **/, State> getStates();
+    Map<String/** state machine name **/, State> getStates();
 
     /**
      * get state
