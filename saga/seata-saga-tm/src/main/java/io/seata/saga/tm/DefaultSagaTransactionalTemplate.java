@@ -29,6 +29,7 @@ import io.seata.tm.TMClient;
 import io.seata.tm.api.GlobalTransaction;
 import io.seata.tm.api.GlobalTransactionContext;
 import io.seata.tm.api.TransactionalExecutor;
+import io.seata.tm.api.TransactionalExecutor.ExecutionException;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
@@ -93,6 +94,11 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
 
         }
         return tx;
+    }
+
+    @Override
+    public GlobalTransaction reloadTransaction(String xid) throws ExecutionException, TransactionException {
+        return GlobalTransactionContext.reload(xid);
     }
 
     @Override
