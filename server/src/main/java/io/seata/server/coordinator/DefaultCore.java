@@ -66,7 +66,7 @@ public class DefaultCore implements Core {
     @Override
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
-        GlobalSession globalSession = assertGlobalSessionNotNull(xid);
+        GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
         return globalSession.lockAndExcute(() -> {
             if (!globalSession.isActive()) {
                 throw new GlobalTransactionException(GlobalTransactionNotActive,
@@ -97,8 +97,8 @@ public class DefaultCore implements Core {
         });
     }
 
-    private GlobalSession assertGlobalSessionNotNull(String xid) throws TransactionException {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+    private GlobalSession assertGlobalSessionNotNull(String xid, boolean withBranchSessions) throws TransactionException {
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid, withBranchSessions);
         if (globalSession == null) {
             throw new GlobalTransactionException(TransactionExceptionCode.GlobalTransactionNotExist, String.format("Could not found global transaction xid = %s", xid));
         }
@@ -108,7 +108,7 @@ public class DefaultCore implements Core {
     @Override
     public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status,
                              String applicationData) throws TransactionException {
-        GlobalSession globalSession = assertGlobalSessionNotNull(xid);
+        GlobalSession globalSession = assertGlobalSessionNotNull(xid, true);
         BranchSession branchSession = globalSession.getBranch(branchId);
         if (branchSession == null) {
             throw new BranchTransactionException(BranchTransactionNotExist, String.format("Could not found branch session xid = %s branchId = %s", xid, branchId));
@@ -355,8 +355,7 @@ public class DefaultCore implements Core {
         //start rollback event
         eventBus.post(new GlobalTransactionEvent(globalSession.getTransactionId(), GlobalTransactionEvent.ROLE_TC,
                 globalSession.getTransactionName(), globalSession.getBeginTime(), null, globalSession.getStatus()));
-
-
+        
         if(isSaga(globalSession)){
             try {
                 String sagaResourceId = globalSession.getApplicationId() + "#" + globalSession.getTransactionServiceGroup();
@@ -386,7 +385,6 @@ public class DefaultCore implements Core {
             }
         }
         else{
-
             for (BranchSession branchSession : globalSession.getReverseSortedBranches()) {
                 BranchStatus currentBranchStatus = branchSession.getStatus();
                 if (currentBranchStatus == BranchStatus.PhaseOne_Failed) {
@@ -452,7 +450,7 @@ public class DefaultCore implements Core {
 
     @Override
     public GlobalStatus getStatus(String xid) throws TransactionException {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid, false);
         if (null == globalSession) {
             return GlobalStatus.Finished;
         } else {
