@@ -16,8 +16,6 @@
 package io.seata.saga.engine.mock;
 
 import io.seata.saga.engine.exception.EngineExecutionException;
-
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,7 +26,7 @@ public class DemoService {
 
     public Map<String, Object> foo(Map<String, Object> input) {
         if(input == null){
-            return new HashMap<>(0);
+            return null;
         }
         if("true".equals(input.get("throwException"))){
             throw new EngineExecutionException("foo execute failed");
@@ -43,7 +41,7 @@ public class DemoService {
 
     public Map<String, Object> compensateFoo(Map<String, Object> input) {
         if(input == null){
-            return new HashMap<>(0);
+            return null;
         }
         if("true".equals(input.get("throwException"))){
             throw new EngineExecutionException("compensateFoo execute failed");
@@ -58,7 +56,7 @@ public class DemoService {
 
     public Map<String, Object> bar(Map<String, Object> input) {
         if(input == null){
-            return new HashMap<>(0);
+            return null;
         }
         if("true".equals(input.get("throwException"))){
             throw new EngineExecutionException("bar execute failed");
@@ -73,7 +71,7 @@ public class DemoService {
 
     public Map<String, Object> compensateBar(Map<String, Object> input) {
         if(input == null){
-            return new HashMap<>(0);
+            return null;
         }
         if("true".equals(input.get("throwException"))){
             throw new EngineExecutionException("compensateBar execute failed");

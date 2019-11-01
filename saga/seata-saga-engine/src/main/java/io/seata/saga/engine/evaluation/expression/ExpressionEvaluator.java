@@ -46,12 +46,6 @@ public class ExpressionEvaluator implements Evaluator {
         Object rootObject;
         if (StringUtils.hasText(this.rootObjectName)) {
             rootObject = variables.get(this.rootObjectName);
-            if (rootObject == null) {
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("Variable [{}] is not exits. Cannot execute expression {}, return false instead.", rootObjectName, expression.getExpressionString());
-                }
-                return false;
-            }
         } else {
             rootObject = variables;
         }
