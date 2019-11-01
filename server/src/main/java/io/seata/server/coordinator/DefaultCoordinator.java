@@ -255,12 +255,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                     request);
                 return response.getBranchStatus();
             } else {
-
                 BranchSession branchSession = globalSession.getBranch(branchId);
-
-                BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
-                    branchSession.getClientId(), request);
-                return response.getBranchStatus();
+                if (null != branchSession) {
+                    BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
+                        branchSession.getClientId(), request);
+                    return response.getBranchStatus();
+                } else {
+                    return BranchStatus.PhaseTwo_Committed;
+                }
             }
         } catch (IOException | TimeoutException e) {
             throw new BranchTransactionException(FailedToSendBranchCommitRequest,
