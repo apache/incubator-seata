@@ -89,7 +89,7 @@ public class DefaultCore implements Core {
             } catch (RuntimeException ex) {
                 branchSession.unlock();
                 throw new BranchTransactionException(FailedToAddBranch,
-                    String.format("Failed to store branch xid = %s branchId = %s", globalSession.getXid(), branchSession.getBranchId()));
+                    String.format("Failed to store branch xid = %s branchId = %s", globalSession.getXid(), branchSession.getBranchId()), ex);
             }
             LOGGER.info("Successfully register branch xid = {}, branchId = {}", globalSession.getXid(), branchSession.getBranchId());
             return branchSession.getBranchId();
