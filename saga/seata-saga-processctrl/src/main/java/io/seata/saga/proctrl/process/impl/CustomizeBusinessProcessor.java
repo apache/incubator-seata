@@ -47,14 +47,14 @@ public class CustomizeBusinessProcessor implements BusinessProcessor {
         ProcessType processType = matchProcessType(context);
         if (processType == null) {
             if(LOGGER.isWarnEnabled()){
-                LOGGER.warn("Process type not found, context=" + context);
+                LOGGER.warn("Process type not found, context= {}",context);
             }
             throw new FrameworkException(FrameworkErrorCode.ProcessTypeNotFound);
         }
 
         ProcessHandler processor = processHandlers.get(processType.getCode());
         if (processor == null) {
-            LOGGER.error("Cannot find process handler by type "+ processType.getCode() +", context=" + context);
+            LOGGER.error("Cannot find process handler by type {}, context= {}",processType.getCode(),context);
             throw new FrameworkException(FrameworkErrorCode.ProcessHandlerNotFound);
         }
 
@@ -67,14 +67,14 @@ public class CustomizeBusinessProcessor implements BusinessProcessor {
         ProcessType processType = matchProcessType(context);
         if (processType == null) {
             if(LOGGER.isWarnEnabled()){
-                LOGGER.warn("Process type not found, the process is no longer advanced, context=" + context);
+                LOGGER.warn("Process type not found, the process is no longer advanced, context= {}",context);
             }
             return;
         }
 
         RouterHandler router = routerHandlers.get(processType.getCode());
         if (router == null) {
-            LOGGER.error("Cannot find router handler by type "+ processType.getCode() +", context=" + context);
+            LOGGER.error("Cannot find router handler by type {}, context= {}",processType.getCode(),context);
             return;
         }
 

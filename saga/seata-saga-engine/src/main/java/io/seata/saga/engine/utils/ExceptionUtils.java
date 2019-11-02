@@ -86,38 +86,31 @@ public class ExceptionUtils {
      * @param throwable
      * @return
      */
-    public static NetExceptionType getNetExceptionType(Throwable throwable){
+    public static NetExceptionType getNetExceptionType(Throwable throwable) {
 
         Throwable currentCause = throwable;
 
         int dep = MAX_CAUSE_DEP;
 
-        while(currentCause != null && dep > 0){
+        while (currentCause != null && dep > 0) {
 
-            if(currentCause instanceof java.net.SocketTimeoutException){
-                if(CONNECT_TIMED_OUT.equals(currentCause.getMessage())){
+            if (currentCause instanceof java.net.SocketTimeoutException) {
+                if (CONNECT_TIMED_OUT.equals(currentCause.getMessage())) {
                     return NetExceptionType.CONNECT_TIMEOUT_EXCEPTION;
-                }
-                else{
+                } else {
                     return NetExceptionType.READ_TIMEOUT_EXCEPTION;
                 }
-            }
-            else if(currentCause instanceof java.net.ConnectException){
+            } else if (currentCause instanceof java.net.ConnectException) {
                 return NetExceptionType.CONNECT_EXCEPTION;
-            }
-
-            else if(currentCause.getClass().getSimpleName().contains(CONNECT_TIME_OUT_EXCEPTION_CLASS_NAME)){
+            } else if (currentCause.getClass().getSimpleName().contains(CONNECT_TIME_OUT_EXCEPTION_CLASS_NAME)) {
                 return NetExceptionType.CONNECT_TIMEOUT_EXCEPTION;
-            }
-            else if(currentCause.getClass().getSimpleName().contains(READ_TIME_OUT_EXCEPTION_CLASS_NAME)){
+            } else if (currentCause.getClass().getSimpleName().contains(READ_TIME_OUT_EXCEPTION_CLASS_NAME)) {
                 return NetExceptionType.READ_TIMEOUT_EXCEPTION;
-            }
-            else if(currentCause.getClass().getSimpleName().contains(CONNECT_EXCEPTION_CLASS_NAME)){
+            } else if (currentCause.getClass().getSimpleName().contains(CONNECT_EXCEPTION_CLASS_NAME)) {
                 return NetExceptionType.CONNECT_EXCEPTION;
-            }
-            else{
+            } else {
                 Throwable parentCause = currentCause.getCause();
-                if(parentCause == null || parentCause == currentCause){
+                if (parentCause == null || parentCause == currentCause) {
                     break;
                 }
                 currentCause = parentCause;

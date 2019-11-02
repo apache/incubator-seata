@@ -146,4 +146,14 @@ public abstract class BaseUndoLogParserTest extends BaseH2Test{
         LOGGER.info("elapsed time {} ms.", (end - start));
     }
 
+    @Test
+    void testDecodeDefaultContent() {
+        byte[] defaultContent = getParser().getDefaultContent();
+
+        BranchUndoLog branchUndoLog = getParser().decode(defaultContent);
+        Assertions.assertNotNull(branchUndoLog);
+        Assertions.assertNull(branchUndoLog.getXid());
+        Assertions.assertEquals(0L, branchUndoLog.getBranchId());
+        Assertions.assertNull(branchUndoLog.getSqlUndoLogs());
+    }
 }

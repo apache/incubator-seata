@@ -51,8 +51,6 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     @Override
     public void afterPropertiesSet() throws Exception {
 
-        super.afterPropertiesSet();
-
         dbType = getDbTypeFromDataSource(dataSource);
 
         if(getStateLogStore() == null){
@@ -86,6 +84,8 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
             setStateLangStore(dbStateLangStore);
         }
+
+        super.afterPropertiesSet();//must execute after StateLangStore initialized
     }
 
     @Override
@@ -106,7 +106,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
                 try {
                     con.close();
                 } catch (SQLException e) {
-                    LOGGER.error("Get dbType from failed: " + e.getMessage(), e);
+                    LOGGER.error("Get dbType from failed: {}",e.getMessage(), e);
                 }
             }
         }

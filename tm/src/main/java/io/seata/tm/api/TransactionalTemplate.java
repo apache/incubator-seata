@@ -134,7 +134,7 @@ public class TransactionalTemplate {
             try {
                 hook.beforeBegin();
             } catch (Exception e) {
-                LOGGER.error("Failed execute beforeBegin in hook " + e.getMessage());
+                LOGGER.error("Failed execute beforeBegin in hook {}",e.getMessage(),e);
             }
         }
     }
@@ -144,7 +144,7 @@ public class TransactionalTemplate {
             try {
                 hook.afterBegin();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterBegin in hook " + e.getMessage());
+                LOGGER.error("Failed execute afterBegin in hook {}",e.getMessage(),e);
             }
         }
     }
@@ -154,7 +154,7 @@ public class TransactionalTemplate {
             try {
                 hook.beforeRollback();
             } catch (Exception e) {
-                LOGGER.error("Failed execute beforeRollback in hook " + e.getMessage());
+                LOGGER.error("Failed execute beforeRollback in hook {}",e.getMessage(),e);
             }
         }
     }
@@ -164,7 +164,7 @@ public class TransactionalTemplate {
             try {
                 hook.afterRollback();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterRollback in hook " + e.getMessage());
+                LOGGER.error("Failed execute afterRollback in hook {}",e.getMessage(),e);
             }
         }
     }
@@ -174,7 +174,7 @@ public class TransactionalTemplate {
             try {
                 hook.beforeCommit();
             } catch (Exception e) {
-                LOGGER.error("Failed execute beforeCommit in hook " + e.getMessage());
+                LOGGER.error("Failed execute beforeCommit in hook {}",e.getMessage(),e);
             }
         }
     }
@@ -184,7 +184,7 @@ public class TransactionalTemplate {
             try {
                 hook.afterCommit();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterCommit in hook " + e.getMessage());
+                LOGGER.error("Failed execute afterCommit in hook {}",e.getMessage(),e);
             }
         }
     }
@@ -194,7 +194,7 @@ public class TransactionalTemplate {
             try {
                 hook.afterCompletion();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterCompletion in hook " + e.getMessage());
+                LOGGER.error("Failed execute afterCompletion in hook {}",e.getMessage(),e);
             }
         }
     }
