@@ -96,6 +96,11 @@ public class ConfigurationKeys {
     /**
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
+    public static final String CLIENT_PHASE_ONE_TRUE_REPORT = CLIENT_PREFIX + "phase_one_true.report";
+
+    /**
+     * The constant CLIENT_REPORT_RETRY_COUNT.
+     */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_PREFIX + "report.retry.count";
 
     /**
