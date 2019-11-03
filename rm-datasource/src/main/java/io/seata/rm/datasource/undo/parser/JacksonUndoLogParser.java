@@ -37,6 +37,7 @@ import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
+import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
@@ -130,7 +131,12 @@ public class JacksonUndoLogParser implements UndoLogParser {
     @Override
     public BranchUndoLog decode(byte[] bytes) {
         try {
-            BranchUndoLog branchUndoLog = MAPPER.readValue(bytes, BranchUndoLog.class);
+            BranchUndoLog branchUndoLog;
+            if (Arrays.equals(bytes, getDefaultContent())) {
+                branchUndoLog = new BranchUndoLog();
+            } else {
+                branchUndoLog = MAPPER.readValue(bytes, BranchUndoLog.class);
+            }
             return branchUndoLog;
         } catch (IOException e) {
             LOGGER.error("json decode exception, {}", e.getMessage(), e);

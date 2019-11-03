@@ -369,59 +369,67 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         Map<String, String> statusMatchList = state.getStatus();
         if (statusMatchList != null && statusMatchList.size() > 0) {
 
-            StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+            if(state.isAsync()){
+                if(LOGGER.isWarnEnabled()){
+                    LOGGER.warn("Service[{}.{}] is execute asynchronously, null return value collected, so user defined Status Matching skipped. stateName: {}, branchId: {}", state.getServiceName(), state.getServiceMethod(), state.getName(), stateInstance.getId());
+                }
+            }
+            else{
 
-            Map<Object, String> statusEvaluators = state.getStatusEvaluators();
-            if (statusEvaluators == null) {
-                synchronized (state) {
-                    statusEvaluators = state.getStatusEvaluators();
-                    if (statusEvaluators == null) {
-                        statusEvaluators = new LinkedHashMap<>(statusMatchList.size());
-                        for (String expressionStr : statusMatchList.keySet()) {
+                StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
-                            String statusVal = statusMatchList.get(expressionStr);
-                            Evaluator evaluator = createEvaluator(stateMachineConfig.getEvaluatorFactoryManager(), expressionStr);
-                            if (evaluator != null) {
-                                statusEvaluators.put(evaluator, statusVal);
+                Map<Object, String> statusEvaluators = state.getStatusEvaluators();
+                if (statusEvaluators == null) {
+                    synchronized (state) {
+                        statusEvaluators = state.getStatusEvaluators();
+                        if (statusEvaluators == null) {
+                            statusEvaluators = new LinkedHashMap<>(statusMatchList.size());
+                            for (String expressionStr : statusMatchList.keySet()) {
+
+                                String statusVal = statusMatchList.get(expressionStr);
+                                Evaluator evaluator = createEvaluator(stateMachineConfig.getEvaluatorFactoryManager(), expressionStr);
+                                if (evaluator != null) {
+                                    statusEvaluators.put(evaluator, statusVal);
+                                }
                             }
                         }
+                        state.setStatusEvaluators(statusEvaluators);
                     }
-                    state.setStatusEvaluators(statusEvaluators);
-                }
-            }
-
-            for (Object evaluatorObj : statusEvaluators.keySet()) {
-                Evaluator evaluator = (Evaluator) evaluatorObj;
-                String statusVal = statusEvaluators.get(evaluator);
-                if (evaluator.evaluate(context.getVariables())) {
-                    stateInstance.setStatus(ExecutionStatus.valueOf(statusVal));
-                    break;
-                }
-            }
-
-            if (exp == null && (stateInstance.getStatus() == null || ExecutionStatus.RU.equals(stateInstance.getStatus()))) {
-
-                if (state.isForUpdate()) {
-                    stateInstance.setStatus(ExecutionStatus.UN);
-                } else {
-                    stateInstance.setStatus(ExecutionStatus.FA);
-                }
-                stateInstance.setGmtEnd(new Date());
-
-                StateMachineInstance stateMachineInstance = stateInstance.getStateMachineInstance();
-
-                if (stateMachineInstance.getStateMachine().isPersist() && state.isPersist() && stateMachineConfig.getStateLogStore() != null) {
-                    stateMachineConfig.getStateLogStore().recordStateFinished(stateInstance, context);
                 }
 
-                EngineExecutionException exception = new EngineExecutionException("State [" + state.getName() + "] execute finished, but cannot matching status, pls check its status manually",
-                    FrameworkErrorCode.NoMatchedStatus);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("State[{}] execute finish with status[{}]", state.getName(), stateInstance.getStatus());
+                for (Object evaluatorObj : statusEvaluators.keySet()) {
+                    Evaluator evaluator = (Evaluator) evaluatorObj;
+                    String statusVal = statusEvaluators.get(evaluator);
+                    if (evaluator.evaluate(context.getVariables())) {
+                        stateInstance.setStatus(ExecutionStatus.valueOf(statusVal));
+                        break;
+                    }
                 }
-                EngineUtils.failStateMachine(context, exception);
 
-                throw exception;
+                if (exp == null && (stateInstance.getStatus() == null || ExecutionStatus.RU.equals(stateInstance.getStatus()))) {
+
+                    if (state.isForUpdate()) {
+                        stateInstance.setStatus(ExecutionStatus.UN);
+                    } else {
+                        stateInstance.setStatus(ExecutionStatus.FA);
+                    }
+                    stateInstance.setGmtEnd(new Date());
+
+                    StateMachineInstance stateMachineInstance = stateInstance.getStateMachineInstance();
+
+                    if (stateMachineInstance.getStateMachine().isPersist() && state.isPersist() && stateMachineConfig.getStateLogStore() != null) {
+                        stateMachineConfig.getStateLogStore().recordStateFinished(stateInstance, context);
+                    }
+
+                    EngineExecutionException exception = new EngineExecutionException("State [" + state.getName() + "] execute finished, but cannot matching status, pls check its status manually",
+                            FrameworkErrorCode.NoMatchedStatus);
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("State[{}] execute finish with status[{}]", state.getName(), stateInstance.getStatus());
+                    }
+                    EngineUtils.failStateMachine(context, exception);
+
+                    throw exception;
+                }
             }
         }
 
@@ -449,8 +457,8 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
             }
         }
 
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("State[{}] finish with status[{}]", state.getName(), stateInstance.getStatus());
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("State[{}] finish with status[{}]", state.getName(), stateInstance.getStatus());
         }
     }
 
