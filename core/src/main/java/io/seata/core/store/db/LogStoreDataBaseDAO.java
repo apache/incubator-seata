@@ -200,7 +200,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public List<GlobalTransactionDO> queryGlobalTransactionDO(int[] statuses, int limit) {
-        List<GlobalTransactionDO> ret = new ArrayList<GlobalTransactionDO>();
+        List<GlobalTransactionDO> ret = new ArrayList<>();
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -268,7 +268,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps.setString(5, globalTransactionDO.getTransactionServiceGroup());
             String transactionName = globalTransactionDO.getTransactionName();
             transactionName = transactionName.length() > transactionNameColumnSize ?
-                    transactionName.substring(0, transactionNameColumnSize) : transactionName;
+                transactionName.substring(0, transactionNameColumnSize) : transactionName;
             ps.setString(6, transactionName);
             ps.setInt(7, globalTransactionDO.getTimeout());
             ps.setLong(8, globalTransactionDO.getBeginTime());
