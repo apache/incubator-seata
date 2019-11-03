@@ -154,7 +154,12 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public GlobalSession findGlobalSession(String xid) {
-        return transactionStoreManager.readSession(xid);
+        return this.findGlobalSession(xid, true);
+    }
+
+    @Override
+    public GlobalSession findGlobalSession(String xid, boolean withBranchSessions) {
+        return transactionStoreManager.readSession(xid, withBranchSessions);
     }
 
     @Override
