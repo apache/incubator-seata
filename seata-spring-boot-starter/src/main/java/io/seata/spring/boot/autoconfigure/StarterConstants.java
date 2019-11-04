@@ -50,6 +50,7 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperP
 public class StarterConstants {
     private static final int MAP_CAPACITY = 64;
     public static final String SEATA_PREFIX = "seata";
+    public static final String SEATA_SPRING_CLOUD_ALIBABA_PREFIX = "spring.cloud.alibaba.seata";
     public static final String TRANSPORT_PREFIX = SEATA_PREFIX + ".transport";
     public static final String THREAD_FACTORY_PREFIX = TRANSPORT_PREFIX + ".thread-factory";
     public static final String SHUTDOWN_PREFIX = TRANSPORT_PREFIX + ".shutdown";
