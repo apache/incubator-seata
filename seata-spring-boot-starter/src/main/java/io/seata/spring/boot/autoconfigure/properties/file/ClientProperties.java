@@ -32,6 +32,7 @@ public class ClientProperties {
     private int tmCommitRetryCount = 5;
     private int tmRollbackRetryCount = 5;
     private boolean rmTableMetaCheckEnable = true;
+    private boolean rmPhaseOneTrueReportEnable = true;
 
     public int getRmAsyncCommitBufferLimit() {
         return rmAsyncCommitBufferLimit;
@@ -76,5 +77,13 @@ public class ClientProperties {
     public ClientProperties setRmTableMetaCheckEnable(boolean rmTableMetaCheckEnable) {
         this.rmTableMetaCheckEnable = rmTableMetaCheckEnable;
         return this;
+    }
+
+    public boolean isRmPhaseOneTrueReportEnable() {
+        return rmPhaseOneTrueReportEnable;
+    }
+
+    public void setRmPhaseOneTrueReportEnable(boolean rmPhaseOneTrueReportEnable) {
+        this.rmPhaseOneTrueReportEnable = rmPhaseOneTrueReportEnable;
     }
 }

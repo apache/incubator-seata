@@ -51,7 +51,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
 
     public static final boolean IS_PHASE_ONE_TRUE_REPORT_ENABLE = ConfigurationFactory.getInstance()
-        .getBoolean(ConfigurationKeys.CLIENT_PHASE_ONE_TRUE_REPORT, true);
+        .getBoolean(ConfigurationKeys.CLIENT_PHASE_ONE_TRUE_REPORT_ENABLE, true);
 
     private final static LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy();
 
