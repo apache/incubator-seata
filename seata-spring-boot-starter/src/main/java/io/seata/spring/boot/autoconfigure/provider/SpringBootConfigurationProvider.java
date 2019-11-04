@@ -38,7 +38,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_DATASOURCE_AUTOPROXY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_GROUPLIST;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_REGISTRY_ZK;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_TRANSACTION;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_UNDO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_TRANSPORT_THREAD_FACTORY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_VGROUP_MAPPING;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_MAP;
@@ -49,10 +49,9 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CO
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_DATASOURCE_AUTOPROXY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_REGISTRY_ZK;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_TRANSACTION;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_UNDO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_TRANSPORT_THREAD_FACTORY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
-
 
 /**
  * @author xingfudeshi@gmail.com
@@ -63,18 +62,19 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     @Override
     public Configuration provide(Configuration originalConfiguration) {
-        return (Configuration) Enhancer.create(originalConfiguration.getClass(), new MethodInterceptor() {
+        return (Configuration)Enhancer.create(originalConfiguration.getClass(), new MethodInterceptor() {
             @Override
-            public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
+            public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy)
+                throws Throwable {
                 if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
                     Object result = null;
-                    String rawDataId = (String) args[0];
+                    String rawDataId = (String)args[0];
                     if (args.length == 1) {
                         result = get(convertDataId(rawDataId));
                     } else if (args.length == 2) {
                         result = get(convertDataId(rawDataId), args[1]);
                     } else if (args.length == 3) {
-                        result = get(convertDataId(rawDataId), args[1], (Long) args[2]);
+                        result = get(convertDataId(rawDataId), args[1], (Long)args[2]);
                     }
                     if (null != result) {
                         return result;
@@ -105,7 +105,8 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         Class propertyClass = getPropertyClass(getPropertyPrefix(dataId));
         if (null != propertyClass) {
             Object propertyObject = SpringUtils.getBean(propertyClass);
-            Optional<Field> fieldOptional = Stream.of(propertyObject.getClass().getDeclaredFields()).filter(f -> f.getName().equalsIgnoreCase(propertySuffix)).findAny();
+            Optional<Field> fieldOptional = Stream.of(propertyObject.getClass().getDeclaredFields()).filter(
+                f -> f.getName().equalsIgnoreCase(propertySuffix)).findAny();
             if (fieldOptional.isPresent()) {
                 Field field = fieldOptional.get();
                 field.setAccessible(true);
@@ -131,13 +132,14 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         if (rawDataId.endsWith(SPECIAL_KEY_DATASOURCE_AUTOPROXY)) {
             return StarterConstants.SPRING_PREFIX + "." + NORMALIZED_KEY_DATASOURCE_AUTOPROXY;
         }
-        if (rawDataId.startsWith(SPECIAL_KEY_TRANSACTION)) {
-            String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_TRANSACTION);
-            return StarterConstants.TRANSACTION_PREFIX + "." + StringFormatUtils.dotToCamel(suffix);
+        if (rawDataId.startsWith(SPECIAL_KEY_UNDO)) {
+            String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_UNDO);
+            return StarterConstants.UNDO_PREFIX + "." + StringFormatUtils.dotToCamel(suffix);
         }
         if (rawDataId.startsWith(SPECIAL_KEY_CLIENT_LOCK)) {
             String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_CLIENT_LOCK);
-            return StarterConstants.LOCK_PREFIX + "." + StringFormatUtils.minusToCamel(StringFormatUtils.dotToCamel(suffix));
+            return StarterConstants.LOCK_PREFIX + "." + StringFormatUtils.minusToCamel(
+                StringFormatUtils.dotToCamel(suffix));
         }
         if (rawDataId.startsWith(SPECIAL_KEY_CLIENT)) {
             String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_CLIENT);
@@ -170,7 +172,8 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @return propertyPrefix
      */
     private String getPropertyPrefix(String dataId) {
-        return StringFormatUtils.underlineToCamel(StringFormatUtils.minusToCamel(StringUtils.substringBeforeLast(dataId, ".")));
+        return StringFormatUtils.underlineToCamel(
+            StringFormatUtils.minusToCamel(StringUtils.substringBeforeLast(dataId, ".")));
     }
 
     /**
@@ -190,7 +193,8 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
      * @return propertyClass
      */
     private Class getPropertyClass(String propertyPrefix) {
-        Optional<Map.Entry<String, Class>> entry = PROPERTY_MAP.entrySet().stream().filter(e -> propertyPrefix.equals(e.getKey())).findAny();
+        Optional<Map.Entry<String, Class>> entry = PROPERTY_MAP.entrySet().stream().filter(
+            e -> propertyPrefix.equals(e.getKey())).findAny();
         return entry.map(Map.Entry::getValue).orElse(null);
     }
 }
