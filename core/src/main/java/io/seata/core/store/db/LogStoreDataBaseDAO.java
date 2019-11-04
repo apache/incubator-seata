@@ -499,6 +499,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         long max = 0;
         Connection conn = null;
         PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
@@ -506,13 +507,19 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps.setLong(1, high);
             ps.setLong(2, low);
 
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs.next()) {
                 max = rs.getLong(1);
             }
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                }
+            }
             if (ps != null) {
                 try {
                     ps.close();
@@ -554,7 +561,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         branchTransactionDO.setLockKey(rs.getString(ServerTableColumnsName.BRANCH_TABLE_LOCK_KEY));
         branchTransactionDO.setXid(rs.getString(ServerTableColumnsName.BRANCH_TABLE_XID));
         branchTransactionDO.setResourceId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_ID));
-        branchTransactionDO.setBranchId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID));
+        branchTransactionDO.setBranchId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID));
         branchTransactionDO.setBranchType(rs.getString(ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE));
         branchTransactionDO.setTransactionId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_TRANSACTION_ID));
         branchTransactionDO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE));

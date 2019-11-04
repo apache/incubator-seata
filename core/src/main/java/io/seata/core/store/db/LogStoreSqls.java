@@ -61,7 +61,7 @@ public class LogStoreSqls {
      */
     protected static final String ALL_BRANCH_COLUMNS
         = ServerTableColumnsName.BRANCH_TABLE_XID + ", " + ServerTableColumnsName.BRANCH_TABLE_TRANSACTION_ID + ", "
-        + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID + ", " + ServerTableColumnsName.BRANCH_TABLE_RESOURCE_GROUP_ID + ", "
+        + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + ", " + ServerTableColumnsName.BRANCH_TABLE_RESOURCE_GROUP_ID + ", "
         + ServerTableColumnsName.BRANCH_TABLE_RESOURCE_ID + ", " + ServerTableColumnsName.BRANCH_TABLE_LOCK_KEY + ", "
         + ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE + ", " + ServerTableColumnsName.BRANCH_TABLE_STATUS + ", "
         + ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID + ", " + ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA + ", "
@@ -157,20 +157,22 @@ public class LogStoreSqls {
      */
     public static final String UPDATE_BRANCH_TRANSACTION_STATUS_MYSQL = "update " + BRANCH_TABLE_PLACEHOLD
         + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED + " = now() where "
-        + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID + " = ?";
+        + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
     /**
      * The constant UPDATE_BRANCH_TRANSACTION_STATUS_ORACLE.
      */
     public static final String UPDATE_BRANCH_TRANSACTION_STATUS_ORACLE = "update " + BRANCH_TABLE_PLACEHOLD
         + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED
-        + " = sysdate where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID + " = ?";
+        + " = sysdate where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID
+        + " = ?";
 
     /**
      * The constant DELETE_BRANCH_TRANSACTION_BY_BRANCH_ID.
      */
     public static final String DELETE_BRANCH_TRANSACTION_BY_BRANCH_ID = "delete from " + BRANCH_TABLE_PLACEHOLD
-        + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID + " = ?";
+        + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID
+        + " = ?";
 
     /**
      * The constant DELETE_BRANCH_TRANSACTION_BY_XID.
@@ -194,9 +196,9 @@ public class LogStoreSqls {
     /**
      * The constant CHECK_MAX_BTANCH_ID.
      */
-    public static final String QUERY_MAX_BTANCH_ID = "select max(" + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID
-        + ") from " + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID + " < ? and "
-        + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID + " > ?";
+    public static final String QUERY_MAX_BTANCH_ID = "select max(" + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID
+        + ") from " + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " < ? and "
+        + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " > ?";
 
     /**
      * Get insert global transaction sql string.
