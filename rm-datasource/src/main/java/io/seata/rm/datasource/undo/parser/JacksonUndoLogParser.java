@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.ser.std.ArraySerializerBase;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
+import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
@@ -181,6 +182,12 @@ public class JacksonUndoLogParser implements UndoLogParser {
             simpleModule.addSerializer(Number.class, ToStringSerializer.instance);
             simpleModule.addSerializer(Date.class, ToStringSerializer.instance);
             simpleModule.addSerializer(TableRecords.EmptyTableRecords.class,new JsonSerializer<Object>() {
+                @Override
+                public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
+                    jgen.writeObject("");// 直接输出为空字符串
+                }
+            });
+            simpleModule.addSerializer(TableMeta.class,new JsonSerializer<Object>() {
                 @Override
                 public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
                     jgen.writeObject("");// 直接输出为空字符串
