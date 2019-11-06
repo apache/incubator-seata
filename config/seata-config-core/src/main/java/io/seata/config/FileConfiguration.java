@@ -46,8 +46,6 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
 
     private final Config fileConfig;
 
-    private String fileName;
-
     private ExecutorService configOperateExecutor;
 
     private ExecutorService configChangeExecutor;
@@ -81,7 +79,7 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
      * @param name the name
      */
     public FileConfiguration(String name) {
-        this.fileName = name;
+        LOGGER.info("The file name of the operation is {}", name);
         if (null == name) {
             fileConfig = ConfigFactory.load();
         }
@@ -198,7 +196,6 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
                     setFailResult(configFuture);
                     return;
                 }
-                LOGGER.info("The file name of the operation is {}", fileName);
                 try {
                     if (configFuture.getOperation() == ConfigOperation.GET) {
                         String result = fileConfig.getString(configFuture.getDataId());
