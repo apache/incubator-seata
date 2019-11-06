@@ -610,7 +610,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             long diff = FILE_TRX_NUM.get() - FILE_FLUSH_NUM.get();
             flush(req.getFileChannel());
             FILE_FLUSH_NUM.addAndGet(diff);
-            closeFile(currRaf);
+            closeFile(req.getFile());
             req.wakeup();
         }
 
