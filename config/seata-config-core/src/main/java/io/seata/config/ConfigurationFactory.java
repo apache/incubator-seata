@@ -15,10 +15,10 @@
  */
 package io.seata.config;
 
+import java.util.Objects;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
-
-import java.util.Objects;
 
 /**
  * The type Configuration factory.
@@ -30,23 +30,38 @@ public final class ConfigurationFactory {
     private static final String REGISTRY_CONF_PREFIX = "registry";
     private static final String REGISTRY_CONF_SUFFIX = ".conf";
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
-    private static final String ENV_PROPERTY_KEY = "seataEnv";
-    /**
-     * the name of env
-     */
-    private static String envValue;
+    public static final String ENV_PROPERTY_KEY = "seataEnv";
+
+    private static final String SYSTEM_PROPERTY_SEATA_CONFIG_NAME = "seata.config.name";
+
+    private static final String ENV_SEATA_CONFIG_NAME = "SEATA_CONFIG_NAME";
+
+    public static final Configuration CURRENT_FILE_INSTANCE;
 
     static {
-        envValue = System.getProperty(ENV_PROPERTY_KEY);
+        String seataConfigName = System.getProperty(SYSTEM_PROPERTY_SEATA_CONFIG_NAME);
+        if (null == seataConfigName) {
+            seataConfigName = System.getenv(ENV_SEATA_CONFIG_NAME);
+        }
+        if (null == seataConfigName) {
+            seataConfigName = REGISTRY_CONF_PREFIX;
+        }
+        String envValue = System.getProperty(ENV_PROPERTY_KEY);
         if (null == envValue) {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
+        Configuration configuration = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX)
+            : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX);
+        Configuration extConfiguration = null;
+        try {
+            extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+
+        } catch (Exception ignore) {
+
+        }
+        CURRENT_FILE_INSTANCE = null == extConfiguration ? configuration : extConfiguration;
     }
 
-    private static final Configuration DEFAULT_FILE_INSTANCE = new FileConfiguration(
-        REGISTRY_CONF_PREFIX + REGISTRY_CONF_SUFFIX);
-    public static final Configuration CURRENT_FILE_INSTANCE = null == envValue ? DEFAULT_FILE_INSTANCE : new FileConfiguration(REGISTRY_CONF_PREFIX + "-" + envValue
-        + REGISTRY_CONF_SUFFIX);
     private static final String NAME_KEY = "name";
     private static final String FILE_TYPE = "file";
 
@@ -84,7 +99,15 @@ public final class ConfigurationFactory {
                 + FILE_TYPE + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + NAME_KEY;
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
-            return new FileConfiguration(name);
+            Configuration configuration = new FileConfiguration(name);
+            Configuration extConfiguration = null;
+            try {
+                extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+            } catch (Exception ignore) {
+
+            }
+            
+            return null == extConfiguration ? configuration : extConfiguration;
         } else {
             return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
                 .provide();

@@ -21,7 +21,10 @@ import java.util.List;
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
+import com.alibaba.druid.sql.ast.expr.SQLMethodInvokeExpr;
+import com.alibaba.druid.sql.ast.expr.SQLNullExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
+import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
@@ -29,13 +32,15 @@ import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLType;
+import io.seata.rm.datasource.sql.struct.Null;
+import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
 
 /**
  * The type My sql insert recognizer.
  *
  * @author sharajava
  */
-public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRecognizer {
+public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLInsertRecognizer {
 
     private final MySqlInsertStatement ast;
 
@@ -62,7 +67,7 @@ public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRe
 
     @Override
     public String getTableName() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
 
             @Override
@@ -102,8 +107,14 @@ public class MySQLInsertRecognizer extends BaseRecognizer implements SQLInsertRe
             List<Object> row = new ArrayList<>(exprs.size());
             rows.add(row);
             for (SQLExpr expr : valuesClause.getValues()) {
-                if (expr instanceof SQLValuableExpr) {
+                if (expr instanceof SQLNullExpr) {
+                    row.add(Null.get());
+                } else if (expr instanceof SQLValuableExpr) {
                     row.add(((SQLValuableExpr)expr).getValue());
+                } else if (expr instanceof SQLVariantRefExpr) {
+                    row.add(((SQLVariantRefExpr)expr).getName());
+                } else if (expr instanceof SQLMethodInvokeExpr) {
+                    row.add(new SqlMethodExpr());
                 } else {
                     throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
                 }

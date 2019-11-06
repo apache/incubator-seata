@@ -34,7 +34,15 @@ public enum CodecType {
      * <p>
      * Math.pow(2, 1)
      */
-    PROTOBUF((byte)0x2);
+    PROTOBUF((byte)0x2),
+
+    /**
+     * The kryo.
+     * <p>
+     * Math.pow(2, 2)
+     */
+    KRYO((byte)0x4),
+    ;
 
     private final byte code;
 

@@ -30,7 +30,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>seata-common</artifactId>
-            <version>${revision}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>

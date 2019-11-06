@@ -47,12 +47,12 @@ public class OracleUndoInsertExecutor extends AbstractUndoExecutor {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = afterImageRows.get(0);
-        StringBuffer mainSQL = new StringBuffer("DELETE FROM " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()));
-        StringBuffer where = new StringBuffer(" WHERE ");
-        boolean first = true;
+        StringBuilder mainSQL = new StringBuilder("DELETE FROM ").append(keywordChecker.checkAndReplace(sqlUndoLog.getTableName()));
+        StringBuilder where = new StringBuilder(" WHERE ");
+        // For a row, there's only one primary key now
         for (Field field : row.getFields()) {
             if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(keywordChecker.checkAndReplace(field.getName()) +" = ?");
+                where.append(keywordChecker.checkAndReplace(field.getName())).append(" = ?");
             }
 
         }

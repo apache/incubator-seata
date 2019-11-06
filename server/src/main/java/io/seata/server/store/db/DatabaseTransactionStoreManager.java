@@ -147,14 +147,29 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
      */
     @Override
     public GlobalSession readSession(String xid) {
+        return this.readSession(xid, true);
+    }
+
+    /**
+     * Read session global session.
+     *
+     * @param xid the xid
+     * @param withBranchSessions the withBranchSessions
+     * @return the global session
+     */
+    @Override
+    public GlobalSession readSession(String xid, boolean withBranchSessions) {
         //global transaction
         GlobalTransactionDO globalTransactionDO = logStore.queryGlobalTransactionDO(xid);
         if (globalTransactionDO == null) {
             return null;
         }
         //branch transactions
-        List<BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(
-            globalTransactionDO.getXid());
+        List<BranchTransactionDO> branchTransactionDOs = null;
+        //reduce rpc with db when branchRegister and getGlobalStatus
+        if (withBranchSessions) {
+            branchTransactionDOs = logStore.queryBranchTransactionDO(globalTransactionDO.getXid());
+        }
         return getGlobalSession(globalTransactionDO, branchTransactionDOs);
     }
 
@@ -188,14 +203,14 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
         if (StringUtils.isNotBlank(sessionCondition.getXid())) {
             GlobalSession globalSession = readSession(sessionCondition.getXid());
             if (globalSession != null) {
-                List<GlobalSession> globalSessions = new ArrayList();
+                List<GlobalSession> globalSessions = new ArrayList<>();
                 globalSessions.add(globalSession);
                 return globalSessions;
             }
         } else if (sessionCondition.getTransactionId() != null) {
             GlobalSession globalSession = readSession(sessionCondition.getTransactionId());
             if (globalSession != null) {
-                List<GlobalSession> globalSessions = new ArrayList();
+                List<GlobalSession> globalSessions = new ArrayList<>();
                 globalSessions.add(globalSession);
                 return globalSessions;
             }

@@ -17,7 +17,6 @@ package io.seata.common.util;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -80,11 +79,9 @@ public class CollectionUtils {
         if (isEmpty(col)) {
             return "";
         }
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append("[");
-        Iterator it = col.iterator();
-        while (it.hasNext()) {
-            Object obj = it.next();
+        for (Object obj : col) {
             sb.append(StringUtils.toString(obj));
             sb.append(",");
         }

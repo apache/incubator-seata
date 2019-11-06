@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * The type Abstract message codec.
@@ -36,7 +37,7 @@ public abstract class AbstractMessageCodec implements MessageSeataCodec {
     /**
      * The constant UTF8.
      */
-    protected static final Charset UTF8 = Charset.forName("utf-8");
+    protected static final Charset UTF8 = StandardCharsets.UTF_8;
 
     /**
      * Bytes to int int.

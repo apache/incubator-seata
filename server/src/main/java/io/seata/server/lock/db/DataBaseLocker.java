@@ -19,6 +19,8 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import io.seata.common.exception.DataAccessException;
+import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
@@ -62,8 +64,10 @@ public class DataBaseLocker extends AbstractLocker {
         }
         try {
             return lockStore.acquireLock(convertToLockDO(locks));
+        } catch (StoreException e) {
+            throw e;
         } catch (Exception t) {
-            LOGGER.error("AcquireLock error, locks:" + CollectionUtils.toString(locks), t);
+            LOGGER.error("AcquireLock error, locks:{}",CollectionUtils.toString(locks), t);
             return false;
         }
     }
@@ -76,8 +80,10 @@ public class DataBaseLocker extends AbstractLocker {
         }
         try {
             return lockStore.unLock(convertToLockDO(locks));
+        } catch (StoreException e) {
+            throw e;
         } catch (Exception t) {
-            LOGGER.error("unLock error, locks:" + CollectionUtils.toString(locks), t);
+            LOGGER.error("unLock error, locks:{}",CollectionUtils.toString(locks), t);
             return false;
         }
     }
@@ -86,8 +92,10 @@ public class DataBaseLocker extends AbstractLocker {
     public boolean isLockable(List<RowLock> locks) {
         try {
             return lockStore.isLockable(convertToLockDO(locks));
+        } catch (DataAccessException e) {
+            throw e;
         } catch (Exception t) {
-            LOGGER.error("isLockable error, locks:" + CollectionUtils.toString(locks), t);
+            LOGGER.error("isLockable error, locks:{}", CollectionUtils.toString(locks), t);
             return false;
         }
     }

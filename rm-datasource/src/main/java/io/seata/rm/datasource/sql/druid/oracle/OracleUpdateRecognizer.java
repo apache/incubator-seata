@@ -21,9 +21,6 @@ import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
 import com.alibaba.druid.sql.ast.expr.SQLPropertyExpr;
 import com.alibaba.druid.sql.ast.expr.SQLValuableExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleUpdateStatement;
@@ -32,7 +29,6 @@ import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.SQLUpdateRecognizer;
-import io.seata.rm.datasource.sql.druid.BaseRecognizer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +39,7 @@ import java.util.List;
  * @author ccg
  * @date 2019/3/25
  */
-public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateRecognizer {
+public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLUpdateRecognizer {
 
     private OracleUpdateStatement ast;
 
@@ -70,7 +66,7 @@ public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
         for (SQLUpdateSetItem updateSetItem : updateSetItems) {
             SQLExpr expr = updateSetItem.getColumn();
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr) expr).getName().toUpperCase());
+                list.add(((SQLIdentifierExpr) expr).getName());
             } else if (expr instanceof SQLPropertyExpr) {
                 // This is alias case, like UPDATE xxx_tbl a SET a.name = ? WHERE a.id = ?
                 SQLExpr owner = ((SQLPropertyExpr) expr).getOwner();
@@ -104,35 +100,13 @@ public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
     @Override
     public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
-        if (where == null) {
-            return "";
-        }
-        StringBuffer sb = new StringBuffer();
-        OracleOutputVisitor visitor = super.createOracleOutputVisitor(parametersHolder, paramAppenderList, sb);
-        visitor.visit((SQLBinaryOpExpr) where);
-        return sb.toString();
+        return super.getWhereCondition(where, parametersHolder, paramAppenderList);
     }
 
     @Override
     public String getWhereCondition() {
         SQLExpr where = ast.getWhere();
-        if (where == null) {
-            return "";
-        }
-
-
-        StringBuffer sb = new StringBuffer();
-        OracleOutputVisitor visitor = new OracleOutputVisitor(sb);
-
-        if (where instanceof SQLBetweenExpr) {
-            visitor.visit((SQLBetweenExpr) where);
-        } else if (where instanceof SQLInListExpr) {
-            visitor.visit((SQLInListExpr) where);
-        } else {
-            visitor.visit((SQLBinaryOpExpr) where);
-        }
-
-        return sb.toString();
+        return super.getWhereCondition(where);
     }
 
     @Override
@@ -142,7 +116,7 @@ public class OracleUpdateRecognizer extends BaseRecognizer implements SQLUpdateR
 
     @Override
     public String getTableName() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
             @Override

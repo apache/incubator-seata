@@ -21,9 +21,6 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.core.context.RootContext;
-
 /**
  * The type Abstract statement proxy.
  *
