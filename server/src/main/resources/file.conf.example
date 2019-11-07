@@ -47,7 +47,7 @@ client {
     }
     report.retry.count = 5
     table.meta.check.enable = true
-    phase-one-true.report.enable = true
+    report.success.enable = true
   }
   tm {
     commit.retry.count = 5
