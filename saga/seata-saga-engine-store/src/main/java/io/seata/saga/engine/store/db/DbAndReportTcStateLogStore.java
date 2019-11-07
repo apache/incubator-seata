@@ -35,7 +35,6 @@ import io.seata.saga.statelang.domain.impl.StateInstanceImpl;
 import io.seata.saga.statelang.domain.impl.StateMachineInstanceImpl;
 import io.seata.saga.tm.SagaTransactionalTemplate;
 import io.seata.tm.api.GlobalTransaction;
-import io.seata.tm.api.GlobalTransactionContext;
 import io.seata.tm.api.TransactionalExecutor.ExecutionException;
 import io.seata.tm.api.transaction.TransactionInfo;
 import org.slf4j.Logger;
@@ -144,7 +143,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             try {
                 GlobalTransaction globalTransaction = (GlobalTransaction)context.getVariable(DomainConstants.VAR_NAME_GLOBAL_TX);
                 if(globalTransaction == null){
-                    globalTransaction = GlobalTransactionContext.reload(machineInstance.getId());
+                    globalTransaction = sagaTransactionalTemplate.reloadTransaction(machineInstance.getId());
                 }
 
                 if(globalTransaction == null){
@@ -216,7 +215,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             try {
                 GlobalTransaction globalTransaction = (GlobalTransaction)context.getVariable(DomainConstants.VAR_NAME_GLOBAL_TX);
                 if(globalTransaction == null){
-                    globalTransaction = GlobalTransactionContext.reload(machineInstance.getId());
+                    globalTransaction = sagaTransactionalTemplate.reloadTransaction(machineInstance.getId());
                 }
 
                 if(globalTransaction == null){
@@ -255,7 +254,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             try {
                 GlobalTransaction globalTransaction = (GlobalTransaction)context.getVariable(DomainConstants.VAR_NAME_GLOBAL_TX);
                 if(globalTransaction == null){
-                    globalTransaction = GlobalTransactionContext.reload(stateInstance.getStateMachineInstance().getId());
+                    globalTransaction = sagaTransactionalTemplate.reloadTransaction(stateInstance.getStateMachineInstance().getId());
                 }
 
                 if(globalTransaction == null){
@@ -266,6 +265,8 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 long branchId = sagaTransactionalTemplate.branchRegister(resourceId, null, globalTransaction.getXid(), null, null);
                 stateInstance.setId(String.valueOf(branchId));
             } catch (TransactionException e) {
+                throw new EngineExecutionException(e,  "Branch transaction error: " + e.getCode() + ", StateMachine:" + stateInstance.getStateMachineInstance().getStateMachine().getName() + ", XID: " + stateInstance.getStateMachineInstance().getId() + ", State:" + stateInstance.getName() + ", stateId: " + stateInstance.getId() + ", Reason: " + e.getMessage(), FrameworkErrorCode.TransactionManagerError);
+            } catch (ExecutionException e) {
                 throw new EngineExecutionException(e,  "Branch transaction error: " + e.getCode() + ", StateMachine:" + stateInstance.getStateMachineInstance().getStateMachine().getName() + ", XID: " + stateInstance.getStateMachineInstance().getId() + ", State:" + stateInstance.getName() + ", stateId: " + stateInstance.getId() + ", Reason: " + e.getMessage(), FrameworkErrorCode.TransactionManagerError);
             }
         }
@@ -292,7 +293,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             try {
                 GlobalTransaction globalTransaction = (GlobalTransaction)context.getVariable(DomainConstants.VAR_NAME_GLOBAL_TX);
                 if(globalTransaction == null){
-                    globalTransaction = GlobalTransactionContext.reload(stateInstance.getStateMachineInstance().getId());
+                    globalTransaction = sagaTransactionalTemplate.reloadTransaction(stateInstance.getStateMachineInstance().getId());
                 }
 
                 if(globalTransaction == null){
@@ -319,6 +320,16 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
                 sagaTransactionalTemplate.branchReport(globalTransaction.getXid(), Long.parseLong(stateInstance.getId()), branchStatus, null);
             } catch (TransactionException e) {
+                LOGGER.error("Report branch status to server error: {}, StateMachine:{}, StateName:{}, XID: {}, branchId: {}, branchStatus:{}, Reason:{} "
+                        ,e.getCode()
+                        ,stateInstance.getStateMachineInstance().getStateMachine().getName()
+                        ,stateInstance.getName()
+                        ,stateInstance.getStateMachineInstance().getId()
+                        ,stateInstance.getId()
+                        ,branchStatus
+                        ,e.getMessage()
+                        ,e);
+            } catch (ExecutionException e) {
                 LOGGER.error("Report branch status to server error: {}, StateMachine:{}, StateName:{}, XID: {}, branchId: {}, branchStatus:{}, Reason:{} "
                         ,e.getCode()
                         ,stateInstance.getStateMachineInstance().getStateMachine().getName()
