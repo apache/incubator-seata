@@ -37,7 +37,7 @@ public class DefaultSessionManager extends AbstractSessionManager {
     /**
      * The Session map.
      */
-    protected Map<String, GlobalSession> sessionMap = new ConcurrentHashMap<String, GlobalSession>();
+    protected Map<String, GlobalSession> sessionMap = new ConcurrentHashMap<>();
 
     /**
      * Instantiates a new Default session manager.
@@ -50,6 +50,22 @@ public class DefaultSessionManager extends AbstractSessionManager {
             @Override
             public boolean writeSession(LogOperation logOperation, SessionStorable session) {
                 return true;
+            }
+
+            @Override
+            public long getCurrentMaxSessionId() {
+                long maxSessionId = 0L;
+                for (Map.Entry<String, GlobalSession> entry : sessionMap.entrySet()) {
+                    GlobalSession globalSession = entry.getValue();
+                    if (globalSession.hasBranch()) {
+                        long maxBranchId = globalSession.getSortedBranches().get(globalSession.getSortedBranches().size() - 1)
+                            .getBranchId();
+                        if (maxBranchId > maxSessionId) {
+                            maxSessionId = maxBranchId;
+                        }
+                    }
+                }
+                return maxSessionId;
             }
         };
     }

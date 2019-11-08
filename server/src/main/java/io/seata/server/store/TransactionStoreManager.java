@@ -67,6 +67,13 @@ public interface TransactionStoreManager {
      */
     void shutdown();
 
+    /**
+     * Gets current max session id.
+     *
+     * @return the current max session id
+     */
+    long getCurrentMaxSessionId();
+
 
     /**
      * The enum Log operation.
