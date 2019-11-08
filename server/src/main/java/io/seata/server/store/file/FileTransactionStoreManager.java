@@ -122,6 +122,8 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
     private static final int MAX_WAIT_FOR_FLUSH_TIME_MILLS = 2 * 1000;
 
+    private static final int MAX_WAIT_FOR_CLOSE_TIME_MILLS = 2 * 1000;
+
     private static final int INT_BYTE_SIZE = 4;
 
     /**
@@ -162,7 +164,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             currRaf.seek(currDataFile.length());
             currFileChannel = currRaf.getChannel();
         } catch (IOException exx) {
-            LOGGER.error("init file error," + exx.getMessage());
+            LOGGER.error("init file error,{}",exx.getMessage(),exx);
             throw exx;
         }
     }
@@ -212,7 +214,9 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         boolean result;
         try {
             result = findTimeoutAndSave();
-            writeDataFileRunnable.putRequest(new CloseFileRequest(currFileChannel, currRaf));
+            StoreRequest request = new CloseFileRequest(currFileChannel, currRaf);
+            writeDataFileRunnable.putRequest(request);
+            ((CloseFileRequest)request).waitForClose(MAX_WAIT_FOR_CLOSE_TIME_MILLS);
             Files.move(currDataFile.toPath(), new File(hisFullFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException exx) {
             LOGGER.error("save history data file error, {}", exx.getMessage(), exx);
@@ -327,7 +331,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         try {
             currFileChannel.force(true);
         } catch (IOException e) {
-            LOGGER.error("filechannel force error", e);
+            LOGGER.error("fileChannel force error{}",e.getMessage(),e);
         }
         closeFile(currRaf);
     }
@@ -405,13 +409,13 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                         break;
                     }
                 } catch (Exception ex) {
-                    LOGGER.error("decode data file error:" + ex.getMessage());
+                    LOGGER.error("decode data file error:{}",ex.getMessage(),ex);
                     break;
                 }
             }
             return transactionWriteStores;
         } catch (IOException exx) {
-            LOGGER.error("parse data file error:" + exx.getMessage() + ",file:" + file.getName());
+            LOGGER.error("parse data file error:{},file:{}",exx.getMessage(),file.getName(),exx);
             return null;
         } finally {
             try {
@@ -424,7 +428,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                 }
                 closeFile(raf);
             } catch (IOException exx) {
-                LOGGER.error("file close error," + exx.getMessage());
+                LOGGER.error("file close error{}",exx.getMessage(),exx);
             }
         }
 
@@ -442,7 +446,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                 raf = null;
             }
         } catch (IOException exx) {
-            LOGGER.error("file close error," + exx.getMessage());
+            LOGGER.error("file close error,{}",exx.getMessage(),exx);
         }
     }
 
@@ -464,10 +468,10 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                 }
                 return true;
             } catch (IOException exx) {
-                LOGGER.error("write data file error:" + exx.getMessage());
+                LOGGER.error("write data file error:{}",exx.getMessage(),exx);
             }
         }
-        LOGGER.error("write dataFile failed,retry more than :" + MAX_WRITE_RETRY);
+        LOGGER.error("write dataFile failed,retry more than :{}",MAX_WRITE_RETRY);
         return false;
     }
 
@@ -502,7 +506,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             super(curFileTrxNum, curFileChannel);
         }
 
-        public void wakeupCustomer() {
+        public void wakeup() {
             this.countDownLatch.countDown();
         }
 
@@ -524,7 +528,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     }
 
     static class CloseFileRequest implements StoreRequest {
-
+        private final CountDownLatch countDownLatch = new CountDownLatch(1);
         private FileChannel fileChannel;
 
         private RandomAccessFile file;
@@ -540,6 +544,18 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
 
         public RandomAccessFile getFile() {
             return file;
+        }
+
+        public void wakeup() {
+            this.countDownLatch.countDown();
+        }
+
+        public void waitForClose(long timeout) {
+            try {
+                this.countDownLatch.await(timeout, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e) {
+                LOGGER.error("Interrupted", e);
+            }
         }
     }
 
@@ -594,7 +610,8 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             long diff = FILE_TRX_NUM.get() - FILE_FLUSH_NUM.get();
             flush(req.getFileChannel());
             FILE_FLUSH_NUM.addAndGet(diff);
-            closeFile(currRaf);
+            closeFile(req.getFile());
+            req.wakeup();
         }
 
         private void async(AsyncFlushRequest req) {
@@ -610,7 +627,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                 FILE_FLUSH_NUM.addAndGet(diff);
             }
             // notify
-            req.wakeupCustomer();
+            req.wakeup();
         }
 
         private void flushOnCondition(FileChannel fileChannel) {
@@ -632,7 +649,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             try {
                 fileChannel.force(false);
             } catch (IOException exx) {
-                LOGGER.error("flush error:" + exx.getMessage());
+                LOGGER.error("flush error: {}",exx.getMessage(),exx);
             }
         }
     }

@@ -23,10 +23,14 @@ import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.expression.seq.SequenceExpressionFactory;
 import io.seata.saga.engine.expression.spel.SpringELExpressionFactory;
 import io.seata.saga.engine.invoker.ServiceInvokerManager;
+import io.seata.saga.engine.invoker.impl.SpringBeanServiceInvoker;
 import io.seata.saga.engine.pcext.StateMachineProcessHandler;
 import io.seata.saga.engine.pcext.StateMachineProcessRouter;
+import io.seata.saga.engine.repo.StateLogRepository;
+import io.seata.saga.engine.repo.impl.StateLogRepositoryImpl;
 import io.seata.saga.engine.store.StateLangStore;
-import io.seata.saga.engine.StatusDecisionStrategy;
+import io.seata.saga.engine.strategy.StatusDecisionStrategy;
+import io.seata.saga.engine.strategy.impl.DefaultStatusDecisionStrategy;
 import io.seata.saga.proctrl.ProcessRouter;
 import io.seata.saga.proctrl.ProcessType;
 import io.seata.saga.proctrl.eventing.impl.AsyncEventBus;
@@ -43,6 +47,7 @@ import io.seata.saga.engine.repo.StateMachineRepository;
 import io.seata.saga.engine.repo.impl.StateMachineRepositoryImpl;
 import io.seata.saga.engine.sequence.SeqGenerator;
 import io.seata.saga.engine.sequence.SpringJvmUUIDSeqGenerator;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -58,12 +63,14 @@ import org.springframework.core.io.Resource;
 
 /**
  * Default state machine configuration
+ *
  * @author lorne.cl
  */
 public class DefaultStateMachineConfig implements StateMachineConfig, ApplicationContextAware, InitializingBean {
 
-    private static final Logger       LOGGER = LoggerFactory.getLogger(DefaultStateMachineConfig.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultStateMachineConfig.class);
 
+    private StateLogRepository        stateLogRepository;
     private StateLogStore             stateLogStore;
     private StateLangStore            stateLangStore;
     private ExpressionFactoryManager  expressionFactoryManager;
@@ -71,6 +78,7 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     private StateMachineRepository    stateMachineRepository;
     private StatusDecisionStrategy    statusDecisionStrategy;
     private SeqGenerator              seqGenerator;
+
     private ProcessCtrlEventPublisher syncProcessCtrlEventPublisher;
     private ProcessCtrlEventPublisher asyncProcessCtrlEventPublisher;
     private ApplicationContext        applicationContext;
@@ -83,10 +91,6 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     private String                    defaultTenantId = "000001";
 
     protected void init() throws Exception {
-
-        if (seqGenerator == null) {
-            seqGenerator = new SpringJvmUUIDSeqGenerator();
-        }
 
         if (expressionFactoryManager == null) {
             expressionFactoryManager = new ExpressionFactoryManager();
@@ -128,6 +132,12 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             this.stateMachineRepository = stateMachineRepository;
         }
 
+        if(stateLogRepository == null){
+            StateLogRepositoryImpl stateLogRepositoryImpl = new StateLogRepositoryImpl();
+            stateLogRepositoryImpl.setStateLogStore(stateLogStore);
+            this.stateLogRepository = stateLogRepositoryImpl;
+        }
+
         if (statusDecisionStrategy == null) {
             statusDecisionStrategy = new DefaultStatusDecisionStrategy();
         }
@@ -165,8 +175,13 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
             asyncProcessCtrlEventPublisher = asyncEventPublisher;
         }
 
-        if(this.serviceInvokerManager == null){
+        if (this.serviceInvokerManager == null) {
             this.serviceInvokerManager = new ServiceInvokerManager();
+
+            SpringBeanServiceInvoker springBeanServiceInvoker = new SpringBeanServiceInvoker();
+            springBeanServiceInvoker.setApplicationContext(getApplicationContext());
+            springBeanServiceInvoker.setThreadPoolExecutor(threadPoolExecutor);
+            this.serviceInvokerManager.putServiceInvoker(DomainConstants.SERVICE_TYPE_SPRING_BEAN, springBeanServiceInvoker);
         }
     }
 
@@ -243,6 +258,13 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
 
     @Override
     public SeqGenerator getSeqGenerator() {
+        if (seqGenerator == null) {
+            synchronized (this){
+                if (seqGenerator == null) {
+                    seqGenerator = new SpringJvmUUIDSeqGenerator();
+                }
+            }
+        }
         return seqGenerator;
     }
 
@@ -274,6 +296,15 @@ public class DefaultStateMachineConfig implements StateMachineConfig, Applicatio
     @Override
     public boolean isEnableAsync() {
         return enableAsync;
+    }
+
+    @Override
+    public StateLogRepository getStateLogRepository() {
+        return stateLogRepository;
+    }
+
+    public void setStateLogRepository(StateLogRepository stateLogRepository) {
+        this.stateLogRepository = stateLogRepository;
     }
 
     public void setStateLogStore(StateLogStore stateLogStore) {
