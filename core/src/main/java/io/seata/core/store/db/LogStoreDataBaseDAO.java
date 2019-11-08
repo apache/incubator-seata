@@ -357,6 +357,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         String sql = LogStoreSqls.getQureyBranchTransaction(brachTable, dbType);
         Connection conn = null;
         PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
@@ -364,7 +365,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps = conn.prepareStatement(sql);
             ps.setString(1, xid);
 
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs.next()) {
                 rets.add(convertBranchTransactionDO(rs));
             }
@@ -372,6 +373,12 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                }
+            }
             if (ps != null) {
                 try {
                     ps.close();

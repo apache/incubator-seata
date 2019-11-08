@@ -184,7 +184,8 @@ public class LogStoreSqls {
      * The constant QUREY_BRANCH_TRANSACTION.
      */
     public static final String QUREY_BRANCH_TRANSACTION = "select " + ALL_BRANCH_COLUMNS + " from "
-        + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ?";
+        + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? order by "
+        + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " asc";
 
     /**
      * The constant CHECK_MAX_TRANS_ID.
