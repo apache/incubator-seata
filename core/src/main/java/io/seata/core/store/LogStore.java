@@ -107,4 +107,13 @@ public interface LogStore {
      */
     boolean deleteBranchTransactionDO(BranchTransactionDO branchTransactionDO);
 
+    /**
+     * Gets current max session id.
+     *
+     * @param high the high
+     * @param low  the low
+     * @return the current max session id
+     */
+    long getCurrentMaxSessionId(long high, long low);
+
 }
