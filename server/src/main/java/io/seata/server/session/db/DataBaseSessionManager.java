@@ -189,7 +189,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
     public void reload() {
         long maxSessionId = transactionStoreManager.getCurrentMaxSessionId();
         if (maxSessionId > UUIDGenerator.getCurrentUUID()) {
-            UUIDGenerator.setUUID(UUIDGenerator.getCurrentUUID(), maxSessionId + 1);
+            UUIDGenerator.setUUID(UUIDGenerator.getCurrentUUID(), maxSessionId);
         }
     }
 }
