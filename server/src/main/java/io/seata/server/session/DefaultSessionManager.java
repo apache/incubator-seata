@@ -82,6 +82,12 @@ public class DefaultSessionManager extends AbstractSessionManager {
     }
 
     @Override
+    public GlobalSession findGlobalSession(String xid, boolean withBranchSessions) {
+        //withBranchSessions without process in memory
+        return sessionMap.get(xid);
+    }
+
+    @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
         super.removeGlobalSession(session);
         sessionMap.remove(session.getXid());

@@ -35,6 +35,7 @@ public class ServiceTaskStateImpl extends AbstractTaskState implements ServiceTa
     private List<Object>        inputExpressions;
     private Map<String, Object> outputExpressions;
     private Map<Object, String> statusEvaluators;
+    private boolean             isAsync;
 
     public ServiceTaskStateImpl() {
         setType(DomainConstants.STATE_TYPE_SERVICE_TASK);
@@ -106,5 +107,13 @@ public class ServiceTaskStateImpl extends AbstractTaskState implements ServiceTa
 
     public void setStatusEvaluators(Map<Object, String> statusEvaluators) {
         this.statusEvaluators = statusEvaluators;
+    }
+
+    public boolean isAsync() {
+        return isAsync;
+    }
+
+    public void setAsync(boolean async) {
+        isAsync = async;
     }
 }
