@@ -27,6 +27,7 @@ import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.druid.BaseRecognizer;
+import io.seata.rm.datasource.sql.struct.Null;
 
 /**
  * @author will
@@ -53,7 +54,8 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
                         oneParamValues.stream().forEach(t -> paramAppenderList.add(new ArrayList<>()));
                     }
                     for (int i = 0; i < oneParamValues.size(); i++) {
-                        paramAppenderList.get(i).add(oneParamValues.get(i));
+                        Object o = oneParamValues.get(i);
+                        paramAppenderList.get(i).add(o instanceof Null ? null : o);
                     }
 
                 }
