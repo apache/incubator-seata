@@ -29,6 +29,7 @@ import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
@@ -136,24 +137,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(rs, ps, conn);
         }
     }
 
@@ -177,24 +161,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(rs, ps, conn);
         }
     }
 
@@ -231,24 +198,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(rs, ps, conn);
         }
     }
 
@@ -277,18 +227,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps, conn);
         }
     }
 
@@ -307,18 +246,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps, conn);
         }
     }
 
@@ -336,18 +264,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps, conn);
         }
     }
 
@@ -372,18 +289,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps, conn);
         }
     }
 
@@ -410,18 +316,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps, conn);
         }
     }
 
@@ -441,18 +336,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps, conn);
         }
     }
 
@@ -471,18 +355,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps, conn);
         }
         return true;
     }

@@ -32,6 +32,7 @@ import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.LambdaUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -185,27 +186,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    if (originalAutoCommit) {
-                        conn.setAutoCommit(true);
-                    }
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(rs, ps, conn);
         }
     }
 
@@ -237,18 +218,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps, conn);
         }
         return true;
     }
@@ -266,12 +236,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -299,12 +264,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps);
         }
     }
 
@@ -337,12 +297,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             //return false,let the caller go to conn.rollabck()
             return false;
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps);
         }
     }
 
@@ -379,18 +334,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(rs, ps);
         }
     }
 
