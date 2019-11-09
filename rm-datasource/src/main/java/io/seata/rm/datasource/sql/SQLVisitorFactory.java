@@ -53,32 +53,18 @@ public class SQLVisitorFactory {
         }
         SQLRecognizer recognizer = null;
         SQLStatement ast = asts.get(0);
-        if (JdbcConstants.MYSQL.equalsIgnoreCase(dbType)) {
-            if (ast instanceof SQLInsertStatement) {
-                recognizer = new MySQLInsertRecognizer(sql, ast);
-            } else if (ast instanceof SQLUpdateStatement) {
-                recognizer = new MySQLUpdateRecognizer(sql, ast);
-            } else if (ast instanceof SQLDeleteStatement) {
-                recognizer = new MySQLDeleteRecognizer(sql, ast);
-            } else if (ast instanceof SQLSelectStatement) {
-                if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
-                    recognizer = new MySQLSelectForUpdateRecognizer(sql, ast);
-                }
+        SQLRecognizerGroup recognizerGroup =
+            SQLRecognizerGroupFactory.getSQLRecognizerGroup(dbType.toLowerCase());
+        if (ast instanceof SQLInsertStatement) {
+            recognizer = recognizerGroup.getInsertRecognizer(sql, ast);
+        } else if (ast instanceof SQLUpdateStatement) {
+            recognizer = recognizerGroup.getUpdateRecognizer(sql, ast);
+        } else if (ast instanceof SQLDeleteStatement) {
+            recognizer = recognizerGroup.getDeleteRecognizer(sql, ast);
+        } else if (ast instanceof SQLSelectStatement) {
+            if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
+                recognizer = recognizerGroup.getSelectForUpdateRecognizer(sql, ast);
             }
-        }  else if (JdbcConstants.ORACLE.equalsIgnoreCase(dbType)) {
-            if (ast instanceof SQLInsertStatement) {
-                recognizer = new OracleInsertRecognizer(sql, ast);
-            } else if (ast instanceof SQLUpdateStatement) {
-                recognizer = new OracleUpdateRecognizer(sql, ast);
-            } else if (ast instanceof SQLDeleteStatement) {
-                recognizer = new OracleDeleteRecognizer(sql, ast);
-            } else if (ast instanceof SQLSelectStatement) {
-                if (((SQLSelectStatement) ast).getSelect().getQueryBlock().isForUpdate()) {
-                    recognizer = new OracleSelectForUpdateRecognizer(sql, ast);
-                }
-            }
-        }else {
-            throw new UnsupportedOperationException("Just support MySQL and Oracle by now!");
         }
         return recognizer;
     }
