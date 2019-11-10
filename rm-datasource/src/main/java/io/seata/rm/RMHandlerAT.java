@@ -52,22 +52,18 @@ public class RMHandlerAT extends AbstractRMHandler {
         Connection conn = null;
         try {
             conn = dataSourceProxy.getPlainConnection();
-            int deleteRows = 0;
-            do {
-                try {
-                    UndoLogManager undoLogManager = UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType());
-                    undoLogManager.deleteUndoLogByLogCreated(logCreatedSave, LIMIT_ROWS, conn);
-                    if (deleteRows > 0 && !conn.getAutoCommit()) {
-                        conn.commit();
-                    }
-                } catch (SQLException exx) {
-                    if (deleteRows > 0 && !conn.getAutoCommit()) {
-                        conn.rollback();
-                    }
-                    throw exx;
+            try {
+                UndoLogManager undoLogManager = UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType());
+                undoLogManager.deleteUndoLogByLogCreated(logCreatedSave, LIMIT_ROWS, conn);
+                if (!conn.getAutoCommit()) {
+                    conn.commit();
                 }
+            } catch (SQLException exx) {
+                if (!conn.getAutoCommit()) {
+                    conn.rollback();
+                }
+                throw exx;
             }
-            while (deleteRows == LIMIT_ROWS);
         } catch (Exception e) {
             LOGGER.error("Failed to delete expired undo_log，error:{}", e.getMessage(), e);
         } finally {
