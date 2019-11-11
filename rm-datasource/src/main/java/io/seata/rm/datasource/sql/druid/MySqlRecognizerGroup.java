@@ -24,7 +24,6 @@ import io.seata.rm.datasource.sql.SQLRecognizerGroup;
  *
  * @author: Zhibei Hao丶
  * @date 2019/8/15 10:32
- * @version: V1.0
  */
 public class MySqlRecognizerGroup implements SQLRecognizerGroup {
   private final String MYSQL = "mysql";

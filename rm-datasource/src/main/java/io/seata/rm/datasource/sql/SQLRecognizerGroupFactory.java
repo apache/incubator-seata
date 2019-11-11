@@ -25,7 +25,6 @@ import java.util.Map;
  *
  * @author: Zhibei Hao丶
  * @date: 2019/11/8 17:37
- * @version: V1.0
  */
 public class SQLRecognizerGroupFactory
 {
