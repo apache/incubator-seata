@@ -25,7 +25,7 @@ public class IOUtil {
      * @param closeables the closeables
      */
     public static void close(AutoCloseable... closeables) {
-        if (closeables != null && closeables.length > 0) {
+        if (CollectionUtils.isNotEmpty(closeables)) {
             for (AutoCloseable closeable : closeables) {
                 close(closeable);
             }
