@@ -421,7 +421,10 @@ public class DefaultCore implements Core {
                 }
             }
 
-            //fix global status inconsistent on db mode
+            //In db mode, there is a problem of inconsistent data in multiple copies, resulting in new branch transaction registration when rolling back.
+            //1. New branch transaction and rollback branch transaction have no data association
+            //2. New branch transaction has data association with rollback branch transaction
+            //The second query can solve the first problem, and if it is the second problem, it may cause a rollback failure due to data changes.
             GlobalSession globalSessionTwice = SessionHolder.findGlobalSession(globalSession.getXid());
             if (globalSessionTwice != null && globalSessionTwice.hasBranch()) {
                 LOGGER.info("Global[{}] rollbacking is NOT done.", globalSession.getXid());
