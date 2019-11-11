@@ -105,21 +105,20 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
         if (LogOperation.GLOBAL_ADD.equals(logOperation)) {
-            logStore.insertGlobalTransactionDO(convertGlobalTransactionDO(session));
+            return logStore.insertGlobalTransactionDO(convertGlobalTransactionDO(session));
         } else if (LogOperation.GLOBAL_UPDATE.equals(logOperation)) {
-            logStore.updateGlobalTransactionDO(convertGlobalTransactionDO(session));
+            return logStore.updateGlobalTransactionDO(convertGlobalTransactionDO(session));
         } else if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
-            logStore.deleteGlobalTransactionDO(convertGlobalTransactionDO(session));
+            return logStore.deleteGlobalTransactionDO(convertGlobalTransactionDO(session));
         } else if (LogOperation.BRANCH_ADD.equals(logOperation)) {
-            logStore.insertBranchTransactionDO(convertBranchTransactionDO(session));
+            return logStore.insertBranchTransactionDO(convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_UPDATE.equals(logOperation)) {
-            logStore.updateBranchTransactionDO(convertBranchTransactionDO(session));
+            return logStore.updateBranchTransactionDO(convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
-            logStore.deleteBranchTransactionDO(convertBranchTransactionDO(session));
+            return logStore.deleteBranchTransactionDO(convertBranchTransactionDO(session));
         } else {
             throw new StoreException("Unknown LogOperation:" + logOperation.name());
         }
-        return true;
     }
 
     /**
