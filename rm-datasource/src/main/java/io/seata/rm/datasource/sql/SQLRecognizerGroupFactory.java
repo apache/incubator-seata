@@ -30,20 +30,22 @@ import java.util.Map;
 public class SQLRecognizerGroupFactory
 {
 
-  private static Object lockObj = new Object();
+  private static volatile boolean initialized;
   private static Map<String, SQLRecognizerGroup> recognizerGroupMap;
 
-  public static SQLRecognizerGroup getSQLRecognizerGroup(String dbType) {
+  public static SQLRecognizerGroup getSQLRecognizerGroup(String dbType)
+  {
 
-    if (recognizerGroupMap == null) {
-      synchronized (lockObj) {
-        if (recognizerGroupMap == null) {
+    if (!initialized) {
+      synchronized (SQLRecognizerGroupFactory.class) {
+        if (!initialized) {
           recognizerGroupMap = new HashMap<>();
           List<SQLRecognizerGroup> groupList =
               EnhancedServiceLoader.loadAll(SQLRecognizerGroup.class);
           for (SQLRecognizerGroup group : groupList) {
             recognizerGroupMap.put(group.getDbType().toLowerCase(), group);
           }
+          initialized=true;
         }
       }
     }
