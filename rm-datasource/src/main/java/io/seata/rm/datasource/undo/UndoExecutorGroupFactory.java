@@ -29,19 +29,21 @@ import java.util.Map;
  */
 public class UndoExecutorGroupFactory
 {
+  private static volatile boolean initialized;
   private static Map<String, UndoExecutorGroup> executorGroupMap;
 
   public static UndoExecutorGroup getUndoExecutorGroup(String dbType) {
 
-    if (executorGroupMap == null) {
+    if (!initialized) {
       synchronized (UndoExecutorGroupFactory.class) {
-        if (executorGroupMap == null) {
+        if (!initialized) {
           executorGroupMap = new HashMap<>();
           List<UndoExecutorGroup> groupList =
               EnhancedServiceLoader.loadAll(UndoExecutorGroup.class);
           for (UndoExecutorGroup group : groupList) {
             executorGroupMap.put(group.getDbType().toLowerCase(), group);
           }
+          initialized=true;
         }
       }
     }
