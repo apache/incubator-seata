@@ -26,6 +26,7 @@ import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 
 import io.seata.rm.datasource.ParametersHolder;
+import io.seata.rm.datasource.sql.struct.Null;
 
 /**
  * @author will
@@ -52,7 +53,8 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
                         oneParamValues.stream().forEach(t -> paramAppenderList.add(new ArrayList<>()));
                     }
                     for (int i = 0; i < oneParamValues.size(); i++) {
-                        paramAppenderList.get(i).add(oneParamValues.get(i));
+                        Object o = oneParamValues.get(i);
+                        paramAppenderList.get(i).add(o instanceof Null ? null : o);
                     }
 
                 }

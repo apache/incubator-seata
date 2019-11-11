@@ -29,6 +29,7 @@ import io.seata.tm.TMClient;
 import io.seata.tm.api.GlobalTransaction;
 import io.seata.tm.api.GlobalTransactionContext;
 import io.seata.tm.api.TransactionalExecutor;
+import io.seata.tm.api.TransactionalExecutor.ExecutionException;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
@@ -96,6 +97,11 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
     }
 
     @Override
+    public GlobalTransaction reloadTransaction(String xid) throws ExecutionException, TransactionException {
+        return GlobalTransactionContext.reload(xid);
+    }
+
+    @Override
     public void reportTransaction(GlobalTransaction tx, GlobalStatus globalStatus) throws TransactionalExecutor.ExecutionException {
         try {
             tx.globalReport(globalStatus);
@@ -123,7 +129,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             try {
                 hook.beforeBegin();
             } catch (Exception e) {
-                LOGGER.error("Failed execute beforeBegin in hook " + e.getMessage());
+                LOGGER.error("Failed execute beforeBegin in hook {}",e.getMessage(),e);
             }
         }
     }
@@ -133,7 +139,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             try {
                 hook.afterBegin();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterBegin in hook " + e.getMessage());
+                LOGGER.error("Failed execute afterBegin in hook {} ",e.getMessage(),e);
             }
         }
     }
@@ -143,7 +149,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             try {
                 hook.beforeRollback();
             } catch (Exception e) {
-                LOGGER.error("Failed execute beforeRollback in hook " + e.getMessage());
+                LOGGER.error("Failed execute beforeRollback in hook {} ",e.getMessage(),e);
             }
         }
     }
@@ -153,7 +159,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             try {
                 hook.afterRollback();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterRollback in hook " + e.getMessage());
+                LOGGER.error("Failed execute afterRollback in hook {}",e.getMessage(),e);
             }
         }
     }
@@ -163,7 +169,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             try {
                 hook.beforeCommit();
             } catch (Exception e) {
-                LOGGER.error("Failed execute beforeCommit in hook " + e.getMessage());
+                LOGGER.error("Failed execute beforeCommit in hook {}",e.getMessage(),e);
             }
         }
     }
@@ -173,7 +179,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             try {
                 hook.afterCommit();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterCommit in hook " + e.getMessage());
+                LOGGER.error("Failed execute afterCommit in hook {}",e.getMessage(),e);
             }
         }
     }
@@ -184,7 +190,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             try {
                 hook.afterCompletion();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterCompletion in hook " + e.getMessage());
+                LOGGER.error("Failed execute afterCompletion in hook {}",e.getMessage(),e);
             }
         }
     }

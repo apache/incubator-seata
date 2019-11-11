@@ -85,7 +85,7 @@ public class ServerTableColumnsName {
     /**
      * The constant branch_table column name branch_id
      */
-    public static final String BRANCH_TABLE_BRANCH_XID = "branch_id";
+    public static final String BRANCH_TABLE_BRANCH_ID = "branch_id";
 
     /**
      * The constant branch_table column name xid
