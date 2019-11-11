@@ -15,13 +15,43 @@
  */
 package io.seata.rm.datasource.undo;
 
+/**
+ * The Type UndoExecutorGroup
+ *
+ * @author: Zhibei Hao丶
+ * @date: 2019/11/9 10:30
+ */
 public interface UndoExecutorGroup
 {
+
+  /**
+   * get the specific Insert UndoExecutor by sqlUndoLog
+   *
+   * @param sqlUndoLog the sqlUndoLog
+   * @return the specific UndoExecutor
+   */
   AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog);
 
+  /**
+   * get the specific Update UndoExecutor by sqlUndoLog
+   *
+   * @param sqlUndoLog the sqlUndoLog
+   * @return the specific UndoExecutor
+   */
   AbstractUndoExecutor getUpdateExecutor(SQLUndoLog sqlUndoLog);
 
+  /**
+   * get the specific Delete UndoExecutor by sqlUndoLog
+   *
+   * @param sqlUndoLog the sqlUndoLog
+   * @return the specific UndoExecutor
+   */
   AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog);
 
+  /**
+   * get the SQL type of the current UndoExecutorGroup
+   *
+   * @return the SQL type string
+   */
   String getDbType();
 }

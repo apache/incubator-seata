@@ -23,16 +23,50 @@ import com.alibaba.druid.sql.ast.SQLStatement;
  * @author: Zhibei Hao丶
  * @date: 2019/11/8 17:39
  */
-public interface SQLRecognizerGroup
+public interface SQLOperateRecognizerGroup
 {
+
+  /**
+   * Get delete recognizer
+   *
+   * @param sql the sql
+   * @param ast the ast
+   * @return the delete recognizer
+   */
   SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast);
 
+  /**
+   * Get insert recognizer
+   *
+   * @param sql the sql
+   * @param ast the ast
+   * @return the insert recognizer
+   */
   SQLRecognizer getInsertRecognizer(String sql, SQLStatement ast);
 
+  /**
+   * Get update recognizer
+   *
+   * @param sql the sql
+   * @param ast the ast
+   * @return the update recognizer
+   */
   SQLRecognizer getUpdateRecognizer(String sql, SQLStatement ast);
 
+  /**
+   * Get SelectForUpdate recognizer
+   *
+   * @param sql the sql
+   * @param ast the ast
+   * @return the SelectForUpdate recognizer
+   */
   SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast);
 
+  /**
+   * Get the SQL type of the current SQLOperateRecognizerGroup
+   *
+   * @return the db type string
+   */
   String getDbType();
 
 }

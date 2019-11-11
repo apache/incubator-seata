@@ -17,15 +17,16 @@ package io.seata.rm.datasource.sql.druid;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.SQLRecognizerGroup;
+import io.seata.rm.datasource.sql.SQLOperateRecognizerGroup;
 
 /**
- * MySqlRecognizerGroup
+ * The class MySqlRecognizerGroup
  *
  * @author: Zhibei Hao丶
  * @date 2019/8/15 10:32
  */
-public class MySqlRecognizerGroup implements SQLRecognizerGroup {
+public class MySqlOperateRecognizerGroup implements SQLOperateRecognizerGroup
+{
   private final String MYSQL = "mysql";
 
   @Override

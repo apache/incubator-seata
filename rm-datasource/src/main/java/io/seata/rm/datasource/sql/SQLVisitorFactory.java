@@ -21,15 +21,6 @@ import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.rm.datasource.sql.druid.MySQLDeleteRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLInsertRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLUpdateRecognizer;
-import io.seata.rm.datasource.sql.druid.oracle.OracleDeleteRecognizer;
-import io.seata.rm.datasource.sql.druid.oracle.OracleInsertRecognizer;
-import io.seata.rm.datasource.sql.druid.oracle.OracleSelectForUpdateRecognizer;
-import io.seata.rm.datasource.sql.druid.oracle.OracleUpdateRecognizer;
 import java.util.List;
 
 /**
@@ -53,8 +44,8 @@ public class SQLVisitorFactory {
         }
         SQLRecognizer recognizer = null;
         SQLStatement ast = asts.get(0);
-        SQLRecognizerGroup recognizerGroup =
-            SQLRecognizerGroupFactory.getSQLRecognizerGroup(dbType.toLowerCase());
+        SQLOperateRecognizerGroup recognizerGroup =
+            SQLOperateRecognizerGroupFactory.getSQLRecognizerGroup(dbType.toLowerCase());
         if (ast instanceof SQLInsertStatement) {
             recognizer = recognizerGroup.getInsertRecognizer(sql, ast);
         } else if (ast instanceof SQLUpdateStatement) {

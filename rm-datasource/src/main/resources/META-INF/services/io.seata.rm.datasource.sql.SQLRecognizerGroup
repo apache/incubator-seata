@@ -1,2 +1,2 @@
-io.seata.rm.datasource.sql.druid.MySqlRecognizerGroup
-io.seata.rm.datasource.sql.druid.oracle.OracleRecognizerGroup
+io.seata.rm.datasource.sql.druid.MySqlOperateRecognizerGroup
+io.seata.rm.datasource.sql.druid.oracle.OracleOperateRecognizerGroup

@@ -16,8 +16,8 @@
 package io.seata.rm.datasource.sql.druid.oracle;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
+import io.seata.rm.datasource.sql.SQLOperateRecognizerGroup;
 import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.SQLRecognizerGroup;
 
 /**
  * The Type OracleRecognizerGroup
@@ -25,7 +25,7 @@ import io.seata.rm.datasource.sql.SQLRecognizerGroup;
  * @author: Zhibei Hao丶
  * @date: 2019/8/23 9:59
  */
-public class OracleRecognizerGroup implements SQLRecognizerGroup
+public class OracleOperateRecognizerGroup implements SQLOperateRecognizerGroup
 {
   private final String ORACLE = "oracle";
   @Override

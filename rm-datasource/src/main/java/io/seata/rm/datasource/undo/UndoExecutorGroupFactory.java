@@ -20,6 +20,7 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 /**
  * The Type UndoExecutorGroupFactory
  *
@@ -28,21 +29,26 @@ import java.util.Map;
  */
 public class UndoExecutorGroupFactory
 {
-  private static volatile boolean initialized;
-  private static Map<String, UndoExecutorGroup> executorGroupMap;
+  private static volatile Map<String, UndoExecutorGroup> executorGroupMap;
 
+  /**
+   * Get UndoExecutorGroup by db type
+   *
+   * @param dbType the db type
+   * @return the UndoExecutorGroup
+   */
   public static UndoExecutorGroup getUndoExecutorGroup(String dbType) {
 
-    if (!initialized) {
+    if (executorGroupMap == null) {
       synchronized (UndoExecutorGroupFactory.class) {
-        if (!initialized) {
-          executorGroupMap = new HashMap<>();
+        if (executorGroupMap == null) {
+          Map<String, UndoExecutorGroup> initializeMap = new HashMap<>();
           List<UndoExecutorGroup> groupList =
               EnhancedServiceLoader.loadAll(UndoExecutorGroup.class);
           for (UndoExecutorGroup group : groupList) {
-            executorGroupMap.put(group.getDbType().toLowerCase(), group);
+            initializeMap.put(group.getDbType().toLowerCase(), group);
           }
-          initialized=true;
+          executorGroupMap = initializeMap;
         }
       }
     }

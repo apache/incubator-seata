@@ -20,31 +20,37 @@ import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 /**
  * The SQLRecognizerGroupFactory
  *
  * @author: Zhibei Hao丶
  * @date: 2019/11/8 17:37
  */
-public class SQLRecognizerGroupFactory
+public class SQLOperateRecognizerGroupFactory
 {
 
-  private static volatile boolean initialized;
-  private static Map<String, SQLRecognizerGroup> recognizerGroupMap;
+  private static volatile Map<String, SQLOperateRecognizerGroup> recognizerGroupMap;
 
-  public static SQLRecognizerGroup getSQLRecognizerGroup(String dbType)
+  /**
+   * get SQLOperateRecognizer by db type
+   *
+   * @param dbType the db type
+   * @return the SQLOperateRecognizer
+   */
+  public static SQLOperateRecognizerGroup getSQLRecognizerGroup(String dbType)
   {
 
-    if (!initialized) {
-      synchronized (SQLRecognizerGroupFactory.class) {
-        if (!initialized) {
-          recognizerGroupMap = new HashMap<>();
-          List<SQLRecognizerGroup> groupList =
-              EnhancedServiceLoader.loadAll(SQLRecognizerGroup.class);
-          for (SQLRecognizerGroup group : groupList) {
-            recognizerGroupMap.put(group.getDbType().toLowerCase(), group);
+    if (recognizerGroupMap == null) {
+      synchronized (SQLOperateRecognizerGroupFactory.class) {
+        if (recognizerGroupMap == null) {
+          Map<String, SQLOperateRecognizerGroup> initializeMap  = new HashMap<>();
+          List<SQLOperateRecognizerGroup> groupList =
+              EnhancedServiceLoader.loadAll(SQLOperateRecognizerGroup.class);
+          for (SQLOperateRecognizerGroup group : groupList) {
+            initializeMap.put(group.getDbType().toLowerCase(), group);
           }
-          initialized=true;
+          recognizerGroupMap = initializeMap;
         }
       }
     }
