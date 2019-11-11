@@ -104,6 +104,11 @@ public class ConfigurationKeys {
     public static final String SERVICE_SESSION_RELOAD_READ_SIZE = STORE_FILE_PREFIX + "session.reload.read_size";
 
     /**
+     * The constant CLIENT_REPORT_SUCCESS_ENABLE.
+     */
+    public static final String CLIENT_REPORT_SUCCESS_ENABLE = CLIENT_PREFIX + "report.success.enable";
+
+    /**
      * The constant CLIENT_REPORT_RETRY_COUNT.
      */
     public static final String CLIENT_REPORT_RETRY_COUNT = CLIENT_RM_PREFIX + "report.retry.count";
