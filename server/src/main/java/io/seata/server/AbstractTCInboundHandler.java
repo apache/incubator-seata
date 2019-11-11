@@ -59,7 +59,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
                     doGlobalBegin(request, response, rpcContext);
                 } catch (StoreException e) {
                     throw new TransactionException(TransactionExceptionCode.FailedStore,
-                            String.format("begin global request failed. xid=%s, msg=%s", response.getXid(), e.getMessage()));
+                            String.format("begin global request failed. xid=%s, msg=%s", response.getXid(), e.getMessage()), e);
                 }
             }
         }, request, response);
@@ -88,7 +88,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
                     doGlobalCommit(request, response, rpcContext);
                 } catch (StoreException e) {
                     throw new TransactionException(TransactionExceptionCode.FailedStore,
-                            String.format("global commit request failed. xid=%s, msg=%s", request.getXid(), e.getMessage()));
+                            String.format("global commit request failed. xid=%s, msg=%s", request.getXid(), e.getMessage()), e);
                 }
             }
         }, request, response);
@@ -117,7 +117,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
                     doGlobalRollback(request, response, rpcContext);
                 } catch (StoreException e) {
                     throw new TransactionException(TransactionExceptionCode.FailedStore,
-                            String.format("global rollback request failed. xid=%s, msg=%s", request.getXid(), e.getMessage()));
+                            String.format("global rollback request failed. xid=%s, msg=%s", request.getXid(), e.getMessage()), e);
                 }
             }
 
@@ -171,7 +171,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
                     doBranchRegister(request, response, rpcContext);
                 } catch (StoreException e) {
                     throw new TransactionException(TransactionExceptionCode.FailedStore,
-                            String.format("branch register request failed. xid=%s, msg=%s", request.getXid(), e.getMessage()));
+                            String.format("branch register request failed. xid=%s, msg=%s", request.getXid(), e.getMessage()), e);
                 }
             }
         }, request, response);
@@ -201,7 +201,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
                 } catch (StoreException e) {
                     throw new TransactionException(TransactionExceptionCode.FailedStore,
                             String.format("branch report request failed. xid=%s, branchId=%s, msg=%s",
-                                    request.getXid(), request.getBranchId(), e.getMessage()));
+                                    request.getXid(), request.getBranchId(), e.getMessage()), e);
                 }
             }
         }, request, response);
@@ -230,7 +230,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
                     doLockCheck(request, response, rpcContext);
                 } catch (StoreException e) {
                     throw new TransactionException(TransactionExceptionCode.FailedStore,
-                            String.format("global lock query request failed. xid=%s, msg=%s", request.getXid(), e.getMessage()));
+                            String.format("global lock query request failed. xid=%s, msg=%s", request.getXid(), e.getMessage()), e);
                 }
             }
         }, request, response);
@@ -259,7 +259,7 @@ public abstract class AbstractTCInboundHandler extends AbstractExceptionHandler 
                     doGlobalStatus(request, response, rpcContext);
                 } catch (StoreException e) {
                     throw new TransactionException(TransactionExceptionCode.FailedStore,
-                            String.format("global status request failed. xid=%s, msg=%s", request.getXid(), e.getMessage()));
+                            String.format("global status request failed. xid=%s, msg=%s", request.getXid(), e.getMessage()), e);
                 }
             }
         }, request, response);
