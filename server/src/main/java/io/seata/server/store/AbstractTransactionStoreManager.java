@@ -34,6 +34,11 @@ public abstract class AbstractTransactionStoreManager implements TransactionStor
     }
 
     @Override
+    public GlobalSession readSession(String xid, boolean withBranchSessions) {
+        return null;
+    }
+
+    @Override
     public List<GlobalSession> readSession(SessionCondition sessionCondition) {
         return null;
     }

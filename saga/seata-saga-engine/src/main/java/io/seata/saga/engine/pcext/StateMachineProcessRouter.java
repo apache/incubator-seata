@@ -27,6 +27,7 @@ import io.seata.saga.proctrl.ProcessRouter;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -35,8 +36,8 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * StateMachine ProcessRouter
  *
- * @see ProcessRouter
  * @author lorne.cl
+ * @see ProcessRouter
  */
 public class StateMachineProcessRouter implements ProcessRouter {
 
@@ -48,11 +49,10 @@ public class StateMachineProcessRouter implements ProcessRouter {
         StateInstruction stateInstruction = context.getInstruction(StateInstruction.class);
 
         State state;
-        if(stateInstruction.getTemporaryState() != null){
+        if (stateInstruction.getTemporaryState() != null) {
             state = stateInstruction.getTemporaryState();
             stateInstruction.setTemporaryState(null);
-        }
-        else{
+        } else {
             StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
             StateMachine stateMachine = stateMachineConfig.getStateMachineRepository().getStateMachine(stateInstruction.getStateMachineName(), stateInstruction.getTenantId());
             state = stateMachine.getStates().get(stateInstruction.getStateName());
@@ -96,7 +96,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
             }
 
             //if 'Succeed' or 'Fail' State did not configured, we must end the state machine
-            if(instruction == null && !stateInstruction.isEnd()){
+            if (instruction == null && !stateInstruction.isEnd()) {
                 EngineUtils.endStateMachine(context);
             }
         }
@@ -104,8 +104,8 @@ public class StateMachineProcessRouter implements ProcessRouter {
         return instruction;
     }
 
-    public void initDefaultStateRouters(){
-        if(this.stateRouters.size() == 0){
+    public void initDefaultStateRouters() {
+        if (this.stateRouters.size() == 0) {
             TaskStateRouter taskStateRouter = new TaskStateRouter();
             this.stateRouters.put(DomainConstants.STATE_TYPE_SERVICE_TASK, taskStateRouter);
             this.stateRouters.put(DomainConstants.STATE_TYPE_CHOICE, taskStateRouter);
