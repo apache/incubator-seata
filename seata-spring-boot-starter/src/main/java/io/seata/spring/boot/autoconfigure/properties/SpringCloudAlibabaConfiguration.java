@@ -16,6 +16,8 @@
 package io.seata.spring.boot.autoconfigure.properties;
 
 import io.seata.spring.boot.autoconfigure.StarterConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.ApplicationContext;
@@ -29,6 +31,8 @@ import org.springframework.context.ApplicationContextAware;
  */
 @ConfigurationProperties(prefix = StarterConstants.SEATA_SPRING_CLOUD_ALIBABA_PREFIX)
 public class SpringCloudAlibabaConfiguration implements ApplicationContextAware {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SpringCloudAlibabaConfiguration.class);
     private static final String SPRING_APPLICATION_NAME_KEY = "spring.application.name";
     private static final String DEFAULT_SPRING_CLOUD_SERVICE_GROUP_POSTFIX = "-seata-service-group";
     private String applicationId;
@@ -41,7 +45,9 @@ public class SpringCloudAlibabaConfiguration implements ApplicationContextAware 
      * @return the application id
      */
     public String getApplicationId() {
-        applicationId = applicationContext.getEnvironment().getProperty(SPRING_APPLICATION_NAME_KEY);
+        if (null == applicationId) {
+            applicationId = applicationContext.getEnvironment().getProperty(SPRING_APPLICATION_NAME_KEY);
+        }
         return applicationId;
     }
 
@@ -52,6 +58,10 @@ public class SpringCloudAlibabaConfiguration implements ApplicationContextAware 
      */
     public String getTxServiceGroup() {
         if (null == txServiceGroup) {
+            String applicationId = getApplicationId();
+            if (null == applicationId) {
+                LOGGER.warn(SPRING_APPLICATION_NAME_KEY + " is null, please set its value");
+            }
             txServiceGroup = applicationId + DEFAULT_SPRING_CLOUD_SERVICE_GROUP_POSTFIX;
         }
         return txServiceGroup;
