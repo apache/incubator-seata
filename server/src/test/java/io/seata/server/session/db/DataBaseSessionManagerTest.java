@@ -16,6 +16,7 @@
 package io.seata.server.session.db;
 
 import io.seata.common.XID;
+import io.seata.common.util.IOUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -102,13 +103,7 @@ public class DataBaseSessionManagerTest {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+            IOUtil.close(conn);
         }
     }
 

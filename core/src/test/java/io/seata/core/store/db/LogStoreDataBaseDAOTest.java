@@ -16,6 +16,7 @@
 package io.seata.core.store.db;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.IOUtil;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -83,13 +84,7 @@ public class LogStoreDataBaseDAOTest {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -131,9 +126,7 @@ public class LogStoreDataBaseDAOTest {
             //delete
             conn.createStatement().execute(delSql);
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
 
     }
@@ -175,9 +168,7 @@ public class LogStoreDataBaseDAOTest {
             //delete
             conn.createStatement().execute(delSql);
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
 
     }
@@ -247,9 +238,7 @@ public class LogStoreDataBaseDAOTest {
             conn = dataSource.getConnection();
             conn.createStatement().execute(delSql);
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -316,9 +305,7 @@ public class LogStoreDataBaseDAOTest {
             conn = dataSource.getConnection();
             conn.createStatement().execute(delSql);
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
 
     }
@@ -354,9 +341,7 @@ public class LogStoreDataBaseDAOTest {
             conn.createStatement().execute(delSql);
 
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -407,9 +392,7 @@ public class LogStoreDataBaseDAOTest {
             conn.createStatement().execute(delSql);
 
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
 
     }
@@ -447,9 +430,7 @@ public class LogStoreDataBaseDAOTest {
             }
             rs.close();
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -514,9 +495,7 @@ public class LogStoreDataBaseDAOTest {
             conn.createStatement().execute(delSql);
 
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -555,9 +534,7 @@ public class LogStoreDataBaseDAOTest {
 
             conn.createStatement().execute(delSql);
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
 
     }
@@ -600,9 +577,7 @@ public class LogStoreDataBaseDAOTest {
 
             conn.createStatement().execute(delSql);
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -652,9 +627,7 @@ public class LogStoreDataBaseDAOTest {
             rs.close();
 
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
     }
 

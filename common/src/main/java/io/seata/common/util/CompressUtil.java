@@ -42,8 +42,7 @@ public class CompressUtil {
             gos.finish();
             result = bos.toByteArray();
         } finally {
-            bos.close();
-            gos.close();
+            IOUtil.close(bos, gos);
         }
         return result;
     }
@@ -72,9 +71,7 @@ public class CompressUtil {
             bos.flush();
             result = bos.toByteArray();
         } finally {
-            bis.close();
-            iis.close();
-            bos.close();
+            IOUtil.close(bis, iis, bos);
         }
         return result;
     }
