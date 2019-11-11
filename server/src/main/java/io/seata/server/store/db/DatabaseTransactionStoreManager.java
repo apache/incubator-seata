@@ -38,6 +38,7 @@ import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
 import io.seata.core.store.StoreMode;
 import io.seata.core.store.db.DataSourceGenerator;
+import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
@@ -147,14 +148,29 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
      */
     @Override
     public GlobalSession readSession(String xid) {
+        return this.readSession(xid, true);
+    }
+
+    /**
+     * Read session global session.
+     *
+     * @param xid the xid
+     * @param withBranchSessions the withBranchSessions
+     * @return the global session
+     */
+    @Override
+    public GlobalSession readSession(String xid, boolean withBranchSessions) {
         //global transaction
         GlobalTransactionDO globalTransactionDO = logStore.queryGlobalTransactionDO(xid);
         if (globalTransactionDO == null) {
             return null;
         }
         //branch transactions
-        List<BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(
-            globalTransactionDO.getXid());
+        List<BranchTransactionDO> branchTransactionDOs = null;
+        //reduce rpc with db when branchRegister and getGlobalStatus
+        if (withBranchSessions) {
+            branchTransactionDOs = logStore.queryBranchTransactionDO(globalTransactionDO.getXid());
+        }
         return getGlobalSession(globalTransactionDO, branchTransactionDOs);
     }
 
@@ -203,6 +219,12 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
             return readSession(sessionCondition.getStatuses());
         }
         return null;
+    }
+
+    @Override
+    public long getCurrentMaxSessionId() {
+        //check max transId or branchId
+        return logStore.getCurrentMaxSessionId(UUIDGenerator.getMaxUUID(), UUIDGenerator.getInitUUID());
     }
 
     private GlobalSession getGlobalSession(GlobalTransactionDO globalTransactionDO,
