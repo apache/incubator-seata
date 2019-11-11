@@ -13,31 +13,36 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.store;
+package io.seata.common.util;
 
 /**
- * @author lizhao
+ * @author jsbxyyx
  */
-public enum FlushDiskMode {
+public class IOUtil {
+
     /**
-     * sync flush disk
+     * close Closeable
+     * @param closeables the closeables
      */
-    SYNC_MODEL("sync"),
-    /**
-     * async flush disk
-     */
-    ASYNC_MODEL("async");
-
-    private String modeStr;
-
-    FlushDiskMode(String modeStr) {
-        this.modeStr = modeStr;
-    }
-
-    public static FlushDiskMode findDiskMode(String modeStr) {
-        if (SYNC_MODEL.modeStr.equals(modeStr)) {
-            return SYNC_MODEL;
+    public static void close(AutoCloseable... closeables) {
+        if (CollectionUtils.isNotEmpty(closeables)) {
+            for (AutoCloseable closeable : closeables) {
+                close(closeable);
+            }
         }
-        return ASYNC_MODEL;
     }
+
+    /**
+     * close Closeable
+     * @param closeable the closeable
+     */
+    public static void close(AutoCloseable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (Exception ignore) {
+            }
+        }
+    }
+
 }
