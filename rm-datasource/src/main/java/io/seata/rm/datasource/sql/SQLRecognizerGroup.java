@@ -22,7 +22,6 @@ import com.alibaba.druid.sql.ast.SQLStatement;
  *
  * @author: Zhibei Hao丶
  * @date: 2019/11/8 17:39
- * @version: V1.0
  */
 public interface SQLRecognizerGroup
 {

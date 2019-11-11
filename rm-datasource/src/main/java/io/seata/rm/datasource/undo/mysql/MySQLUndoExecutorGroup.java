@@ -22,10 +22,9 @@ import io.seata.rm.datasource.undo.UndoExecutorGroup;
 import io.seata.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
 
 /**
- *
+ * The Type MySQLUndoExecutorGroup
  * @author: Zhibei Hao丶
  * @date: 2019/8/15 10:57
- * @version: V1.0
  */
 public class MySQLUndoExecutorGroup implements UndoExecutorGroup {
   private final String MYSQL = "mysql";

@@ -22,10 +22,10 @@ import io.seata.rm.datasource.undo.UndoExecutorGroup;
 import io.seata.rm.datasource.undo.oracle.keyword.OracleKeywordChecker;
 
 /**
+ * The Type OracleUndoExecutorGroup
  *
  * @author: Zhibei Hao丶
  * @date: 2019/8/23 10:03
- * @version: V1.0
  */
 public class OracleUndoExecutorGroup implements UndoExecutorGroup
 {

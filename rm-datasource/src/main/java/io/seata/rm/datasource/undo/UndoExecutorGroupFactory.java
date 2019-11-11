@@ -21,11 +21,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 /**
- * 功能描述:
+ * The Type UndoExecutorGroupFactory
  *
  * @author: Zhibei Hao丶
  * @date: 2019/11/9 10:30
- * @version: V1.0
  */
 public class UndoExecutorGroupFactory
 {

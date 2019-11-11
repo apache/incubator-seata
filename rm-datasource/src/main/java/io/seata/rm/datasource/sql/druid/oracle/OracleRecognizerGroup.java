@@ -20,11 +20,10 @@ import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLRecognizerGroup;
 
 /**
- * 功能描述:
+ * The Type OracleRecognizerGroup
  *
  * @author: Zhibei Hao丶
  * @date: 2019/8/23 9:59
- * @version: V1.0
  */
 public class OracleRecognizerGroup implements SQLRecognizerGroup
 {
