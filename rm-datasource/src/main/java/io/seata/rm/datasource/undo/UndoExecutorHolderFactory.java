@@ -22,38 +22,37 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The Type UndoExecutorGroupFactory
+ * The Type UndoExecutorHolderFactory
  *
  * @author: Zhibei Hao丶
- * @date: 2019/11/9 10:30
  */
-public class UndoExecutorGroupFactory
+public class UndoExecutorHolderFactory
 {
-  private static volatile Map<String, UndoExecutorGroup> executorGroupMap;
+  private static volatile Map<String, UndoExecutorHolder> executorHolderMap;
 
   /**
-   * Get UndoExecutorGroup by db type
+   * Get UndoExecutorHolder by db type
    *
    * @param dbType the db type
    * @return the UndoExecutorGroup
    */
-  public static UndoExecutorGroup getUndoExecutorGroup(String dbType) {
+  public static UndoExecutorHolder getUndoExecutorHolder(String dbType) {
 
-    if (executorGroupMap == null) {
-      synchronized (UndoExecutorGroupFactory.class) {
-        if (executorGroupMap == null) {
-          Map<String, UndoExecutorGroup> initializeMap = new HashMap<>();
-          List<UndoExecutorGroup> groupList =
-              EnhancedServiceLoader.loadAll(UndoExecutorGroup.class);
-          for (UndoExecutorGroup group : groupList) {
-            initializeMap.put(group.getDbType().toLowerCase(), group);
+    if (executorHolderMap == null) {
+      synchronized (UndoExecutorHolderFactory.class) {
+        if (executorHolderMap == null) {
+          Map<String, UndoExecutorHolder> initializedMap = new HashMap<>();
+          List<UndoExecutorHolder> holderList =
+              EnhancedServiceLoader.loadAll(UndoExecutorHolder.class);
+          for (UndoExecutorHolder holder : holderList) {
+            initializedMap.put(holder.getDbType().toLowerCase(), holder);
           }
-          executorGroupMap = initializeMap;
+          executorHolderMap = initializedMap;
         }
       }
     }
-    if (executorGroupMap.containsKey(dbType)) {
-      return executorGroupMap.get(dbType);
+    if (executorHolderMap.containsKey(dbType)) {
+      return executorHolderMap.get(dbType);
     }
     throw new UnsupportedOperationException(MessageFormat.format("now not support {0}", dbType));
   }

@@ -22,15 +22,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The SQLRecognizerGroupFactory
+ * The SQLOperateRecognizerHolderFactory
  *
  * @author: Zhibei Hao丶
- * @date: 2019/11/8 17:37
  */
-public class SQLOperateRecognizerGroupFactory
+public class SQLOperateRecognizerHolderFactory
 {
 
-  private static volatile Map<String, SQLOperateRecognizerGroup> recognizerGroupMap;
+  private static volatile Map<String, SQLOperateRecognizerHolder> recognizerHolderMap;
 
   /**
    * get SQLOperateRecognizer by db type
@@ -38,24 +37,24 @@ public class SQLOperateRecognizerGroupFactory
    * @param dbType the db type
    * @return the SQLOperateRecognizer
    */
-  public static SQLOperateRecognizerGroup getSQLRecognizerGroup(String dbType)
+  public static SQLOperateRecognizerHolder getSQLRecognizerHolder(String dbType)
   {
 
-    if (recognizerGroupMap == null) {
-      synchronized (SQLOperateRecognizerGroupFactory.class) {
-        if (recognizerGroupMap == null) {
-          Map<String, SQLOperateRecognizerGroup> initializeMap  = new HashMap<>();
-          List<SQLOperateRecognizerGroup> groupList =
-              EnhancedServiceLoader.loadAll(SQLOperateRecognizerGroup.class);
-          for (SQLOperateRecognizerGroup group : groupList) {
-            initializeMap.put(group.getDbType().toLowerCase(), group);
+    if (recognizerHolderMap == null) {
+      synchronized (SQLOperateRecognizerHolderFactory.class) {
+        if (recognizerHolderMap == null) {
+          Map<String, SQLOperateRecognizerHolder> initializedMap  = new HashMap<>();
+          List<SQLOperateRecognizerHolder> holderList =
+              EnhancedServiceLoader.loadAll(SQLOperateRecognizerHolder.class);
+          for (SQLOperateRecognizerHolder holder : holderList) {
+            initializedMap.put(holder.getDbType().toLowerCase(), holder);
           }
-          recognizerGroupMap = initializeMap;
+          recognizerHolderMap = initializedMap;
         }
       }
     }
-    if (recognizerGroupMap.containsKey(dbType)) {
-      return recognizerGroupMap.get(dbType);
+    if (recognizerHolderMap.containsKey(dbType)) {
+      return recognizerHolderMap.get(dbType);
     }
     throw new UnsupportedOperationException(MessageFormat.format("now not support {0}", dbType));
   }

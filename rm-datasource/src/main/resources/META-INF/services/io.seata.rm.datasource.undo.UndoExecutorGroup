@@ -1,2 +1,0 @@
-io.seata.rm.datasource.undo.mysql.MySQLUndoExecutorGroup
-io.seata.rm.datasource.undo.oracle.OracleUndoExecutorGroup

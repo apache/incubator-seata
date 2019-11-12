@@ -1,2 +1,0 @@
-io.seata.rm.datasource.sql.druid.MySqlOperateRecognizerGroup
-io.seata.rm.datasource.sql.druid.oracle.OracleOperateRecognizerGroup
