@@ -24,8 +24,6 @@ import java.util.Map;
  */
 public interface ResourceManager extends ResourceManagerInbound, ResourceManagerOutbound {
 
-    Object RESOURCE_LOCK = new Object();
-
     /**
      * Register a Resource to be managed by Resource Manager.
      *
