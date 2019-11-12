@@ -58,6 +58,8 @@ public interface LockStore {
      */
     boolean unLock(List<LockDO> lockDOs);
 
+    boolean unLock(List<Long> branchIds);
+
     /**
      * Is lockable boolean.
      *

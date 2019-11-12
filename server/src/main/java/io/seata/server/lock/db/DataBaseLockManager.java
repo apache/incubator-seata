@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.lock;
+package io.seata.server.lock.db;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +27,8 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.core.lock.RowLock;
 import io.seata.core.store.StoreMode;
+import io.seata.server.lock.AbstractLockManager;
+import io.seata.server.lock.LockerFactory;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 
@@ -36,12 +38,31 @@ import io.seata.server.session.GlobalSession;
  * @author zhangsen
  * @data 2019 -05-15
  */
-public class DefaultLockManager extends AbstractLockManager {
+public class DataBaseLockManager extends AbstractLockManager {
 
     /**
      * The constant CONFIG.
      */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
+    @Override
+    public boolean acquireLock(BranchSession branchSession) throws TransactionException {
+        if (branchSession == null) {
+            throw new IllegalArgumentException("branchSession can't be null for memory/file locker.");
+        }
+        String lockKey = branchSession.getLockKey();
+        if (StringUtils.isNullOrEmpty(lockKey)) {
+            //no lock
+            return true;
+        }
+        //get locks of branch
+        List<RowLock> locks = collectRowLocks(branchSession);
+        if (CollectionUtils.isEmpty(locks)) {
+            //no lock
+            return true;
+        }
+        return getLocker().acquireLock(locks);
+    }
 
     @Override
     public boolean releaseLock(BranchSession branchSession) throws TransactionException {
@@ -50,9 +71,9 @@ public class DefaultLockManager extends AbstractLockManager {
         }
         List<RowLock> locks = collectRowLocks(branchSession);
         try {
-            return getLocker(branchSession).releaseLock(locks);
+            return getLocker().releaseLock(locks);
         } catch (Exception t) {
-            LOGGER.error("unLock error, branchSession:{}", branchSession, t);
+            LOGGER.error("unLock error, branchSession:{}",branchSession, t);
             return false;
         }
     }
@@ -60,13 +81,27 @@ public class DefaultLockManager extends AbstractLockManager {
     @Override
     public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
         ArrayList<BranchSession> branchSessions = globalSession.getBranchSessions();
-        boolean releaseLockResult = true;
-        for (BranchSession branchSession : branchSessions) {
-            if (!this.releaseLock(branchSession)) {
-                releaseLockResult = false;
+        String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
+        if (StoreMode.DB.name().equalsIgnoreCase(storeMode)) {
+            List<RowLock> locks = new ArrayList<>();
+            for (BranchSession branchSession : branchSessions) {
+                locks.addAll(collectRowLocks(branchSession));
             }
+            try {
+                return getLocker().releaseLock(locks);
+            } catch (Exception t) {
+                LOGGER.error("unLock globalSession error, xid:{}", globalSession.getXid(), t);
+                return false;
+            }
+        } else {
+            boolean releaseLockResult = true;
+            for (BranchSession branchSession : branchSessions) {
+                if (!this.releaseLock(branchSession)) {
+                    releaseLockResult = false;
+                }
+            }
+            return releaseLockResult;
         }
-        return releaseLockResult;
     }
 
     @Override
@@ -75,7 +110,7 @@ public class DefaultLockManager extends AbstractLockManager {
         try {
             return getLocker().isLockable(locks);
         } catch (Exception t) {
-            LOGGER.error("isLockable error, xid:{} resourceId:{}, lockKey:{}", xid, resourceId, lockKey, t);
+            LOGGER.error("isLockable error, xid:{} resourceId:{}, lockKey:{}", xid,resourceId,lockKey,t);
             return false;
         }
     }
@@ -91,17 +126,7 @@ public class DefaultLockManager extends AbstractLockManager {
      * @return the locker
      */
     protected Locker getLocker() {
-        return getLocker(null);
-    }
-
-    /**
-     * Gets locker.
-     *
-     * @param branchSession the branch session
-     * @return the locker
-     */
-    protected Locker getLocker(BranchSession branchSession) {
-        return LockerFactory.get(branchSession);
+        return LockerFactory.get(null);
     }
 
 }

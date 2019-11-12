@@ -25,7 +25,6 @@ create table `branch_table` (
   `transaction_id` bigint ,
   `resource_group_id` varchar(32),
   `resource_id` varchar(256) ,
-  `lock_key` varchar(128) ,
   `branch_type` varchar(8) ,
   `status` tinyint,
   `client_id` varchar(64),
@@ -48,5 +47,6 @@ create table `lock_table` (
   `pk` varchar(36) ,
   `gmt_create` datetime ,
   `gmt_modified` datetime,
-  primary key(`row_key`)
+  primary key(`row_key`),
+  key `idx_branch_id` (`branch_id`)
 );

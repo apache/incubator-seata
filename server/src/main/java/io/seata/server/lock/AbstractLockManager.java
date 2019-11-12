@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.seata.common.XID;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.RowLock;
 import io.seata.server.session.BranchSession;
 import org.slf4j.Logger;
@@ -37,6 +39,25 @@ public abstract class AbstractLockManager implements LockManager {
      * The constant LOGGER.
      */
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractLockManager.class);
+
+    @Override
+    public boolean acquireLock(BranchSession branchSession) throws TransactionException {
+        if (branchSession == null) {
+            throw new IllegalArgumentException("branchSession can't be null for memory/file locker.");
+        }
+        String lockKey = branchSession.getLockKey();
+        if (StringUtils.isNullOrEmpty(lockKey)) {
+            //no lock
+            return true;
+        }
+        //get locks of branch
+        List<RowLock> locks = collectRowLocks(branchSession);
+        if (CollectionUtils.isEmpty(locks)) {
+            //no lock
+            return true;
+        }
+        return getLocker(branchSession).acquireLock(locks);
+    }
 
     /**
      * Collect row locks list.`

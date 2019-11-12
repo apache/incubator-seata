@@ -22,6 +22,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.lock.Locker;
 import io.seata.core.store.StoreMode;
 import io.seata.core.store.db.DataSourceGenerator;
+import io.seata.server.lock.db.DataBaseLockManager;
 import io.seata.server.session.BranchSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,8 @@ public class LockerFactory {
     /**
      * The constant lockManager.
      */
-    protected static LockManager lockManager = new DefaultLockManager();
+    protected static LockManager lockManager = StoreMode.DB.name().equalsIgnoreCase(CONFIG.getConfig
+        (ConfigurationKeys.STORE_MODE)) ? new DataBaseLockManager() : new DefaultLockManager();
 
     /**
      * Get lock manager.
