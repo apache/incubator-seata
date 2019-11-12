@@ -23,7 +23,6 @@ import io.seata.rm.datasource.sql.SQLRecognizer;
  * The class MySqlOperateRecognizerHolder
  *
  * @author: Zhibei Hao丶
- * @date 2019/8/15 10:32
  */
 public class MySqlOperateRecognizerHolder implements SQLOperateRecognizerHolder
 {
