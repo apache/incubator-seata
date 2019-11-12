@@ -42,7 +42,7 @@ public class TransactionPropagationFilter implements Filter {
         String xid = RootContext.getXID();
         String xidInterceptorType = RootContext.getXIDInterceptorType();
 
-        String rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID);
+        String rpcXid = getRpcXid();
         String rpcXidInterceptorType = RpcContext.getContext().getAttachment(RootContext.KEY_XID_INTERCEPTOR_TYPE);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RootContext[{}] xid in RpcContext[{}]", xid, rpcXid);
@@ -81,4 +81,17 @@ public class TransactionPropagationFilter implements Filter {
             }
         }
     }
+
+    /**
+     * get rpc xid
+     * @return
+     */
+    private String getRpcXid() {
+        String rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID);
+        if (rpcXid == null) {
+            rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID.toLowerCase());
+        }
+        return rpcXid;
+    }
+
 }
