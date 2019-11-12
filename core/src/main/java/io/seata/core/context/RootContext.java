@@ -37,7 +37,7 @@ public class RootContext {
      */
     public static final String KEY_XID = "TX_XID";
 
-    public static final String KEY_XID_INTERCEPTOR_TYPE = "TX_XID_INTERCEPTOR_TYPE";
+    public static final String KEY_XID_INTERCEPTOR_TYPE = "TX-XID-INTERCEPTOR-TYPE";
 
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
