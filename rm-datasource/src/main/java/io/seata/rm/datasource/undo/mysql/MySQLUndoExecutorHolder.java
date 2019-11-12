@@ -16,17 +16,15 @@
 package io.seata.rm.datasource.undo.mysql;
 
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
-import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.rm.datasource.undo.UndoExecutorGroup;
-import io.seata.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
+import io.seata.rm.datasource.undo.UndoExecutorHolder;
 
 /**
- * The Type MySQLUndoExecutorGroup
+ * The Type MySQLUndoExecutorHolder
  * @author: Zhibei Hao丶
- * @date: 2019/8/15 10:57
  */
-public class MySQLUndoExecutorGroup implements UndoExecutorGroup {
+public class MySQLUndoExecutorHolder implements UndoExecutorHolder
+{
   private final String MYSQL = "mysql";
 
   @Override

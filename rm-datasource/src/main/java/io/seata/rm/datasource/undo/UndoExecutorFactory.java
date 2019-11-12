@@ -39,16 +39,16 @@ public class UndoExecutorFactory {
         throw new NotSupportYetException(dbType);
       }
       AbstractUndoExecutor result = null;
-      UndoExecutorGroup group = UndoExecutorGroupFactory.getUndoExecutorGroup(dbType.toLowerCase());
+      UndoExecutorHolder holder = UndoExecutorHolderFactory.getUndoExecutorHolder(dbType.toLowerCase());
       switch ((sqlUndoLog.getSqlType())) {
         case INSERT:
-          result = group.getInsertExecutor(sqlUndoLog);
+          result = holder.getInsertExecutor(sqlUndoLog);
           break;
         case UPDATE:
-          result = group.getUpdateExecutor(sqlUndoLog);
+          result = holder.getUpdateExecutor(sqlUndoLog);
           break;
         case DELETE:
-          result = group.getDeleteExecutor(sqlUndoLog);
+          result = holder.getDeleteExecutor(sqlUndoLog);
           break;
         default:
           throw new ShouldNeverHappenException();

@@ -44,17 +44,17 @@ public class SQLVisitorFactory {
         }
         SQLRecognizer recognizer = null;
         SQLStatement ast = asts.get(0);
-        SQLOperateRecognizerGroup recognizerGroup =
-            SQLOperateRecognizerGroupFactory.getSQLRecognizerGroup(dbType.toLowerCase());
+        SQLOperateRecognizerHolder recognizerHolder =
+            SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
         if (ast instanceof SQLInsertStatement) {
-            recognizer = recognizerGroup.getInsertRecognizer(sql, ast);
+            recognizer = recognizerHolder.getInsertRecognizer(sql, ast);
         } else if (ast instanceof SQLUpdateStatement) {
-            recognizer = recognizerGroup.getUpdateRecognizer(sql, ast);
+            recognizer = recognizerHolder.getUpdateRecognizer(sql, ast);
         } else if (ast instanceof SQLDeleteStatement) {
-            recognizer = recognizerGroup.getDeleteRecognizer(sql, ast);
+            recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
         } else if (ast instanceof SQLSelectStatement) {
             if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
-                recognizer = recognizerGroup.getSelectForUpdateRecognizer(sql, ast);
+                recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
             }
         }
         return recognizer;

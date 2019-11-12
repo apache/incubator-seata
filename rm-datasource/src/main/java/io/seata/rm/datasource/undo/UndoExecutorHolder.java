@@ -16,12 +16,11 @@
 package io.seata.rm.datasource.undo;
 
 /**
- * The Type UndoExecutorGroup
+ * The Type UndoExecutorHolder
  *
  * @author: Zhibei Hao丶
- * @date: 2019/11/9 10:30
  */
-public interface UndoExecutorGroup
+public interface UndoExecutorHolder
 {
 
   /**
@@ -49,7 +48,7 @@ public interface UndoExecutorGroup
   AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog);
 
   /**
-   * get the SQL type of the current UndoExecutorGroup
+   * get the SQL type of the current UndoExecutorHolder
    *
    * @return the SQL type string
    */

@@ -16,18 +16,15 @@
 package io.seata.rm.datasource.undo.oracle;
 
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
-import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.rm.datasource.undo.UndoExecutorGroup;
-import io.seata.rm.datasource.undo.oracle.keyword.OracleKeywordChecker;
+import io.seata.rm.datasource.undo.UndoExecutorHolder;
 
 /**
- * The Type OracleUndoExecutorGroup
+ * The Type OracleUndoExecutorHolder
  *
  * @author: Zhibei Hao丶
- * @date: 2019/8/23 10:03
  */
-public class OracleUndoExecutorGroup implements UndoExecutorGroup
+public class OracleUndoExecutorHolder implements UndoExecutorHolder
 {
   private final String ORACLE = "oracle";
   @Override

@@ -16,16 +16,15 @@
 package io.seata.rm.datasource.sql.druid.oracle;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
-import io.seata.rm.datasource.sql.SQLOperateRecognizerGroup;
+import io.seata.rm.datasource.sql.SQLOperateRecognizerHolder;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 
 /**
- * The Type OracleRecognizerGroup
+ * The Type OracleOperateRecognizerHolder
  *
  * @author: Zhibei Hao丶
- * @date: 2019/8/23 9:59
  */
-public class OracleOperateRecognizerGroup implements SQLOperateRecognizerGroup
+public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder
 {
   private final String ORACLE = "oracle";
   @Override

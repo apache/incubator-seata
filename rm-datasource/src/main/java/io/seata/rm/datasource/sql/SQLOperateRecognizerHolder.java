@@ -18,12 +18,11 @@ package io.seata.rm.datasource.sql;
 import com.alibaba.druid.sql.ast.SQLStatement;
 
 /**
- * The interface SQLRecognizerGroup
+ * The interface SQLOperateRecognizerHolder
  *
  * @author: Zhibei Hao丶
- * @date: 2019/11/8 17:39
  */
-public interface SQLOperateRecognizerGroup
+public interface SQLOperateRecognizerHolder
 {
 
   /**
@@ -63,7 +62,7 @@ public interface SQLOperateRecognizerGroup
   SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast);
 
   /**
-   * Get the SQL type of the current SQLOperateRecognizerGroup
+   * Get the SQL type of the current SQLOperateRecognizerHolder
    *
    * @return the db type string
    */
