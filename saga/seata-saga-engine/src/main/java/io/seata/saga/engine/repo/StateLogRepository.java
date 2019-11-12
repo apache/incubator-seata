@@ -15,19 +15,21 @@
  */
 package io.seata.saga.engine.repo;
 
+import java.util.List;
+
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 
-import java.util.List;
-
 /**
  * State Log Repository
+ *
  * @author lorne.cl
  */
 public interface StateLogRepository {
 
     /**
      * Get state machine instance
+     *
      * @param stateMachineInstanceId
      * @return
      */
@@ -35,6 +37,7 @@ public interface StateLogRepository {
 
     /**
      * Get state machine instance by businessKey
+     *
      * @param businessKey
      * @param tenantId
      * @return
@@ -43,6 +46,7 @@ public interface StateLogRepository {
 
     /**
      * Query the list of state machine instances by parent id
+     *
      * @param parentId
      * @return
      */
@@ -50,6 +54,7 @@ public interface StateLogRepository {
 
     /**
      * Get state instance
+     *
      * @param stateInstanceId
      * @param machineInstId
      * @return
@@ -58,6 +63,7 @@ public interface StateLogRepository {
 
     /**
      * Get a list of state instances by state machine instance id
+     *
      * @param stateMachineInstanceId
      * @return
      */
