@@ -46,5 +46,6 @@ public interface StateRouterInterceptor {
      * @param e
      * @throws EngineExecutionException
      */
-    void postRoute(ProcessContext context, State state, Instruction instruction, Exception e) throws EngineExecutionException;
+    void postRoute(ProcessContext context, State state, Instruction instruction, Exception e)
+        throws EngineExecutionException;
 }

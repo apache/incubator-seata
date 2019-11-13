@@ -15,19 +15,20 @@
  */
 package io.seata.saga.statelang.parser.impl;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import io.seata.saga.statelang.domain.TaskState.ExceptionMatch;
 import io.seata.saga.statelang.domain.TaskState.Retry;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState.ExceptionMatchImpl;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState.RetryImpl;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 /**
  * AbstractTaskStateParser
+ *
  * @author lorne.cl
  */
 public abstract class AbstractTaskStateParser extends BaseStatePaser {
@@ -36,37 +37,37 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
 
         parseBaseAttributes(state, node);
 
-        Map<String, Object> nodeMap = (Map<String, Object>) node;
+        Map<String, Object> nodeMap = (Map<String, Object>)node;
 
-        state.setCompensateState((String) nodeMap.get("CompensateState"));
+        state.setCompensateState((String)nodeMap.get("CompensateState"));
         state.setForCompensation("true".equals(nodeMap.get("IsForCompensation")));
         state.setForUpdate("true".equals(nodeMap.get("IsForUpdate")));
         Object isPersist = nodeMap.get("IsPersist");
-        if(Boolean.FALSE.equals(isPersist)){
+        if (Boolean.FALSE.equals(isPersist)) {
             state.setPersist(false);
         }
 
-        Map<String, Object> retryMap = (Map<String, Object>) nodeMap.get("Retry");
+        Map<String, Object> retryMap = (Map<String, Object>)nodeMap.get("Retry");
         if (retryMap != null) {
             state.setRetry(parseRetry(retryMap));
         }
 
-        List<Object> catchList = (List<Object>) nodeMap.get("Catch");
+        List<Object> catchList = (List<Object>)nodeMap.get("Catch");
         if (catchList != null) {
             state.setCatches(parseCatch(catchList));
         }
 
-        List<Object> inputList = (List<Object>) nodeMap.get("Input");
+        List<Object> inputList = (List<Object>)nodeMap.get("Input");
         if (inputList != null) {
             state.setInput(inputList);
         }
 
-        Map<String, Object> outputMap = (Map<String, Object>) nodeMap.get("Output");
+        Map<String, Object> outputMap = (Map<String, Object>)nodeMap.get("Output");
         if (outputMap != null) {
             state.setOutput(outputMap);
         }
 
-        Map<String/* expression */, String /* status */> statusMap = (Map<String, String>) nodeMap.get("Status");
+        Map<String/* expression */, String /* status */> statusMap = (Map<String, String>)nodeMap.get("Status");
         if (statusMap != null) {
             state.setStatus(statusMap);
         }
@@ -74,9 +75,9 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
 
     protected Retry parseRetry(Map<String, Object> retryMap) {
         RetryImpl retry = new RetryImpl();
-        retry.setIntervalSeconds(((Double) retryMap.get("IntervalSeconds")).intValue());
-        retry.setMaxAttempts(((Double) retryMap.get("MaxAttempts")).intValue());
-        retry.setBackoffRate(new BigDecimal((Double) retryMap.get("BackoffRate")));
+        retry.setIntervalSeconds(((Double)retryMap.get("IntervalSeconds")).intValue());
+        retry.setMaxAttempts(((Double)retryMap.get("MaxAttempts")).intValue());
+        retry.setBackoffRate(new BigDecimal((Double)retryMap.get("BackoffRate")));
         return retry;
     }
 
@@ -84,10 +85,10 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
 
         List<ExceptionMatch> exceptionMatchList = new ArrayList<>(catchList.size());
         for (Object exceptionMatchObj : catchList) {
-            Map<String, Object> exceptionMatchMap = (Map<String, Object>) exceptionMatchObj;
+            Map<String, Object> exceptionMatchMap = (Map<String, Object>)exceptionMatchObj;
             ExceptionMatchImpl exceptionMatch = new ExceptionMatchImpl();
-            exceptionMatch.setExceptions((List<String>) exceptionMatchMap.get("Exceptions"));
-            exceptionMatch.setNext((String) exceptionMatchMap.get("Next"));
+            exceptionMatch.setExceptions((List<String>)exceptionMatchMap.get("Exceptions"));
+            exceptionMatch.setNext((String)exceptionMatchMap.get("Next"));
 
             exceptionMatchList.add(exceptionMatch);
         }
