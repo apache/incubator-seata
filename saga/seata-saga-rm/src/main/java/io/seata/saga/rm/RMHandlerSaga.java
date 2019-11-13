@@ -35,6 +35,7 @@ public class RMHandlerSaga extends AbstractRMHandler {
 
     /**
      * get SAGA resource manager
+     *
      * @return
      */
     @Override
@@ -43,7 +44,7 @@ public class RMHandlerSaga extends AbstractRMHandler {
     }
 
     @Override
-    public BranchType getBranchType(){
+    public BranchType getBranchType() {
         return BranchType.SAGA;
     }
 

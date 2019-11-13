@@ -22,13 +22,17 @@ package io.seata.saga.engine.store.db;
  */
 public class StateLangStoreSqls {
 
-    private static final String STATE_MACHINE_FIELDS = "id, tenant_id, app_name, name, status, gmt_create, ver, type, content, recover_strategy, comment_";
+    private static final String STATE_MACHINE_FIELDS
+        = "id, tenant_id, app_name, name, status, gmt_create, ver, type, content, recover_strategy, comment_";
 
-    private static final String GET_STATE_MACHINE_BY_ID_SQL = "SELECT " + STATE_MACHINE_FIELDS + " FROM ${TABLE_PREFIX}state_machine_def WHERE id = ?";
+    private static final String GET_STATE_MACHINE_BY_ID_SQL = "SELECT " + STATE_MACHINE_FIELDS
+        + " FROM ${TABLE_PREFIX}state_machine_def WHERE id = ?";
 
-    private static final String QUERY_STATE_MACHINES_BY_NAME_AND_TENANT_SQL = "SELECT " + STATE_MACHINE_FIELDS + " FROM ${TABLE_PREFIX}state_machine_def WHERE name = ? AND tenant_id = ? ORDER BY gmt_create DESC";
+    private static final String QUERY_STATE_MACHINES_BY_NAME_AND_TENANT_SQL = "SELECT " + STATE_MACHINE_FIELDS
+        + " FROM ${TABLE_PREFIX}state_machine_def WHERE name = ? AND tenant_id = ? ORDER BY gmt_create DESC";
 
-    private static final String INSERT_STATE_MACHINE_SQL = "INSERT INTO ${TABLE_PREFIX}state_machine_def (" + STATE_MACHINE_FIELDS + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+    private static final String INSERT_STATE_MACHINE_SQL = "INSERT INTO ${TABLE_PREFIX}state_machine_def ("
+        + STATE_MACHINE_FIELDS + ") VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
     private static final String TABLE_PREFIX_REGEX = "\\$\\{TABLE_PREFIX}";
 
@@ -38,26 +42,27 @@ public class StateLangStoreSqls {
     private String queryStateMachinesByNameAndTenantSql;
     private String insertStateMachineSql;
 
-    public StateLangStoreSqls(String tablePrefix){
+    public StateLangStoreSqls(String tablePrefix) {
         this.tablePrefix = tablePrefix;
         init();
     }
 
-    private void init(){
+    private void init() {
         getGetStateMachineByIdSql = GET_STATE_MACHINE_BY_ID_SQL.replaceAll(TABLE_PREFIX_REGEX, tablePrefix);
-        queryStateMachinesByNameAndTenantSql = QUERY_STATE_MACHINES_BY_NAME_AND_TENANT_SQL.replaceAll(TABLE_PREFIX_REGEX, tablePrefix);
+        queryStateMachinesByNameAndTenantSql = QUERY_STATE_MACHINES_BY_NAME_AND_TENANT_SQL.replaceAll(
+            TABLE_PREFIX_REGEX, tablePrefix);
         insertStateMachineSql = INSERT_STATE_MACHINE_SQL.replaceAll(TABLE_PREFIX_REGEX, tablePrefix);
     }
 
-    public String getGetStateMachineByIdSql(String dbType){
+    public String getGetStateMachineByIdSql(String dbType) {
         return getGetStateMachineByIdSql;
     }
 
-    public String getQueryStateMachinesByNameAndTenantSql(String dbType){
+    public String getQueryStateMachinesByNameAndTenantSql(String dbType) {
         return queryStateMachinesByNameAndTenantSql;
     }
 
-    public String getInsertStateMachineSql(String dbType){
+    public String getInsertStateMachineSql(String dbType) {
         return insertStateMachineSql;
     }
 
