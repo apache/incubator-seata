@@ -20,6 +20,7 @@ import io.seata.core.model.Resource;
 
 /**
  * Saga resource (Only register application as a saga resource)
+ *
  * @author lorne.cl
  */
 public class SagaResource implements Resource {
@@ -36,6 +37,15 @@ public class SagaResource implements Resource {
     @Override
     public String getResourceGroupId() {
         return resourceGroupId;
+    }
+
+    /**
+     * Sets set resource group id.
+     *
+     * @param resourceGroupId the resource group id
+     */
+    public void setResourceGroupId(String resourceGroupId) {
+        this.resourceGroupId = resourceGroupId;
     }
 
     /**
@@ -56,15 +66,6 @@ public class SagaResource implements Resource {
     @Override
     public BranchType getBranchType() {
         return BranchType.SAGA;
-    }
-
-    /**
-     * Sets set resource group id.
-     *
-     * @param resourceGroupId the resource group id
-     */
-    public void setResourceGroupId(String resourceGroupId) {
-        this.resourceGroupId = resourceGroupId;
     }
 
     /**
