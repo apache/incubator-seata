@@ -40,46 +40,60 @@ public class TransactionPropagationFilter implements Filter {
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         String xid = RootContext.getXID();
-        String xidFilterType = RootContext.getXIDFilterType();
+        String xidInterceptorType = RootContext.getXIDInterceptorType();
 
-        String rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID);
-        String rpcXidFilterType = RpcContext.getContext().getAttachment(RootContext.KEY_XID_FILTER_TYPE);
+        String rpcXid = getRpcXid();
+        String rpcXidInterceptorType = RpcContext.getContext().getAttachment(RootContext.KEY_XID_INTERCEPTOR_TYPE);
+
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RootContext[{}] xid in RpcContext[{}]", xid, rpcXid);
         }
         boolean bind = false;
         if (xid != null) {
             RpcContext.getContext().setAttachment(RootContext.KEY_XID, xid);
-            RpcContext.getContext().setAttachment(RootContext.KEY_XID_FILTER_TYPE, xidFilterType);
+            RpcContext.getContext().setAttachment(RootContext.KEY_XID_INTERCEPTOR_TYPE, xidInterceptorType);
         } else {
             if (rpcXid != null) {
                 RootContext.bind(rpcXid);
-                RootContext.bindFilterType(rpcXidFilterType);
+                RootContext.bindInterceptorType(rpcXidInterceptorType);
                 bind = true;
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("bind[{}] filterType[{}] to RootContext", rpcXid, rpcXidFilterType);
+                    LOGGER.debug("bind[{}] interceptorType[{}] to RootContext", rpcXid, rpcXidInterceptorType);
                 }
             }
         }
         try {
             return invoker.invoke(invocation);
-
         } finally {
             if (bind) {
+                String unbindInterceptorType = RootContext.unbindInterceptorType();
                 String unbindXid = RootContext.unbind();
                 String unbindFilterType = RootContext.unbindFilterType();
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("unbind[{}] filterType[{}] from RootContext", unbindXid, unbindFilterType);
+                    LOGGER.debug("unbind[{}] interceptorType[{}] from RootContext", unbindXid, unbindInterceptorType);
                 }
                 if (!rpcXid.equalsIgnoreCase(unbindXid)) {
-                    LOGGER.warn("xid in change during RPC from {} to {}, xidFilterType in change during RPC from {} to {}", rpcXid, unbindXid, rpcXidFilterType, unbindFilterType);
+                    LOGGER.warn("xid in change during RPC from {} to {}, xidInterceptorType from {} to {} ", rpcXid, unbindXid, rpcXidInterceptorType, unbindInterceptorType);
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
-                        RootContext.bindFilterType(unbindFilterType);
-                        LOGGER.warn("bind [{}] filterType [{}] back to RootContext", unbindXid, unbindFilterType);
+                        RootContext.bindInterceptorType(unbindInterceptorType);
+                        LOGGER.warn("bind [{}] interceptorType[{}] back to RootContext", unbindXid, unbindInterceptorType);
                     }
                 }
             }
         }
     }
+
+    /**
+     * get rpc xid
+     * @return
+     */
+    private String getRpcXid() {
+        String rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID);
+        if (rpcXid == null) {
+            rpcXid = RpcContext.getContext().getAttachment(RootContext.KEY_XID.toLowerCase());
+        }
+        return rpcXid;
+    }
+
 }
