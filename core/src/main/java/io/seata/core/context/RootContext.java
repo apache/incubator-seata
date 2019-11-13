@@ -39,6 +39,8 @@ public class RootContext {
 
     public static final String KEY_XID_INTERCEPTOR_TYPE = "tx-xid-interceptor-type";
 
+    public static final String KEY_XID_FILTER_TYPE = "tx-xid-filter-type";
+
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
@@ -53,9 +55,14 @@ public class RootContext {
         if (StringUtils.isNotBlank(xid)) {
             return xid;
         }
-        String xidType = CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
-        if (StringUtils.isNotBlank(xidType) && xidType.indexOf("_")>-1) {
-            return xidType.split("_")[0];
+        String xidInterceptorType = CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
+        if (StringUtils.isNotBlank(xidInterceptorType) && xidInterceptorType.indexOf("_")>-1) {
+            return xidInterceptorType.split("_")[0];
+        }
+
+        String xidFilterType = CONTEXT_HOLDER.get(KEY_XID_FILTER_TYPE);
+        if (StringUtils.isNotBlank(xidFilterType) && xidFilterType.indexOf("_")>-1) {
+            return xidFilterType.split("_")[0];
         }
         return null;
     }
@@ -67,6 +74,15 @@ public class RootContext {
      */
     public static String getXIDInterceptorType() {
         return CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
+    }
+
+    /**
+     * Gets xid.
+     *
+     * @return the xid
+     */
+    public static String getXIDFilterType() {
+        return CONTEXT_HOLDER.get(KEY_XID_FILTER_TYPE);
     }
 
     /**
@@ -94,6 +110,17 @@ public class RootContext {
     /**
      * Bind interceptor type
      *
+     * @param xidType
+     */
+    public static void bindFilterType(String xidType) {
+        String[] xidTypes = xidType.split("_");
+        bindFilterType(xidTypes[0], BranchType.valueOf(xidTypes[1]));
+    }
+
+
+    /**
+     * Bind interceptor type
+     *
      * @param xid
      * @param branchType
      */
@@ -103,6 +130,20 @@ public class RootContext {
             LOGGER.debug("bind interceptor type xid={} branchType={}", xid, branchType);
         }
         CONTEXT_HOLDER.put(KEY_XID_INTERCEPTOR_TYPE, xidType);
+    }
+
+    /**
+     * Bind filter type
+     *
+     * @param xid
+     * @param branchType
+     */
+    public static void bindFilterType(String xid, BranchType branchType) {
+        String xidType = String.format("%s_%s", xid, branchType.name());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("bind filter type xid={} branchType={}", xid, branchType);
+        }
+        CONTEXT_HOLDER.put(KEY_XID_FILTER_TYPE, xidType);
     }
 
     /**
@@ -140,6 +181,19 @@ public class RootContext {
         String xidType = CONTEXT_HOLDER.remove(KEY_XID_INTERCEPTOR_TYPE);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("unbind inteceptor type {}", xidType);
+        }
+        return xidType;
+    }
+
+    /**
+     * Unbind temporary string
+     *
+     * @return the string
+     */
+    public static String unbindFilterType() {
+        String xidType = CONTEXT_HOLDER.remove(KEY_XID_FILTER_TYPE);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("unbind filter type {}", xidType);
         }
         return xidType;
     }
