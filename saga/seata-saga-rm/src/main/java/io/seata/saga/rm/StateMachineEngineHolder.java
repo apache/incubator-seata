@@ -18,18 +18,17 @@ package io.seata.saga.rm;
 import io.seata.saga.engine.StateMachineEngine;
 
 /**
- *
  * @author lorne.cl
  */
 public class StateMachineEngineHolder {
 
     private static StateMachineEngine stateMachineEngine;
 
-    public static StateMachineEngine getStateMachineEngine(){
+    public static StateMachineEngine getStateMachineEngine() {
         return stateMachineEngine;
     }
 
-    public void setStateMachineEngine(StateMachineEngine smEngine){
+    public void setStateMachineEngine(StateMachineEngine smEngine) {
         stateMachineEngine = smEngine;
     }
 }

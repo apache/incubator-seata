@@ -15,13 +15,14 @@
  */
 package io.seata.saga.proctrl.impl;
 
-import io.seata.saga.proctrl.HierarchicalProcessContext;
-import io.seata.saga.proctrl.Instruction;
-import io.seata.saga.proctrl.ProcessContext;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.seata.saga.proctrl.HierarchicalProcessContext;
+import io.seata.saga.proctrl.Instruction;
+import io.seata.saga.proctrl.ProcessContext;
 
 /**
  * The default process context implementation
@@ -52,12 +53,10 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
     public void setVariable(String name, Object value) {
         if (variables.containsKey(name)) {
             setVariableLocally(name, value);
-        }
-        else {
+        } else {
             if (parent != null) {
                 parent.setVariable(name, value);
-            }
-            else {
+            } else {
                 setVariableLocally(name, value);
             }
         }
@@ -67,7 +66,7 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
     public Map<String, Object> getVariables() {
         Map<String, Object> collectedVariables = new HashMap<>();
 
-        if(parent != null){
+        if (parent != null) {
             collectedVariables.putAll(parent.getVariables());
         }
         for (String name : variables.keySet()) {
@@ -85,7 +84,6 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
             }
         }
     }
-
 
     @Override
     public Object getVariableLocally(String name) {
@@ -124,13 +122,13 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
     }
 
     @Override
-    public <T extends Instruction> T getInstruction(Class<T> clazz) {
-        return (T)instruction;
+    public void setInstruction(Instruction instruction) {
+        this.instruction = instruction;
     }
 
     @Override
-    public void setInstruction(Instruction instruction) {
-        this.instruction = instruction;
+    public <T extends Instruction> T getInstruction(Class<T> clazz) {
+        return (T)instruction;
     }
 
     @Override
@@ -171,10 +169,6 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
 
     @Override
     public String toString() {
-        return "{" +
-                "variables=" + variables +
-                ", instruction=" + instruction +
-                ", parent=" + parent +
-                '}';
+        return "{" + "variables=" + variables + ", instruction=" + instruction + ", parent=" + parent + '}';
     }
 }

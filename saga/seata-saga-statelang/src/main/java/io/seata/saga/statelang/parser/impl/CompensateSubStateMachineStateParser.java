@@ -23,20 +23,23 @@ import org.springframework.util.StringUtils;
 
 /**
  * CompensateSubStateMachineState Parser
+ *
  * @author lorne.cl
  */
-public class CompensateSubStateMachineStateParser extends AbstractTaskStateParser implements StateParser<ServiceTaskState> {
+public class CompensateSubStateMachineStateParser extends AbstractTaskStateParser
+    implements StateParser<ServiceTaskState> {
 
     @Override
     public ServiceTaskState parse(Object node) {
 
         CompensateSubStateMachineStateImpl compensateSubStateMachineState = new CompensateSubStateMachineStateImpl();
         compensateSubStateMachineState.setForCompensation(true);
-        if(node != null){
+        if (node != null) {
             parseTaskAttributes(compensateSubStateMachineState, node);
         }
-        if(StringUtils.isEmpty(compensateSubStateMachineState.getName())){
-            compensateSubStateMachineState.setName(DomainConstants.COMPENSATE_SUB_MACHINE_STATE_NAME_PREFIX + compensateSubStateMachineState.hashCode());
+        if (StringUtils.isEmpty(compensateSubStateMachineState.getName())) {
+            compensateSubStateMachineState.setName(
+                DomainConstants.COMPENSATE_SUB_MACHINE_STATE_NAME_PREFIX + compensateSubStateMachineState.hashCode());
         }
         return compensateSubStateMachineState;
     }

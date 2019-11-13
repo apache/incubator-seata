@@ -20,7 +20,6 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.handler.ProcessHandler;
 
 /**
- *
  * @author lorne.cl
  */
 public class MockProcessHandler implements ProcessHandler {

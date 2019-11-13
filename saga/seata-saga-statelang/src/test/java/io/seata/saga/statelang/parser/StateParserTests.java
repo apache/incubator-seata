@@ -15,17 +15,19 @@
  */
 package io.seata.saga.statelang.parser;
 
+import java.io.IOException;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+
 import io.seata.saga.statelang.domain.StateMachine;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.IOException;
-
 /**
  * StateParser tests
+ *
  * @author lorne.cl
  */
 public class StateParserTests {

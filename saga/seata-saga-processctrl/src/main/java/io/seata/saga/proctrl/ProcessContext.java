@@ -38,7 +38,7 @@ public interface ProcessContext {
     /**
      * Sets set variable.
      *
-     * @param name the name
+     * @param name  the name
      * @param value the value
      */
     void setVariable(String name, Object value);
@@ -80,18 +80,18 @@ public interface ProcessContext {
     Instruction getInstruction();
 
     /**
-     * Gets get instruction.
-     *
-     * @param <T> the type parameter
-     * @param clazz the clazz
-     * @return the get instruction
-     */
-    <T extends Instruction> T getInstruction(Class<T> clazz);
-
-    /**
      * Sets set instruction.
      *
      * @param instruction the instruction
      */
     void setInstruction(Instruction instruction);
+
+    /**
+     * Gets get instruction.
+     *
+     * @param <T>   the type parameter
+     * @param clazz the clazz
+     * @return the get instruction
+     */
+    <T extends Instruction> T getInstruction(Class<T> clazz);
 }

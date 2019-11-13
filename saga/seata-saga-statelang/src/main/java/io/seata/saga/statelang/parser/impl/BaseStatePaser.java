@@ -15,11 +15,13 @@
  */
 package io.seata.saga.statelang.parser.impl;
 
-import io.seata.saga.statelang.domain.impl.BaseState;
 import java.util.Map;
+
+import io.seata.saga.statelang.domain.impl.BaseState;
 
 /**
  * BaseStatePaser
+ *
  * @author lorne.cl
  */
 public abstract class BaseStatePaser {

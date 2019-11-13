@@ -15,41 +15,43 @@
  */
 package io.seata.saga.statelang.domain.impl;
 
+import java.util.Date;
+
 import io.seata.common.util.StringUtils;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
-import java.util.Date;
 
 /**
  * state execution instance
+ *
  * @author lorne.cl
  */
 public class StateInstanceImpl implements StateInstance {
 
-    private String               id;
-    private String               machineInstanceId;
-    private String               name;
-    private String               type;
-    private String               serviceName;
-    private String               serviceMethod;
-    private String               serviceType;
-    private String               businessKey;
-    private Date                 gmtStarted;
-    private Date                 gmtEnd;
-    private boolean              isForUpdate;
-    private Exception            exception;
-    private Object               serializedException;
-    private Object               inputParams;
-    private Object               serializedInputParams;
-    private Object               outputParams;
-    private Object               serializedOutputParams;
-    private ExecutionStatus      status;
-    private String               stateIdCompensatedFor;
-    private String               stateIdRetriedFor;
-    private StateInstance        compensationState;
+    private String id;
+    private String machineInstanceId;
+    private String name;
+    private String type;
+    private String serviceName;
+    private String serviceMethod;
+    private String serviceType;
+    private String businessKey;
+    private Date gmtStarted;
+    private Date gmtEnd;
+    private boolean isForUpdate;
+    private Exception exception;
+    private Object serializedException;
+    private Object inputParams;
+    private Object serializedInputParams;
+    private Object outputParams;
+    private Object serializedOutputParams;
+    private ExecutionStatus status;
+    private String stateIdCompensatedFor;
+    private String stateIdRetriedFor;
+    private StateInstance compensationState;
     private StateMachineInstance stateMachineInstance;
-    private boolean              ignoreStatus;
+    private boolean ignoreStatus;
 
     @Override
     public String getId() {
@@ -288,7 +290,7 @@ public class StateInstanceImpl implements StateInstance {
 
     @Override
     public ExecutionStatus getCompensationStatus() {
-        if(this.compensationState != null) {
+        if (this.compensationState != null) {
             return this.compensationState.getStatus();
         } else {
             return null;

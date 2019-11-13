@@ -15,21 +15,25 @@
  */
 package io.seata.saga.statelang.domain.impl;
 
-import io.seata.saga.statelang.domain.ChoiceState;
-import io.seata.saga.statelang.domain.DomainConstants;
 import java.util.List;
 import java.util.Map;
 
+import io.seata.saga.statelang.domain.ChoiceState;
+import io.seata.saga.statelang.domain.DomainConstants;
+
 /**
  * Single selection status
+ *
  * @author lorne.cl
  */
 public class ChoiceStateImpl extends BaseState implements ChoiceState {
 
-    private List<Choice>         choices;
-    private String               defaultChoice;
-    /** key: Evaluator, value: Next **/
-    private Map<Object, String>  choiceEvaluators;
+    private List<Choice> choices;
+    private String defaultChoice;
+    /**
+     * key: Evaluator, value: Next
+     **/
+    private Map<Object, String> choiceEvaluators;
 
     public ChoiceStateImpl() {
         setType(DomainConstants.STATE_TYPE_CHOICE);

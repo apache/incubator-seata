@@ -26,12 +26,14 @@ public interface ChoiceState extends State {
 
     /**
      * get choices
+     *
      * @return
      */
     List<Choice> getChoices();
 
     /**
      * default choice
+     *
      * @return
      */
     String getDefault();

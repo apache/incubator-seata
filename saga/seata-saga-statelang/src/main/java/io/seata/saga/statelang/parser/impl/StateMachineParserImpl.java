@@ -15,8 +15,11 @@
  */
 package io.seata.saga.statelang.parser.impl;
 
+import java.util.Map;
+
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
+
 import io.seata.common.util.StringUtils;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
@@ -26,10 +29,10 @@ import io.seata.saga.statelang.domain.impl.StateMachineImpl;
 import io.seata.saga.statelang.parser.StateMachineParser;
 import io.seata.saga.statelang.parser.StateParser;
 import io.seata.saga.statelang.parser.StateParserFactory;
-import java.util.Map;
 
 /**
  * State machine language parser
+ *
  * @author lorne.cl
  */
 public class StateMachineParserImpl implements StateMachineParser {
@@ -44,39 +47,39 @@ public class StateMachineParserImpl implements StateMachineParser {
         stateMachine.setVersion((String)node.get("Version"));
         stateMachine.setStartState((String)node.get("StartState"));
         Object isPersist = node.get("IsPersist");
-        if(Boolean.FALSE.equals(isPersist)){
+        if (Boolean.FALSE.equals(isPersist)) {
             stateMachine.setPersist(false);
         }
 
         Map<String, Object> statesNode = (Map<String, Object>)node.get("States");
-        for(String stateName : statesNode.keySet()){
+        for (String stateName : statesNode.keySet()) {
             Map<String, Object> stateNode = (Map<String, Object>)statesNode.get(stateName);
             String stateType = (String)stateNode.get("Type");
             StateParser stateParser = StateParserFactory.getStateParser(stateType);
-            if(stateParser == null){
-                throw new IllegalArgumentException("State Type ["+stateType+"] is not support");
+            if (stateParser == null) {
+                throw new IllegalArgumentException("State Type [" + stateType + "] is not support");
             }
             State state = stateParser.parse(stateNode);
-            if(state instanceof BaseState){
+            if (state instanceof BaseState) {
                 ((BaseState)state).setName(stateName);
             }
 
-            if(stateMachine.getState(stateName) != null){
-                throw new IllegalArgumentException("State[name:"+stateName+"] is already exists");
+            if (stateMachine.getState(stateName) != null) {
+                throw new IllegalArgumentException("State[name:" + stateName + "] is already exists");
             }
             stateMachine.putState(stateName, state);
         }
 
         Map<String, State> stateMap = stateMachine.getStates();
-        for(String name : stateMap.keySet()){
+        for (String name : stateMap.keySet()) {
             State state = stateMap.get(name);
-            if(state instanceof AbstractTaskState){
-                AbstractTaskState taskState = (AbstractTaskState) state;
-                if(StringUtils.isNotBlank(taskState.getCompensateState())){
+            if (state instanceof AbstractTaskState) {
+                AbstractTaskState taskState = (AbstractTaskState)state;
+                if (StringUtils.isNotBlank(taskState.getCompensateState())) {
                     taskState.setForUpdate(true);
 
                     State compState = stateMap.get(taskState.getCompensateState());
-                    if(compState != null && compState instanceof AbstractTaskState){
+                    if (compState != null && compState instanceof AbstractTaskState) {
                         ((AbstractTaskState)compState).setForCompensation(true);
                     }
                 }

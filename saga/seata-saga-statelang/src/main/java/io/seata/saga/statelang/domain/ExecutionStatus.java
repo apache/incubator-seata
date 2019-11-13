@@ -47,11 +47,9 @@ public enum ExecutionStatus {
      */
     SK("Skipped");
 
-
-
     private String statusString;
 
-    private ExecutionStatus(String statusString){
+    private ExecutionStatus(String statusString) {
         this.statusString = statusString;
     }
 

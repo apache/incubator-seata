@@ -15,6 +15,11 @@
  */
 package io.seata.saga.engine.pcext;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.common.exception.FrameworkException;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.pcext.interceptors.EndStateRouterInterceptor;
@@ -27,11 +32,6 @@ import io.seata.saga.proctrl.ProcessRouter;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * StateMachine ProcessRouter
@@ -53,11 +53,12 @@ public class StateMachineProcessRouter implements ProcessRouter {
             state = stateInstruction.getTemporaryState();
             stateInstruction.setTemporaryState(null);
         } else {
-            StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-            StateMachine stateMachine = stateMachineConfig.getStateMachineRepository().getStateMachine(stateInstruction.getStateMachineName(), stateInstruction.getTenantId());
+            StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+                DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+            StateMachine stateMachine = stateMachineConfig.getStateMachineRepository().getStateMachine(
+                stateInstruction.getStateMachineName(), stateInstruction.getTenantId());
             state = stateMachine.getStates().get(stateInstruction.getStateName());
         }
-
 
         String stateType = state.getType();
 
@@ -67,7 +68,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
 
         List<StateRouterInterceptor> interceptors = null;
         if (router instanceof InterceptibleStateRouter) {
-            interceptors = ((InterceptibleStateRouter) router).getInterceptors();
+            interceptors = ((InterceptibleStateRouter)router).getInterceptors();
         }
 
         List<StateRouterInterceptor> executedInterceptors = null;

@@ -15,11 +15,12 @@
  */
 package io.seata.saga.proctrl.eventing.impl;
 
+import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
+
 import io.seata.common.exception.FrameworkException;
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.eventing.EventConsumer;
-import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,14 +39,14 @@ public class AsyncEventBus extends AbstractEventBus<ProcessContext> {
     public boolean offer(ProcessContext context) throws FrameworkException {
 
         List<EventConsumer> eventConsumers = getEventConsumers(context.getClass());
-        if(eventConsumers == null || eventConsumers.size() == 0){
-            if(LOGGER.isWarnEnabled()){
+        if (eventConsumers == null || eventConsumers.size() == 0) {
+            if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("cannot find event handler by class: " + context.getClass());
             }
             return false;
         }
 
-        for(EventConsumer eventConsumer : eventConsumers){
+        for (EventConsumer eventConsumer : eventConsumers) {
 
             threadPoolExecutor.execute(new Runnable() {
                 @Override

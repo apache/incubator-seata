@@ -15,6 +15,10 @@
  */
 package io.seata.saga.engine.pcext.handlers;
 
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.evaluation.Evaluator;
 import io.seata.saga.engine.evaluation.EvaluatorFactory;
@@ -27,10 +31,6 @@ import io.seata.saga.statelang.domain.ChoiceState;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.impl.ChoiceStateImpl;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
  * ChoiceState Handler
  *
@@ -42,7 +42,7 @@ public class ChoiceStateHandler implements StateHandler {
     public void process(ProcessContext context) throws EngineExecutionException {
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
-        ChoiceStateImpl choiceState = (ChoiceStateImpl) instruction.getState(context);
+        ChoiceStateImpl choiceState = (ChoiceStateImpl)instruction.getState(context);
 
         Map<Object, String> choiceEvaluators = choiceState.getChoiceEvaluators();
         if (choiceEvaluators == null) {
@@ -66,7 +66,7 @@ public class ChoiceStateHandler implements StateHandler {
         }
 
         for (Object choiceEvaluatorObj : choiceEvaluators.keySet()) {
-            Evaluator evaluator = (Evaluator) choiceEvaluatorObj;
+            Evaluator evaluator = (Evaluator)choiceEvaluatorObj;
             if (evaluator.evaluate(context.getVariables())) {
                 context.setVariable(DomainConstants.VAR_NAME_CURRENT_CHOICE, choiceEvaluators.get(evaluator));
                 return;
@@ -77,7 +77,9 @@ public class ChoiceStateHandler implements StateHandler {
     }
 
     public EvaluatorFactory getEvaluatorFactory(ProcessContext context) {
-        StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-        return stateMachineConfig.getEvaluatorFactoryManager().getEvaluatorFactory(EvaluatorFactoryManager.EVALUATOR_TYPE_DEFAULT);
+        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+        return stateMachineConfig.getEvaluatorFactoryManager().getEvaluatorFactory(
+            EvaluatorFactoryManager.EVALUATOR_TYPE_DEFAULT);
     }
 }

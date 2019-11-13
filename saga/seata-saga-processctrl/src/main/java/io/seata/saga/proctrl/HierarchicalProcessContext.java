@@ -35,7 +35,7 @@ public interface HierarchicalProcessContext extends ProcessContext {
     /**
      * Sets set variable locally.
      *
-     * @param name the name
+     * @param name  the name
      * @param value the value
      */
     void setVariableLocally(String name, Object value);

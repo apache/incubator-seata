@@ -15,6 +15,9 @@
  */
 package io.seata.saga.statelang.parser;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.parser.impl.ChoiceStateParser;
 import io.seata.saga.statelang.parser.impl.CompensateSubStateMachineStateParser;
@@ -23,28 +26,28 @@ import io.seata.saga.statelang.parser.impl.FailEndStateParser;
 import io.seata.saga.statelang.parser.impl.ServiceTaskStateParser;
 import io.seata.saga.statelang.parser.impl.SubStateMachineParser;
 import io.seata.saga.statelang.parser.impl.SucceedEndStateParser;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A simple factory of state parser
+ *
  * @author lorne.cl
  */
 public class StateParserFactory {
 
     protected static Map<String, StateParser> stateParserMap = new ConcurrentHashMap<>();
 
-    static{
+    static {
         stateParserMap.put(DomainConstants.STATE_TYPE_SERVICE_TASK, new ServiceTaskStateParser());
         stateParserMap.put(DomainConstants.STATE_TYPE_CHOICE, new ChoiceStateParser());
         stateParserMap.put(DomainConstants.STATE_TYPE_COMPENSATION_TRIGGER, new CompensationTriggerStateParser());
         stateParserMap.put(DomainConstants.STATE_TYPE_FAIL, new FailEndStateParser());
         stateParserMap.put(DomainConstants.STATE_TYPE_SUCCEED, new SucceedEndStateParser());
         stateParserMap.put(DomainConstants.STATE_TYPE_SUB_STATE_MACHINE, new SubStateMachineParser());
-        stateParserMap.put(DomainConstants.STATE_TYPE_SUB_MACHINE_COMPENSATION, new CompensateSubStateMachineStateParser());
+        stateParserMap.put(DomainConstants.STATE_TYPE_SUB_MACHINE_COMPENSATION,
+            new CompensateSubStateMachineStateParser());
     }
 
-    public static StateParser getStateParser(String stateType){
+    public static StateParser getStateParser(String stateType) {
 
         return stateParserMap.get(stateType);
     }

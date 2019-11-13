@@ -24,12 +24,14 @@ public interface FailEndState extends EndState {
 
     /**
      * error code
+     *
      * @return
      */
     String getErrorCode();
 
     /**
      * error message
+     *
      * @return
      */
     String getMessage();
