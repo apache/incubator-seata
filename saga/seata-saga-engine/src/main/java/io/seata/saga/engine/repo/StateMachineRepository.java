@@ -15,10 +15,10 @@
  */
 package io.seata.saga.engine.repo;
 
+import java.io.IOException;
+
 import io.seata.saga.statelang.domain.StateMachine;
 import org.springframework.core.io.Resource;
-
-import java.io.IOException;
 
 /**
  * StateMachineRepository
@@ -39,7 +39,7 @@ public interface StateMachineRepository {
      * Gets get state machine.
      *
      * @param stateMachineName the state machine name
-     * @param tenantId the tenant id
+     * @param tenantId         the tenant id
      * @return the get state machine
      */
     StateMachine getStateMachine(String stateMachineName, String tenantId);
@@ -48,8 +48,8 @@ public interface StateMachineRepository {
      * Gets get state machine.
      *
      * @param stateMachineName the state machine name
-     * @param tenantId the tenant id
-     * @param version the version
+     * @param tenantId         the tenant id
+     * @param version          the version
      * @return the get state machine
      */
     StateMachine getStateMachine(String stateMachineName, String tenantId, String version);

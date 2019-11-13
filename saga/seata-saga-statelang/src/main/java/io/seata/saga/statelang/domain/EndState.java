@@ -22,5 +22,4 @@ package io.seata.saga.statelang.domain;
  */
 public interface EndState extends State {
 
-
 }

@@ -15,15 +15,16 @@
  */
 package io.seata.saga.engine.repo.impl;
 
+import java.util.List;
+
 import io.seata.saga.engine.repo.StateLogRepository;
 import io.seata.saga.engine.store.StateLogStore;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
 
-import java.util.List;
-
 /**
  * State Log Repository
+ *
  * @author lorne.cl
  */
 public class StateLogRepositoryImpl implements StateLogRepository {
@@ -32,7 +33,7 @@ public class StateLogRepositoryImpl implements StateLogRepository {
 
     @Override
     public StateMachineInstance getStateMachineInstance(String stateMachineInstanceId) {
-        if(stateLogStore == null){
+        if (stateLogStore == null) {
             return null;
         }
         return stateLogStore.getStateMachineInstance(stateMachineInstanceId);
@@ -40,7 +41,7 @@ public class StateLogRepositoryImpl implements StateLogRepository {
 
     @Override
     public StateMachineInstance getStateMachineInstanceByBusinessKey(String businessKey, String tenantId) {
-        if(stateLogStore == null){
+        if (stateLogStore == null) {
             return null;
         }
         return stateLogStore.getStateMachineInstanceByBusinessKey(businessKey, tenantId);
@@ -48,7 +49,7 @@ public class StateLogRepositoryImpl implements StateLogRepository {
 
     @Override
     public List<StateMachineInstance> queryStateMachineInstanceByParentId(String parentId) {
-        if(stateLogStore == null){
+        if (stateLogStore == null) {
             return null;
         }
         return stateLogStore.queryStateMachineInstanceByParentId(parentId);
@@ -56,7 +57,7 @@ public class StateLogRepositoryImpl implements StateLogRepository {
 
     @Override
     public StateInstance getStateInstance(String stateInstanceId, String machineInstId) {
-        if(stateLogStore == null){
+        if (stateLogStore == null) {
             return null;
         }
         return stateLogStore.getStateInstance(stateInstanceId, machineInstId);
@@ -64,7 +65,7 @@ public class StateLogRepositoryImpl implements StateLogRepository {
 
     @Override
     public List<StateInstance> queryStateInstanceListByMachineInstanceId(String stateMachineInstanceId) {
-        if(stateLogStore == null){
+        if (stateLogStore == null) {
             return null;
         }
         return stateLogStore.queryStateInstanceListByMachineInstanceId(stateMachineInstanceId);

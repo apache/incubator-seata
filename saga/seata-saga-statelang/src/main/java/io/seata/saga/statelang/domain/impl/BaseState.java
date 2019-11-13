@@ -15,22 +15,24 @@
  */
 package io.seata.saga.statelang.domain.impl;
 
+import java.util.Map;
+
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
-import java.util.Map;
 
 /**
  * BaseState
+ *
  * @author lorne.cl
  */
 public abstract class BaseState implements State {
 
-    private transient String              name;
-    private           String              type;
-    private           String              comment;
-    private           String              next;
-    private           Map<String, Object> extensions;
-    private transient StateMachine        stateMachine;
+    private transient String name;
+    private String type;
+    private String comment;
+    private String next;
+    private Map<String, Object> extensions;
+    private transient StateMachine stateMachine;
 
     @Override
     public String getName() {
