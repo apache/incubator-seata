@@ -20,7 +20,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -214,16 +213,17 @@ public class FileConfiguration extends AbstractConfiguration {
     }
 
     /**
-     * The type Config change runnable.
+     * The type FileListener.
      */
     class FileListener implements ConfigurationChangeListener {
 
         private final String dataId;
         private final ConfigurationChangeListener listener;
-        private final ExecutorService executor = Executors.newSingleThreadExecutor();
+        private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
+            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
 
         /**
-         * Instantiates a new Config change runnable.
+         * Instantiates a new FileListener.
          *
          * @param dataId   the data id
          * @param listener the listener
