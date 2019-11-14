@@ -297,8 +297,9 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public List<BranchTransactionDO> queryBranchTransactionDO(List<String> xids) {
-        List<BranchTransactionDO> rets = new ArrayList<>();
         int length = xids.size();
+        int retsSize = length * 3;
+        List<BranchTransactionDO> rets = new ArrayList<>(retsSize > 10 ? retsSize : 10);
         StringJoiner sj = new StringJoiner(",");
         xids.stream().forEach(xid -> sj.add("?"));
         String sql = LogStoreSqls.getQureyBranchTransaction(brachTable, dbType, sj.toString());
@@ -419,7 +420,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
-            IOUtil.close(rs, ps ,conn);
+            IOUtil.close(rs, ps, conn);
         }
         return max;
     }
@@ -473,14 +474,14 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
      * query column info from table
      *
      * @param tableName the table name
-     * @param colName the column name
+     * @param colName   the column name
      * @return the column info
      */
     private ColumnInfo queryTableStructure(final String tableName, String colName) {
-        try(Connection conn = logStoreDataSource.getConnection()) {
+        try (Connection conn = logStoreDataSource.getConnection()) {
             DatabaseMetaData dbmd = conn.getMetaData();
             String schema = getSchema(conn);
-            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[] { "TABLE" });
+            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[]{"TABLE"});
             while (tableRs.next()) {
                 String table = tableRs.getString("TABLE_NAME");
                 if (StringUtils.equalsIgnoreCase(table, tableName)) {
