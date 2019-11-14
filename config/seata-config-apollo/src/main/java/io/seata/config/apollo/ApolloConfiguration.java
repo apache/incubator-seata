@@ -15,7 +15,6 @@
  */
 package io.seata.config.apollo;
 
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,7 +28,6 @@ import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigService;
 import com.ctrip.framework.apollo.enums.PropertyChangeType;
 import com.ctrip.framework.apollo.model.ConfigChange;
-import com.google.common.collect.Lists;
 import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
@@ -82,7 +80,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
                             ConfigChange change = changeEvent.getChange(key);
                             ConfigurationChangeEvent event = new ConfigurationChangeEvent(key, change.getNamespace(),
                                 change.getOldValue(), change.getNewValue(), getChangeType(change.getChangeType()));
-                            LISTENER_SERVICE_MAP.get(key).forEach(listener -> listener.onChangeEvent(event));
+                            LISTENER_SERVICE_MAP.get(key).forEach(listener -> listener.onProcessEvent(event));
                         }
                     });
                 }
@@ -147,12 +145,15 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (!LISTENER_SERVICE_MAP.containsKey(dataId)) {
+            return;
+        }
         LISTENER_SERVICE_MAP.get(dataId).remove(listener);
     }
 
     @Override
-    public List<ConfigurationChangeListener> getConfigListeners(String dataId) {
-        return Lists.newArrayList(LISTENER_SERVICE_MAP.get(dataId));
+    public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
+        return LISTENER_SERVICE_MAP.get(dataId);
     }
 
     private void readyApolloConfig() {

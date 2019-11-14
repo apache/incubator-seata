@@ -16,7 +16,7 @@
 package io.seata.config;
 
 import java.time.Duration;
-import java.util.List;
+import java.util.Set;
 
 /**
  * The interface Configuration.
@@ -274,7 +274,7 @@ public interface Configuration {
      * @param dataId the data id
      * @return the config listeners
      */
-    List<ConfigurationChangeListener> getConfigListeners(String dataId);
+    Set<ConfigurationChangeListener> getConfigListeners(String dataId);
 
     /**
      * Gets config from sys pro.

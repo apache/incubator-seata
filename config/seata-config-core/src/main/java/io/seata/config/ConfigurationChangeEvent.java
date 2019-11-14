@@ -29,6 +29,16 @@ public class ConfigurationChangeEvent {
     private String newValue;
     private String namespace;
     private ConfigurationChangeType changeType;
+    private static final String DEFAULT_NAMESPACE = "DEFAULT";
+
+
+    public ConfigurationChangeEvent(){
+
+    }
+
+    public ConfigurationChangeEvent(String dataId, String newValue) {
+        this(dataId, DEFAULT_NAMESPACE, null, newValue, ConfigurationChangeType.MODIFY);
+    }
 
     public ConfigurationChangeEvent(String dataId, String namespace, String oldValue, String newValue,
                                     ConfigurationChangeType type) {
@@ -53,8 +63,9 @@ public class ConfigurationChangeEvent {
      *
      * @param dataId the data id
      */
-    public void setDataId(String dataId) {
+    public ConfigurationChangeEvent setDataId(String dataId) {
         this.dataId = dataId;
+        return this;
     }
 
     /**
@@ -71,8 +82,9 @@ public class ConfigurationChangeEvent {
      *
      * @param oldValue the old value
      */
-    public void setOldValue(String oldValue) {
+    public ConfigurationChangeEvent setOldValue(String oldValue) {
         this.oldValue = oldValue;
+        return this;
     }
 
     /**
@@ -89,8 +101,9 @@ public class ConfigurationChangeEvent {
      *
      * @param newValue the new value
      */
-    public void setNewValue(String newValue) {
+    public ConfigurationChangeEvent setNewValue(String newValue) {
         this.newValue = newValue;
+        return this;
     }
 
     /**
@@ -107,8 +120,9 @@ public class ConfigurationChangeEvent {
      *
      * @param changeType the change type
      */
-    public void setChangeType(ConfigurationChangeType changeType) {
+    public ConfigurationChangeEvent setChangeType(ConfigurationChangeType changeType) {
         this.changeType = changeType;
+        return this;
     }
 
     /**
@@ -125,7 +139,8 @@ public class ConfigurationChangeEvent {
      *
      * @param namespace the namespace
      */
-    public void setNamespace(String namespace) {
+    public ConfigurationChangeEvent setNamespace(String namespace) {
         this.namespace = namespace;
+        return this;
     }
 }
