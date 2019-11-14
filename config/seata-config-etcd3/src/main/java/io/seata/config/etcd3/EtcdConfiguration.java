@@ -243,7 +243,8 @@ public class EtcdConfiguration extends AbstractConfiguration {
         private final ConfigurationChangeListener listener;
         private Watch.Watcher watcher;
         private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
-            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+            new NamedThreadFactory("etcdListener", MAX_LISTENER_THREAD));
 
         /**
          * Instantiates a new Etcd listener.

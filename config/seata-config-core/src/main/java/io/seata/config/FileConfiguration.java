@@ -220,7 +220,8 @@ public class FileConfiguration extends AbstractConfiguration {
         private final String dataId;
         private final ConfigurationChangeListener listener;
         private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
-            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>());
+            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+            new NamedThreadFactory("fileListener", MAX_LISTENER_THREAD));
 
         /**
          * Instantiates a new FileListener.
