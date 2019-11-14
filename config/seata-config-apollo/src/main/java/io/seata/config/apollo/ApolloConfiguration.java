@@ -145,7 +145,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
-        if (!LISTENER_SERVICE_MAP.containsKey(dataId)) {
+        if (!LISTENER_SERVICE_MAP.containsKey(dataId) || listener == null) {
             return;
         }
         LISTENER_SERVICE_MAP.get(dataId).remove(listener);

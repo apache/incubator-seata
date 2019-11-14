@@ -42,8 +42,10 @@ import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
 
 /**
- * @author xingfudeshi@gmail.com
- * @date 2019/05/05
+ * The type Consul configuration.
+ *
+ * @author xingfudeshi @gmail.com
+ * @date 2019 /05/05
  */
 public class ConsulConfiguration extends AbstractConfiguration {
     private volatile static ConsulConfiguration instance;
@@ -75,7 +77,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
     /**
      * get instance
      *
-     * @return
+     * @return instance
      */
     public static ConsulConfiguration getInstance() {
         if (null == instance) {
@@ -145,7 +147,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
     @Override
     public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
         Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
-        if (configChangeListeners == null) {
+        if (configChangeListeners == null || listener == null) {
             return;
         }
         for (ConfigurationChangeListener entry : configChangeListeners) {
@@ -153,6 +155,7 @@ public class ConsulConfiguration extends AbstractConfiguration {
             if (listener.equals(target)) {
                 entry.onShutDown();
                 configChangeListeners.remove(entry);
+                break;
             }
         }
     }
@@ -200,6 +203,9 @@ public class ConsulConfiguration extends AbstractConfiguration {
         }
     }
 
+    /**
+     * The type Consul listener.
+     */
     public class ConsulListener implements ConfigurationChangeListener {
 
         private final ConfigurationChangeListener listener;
@@ -207,6 +213,12 @@ public class ConsulConfiguration extends AbstractConfiguration {
         private long consulIndex;
         private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
+        /**
+         * Instantiates a new Consul listener.
+         *
+         * @param dataId   the data id
+         * @param listener the listener
+         */
         public ConsulListener(String dataId, ConfigurationChangeListener listener) {
             this.dataId = dataId;
             this.listener = listener;
@@ -235,6 +247,11 @@ public class ConsulConfiguration extends AbstractConfiguration {
             return executor;
         }
 
+        /**
+         * Gets target listener.
+         *
+         * @return the target listener
+         */
         public ConfigurationChangeListener getTargetListener() {
             return this.listener;
         }
