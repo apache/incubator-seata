@@ -15,10 +15,11 @@
  */
 package io.seata.saga.proctrl.eventing.impl;
 
-import io.seata.saga.proctrl.eventing.EventBus;
-import io.seata.saga.proctrl.eventing.EventConsumer;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.seata.saga.proctrl.eventing.EventBus;
+import io.seata.saga.proctrl.eventing.EventConsumer;
 
 /**
  * Abstract Event Bus
@@ -34,8 +35,8 @@ public abstract class AbstractEventBus<E> implements EventBus<E> {
     public List<EventConsumer> getEventConsumers(Class clazz) {
 
         List<EventConsumer> acceptedConsumers = new ArrayList<>();
-        for(EventConsumer eventConsumer : eventConsumerList){
-            if(eventConsumer.accept(clazz)){
+        for (EventConsumer eventConsumer : eventConsumerList) {
+            if (eventConsumer.accept(clazz)) {
                 acceptedConsumers.add(eventConsumer);
             }
         }
