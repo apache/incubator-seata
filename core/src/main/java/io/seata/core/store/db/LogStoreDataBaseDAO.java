@@ -478,10 +478,10 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
      * @return the column info
      */
     private ColumnInfo queryTableStructure(final String tableName, String colName) {
-        try (Connection conn = logStoreDataSource.getConnection()) {
+        try(Connection conn = logStoreDataSource.getConnection()) {
             DatabaseMetaData dbmd = conn.getMetaData();
             String schema = getSchema(conn);
-            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[]{"TABLE"});
+            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[] { "TABLE" });
             while (tableRs.next()) {
                 String table = tableRs.getString("TABLE_NAME");
                 if (StringUtils.equalsIgnoreCase(table, tableName)) {
