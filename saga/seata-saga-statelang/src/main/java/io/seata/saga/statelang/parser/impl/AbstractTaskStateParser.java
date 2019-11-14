@@ -39,8 +39,8 @@ public abstract class AbstractTaskStateParser extends BaseStatePaser {
         Map<String, Object> nodeMap = (Map<String, Object>) node;
 
         state.setCompensateState((String) nodeMap.get("CompensateState"));
-        state.setForCompensation("true".equals(nodeMap.get("IsForCompensation")));
-        state.setForUpdate("true".equals(nodeMap.get("IsForUpdate")));
+        state.setForCompensation(Boolean.TRUE.equals(nodeMap.get("IsForCompensation")));
+        state.setForUpdate(Boolean.TRUE.equals(nodeMap.get("IsForUpdate")));
         Object isPersist = nodeMap.get("IsPersist");
         if (Boolean.FALSE.equals(isPersist)) {
             state.setPersist(false);
