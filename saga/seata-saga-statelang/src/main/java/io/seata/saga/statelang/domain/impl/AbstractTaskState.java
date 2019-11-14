@@ -15,7 +15,6 @@
  */
 package io.seata.saga.statelang.domain.impl;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -32,7 +31,7 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
     private String compensateState;
     private boolean isForCompensation;
     private boolean isForUpdate;
-    private Retry retry;
+    private List<Retry> retry;
     private List<ExceptionMatch> catches;
     private List<Object> input;
     private Map<String, Object> output;
@@ -71,14 +70,15 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
     }
 
     @Override
-    public Retry getRetry() {
+    public List<Retry> getRetry() {
         return retry;
     }
 
-    public void setRetry(Retry retry) {
+    public void setRetry(List<Retry> retry) {
         this.retry = retry;
     }
 
+    @Override
     public List<ExceptionMatch> getCatches() {
         return catches;
     }
@@ -122,16 +122,37 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
 
     public static class RetryImpl implements Retry {
 
-        private int intervalSeconds;
+        private List<String> exceptions;
+        private List<Class<? extends Exception>> exceptionClasses;
+        private double intervalSeconds;
         private int maxAttempts;
-        private BigDecimal backoffRate;
+        private double backoffRate;
 
         @Override
-        public int getIntervalSeconds() {
+        public List<String> getExceptions() {
+            return exceptions;
+        }
+
+        public void setExceptions(List<String> exceptions) {
+            this.exceptions = exceptions;
+        }
+
+        @Override
+        public List<Class<? extends Exception>> getExceptionClasses() {
+            return exceptionClasses;
+        }
+
+        @Override
+        public void setExceptionClasses(List<Class<? extends Exception>> exceptionClasses) {
+            this.exceptionClasses = exceptionClasses;
+        }
+
+        @Override
+        public double getIntervalSeconds() {
             return intervalSeconds;
         }
 
-        public void setIntervalSeconds(int intervalSeconds) {
+        public void setIntervalSeconds(double intervalSeconds) {
             this.intervalSeconds = intervalSeconds;
         }
 
@@ -145,11 +166,11 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
         }
 
         @Override
-        public BigDecimal getBackoffRate() {
+        public double getBackoffRate() {
             return backoffRate;
         }
 
-        public void setBackoffRate(BigDecimal backoffRate) {
+        public void setBackoffRate(double backoffRate) {
             this.backoffRate = backoffRate;
         }
     }
@@ -174,6 +195,7 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
             return exceptionClasses;
         }
 
+        @Override
         public void setExceptionClasses(List<Class<? extends Exception>> exceptionClasses) {
             this.exceptionClasses = exceptionClasses;
         }
