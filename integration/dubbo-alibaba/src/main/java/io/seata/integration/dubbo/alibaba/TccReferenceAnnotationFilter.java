@@ -72,9 +72,7 @@ public class TccReferenceAnnotationFilter implements Filter {
                     Map<String, Object> ret = actionInterceptorHandler.proceed(method, arguments, xid, businessAction,
                             () -> invoker.invoke(invocation));
                     return (Result) ret.get(io.seata.common.Constants.TCC_METHOD_RESULT);
-                } catch (Throwable throwable) {
-                    throw throwable;
-                } finally {
+                }  finally {
                     //recovery the context
                     RootContext.unbindFilterType();
                     RootContext.bind(xid);
@@ -82,6 +80,7 @@ public class TccReferenceAnnotationFilter implements Filter {
             }
         } catch (Throwable e) {
             LOGGER.error("Tcc dubbo invokes service to register branch transaction exception:{}", e.getMessage(), e);
+            throw new RpcException(e);
         }
         return invoker.invoke(invocation);
     }
