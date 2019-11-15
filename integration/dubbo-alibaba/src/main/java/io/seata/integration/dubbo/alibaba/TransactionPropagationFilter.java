@@ -59,7 +59,7 @@ public class TransactionPropagationFilter implements Filter {
             if (rpcXid != null) {
                 RootContext.bind(rpcXid);
                 RootContext.bindInterceptorType(rpcXidInterceptorType);
-                RootContext.bindInterceptorType(rpcXidFilterType);
+                RootContext.bindFilterType(rpcXidFilterType);
                 bind = true;
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("bind[{}] interceptorType[{}] filterType[{}] to RootContext", rpcXid, rpcXidInterceptorType, rpcXidFilterType);
@@ -81,6 +81,7 @@ public class TransactionPropagationFilter implements Filter {
                     if (unbindXid != null) {
                         RootContext.bind(unbindXid);
                         RootContext.bindInterceptorType(unbindInterceptorType);
+                        RootContext.bindFilterType(unbindFilterType);
                         LOGGER.warn("bind [{}] interceptorType[{}] filterType[{}] back to RootContext", unbindXid, unbindInterceptorType, unbindFilterType);
                     }
                 }
