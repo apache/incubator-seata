@@ -239,7 +239,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
-            //batch release lock by branch list
+            //batch release lock by branch
             String batchDeleteSQL = LockStoreSqls.getBatchDeleteLockSqlByBranch(lockTable, dbType);
             ps = conn.prepareStatement(batchDeleteSQL);
             ps.setString(1, xid);
