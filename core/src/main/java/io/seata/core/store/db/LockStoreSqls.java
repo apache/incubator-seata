@@ -74,14 +74,14 @@ public class LockStoreSqls {
         + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " in (" + IN_PARAMS_PLACEHOLD + ") ";
 
     /**
-     * The constant BATCH_DELETE_LOCK_SQL.
+     * The constant BATCH_DELETE_LOCK_BY_BRANCH_SQL.
      */
     public static final String BATCH_DELETE_LOCK_BY_BRANCH_SQL = "delete from " + LOCK_TABLE_PLACEHOLD
         + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and " + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID +  " = ? ";
 
 
     /**
-     * The constant BATCH_DELETE_LOCK_SQL.
+     * The constant BATCH_DELETE_LOCK_BY_BRANCHS_SQL.
      */
     public static final String BATCH_DELETE_LOCK_BY_BRANCHS_SQL = "delete from " + LOCK_TABLE_PLACEHOLD
         + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and " + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID + " in (" + IN_PARAMS_PLACEHOLD + ") ";

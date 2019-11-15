@@ -51,8 +51,8 @@ public class DataBaseLocker extends AbstractLocker {
      * @param logStoreDataSource the log store data source
      */
     public DataBaseLocker(DataSource logStoreDataSource) {
-        lockStore = EnhancedServiceLoader.load(LockStore.class, StoreMode.DB.name(), new Class[]{DataSource.class},
-            new Object[]{logStoreDataSource});
+        lockStore = EnhancedServiceLoader.load(LockStore.class, StoreMode.DB.name(), new Class[] {DataSource.class},
+            new Object[] {logStoreDataSource});
     }
 
     @Override
@@ -94,7 +94,7 @@ public class DataBaseLocker extends AbstractLocker {
         } catch (StoreException e) {
             throw e;
         } catch (Exception t) {
-            LOGGER.error("unLock by branchIds error, xid {}, branchId:{}", xid, branchId, t);
+            LOGGER.error("unLock by branchId error, xid {}, branchId:{}", xid, branchId, t);
             return false;
         }
     }

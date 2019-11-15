@@ -96,12 +96,12 @@ public class LockerFactory {
             DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class,
                 datasourceType);
             DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
-            locker = EnhancedServiceLoader.load(Locker.class, storeMode, new Class[]{DataSource.class},
-                new Object[]{logStoreDataSource});
+            locker = EnhancedServiceLoader.load(Locker.class, storeMode, new Class[] {DataSource.class},
+                new Object[] {logStoreDataSource});
             lockerMap.putIfAbsent(storeMode, locker);
         } else if (StoreMode.FILE.name().equalsIgnoreCase(storeMode)) {
             locker = EnhancedServiceLoader.load(Locker.class, storeMode,
-                new Class[]{BranchSession.class}, new Object[]{branchSession});
+                new Class[] {BranchSession.class}, new Object[] {branchSession});
         } else {
             //other locker
             locker = EnhancedServiceLoader.load(Locker.class, storeMode);
