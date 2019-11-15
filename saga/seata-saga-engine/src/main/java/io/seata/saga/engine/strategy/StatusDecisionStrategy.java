@@ -22,7 +22,8 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
  * Default state machine execution status decision strategy.
  * The strategy is to traverse the execution state of each state executed.
  * If all state are successfully executed the state machine is successfully executed,
- * if there is a state that fails to execute which is for data update, the state machine execution status is considered to be UN (the data is inconsistent),
+ * if there is a state that fails to execute which is for data update, the state machine execution status is considered
+ * to be UN (the data is inconsistent),
  * otherwise FA (failure: no data inconsistency)
  *
  * @author lorne.cl

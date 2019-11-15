@@ -15,9 +15,8 @@
  */
 package io.seata.server.lock.db;
 
-import java.util.List;
-
 import javax.sql.DataSource;
+import java.util.List;
 
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
@@ -52,8 +51,8 @@ public class DataBaseLocker extends AbstractLocker {
      * @param logStoreDataSource the log store data source
      */
     public DataBaseLocker(DataSource logStoreDataSource) {
-        lockStore = EnhancedServiceLoader.load(LockStore.class, StoreMode.DB.name(), new Class[] {DataSource.class},
-            new Object[] {logStoreDataSource});
+        lockStore = EnhancedServiceLoader.load(LockStore.class, StoreMode.DB.name(), new Class[]{DataSource.class},
+            new Object[]{logStoreDataSource});
     }
 
     @Override
@@ -67,13 +66,13 @@ public class DataBaseLocker extends AbstractLocker {
         } catch (StoreException e) {
             throw e;
         } catch (Exception t) {
-            LOGGER.error("AcquireLock error, locks:{}",CollectionUtils.toString(locks), t);
+            LOGGER.error("AcquireLock error, locks:{}", CollectionUtils.toString(locks), t);
             return false;
         }
     }
 
     @Override
-    public boolean releaseLock(List<RowLock> locks) {
+    public boolean releaseBranchLock(List<RowLock> locks) {
         if (CollectionUtils.isEmpty(locks)) {
             //no lock
             return true;
@@ -83,7 +82,35 @@ public class DataBaseLocker extends AbstractLocker {
         } catch (StoreException e) {
             throw e;
         } catch (Exception t) {
-            LOGGER.error("unLock error, locks:{}",CollectionUtils.toString(locks), t);
+            LOGGER.error("unLock error, locks:{}", CollectionUtils.toString(locks), t);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean releaseBranchLock(String xid, Long branchId) {
+        try {
+            return lockStore.unLock(xid, branchId);
+        } catch (StoreException e) {
+            throw e;
+        } catch (Exception t) {
+            LOGGER.error("unLock by branchIds error, xid {}, branchId:{}", xid, branchId, t);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean releaseGlobalLock(String xid, List<Long> branchIds) {
+        if (CollectionUtils.isEmpty(branchIds)) {
+            //no lock
+            return true;
+        }
+        try {
+            return lockStore.unLock(xid, branchIds);
+        } catch (StoreException e) {
+            throw e;
+        } catch (Exception t) {
+            LOGGER.error("unLock by branchIds error, xid {}, branchIds:{}", xid, CollectionUtils.toString(branchIds), t);
             return false;
         }
     }

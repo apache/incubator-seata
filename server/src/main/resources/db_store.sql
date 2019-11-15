@@ -40,8 +40,8 @@ drop table if exists `lock_table`;
 create table `lock_table` (
   `row_key` varchar(128) not null,
   `xid` varchar(96),
-  `transaction_id` long ,
-  `branch_id` long,
+  `transaction_id` bigint ,
+  `branch_id` bigint not null,
   `resource_id` varchar(256) ,
   `table_name` varchar(32) ,
   `pk` varchar(36) ,

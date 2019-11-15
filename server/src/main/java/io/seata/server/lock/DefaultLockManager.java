@@ -16,17 +16,8 @@
 package io.seata.server.lock;
 
 import java.util.ArrayList;
-import java.util.List;
 
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.StringUtils;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
-import io.seata.core.lock.Locker;
-import io.seata.core.lock.RowLock;
-import io.seata.core.store.StoreMode;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 
@@ -38,25 +29,6 @@ import io.seata.server.session.GlobalSession;
  */
 public class DefaultLockManager extends AbstractLockManager {
 
-    /**
-     * The constant CONFIG.
-     */
-    protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
-
-    @Override
-    public boolean releaseLock(BranchSession branchSession) throws TransactionException {
-        if (branchSession == null) {
-            throw new IllegalArgumentException("branchSession can't be null for memory/file locker.");
-        }
-        List<RowLock> locks = collectRowLocks(branchSession);
-        try {
-            return getLocker(branchSession).releaseLock(locks);
-        } catch (Exception t) {
-            LOGGER.error("unLock error, branchSession:{}", branchSession, t);
-            return false;
-        }
-    }
-
     @Override
     public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
         ArrayList<BranchSession> branchSessions = globalSession.getBranchSessions();
@@ -67,41 +39,6 @@ public class DefaultLockManager extends AbstractLockManager {
             }
         }
         return releaseLockResult;
-    }
-
-    @Override
-    public boolean isLockable(String xid, String resourceId, String lockKey) throws TransactionException {
-        List<RowLock> locks = collectRowLocks(lockKey, resourceId, xid);
-        try {
-            return getLocker().isLockable(locks);
-        } catch (Exception t) {
-            LOGGER.error("isLockable error, xid:{} resourceId:{}, lockKey:{}", xid, resourceId, lockKey, t);
-            return false;
-        }
-    }
-
-    @Override
-    public void cleanAllLocks() throws TransactionException {
-        getLocker().cleanAllLocks();
-    }
-
-    /**
-     * Gets locker.
-     *
-     * @return the locker
-     */
-    protected Locker getLocker() {
-        return getLocker(null);
-    }
-
-    /**
-     * Gets locker.
-     *
-     * @param branchSession the branch session
-     * @return the locker
-     */
-    protected Locker getLocker(BranchSession branchSession) {
-        return LockerFactory.get(branchSession);
     }
 
 }

@@ -61,8 +61,7 @@ public class LockerFactory {
     /**
      * The constant lockManager.
      */
-    protected static LockManager lockManager = StoreMode.DB.name().equalsIgnoreCase(CONFIG.getConfig
-        (ConfigurationKeys.STORE_MODE)) ? new DataBaseLockManager() : new DefaultLockManager();
+    protected static LockManager lockManager;
 
     /**
      * Get lock manager.
@@ -70,6 +69,13 @@ public class LockerFactory {
      * @return the lock manager
      */
     public static final LockManager getLockManager() {
+        if (lockManager == null) {
+            if (StoreMode.DB.name().equalsIgnoreCase(CONFIG.getConfig(ConfigurationKeys.STORE_MODE))) {
+                lockManager = new DataBaseLockManager();
+            } else {
+                lockManager = new DefaultLockManager();
+            }
+        }
         return lockManager;
     }
 
@@ -90,12 +96,12 @@ public class LockerFactory {
             DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class,
                 datasourceType);
             DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
-            locker = EnhancedServiceLoader.load(Locker.class, storeMode, new Class[] {DataSource.class},
-                new Object[] {logStoreDataSource});
+            locker = EnhancedServiceLoader.load(Locker.class, storeMode, new Class[]{DataSource.class},
+                new Object[]{logStoreDataSource});
             lockerMap.putIfAbsent(storeMode, locker);
         } else if (StoreMode.FILE.name().equalsIgnoreCase(storeMode)) {
             locker = EnhancedServiceLoader.load(Locker.class, storeMode,
-                new Class[] {BranchSession.class}, new Object[] {branchSession});
+                new Class[]{BranchSession.class}, new Object[]{branchSession});
         } else {
             //other locker
             locker = EnhancedServiceLoader.load(Locker.class, storeMode);

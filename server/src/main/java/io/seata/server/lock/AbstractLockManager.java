@@ -22,6 +22,7 @@ import io.seata.common.XID;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.lock.Locker;
 import io.seata.core.lock.RowLock;
 import io.seata.server.session.BranchSession;
 import org.slf4j.Logger;
@@ -57,6 +58,56 @@ public abstract class AbstractLockManager implements LockManager {
             return true;
         }
         return getLocker(branchSession).acquireLock(locks);
+    }
+
+    @Override
+    public boolean releaseLock(BranchSession branchSession) throws TransactionException {
+        if (branchSession == null) {
+            throw new IllegalArgumentException("branchSession can't be null for memory/file locker.");
+        }
+        List<RowLock> locks = collectRowLocks(branchSession);
+        try {
+            return getLocker(branchSession).releaseBranchLock(locks);
+        } catch (Exception t) {
+            LOGGER.error("unLock error, branchSession:{}", branchSession, t);
+            return false;
+        }
+    }
+
+    @Override
+    public boolean isLockable(String xid, String resourceId, String lockKey) throws TransactionException {
+        List<RowLock> locks = collectRowLocks(lockKey, resourceId, xid);
+        try {
+            return getLocker().isLockable(locks);
+        } catch (Exception t) {
+            LOGGER.error("isLockable error, xid:{} resourceId:{}, lockKey:{}", xid, resourceId, lockKey, t);
+            return false;
+        }
+    }
+
+
+    @Override
+    public void cleanAllLocks() throws TransactionException {
+        getLocker().cleanAllLocks();
+    }
+
+    /**
+     * Gets locker.
+     *
+     * @return the locker
+     */
+    protected Locker getLocker() {
+        return getLocker(null);
+    }
+
+    /**
+     * Gets locker.
+     *
+     * @param branchSession the branch session
+     * @return the locker
+     */
+    protected Locker getLocker(BranchSession branchSession) {
+        return LockerFactory.get(branchSession);
     }
 
     /**
