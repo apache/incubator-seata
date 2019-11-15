@@ -197,7 +197,10 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
         List<BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(xids);
         Map<String, List<BranchTransactionDO>> branchTransactionDOsMap = branchTransactionDOs.stream()
             .collect(Collectors.groupingBy(BranchTransactionDO::getXid, LinkedHashMap::new, Collectors.toList()));
-        globalTransactionDOs.stream().forEach(globalTransactionDO -> globalSessions.add(getGlobalSession(globalTransactionDO, branchTransactionDOsMap.get(globalTransactionDO.getXid()))));
+        globalTransactionDOs.stream().forEach(globalTransactionDO -> {
+            GlobalSession globalSession = getGlobalSession(globalTransactionDO, branchTransactionDOsMap.get(globalTransactionDO.getXid()));
+            globalSessions.add(globalSession);
+        });
         return globalSessions;
     }
 
