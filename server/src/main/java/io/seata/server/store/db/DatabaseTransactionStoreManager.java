@@ -187,7 +187,6 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
         for (int i = 0; i < statuses.length; i++) {
             states[i] = statuses[i].getCode();
         }
-        List<GlobalSession> globalSessions = new ArrayList<>();
         //global transaction
         List<GlobalTransactionDO> globalTransactionDOs = logStore.queryGlobalTransactionDO(states, logQueryLimit);
         if (CollectionUtils.isEmpty(globalTransactionDOs)) {
@@ -197,11 +196,9 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
         List<BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(xids);
         Map<String, List<BranchTransactionDO>> branchTransactionDOsMap = branchTransactionDOs.stream()
             .collect(Collectors.groupingBy(BranchTransactionDO::getXid, LinkedHashMap::new, Collectors.toList()));
-        globalTransactionDOs.stream().forEach(globalTransactionDO -> {
-            GlobalSession globalSession = getGlobalSession(globalTransactionDO, branchTransactionDOsMap.get(globalTransactionDO.getXid()));
-            globalSessions.add(globalSession);
-        });
-        return globalSessions;
+        return globalTransactionDOs.stream().map(globalTransactionDO ->
+            getGlobalSession(globalTransactionDO, branchTransactionDOsMap.get(globalTransactionDO.getXid())))
+            .collect(Collectors.toList());
     }
 
     @Override
