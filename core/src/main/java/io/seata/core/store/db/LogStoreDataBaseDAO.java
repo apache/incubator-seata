@@ -299,7 +299,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
     public List<BranchTransactionDO> queryBranchTransactionDO(List<String> xids) {
         int length = xids.size();
         int retsSize = length * 3;
-        List<BranchTransactionDO> rets = new ArrayList<>(retsSize > 10 ? retsSize : 10);
+        List<BranchTransactionDO> rets = new ArrayList<>(retsSize);
         StringJoiner sj = new StringJoiner(",");
         xids.stream().forEach(xid -> sj.add("?"));
         String sql = LogStoreSqls.getQureyBranchTransaction(brachTable, dbType, sj.toString());
