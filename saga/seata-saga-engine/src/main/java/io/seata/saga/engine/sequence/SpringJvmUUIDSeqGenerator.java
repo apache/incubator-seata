@@ -15,10 +15,10 @@
  */
 package io.seata.saga.engine.sequence;
 
+import java.util.List;
+
 import org.springframework.util.AlternativeJdkIdGenerator;
 import org.springframework.util.IdGenerator;
-
-import java.util.List;
 
 /**
  * Based On Spring AlternativeJdkIdGenerator

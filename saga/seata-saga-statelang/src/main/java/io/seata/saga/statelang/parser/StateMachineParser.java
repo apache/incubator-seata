@@ -19,12 +19,14 @@ import io.seata.saga.statelang.domain.StateMachine;
 
 /**
  * State machine parser
+ *
  * @author lorne.cl
  */
 public interface StateMachineParser {
 
     /**
      * Parse an object (such as Json) into a State Machine model
+     *
      * @param json
      * @return
      */
