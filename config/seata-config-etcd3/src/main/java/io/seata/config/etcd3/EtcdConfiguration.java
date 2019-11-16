@@ -231,7 +231,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
                 throw new ShouldNeverHappenException("unsupported response type");
             }
         } catch (Exception e) {
-            LOGGER.error("error occurred while completing the future{}", e.getMessage());
+            LOGGER.error("error occurred while completing the future{}", e.getMessage(),e);
         }
     }
 
@@ -287,7 +287,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
                             listener.onChangeEvent(event);
                         }
                     } catch (Exception e) {
-                        LOGGER.error("error occurred while getting value{}", e.getMessage());
+                        LOGGER.error("error occurred while getting value{}", e.getMessage(), e);
                     }
                 }
 
