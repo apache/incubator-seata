@@ -84,7 +84,12 @@ public class Server {
         }
         XID.setPort(rpcServer.getListenPort());
 
-        rpcServer.init();
+        try {
+            rpcServer.init();
+        } catch (Throwable e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
 
         System.exit(0);
     }
