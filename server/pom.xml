@@ -162,7 +162,7 @@
                         <image>openjdk:8u232-jre-stretch</image>
                     </from>
                     <to>
-                        <image>docker.io/seata.io/seata</image>
+                        <image>docker.io/seataio/seata-server</image>
                         <tags>
                             ${image.tags}
                         </tags>
