@@ -120,6 +120,7 @@ public class DefaultSagaTransactionalTemplate
             lockKeys);
     }
 
+    @Override
     public void branchReport(String xid, long branchId, BranchStatus status, String applicationData)
         throws TransactionException {
         DefaultResourceManager.get().branchReport(BranchType.SAGA, xid, branchId, status, applicationData);
