@@ -18,15 +18,7 @@ package io.seata.rm.datasource.undo;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.undo.mysql.MySQLUndoDeleteExecutor;
-import io.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
-import io.seata.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
-import io.seata.rm.datasource.undo.oracle.OracleUndoDeleteExecutor;
-import io.seata.rm.datasource.undo.oracle.OracleUndoInsertExecutor;
-import io.seata.rm.datasource.undo.oracle.OracleUndoUpdateExecutor;
-import io.seata.rm.datasource.undo.postgresql.PostgresqlUndoDeleteExecutor;
-import io.seata.rm.datasource.undo.postgresql.PostgresqlUndoInsertExecutor;
-import io.seata.rm.datasource.undo.postgresql.PostgresqlUndoUpdateExecutor;
+
 
 /**
  * The type Undo executor factory.
@@ -38,46 +30,29 @@ public class UndoExecutorFactory {
     /**
      * Gets undo executor.
      *
-     * @param dbType the db type
+     * @param dbType     the db type
      * @param sqlUndoLog the sql undo log
      * @return the undo executor
      */
     public static AbstractUndoExecutor getUndoExecutor(String dbType, SQLUndoLog sqlUndoLog) {
-        if (dbType.equalsIgnoreCase(JdbcConstants.ORACLE)) {
-            switch (sqlUndoLog.getSqlType()) {
-                case INSERT:
-                    return new OracleUndoInsertExecutor(sqlUndoLog);
-                case UPDATE:
-                    return new OracleUndoUpdateExecutor(sqlUndoLog);
-                case DELETE:
-                    return new OracleUndoDeleteExecutor(sqlUndoLog);
-                default:
-                    throw new ShouldNeverHappenException();
-            }
-        } else if (dbType.equalsIgnoreCase(JdbcConstants.MYSQL)) {
-            switch (sqlUndoLog.getSqlType()) {
-                case INSERT:
-                    return new MySQLUndoInsertExecutor(sqlUndoLog);
-                case UPDATE:
-                    return new MySQLUndoUpdateExecutor(sqlUndoLog);
-                case DELETE:
-                    return new MySQLUndoDeleteExecutor(sqlUndoLog);
-                default:
-                    throw new ShouldNeverHappenException();
-            }
-        } else if (dbType.equalsIgnoreCase(JdbcConstants.POSTGRESQL)) {
-            switch (sqlUndoLog.getSqlType()) {
-                case INSERT:
-                    return new PostgresqlUndoInsertExecutor(sqlUndoLog);
-                case UPDATE:
-                    return new PostgresqlUndoUpdateExecutor(sqlUndoLog);
-                case DELETE:
-                    return new PostgresqlUndoDeleteExecutor(sqlUndoLog);
-                default:
-                    throw new ShouldNeverHappenException();
-            }
-        } else {
-            throw new NotSupportYetException(dbType);
-        }
+      if (!JdbcConstants.MYSQL.equals(dbType) && !JdbcConstants.ORACLE.equals(dbType)) {
+        throw new NotSupportYetException(dbType);
+      }
+      AbstractUndoExecutor result = null;
+      UndoExecutorHolder holder = UndoExecutorHolderFactory.getUndoExecutorHolder(dbType.toLowerCase());
+      switch ((sqlUndoLog.getSqlType())) {
+        case INSERT:
+          result = holder.getInsertExecutor(sqlUndoLog);
+          break;
+        case UPDATE:
+          result = holder.getUpdateExecutor(sqlUndoLog);
+          break;
+        case DELETE:
+          result = holder.getDeleteExecutor(sqlUndoLog);
+          break;
+        default:
+          throw new ShouldNeverHappenException();
+      }
+      return result;
     }
 }

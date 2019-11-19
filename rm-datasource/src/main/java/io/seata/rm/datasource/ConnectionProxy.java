@@ -50,6 +50,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     private static final int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
 
+    public static final boolean IS_REPORT_SUCCESS_ENABLE = ConfigurationFactory.getInstance()
+        .getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, true);
+
     private final static LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy();
 
     /**
@@ -221,7 +224,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             report(false);
             throw new SQLException(ex);
         }
-        report(true);
+        if (IS_REPORT_SUCCESS_ENABLE) {
+            report(true);
+        }
         context.reset();
     }
 
