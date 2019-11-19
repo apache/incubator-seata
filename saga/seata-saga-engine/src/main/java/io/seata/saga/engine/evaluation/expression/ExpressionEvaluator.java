@@ -15,14 +15,13 @@
  */
 package io.seata.saga.engine.evaluation.expression;
 
+import java.util.Map;
+
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.saga.engine.evaluation.Evaluator;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.expression.Expression;
 import io.seata.saga.statelang.domain.DomainConstants;
-
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -56,7 +55,8 @@ public class ExpressionEvaluator implements Evaluator {
         } catch (Exception e) {
             result = Boolean.FALSE;
             if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("Expression [{}] execute failed, and it will return false by default. variables:{}", expression.getExpressionString(), variables, e);
+                LOGGER.warn("Expression [{}] execute failed, and it will return false by default. variables:{}",
+                    expression.getExpressionString(), variables, e);
             }
         }
 
@@ -64,10 +64,11 @@ public class ExpressionEvaluator implements Evaluator {
             throw new EngineExecutionException("Evaluation returns null", FrameworkErrorCode.EvaluationReturnsNull);
         }
         if (!(result instanceof Boolean)) {
-            throw new EngineExecutionException("Evaluation returns non-Boolean: " + result + " (" + result.getClass().getName() + ")",
+            throw new EngineExecutionException(
+                "Evaluation returns non-Boolean: " + result + " (" + result.getClass().getName() + ")",
                 FrameworkErrorCode.EvaluationReturnsNonBoolean);
         }
-        return (Boolean) result;
+        return (Boolean)result;
     }
 
     public Expression getExpression() {
