@@ -110,6 +110,9 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      * @param mockReturnValue
      */
     public void setMockReturnValue(Object[][] mockReturnValue) {
+        if (mockReturnValue == null) {
+            this.mockReturnValue = new Object[][]{};
+        }
         this.mockReturnValue = mockReturnValue;
     }
 
@@ -118,6 +121,10 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      * @param mockColumnsMetasReturnValue
      */
     public void setMockColumnsMetasReturnValue(Object[][] mockColumnsMetasReturnValue) {
+        if (mockColumnsMetasReturnValue == null) {
+            this.mockColumnsMetasReturnValue = new Object[][]{};
+            return;
+        }
         this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
     }
 
@@ -134,6 +141,9 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      * @param mockIndexMetasReturnValue
      */
     public void setMockIndexMetasReturnValue(Object[][] mockIndexMetasReturnValue) {
+        if (mockIndexMetasReturnValue == null) {
+            this.mockIndexMetasReturnValue = new Object[][]{};
+        }
         this.mockIndexMetasReturnValue = mockIndexMetasReturnValue;
     }
 
