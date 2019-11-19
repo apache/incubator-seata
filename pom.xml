@@ -457,6 +457,7 @@
                             <failsOnError>true</failsOnError>
                             <failOnViolation>false</failOnViolation>
                             <excludes>**/generated/**</excludes>
+                            <excludes>**/grpc/src/main/java/io/seata/integration/grpc/interceptor/**</excludes>
                         </configuration>
                         <goals>
                             <goal>check</goal>
