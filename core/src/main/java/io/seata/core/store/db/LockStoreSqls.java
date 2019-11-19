@@ -23,6 +23,7 @@ import io.seata.core.constants.ServerTableColumnsName;
  * The type Lock store sqls.
  *
  * @author zhangsen
+ * @date 2019 /4/26
  */
 public class LockStoreSqls {
 
@@ -37,8 +38,8 @@ public class LockStoreSqls {
     public static final String IN_PARAMS_PLACEHOLD = " #in_params# ";
 
     /**
-     * The constant ALL_COLUMNS. xid, transaction_id, branch_id, resource_id, table_name, pk, row_key, gmt_create,
-     * gmt_modified
+     * The constant ALL_COLUMNS.
+     * xid, transaction_id, branch_id, resource_id, table_name, pk, row_key, gmt_create, gmt_modified
      */
     public static final String ALL_COLUMNS
         = ServerTableColumnsName.LOCK_TABLE_XID + ", " + ServerTableColumnsName.LOCK_TABLE_TRANSACTION_ID + ", "
@@ -95,7 +96,7 @@ public class LockStoreSqls {
      * Get insert lock sql string.
      *
      * @param lockTable the lock table
-     * @param dbType the db type
+     * @param dbType    the db type
      * @return the string
      */
     public static String getInsertLockSQL(String lockTable, String dbType) {
@@ -116,7 +117,7 @@ public class LockStoreSqls {
      * Get delete lock sql string.
      *
      * @param lockTable the lock table
-     * @param dbType the db type
+     * @param dbType    the db type
      * @return the string
      */
     public static String getDeleteLockSql(String lockTable, String dbType) {
@@ -126,9 +127,9 @@ public class LockStoreSqls {
     /**
      * Get batch delete lock sql string.
      *
-     * @param lockTable the lock table
+     * @param lockTable      the lock table
      * @param paramPlaceHold the param place hold
-     * @param dbType the db type
+     * @param dbType         the db type
      * @return the string
      */
     public static String getBatchDeleteLockSql(String lockTable, String paramPlaceHold, String dbType) {
@@ -140,7 +141,7 @@ public class LockStoreSqls {
      * Get query lock sql string.
      *
      * @param lockTable the lock table
-     * @param dbType the db type
+     * @param dbType    the db type
      * @return the string
      */
     public static String getQueryLockSql(String lockTable, String dbType) {
@@ -150,9 +151,9 @@ public class LockStoreSqls {
     /**
      * Get check lock sql string.
      *
-     * @param lockTable the lock table
+     * @param lockTable      the lock table
      * @param paramPlaceHold the param place hold
-     * @param dbType the db type
+     * @param dbType         the db type
      * @return the string
      */
     public static String getCheckLockableSql(String lockTable, String paramPlaceHold, String dbType) {

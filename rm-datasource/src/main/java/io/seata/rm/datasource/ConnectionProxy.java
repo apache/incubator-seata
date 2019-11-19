@@ -15,6 +15,10 @@
  */
 package io.seata.rm.datasource;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.Callable;
+
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -26,11 +30,7 @@ import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.exec.LockConflictException;
 import io.seata.rm.datasource.exec.LockRetryController;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-import io.seata.rm.datasource.undo.UndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.concurrent.Callable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +58,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     /**
      * Instantiates a new Connection proxy.
      *
-     * @param dataSourceProxy the data source proxy
+     * @param dataSourceProxy  the data source proxy
      * @param targetConnection the target connection
      */
     public ConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
@@ -215,8 +215,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
         try {
             if (context.hasUndoLog()) {
-                UndoLogManager undoLogManager = UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType());
-                undoLogManager.flushUndoLogs(this);
+                UndoLogManagerFactory.getUndoLogManager(this.getDbType()).flushUndoLogs(this);
             }
             targetConnection.commit();
         } catch (Throwable ex) {
@@ -277,7 +276,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     public static class LockRetryPolicy {
         protected final static boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT =
-            ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, true);
+                ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, true);
 
         public <T> T execute(Callable<T> callable) throws Exception {
             if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT) {

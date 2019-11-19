@@ -38,8 +38,7 @@ public final class UndoLogManagerFactory {
         UNDO_LOG_MANAGER_MAP.put(JdbcConstants.POSTGRESQL, new PostgresqlUndoLogManager());
     }
 
-    private UndoLogManagerFactory() {
-    }
+    private UndoLogManagerFactory() {}
 
     public static UndoLogManager getUndoLogManager(String dbType) {
         UndoLogManager undoLogManager = UNDO_LOG_MANAGER_MAP.get(dbType);
