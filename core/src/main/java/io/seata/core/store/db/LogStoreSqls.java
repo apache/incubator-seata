@@ -188,6 +188,13 @@ public class LogStoreSqls {
         + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " asc";
 
     /**
+     * The constant QUREY_BRANCH_TRANSACTION_XIDS.
+     */
+    public static final String QUREY_BRANCH_TRANSACTION_XIDS = "select " + ALL_BRANCH_COLUMNS + " from "
+        + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " in (" + PRAMETER_PLACEHOLD + ") order by "
+        + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " asc";
+
+    /**
      * The constant CHECK_MAX_TRANS_ID.
      */
     public static final String QUERY_MAX_TRANS_ID = "select max(" + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID
@@ -383,6 +390,20 @@ public class LogStoreSqls {
      */
     public static String getQureyBranchTransaction(String branchTable, String dbType) {
         return QUREY_BRANCH_TRANSACTION.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
+    }
+
+    /**
+     * Get qurey branch transaction string.
+     *
+     * @param branchTable the branch table
+     * @param dbType      the db type
+     * @param paramsPlaceHolder the params place holder
+     * @return the string
+     */
+    public static String getQureyBranchTransaction(String branchTable, String dbType,
+                                                   String paramsPlaceHolder) {
+        return QUREY_BRANCH_TRANSACTION_XIDS.replace(BRANCH_TABLE_PLACEHOLD, branchTable)
+            .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
 
     /**

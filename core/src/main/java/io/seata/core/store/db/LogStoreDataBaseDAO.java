@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import javax.sql.DataSource;
 
@@ -290,7 +291,37 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
-            IOUtil.close(ps, conn);
+            IOUtil.close(rs, ps, conn);
+        }
+    }
+
+    @Override
+    public List<BranchTransactionDO> queryBranchTransactionDO(List<String> xids) {
+        int length = xids.size();
+        int retsSize = length * 3;
+        List<BranchTransactionDO> rets = new ArrayList<>(retsSize);
+        StringJoiner sj = new StringJoiner(",");
+        xids.stream().forEach(xid -> sj.add("?"));
+        String sql = LogStoreSqls.getQureyBranchTransaction(brachTable, dbType, sj.toString());
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            ps = conn.prepareStatement(sql);
+            for (int i = 0; i < length; i++) {
+                ps.setString(i + 1, xids.get(i));
+            }
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                rets.add(convertBranchTransactionDO(rs));
+            }
+            return rets;
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        } finally {
+            IOUtil.close(rs, ps, conn);
         }
     }
 
@@ -389,24 +420,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(rs, ps, conn);
         }
         return max;
     }
@@ -451,15 +465,16 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         ColumnInfo columnInfo = queryTableStructure(globalTable, TRANSACTION_NAME_KEY);
         if (columnInfo == null) {
             LOGGER.warn("{} table or {} column not found", globalTable, TRANSACTION_NAME_KEY);
-            return ;
+            return;
         }
         this.transactionNameColumnSize = columnInfo.getColumnSize();
     }
 
     /**
      * query column info from table
+     *
      * @param tableName the table name
-     * @param colName the column name
+     * @param colName   the column name
      * @return the column info
      */
     private ColumnInfo queryTableStructure(final String tableName, String colName) {
