@@ -29,7 +29,6 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -41,10 +40,9 @@ import java.util.StringJoiner;
 /**
  * The type Base transactional executor.
  *
- * @author sharajava
- *
  * @param <T> the type parameter
  * @param <S> the type parameter
+ * @author sharajava
  */
 public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor {
 
@@ -68,12 +66,12 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * Instantiates a new Base transactional executor.
      *
-     * @param statementProxy    the statement proxy
+     * @param statementProxy the statement proxy
      * @param statementCallback the statement callback
-     * @param sqlRecognizer     the sql recognizer
+     * @param sqlRecognizer the sql recognizer
      */
     public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
-                                     SQLRecognizer sqlRecognizer) {
+        SQLRecognizer sqlRecognizer) {
         this.statementProxy = statementProxy;
         this.statementCallback = statementCallback;
         this.sqlRecognizer = sqlRecognizer;
@@ -122,7 +120,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     /**
      * build buildWhereCondition
      *
-     * @param recognizer        the recognizer
+     * @param recognizer the recognizer
      * @param paramAppenderList the param paramAppender list
      * @return the string
      */
@@ -188,7 +186,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         tableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
-                .getTableMeta(connectionProxy.getDataSourceProxy(), tableName);
+            .getTableMeta(connectionProxy.getDataSourceProxy(), tableName);
         return tableMeta;
     }
 
@@ -196,7 +194,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * prepare undo log.
      *
      * @param beforeImage the before image
-     * @param afterImage  the after image
+     * @param afterImage the after image
      * @throws SQLException the sql exception
      */
     protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
@@ -242,7 +240,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * build a SQLUndoLog
      *
      * @param beforeImage the before image
-     * @param afterImage  the after image
+     * @param afterImage the after image
      * @return sql undo log
      */
     protected SQLUndoLog buildUndoItem(TableRecords beforeImage, TableRecords afterImage) {
@@ -257,17 +255,17 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         return sqlUndoLog;
     }
 
-
     /**
      * build a BeforeImage
      *
-     * @param tableMeta         the tableMeta
-     * @param selectSQL         the selectSQL
+     * @param tableMeta the tableMeta
+     * @param selectSQL the selectSQL
      * @param paramAppenderList the paramAppender list
      * @return a tableRecords
      * @throws SQLException the sql exception
      */
-    protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
+    protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL,
+        ArrayList<List<Object>> paramAppenderList) throws SQLException {
         TableRecords tableRecords = null;
         PreparedStatement ps = null;
         Statement st = null;
@@ -349,6 +347,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     /**
      * get db type
+     *
      * @return
      */
     protected String getDbType() {

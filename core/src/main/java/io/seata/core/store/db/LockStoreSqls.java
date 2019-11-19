@@ -23,7 +23,6 @@ import io.seata.core.constants.ServerTableColumnsName;
  * The type Lock store sqls.
  *
  * @author zhangsen
- * @date 2019 /4/26
  */
 public class LockStoreSqls {
 
@@ -38,8 +37,8 @@ public class LockStoreSqls {
     public static final String IN_PARAMS_PLACEHOLD = " #in_params# ";
 
     /**
-     * The constant ALL_COLUMNS.
-     * xid, transaction_id, branch_id, resource_id, table_name, pk, row_key, gmt_create, gmt_modified
+     * The constant ALL_COLUMNS. xid, transaction_id, branch_id, resource_id, table_name, pk, row_key, gmt_create,
+     * gmt_modified
      */
     public static final String ALL_COLUMNS
         = ServerTableColumnsName.LOCK_TABLE_XID + ", " + ServerTableColumnsName.LOCK_TABLE_TRANSACTION_ID + ", "
@@ -60,6 +59,13 @@ public class LockStoreSqls {
     public static final String INSERT_LOCK_SQL_ORACLE = "insert into " + LOCK_TABLE_PLACEHOLD + "(" + ALL_COLUMNS + ")"
         +
         "values (?, ?, ?, ?, ?, ?, ?, sysdate, sysdate)";
+
+    /**
+     * The constant INSERT_LOCK_SQL_POSTGRESQL.
+     */
+    public static final String INSERT_LOCK_SQL_POSTGRESQL = "insert into " + LOCK_TABLE_PLACEHOLD + "(" + ALL_COLUMNS + ")"
+        +
+        "values (?, ?, ?, ?, ?, ?, ?, now(), now())";
 
     /**
      * The constant DELETE_LOCK_SQL.
@@ -89,7 +95,7 @@ public class LockStoreSqls {
      * Get insert lock sql string.
      *
      * @param lockTable the lock table
-     * @param dbType    the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getInsertLockSQL(String lockTable, String dbType) {
@@ -99,6 +105,8 @@ public class LockStoreSqls {
             return INSERT_LOCK_SQL_MYSQL.replace(LOCK_TABLE_PLACEHOLD, lockTable);
         } else if (DBType.ORACLE.name().equalsIgnoreCase(dbType)) {
             return INSERT_LOCK_SQL_ORACLE.replace(LOCK_TABLE_PLACEHOLD, lockTable);
+        } else if (DBType.POSTGRESQL.name().equalsIgnoreCase(dbType)) {
+            return INSERT_LOCK_SQL_POSTGRESQL.replace(LOCK_TABLE_PLACEHOLD, lockTable);
         } else {
             throw new NotSupportYetException("unknown dbType:" + dbType);
         }
@@ -108,7 +116,7 @@ public class LockStoreSqls {
      * Get delete lock sql string.
      *
      * @param lockTable the lock table
-     * @param dbType    the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getDeleteLockSql(String lockTable, String dbType) {
@@ -118,9 +126,9 @@ public class LockStoreSqls {
     /**
      * Get batch delete lock sql string.
      *
-     * @param lockTable      the lock table
+     * @param lockTable the lock table
      * @param paramPlaceHold the param place hold
-     * @param dbType         the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getBatchDeleteLockSql(String lockTable, String paramPlaceHold, String dbType) {
@@ -132,7 +140,7 @@ public class LockStoreSqls {
      * Get query lock sql string.
      *
      * @param lockTable the lock table
-     * @param dbType    the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getQueryLockSql(String lockTable, String dbType) {
@@ -142,9 +150,9 @@ public class LockStoreSqls {
     /**
      * Get check lock sql string.
      *
-     * @param lockTable      the lock table
+     * @param lockTable the lock table
      * @param paramPlaceHold the param place hold
-     * @param dbType         the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getCheckLockableSql(String lockTable, String paramPlaceHold, String dbType) {

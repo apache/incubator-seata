@@ -13,15 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.undo.oracle;
+package io.seata.rm.datasource.undo.postgresql;
 
 import com.alibaba.druid.util.JdbcConstants;
-import io.seata.common.util.BlobUtils;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogParser;
-import java.io.ByteArrayInputStream;
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -31,22 +28,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author jsbxyyx
+ * @author japsercloud
  */
-public class OracleUndoLogManager extends AbstractUndoLogManager {
+public class PostgresqlUndoLogManager extends AbstractUndoLogManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(OracleUndoLogManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PostgresqlUndoLogManager.class);
 
     private static final String INSERT_UNDO_LOG_SQL = "INSERT INTO " + UNDO_LOG_TABLE_NAME + "\n" +
         "\t(id,branch_id, xid,context, rollback_info, log_status, log_created, log_modified)\n" +
-        "VALUES (UNDO_LOG_SEQ.nextval,?, ?,?, ?, ?, sysdate, sysdate)";
+        "VALUES (nextval('undo_log_seq'),?, ?,?, ?, ?, now(), now())";
 
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
-        " WHERE log_created <= ? and ROWNUM <= ?";
+        " WHERE log_created <= ? LIMIT ?";
 
     @Override
     public String getDbType() {
-        return JdbcConstants.ORACLE;
+        return JdbcConstants.POSTGRESQL;
     }
 
     @Override
@@ -81,8 +78,7 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
 
     @Override
     protected byte[] getRollbackInfo(ResultSet rs) throws SQLException {
-        Blob b = rs.getBlob(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
-        byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
+        byte[] rollbackInfo = rs.getBytes(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
         return rollbackInfo;
     }
 
@@ -101,8 +97,7 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
             pst.setLong(1, branchID);
             pst.setString(2, xid);
             pst.setString(3, rollbackCtx);
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(undoLogContent);
-            pst.setBlob(4, inputStream);
+            pst.setBytes(4, undoLogContent);
             pst.setInt(5, state.getValue());
             pst.executeUpdate();
         } catch (Exception e) {
@@ -116,5 +111,4 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
             }
         }
     }
-
 }
