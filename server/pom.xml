@@ -183,6 +183,7 @@
                             <STORE_MODE>file</STORE_MODE>
                         </environment>
                         <jvmFlags>
+                            <jvmFlag>-Djava.security.egd=file:/dev/./urandom</jvmFlag>
                             <jvmFlag>-server</jvmFlag>
                             <jvmFlag>-Xss512k</jvmFlag>
                             <jvmFlag>-XX:SurvivorRatio=10</jvmFlag>
@@ -202,7 +203,6 @@
                             <jvmFlag>-verbose:gc</jvmFlag>
                             <!--netty-->
                             <jvmFlag>-Dio.netty.leakDetectionLevel=advanced</jvmFlag>
-                            <jvmFlag>-Djava.security.egd=file:/dev/./urandom</jvmFlag>
                         </jvmFlags>
                         <labels>
                             <name>seata-server</name>
