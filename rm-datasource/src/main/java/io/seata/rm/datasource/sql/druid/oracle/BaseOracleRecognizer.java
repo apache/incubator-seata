@@ -37,13 +37,16 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
 
     /**
      * Instantiates a new oracle base recognizer
+     *
      * @param originalSql the original sql
      */
-    public BaseOracleRecognizer(String originalSql){
+    public BaseOracleRecognizer(String originalSql) {
         super(originalSql);
     }
 
-    public OracleOutputVisitor createOutputVisitor(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList, final StringBuilder sb) {
+    public OracleOutputVisitor createOutputVisitor(final ParametersHolder parametersHolder,
+                                                   final ArrayList<List<Object>> paramAppenderList,
+                                                   final StringBuilder sb) {
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
             @Override
@@ -65,18 +68,19 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
         return visitor;
     }
 
-    public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder,
+                                    final ArrayList<List<Object>> paramAppenderList) {
         if (where == null) {
             return "";
         }
         StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = createOutputVisitor(parametersHolder, paramAppenderList, sb);
         if (where instanceof SQLBinaryOpExpr) {
-            visitor.visit((SQLBinaryOpExpr) where);
+            visitor.visit((SQLBinaryOpExpr)where);
         } else if (where instanceof SQLInListExpr) {
-            visitor.visit((SQLInListExpr) where);
+            visitor.visit((SQLInListExpr)where);
         } else if (where instanceof SQLBetweenExpr) {
-            visitor.visit((SQLBetweenExpr) where);
+            visitor.visit((SQLBetweenExpr)where);
         } else {
             throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
         }
@@ -91,11 +95,11 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
         StringBuilder sb = new StringBuilder();
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb);
         if (where instanceof SQLBinaryOpExpr) {
-            visitor.visit((SQLBinaryOpExpr) where);
+            visitor.visit((SQLBinaryOpExpr)where);
         } else if (where instanceof SQLInListExpr) {
-            visitor.visit((SQLInListExpr) where);
+            visitor.visit((SQLInListExpr)where);
         } else if (where instanceof SQLBetweenExpr) {
-            visitor.visit((SQLBetweenExpr) where);
+            visitor.visit((SQLBetweenExpr)where);
         } else {
             throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
         }

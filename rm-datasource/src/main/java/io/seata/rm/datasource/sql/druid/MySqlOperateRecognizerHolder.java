@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.sql.druid;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
+
 import io.seata.rm.datasource.sql.SQLOperateRecognizerHolder;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 
@@ -24,32 +25,31 @@ import io.seata.rm.datasource.sql.SQLRecognizer;
  *
  * @author: Zhibei Hao丶
  */
-public class MySqlOperateRecognizerHolder implements SQLOperateRecognizerHolder
-{
-  private final String MYSQL = "mysql";
+public class MySqlOperateRecognizerHolder implements SQLOperateRecognizerHolder {
+    private final String MYSQL = "mysql";
 
-  @Override
-  public SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast) {
-    return new MySQLDeleteRecognizer(sql, ast);
-  }
+    @Override
+    public SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast) {
+        return new MySQLDeleteRecognizer(sql, ast);
+    }
 
-  @Override
-  public SQLRecognizer getInsertRecognizer(String sql, SQLStatement ast) {
-    return new MySQLInsertRecognizer(sql, ast);
-  }
+    @Override
+    public SQLRecognizer getInsertRecognizer(String sql, SQLStatement ast) {
+        return new MySQLInsertRecognizer(sql, ast);
+    }
 
-  @Override
-  public SQLRecognizer getUpdateRecognizer(String sql, SQLStatement ast) {
-    return new MySQLUpdateRecognizer(sql, ast);
-  }
+    @Override
+    public SQLRecognizer getUpdateRecognizer(String sql, SQLStatement ast) {
+        return new MySQLUpdateRecognizer(sql, ast);
+    }
 
-  @Override
-  public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast) {
-    return new MySQLSelectForUpdateRecognizer(sql, ast);
-  }
+    @Override
+    public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast) {
+        return new MySQLSelectForUpdateRecognizer(sql, ast);
+    }
 
-  @Override
-  public String getDbType() {
-    return MYSQL;
-  }
+    @Override
+    public String getDbType() {
+        return MYSQL;
+    }
 }
