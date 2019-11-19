@@ -378,7 +378,8 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         }
 
         if (exp != null && context.getVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH) != null
-            && (Boolean)context.getVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH)) {//如果存在异常没有catch则需要退出状态机执行
+            && (Boolean)context.getVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH)) {
+            //If there is an exception and there is no catch, need to exit the state machine to execute.
 
             context.removeVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH);
             EngineUtils.failStateMachine(context, exp);

@@ -575,7 +575,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
         if (stateMachineInstance.isRunning()) {
             throw new EngineExecutionException(
-                "StateMachineInstance[id:" + stateMachineInstance.getId() + "]is running，operation[" + operation
+                "StateMachineInstance [id:" + stateMachineInstance.getId() + "]is running, operation[" + operation
                     + "] denied", FrameworkErrorCode.OperationDenied);
         }
 

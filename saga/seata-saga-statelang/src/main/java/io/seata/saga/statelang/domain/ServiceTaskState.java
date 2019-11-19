@@ -25,7 +25,7 @@ import java.util.List;
 public interface ServiceTaskState extends TaskState {
 
     /**
-     * Service type，such as SpringBean、SOFA RPC，default is StringBean
+     * Service type: such as SpringBean, SOFA RPC, default is StringBean
      *
      * @return
      */
