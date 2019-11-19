@@ -473,7 +473,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                     currFileChannel.write(byteBuffer);
                 }
                 return true;
-            } catch (IOException exx) {
+            } catch (Exception exx) {
                 LOGGER.error("write data file error:{}",exx.getMessage(),exx);
             }
         }

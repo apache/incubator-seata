@@ -79,6 +79,7 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
      * @param name the name
      */
     public FileConfiguration(String name) {
+        LOGGER.info("The file name of the operation is {}", name);
         if (null == name) {
             fileConfig = ConfigFactory.load();
         }
