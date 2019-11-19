@@ -148,7 +148,8 @@ public class MessageCodecFactory {
 
         try {
             msgCodec = getMergeRequestMessageSeataCodec(typeCode);
-        } catch (Exception exx) {}
+        } catch (Exception exx) {
+        }
 
         if (null != msgCodec) {
             return msgCodec;
@@ -275,7 +276,8 @@ public class MessageCodecFactory {
 
         try {
             abstractMessage = getMergeRequestInstanceByCode(typeCode);
-        } catch (Exception exx) {}
+        } catch (Exception exx) {
+        }
 
         if (null != abstractMessage) {
             return abstractMessage;
