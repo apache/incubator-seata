@@ -181,7 +181,8 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
         } catch (TransactionException te) {
             if (LOGGER.isInfoEnabled()) {
                 if (System.currentTimeMillis() % 10000 == 0) {
-                    LOGGER.info("branchRollback failed with stackTrace reason [{}]", te.getMessage(), te);
+                    LOGGER.info("[stacktrace]branchRollback failed. branchType:[{}], xid:[{}], branchId:[{}], resourceId:[{}], applicationData:[{}]. stacktrace:[{}]",
+                        branchType, xid, branchId, resourceId, applicationData, te.getMessage(), te);
                 } else {
                     LOGGER.info("branchRollback failed reason [{}]", te.getMessage());
                 }
