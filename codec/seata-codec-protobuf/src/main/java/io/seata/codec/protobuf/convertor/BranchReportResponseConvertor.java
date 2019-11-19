@@ -39,18 +39,16 @@ public class BranchReportResponseConvertor implements PbConvertor<BranchReportRe
 
         final String msg = branchReportResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            msg == null ? "" : msg)
-            .setResultCode(ResultCodeProto.valueOf(branchReportResponse.getResultCode().name())).setAbstractMessage(
-                abstractMessage).build();
+            msg == null ? "" : msg).setResultCode(ResultCodeProto.valueOf(branchReportResponse.getResultCode().name()))
+            .setAbstractMessage(abstractMessage).build();
 
         AbstractTransactionResponseProto abstractTransactionResponseProto = AbstractTransactionResponseProto
-            .newBuilder().setAbstractResultMessage(abstractResultMessageProto)
-            .setTransactionExceptionCode(
+            .newBuilder().setAbstractResultMessage(abstractResultMessageProto).setTransactionExceptionCode(
                 TransactionExceptionCodeProto.valueOf(branchReportResponse.getTransactionExceptionCode().name()))
             .build();
 
-        BranchReportResponseProto result = BranchReportResponseProto.newBuilder()
-            .setAbstractTransactionResponse(abstractTransactionResponseProto).build();
+        BranchReportResponseProto result = BranchReportResponseProto.newBuilder().setAbstractTransactionResponse(
+            abstractTransactionResponseProto).build();
 
         return result;
     }
@@ -60,11 +58,10 @@ public class BranchReportResponseConvertor implements PbConvertor<BranchReportRe
         BranchReportResponse branchRegisterResponse = new BranchReportResponse();
         final AbstractResultMessageProto abstractResultMessage = branchReportResponseProto
             .getAbstractTransactionResponse().getAbstractResultMessage();
-        branchRegisterResponse.setMsg(
-            abstractResultMessage.getMsg());
+        branchRegisterResponse.setMsg(abstractResultMessage.getMsg());
         branchRegisterResponse.setResultCode(ResultCode.valueOf(abstractResultMessage.getResultCode().name()));
-        branchRegisterResponse.setTransactionExceptionCode(TransactionExceptionCode.valueOf(
-            branchReportResponseProto.getAbstractTransactionResponse().getTransactionExceptionCode().name()));
+        branchRegisterResponse.setTransactionExceptionCode(TransactionExceptionCode
+            .valueOf(branchReportResponseProto.getAbstractTransactionResponse().getTransactionExceptionCode().name()));
 
         return branchRegisterResponse;
     }

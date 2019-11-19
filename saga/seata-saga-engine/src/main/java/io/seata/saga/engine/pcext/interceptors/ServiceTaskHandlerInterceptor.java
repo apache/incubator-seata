@@ -396,8 +396,8 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn(
                         "Service[{}.{}] is execute asynchronously, null return value collected, so user defined "
-                            + "Status Matching skipped. stateName: {}, branchId: {}",
-                        state.getServiceName(), state.getServiceMethod(), state.getName(), stateInstance.getId());
+                            + "Status Matching skipped. stateName: {}, branchId: {}", state.getServiceName(),
+                        state.getServiceMethod(), state.getName(), stateInstance.getId());
                 }
             } else {
 

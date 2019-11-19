@@ -82,10 +82,10 @@ public class ExceptionSerializer implements Serializer<Exception, byte[]> {
                 result = ois.readObject();
             } catch (IOException e) {
                 LOGGER.error("deserialize failed：", e);
-                throw (new RuntimeException("IO Create Error", e));
+                throw new RuntimeException("IO Create Error", e);
             } catch (ClassNotFoundException e) {
                 LOGGER.error("deserialize failed：", e);
-                throw (new RuntimeException("Cannot find specified class", e));
+                throw new RuntimeException("Cannot find specified class", e);
             } finally {
                 if (ois != null) {
                     try {
