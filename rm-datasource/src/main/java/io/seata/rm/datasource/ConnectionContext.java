@@ -35,7 +35,7 @@ public class ConnectionContext {
     private boolean isGlobalLockRequire;
 
     /**
-     * table and primary key should not be duplicated
+     * Table and primary key should not be duplicated.
      */
     private Set<String> lockKeysBuffer = new HashSet<>();
     private List<SQLUndoLog> sqlUndoItemsBuffer = new ArrayList<>();
