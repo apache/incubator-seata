@@ -67,6 +67,7 @@ public class StateMachineImpl implements StateMachine {
         return startState;
     }
 
+    @Override
     public void setStartState(String startState) {
         this.startState = startState;
     }
@@ -164,6 +165,7 @@ public class StateMachineImpl implements StateMachine {
         return content;
     }
 
+    @Override
     public void setContent(String content) {
         this.content = content;
     }
