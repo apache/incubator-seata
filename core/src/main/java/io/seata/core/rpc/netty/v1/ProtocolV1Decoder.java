@@ -77,6 +77,7 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
         super(maxFrameLength, 3, 4, -7, 0);
     }
 
+    @Override
     protected Object decode(ChannelHandlerContext ctx, ByteBuf in) throws Exception {
         Object decoded = super.decode(ctx, in);
         if (decoded instanceof ByteBuf) {
