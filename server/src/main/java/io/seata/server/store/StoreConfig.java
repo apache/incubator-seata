@@ -30,17 +30,17 @@ public class StoreConfig {
 
 
     /**
-     * default 16kb
+     * Default 16kb.
      */
     private static final int DEFAULT_MAX_BRANCH_SESSION_SIZE = 1024 * 16;
 
     /**
-     * default 512b
+     * Default 512b.
      */
     private static final int DEFAULT_MAX_GLOBAL_SESSION_SIZE = 512;
 
     /**
-     * default 16kb
+     * Default 16kb.
      */
     private static final int DEFAULT_WRITE_BUFFER_SIZE = 1024 * 16;
 
