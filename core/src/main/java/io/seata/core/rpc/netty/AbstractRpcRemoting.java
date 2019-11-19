@@ -38,10 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.SocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -65,13 +62,15 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
      * The Timer executor.
      */
     protected final ScheduledExecutorService timerExecutor = new ScheduledThreadPoolExecutor(1,
-        new NamedThreadFactory("timeoutChecker", 1, true));
+            new NamedThreadFactory("timeoutChecker", 1, true));
     /**
      * The Message executor.
      */
     protected final ThreadPoolExecutor messageExecutor;
 
-    /** Id generator of this remoting */
+    /**
+     * Id generator of this remoting
+     */
     protected final PositiveAtomicCounter idGenerator = new PositiveAtomicCounter();
 
     /**
@@ -133,19 +132,18 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                List<MessageFuture> timeoutMessageFutures = new ArrayList<MessageFuture>(futures.size());
-                for (MessageFuture future : futures.values()) {
-                    if (future.isTimeout()) {
-                        timeoutMessageFutures.add(future);
+                Iterator<Map.Entry<Integer, MessageFuture>> futuresIterator = futures.entrySet().iterator();
+                for (; futuresIterator.hasNext(); ) {
+                    Map.Entry<Integer, MessageFuture> next = futuresIterator.next();
+                    if (next.getValue().isTimeout()) {
+                        futures.remove(next.getKey());
+                        next.getValue().setResultMessage(null);
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("timeout clear future: {}", next.getValue().getRequestMessage().getBody());
+                        }
                     }
                 }
-                for (MessageFuture messageFuture : timeoutMessageFutures) {
-                    futures.remove(messageFuture.getRequestMessage().getId());
-                    messageFuture.setResultMessage(null);
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("timeout clear future : " + messageFuture.getRequestMessage().getBody());
-                    }
-                }
+
                 nowMills = System.currentTimeMillis();
             }
         }, TIMEOUT_CHECK_INTERNAL, TIMEOUT_CHECK_INTERNAL, TimeUnit.MILLISECONDS);
@@ -194,7 +192,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
      * @throws TimeoutException the timeout exception
      */
     protected Object sendAsyncRequestWithResponse(String address, Channel channel, Object msg, long timeout) throws
-        TimeoutException {
+            TimeoutException {
         if (timeout <= 0) {
             throw new FrameworkException("timeout should more than 0ms");
         }
@@ -210,12 +208,12 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
      * @throws TimeoutException the timeout exception
      */
     protected Object sendAsyncRequestWithoutResponse(Channel channel, Object msg) throws
-        TimeoutException {
+            TimeoutException {
         return sendAsyncRequest(null, channel, msg, 0);
     }
 
     private Object sendAsyncRequest(String address, Channel channel, Object msg, long timeout)
-        throws TimeoutException {
+            throws TimeoutException {
         if (channel == null) {
             LOGGER.warn("sendAsyncRequestWithResponse nothing, caused by null channel.");
             return null;
@@ -271,7 +269,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
             } catch (Exception exx) {
                 LOGGER.error("wait response error:" + exx.getMessage() + ",ip:" + address + ",request:" + msg);
                 if (exx instanceof TimeoutException) {
-                    throw (TimeoutException)exx;
+                    throw (TimeoutException) exx;
                 } else {
                     throw new RuntimeException(exx);
                 }
@@ -297,12 +295,12 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         rpcMessage.setBody(msg);
         rpcMessage.setId(getNextMessageId());
         if (msg instanceof MergeMessage) {
-            mergeMsgMap.put(rpcMessage.getId(), (MergeMessage)msg);
+            mergeMsgMap.put(rpcMessage.getId(), (MergeMessage) msg);
         }
         channelWriteableCheck(channel, msg);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("write message:" + rpcMessage.getBody() + ", channel:" + channel + ",active?"
-                + channel.isActive() + ",writable?" + channel.isWritable() + ",isopen?" + channel.isOpen());
+                    + channel.isActive() + ",writable?" + channel.isWritable() + ",isopen?" + channel.isOpen());
         }
         channel.writeAndFlush(rpcMessage);
     }
@@ -310,7 +308,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     /**
      * Send response.
      *
-     * @param request  the msg id
+     * @param request the msg id
      * @param channel the channel
      * @param msg     the msg
      */
@@ -339,7 +337,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                     if (tryTimes > NettyClientConfig.getMaxNotWriteableRetry()) {
                         destroyChannel(channel);
                         throw new FrameworkException("msg:" + ((msg == null) ? "null" : msg.toString()),
-                            FrameworkErrorCode.ChannelIsNotWritable);
+                                FrameworkErrorCode.ChannelIsNotWritable);
                     }
                     lock.wait(NOT_WRITEABLE_CHECK_MILLS);
                 } catch (InterruptedException exx) {
@@ -357,7 +355,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof RpcMessage) {
-            final RpcMessage rpcMessage = (RpcMessage)msg;
+            final RpcMessage rpcMessage = (RpcMessage) msg;
             if (rpcMessage.getMessageType() == ProtocolConstants.MSGTYPE_RESQUEST
                     || rpcMessage.getMessageType() == ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY) {
                 if (LOGGER.isDebugEnabled()) {
@@ -376,7 +374,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                     });
                 } catch (RejectedExecutionException e) {
                     LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
-                        "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
+                            "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
                     if (allowDumpStack) {
                         String name = ManagementFactory.getRuntimeMXBean().getName();
                         String pid = name.split("@")[0];
@@ -393,8 +391,8 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                 MessageFuture messageFuture = futures.remove(rpcMessage.getId());
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug(String
-                        .format("%s msgId:%s, future :%s, body:%s", this, rpcMessage.getId(), messageFuture,
-                            rpcMessage.getBody()));
+                            .format("%s msgId:%s, future :%s, body:%s", this, rpcMessage.getId(), messageFuture,
+                                    rpcMessage.getBody()));
                 }
                 if (messageFuture != null) {
                     messageFuture.setResultMessage(rpcMessage.getBody());
@@ -412,7 +410,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                         });
                     } catch (RejectedExecutionException e) {
                         LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
-                            "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
+                                "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
                     }
                 }
             }
@@ -422,8 +420,8 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         LOGGER.error(FrameworkErrorCode.ExceptionCaught.getErrCode(),
-            ctx.channel() + " connect exception. " + cause.getMessage(),
-            cause);
+                ctx.channel() + " connect exception. " + cause.getMessage(),
+                cause);
         try {
             destroyChannel(ctx.channel());
         } catch (Exception e) {
