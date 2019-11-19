@@ -17,6 +17,7 @@ package io.seata.config;
 
 import java.util.Objects;
 
+import com.typesafe.config.ConfigFactory;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 
@@ -83,6 +84,14 @@ public final class ConfigurationFactory {
         return instance;
     }
 
+    public static Configuration refersh() {
+        if (null != instance) {
+            ConfigFactory.invalidateCaches();
+            instance = buildConfiguration();
+        }
+        return instance;
+    }
+
     private static Configuration buildConfiguration() {
         ConfigType configType = null;
         String configTypeName = null;
@@ -96,8 +105,7 @@ public final class ConfigurationFactory {
         }
         if (ConfigType.File == configType) {
             String pathDataId = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + FILE_TYPE + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + NAME_KEY;
+                + FILE_TYPE + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + NAME_KEY;
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             Configuration configuration = new FileConfiguration(name);
             Configuration extConfiguration = null;
@@ -106,7 +114,7 @@ public final class ConfigurationFactory {
             } catch (Exception ignore) {
 
             }
-            
+
             return null == extConfiguration ? configuration : extConfiguration;
         } else {
             return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
