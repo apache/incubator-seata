@@ -42,12 +42,9 @@ public class MemoryLocker extends AbstractLocker {
 
     private static final int BUCKET_PER_TABLE = 128;
 
-    private static final ConcurrentMap<String/* resourceId */,
-        ConcurrentMap<String/* tableName */,
-            ConcurrentMap<Integer/* bucketId */,
-                BucketLockMap>>>
-        LOCK_MAP
-        = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String/* resourceId */, ConcurrentMap<String/* tableName */,
+        ConcurrentMap<Integer/* bucketId */, BucketLockMap>>>
+        LOCK_MAP = new ConcurrentHashMap<>();
 
     /**
      * The Branch session.
@@ -75,8 +72,7 @@ public class MemoryLocker extends AbstractLocker {
         ConcurrentMap<BucketLockMap, Set<String>> bucketHolder = branchSession.getLockHolder();
         ConcurrentMap<String, ConcurrentMap<Integer, BucketLockMap>> dbLockMap = LOCK_MAP.get(resourceId);
         if (dbLockMap == null) {
-            LOCK_MAP.putIfAbsent(resourceId,
-                new ConcurrentHashMap<>());
+            LOCK_MAP.putIfAbsent(resourceId, new ConcurrentHashMap<>());
             dbLockMap = LOCK_MAP.get(resourceId);
         }
 
