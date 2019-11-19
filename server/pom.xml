@@ -172,8 +172,8 @@
                         </auth>
                     </to>
                     <container>
-                        <appRoot>/seata</appRoot>
-                        <workingDirectory>/seata</workingDirectory>
+                        <appRoot>/seata-server</appRoot>
+                        <workingDirectory>/seata-server</workingDirectory>
                         <mainClass>io.seata.server.Server</mainClass>
                         <ports>
                             <port>8091</port>
@@ -192,19 +192,20 @@
                             <jvmFlag>-XX:-OmitStackTraceInFastThrow</jvmFlag>
                             <jvmFlag>-XX:-UseAdaptiveSizePolicy</jvmFlag>
                             <jvmFlag>-XX:+HeapDumpOnOutOfMemoryError</jvmFlag>
-                            <jvmFlag>-XX:HeapDumpPath=/seata/logs/java_heapdump.hprof</jvmFlag>
+                            <jvmFlag>-XX:HeapDumpPath=/var/log/seata_heapdump.hprof</jvmFlag>
                             <!--gc-->
                             <jvmFlag>-XX:+DisableExplicitGC</jvmFlag>
                             <jvmFlag>-XX:+CMSParallelRemarkEnabled</jvmFlag>
                             <jvmFlag>-XX:+UseCMSInitiatingOccupancyOnly</jvmFlag>
                             <jvmFlag>-XX:CMSInitiatingOccupancyFraction=75</jvmFlag>
-                            <jvmFlag>-Xloggc:/seata/logs/seata_gc.log</jvmFlag>
+                            <jvmFlag>-Xloggc:/var/log/seata_gc.log</jvmFlag>
                             <jvmFlag>-verbose:gc</jvmFlag>
                             <!--netty-->
                             <jvmFlag>-Dio.netty.leakDetectionLevel=advanced</jvmFlag>
+                            <jvmFlag>-Djava.security.egd=file:/dev/./urandom</jvmFlag>
                         </jvmFlags>
                         <labels>
-                            <name>Seata</name>
+                            <name>seata-server</name>
                         </labels>
                         <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
                     </container>
