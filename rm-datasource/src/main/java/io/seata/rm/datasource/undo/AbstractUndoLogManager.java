@@ -391,7 +391,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     protected abstract void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser undoLogParser, Connection conn) throws SQLException;
 
     /**
-     *  nsert uodo log when normal
+     * insert uodo log when normal
      * @param xid  the xid
      * @param branchId the branchId
      * @param rollbackCtx the rollbackContext

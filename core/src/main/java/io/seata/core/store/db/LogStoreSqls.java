@@ -54,6 +54,7 @@ public class LogStoreSqls {
         + ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA + ", " + ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE + ", "
         + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED;
 
+
     /**
      * The constant ALL_BRANCH_COLUMNS.
      * xid, transaction_id, branch_id, resource_group_id, resource_id, lock_key, branch_type, status, client_id, application_data, gmt_create, gmt_modified
@@ -125,9 +126,9 @@ public class LogStoreSqls {
      * The constant QUERY_GLOBAL_TRANSACTION_BY_STATUS.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_MYSQL =
-        "select " + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD
-            + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
-            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
+            "select " + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD
+                    + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+                    + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
 
     public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE =
         "select t.* from ("
@@ -201,7 +202,7 @@ public class LogStoreSqls {
      */
     public static final String UPDATE_BRANCH_TRANSACTION_STATUS_POSTGRESQL = "update " + BRANCH_TABLE_PLACEHOLD
         + " set " + ServerTableColumnsName.BRANCH_TABLE_STATUS + " = ?, " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED
-        + " = now() where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_XID + " = ?";
+        + " = now() where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? and " + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " = ?";
 
     /**
      * The constant DELETE_BRANCH_TRANSACTION_BY_BRANCH_ID.
@@ -321,12 +322,12 @@ public class LogStoreSqls {
      * @return the string
      */
     public static String getQueryGlobalTransactionSQLByStatus(String globalTable, String dbType,
-        String paramsPlaceHolder) {
+                                                              String paramsPlaceHolder) {
         if (DBType.MYSQL.name().equalsIgnoreCase(dbType)
             || DBType.OCEANBASE.name().equalsIgnoreCase(dbType)
             || DBType.H2.name().equalsIgnoreCase(dbType)) {
             return QUERY_GLOBAL_TRANSACTION_BY_STATUS_MYSQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(
-                PRAMETER_PLACEHOLD, paramsPlaceHolder);
+                    PRAMETER_PLACEHOLD, paramsPlaceHolder);
         } else if (DBType.ORACLE.name().equalsIgnoreCase(dbType)) {
             return QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE.replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(
                 PRAMETER_PLACEHOLD, paramsPlaceHolder);
