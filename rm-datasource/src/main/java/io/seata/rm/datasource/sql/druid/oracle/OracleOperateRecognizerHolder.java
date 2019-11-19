@@ -23,10 +23,10 @@ import io.seata.rm.datasource.sql.SQLRecognizer;
 /**
  * The Type OracleOperateRecognizerHolder
  *
- * @author: Zhibei Hao丶
+ * @author: Zhibei Hao
  */
 public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder {
-    private final String ORACLE = "oracle";
+    private static final String ORACLE = "oracle";
 
     @Override
     public SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast) {
