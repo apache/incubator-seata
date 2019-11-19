@@ -23,10 +23,10 @@ import io.seata.rm.datasource.sql.SQLRecognizer;
 /**
  * The class MySqlOperateRecognizerHolder
  *
- * @author: Zhibei Hao丶
+ * @author: Zhibei Hao
  */
 public class MySqlOperateRecognizerHolder implements SQLOperateRecognizerHolder {
-    private final String MYSQL = "mysql";
+    private static final String MYSQL = "mysql";
 
     @Override
     public SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast) {

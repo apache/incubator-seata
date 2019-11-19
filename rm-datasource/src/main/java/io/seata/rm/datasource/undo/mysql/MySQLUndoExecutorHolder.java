@@ -25,7 +25,7 @@ import io.seata.rm.datasource.undo.UndoExecutorHolder;
  * @author: Zhibei Hao
  */
 public class MySQLUndoExecutorHolder implements UndoExecutorHolder {
-    private final String MYSQL = "mysql";
+    private static final String MYSQL = "mysql";
 
     @Override
     public AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog) {

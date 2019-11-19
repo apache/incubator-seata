@@ -40,7 +40,7 @@ public class UndoExecutorFactory {
         }
         AbstractUndoExecutor result = null;
         UndoExecutorHolder holder = UndoExecutorHolderFactory.getUndoExecutorHolder(dbType.toLowerCase());
-        switch ((sqlUndoLog.getSqlType())) {
+        switch (sqlUndoLog.getSqlType()) {
             case INSERT:
                 result = holder.getInsertExecutor(sqlUndoLog);
                 break;

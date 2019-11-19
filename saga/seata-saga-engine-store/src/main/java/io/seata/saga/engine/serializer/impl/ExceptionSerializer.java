@@ -47,7 +47,7 @@ public class ExceptionSerializer implements Serializer<Exception, byte[]> {
                 result = baos.toByteArray();
             } catch (IOException e) {
                 LOGGER.error("serializer failed: {}", o.getClass(), e);
-                throw (new RuntimeException("IO Create Error", e));
+                throw new RuntimeException("IO Create Error", e);
             } finally {
                 if (oos != null) {
                     try {
