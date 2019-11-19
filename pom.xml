@@ -456,8 +456,8 @@
                             <consoleOutput>true</consoleOutput>
                             <failsOnError>true</failsOnError>
                             <failOnViolation>false</failOnViolation>
-                            <excludes>**/generated/**</excludes>
-                            <excludes>**/integration/grpc/interceptor/**</excludes>
+                            <excludes>**/generated/**/*</excludes>
+                            <excludes>io/seata/integration/grpc/interceptor/</excludes>
                         </configuration>
                         <goals>
                             <goal>check</goal>
