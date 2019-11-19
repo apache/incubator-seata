@@ -35,7 +35,7 @@ public interface SeqGenerator {
     /**
      * Generate string.
      *
-     * @param entity the entity
+     * @param entity             the entity
      * @param shardingParameters the sharding parameters
      * @return the string
      */
@@ -44,8 +44,8 @@ public interface SeqGenerator {
     /**
      * Generate string.
      *
-     * @param entity the entity
-     * @param ruleName the rule name
+     * @param entity             the entity
+     * @param ruleName           the rule name
      * @param shardingParameters the sharding parameters
      * @return the string
      */

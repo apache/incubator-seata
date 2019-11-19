@@ -27,27 +27,28 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_PREFIX;
 @Component
 @ConfigurationProperties(prefix = CLIENT_PREFIX)
 public class ClientProperties {
-    private int asyncCommitBufferLimit = 10000;
-    private int reportRetryCount = 5;
+    private int rmAsyncCommitBufferLimit = 10000;
+    private int rmReportRetryCount = 5;
     private int tmCommitRetryCount = 5;
-    private int tmRollbackRetryCount = 1;
-    private boolean tableMetaCheckEnable = true;
+    private int tmRollbackRetryCount = 5;
+    private boolean rmTableMetaCheckEnable = true;
+    private boolean rmReportSuccessEnable = true;
 
-    public int getAsyncCommitBufferLimit() {
-        return asyncCommitBufferLimit;
+    public int getRmAsyncCommitBufferLimit() {
+        return rmAsyncCommitBufferLimit;
     }
 
-    public ClientProperties setAsyncCommitBufferLimit(int asyncCommitBufferLimit) {
-        this.asyncCommitBufferLimit = asyncCommitBufferLimit;
+    public ClientProperties setRmAsyncCommitBufferLimit(int rmAsyncCommitBufferLimit) {
+        this.rmAsyncCommitBufferLimit = rmAsyncCommitBufferLimit;
         return this;
     }
 
-    public int getReportRetryCount() {
-        return reportRetryCount;
+    public int getRmReportRetryCount() {
+        return rmReportRetryCount;
     }
 
-    public ClientProperties setReportRetryCount(int reportRetryCount) {
-        this.reportRetryCount = reportRetryCount;
+    public ClientProperties setRmReportRetryCount(int rmReportRetryCount) {
+        this.rmReportRetryCount = rmReportRetryCount;
         return this;
     }
 
@@ -69,12 +70,20 @@ public class ClientProperties {
         return this;
     }
 
-    public boolean isTableMetaCheckEnable() {
-        return tableMetaCheckEnable;
+    public boolean isRmTableMetaCheckEnable() {
+        return rmTableMetaCheckEnable;
     }
 
-    public ClientProperties setTableMetaCheckEnable(boolean tableMetaCheckEnable) {
-        this.tableMetaCheckEnable = tableMetaCheckEnable;
+    public ClientProperties setRmTableMetaCheckEnable(boolean rmTableMetaCheckEnable) {
+        this.rmTableMetaCheckEnable = rmTableMetaCheckEnable;
         return this;
+    }
+
+    public boolean isRmReportSuccessEnable() {
+        return rmReportSuccessEnable;
+    }
+
+    public void setRmReportSuccessEnable(boolean rmReportSuccessEnable) {
+        this.rmReportSuccessEnable = rmReportSuccessEnable;
     }
 }

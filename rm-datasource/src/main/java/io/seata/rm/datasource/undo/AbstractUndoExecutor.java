@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo;
 
 import com.alibaba.fastjson.JSON;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -167,6 +168,8 @@ public abstract class AbstractUndoExecutor {
                 } else {
                     undoPST.setObject(undoIndex, null);
                 }
+            } else if (undoValue.getType() == JDBCType.OTHER.getVendorTypeNumber()) {
+                undoPST.setObject(undoIndex, undoValue.getValue());
             } else {
                 undoPST.setObject(undoIndex, undoValue.getValue(), undoValue.getType());
             }
@@ -281,18 +284,7 @@ public abstract class AbstractUndoExecutor {
             checkSet = statement.executeQuery();
             currentRecords = TableRecords.buildRecords(tableMeta, checkSet);
         } finally {
-            if (checkSet != null) {
-                try {
-                    checkSet.close();
-                } catch (Exception e) {
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (Exception e) {
-                }
-            }
+            IOUtil.close(checkSet, statement);
         }
         return currentRecords;
     }
