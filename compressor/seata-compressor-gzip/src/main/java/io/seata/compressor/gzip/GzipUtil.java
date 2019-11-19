@@ -15,6 +15,8 @@
  */
 package io.seata.compressor.gzip;
 
+import io.seata.common.util.IOUtil;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -43,12 +45,7 @@ public class GzipUtil {
         } catch (IOException e) {
             throw new RuntimeException("gzip compress error", e);
         } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException ignore) {
-                }
-            }
+            IOUtil.close(out);
         }
 
     }
@@ -72,12 +69,7 @@ public class GzipUtil {
         } catch (IOException e) {
             throw new RuntimeException("gzip decompress error", e);
         } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException ignore) {
-                }
-            }
+            IOUtil.close(out);
         }
     }
 
