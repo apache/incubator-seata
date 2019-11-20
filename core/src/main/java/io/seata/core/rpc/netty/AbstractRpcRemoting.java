@@ -38,7 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.SocketAddress;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
@@ -134,14 +133,12 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                Iterator<Map.Entry<Integer, MessageFuture>> futuresIterator = futures.entrySet().iterator();
-                for (; futuresIterator.hasNext(); ) {
-                    Map.Entry<Integer, MessageFuture> next = futuresIterator.next();
-                    if (next.getValue().isTimeout()) {
-                        futures.remove(next.getKey());
-                        next.getValue().setResultMessage(null);
+                for (Map.Entry<Integer, MessageFuture> entry : futures.entrySet()) {
+                    if (entry.getValue().isTimeout()) {
+                        futures.remove(entry.getKey());
+                        entry.getValue().setResultMessage(null);
                         if (LOGGER.isDebugEnabled()) {
-                            LOGGER.debug("timeout clear future: {}", next.getValue().getRequestMessage().getBody());
+                            LOGGER.debug("timeout clear future: {}", entry.getValue().getRequestMessage().getBody());
                         }
                     }
                 }
