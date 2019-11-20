@@ -64,7 +64,7 @@ public final class ConfigurationFactory {
                 LOGGER.info("load extConfiguration:{}", extConfiguration.getClass().getSimpleName());
             }
         } catch (Exception e) {
-            LOGGER.warn("failed to load extConfiguration:{}", e);
+            LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
         }
         CURRENT_FILE_INSTANCE = null == extConfiguration ? configuration : extConfiguration;
     }
@@ -110,8 +110,11 @@ public final class ConfigurationFactory {
             Configuration extConfiguration = null;
             try {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
-            } catch (Exception ignore) {
-
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("load extConfiguration:{}", extConfiguration.getClass().getSimpleName());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
             }
             
             return null == extConfiguration ? configuration : extConfiguration;
