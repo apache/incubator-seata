@@ -62,7 +62,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
      * The Timer executor.
      */
     protected final ScheduledExecutorService timerExecutor = new ScheduledThreadPoolExecutor(1,
-            new NamedThreadFactory("timeoutChecker", 1, true));
+        new NamedThreadFactory("timeoutChecker", 1, true));
     /**
      * The Message executor.
      */
@@ -192,7 +192,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
      * @throws TimeoutException the timeout exception
      */
     protected Object sendAsyncRequestWithResponse(String address, Channel channel, Object msg, long timeout) throws
-            TimeoutException {
+        TimeoutException {
         if (timeout <= 0) {
             throw new FrameworkException("timeout should more than 0ms");
         }
@@ -208,12 +208,12 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
      * @throws TimeoutException the timeout exception
      */
     protected Object sendAsyncRequestWithoutResponse(Channel channel, Object msg) throws
-            TimeoutException {
+        TimeoutException {
         return sendAsyncRequest(null, channel, msg, 0);
     }
 
     private Object sendAsyncRequest(String address, Channel channel, Object msg, long timeout)
-            throws TimeoutException {
+        throws TimeoutException {
         if (channel == null) {
             LOGGER.warn("sendAsyncRequestWithResponse nothing, caused by null channel.");
             return null;
@@ -288,8 +288,8 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     protected void sendRequest(Channel channel, Object msg) {
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setMessageType(msg instanceof HeartbeatMessage ?
-                ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
-                : ProtocolConstants.MSGTYPE_RESQUEST);
+            ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
+            : ProtocolConstants.MSGTYPE_RESQUEST);
         rpcMessage.setCodec(ProtocolConstants.CONFIGURED_CODEC);
         rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
         rpcMessage.setBody(msg);
@@ -300,7 +300,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         channelWriteableCheck(channel, msg);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("write message:" + rpcMessage.getBody() + ", channel:" + channel + ",active?"
-                    + channel.isActive() + ",writable?" + channel.isWritable() + ",isopen?" + channel.isOpen());
+                + channel.isActive() + ",writable?" + channel.isWritable() + ",isopen?" + channel.isOpen());
         }
         channel.writeAndFlush(rpcMessage);
     }
@@ -315,8 +315,8 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     protected void sendResponse(RpcMessage request, Channel channel, Object msg) {
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setMessageType(msg instanceof HeartbeatMessage ?
-                ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE :
-                ProtocolConstants.MSGTYPE_RESPONSE);
+            ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE :
+            ProtocolConstants.MSGTYPE_RESPONSE);
         rpcMessage.setCodec(request.getCodec()); // same with request
         rpcMessage.setCompressor(request.getCompressor());
         rpcMessage.setBody(msg);
@@ -337,7 +337,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                     if (tryTimes > NettyClientConfig.getMaxNotWriteableRetry()) {
                         destroyChannel(channel);
                         throw new FrameworkException("msg:" + ((msg == null) ? "null" : msg.toString()),
-                                FrameworkErrorCode.ChannelIsNotWritable);
+                            FrameworkErrorCode.ChannelIsNotWritable);
                     }
                     lock.wait(NOT_WRITEABLE_CHECK_MILLS);
                 } catch (InterruptedException exx) {
@@ -357,7 +357,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         if (msg instanceof RpcMessage) {
             final RpcMessage rpcMessage = (RpcMessage) msg;
             if (rpcMessage.getMessageType() == ProtocolConstants.MSGTYPE_RESQUEST
-                    || rpcMessage.getMessageType() == ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY) {
+                || rpcMessage.getMessageType() == ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY) {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug(String.format("%s msgId:%s, body:%s", this, rpcMessage.getId(), rpcMessage.getBody()));
                 }
@@ -374,7 +374,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                     });
                 } catch (RejectedExecutionException e) {
                     LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
-                            "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
+                        "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
                     if (allowDumpStack) {
                         String name = ManagementFactory.getRuntimeMXBean().getName();
                         String pid = name.split("@")[0];
@@ -391,8 +391,8 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                 MessageFuture messageFuture = futures.remove(rpcMessage.getId());
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug(String
-                            .format("%s msgId:%s, future :%s, body:%s", this, rpcMessage.getId(), messageFuture,
-                                    rpcMessage.getBody()));
+                        .format("%s msgId:%s, future :%s, body:%s", this, rpcMessage.getId(), messageFuture,
+                            rpcMessage.getBody()));
                 }
                 if (messageFuture != null) {
                     messageFuture.setResultMessage(rpcMessage.getBody());
@@ -410,7 +410,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                         });
                     } catch (RejectedExecutionException e) {
                         LOGGER.error(FrameworkErrorCode.ThreadPoolFull.getErrCode(),
-                                "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
+                            "thread pool is full, current max pool size is " + messageExecutor.getActiveCount());
                     }
                 }
             }
@@ -420,8 +420,8 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         LOGGER.error(FrameworkErrorCode.ExceptionCaught.getErrCode(),
-                ctx.channel() + " connect exception. " + cause.getMessage(),
-                cause);
+            ctx.channel() + " connect exception. " + cause.getMessage(),
+            cause);
         try {
             destroyChannel(ctx.channel());
         } catch (Exception e) {
