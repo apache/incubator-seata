@@ -71,7 +71,7 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
 
         StringBuilder sb = new StringBuilder();
 
-        excuteVisit(where, createOutputVisitor(parametersHolder, paramAppenderList, sb));
+        executeVisit(where, createOutputVisitor(parametersHolder, paramAppenderList, sb));
         return sb.toString();
     }
 
@@ -82,7 +82,7 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
 
         StringBuilder sb = new StringBuilder();
 
-        excuteVisit(where, new OracleOutputVisitor(sb));
+        executeVisit(where, new OracleOutputVisitor(sb));
         return sb.toString();
     }
 }

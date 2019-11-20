@@ -70,7 +70,7 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
 
         StringBuilder sb = new StringBuilder();
 
-        excuteVisit(where, createOutputVisitor(parametersHolder, paramAppenderList, sb));
+        executeVisit(where, createOutputVisitor(parametersHolder, paramAppenderList, sb));
         return sb.toString();
     }
 
@@ -81,7 +81,7 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
 
         StringBuilder sb = new StringBuilder();
 
-        excuteVisit(where, new MySqlOutputVisitor(sb));
+        executeVisit(where, new MySqlOutputVisitor(sb));
         return sb.toString();
     }
 }

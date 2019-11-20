@@ -57,7 +57,7 @@ public abstract class BaseRecognizer implements SQLRecognizer {
 
     }
 
-    public void excuteVisit(SQLExpr where, SQLASTVisitor visitor) {
+    public void executeVisit(SQLExpr where, SQLASTVisitor visitor) {
         if (where instanceof SQLBinaryOpExpr) {
             visitor.visit((SQLBinaryOpExpr) where);
         } else if (where instanceof SQLInListExpr) {
