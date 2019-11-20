@@ -15,6 +15,13 @@
  */
 package io.seata.rm.datasource.sql.druid;
 
+import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
+import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
+import com.alibaba.druid.sql.ast.expr.SQLExistsExpr;
+import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
+import com.alibaba.druid.sql.visitor.SQLASTVisitor;
+
 import io.seata.rm.datasource.sql.SQLRecognizer;
 
 /**
@@ -48,6 +55,20 @@ public abstract class BaseRecognizer implements SQLRecognizer {
     public BaseRecognizer(String originalSQL) {
         this.originalSQL = originalSQL;
 
+    }
+
+    public void executeVisit(SQLExpr where, SQLASTVisitor visitor) {
+        if (where instanceof SQLBinaryOpExpr) {
+            visitor.visit((SQLBinaryOpExpr) where);
+        } else if (where instanceof SQLInListExpr) {
+            visitor.visit((SQLInListExpr) where);
+        } else if (where instanceof SQLBetweenExpr) {
+            visitor.visit((SQLBetweenExpr) where);
+        } else if (where instanceof SQLExistsExpr) {
+            visitor.visit((SQLExistsExpr) where);
+        } else {
+            throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
+        }
     }
 
     @Override
