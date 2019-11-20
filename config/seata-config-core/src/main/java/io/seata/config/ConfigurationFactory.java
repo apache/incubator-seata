@@ -19,6 +19,8 @@ import java.util.Objects;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Configuration factory.
@@ -27,6 +29,9 @@ import io.seata.common.loader.EnhancedServiceLoader;
  * @author Geng Zhang
  */
 public final class ConfigurationFactory {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConfigurationFactory.class);
+
     private static final String REGISTRY_CONF_PREFIX = "registry";
     private static final String REGISTRY_CONF_SUFFIX = ".conf";
     private static final String ENV_SYSTEM_KEY = "SEATA_ENV";
@@ -55,9 +60,12 @@ public final class ConfigurationFactory {
         Configuration extConfiguration = null;
         try {
             extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
-
-        } catch (Exception ignore) {
-
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("load extConfiguration:{}",
+                    extConfiguration == null ? null : extConfiguration.getClass().getSimpleName());
+            }
+        } catch (Exception e) {
+            LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
         }
         CURRENT_FILE_INSTANCE = null == extConfiguration ? configuration : extConfiguration;
     }
@@ -103,8 +111,12 @@ public final class ConfigurationFactory {
             Configuration extConfiguration = null;
             try {
                 extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
-            } catch (Exception ignore) {
-
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("load extConfiguration:{}",
+                        extConfiguration == null ? null : extConfiguration.getClass().getSimpleName());
+                }
+            } catch (Exception e) {
+                LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
             }
             
             return null == extConfiguration ? configuration : extConfiguration;
