@@ -36,7 +36,10 @@ public class ExpressionEvaluator implements Evaluator {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExpressionEvaluator.class);
 
     private Expression expression;
-    // If it is empty, use variables as the root variable, otherwise take rootObjectName as the root.
+
+    /**
+     * If it is empty, use variables as the root variable, otherwise take rootObjectName as the root.
+     */
     private String rootObjectName = DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT;
 
     @Override
