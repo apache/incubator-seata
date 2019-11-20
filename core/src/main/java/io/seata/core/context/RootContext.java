@@ -89,8 +89,14 @@ public class RootContext {
      * @param xidType
      */
     public static void bindInterceptorType(String xidType) {
-        String[] xidTypes = xidType.split("_");
-        bindInterceptorType(xidTypes[0], BranchType.valueOf(xidTypes[1]));
+        if (StringUtils.isNotBlank(xidType)) {
+
+            String[] xidTypes = xidType.split("_");
+
+            if(xidTypes.length == 2){
+                bindInterceptorType(xidTypes[0], BranchType.valueOf(xidTypes[1]));
+            }
+        }
     }
 
     /**
