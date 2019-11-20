@@ -167,8 +167,8 @@
                             ${image.tags}
                         </tags>
                         <auth>
-                            <username>${env.REGISTRY_USERNAME}</username>
-                            <password>${env.REGISTRY_PASSWORD}</password>
+                            <username>${REGISTRY_USERNAME}</username>
+                            <password>${REGISTRY_PASSWORD}</password>
                         </auth>
                     </to>
                     <container>
