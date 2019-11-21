@@ -107,7 +107,7 @@ public class AbstractStore {
             }
 
             for (int i = 0; i < args.length; i++) {
-                stmt.setObject((i + 1), args[i]);
+                stmt.setObject(i + 1, args[i]);
             }
             resultSet = stmt.executeQuery();
             List<T> list = new ArrayList<>();
@@ -171,7 +171,7 @@ public class AbstractStore {
             }
 
             for (int i = 0; i < args.length; i++) {
-                stmt.setObject((i + 1), args[i]);
+                stmt.setObject(i + 1, args[i]);
             }
             int count = stmt.executeUpdate();
             if (!connection.getAutoCommit()) {

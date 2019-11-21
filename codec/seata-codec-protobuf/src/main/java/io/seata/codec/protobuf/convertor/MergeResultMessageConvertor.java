@@ -49,9 +49,7 @@ public class MergeResultMessageConvertor implements PbConvertor<MergeResultMessa
         }
 
         MergedResultMessageProto mergedWarpMessageProto = MergedResultMessageProto.newBuilder().setAbstractMessage(
-            abstractMessage)
-            .addAllMsgs(lists)
-            .build();
+            abstractMessage).addAllMsgs(lists).build();
 
         return mergedWarpMessageProto;
     }
@@ -82,8 +80,7 @@ public class MergeResultMessageConvertor implements PbConvertor<MergeResultMessa
         return result;
     }
 
-    private static String getTypeNameFromTypeUrl(
-        java.lang.String typeUrl) {
+    private static String getTypeNameFromTypeUrl(java.lang.String typeUrl) {
         int pos = typeUrl.lastIndexOf('/');
         return pos == -1 ? "" : typeUrl.substring(pos + 1);
     }

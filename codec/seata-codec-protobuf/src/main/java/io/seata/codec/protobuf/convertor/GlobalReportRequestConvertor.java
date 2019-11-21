@@ -36,20 +36,16 @@ public class GlobalReportRequestConvertor implements PbConvertor<GlobalReportReq
             MessageTypeProto.forNumber(typeCode)).build();
 
         final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
-            .newBuilder().setAbstractMessage(
-                abstractMessage).build();
+            .newBuilder().setAbstractMessage(abstractMessage).build();
 
         final String extraData = globalReportRequest.getExtraData();
         AbstractGlobalEndRequestProto abstractGlobalEndRequestProto = AbstractGlobalEndRequestProto.newBuilder()
-            .setAbstractTransactionRequest(abstractTransactionRequestProto)
-            .setXid(globalReportRequest.getXid())
-            .setExtraData(extraData == null ? "" : extraData)
-            .build();
+            .setAbstractTransactionRequest(abstractTransactionRequestProto).setXid(globalReportRequest.getXid())
+            .setExtraData(extraData == null ? "" : extraData).build();
 
         GlobalReportRequestProto result = GlobalReportRequestProto.newBuilder().setAbstractGlobalEndRequest(
-            abstractGlobalEndRequestProto)
-                .setGlobalStatus(GlobalStatusProto.valueOf(globalReportRequest.getGlobalStatus().name()))
-                .build();
+            abstractGlobalEndRequestProto).setGlobalStatus(
+            GlobalStatusProto.valueOf(globalReportRequest.getGlobalStatus().name())).build();
 
         return result;
     }

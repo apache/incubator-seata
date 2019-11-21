@@ -76,12 +76,20 @@ public interface LogStore {
     boolean deleteGlobalTransactionDO(GlobalTransactionDO globalTransactionDO);
 
     /**
-     * Query branch transaction do boolean.
+     * Query branch transaction do list.
      *
      * @param xid the xid
-     * @return the boolean
+     * @return the BranchTransactionDO list
      */
     List<BranchTransactionDO> queryBranchTransactionDO(String xid);
+
+    /**
+     * Query branch transaction do list.
+     *
+     * @param xids the xid list
+     * @return the BranchTransactionDO list
+     */
+    List<BranchTransactionDO> queryBranchTransactionDO(List<String> xids);
 
     /**
      * Insert branch transaction do boolean.
