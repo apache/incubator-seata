@@ -60,9 +60,6 @@ public class TCCResourceManager extends AbstractResourceManager {
     public void registerResource(Resource resource) {
         TCCResource tccResource = (TCCResource)resource;
         tccResourceCache.put(tccResource.getResourceId(), tccResource);
-        synchronized (RESOURCE_LOCK) {
-            RESOURCE_LOCK.notifyAll();
-        }
         super.registerResource(tccResource);
     }
 

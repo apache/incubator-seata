@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.engine;
+package io.seata.saga.engine.strategy;
 
 import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.StateMachineInstance;
@@ -22,7 +22,8 @@ import io.seata.saga.statelang.domain.StateMachineInstance;
  * Default state machine execution status decision strategy.
  * The strategy is to traverse the execution state of each state executed.
  * If all state are successfully executed the state machine is successfully executed,
- * if there is a state that fails to execute which is for data update, the state machine execution status is considered to be UN (the data is inconsistent),
+ * if there is a state that fails to execute which is for data update, the state machine execution status is considered
+ * to be UN (the data is inconsistent),
  * otherwise FA (failure: no data inconsistency)
  *
  * @author lorne.cl
@@ -31,6 +32,7 @@ public interface StatusDecisionStrategy {
 
     /**
      * Determine state machine execution status when executing to EndState
+     *
      * @param context
      * @param stateMachineInstance
      * @param exp
@@ -39,6 +41,7 @@ public interface StatusDecisionStrategy {
 
     /**
      * Determine state machine execution status when executing TaskState error
+     *
      * @param context
      * @param stateMachineInstance
      * @param exp
@@ -47,11 +50,12 @@ public interface StatusDecisionStrategy {
 
     /**
      * Determine the forward execution state of the state machine
+     *
      * @param stateMachineInstance
      * @param exp
      * @param specialPolicy
      * @return
      */
     boolean decideMachineForwardExecutionStatus(StateMachineInstance stateMachineInstance, Exception exp,
-        boolean specialPolicy);
+                                                boolean specialPolicy);
 }

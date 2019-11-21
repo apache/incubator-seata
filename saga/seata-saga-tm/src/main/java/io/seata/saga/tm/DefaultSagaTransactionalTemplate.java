@@ -15,6 +15,8 @@
  */
 package io.seata.saga.tm;
 
+import java.util.List;
+
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -29,6 +31,7 @@ import io.seata.tm.TMClient;
 import io.seata.tm.api.GlobalTransaction;
 import io.seata.tm.api.GlobalTransactionContext;
 import io.seata.tm.api.TransactionalExecutor;
+import io.seata.tm.api.TransactionalExecutor.ExecutionException;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
@@ -41,22 +44,21 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
 
-import java.util.List;
-
 /**
  * Template of executing business logic with a global transaction for SAGA mode
  *
  * @author lorne.cl
  */
-public class DefaultSagaTransactionalTemplate implements SagaTransactionalTemplate, ApplicationContextAware, DisposableBean, InitializingBean {
+public class DefaultSagaTransactionalTemplate
+    implements SagaTransactionalTemplate, ApplicationContextAware, DisposableBean, InitializingBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSagaTransactionalTemplate.class);
 
     private static final int DEFAULT_TRANS_OPER_TIMEOUT = 60000 * 10;
     private int timeout = DEFAULT_TRANS_OPER_TIMEOUT;
 
-    private String             applicationId;
-    private String             txServiceGroup;
+    private String applicationId;
+    private String txServiceGroup;
     private ApplicationContext applicationContext;
 
     @Override
@@ -67,13 +69,13 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             triggerAfterCommit();
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
-            throw new TransactionalExecutor.ExecutionException(tx, txe,
-                    TransactionalExecutor.Code.CommitFailure);
+            throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.CommitFailure);
         }
     }
 
     @Override
-    public void rollbackTransaction(GlobalTransaction tx, Throwable ex) throws TransactionException, TransactionalExecutor.ExecutionException {
+    public void rollbackTransaction(GlobalTransaction tx, Throwable ex)
+        throws TransactionException, TransactionalExecutor.ExecutionException {
         triggerBeforeRollback();
         tx.rollback();
         triggerAfterRollback();
@@ -88,33 +90,39 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             tx.begin(txInfo.getTimeOut(), txInfo.getName());
             triggerAfterBegin();
         } catch (TransactionException txe) {
-            throw new TransactionalExecutor.ExecutionException(tx, txe,
-                    TransactionalExecutor.Code.BeginFailure);
+            throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.BeginFailure);
 
         }
         return tx;
     }
 
     @Override
-    public void reportTransaction(GlobalTransaction tx, GlobalStatus globalStatus) throws TransactionalExecutor.ExecutionException {
+    public GlobalTransaction reloadTransaction(String xid) throws ExecutionException, TransactionException {
+        return GlobalTransactionContext.reload(xid);
+    }
+
+    @Override
+    public void reportTransaction(GlobalTransaction tx, GlobalStatus globalStatus)
+        throws TransactionalExecutor.ExecutionException {
         try {
             tx.globalReport(globalStatus);
             triggerAfterCompletion();
         } catch (TransactionException txe) {
 
-            throw new TransactionalExecutor.ExecutionException(tx, txe,
-                    TransactionalExecutor.Code.ReportFailure);
+            throw new TransactionalExecutor.ExecutionException(tx, txe, TransactionalExecutor.Code.ReportFailure);
         }
     }
 
     @Override
     public long branchRegister(String resourceId, String clientId, String xid, String applicationData, String lockKeys)
-            throws TransactionException {
-        return DefaultResourceManager.get().branchRegister(BranchType.SAGA, resourceId, clientId, xid, applicationData, lockKeys);
+        throws TransactionException {
+        return DefaultResourceManager.get().branchRegister(BranchType.SAGA, resourceId, clientId, xid, applicationData,
+            lockKeys);
     }
 
+    @Override
     public void branchReport(String xid, long branchId, BranchStatus status, String applicationData)
-            throws TransactionException{
+        throws TransactionException {
         DefaultResourceManager.get().branchReport(BranchType.SAGA, xid, branchId, status, applicationData);
     }
 
@@ -123,7 +131,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             try {
                 hook.beforeBegin();
             } catch (Exception e) {
-                LOGGER.error("Failed execute beforeBegin in hook " + e.getMessage());
+                LOGGER.error("Failed execute beforeBegin in hook {}", e.getMessage(), e);
             }
         }
     }
@@ -133,7 +141,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             try {
                 hook.afterBegin();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterBegin in hook " + e.getMessage());
+                LOGGER.error("Failed execute afterBegin in hook {} ", e.getMessage(), e);
             }
         }
     }
@@ -143,7 +151,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             try {
                 hook.beforeRollback();
             } catch (Exception e) {
-                LOGGER.error("Failed execute beforeRollback in hook " + e.getMessage());
+                LOGGER.error("Failed execute beforeRollback in hook {} ", e.getMessage(), e);
             }
         }
     }
@@ -153,7 +161,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             try {
                 hook.afterRollback();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterRollback in hook " + e.getMessage());
+                LOGGER.error("Failed execute afterRollback in hook {}", e.getMessage(), e);
             }
         }
     }
@@ -163,7 +171,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             try {
                 hook.beforeCommit();
             } catch (Exception e) {
-                LOGGER.error("Failed execute beforeCommit in hook " + e.getMessage());
+                LOGGER.error("Failed execute beforeCommit in hook {}", e.getMessage(), e);
             }
         }
     }
@@ -173,7 +181,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             try {
                 hook.afterCommit();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterCommit in hook " + e.getMessage());
+                LOGGER.error("Failed execute afterCommit in hook {}", e.getMessage(), e);
             }
         }
     }
@@ -184,7 +192,7 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
             try {
                 hook.afterCompletion();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterCompletion in hook " + e.getMessage());
+                LOGGER.error("Failed execute afterCompletion in hook {}", e.getMessage(), e);
             }
         }
     }
@@ -203,23 +211,24 @@ public class DefaultSagaTransactionalTemplate implements SagaTransactionalTempla
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Initializing Global Transaction Clients ... ");
         }
-        if (io.seata.common.util.StringUtils.isNullOrEmpty(applicationId) || io.seata.common.util.StringUtils.isNullOrEmpty(txServiceGroup)) {
+        if (io.seata.common.util.StringUtils.isNullOrEmpty(applicationId) || io.seata.common.util.StringUtils
+            .isNullOrEmpty(txServiceGroup)) {
             throw new IllegalArgumentException(
-                    "applicationId: " + applicationId + ", txServiceGroup: " + txServiceGroup);
+                "applicationId: " + applicationId + ", txServiceGroup: " + txServiceGroup);
         }
         //init TM
         TMClient.init(applicationId, txServiceGroup);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(
-                    "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
-                            + txServiceGroup + "]");
+                "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
+                    + txServiceGroup + "]");
         }
         //init RM
         RMClient.init(applicationId, txServiceGroup);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(
-                    "Resource Manager is initialized. applicationId[" + applicationId + "] txServiceGroup[" + txServiceGroup
-                            + "]");
+                "Resource Manager is initialized. applicationId[" + applicationId + "] txServiceGroup[" + txServiceGroup
+                    + "]");
         }
 
         // Only register application as a saga resource

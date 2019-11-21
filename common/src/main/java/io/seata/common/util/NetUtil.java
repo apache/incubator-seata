@@ -48,6 +48,9 @@ public class NetUtil {
      * @return the string
      */
     public static String toStringAddress(SocketAddress address) {
+        if (null == address) {
+            return StringUtils.EMPTY;
+        }
         return toStringAddress((InetSocketAddress) address);
     }
 
@@ -220,7 +223,7 @@ public class NetUtil {
         if (validLocalAndAny) {
             return ip != null && IP_PATTERN.matcher(ip).matches();
         } else {
-            return (ip != null && !ANY_HOST.equals(ip) && !LOCALHOST.equals(ip) && IP_PATTERN.matcher(ip).matches());
+            return ip != null && !ANY_HOST.equals(ip) && !LOCALHOST.equals(ip) && IP_PATTERN.matcher(ip).matches();
         }
 
     }

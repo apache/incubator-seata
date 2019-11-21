@@ -15,39 +15,29 @@
  */
 package io.seata.saga.engine.serializer.impl;
 
-import io.seata.saga.engine.serializer.Serializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import io.seata.saga.engine.serializer.Serializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Exception serializer
+ *
  * @author lorne.cl
  */
 public class ExceptionSerializer implements Serializer<Exception, byte[]> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionSerializer.class);
 
-    @Override
-    public byte[] serialize(Exception object) {
-
-        return serializeByObjectOutput(object);
-    }
-
-    @Override
-    public Exception deserialize(byte[] bytes) {
-        return deserializeByObjectInputStream(bytes, Exception.class);
-    }
-
     public static byte[] serializeByObjectOutput(Object o) {
 
         byte[] result = null;
-        if(o != null){
+        if (o != null) {
             ObjectOutputStream oos = null;
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -56,8 +46,8 @@ public class ExceptionSerializer implements Serializer<Exception, byte[]> {
                 oos.flush();
                 result = baos.toByteArray();
             } catch (IOException e) {
-                LOGGER.error("serializer failed：" + o.getClass(), e);
-                throw (new RuntimeException("IO Create Error", e));
+                LOGGER.error("serializer failed: {}", o.getClass(), e);
+                throw new RuntimeException("IO Create Error", e);
             } finally {
                 if (oos != null) {
                     try {
@@ -73,7 +63,7 @@ public class ExceptionSerializer implements Serializer<Exception, byte[]> {
 
     public static <T> T deserializeByObjectInputStream(byte[] bytes, Class<T> valueType) {
 
-        if ( bytes == null ) {
+        if (bytes == null) {
             return null;
         }
 
@@ -84,23 +74,20 @@ public class ExceptionSerializer implements Serializer<Exception, byte[]> {
     public static Object deserializeByObjectInputStream(byte[] bytes) {
 
         Object result = null;
-        if(bytes != null){
+        if (bytes != null) {
             ObjectInputStream ois = null;
             try {
                 ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
                 ois = new ObjectInputStream(bais);
                 result = ois.readObject();
-            }
-            catch (IOException e) {
-                LOGGER.error("deserialize failed：", e);
-                throw(new RuntimeException("IO Create Error", e));
-            }
-            catch (ClassNotFoundException e) {
-                LOGGER.error("deserialize failed：", e);
-                throw(new RuntimeException("Cannot find specified class", e));
-            }
-            finally {
-                if(ois!=null){
+            } catch (IOException e) {
+                LOGGER.error("deserialize failed:", e);
+                throw new RuntimeException("IO Create Error", e);
+            } catch (ClassNotFoundException e) {
+                LOGGER.error("deserialize failed:", e);
+                throw new RuntimeException("Cannot find specified class", e);
+            } finally {
+                if (ois != null) {
                     try {
                         ois.close();
                     } catch (IOException e) {
@@ -110,5 +97,16 @@ public class ExceptionSerializer implements Serializer<Exception, byte[]> {
             }
         }
         return result;
+    }
+
+    @Override
+    public byte[] serialize(Exception object) {
+
+        return serializeByObjectOutput(object);
+    }
+
+    @Override
+    public Exception deserialize(byte[] bytes) {
+        return deserializeByObjectInputStream(bytes, Exception.class);
     }
 }

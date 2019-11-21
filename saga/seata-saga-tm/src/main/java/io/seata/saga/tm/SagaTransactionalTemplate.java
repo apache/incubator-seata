@@ -31,17 +31,22 @@ public interface SagaTransactionalTemplate {
 
     void commitTransaction(GlobalTransaction tx) throws TransactionalExecutor.ExecutionException;
 
-    void rollbackTransaction(GlobalTransaction tx, Throwable ex) throws TransactionException, TransactionalExecutor.ExecutionException;
+    void rollbackTransaction(GlobalTransaction tx, Throwable ex)
+        throws TransactionException, TransactionalExecutor.ExecutionException;
 
     GlobalTransaction beginTransaction(TransactionInfo txInfo) throws TransactionalExecutor.ExecutionException;
 
-    void reportTransaction(GlobalTransaction tx, GlobalStatus globalStatus) throws TransactionalExecutor.ExecutionException;
+    GlobalTransaction reloadTransaction(String xid)
+        throws TransactionalExecutor.ExecutionException, TransactionException;
+
+    void reportTransaction(GlobalTransaction tx, GlobalStatus globalStatus)
+        throws TransactionalExecutor.ExecutionException;
 
     long branchRegister(String resourceId, String clientId, String xid, String applicationData, String lockKeys)
-            throws TransactionException;
+        throws TransactionException;
 
     void branchReport(String xid, long branchId, BranchStatus status, String applicationData)
-            throws TransactionException;
+        throws TransactionException;
 
     int getTimeout();
 

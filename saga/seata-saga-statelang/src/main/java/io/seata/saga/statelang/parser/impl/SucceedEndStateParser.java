@@ -21,6 +21,7 @@ import io.seata.saga.statelang.parser.StateParser;
 
 /**
  * Succeed end state parser
+ *
  * @author lorne.cl
  */
 public class SucceedEndStateParser extends BaseStatePaser implements StateParser<SucceedEndState> {

@@ -15,6 +15,11 @@
  */
 package io.seata.saga.engine.pcext;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.common.exception.FrameworkException;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.pcext.interceptors.EndStateRouterInterceptor;
@@ -27,16 +32,12 @@ import io.seata.saga.proctrl.ProcessRouter;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * StateMachine ProcessRouter
  *
- * @see ProcessRouter
  * @author lorne.cl
+ * @see ProcessRouter
  */
 public class StateMachineProcessRouter implements ProcessRouter {
 
@@ -48,16 +49,16 @@ public class StateMachineProcessRouter implements ProcessRouter {
         StateInstruction stateInstruction = context.getInstruction(StateInstruction.class);
 
         State state;
-        if(stateInstruction.getTemporaryState() != null){
+        if (stateInstruction.getTemporaryState() != null) {
             state = stateInstruction.getTemporaryState();
             stateInstruction.setTemporaryState(null);
-        }
-        else{
-            StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
-            StateMachine stateMachine = stateMachineConfig.getStateMachineRepository().getStateMachine(stateInstruction.getStateMachineName(), stateInstruction.getTenantId());
+        } else {
+            StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+                DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+            StateMachine stateMachine = stateMachineConfig.getStateMachineRepository().getStateMachine(
+                stateInstruction.getStateMachineName(), stateInstruction.getTenantId());
             state = stateMachine.getStates().get(stateInstruction.getStateName());
         }
-
 
         String stateType = state.getType();
 
@@ -67,7 +68,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
 
         List<StateRouterInterceptor> interceptors = null;
         if (router instanceof InterceptibleStateRouter) {
-            interceptors = ((InterceptibleStateRouter) router).getInterceptors();
+            interceptors = ((InterceptibleStateRouter)router).getInterceptors();
         }
 
         List<StateRouterInterceptor> executedInterceptors = null;
@@ -96,7 +97,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
             }
 
             //if 'Succeed' or 'Fail' State did not configured, we must end the state machine
-            if(instruction == null && !stateInstruction.isEnd()){
+            if (instruction == null && !stateInstruction.isEnd()) {
                 EngineUtils.endStateMachine(context);
             }
         }
@@ -104,8 +105,8 @@ public class StateMachineProcessRouter implements ProcessRouter {
         return instruction;
     }
 
-    public void initDefaultStateRouters(){
-        if(this.stateRouters.size() == 0){
+    public void initDefaultStateRouters() {
+        if (this.stateRouters.size() == 0) {
             TaskStateRouter taskStateRouter = new TaskStateRouter();
             this.stateRouters.put(DomainConstants.STATE_TYPE_SERVICE_TASK, taskStateRouter);
             this.stateRouters.put(DomainConstants.STATE_TYPE_CHOICE, taskStateRouter);

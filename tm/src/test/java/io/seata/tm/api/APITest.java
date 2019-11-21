@@ -20,6 +20,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
+import io.seata.tm.api.transaction.RollbackRule;
 import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
@@ -196,6 +197,25 @@ public class APITest {
             Assertions.assertEquals(oex.getMessage(), oexMsg);
         }
     }
+
+    @Test
+    public void testGlobalReport() throws Exception {
+        RootContext.bind(DEFAULT_XID);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        tx.globalReport(tx.getStatus());
+
+        Assertions.assertThrows(IllegalStateException.class, () ->  tx.globalReport(null));
+        Assertions.assertThrows(IllegalStateException.class, () -> {
+            RootContext.unbind();
+            GlobalTransaction tx2 = GlobalTransactionContext.getCurrentOrCreate();
+            tx2.globalReport(tx2.getStatus());
+        });
+
+        Assertions.assertEquals(tx.getStatus(), GlobalStatus.Begin);
+        Assertions.assertNotNull(tx.getXid());
+
+    }
+
 
     private static abstract class AbstractTransactionalExecutor implements TransactionalExecutor {
 

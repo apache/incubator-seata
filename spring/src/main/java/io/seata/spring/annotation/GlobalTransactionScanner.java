@@ -217,7 +217,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 interceptor = null;
                 //check TCC proxy
                 if (TCCBeanParserUtils.isTccAutoProxy(bean, beanName, applicationContext)) {
-                    //TCC interceptor， proxy bean of sofa:reference/dubbo:reference, and LocalTCC
+                    //TCC interceptor, proxy bean of sofa:reference/dubbo:reference, and LocalTCC
                     interceptor = new TccActionInterceptor(TCCBeanParserUtils.getRemotingDesc(beanName));
                 } else {
                     Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
@@ -305,10 +305,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) throws BeansException {
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof DataSource && !(bean instanceof DataSourceProxy) && ConfigurationFactory.getInstance().getBoolean(DATASOURCE_AUTOPROXY, false)) {
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Auto proxy of  [" + beanName + "]");
+                LOGGER.info("Auto proxy of [{}]", beanName);
             }
             DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
             return Enhancer.create(bean.getClass(), (org.springframework.cglib.proxy.MethodInterceptor) (o, method, args, methodProxy) -> {
@@ -327,6 +327,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 }
             });
         }
-        return bean;
+        return super.postProcessAfterInitialization(bean, beanName);
     }
 }
