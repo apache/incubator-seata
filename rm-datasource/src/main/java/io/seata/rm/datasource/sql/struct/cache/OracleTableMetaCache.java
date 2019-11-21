@@ -24,6 +24,7 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
 
 import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -88,10 +89,10 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
-        if(tableName.contains("\"")){
+        if (tableName.contains("\"")) {
             tableName = tableName.replace("\"", "");
             schemaName = schemaName.replace("\"", "");
-        }else{
+        } else {
             tableName = tableName.toUpperCase();
         }
 

@@ -39,22 +39,18 @@ public class GlobalBeginResponseConvertor implements PbConvertor<GlobalBeginResp
 
         final String msg = globalBeginResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            msg == null ? "" : msg)
-            .setResultCode(ResultCodeProto.valueOf(globalBeginResponse.getResultCode().name())).setAbstractMessage(
-                abstractMessage).build();
+            msg == null ? "" : msg).setResultCode(ResultCodeProto.valueOf(globalBeginResponse.getResultCode().name()))
+            .setAbstractMessage(abstractMessage).build();
 
         final AbstractTransactionResponseProto abstractTransactionRequestProto = AbstractTransactionResponseProto
-            .newBuilder()
-            .setAbstractResultMessage(abstractResultMessageProto)
-            .setTransactionExceptionCode(
+            .newBuilder().setAbstractResultMessage(abstractResultMessageProto).setTransactionExceptionCode(
                 TransactionExceptionCodeProto.valueOf(globalBeginResponse.getTransactionExceptionCode().name()))
             .build();
 
         final String extraData = globalBeginResponse.getExtraData();
         GlobalBeginResponseProto result = GlobalBeginResponseProto.newBuilder().setAbstractTransactionResponse(
-            abstractTransactionRequestProto)
-            .setExtraData(extraData == null ? "" : extraData)
-            .setXid(globalBeginResponse.getXid()).build();
+            abstractTransactionRequestProto).setExtraData(extraData == null ? "" : extraData).setXid(
+            globalBeginResponse.getXid()).build();
         return result;
     }
 
@@ -62,18 +58,15 @@ public class GlobalBeginResponseConvertor implements PbConvertor<GlobalBeginResp
     public GlobalBeginResponse convert2Model(GlobalBeginResponseProto globalBeginResponseProto) {
         GlobalBeginResponse branchCommitResponse = new GlobalBeginResponse();
         branchCommitResponse.setXid(globalBeginResponseProto.getXid());
-        branchCommitResponse.setExtraData(
-            globalBeginResponseProto.getExtraData());
+        branchCommitResponse.setExtraData(globalBeginResponseProto.getExtraData());
         branchCommitResponse.setMsg(
-            globalBeginResponseProto.getAbstractTransactionResponse()
-                .getAbstractResultMessage().getMsg());
+            globalBeginResponseProto.getAbstractTransactionResponse().getAbstractResultMessage().getMsg());
         branchCommitResponse.setResultCode(ResultCode.valueOf(
-            globalBeginResponseProto.getAbstractTransactionResponse()
-                .getAbstractResultMessage().getResultCode().name()));
+            globalBeginResponseProto.getAbstractTransactionResponse().getAbstractResultMessage().getResultCode()
+                .name()));
 
-        branchCommitResponse.setTransactionExceptionCode(TransactionExceptionCode.valueOf(
-            globalBeginResponseProto.getAbstractTransactionResponse()
-                .getTransactionExceptionCode().name()));
+        branchCommitResponse.setTransactionExceptionCode(TransactionExceptionCode
+            .valueOf(globalBeginResponseProto.getAbstractTransactionResponse().getTransactionExceptionCode().name()));
         return branchCommitResponse;
     }
 }

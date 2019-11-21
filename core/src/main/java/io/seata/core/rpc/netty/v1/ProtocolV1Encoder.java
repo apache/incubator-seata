@@ -34,7 +34,7 @@ import java.util.Map;
  * 0     1     2     3     4     5     6     7     8     9    10     11    12    13    14    15    16
  * +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
  * |   magic   |Proto|     Full length       |    Head   | Msg |Seria|Compr|     RequestId         |
- * |   code    |colVer|    （head+body)      |   Length  |Type |lizer|ess  |                       |
+ * |   code    |colVer|    (head+body)      |   Length  |Type |lizer|ess  |                       |
  * +-----------+-----------+-----------+-----------+-----------+-----------+-----------+-----------+
  * |                                                                                               |
  * |                                   Head Map [Optional]                                         |

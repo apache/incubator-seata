@@ -18,39 +18,38 @@ package io.seata.rm.datasource.undo;
 /**
  * The Type UndoExecutorHolder
  *
- * @author: Zhibei Hao丶
+ * @author: Zhibei Hao
  */
-public interface UndoExecutorHolder
-{
+public interface UndoExecutorHolder {
 
-  /**
-   * get the specific Insert UndoExecutor by sqlUndoLog
-   *
-   * @param sqlUndoLog the sqlUndoLog
-   * @return the specific UndoExecutor
-   */
-  AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog);
+    /**
+     * get the specific Insert UndoExecutor by sqlUndoLog
+     *
+     * @param sqlUndoLog the sqlUndoLog
+     * @return the specific UndoExecutor
+     */
+    AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog);
 
-  /**
-   * get the specific Update UndoExecutor by sqlUndoLog
-   *
-   * @param sqlUndoLog the sqlUndoLog
-   * @return the specific UndoExecutor
-   */
-  AbstractUndoExecutor getUpdateExecutor(SQLUndoLog sqlUndoLog);
+    /**
+     * get the specific Update UndoExecutor by sqlUndoLog
+     *
+     * @param sqlUndoLog the sqlUndoLog
+     * @return the specific UndoExecutor
+     */
+    AbstractUndoExecutor getUpdateExecutor(SQLUndoLog sqlUndoLog);
 
-  /**
-   * get the specific Delete UndoExecutor by sqlUndoLog
-   *
-   * @param sqlUndoLog the sqlUndoLog
-   * @return the specific UndoExecutor
-   */
-  AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog);
+    /**
+     * get the specific Delete UndoExecutor by sqlUndoLog
+     *
+     * @param sqlUndoLog the sqlUndoLog
+     * @return the specific UndoExecutor
+     */
+    AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog);
 
-  /**
-   * get the SQL type of the current UndoExecutorHolder
-   *
-   * @return the SQL type string
-   */
-  String getDbType();
+    /**
+     * get the SQL type of the current UndoExecutorHolder
+     *
+     * @return the SQL type string
+     */
+    String getDbType();
 }

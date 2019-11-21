@@ -75,7 +75,6 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static volatile EurekaRegistryServiceImpl instance;
     private static volatile EurekaClient eurekaClient;
 
-
     private EurekaRegistryServiceImpl() {
     }
 
@@ -155,7 +154,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private void refreshCluster() {
         List<Application> applications = getEurekaClient(false).getApplications().getRegisteredApplications();
 
-        if (CollectionUtils.isEmpty(applications)){
+        if (CollectionUtils.isEmpty(applications)) {
             clusterAddressMap.clear();
 
             if (LOGGER.isDebugEnabled()) {
@@ -254,13 +253,11 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     }
 
     private String getEurekaApplicationFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-            + CLUSTER;
+        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR + CLUSTER;
     }
 
     private String getEurekaInstanceWeightFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-            + REGISTRY_WEIGHT;
+        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR + REGISTRY_WEIGHT;
     }
 
 }

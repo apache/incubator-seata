@@ -15,7 +15,6 @@
  */
 package io.seata.core.store;
 
-
 import io.seata.common.util.StringUtils;
 
 import java.util.Date;
@@ -249,7 +248,7 @@ public class GlobalTransactionDO {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return StringUtils.toString(this);
     }
 

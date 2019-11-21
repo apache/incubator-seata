@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo.oracle;
 
 import com.alibaba.druid.util.JdbcConstants;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -30,6 +31,7 @@ import java.util.List;
 
 /**
  * The type oracle undo update executor.
+ *
  * @author ccg
  * @date 2019/3/25
  */
@@ -37,14 +39,15 @@ public class OracleUndoUpdateExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (beforeImageRows == null || beforeImageRows.size() == 0) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG"); // TODO
         }
         Row row = beforeImageRows.get(0);
-        StringBuilder mainSQL = new StringBuilder("UPDATE ").append(keywordChecker.checkAndReplace(sqlUndoLog.getTableName())).append(" SET ");
+        StringBuilder mainSQL = new StringBuilder("UPDATE ").append(
+            keywordChecker.checkAndReplace(sqlUndoLog.getTableName())).append(" SET ");
         StringBuilder where = new StringBuilder(" WHERE ");
         boolean first = true;
         for (Field field : row.getFields()) {

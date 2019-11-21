@@ -50,10 +50,7 @@ public class MergedWarpMessageConvertor implements PbConvertor<MergedWarpMessage
         }
 
         MergedWarpMessageProto mergedWarpMessageProto = MergedWarpMessageProto.newBuilder().setAbstractMessage(
-            abstractMessage)
-            .addAllMsgs(lists)
-            .addAllMsgIds(mergedWarpMessage.msgIds)
-            .build();
+            abstractMessage).addAllMsgs(lists).addAllMsgIds(mergedWarpMessage.msgIds).build();
 
         return mergedWarpMessageProto;
 
@@ -83,8 +80,7 @@ public class MergedWarpMessageConvertor implements PbConvertor<MergedWarpMessage
         return result;
     }
 
-    private static String getTypeNameFromTypeUrl(
-        java.lang.String typeUrl) {
+    private static String getTypeNameFromTypeUrl(java.lang.String typeUrl) {
         int pos = typeUrl.lastIndexOf('/');
         return pos == -1 ? "" : typeUrl.substring(pos + 1);
     }

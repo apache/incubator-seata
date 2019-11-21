@@ -37,20 +37,16 @@ public class BranchReportRequestConvertor implements PbConvertor<BranchReportReq
             MessageTypeProto.forNumber(typeCode)).build();
 
         final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
-            .newBuilder().setAbstractMessage(
-                abstractMessage).build();
+            .newBuilder().setAbstractMessage(abstractMessage).build();
 
         final String applicationData = branchReportRequest.getApplicationData();
         final String resourceId = branchReportRequest.getResourceId();
         BranchReportRequestProto result = BranchReportRequestProto.newBuilder().setAbstractTransactionRequest(
-            abstractTransactionRequestProto)
-            .setXid(branchReportRequest.getXid())
-            .setBranchId(branchReportRequest.getBranchId())
-            .setBranchType(BranchTypeProto.valueOf(branchReportRequest.getBranchType().name()))
-            .setApplicationData(applicationData == null ? "" : applicationData)
-            .setResourceId(resourceId == null ? "" : resourceId)
-            .setStatus(BranchStatusProto.valueOf(branchReportRequest.getStatus().name()))
-            .build();
+            abstractTransactionRequestProto).setXid(branchReportRequest.getXid()).setBranchId(
+            branchReportRequest.getBranchId()).setBranchType(
+            BranchTypeProto.valueOf(branchReportRequest.getBranchType().name())).setApplicationData(
+            applicationData == null ? "" : applicationData).setResourceId(resourceId == null ? "" : resourceId)
+            .setStatus(BranchStatusProto.valueOf(branchReportRequest.getStatus().name())).build();
 
         return result;
     }
@@ -58,13 +54,11 @@ public class BranchReportRequestConvertor implements PbConvertor<BranchReportReq
     @Override
     public BranchReportRequest convert2Model(BranchReportRequestProto branchReportRequestProto) {
         BranchReportRequest branchReportRequest = new BranchReportRequest();
-        branchReportRequest.setApplicationData(
-            branchReportRequestProto.getApplicationData());
+        branchReportRequest.setApplicationData(branchReportRequestProto.getApplicationData());
         branchReportRequest.setBranchId(branchReportRequestProto.getBranchId());
         branchReportRequest.setResourceId(branchReportRequestProto.getResourceId());
         branchReportRequest.setXid(branchReportRequestProto.getXid());
-        branchReportRequest.setBranchType(
-            BranchType.valueOf(branchReportRequestProto.getBranchType().name()));
+        branchReportRequest.setBranchType(BranchType.valueOf(branchReportRequestProto.getBranchType().name()));
         branchReportRequest.setStatus(BranchStatus.valueOf(branchReportRequestProto.getStatus().name()));
         return branchReportRequest;
     }

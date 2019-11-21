@@ -42,20 +42,17 @@ public class GlobalCommitResponseConvertor implements PbConvertor<GlobalCommitRe
 
         final String msg = globalCommitResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            msg == null ? "" : msg)
-            .setResultCode(ResultCodeProto.valueOf(globalCommitResponse.getResultCode().name())).setAbstractMessage(
-                abstractMessage).build();
+            msg == null ? "" : msg).setResultCode(ResultCodeProto.valueOf(globalCommitResponse.getResultCode().name()))
+            .setAbstractMessage(abstractMessage).build();
 
         AbstractTransactionResponseProto abstractTransactionResponseProto = AbstractTransactionResponseProto
-            .newBuilder().setAbstractResultMessage(abstractResultMessageProto)
-            .setTransactionExceptionCode(
+            .newBuilder().setAbstractResultMessage(abstractResultMessageProto).setTransactionExceptionCode(
                 TransactionExceptionCodeProto.valueOf(globalCommitResponse.getTransactionExceptionCode().name()))
             .build();
 
         AbstractGlobalEndResponseProto abstractGlobalEndResponseProto = AbstractGlobalEndResponseProto.newBuilder()
-            .setAbstractTransactionResponse(abstractTransactionResponseProto)
-            .setGlobalStatus(GlobalStatusProto.valueOf(globalCommitResponse.getGlobalStatus().name()))
-            .build();
+            .setAbstractTransactionResponse(abstractTransactionResponseProto).setGlobalStatus(
+                GlobalStatusProto.valueOf(globalCommitResponse.getGlobalStatus().name())).build();
 
         GlobalCommitResponseProto result = GlobalCommitResponseProto.newBuilder().setAbstractGlobalEndResponse(
             abstractGlobalEndResponseProto).build();
@@ -70,12 +67,11 @@ public class GlobalCommitResponseConvertor implements PbConvertor<GlobalCommitRe
             .getAbstractGlobalEndResponse();
         AbstractTransactionResponseProto abstractResultMessage = abstractGlobalEndResponse
             .getAbstractTransactionResponse();
-        branchRegisterResponse.setMsg(
-            abstractResultMessage.getAbstractResultMessage().getMsg());
+        branchRegisterResponse.setMsg(abstractResultMessage.getAbstractResultMessage().getMsg());
         branchRegisterResponse.setResultCode(
             ResultCode.valueOf(abstractResultMessage.getAbstractResultMessage().getResultCode().name()));
-        branchRegisterResponse.setTransactionExceptionCode(TransactionExceptionCode.valueOf(
-            abstractResultMessage.getTransactionExceptionCode().name()));
+        branchRegisterResponse.setTransactionExceptionCode(
+            TransactionExceptionCode.valueOf(abstractResultMessage.getTransactionExceptionCode().name()));
         branchRegisterResponse.setGlobalStatus(
             GlobalStatus.valueOf(abstractGlobalEndResponse.getGlobalStatus().name()));
 

@@ -69,7 +69,8 @@ public class AsyncWorker implements ResourceManagerInbound {
          * @param resourceId      the resource id
          * @param applicationData the application data
          */
-        public Phase2Context(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) {
+        public Phase2Context(BranchType branchType, String xid, long branchId, String resourceId,
+                             String applicationData) {
             this.xid = xid;
             this.branchId = branchId;
             this.resourceId = resourceId;
@@ -101,17 +102,19 @@ public class AsyncWorker implements ResourceManagerInbound {
     }
 
     private static int ASYNC_COMMIT_BUFFER_LIMIT = ConfigurationFactory.getInstance().getInt(
-            CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, 10000);
+        CLIENT_ASYNC_COMMIT_BUFFER_LIMIT, 10000);
 
-    private static final BlockingQueue<Phase2Context> ASYNC_COMMIT_BUFFER = new LinkedBlockingQueue<>(ASYNC_COMMIT_BUFFER_LIMIT);
-
+    private static final BlockingQueue<Phase2Context> ASYNC_COMMIT_BUFFER = new LinkedBlockingQueue<>(
+        ASYNC_COMMIT_BUFFER_LIMIT);
 
     private static ScheduledExecutorService timerExecutor;
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
+                                     String applicationData) throws TransactionException {
         if (!ASYNC_COMMIT_BUFFER.offer(new Phase2Context(branchType, xid, branchId, resourceId, applicationData))) {
-            LOGGER.warn("Async commit buffer is FULL. Rejected branch [" + branchId + "/" + xid + "] will be handled by housekeeping later.");
+            LOGGER.warn("Async commit buffer is FULL. Rejected branch [" + branchId + "/" + xid
+                + "] will be handled by housekeeping later.");
         }
         return BranchStatus.PhaseTwo_Committed;
     }
@@ -121,8 +124,7 @@ public class AsyncWorker implements ResourceManagerInbound {
      */
     public synchronized void init() {
         LOGGER.info("Async Commit Buffer Limit: " + ASYNC_COMMIT_BUFFER_LIMIT);
-        timerExecutor = new ScheduledThreadPoolExecutor(1,
-                new NamedThreadFactory("AsyncWorker", 1, true));
+        timerExecutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("AsyncWorker", 1, true));
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -160,7 +162,8 @@ public class AsyncWorker implements ResourceManagerInbound {
             DataSourceProxy dataSourceProxy;
             try {
                 try {
-                    DataSourceManager resourceManager = (DataSourceManager) DefaultResourceManager.get().getResourceManager(BranchType.AT);
+                    DataSourceManager resourceManager = (DataSourceManager)DefaultResourceManager.get()
+                        .getResourceManager(BranchType.AT);
                     dataSourceProxy = resourceManager.get(entry.getKey());
                     if (dataSourceProxy == null) {
                         throw new ShouldNeverHappenException("Failed to find resource on " + entry.getKey());
@@ -177,9 +180,10 @@ public class AsyncWorker implements ResourceManagerInbound {
                     xids.add(commitContext.xid);
                     branchIds.add(commitContext.branchId);
                     int maxSize = xids.size() > branchIds.size() ? xids.size() : branchIds.size();
-                    if(maxSize == UNDOLOG_DELETE_LIMIT_SIZE){
+                    if (maxSize == UNDOLOG_DELETE_LIMIT_SIZE) {
                         try {
-                            UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).batchDeleteUndoLog(xids, branchIds, conn);
+                            UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).batchDeleteUndoLog(
+                                xids, branchIds, conn);
                         } catch (Exception ex) {
                             LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                         }
@@ -193,8 +197,9 @@ public class AsyncWorker implements ResourceManagerInbound {
                 }
 
                 try {
-                    UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).batchDeleteUndoLog(xids, branchIds, conn);
-                }catch (Exception ex) {
+                    UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).batchDeleteUndoLog(xids,
+                        branchIds, conn);
+                } catch (Exception ex) {
                     LOGGER.warn("Failed to batch delete undo log [" + branchIds + "/" + xids + "]", ex);
                 }
 
@@ -211,7 +216,8 @@ public class AsyncWorker implements ResourceManagerInbound {
     }
 
     @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
+                                       String applicationData) throws TransactionException {
         throw new NotSupportYetException();
 
     }

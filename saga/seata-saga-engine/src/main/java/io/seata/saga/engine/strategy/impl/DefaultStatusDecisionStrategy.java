@@ -168,7 +168,7 @@ public class DefaultStatusDecisionStrategy implements StatusDecisionStrategy {
             decideMachineCompensateStatus(stateMachineInstance, compensationHolder);
         } else {
             Object failEndStateFlag = context.getVariable(DomainConstants.VAR_NAME_FAIL_END_STATE_FLAG);
-            boolean isComeFromFailEndState = (failEndStateFlag != null && (Boolean)failEndStateFlag);
+            boolean isComeFromFailEndState = failEndStateFlag != null && (Boolean)failEndStateFlag;
             decideMachineForwardExecutionStatus(stateMachineInstance, exp, isComeFromFailEndState);
         }
 

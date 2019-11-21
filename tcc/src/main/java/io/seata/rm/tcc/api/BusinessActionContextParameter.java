@@ -21,7 +21,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * the TCC parameters that need to be passed to  the BusinessActivityContext；
+ * the TCC parameters that need to be passed to  the BusinessActivityContext;
  * <p>
  * add this annotation on the parameters of the try method, and the parameters will be passed to  the
  * BusinessActivityContext

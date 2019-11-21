@@ -64,7 +64,7 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
-        Class<?> targetClass = (methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis()) : null);
+        Class<?> targetClass = methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis()) : null;
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
         final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
@@ -158,8 +158,7 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
     }
 
     private String formatMethod(Method method) {
-        StringBuilder sb = new StringBuilder(method.getName())
-                .append("(");
+        StringBuilder sb = new StringBuilder(method.getName()).append("(");
 
         Class<?>[] params = method.getParameterTypes();
         int in = 0;

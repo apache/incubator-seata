@@ -35,16 +35,13 @@ public class UndoLogDeleteRequestConvertor implements PbConvertor<UndoLogDeleteR
             MessageTypeProto.forNumber(typeCode)).build();
 
         final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
-            .newBuilder().setAbstractMessage(
-                abstractMessage).build();
+            .newBuilder().setAbstractMessage(abstractMessage).build();
 
-        final UndoLogDeleteRequestProto undoLogDeleteRequestProto = UndoLogDeleteRequestProto
-            .newBuilder()
-            .setAbstractTransactionRequest(abstractTransactionRequestProto)
-            .setSaveDays(undoLogDeleteRequest.getSaveDays())
-            .setBranchType(BranchTypeProto.valueOf(undoLogDeleteRequest.getBranchType().name()))
-            .setResourceId(undoLogDeleteRequest.getResourceId())
-            .build();
+        final UndoLogDeleteRequestProto undoLogDeleteRequestProto = UndoLogDeleteRequestProto.newBuilder()
+            .setAbstractTransactionRequest(abstractTransactionRequestProto).setSaveDays(
+                undoLogDeleteRequest.getSaveDays()).setBranchType(
+                BranchTypeProto.valueOf(undoLogDeleteRequest.getBranchType().name())).setResourceId(
+                undoLogDeleteRequest.getResourceId()).build();
 
         return undoLogDeleteRequestProto;
     }

@@ -34,14 +34,11 @@ public class GlobalBeginRequestConvertor implements PbConvertor<GlobalBeginReque
             MessageTypeProto.forNumber(typeCode)).build();
 
         final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
-            .newBuilder().setAbstractMessage(
-                abstractMessage).build();
+            .newBuilder().setAbstractMessage(abstractMessage).build();
 
-        GlobalBeginRequestProto result = GlobalBeginRequestProto.newBuilder()
-            .setTimeout(globalBeginRequest.getTimeout())
-            .setTransactionName(globalBeginRequest.getTransactionName())
-            .setAbstractTransactionRequest(abstractTransactionRequestProto)
-            .build();
+        GlobalBeginRequestProto result = GlobalBeginRequestProto.newBuilder().setTimeout(
+            globalBeginRequest.getTimeout()).setTransactionName(globalBeginRequest.getTransactionName())
+            .setAbstractTransactionRequest(abstractTransactionRequestProto).build();
         return result;
     }
 

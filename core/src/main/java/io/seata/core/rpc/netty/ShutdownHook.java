@@ -114,10 +114,10 @@ public class ShutdownHook extends Thread {
 
         @Override
         public boolean equals(Object other) {
-            if(this == other){
+            if (this == other) {
                 return true;
             }
-            if(!(other instanceof DisposablePriorityWrapper)){
+            if (!(other instanceof DisposablePriorityWrapper)) {
                 return false;
             }
             DisposablePriorityWrapper dpw = (DisposablePriorityWrapper)other;

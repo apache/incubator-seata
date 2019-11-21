@@ -71,7 +71,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                             stateMachine.getContent());
                         if (parsedStatMachine == null) {
                             throw new RuntimeException(
-                                "Parse State Language failed, stateMachineId：" + stateMachine.getId() + ", name:"
+                                "Parse State Language failed, stateMachineId:" + stateMachine.getId() + ", name:"
                                     + stateMachine.getName());
                         }
                         stateMachine.setStartState(parsedStatMachine.getStartState());
@@ -106,7 +106,7 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                             stateMachine.getContent());
                         if (parsedStatMachine == null) {
                             throw new RuntimeException(
-                                "Parse State Language failed, stateMachineId：" + stateMachine.getId() + ", name:"
+                                "Parse State Language failed, stateMachineId:" + stateMachine.getId() + ", name:"
                                     + stateMachine.getName());
                         }
                         stateMachine.setStartState(parsedStatMachine.getStartState());

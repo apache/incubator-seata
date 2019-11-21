@@ -16,44 +16,40 @@
 package io.seata.rm.datasource.sql.druid.oracle;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
+
 import io.seata.rm.datasource.sql.SQLOperateRecognizerHolder;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 
 /**
  * The Type OracleOperateRecognizerHolder
  *
- * @author: Zhibei Hao丶
+ * @author: Zhibei Hao
  */
-public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder
-{
-  private final String ORACLE = "oracle";
-  @Override
-  public SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast)
-  {
-    return new OracleDeleteRecognizer(sql,ast);
-  }
+public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder {
+    private static final String ORACLE = "oracle";
 
-  @Override
-  public SQLRecognizer getInsertRecognizer(String sql, SQLStatement ast)
-  {
-    return new OracleInsertRecognizer(sql,ast);
-  }
+    @Override
+    public SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast) {
+        return new OracleDeleteRecognizer(sql, ast);
+    }
 
-  @Override
-  public SQLRecognizer getUpdateRecognizer(String sql, SQLStatement ast)
-  {
-    return new OracleUpdateRecognizer(sql,ast);
-  }
+    @Override
+    public SQLRecognizer getInsertRecognizer(String sql, SQLStatement ast) {
+        return new OracleInsertRecognizer(sql, ast);
+    }
 
-  @Override
-  public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast)
-  {
-    return new OracleSelectForUpdateRecognizer(sql,ast);
-  }
+    @Override
+    public SQLRecognizer getUpdateRecognizer(String sql, SQLStatement ast) {
+        return new OracleUpdateRecognizer(sql, ast);
+    }
 
-  @Override
-  public String getDbType()
-  {
-    return ORACLE;
-  }
+    @Override
+    public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast) {
+        return new OracleSelectForUpdateRecognizer(sql, ast);
+    }
+
+    @Override
+    public String getDbType() {
+        return ORACLE;
+    }
 }

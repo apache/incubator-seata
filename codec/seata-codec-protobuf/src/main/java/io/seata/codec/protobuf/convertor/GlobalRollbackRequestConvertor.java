@@ -34,15 +34,12 @@ public class GlobalRollbackRequestConvertor implements PbConvertor<GlobalRollbac
             MessageTypeProto.forNumber(typeCode)).build();
 
         final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
-            .newBuilder().setAbstractMessage(
-                abstractMessage).build();
+            .newBuilder().setAbstractMessage(abstractMessage).build();
 
         final String extraData = globalRollbackRequest.getExtraData();
         AbstractGlobalEndRequestProto abstractGlobalEndRequestProto = AbstractGlobalEndRequestProto.newBuilder()
-            .setAbstractTransactionRequest(abstractTransactionRequestProto)
-            .setXid(globalRollbackRequest.getXid())
-            .setExtraData(extraData==null?"":extraData)
-            .build();
+            .setAbstractTransactionRequest(abstractTransactionRequestProto).setXid(globalRollbackRequest.getXid())
+            .setExtraData(extraData == null ? "" : extraData).build();
 
         GlobalRollbackRequestProto result = GlobalRollbackRequestProto.newBuilder().setAbstractGlobalEndRequest(
             abstractGlobalEndRequestProto).build();

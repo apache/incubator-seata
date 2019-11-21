@@ -42,28 +42,21 @@ public class BranchCommitResponseConvertor implements PbConvertor<BranchCommitRe
 
         final String msg = branchCommitResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            msg == null ? "" : msg)
-            .setResultCode(ResultCodeProto.valueOf(branchCommitResponse.getResultCode().name())).setAbstractMessage(
-                abstractMessage).build();
+            msg == null ? "" : msg).setResultCode(ResultCodeProto.valueOf(branchCommitResponse.getResultCode().name()))
+            .setAbstractMessage(abstractMessage).build();
 
         final AbstractTransactionResponseProto abstractTransactionRequestProto = AbstractTransactionResponseProto
-            .newBuilder()
-            .setAbstractResultMessage(abstractResultMessageProto)
-            .setTransactionExceptionCode(
+            .newBuilder().setAbstractResultMessage(abstractResultMessageProto).setTransactionExceptionCode(
                 TransactionExceptionCodeProto.valueOf(branchCommitResponse.getTransactionExceptionCode().name()))
             .build();
 
-        final AbstractBranchEndResponseProto abstractBranchEndResponse = AbstractBranchEndResponseProto
-            .newBuilder().
-                setAbstractTransactionResponse(abstractTransactionRequestProto)
-            .setXid(branchCommitResponse.getXid())
-            .setBranchId(branchCommitResponse.getBranchId())
-            .setBranchStatus(BranchStatusProto.forNumber(branchCommitResponse.getBranchStatus().getCode()))
-            .build();
+        final AbstractBranchEndResponseProto abstractBranchEndResponse = AbstractBranchEndResponseProto.newBuilder().
+            setAbstractTransactionResponse(abstractTransactionRequestProto).setXid(branchCommitResponse.getXid())
+            .setBranchId(branchCommitResponse.getBranchId()).setBranchStatus(
+                BranchStatusProto.forNumber(branchCommitResponse.getBranchStatus().getCode())).build();
 
-        BranchCommitResponseProto result = BranchCommitResponseProto.newBuilder()
-            .setAbstractBranchEndResponse(abstractBranchEndResponse)
-            .build();
+        BranchCommitResponseProto result = BranchCommitResponseProto.newBuilder().setAbstractBranchEndResponse(
+            abstractBranchEndResponse).build();
         return result;
     }
 

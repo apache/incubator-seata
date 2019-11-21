@@ -68,7 +68,7 @@ public class RMHandlerAT extends AbstractRMHandler {
                 }
             } while (deleteRows == LIMIT_ROWS);
         } catch (Exception e) {
-            LOGGER.error("Failed to delete expired undo_log，error:{}", e.getMessage(), e);
+            LOGGER.error("Failed to delete expired undo_log, error:{}", e.getMessage(), e);
         } finally {
             if (conn != null) {
                 try {

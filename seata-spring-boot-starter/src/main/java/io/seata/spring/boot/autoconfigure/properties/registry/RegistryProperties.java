@@ -28,7 +28,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_PREFI
 @ConfigurationProperties(prefix = REGISTRY_PREFIX)
 public class RegistryProperties {
     /**
-     * file 、nacos 、eureka、redis、zk、consul、etcd3、sofa
+     * file, nacos, eureka, redis, zk, consul, etcd3, sofa
      */
     private String type = "file";
 

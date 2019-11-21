@@ -28,6 +28,7 @@ import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateSetItem;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlUpdateStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
+
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLType;
@@ -50,7 +51,7 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
      */
     public MySQLUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (MySqlUpdateStatement) ast;
+        this.ast = (MySqlUpdateStatement)ast;
     }
 
     @Override
@@ -65,12 +66,12 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
         for (SQLUpdateSetItem updateSetItem : updateSetItems) {
             SQLExpr expr = updateSetItem.getColumn();
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr) expr).getName());
+                list.add(((SQLIdentifierExpr)expr).getName());
             } else if (expr instanceof SQLPropertyExpr) {
                 // This is alias case, like UPDATE xxx_tbl a SET a.name = ? WHERE a.id = ?
-                SQLExpr owner = ((SQLPropertyExpr) expr).getOwner();
+                SQLExpr owner = ((SQLPropertyExpr)expr).getOwner();
                 if (owner instanceof SQLIdentifierExpr) {
-                    list.add((((SQLIdentifierExpr) owner).getName() + "." + ((SQLPropertyExpr) expr).getName()));
+                    list.add(((SQLIdentifierExpr)owner).getName() + "." + ((SQLPropertyExpr)expr).getName());
                 }
             } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
@@ -86,7 +87,7 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
         for (SQLUpdateSetItem updateSetItem : updateSetItems) {
             SQLExpr expr = updateSetItem.getValue();
             if (expr instanceof SQLValuableExpr) {
-                list.add(((SQLValuableExpr) expr).getValue());
+                list.add(((SQLValuableExpr)expr).getValue());
             } else if (expr instanceof SQLVariantRefExpr) {
                 list.add(new VMarker());
             } else {
@@ -97,7 +98,8 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
     }
 
     @Override
-    public String getWhereCondition(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(final ParametersHolder parametersHolder,
+                                    final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
     }
@@ -124,7 +126,7 @@ public class MySQLUpdateRecognizer extends BaseMySQLRecognizer implements SQLUpd
                 return false;
             }
         };
-        SQLExprTableSource tableSource = (SQLExprTableSource) ast.getTableSource();
+        SQLExprTableSource tableSource = (SQLExprTableSource)ast.getTableSource();
         visitor.visit(tableSource);
         return sb.toString();
     }

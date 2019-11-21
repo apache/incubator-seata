@@ -22,33 +22,28 @@ import io.seata.rm.datasource.undo.UndoExecutorHolder;
 /**
  * The Type OracleUndoExecutorHolder
  *
- * @author: Zhibei Hao丶
+ * @author: Zhibei Hao
  */
-public class OracleUndoExecutorHolder implements UndoExecutorHolder
-{
-  private final String ORACLE = "oracle";
-  @Override
-  public AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog)
-  {
-    return new OracleUndoInsertExecutor(sqlUndoLog);
-  }
+public class OracleUndoExecutorHolder implements UndoExecutorHolder {
+    private static final String ORACLE = "oracle";
 
-  @Override
-  public AbstractUndoExecutor getUpdateExecutor(SQLUndoLog sqlUndoLog)
-  {
-    return new OracleUndoUpdateExecutor(sqlUndoLog);
-  }
+    @Override
+    public AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog) {
+        return new OracleUndoInsertExecutor(sqlUndoLog);
+    }
 
-  @Override
-  public AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog)
-  {
-    return new OracleUndoDeleteExecutor(sqlUndoLog);
-  }
+    @Override
+    public AbstractUndoExecutor getUpdateExecutor(SQLUndoLog sqlUndoLog) {
+        return new OracleUndoUpdateExecutor(sqlUndoLog);
+    }
 
+    @Override
+    public AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog) {
+        return new OracleUndoDeleteExecutor(sqlUndoLog);
+    }
 
-  @Override
-  public String getDbType()
-  {
-    return ORACLE;
-  }
+    @Override
+    public String getDbType() {
+        return ORACLE;
+    }
 }

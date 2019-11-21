@@ -40,19 +40,18 @@ public class GlobalLockQueryResponseConvertor
 
         final String msg = globalLockQueryResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            msg == null ? "" : msg)
-            .setResultCode(ResultCodeProto.valueOf(globalLockQueryResponse.getResultCode().name())).setAbstractMessage(
-                abstractMessage).build();
+            msg == null ? "" : msg).setResultCode(
+            ResultCodeProto.valueOf(globalLockQueryResponse.getResultCode().name())).setAbstractMessage(abstractMessage)
+            .build();
 
         AbstractTransactionResponseProto abstractTransactionResponseProto = AbstractTransactionResponseProto
-            .newBuilder().setAbstractResultMessage(abstractResultMessageProto)
-            .setTransactionExceptionCode(
+            .newBuilder().setAbstractResultMessage(abstractResultMessageProto).setTransactionExceptionCode(
                 TransactionExceptionCodeProto.valueOf(globalLockQueryResponse.getTransactionExceptionCode().name()))
             .build();
 
         GlobalLockQueryResponseProto result = GlobalLockQueryResponseProto.newBuilder().setLockable(
-            globalLockQueryResponse.isLockable())
-            .setAbstractTransactionResponse(abstractTransactionResponseProto).build();
+            globalLockQueryResponse.isLockable()).setAbstractTransactionResponse(abstractTransactionResponseProto)
+            .build();
 
         return result;
     }
@@ -64,11 +63,10 @@ public class GlobalLockQueryResponseConvertor
         AbstractTransactionResponseProto branchRegisterResponseProto = globalLockQueryResponseProto
             .getAbstractTransactionResponse();
         final AbstractResultMessageProto abstractResultMessage = branchRegisterResponseProto.getAbstractResultMessage();
-        branchRegisterResponse.setMsg(
-            abstractResultMessage.getMsg());
+        branchRegisterResponse.setMsg(abstractResultMessage.getMsg());
         branchRegisterResponse.setResultCode(ResultCode.valueOf(abstractResultMessage.getResultCode().name()));
-        branchRegisterResponse.setTransactionExceptionCode(TransactionExceptionCode.valueOf(
-            branchRegisterResponseProto.getTransactionExceptionCode().name()));
+        branchRegisterResponse.setTransactionExceptionCode(
+            TransactionExceptionCode.valueOf(branchRegisterResponseProto.getTransactionExceptionCode().name()));
         branchRegisterResponse.setLockable(globalLockQueryResponseProto.getLockable());
         return branchRegisterResponse;
     }

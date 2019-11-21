@@ -46,8 +46,8 @@ public class ExceptionSerializer implements Serializer<Exception, byte[]> {
                 oos.flush();
                 result = baos.toByteArray();
             } catch (IOException e) {
-                LOGGER.error("serializer failed：{}", o.getClass(), e);
-                throw (new RuntimeException("IO Create Error", e));
+                LOGGER.error("serializer failed: {}", o.getClass(), e);
+                throw new RuntimeException("IO Create Error", e);
             } finally {
                 if (oos != null) {
                     try {
@@ -81,11 +81,11 @@ public class ExceptionSerializer implements Serializer<Exception, byte[]> {
                 ois = new ObjectInputStream(bais);
                 result = ois.readObject();
             } catch (IOException e) {
-                LOGGER.error("deserialize failed：", e);
-                throw (new RuntimeException("IO Create Error", e));
+                LOGGER.error("deserialize failed:", e);
+                throw new RuntimeException("IO Create Error", e);
             } catch (ClassNotFoundException e) {
-                LOGGER.error("deserialize failed：", e);
-                throw (new RuntimeException("Cannot find specified class", e));
+                LOGGER.error("deserialize failed:", e);
+                throw new RuntimeException("Cannot find specified class", e);
             } finally {
                 if (ois != null) {
                     try {

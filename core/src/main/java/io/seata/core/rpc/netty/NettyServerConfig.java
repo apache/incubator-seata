@@ -53,7 +53,7 @@ public class NettyServerConfig extends NettyBaseConfig {
     /**
      * The Server channel clazz.
      */
-    public final Class<? extends ServerChannel> SERVER_CHANNEL_CLAZZ = NettyBaseConfig.SERVER_CHANNEL_CLAZZ;
+    public static final Class<? extends ServerChannel> SERVER_CHANNEL_CLAZZ = NettyBaseConfig.SERVER_CHANNEL_CLAZZ;
 
     /**
      * The constant DIRECT_BYTE_BUF_ALLOCATOR.

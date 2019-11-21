@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * TCC annotation, Define a TCC interface，which added on the try method
+ * TCC annotation, Define a TCC interface, which added on the try method
  *
  * @author zhangsen
  */

@@ -35,9 +35,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Select for update executor.
  *
- * @author sharajava
- *
  * @param <S> the type parameter
+ * @author sharajava
  */
 public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
 
@@ -75,7 +74,8 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
             } else if (dbmd.supportsSavepoints()) {
                 /*
                  * In order to release the local db lock when global lock conflict
-                 * create a save point if original auto commit was false, then use the save point here to release db lock during global lock checking if necessary
+                 * create a save point if original auto commit was false, then use the save point here to release db
+                 * lock during global lock checking if necessary
                  */
                 sp = conn.setSavepoint();
             } else {
@@ -133,7 +133,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         return rs;
     }
 
-    private String buildSelectSQL(ArrayList<List<Object>> paramAppenderList){
+    private String buildSelectSQL(ArrayList<List<Object>> paramAppenderList) {
         SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
         StringBuilder selectSQLAppender = new StringBuilder("SELECT ");
         selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));

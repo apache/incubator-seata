@@ -34,7 +34,7 @@ public interface TaskState extends State {
     String getCompensateState();
 
     /**
-     * Is this state is used to compensate an other state，default false
+     * Is this state is used to compensate an other state, default false
      *
      * @return
      */
@@ -88,7 +88,7 @@ public interface TaskState extends State {
         int getMaxAttempts();
 
         /**
-         * get BackoffRate，default 1
+         * get BackoffRate, default 1
          *
          * @return
          */

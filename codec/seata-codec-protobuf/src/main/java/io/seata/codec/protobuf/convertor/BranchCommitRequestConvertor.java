@@ -36,23 +36,18 @@ public class BranchCommitRequestConvertor implements PbConvertor<BranchCommitReq
             MessageTypeProto.forNumber(typeCode)).build();
 
         final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
-            .newBuilder().setAbstractMessage(
-                abstractMessage).build();
+            .newBuilder().setAbstractMessage(abstractMessage).build();
 
         final String applicationData = branchCommitRequest.getApplicationData();
-        final AbstractBranchEndRequestProto abstractBranchEndRequestProto = AbstractBranchEndRequestProto
-            .newBuilder().
-                setAbstractTransactionRequest(abstractTransactionRequestProto)
-            .setXid(branchCommitRequest.getXid())
-            .setBranchId(branchCommitRequest.getBranchId())
-            .setBranchType(BranchTypeProto.valueOf(branchCommitRequest.getBranchType().name()))
-            .setApplicationData(applicationData==null?"":applicationData)
-            .setResourceId(branchCommitRequest.getResourceId())
+        final AbstractBranchEndRequestProto abstractBranchEndRequestProto = AbstractBranchEndRequestProto.newBuilder().
+            setAbstractTransactionRequest(abstractTransactionRequestProto).setXid(branchCommitRequest.getXid())
+            .setBranchId(branchCommitRequest.getBranchId()).setBranchType(
+                BranchTypeProto.valueOf(branchCommitRequest.getBranchType().name())).setApplicationData(
+                applicationData == null ? "" : applicationData).setResourceId(branchCommitRequest.getResourceId())
             .build();
 
-        BranchCommitRequestProto result = BranchCommitRequestProto.newBuilder()
-            .setAbstractBranchEndRequest(abstractBranchEndRequestProto)
-            .build();
+        BranchCommitRequestProto result = BranchCommitRequestProto.newBuilder().setAbstractBranchEndRequest(
+            abstractBranchEndRequestProto).build();
         return result;
     }
 

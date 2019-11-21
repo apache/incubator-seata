@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo.oracle;
 
 import com.alibaba.druid.util.JdbcConstants;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -30,6 +31,7 @@ import java.util.List;
 
 /**
  * The type oracle undo delete executor.
+ *
  * @author ccg
  * @date 2019/3/25
  */
@@ -46,7 +48,7 @@ public class OracleUndoDeleteExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (beforeImageRows == null || beforeImageRows.size() == 0) {
@@ -81,7 +83,8 @@ public class OracleUndoDeleteExecutor extends AbstractUndoExecutor {
         insertColumns.append(keywordChecker.checkAndReplace(pkField.getName()));
         insertValues.append("?");
 
-        return "INSERT INTO " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()) + "(" + insertColumns.toString() + ") VALUES (" + insertValues.toString() + ")";
+        return "INSERT INTO " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()) + "(" + insertColumns
+            .toString() + ") VALUES (" + insertValues.toString() + ")";
     }
 
     @Override

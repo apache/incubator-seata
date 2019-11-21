@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.sql.struct.cache;
 
 import com.alibaba.druid.util.JdbcConstants;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
@@ -26,6 +27,7 @@ import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 
 import javax.sql.DataSource;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -116,7 +118,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
          * select xxx from xxx where catalog_name like ? and table_name like ?
          * in the second type we have to remove the "`"
          */
-        if(tableName.contains("`")){
+        if (tableName.contains("`")) {
             tableName = tableName.replace("`", "");
         }
 

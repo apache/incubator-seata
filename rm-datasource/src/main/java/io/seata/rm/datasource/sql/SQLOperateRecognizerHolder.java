@@ -20,52 +20,51 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 /**
  * The interface SQLOperateRecognizerHolder
  *
- * @author: Zhibei Hao丶
+ * @author: Zhibei Hao
  */
-public interface SQLOperateRecognizerHolder
-{
+public interface SQLOperateRecognizerHolder {
 
-  /**
-   * Get delete recognizer
-   *
-   * @param sql the sql
-   * @param ast the ast
-   * @return the delete recognizer
-   */
-  SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast);
+    /**
+     * Get delete recognizer
+     *
+     * @param sql the sql
+     * @param ast the ast
+     * @return the delete recognizer
+     */
+    SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast);
 
-  /**
-   * Get insert recognizer
-   *
-   * @param sql the sql
-   * @param ast the ast
-   * @return the insert recognizer
-   */
-  SQLRecognizer getInsertRecognizer(String sql, SQLStatement ast);
+    /**
+     * Get insert recognizer
+     *
+     * @param sql the sql
+     * @param ast the ast
+     * @return the insert recognizer
+     */
+    SQLRecognizer getInsertRecognizer(String sql, SQLStatement ast);
 
-  /**
-   * Get update recognizer
-   *
-   * @param sql the sql
-   * @param ast the ast
-   * @return the update recognizer
-   */
-  SQLRecognizer getUpdateRecognizer(String sql, SQLStatement ast);
+    /**
+     * Get update recognizer
+     *
+     * @param sql the sql
+     * @param ast the ast
+     * @return the update recognizer
+     */
+    SQLRecognizer getUpdateRecognizer(String sql, SQLStatement ast);
 
-  /**
-   * Get SelectForUpdate recognizer
-   *
-   * @param sql the sql
-   * @param ast the ast
-   * @return the SelectForUpdate recognizer
-   */
-  SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast);
+    /**
+     * Get SelectForUpdate recognizer
+     *
+     * @param sql the sql
+     * @param ast the ast
+     * @return the SelectForUpdate recognizer
+     */
+    SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast);
 
-  /**
-   * Get the SQL type of the current SQLOperateRecognizerHolder
-   *
-   * @return the db type string
-   */
-  String getDbType();
+    /**
+     * Get the SQL type of the current SQLOperateRecognizerHolder
+     *
+     * @return the db type string
+     */
+    String getDbType();
 
 }
