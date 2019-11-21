@@ -101,7 +101,7 @@ public class CompensationHolder {
 
                         String message = "StateMachineInstance[" + stateMachineInstance.getId() + ":" + stateMachine
                             .getName() + "] have a state [" + stateInstance.getName()
-                            + "] is a service for update data，but no compensateState found.";
+                            + "] is a service for update data, but no compensateState found.";
                         EngineExecutionException exception = ExceptionUtils.createEngineExecutionException(
                             FrameworkErrorCode.CompensationStateNotFound, message, stateMachineInstance, stateInstance);
 

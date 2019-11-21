@@ -36,13 +36,16 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
 
     /**
      * Instantiates a new oracle base recognizer
+     *
      * @param originalSql the original sql
      */
-    public BaseOracleRecognizer(String originalSql){
+    public BaseOracleRecognizer(String originalSql) {
         super(originalSql);
     }
 
-    public OracleOutputVisitor createOutputVisitor(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList, final StringBuilder sb) {
+    public OracleOutputVisitor createOutputVisitor(final ParametersHolder parametersHolder,
+                                                   final ArrayList<List<Object>> paramAppenderList,
+                                                   final StringBuilder sb) {
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
             @Override
@@ -70,7 +73,6 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
         }
 
         StringBuilder sb = new StringBuilder();
-
         executeVisit(where, createOutputVisitor(parametersHolder, paramAppenderList, sb));
         return sb.toString();
     }
@@ -81,7 +83,6 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
         }
 
         StringBuilder sb = new StringBuilder();
-
         executeVisit(where, new OracleOutputVisitor(sb));
         return sb.toString();
     }
