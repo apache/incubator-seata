@@ -47,17 +47,13 @@ public class RegisterTMResponseConvertor implements PbConvertor<RegisterTMRespon
         }
 
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            msg == null ? "" : msg)
-            .setResultCode(ResultCodeProto.valueOf(registerTMResponse.getResultCode().name())).setAbstractMessage(
-                abstractMessage).build();
+            msg == null ? "" : msg).setResultCode(ResultCodeProto.valueOf(registerTMResponse.getResultCode().name()))
+            .setAbstractMessage(abstractMessage).build();
 
         final String extraData = registerTMResponse.getExtraData();
         AbstractIdentifyResponseProto abstractIdentifyResponseProto = AbstractIdentifyResponseProto.newBuilder()
-            .setAbstractResultMessage(abstractResultMessageProto)
-            .setExtraData(extraData == null ? "" : extraData)
-            .setVersion(registerTMResponse.getVersion())
-            .setIdentified(registerTMResponse.isIdentified())
-            .build();
+            .setAbstractResultMessage(abstractResultMessageProto).setExtraData(extraData == null ? "" : extraData)
+            .setVersion(registerTMResponse.getVersion()).setIdentified(registerTMResponse.isIdentified()).build();
 
         RegisterTMResponseProto result = RegisterTMResponseProto.newBuilder().setAbstractIdentifyResponse(
             abstractIdentifyResponseProto).build();

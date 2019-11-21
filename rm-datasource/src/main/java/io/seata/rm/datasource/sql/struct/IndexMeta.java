@@ -223,7 +223,7 @@ public class IndexMeta {
         if (!(o instanceof IndexMeta)) {
             return false;
         }
-        IndexMeta indexMeta = (IndexMeta) o;
+        IndexMeta indexMeta = (IndexMeta)o;
         if (!ArrayUtils.isEquals(indexMeta.values, this.values)) {
             return false;
         }
@@ -245,7 +245,7 @@ public class IndexMeta {
         if (!Objects.equals(indexMeta.ascOrDesc, this.ascOrDesc)) {
             return false;
         }
-        if (!Objects.equals(indexMeta.ordinalPosition, this.ordinalPosition)){
+        if (!Objects.equals(indexMeta.ordinalPosition, this.ordinalPosition)) {
             return false;
         }
         return true;
