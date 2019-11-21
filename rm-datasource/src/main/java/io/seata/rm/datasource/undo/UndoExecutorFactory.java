@@ -46,7 +46,7 @@ public class UndoExecutorFactory {
      */
     public static AbstractUndoExecutor getUndoExecutor(String dbType, SQLUndoLog sqlUndoLog) {
         if (!UNDO_LOG_SUPPORT_SET.contains(dbType)) {
-          throw new NotSupportYetException(dbType);
+            throw new NotSupportYetException(dbType);
         }
         AbstractUndoExecutor result = null;
         UndoExecutorHolder holder = UndoExecutorHolderFactory.getUndoExecutorHolder(dbType.toLowerCase());
