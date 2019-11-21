@@ -511,30 +511,27 @@ public class DefaultCore implements Core {
 
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
 
-        if(isSaga(globalSession)){
+        if (isSaga(globalSession)) {
 
-            if(GlobalStatus.Committed.equals(globalStatus)){
+            if (GlobalStatus.Committed.equals(globalStatus)) {
                 removeAllBranches(globalSession);
                 SessionHelper.endCommitted(globalSession);
                 LOGGER.info("Global[{}] committed", globalSession.getXid());
-            }
-            else if(GlobalStatus.Rollbacked.equals(globalStatus)
-                    || GlobalStatus.Finished.equals(globalStatus)){
+            } else if (GlobalStatus.Rollbacked.equals(globalStatus)
+                    || GlobalStatus.Finished.equals(globalStatus)) {
                 removeAllBranches(globalSession);
                 SessionHelper.endRollbacked(globalSession);
                 LOGGER.info("Global[{}] rollbacked", globalSession.getXid());
-            }
-            else {
+            } else {
                 globalSession.changeStatus(globalStatus);
                 LOGGER.info("Global[{}] reporting is successfully done. status[{}]", globalSession.getXid(), globalSession.getStatus());
 
-                if(GlobalStatus.RollbackRetrying.equals(globalStatus)
+                if (GlobalStatus.RollbackRetrying.equals(globalStatus)
                         || GlobalStatus.TimeoutRollbackRetrying.equals(globalStatus)
-                        || GlobalStatus.UnKnown.equals(globalStatus)){
+                        || GlobalStatus.UnKnown.equals(globalStatus)) {
                     queueToRetryRollback(globalSession);
                     LOGGER.info("Global[{}] will retry rollback", globalSession.getXid());
-                }
-                else if(GlobalStatus.CommitRetrying.equals(globalStatus)){
+                } else if (GlobalStatus.CommitRetrying.equals(globalStatus)) {
                     queueToRetryCommit(globalSession);
                     LOGGER.info("Global[{}] will retry commit", globalSession.getXid());
                 }

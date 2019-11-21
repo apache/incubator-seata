@@ -282,8 +282,8 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             else if (StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
 
                 stateInstance.setId(generateCompensateStateInstanceId(stateInstance));
-            } else {//Register branch
-
+            } else {
+                //Register branch
                 try {
                     GlobalTransaction globalTransaction = (GlobalTransaction) context.getVariable(DomainConstants.VAR_NAME_GLOBAL_TX);
                     if (globalTransaction == null) {
