@@ -55,7 +55,7 @@ public class RootContext {
         }
 
         String xidType = CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
-        if (StringUtils.isNotBlank(xidType) && xidType.indexOf("_")>-1) {
+        if (StringUtils.isNotBlank(xidType) && xidType.indexOf("_") > -1) {
             return xidType.split("_")[0];
         }
 
@@ -89,8 +89,14 @@ public class RootContext {
      * @param xidType
      */
     public static void bindInterceptorType(String xidType) {
-        String[] xidTypes = xidType.split("_");
-        bindInterceptorType(xidTypes[0], BranchType.valueOf(xidTypes[1]));
+        if (StringUtils.isNotBlank(xidType)) {
+
+            String[] xidTypes = xidType.split("_");
+
+            if (xidTypes.length == 2) {
+                bindInterceptorType(xidTypes[0], BranchType.valueOf(xidTypes[1]));
+            }
+        }
     }
 
     /**
@@ -185,7 +191,7 @@ public class RootContext {
      *
      * @return
      */
-    public static Map<String, String> entries(){
+    public static Map<String, String> entries() {
         return CONTEXT_HOLDER.entries();
     }
 }

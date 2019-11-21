@@ -79,6 +79,7 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
         this.retry = retry;
     }
 
+    @Override
     public List<ExceptionMatch> getCatches() {
         return catches;
     }
