@@ -140,11 +140,6 @@ public class TableMetaCacheTest {
             };
         mockDriver.setMockColumnsMetasReturnValue(columnMetas);
         getTableMetaCache().refresh(dataSourceProxy);
-
-        //test exception
-        mockDriver.setMockColumnsMetasReturnValue(null);
-        getTableMetaCache().refresh(dataSourceProxy);
-
     }
 
     private void assertColumnMetaEquals(Object[] expected, ColumnMeta actual) {
