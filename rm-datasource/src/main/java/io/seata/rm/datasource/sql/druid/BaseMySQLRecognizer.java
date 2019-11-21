@@ -16,14 +16,8 @@
 package io.seata.rm.datasource.sql.druid;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
-import com.alibaba.druid.sql.ast.expr.SQLExistsExpr;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
-import com.alibaba.druid.sql.visitor.SQLASTVisitor;
-
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.struct.Null;
@@ -79,7 +73,7 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
 
         StringBuilder sb = new StringBuilder();
 
-        excuteVisit(where, createOutputVisitor(parametersHolder, paramAppenderList, sb));
+        executeVisit(where, createOutputVisitor(parametersHolder, paramAppenderList, sb));
         return sb.toString();
     }
 
@@ -90,22 +84,8 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
 
         StringBuilder sb = new StringBuilder();
 
-        excuteVisit(where, new MySqlOutputVisitor(sb));
+        executeVisit(where, new MySqlOutputVisitor(sb));
         return sb.toString();
-    }
-
-    private void excuteVisit(SQLExpr where, SQLASTVisitor visitor) {
-        if (where instanceof SQLBinaryOpExpr) {
-            visitor.visit((SQLBinaryOpExpr)where);
-        } else if (where instanceof SQLInListExpr) {
-            visitor.visit((SQLInListExpr)where);
-        } else if (where instanceof SQLBetweenExpr) {
-            visitor.visit((SQLBetweenExpr)where);
-        } else if (where instanceof SQLExistsExpr) {
-            visitor.visit((SQLExistsExpr)where);
-        } else {
-            throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
-        }
     }
 
 }
