@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.loader.EnhancedServiceLoader;
+
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -24,36 +25,34 @@ import java.util.Map;
 /**
  * The Type UndoExecutorHolderFactory
  *
- * @author: Zhibei Hao丶
+ * @author: Zhibei Hao
  */
-public class UndoExecutorHolderFactory
-{
-  private static volatile Map<String, UndoExecutorHolder> executorHolderMap;
+public class UndoExecutorHolderFactory {
+    private static volatile Map<String, UndoExecutorHolder> executorHolderMap;
 
-  /**
-   * Get UndoExecutorHolder by db type
-   *
-   * @param dbType the db type
-   * @return the UndoExecutorGroup
-   */
-  public static UndoExecutorHolder getUndoExecutorHolder(String dbType) {
+    /**
+     * Get UndoExecutorHolder by db type
+     *
+     * @param dbType the db type
+     * @return the UndoExecutorGroup
+     */
+    public static UndoExecutorHolder getUndoExecutorHolder(String dbType) {
 
-    if (executorHolderMap == null) {
-      synchronized (UndoExecutorHolderFactory.class) {
         if (executorHolderMap == null) {
-          Map<String, UndoExecutorHolder> initializedMap = new HashMap<>();
-          List<UndoExecutorHolder> holderList =
-              EnhancedServiceLoader.loadAll(UndoExecutorHolder.class);
-          for (UndoExecutorHolder holder : holderList) {
-            initializedMap.put(holder.getDbType().toLowerCase(), holder);
-          }
-          executorHolderMap = initializedMap;
+            synchronized (UndoExecutorHolderFactory.class) {
+                if (executorHolderMap == null) {
+                    Map<String, UndoExecutorHolder> initializedMap = new HashMap<>();
+                    List<UndoExecutorHolder> holderList = EnhancedServiceLoader.loadAll(UndoExecutorHolder.class);
+                    for (UndoExecutorHolder holder : holderList) {
+                        initializedMap.put(holder.getDbType().toLowerCase(), holder);
+                    }
+                    executorHolderMap = initializedMap;
+                }
+            }
         }
-      }
+        if (executorHolderMap.containsKey(dbType)) {
+            return executorHolderMap.get(dbType);
+        }
+        throw new UnsupportedOperationException(MessageFormat.format("now not support {0}", dbType));
     }
-    if (executorHolderMap.containsKey(dbType)) {
-      return executorHolderMap.get(dbType);
-    }
-    throw new UnsupportedOperationException(MessageFormat.format("now not support {0}", dbType));
-  }
 }
