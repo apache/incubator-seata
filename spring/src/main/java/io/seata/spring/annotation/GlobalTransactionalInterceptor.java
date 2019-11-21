@@ -35,10 +35,8 @@ import org.springframework.util.ClassUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * The type Global transactional interceptor.
@@ -66,7 +64,7 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(final MethodInvocation methodInvocation) throws Throwable {
-        Class<?> targetClass = (methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis()) : null);
+        Class<?> targetClass = methodInvocation.getThis() != null ? AopUtils.getTargetClass(methodInvocation.getThis()) : null;
         Method specificMethod = ClassUtils.getMostSpecificMethod(methodInvocation.getMethod(), targetClass);
         final Method method = BridgeMethodResolver.findBridgedMethod(specificMethod);
 
@@ -160,9 +158,16 @@ public class GlobalTransactionalInterceptor implements MethodInterceptor {
     }
 
     private String formatMethod(Method method) {
-        String paramTypes = Arrays.stream(method.getParameterTypes())
-                .map(Class::getName)
-                .collect(Collectors.joining(", ", "(", ")"));
-        return method.getName() + paramTypes;
+        StringBuilder sb = new StringBuilder(method.getName()).append("(");
+
+        Class<?>[] params = method.getParameterTypes();
+        int in = 0;
+        for (Class<?> clazz : params) {
+            sb.append(clazz.getName());
+            if (++in < params.length) {
+                sb.append(", ");
+            }
+        }
+        return sb.append(")").toString();
     }
 }

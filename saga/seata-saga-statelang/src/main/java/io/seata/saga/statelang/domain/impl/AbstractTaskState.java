@@ -15,27 +15,29 @@
  */
 package io.seata.saga.statelang.domain.impl;
 
-import io.seata.common.util.StringUtils;
-import io.seata.saga.statelang.domain.TaskState;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import io.seata.common.util.StringUtils;
+import io.seata.saga.statelang.domain.TaskState;
+
 /**
  * The state of the execution task (abstract class), the specific task to be executed is determined by the subclass
+ *
  * @author lorne.cl
  */
 public abstract class AbstractTaskState extends BaseState implements TaskState {
 
-    private String                    compensateState;
-    private boolean                   isForCompensation;
-    private boolean                   isForUpdate;
-    private Retry                     retry;
-    private List<ExceptionMatch>      catches;
-    private List<Object>              input;
-    private Map<String, Object>       output;
-    private Map<String, String>       status;//Map<String/* expression */, String /* status */>
-    private boolean                   isPersist = true;
+    private String compensateState;
+    private boolean isForCompensation;
+    private boolean isForUpdate;
+    private Retry retry;
+    private List<ExceptionMatch> catches;
+    private List<Object> input;
+    private Map<String, Object> output;
+    private Map<String, String> status;//Map<String/* expression */, String /* status */>
+    private boolean isPersist = true;
 
     @Override
     public String getCompensateState() {
@@ -45,7 +47,7 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
     public void setCompensateState(String compensateState) {
         this.compensateState = compensateState;
 
-        if(StringUtils.isNotBlank(this.compensateState)){
+        if (StringUtils.isNotBlank(this.compensateState)) {
             setForUpdate(true);
         }
     }
@@ -77,6 +79,7 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
         this.retry = retry;
     }
 
+    @Override
     public List<ExceptionMatch> getCatches() {
         return catches;
     }
@@ -120,8 +123,8 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
 
     public static class RetryImpl implements Retry {
 
-        private int        intervalSeconds;
-        private int        maxAttempts;
+        private int intervalSeconds;
+        private int maxAttempts;
         private BigDecimal backoffRate;
 
         @Override
@@ -154,9 +157,9 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
 
     public static class ExceptionMatchImpl implements ExceptionMatch {
 
-        List<String>                     exceptions;
+        List<String> exceptions;
         List<Class<? extends Exception>> exceptionClasses;
-        String                           next;
+        String next;
 
         @Override
         public List<String> getExceptions() {

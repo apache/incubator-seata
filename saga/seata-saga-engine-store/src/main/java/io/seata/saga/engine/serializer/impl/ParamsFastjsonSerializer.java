@@ -18,23 +18,23 @@ package io.seata.saga.engine.serializer.impl;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+
 import io.seata.saga.engine.serializer.Serializer;
 
 /**
  * Parameter serializer based on Fastjson
+ *
  * @author lorne.cl
  */
 public class ParamsFastjsonSerializer implements Serializer<Object, String> {
 
     private static final SerializerFeature[] SERIALIZER_FEATURES = new SerializerFeature[] {
-            SerializerFeature.DisableCircularReferenceDetect,
-            SerializerFeature.WriteDateUseDateFormat,
-            SerializerFeature.WriteClassName
-    };
+        SerializerFeature.DisableCircularReferenceDetect, SerializerFeature.WriteDateUseDateFormat,
+        SerializerFeature.WriteClassName};
 
     @Override
     public String serialize(Object params) {
-        if(params != null){
+        if (params != null) {
             return JSON.toJSONString(params, SERIALIZER_FEATURES);
         }
         return null;
@@ -42,7 +42,7 @@ public class ParamsFastjsonSerializer implements Serializer<Object, String> {
 
     @Override
     public Object deserialize(String json) {
-        if(json != null){
+        if (json != null) {
             return JSON.parse(json, Feature.SupportAutoType);
 
         }

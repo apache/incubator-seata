@@ -33,26 +33,10 @@ public class ExceptionUtils {
     public static final String CONNECT_EXCEPTION_CLASS_NAME = "ConnectException";
     public static final int MAX_CAUSE_DEP = 20;
 
-    public enum NetExceptionType {
-        /**
-         * Exception occurred while creating connection
-         */
-        CONNECT_EXCEPTION,
-        /**
-         * create connection timeout
-         */
-        CONNECT_TIMEOUT_EXCEPTION,
-        /**
-         * read timeout from remote（request has sent）
-         */
-        READ_TIMEOUT_EXCEPTION,
-        /**
-         * not a network exception
-         */
-        NOT_NET_EXCEPTION
-    }
-
-    public static EngineExecutionException createEngineExecutionException(Exception e, FrameworkErrorCode code, String message, StateMachineInstance stateMachineInstance, StateInstance stateInstance) {
+    public static EngineExecutionException createEngineExecutionException(Exception e, FrameworkErrorCode code,
+                                                                          String message,
+                                                                          StateMachineInstance stateMachineInstance,
+                                                                          StateInstance stateInstance) {
         EngineExecutionException exception = new EngineExecutionException(e, message, code);
         if (stateMachineInstance != null) {
             exception.setStateMachineName(stateMachineInstance.getStateMachine().getAppName());
@@ -65,12 +49,17 @@ public class ExceptionUtils {
         return exception;
     }
 
-    public static EngineExecutionException createEngineExecutionException(FrameworkErrorCode code, String message, StateMachineInstance stateMachineInstance, StateInstance stateInstance) {
+    public static EngineExecutionException createEngineExecutionException(FrameworkErrorCode code, String message,
+                                                                          StateMachineInstance stateMachineInstance,
+                                                                          StateInstance stateInstance) {
 
         return createEngineExecutionException(null, code, message, stateMachineInstance, stateInstance);
     }
 
-    public static EngineExecutionException createEngineExecutionException(Exception e, FrameworkErrorCode code, String message, StateMachineInstance stateMachineInstance, String stateName) {
+    public static EngineExecutionException createEngineExecutionException(Exception e, FrameworkErrorCode code,
+                                                                          String message,
+                                                                          StateMachineInstance stateMachineInstance,
+                                                                          String stateName) {
         EngineExecutionException exception = new EngineExecutionException(e, message, code);
         if (stateMachineInstance != null) {
             exception.setStateMachineName(stateMachineInstance.getStateMachine().getAppName());
@@ -118,5 +107,24 @@ public class ExceptionUtils {
             }
         }
         return NetExceptionType.NOT_NET_EXCEPTION;
+    }
+
+    public enum NetExceptionType {
+        /**
+         * Exception occurred while creating connection
+         */
+        CONNECT_EXCEPTION,
+        /**
+         * create connection timeout
+         */
+        CONNECT_TIMEOUT_EXCEPTION,
+        /**
+         * read timeout from remote(request has sent)
+         */
+        READ_TIMEOUT_EXCEPTION,
+        /**
+         * not a network exception
+         */
+        NOT_NET_EXCEPTION
     }
 }
