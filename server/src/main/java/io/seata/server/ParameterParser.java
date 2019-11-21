@@ -40,9 +40,12 @@ import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
  * @date 2019/05/30
  */
 public class ParameterParser {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ParameterParser.class);
 
-    private static final String PROGRAM_NAME = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
+    private static final String PROGRAM_NAME
+        = "sh seata-server.sh(for linux and mac) or cmd seata-server.bat(for windows)";
+
     private static final int SERVER_DEFAULT_PORT = 8091;
     private static final String SERVER_DEFAULT_STORE_MODE = "file";
     private static final int SERVER_DEFAULT_NODE = 1;
@@ -65,7 +68,8 @@ public class ParameterParser {
     private String storeMode;
     @Parameter(names = {"--serverNode", "-n"}, description = "server node id, such as 1, 2, 3. default is 1", order = 4)
     private int serverNode = SERVER_DEFAULT_NODE;
-    @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.", order = 5)
+    @Parameter(names = {"--seataEnv", "-e"}, description = "The name used for multi-configuration isolation.",
+        order = 5)
     private String seataEnv;
 
     /**
@@ -104,7 +108,8 @@ public class ParameterParser {
                 System.setProperty(ENV_PROPERTY_KEY, seataEnv);
             }
             if (StringUtils.isBlank(storeMode)) {
-                storeMode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE, SERVER_DEFAULT_STORE_MODE);
+                storeMode = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE,
+                    SERVER_DEFAULT_STORE_MODE);
             }
         } catch (ParameterException e) {
             printError(e);

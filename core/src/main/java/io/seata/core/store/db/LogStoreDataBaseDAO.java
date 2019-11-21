@@ -218,8 +218,8 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps.setString(4, globalTransactionDO.getApplicationId());
             ps.setString(5, globalTransactionDO.getTransactionServiceGroup());
             String transactionName = globalTransactionDO.getTransactionName();
-            transactionName = transactionName.length() > transactionNameColumnSize ?
-                transactionName.substring(0, transactionNameColumnSize) : transactionName;
+            transactionName = transactionName.length() > transactionNameColumnSize ? transactionName.substring(0,
+                transactionNameColumnSize) : transactionName;
             ps.setString(6, transactionName);
             ps.setInt(7, globalTransactionDO.getTimeout());
             ps.setLong(8, globalTransactionDO.getBeginTime());
@@ -434,7 +434,8 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         globalTransactionDO.setTimeout(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT));
         globalTransactionDO.setTransactionId(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID));
         globalTransactionDO.setTransactionName(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME));
-        globalTransactionDO.setTransactionServiceGroup(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
+        globalTransactionDO.setTransactionServiceGroup(
+            rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
         globalTransactionDO.setApplicationData(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA));
         globalTransactionDO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE));
         globalTransactionDO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED));
@@ -478,10 +479,10 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
      * @return the column info
      */
     private ColumnInfo queryTableStructure(final String tableName, String colName) {
-        try(Connection conn = logStoreDataSource.getConnection()) {
+        try (Connection conn = logStoreDataSource.getConnection()) {
             DatabaseMetaData dbmd = conn.getMetaData();
             String schema = getSchema(conn);
-            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[] { "TABLE" });
+            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[] {"TABLE"});
             while (tableRs.next()) {
                 String table = tableRs.getString("TABLE_NAME");
                 if (StringUtils.equalsIgnoreCase(table, tableName)) {

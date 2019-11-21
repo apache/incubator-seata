@@ -46,6 +46,6 @@ public class GlobalLockQueryResponseCodec extends AbstractTransactionResponseCod
         super.decode(t, in);
 
         GlobalLockQueryResponse globalLockQueryResponse = (GlobalLockQueryResponse)t;
-        globalLockQueryResponse.setLockable((in.getShort() == 1));
+        globalLockQueryResponse.setLockable(in.getShort() == 1);
     }
 }
