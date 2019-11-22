@@ -34,16 +34,12 @@ public class RegisterRMRequestConvertor implements PbConvertor<RegisterRMRequest
 
         final String extraData = registerRMRequest.getExtraData();
         AbstractIdentifyRequestProto abstractIdentifyRequestProto = AbstractIdentifyRequestProto.newBuilder()
-            .setAbstractMessage(abstractMessage)
-            .setApplicationId(registerRMRequest.getApplicationId())
-            .setExtraData(extraData == null ? "" : extraData)
-            .setTransactionServiceGroup(registerRMRequest.getTransactionServiceGroup())
-            .setVersion(registerRMRequest.getVersion())
-            .build();
+            .setAbstractMessage(abstractMessage).setApplicationId(registerRMRequest.getApplicationId()).setExtraData(
+                extraData == null ? "" : extraData).setTransactionServiceGroup(
+                registerRMRequest.getTransactionServiceGroup()).setVersion(registerRMRequest.getVersion()).build();
         RegisterRMRequestProto result = RegisterRMRequestProto.newBuilder().setAbstractIdentifyRequest(
-            abstractIdentifyRequestProto)
-            .setResourceIds(registerRMRequest.getResourceIds() == null ? "" : registerRMRequest.getResourceIds())
-            .build();
+            abstractIdentifyRequestProto).setResourceIds(
+            registerRMRequest.getResourceIds() == null ? "" : registerRMRequest.getResourceIds()).build();
 
         return result;
     }

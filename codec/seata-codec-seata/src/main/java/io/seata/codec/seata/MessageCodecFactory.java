@@ -15,7 +15,6 @@
  */
 package io.seata.codec.seata;
 
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -46,9 +45,7 @@ import io.seata.codec.seata.protocol.transaction.GlobalRollbackResponseCodec;
 import io.seata.codec.seata.protocol.transaction.GlobalStatusRequestCodec;
 import io.seata.codec.seata.protocol.transaction.GlobalStatusResponseCodec;
 import io.seata.codec.seata.protocol.transaction.UndoLogDeleteRequestCodec;
-import io.seata.core.protocol.AbstractIdentifyRequest;
 import io.seata.core.protocol.AbstractMessage;
-import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageType;
@@ -56,8 +53,6 @@ import io.seata.core.protocol.RegisterRMRequest;
 import io.seata.core.protocol.RegisterRMResponse;
 import io.seata.core.protocol.RegisterTMRequest;
 import io.seata.core.protocol.RegisterTMResponse;
-import io.seata.core.protocol.transaction.AbstractBranchEndRequest;
-import io.seata.core.protocol.transaction.AbstractGlobalEndRequest;
 import io.seata.core.protocol.transaction.BranchCommitRequest;
 import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
@@ -148,7 +143,8 @@ public class MessageCodecFactory {
 
         try {
             msgCodec = getMergeRequestMessageSeataCodec(typeCode);
-        } catch (Exception exx) {}
+        } catch (Exception exx) {
+        }
 
         if (null != msgCodec) {
             return msgCodec;
@@ -275,7 +271,8 @@ public class MessageCodecFactory {
 
         try {
             abstractMessage = getMergeRequestInstanceByCode(typeCode);
-        } catch (Exception exx) {}
+        } catch (Exception exx) {
+        }
 
         if (null != abstractMessage) {
             return abstractMessage;
@@ -344,74 +341,6 @@ public class MessageCodecFactory {
             default:
                 throw new IllegalArgumentException("not support typeCode," + typeCode);
         }
-    }
-
-    /**
-     * Get byte buffer byte buffer.
-     *
-     * @param abstractMessage the abstract message
-     * @return the byte buffer
-     */
-    public static ByteBuffer getByteBuffer(AbstractMessage abstractMessage) {
-        int bufferSize = 1024;
-        if (abstractMessage instanceof MergedWarpMessage) {
-            bufferSize = ((MergedWarpMessage)abstractMessage).msgs.size() * 1024 + 4;
-        } else if (abstractMessage instanceof MergeResultMessage) {
-            bufferSize = ((MergeResultMessage)abstractMessage).msgs.length * 1024 + 4;
-        } else if (abstractMessage instanceof AbstractIdentifyRequest) {
-            bufferSize = 10 * 1024;
-        } else if (abstractMessage instanceof AbstractResultMessage) {
-            bufferSize = 512;
-        } else if (abstractMessage instanceof AbstractBranchEndRequest) {
-            AbstractBranchEndRequest abstractBranchEndRequest = (AbstractBranchEndRequest)abstractMessage;
-            byte[] applicationDataBytes = null;
-            if (abstractBranchEndRequest.getApplicationData() != null) {
-                applicationDataBytes = abstractBranchEndRequest.getApplicationData().getBytes(UTF8);
-                if (applicationDataBytes.length > 512) {
-                    bufferSize = applicationDataBytes.length + 1024;
-                } else {
-                    bufferSize = 1024;
-                }
-            } else {
-                bufferSize = 1024;
-            }
-        } else if (abstractMessage instanceof GlobalBeginRequest) {
-            bufferSize = 256;
-        } else if (abstractMessage instanceof AbstractGlobalEndRequest) {
-            bufferSize = 256;
-        } else if (abstractMessage instanceof BranchRegisterRequest) {
-            BranchRegisterRequest branchRegisterRequest = (BranchRegisterRequest)abstractMessage;
-            int byteLenth = 0;
-            byte[] lockKeyBytes = null;
-            if (branchRegisterRequest.getLockKey() != null) {
-                lockKeyBytes = branchRegisterRequest.getLockKey().getBytes(UTF8);
-                if (lockKeyBytes.length > 512) {
-                    byteLenth += lockKeyBytes.length;
-                }
-            }
-            byte[] applicationDataBytes = null;
-            if (branchRegisterRequest.getApplicationData() != null) {
-                applicationDataBytes = branchRegisterRequest.getApplicationData().getBytes(UTF8);
-                if (applicationDataBytes.length > 512) {
-                    byteLenth += applicationDataBytes.length;
-                }
-            }
-            bufferSize = byteLenth + 1024;
-        } else if (abstractMessage instanceof BranchReportRequest) {
-            BranchReportRequest branchReportRequest = (BranchReportRequest)abstractMessage;
-            int byteLenth = 0;
-            byte[] applicationDataBytes = null;
-            if (branchReportRequest.getApplicationData() != null) {
-                applicationDataBytes = branchReportRequest.getApplicationData().getBytes(UTF8);
-                if (applicationDataBytes.length > 512) {
-                    byteLenth += (applicationDataBytes.length);
-                }
-            }
-            bufferSize = byteLenth + 1024;
-        } else {
-            bufferSize = 512;
-        }
-        return ByteBuffer.allocate(bufferSize);
     }
 
 }

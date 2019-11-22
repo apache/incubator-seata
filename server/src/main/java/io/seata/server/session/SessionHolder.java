@@ -81,7 +81,7 @@ public class SessionHolder {
     /**
      * Init.
      *
-     * @param mode the store mode: file、db
+     * @param mode the store mode: file, db
      * @throws IOException the io exception
      */
     public static void init(String mode) throws IOException {
@@ -102,7 +102,8 @@ public class SessionHolder {
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
         } else if (StoreMode.FILE.equals(storeMode)) {
             //file store
-            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR, DEFAULT_SESSION_STORE_FILE_DIR);
+            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
+                DEFAULT_SESSION_STORE_FILE_DIR);
             if (sessionStorePath == null) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
@@ -166,8 +167,7 @@ public class SessionHolder {
                                 case Committing:
                                 case CommitRetrying:
                                     try {
-                                        globalSession.addSessionLifecycleListener(
-                                            getRetryCommittingSessionManager());
+                                        globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
                                         getRetryCommittingSessionManager().addGlobalSession(globalSession);
                                     } catch (TransactionException e) {
                                         throw new ShouldNeverHappenException(e);
@@ -178,8 +178,7 @@ public class SessionHolder {
                                 case TimeoutRollbacking:
                                 case TimeoutRollbackRetrying:
                                     try {
-                                        globalSession.addSessionLifecycleListener(
-                                            getRetryRollbackingSessionManager());
+                                        globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
                                         getRetryRollbackingSessionManager().addGlobalSession(globalSession);
                                     } catch (TransactionException e) {
                                         throw new ShouldNeverHappenException(e);
@@ -263,7 +262,7 @@ public class SessionHolder {
     /**
      * Find global session.
      *
-     * @param xid the xid
+     * @param xid                the xid
      * @param withBranchSessions the withBranchSessions
      * @return the global session
      */

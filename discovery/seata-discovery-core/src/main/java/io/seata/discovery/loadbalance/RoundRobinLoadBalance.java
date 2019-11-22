@@ -40,7 +40,7 @@ public class RoundRobinLoadBalance extends AbstractLoadBalance {
     private int getPositiveSequence() {
         for (; ; ) {
             int current = sequence.get();
-            int next = (current >= Integer.MAX_VALUE ? 0 : current + 1);
+            int next = current >= Integer.MAX_VALUE ? 0 : current + 1;
             if (sequence.compareAndSet(current, next)) {
                 return current;
             }
