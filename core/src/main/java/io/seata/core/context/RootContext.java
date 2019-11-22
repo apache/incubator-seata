@@ -56,11 +56,11 @@ public class RootContext {
             return xid;
         }
         String xidInterceptorType = CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
-        if (StringUtils.isNotBlank(xidInterceptorType) && xidInterceptorType.indexOf("_")>-1) {
+        if (StringUtils.isNotBlank(xidInterceptorType) && xidInterceptorType.indexOf("_") > -1) {
             return xidInterceptorType.split("_")[0];
         }
         String xidFilterType = CONTEXT_HOLDER.get(KEY_XID_FILTER_TYPE);
-        if (StringUtils.isNotBlank(xidFilterType) && xidFilterType.indexOf("_")>-1) {
+        if (StringUtils.isNotBlank(xidFilterType) && xidFilterType.indexOf("_") > -1) {
             return xidFilterType.split("_")[0];
         }
         return null;
@@ -98,13 +98,11 @@ public class RootContext {
 
     /**
      * Bind interceptor type
-     *
-     * @param xidType
      */
     public static void bindInterceptorType(String xidType) {
-        if(StringUtils.isNotBlank(xidType)){
+        if (StringUtils.isNotBlank(xidType)) {
             String[] xidTypes = xidType.split("_");
-            if(xidTypes.length == 2){
+            if (xidTypes.length == 2) {
                 bindInterceptorType(xidTypes[0], BranchType.valueOf(xidTypes[1]));
             }
         }
@@ -112,13 +110,11 @@ public class RootContext {
 
     /**
      * Bind interceptor type
-     *
-     * @param xidType
      */
     public static void bindFilterType(String xidType) {
-        if(StringUtils.isNotBlank(xidType)){
+        if (StringUtils.isNotBlank(xidType)) {
             String[] xidTypes = xidType.split("_");
-            if(xidTypes.length == 2){
+            if (xidTypes.length == 2) {
                 bindFilterType(xidTypes[0], BranchType.valueOf(xidTypes[1]));
             }
         }
@@ -126,9 +122,6 @@ public class RootContext {
 
     /**
      * Bind interceptor type
-     *
-     * @param xid
-     * @param branchType
      */
     public static void bindInterceptorType(String xid, BranchType branchType) {
         String xidType = String.format("%s_%s", xid, branchType.name());
@@ -140,9 +133,6 @@ public class RootContext {
 
     /**
      * Bind filter type
-     *
-     * @param xid
-     * @param branchType
      */
     public static void bindFilterType(String xid, BranchType branchType) {
         String xidType = String.format("%s_%s", xid, branchType.name());
@@ -153,7 +143,8 @@ public class RootContext {
     }
 
     /**
-     * declare local transactions will use global lock check for update/delete/insert/selectForUpdate SQL
+     * declare local transactions will use global lock check for update/delete/insert/selectForUpdate
+     * SQL
      */
     public static void bindGlobalLockFlag() {
 
@@ -222,8 +213,6 @@ public class RootContext {
 
     /**
      * requires global lock check
-     *
-     * @return
      */
     public static boolean requireGlobalLock() {
         return CONTEXT_HOLDER.get(KEY_GLOBAL_LOCK_FLAG) != null;
@@ -240,8 +229,6 @@ public class RootContext {
 
     /**
      * entry map
-     *
-     * @return
      */
     public static Map<String, String> entries() {
         return CONTEXT_HOLDER.entries();
