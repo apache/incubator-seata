@@ -22,4 +22,6 @@ package io.seata.saga.proctrl;
  * @author xi.chen
  * @author lorne.cl
  */
-public interface Instruction {}
+public interface Instruction {
+
+}
