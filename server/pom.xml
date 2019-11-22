@@ -153,6 +153,73 @@
                     </programs>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>1.7.0</version>
+                <configuration>
+                    <from>
+                        <image>openjdk:8u232-jre-stretch</image>
+                    </from>
+                    <to>
+                        <image>docker.io/seataio/seata-server</image>
+                        <tags>
+                            ${image.tags}
+                        </tags>
+                        <auth>
+                            <username>${REGISTRY_USERNAME}</username>
+                            <password>${REGISTRY_PASSWORD}</password>
+                        </auth>
+                    </to>
+                    <container>
+                        <appRoot>/seata-server</appRoot>
+                        <workingDirectory>/seata-server</workingDirectory>
+                        <mainClass>io.seata.server.Server</mainClass>
+                        <ports>
+                            <port>8091</port>
+                        </ports>
+                        <environment>
+                            <SEATA_PORT>8091</SEATA_PORT>
+                            <STORE_MODE>file</STORE_MODE>
+                        </environment>
+                        <jvmFlags>
+                            <jvmFlag>-Djava.security.egd=file:/dev/./urandom</jvmFlag>
+                            <jvmFlag>-server</jvmFlag>
+                            <jvmFlag>-Xss512k</jvmFlag>
+                            <jvmFlag>-XX:SurvivorRatio=10</jvmFlag>
+                            <jvmFlag>-XX:MetaspaceSize=128m</jvmFlag>
+                            <jvmFlag>-XX:MaxMetaspaceSize=256m</jvmFlag>
+                            <jvmFlag>-XX:MaxDirectMemorySize=1024m</jvmFlag>
+                            <jvmFlag>-XX:-OmitStackTraceInFastThrow</jvmFlag>
+                            <jvmFlag>-XX:-UseAdaptiveSizePolicy</jvmFlag>
+                            <jvmFlag>-XX:+HeapDumpOnOutOfMemoryError</jvmFlag>
+                            <jvmFlag>-XX:HeapDumpPath=/var/log/seata_heapdump.hprof</jvmFlag>
+                            <!--gc-->
+                            <jvmFlag>-XX:+DisableExplicitGC</jvmFlag>
+                            <jvmFlag>-XX:+CMSParallelRemarkEnabled</jvmFlag>
+                            <jvmFlag>-XX:+UseCMSInitiatingOccupancyOnly</jvmFlag>
+                            <jvmFlag>-XX:CMSInitiatingOccupancyFraction=75</jvmFlag>
+                            <jvmFlag>-Xloggc:/var/log/seata_gc.log</jvmFlag>
+                            <jvmFlag>-verbose:gc</jvmFlag>
+                            <!--netty-->
+                            <jvmFlag>-Dio.netty.leakDetectionLevel=advanced</jvmFlag>
+                        </jvmFlags>
+                        <labels>
+                            <name>seata-server</name>
+                        </labels>
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                    </container>
+                    <skip>${image.publish.skip}</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
