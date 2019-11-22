@@ -505,7 +505,6 @@ public class OracleKeywordChecker implements KeywordChecker {
         }
     }
 
-
     @Override
     public boolean check(String fieldOrTableName) {
         if (keywordSet.contains(fieldOrTableName)) {
@@ -520,7 +519,7 @@ public class OracleKeywordChecker implements KeywordChecker {
 
     @Override
     public String checkAndReplace(String fieldOrTableName) {
-        return check(fieldOrTableName)? fieldOrTableName :fieldOrTableName;
-//        return check(fieldOrTableName)?"`" + fieldOrTableName + "`":fieldOrTableName;
+        return check(fieldOrTableName) ? fieldOrTableName : fieldOrTableName;
+        //        return check(fieldOrTableName)?"`" + fieldOrTableName + "`":fieldOrTableName;
     }
 }

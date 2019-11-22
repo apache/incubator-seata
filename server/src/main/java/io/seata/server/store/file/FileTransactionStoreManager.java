@@ -137,8 +137,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     public FileTransactionStoreManager(String fullFileName, SessionManager sessionManager) throws IOException {
         initFile(fullFileName);
         fileWriteExecutor = new ThreadPoolExecutor(MAX_THREAD_WRITE, MAX_THREAD_WRITE, Integer.MAX_VALUE,
-            TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<Runnable>(),
+            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
             new NamedThreadFactory("fileTransactionStore", MAX_THREAD_WRITE, true));
         writeDataFileRunnable = new WriteDataFileRunnable();
         fileWriteExecutor.submit(writeDataFileRunnable);
@@ -165,7 +164,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             currRaf.seek(currDataFile.length());
             currFileChannel = currRaf.getChannel();
         } catch (IOException exx) {
-            LOGGER.error("init file error,{}",exx.getMessage(),exx);
+            LOGGER.error("init file error,{}", exx.getMessage(), exx);
             throw exx;
         }
     }
@@ -180,8 +179,8 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             }
             lastModifiedTime = System.currentTimeMillis();
             curFileTrxNum = FILE_TRX_NUM.incrementAndGet();
-            if (curFileTrxNum % PER_FILE_BLOCK_SIZE == 0 &&
-                (System.currentTimeMillis() - trxStartTimeMills) > MAX_TRX_TIMEOUT_MILLS) {
+            if (curFileTrxNum % PER_FILE_BLOCK_SIZE == 0
+                && (System.currentTimeMillis() - trxStartTimeMills) > MAX_TRX_TIMEOUT_MILLS) {
                 return saveHistory();
             }
         } catch (Exception exx) {
@@ -241,7 +240,8 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         }
         bufferRemainingSize = writeBuffer.remaining();
         if (bufferRemainingSize <= INT_BYTE_SIZE) {
-            throw new IllegalStateException(String.format("Write buffer remaining size %d was too small", bufferRemainingSize));
+            throw new IllegalStateException(
+                String.format("Write buffer remaining size %d was too small", bufferRemainingSize));
         }
         writeBuffer.putInt(dataLength);
         bufferRemainingSize = writeBuffer.remaining();
@@ -272,24 +272,24 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     }
 
     private boolean findTimeoutAndSave() throws IOException {
-        List<GlobalSession> globalSessionsOverMaxTimeout =
-            sessionManager.findGlobalSessions(new SessionCondition(MAX_TRX_TIMEOUT_MILLS));
+        List<GlobalSession> globalSessionsOverMaxTimeout = sessionManager.findGlobalSessions(
+            new SessionCondition(MAX_TRX_TIMEOUT_MILLS));
         if (CollectionUtils.isEmpty(globalSessionsOverMaxTimeout)) {
             return true;
         }
         for (GlobalSession globalSession : globalSessionsOverMaxTimeout) {
             TransactionWriteStore globalWriteStore = new TransactionWriteStore(globalSession, LogOperation.GLOBAL_ADD);
             byte[] data = globalWriteStore.encode();
-            if(!writeDataFrame(data)) {
+            if (!writeDataFrame(data)) {
                 return false;
             }
             List<BranchSession> branchSessIonsOverMaXTimeout = globalSession.getSortedBranches();
             if (null != branchSessIonsOverMaXTimeout) {
                 for (BranchSession branchSession : branchSessIonsOverMaXTimeout) {
-                    TransactionWriteStore branchWriteStore =
-                        new TransactionWriteStore(branchSession, LogOperation.BRANCH_ADD);
+                    TransactionWriteStore branchWriteStore = new TransactionWriteStore(branchSession,
+                        LogOperation.BRANCH_ADD);
                     data = branchWriteStore.encode();
-                    if(!writeDataFrame(data)) {
+                    if (!writeDataFrame(data)) {
                         return false;
                     }
                 }
@@ -332,7 +332,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
         try {
             currFileChannel.force(true);
         } catch (IOException e) {
-            LOGGER.error("fileChannel force error{}",e.getMessage(),e);
+            LOGGER.error("fileChannel force error{}", e.getMessage(), e);
         }
         closeFile(currRaf);
     }
@@ -415,13 +415,13 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                         break;
                     }
                 } catch (Exception ex) {
-                    LOGGER.error("decode data file error:{}",ex.getMessage(),ex);
+                    LOGGER.error("decode data file error:{}", ex.getMessage(), ex);
                     break;
                 }
             }
             return transactionWriteStores;
         } catch (IOException exx) {
-            LOGGER.error("parse data file error:{},file:{}",exx.getMessage(),file.getName(),exx);
+            LOGGER.error("parse data file error:{},file:{}", exx.getMessage(), file.getName(), exx);
             return null;
         } finally {
             try {
@@ -434,7 +434,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                 }
                 closeFile(raf);
             } catch (IOException exx) {
-                LOGGER.error("file close error{}",exx.getMessage(),exx);
+                LOGGER.error("file close error{}", exx.getMessage(), exx);
             }
         }
 
@@ -452,7 +452,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                 raf = null;
             }
         } catch (IOException exx) {
-            LOGGER.error("file close error,{}",exx.getMessage(),exx);
+            LOGGER.error("file close error,{}", exx.getMessage(), exx);
         }
     }
 
@@ -473,11 +473,11 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
                     currFileChannel.write(byteBuffer);
                 }
                 return true;
-            } catch (IOException exx) {
-                LOGGER.error("write data file error:{}",exx.getMessage(),exx);
+            } catch (Exception exx) {
+                LOGGER.error("write data file error:{}", exx.getMessage(), exx);
             }
         }
-        LOGGER.error("write dataFile failed,retry more than :{}",MAX_WRITE_RETRY);
+        LOGGER.error("write dataFile failed,retry more than :{}", MAX_WRITE_RETRY);
         return false;
     }
 
@@ -644,8 +644,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             if (diff == 0) {
                 return;
             }
-            if (diff % MAX_FLUSH_NUM == 0 ||
-                System.currentTimeMillis() - lastModifiedTime > MAX_FLUSH_TIME_MILLS) {
+            if (diff % MAX_FLUSH_NUM == 0 || System.currentTimeMillis() - lastModifiedTime > MAX_FLUSH_TIME_MILLS) {
                 flush(fileChannel);
                 FILE_FLUSH_NUM.addAndGet(diff);
             }
@@ -655,7 +654,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             try {
                 fileChannel.force(false);
             } catch (IOException exx) {
-                LOGGER.error("flush error: {}",exx.getMessage(),exx);
+                LOGGER.error("flush error: {}", exx.getMessage(), exx);
             }
         }
     }

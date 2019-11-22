@@ -16,16 +16,26 @@
 package io.seata.rm.datasource.undo;
 
 import com.alibaba.druid.util.JdbcConstants;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * The type Undo executor factory.
  *
  * @author sharajava
  */
-  public class UndoExecutorFactory {
+public class UndoExecutorFactory {
+
+    private static final Set<String> UNDO_LOG_SUPPORT_SET = new HashSet<>();
+
+    static {
+        UNDO_LOG_SUPPORT_SET.add(JdbcConstants.MYSQL);
+        UNDO_LOG_SUPPORT_SET.add(JdbcConstants.ORACLE);
+    }
 
     /**
      * Gets undo executor.
@@ -35,24 +45,24 @@ import io.seata.common.exception.ShouldNeverHappenException;
      * @return the undo executor
      */
     public static AbstractUndoExecutor getUndoExecutor(String dbType, SQLUndoLog sqlUndoLog) {
-      if (!JdbcConstants.MYSQL.equals(dbType) && !JdbcConstants.ORACLE.equals(dbType)) {
-        throw new NotSupportYetException(dbType);
-      }
-      AbstractUndoExecutor result = null;
-      UndoExecutorHolder holder = UndoExecutorHolderFactory.getUndoExecutorHolder(dbType.toLowerCase());
-      switch ((sqlUndoLog.getSqlType())) {
-        case INSERT:
-          result = holder.getInsertExecutor(sqlUndoLog);
-          break;
-        case UPDATE:
-          result = holder.getUpdateExecutor(sqlUndoLog);
-          break;
-        case DELETE:
-          result = holder.getDeleteExecutor(sqlUndoLog);
-          break;
-        default:
-          throw new ShouldNeverHappenException();
-      }
-      return result;
+        if (!UNDO_LOG_SUPPORT_SET.contains(dbType)) {
+            throw new NotSupportYetException(dbType);
+        }
+        AbstractUndoExecutor result = null;
+        UndoExecutorHolder holder = UndoExecutorHolderFactory.getUndoExecutorHolder(dbType.toLowerCase());
+        switch (sqlUndoLog.getSqlType()) {
+            case INSERT:
+                result = holder.getInsertExecutor(sqlUndoLog);
+                break;
+            case UPDATE:
+                result = holder.getUpdateExecutor(sqlUndoLog);
+                break;
+            case DELETE:
+                result = holder.getDeleteExecutor(sqlUndoLog);
+                break;
+            default:
+                throw new ShouldNeverHappenException();
+        }
+        return result;
     }
 }
