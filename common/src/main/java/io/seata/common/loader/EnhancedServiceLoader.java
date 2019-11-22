@@ -349,13 +349,10 @@ public class EnhancedServiceLoader {
         if (argTypes != null && args != null) {
             // Constructor with arguments
             Constructor<S> constructor = implClazz.getDeclaredConstructor(argTypes);
-            constructor.setAccessible(true);
             s = service.cast(constructor.newInstance(args));
         } else {
-            // default Constructor (might be private, use ctor.newInstance() instead of class.newInstance())
-            Constructor<S> constructor = implClazz.getDeclaredConstructor();
-            constructor.setAccessible(true);
-            s = service.cast(constructor.newInstance());
+            // default Constructor
+            s = service.cast(implClazz.newInstance());
         }
         if (s instanceof Initialize) {
             ((Initialize)s).init();
