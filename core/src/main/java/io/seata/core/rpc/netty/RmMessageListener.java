@@ -69,14 +69,13 @@ public class RmMessageListener implements ClientMessageListener {
             handleBranchCommit(request, serverAddress, (BranchCommitRequest)msg, sender);
         } else if (msg instanceof BranchRollbackRequest) {
             handleBranchRollback(request, serverAddress, (BranchRollbackRequest)msg, sender);
-        }else if (msg instanceof UndoLogDeleteRequest) {
-            handleUndoLogDelete((UndoLogDeleteRequest) msg);
+        } else if (msg instanceof UndoLogDeleteRequest) {
+            handleUndoLogDelete((UndoLogDeleteRequest)msg);
         }
     }
 
     private void handleBranchRollback(RpcMessage request, String serverAddress,
-                                      BranchRollbackRequest branchRollbackRequest,
-                                      ClientMessageSender sender) {
+                                      BranchRollbackRequest branchRollbackRequest, ClientMessageSender sender) {
         BranchRollbackResponse resultMessage = null;
         resultMessage = (BranchRollbackResponse)handler.onRequest(branchRollbackRequest, null);
         if (LOGGER.isDebugEnabled()) {
@@ -89,8 +88,7 @@ public class RmMessageListener implements ClientMessageListener {
         }
     }
 
-    private void handleBranchCommit(RpcMessage request, String serverAddress,
-                                    BranchCommitRequest branchCommitRequest,
+    private void handleBranchCommit(RpcMessage request, String serverAddress, BranchCommitRequest branchCommitRequest,
                                     ClientMessageSender sender) {
 
         BranchCommitResponse resultMessage = null;

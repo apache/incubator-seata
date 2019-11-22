@@ -88,7 +88,7 @@ public class TCCBeanParserUtils {
         if (applicationContext != null && applicationContext.containsBean(factoryBeanName)) {
             factoryBean = applicationContext.getBean(factoryBeanName);
         }
-        //not factory bean，needn't proxy
+        //not factory bean, needn't proxy
         if (factoryBean == null) {
             return false;
         }
@@ -132,11 +132,11 @@ public class TCCBeanParserUtils {
     }
 
     /**
-     * get remoting bean info: sofa:service、sofa:reference、dubbo:reference、dubbo:service
+     * get remoting bean info: sofa:service, sofa:reference, dubbo:reference, dubbo:service
      *
      * @param bean     the bean
      * @param beanName the bean name
-     * @return if sofa:service、sofa:reference、dubbo:reference、dubbo:service return true，else return false
+     * @return if sofa:service, sofa:reference, dubbo:reference, dubbo:service return true, else return false
      */
     protected static boolean parserRemotingServiceInfo(Object bean, String beanName) {
         if (DefaultRemotingParser.get().isRemoting(bean, beanName)) {
