@@ -115,7 +115,7 @@ public interface StateMachine {
     String getType();
 
     /**
-     * statue（Active|Inactive）
+     * statue (Active|Inactive)
      *
      * @return
      */
