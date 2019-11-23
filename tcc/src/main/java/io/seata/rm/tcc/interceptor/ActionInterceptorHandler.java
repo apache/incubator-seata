@@ -55,7 +55,7 @@ public class ActionInterceptorHandler {
      */
     public Map<String, Object> proceed(Method method, Object[] arguments, String xid, TwoPhaseBusinessAction businessAction,
                                        Callback<Object> targetCallback) throws Throwable {
-        Map<String, Object> ret = new HashMap<String, Object>(16);
+        Map<String, Object> ret = new HashMap<String, Object>(4);
 
         //TCC name
         String actionName = businessAction.name();
