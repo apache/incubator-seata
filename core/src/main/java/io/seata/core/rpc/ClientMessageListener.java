@@ -29,7 +29,6 @@ public interface ClientMessageListener {
      *
      * @param request       the msg id
      * @param serverAddress the server address
-     * @param sender        the sender
      */
-    void onMessage(RpcMessage request, String serverAddress, ClientMessageSender sender);
+    void onMessage(RpcMessage request, String serverAddress);
 }

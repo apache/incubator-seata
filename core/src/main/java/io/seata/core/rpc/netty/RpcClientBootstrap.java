@@ -62,11 +62,11 @@ public class RpcClientBootstrap implements RemotingClient {
     private AbstractChannelPoolMap<InetSocketAddress, FixedChannelPool> clientChannelPool;
     private final AtomicBoolean initialized = new AtomicBoolean(false);
     private static final String THREAD_PREFIX_SPLIT_CHAR = "_";
-    private final ChannelHandler channelHandler;
     private final NettyPoolKey.TransactionRole transactionRole;
-    
+    private ChannelHandler[] channelHandlers;
+
     public RpcClientBootstrap(NettyClientConfig nettyClientConfig, final EventExecutorGroup eventExecutorGroup,
-                              ChannelHandler channelHandler, NettyPoolKey.TransactionRole transactionRole) {
+                              NettyPoolKey.TransactionRole transactionRole) {
         if (null == nettyClientConfig) {
             nettyClientConfig = new NettyClientConfig();
             if (LOGGER.isInfoEnabled()) {
@@ -80,7 +80,29 @@ public class RpcClientBootstrap implements RemotingClient {
             new NamedThreadFactory(getThreadPrefix(this.nettyClientConfig.getClientSelectorThreadPrefix()),
                 selectorThreadSizeThreadSize));
         this.defaultEventExecutorGroup = eventExecutorGroup;
-        this.channelHandler = channelHandler;
+    }
+
+    /**
+     * Sets channel handlers.
+     *
+     * @param handlers the handlers
+     */
+    protected void setChannelHandlers(final ChannelHandler... handlers) {
+        if (null != handlers) {
+            channelHandlers = handlers;
+        }
+    }
+
+    /**
+     * Add channel pipeline last.
+     *
+     * @param channel  the channel
+     * @param handlers the handlers
+     */
+    private void addChannelPipelineLast(Channel channel, ChannelHandler... handlers) {
+        if (null != channel && null != handlers) {
+            channel.pipeline().addLast(handlers);
+        }
     }
     
     @Override
@@ -147,8 +169,8 @@ public class RpcClientBootstrap implements RemotingClient {
                                 nettyClientConfig.getChannelMaxAllIdleSeconds()))
                                 .addLast(new ProtocolV1Decoder())
                                 .addLast(new ProtocolV1Encoder());
-                        if (null != channelHandler) {
-                            ch.pipeline().addLast(channelHandler);
+                        if (null != channelHandlers) {
+                            addChannelPipelineLast(ch, channelHandlers);
                         }
                     }
                 });
@@ -172,7 +194,7 @@ public class RpcClientBootstrap implements RemotingClient {
             LOGGER.error("Failed to shutdown: {}", exx.getMessage());
         }
     }
-    
+
     /**
      * Gets new channel.
      *
