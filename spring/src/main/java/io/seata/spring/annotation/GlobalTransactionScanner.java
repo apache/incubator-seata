@@ -34,6 +34,7 @@ import io.seata.spring.util.TCCBeanParserUtils;
 import io.seata.tm.TMClient;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
+import io.seata.tm.api.GlobalTransaction;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -182,7 +183,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
 
         // Not every service needs to initialize tm client.
-        // Need to initialize tm client when use @GlobalTransactional and @GlobalLock.
+        // Need to initialize tm client when use @GlobalTransactional.
         if (initTmClient) {
             //init TM
             TMClient.init(applicationId, txServiceGroup);
@@ -286,6 +287,24 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         return false;
     }
 
+    private boolean exitsGlobalTransaction(Class<?>[] classes) {
+        if (classes != null && classes.length > 0) {
+            for (Class clazz : classes) {
+                if (clazz == null) {
+                    continue;
+                }
+                Method[] methods = clazz.getMethods();
+                for (Method method : methods) {
+                    GlobalTransactional trxAnno = method.getAnnotation(GlobalTransactional.class);
+                    if (trxAnno != null) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     private MethodDesc makeMethodDesc(GlobalTransactional anno, Method method) {
         return new MethodDesc(anno, method);
     }
@@ -320,7 +339,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         if (!initTmClient && !disableGlobalTransaction) {
             try {
                 Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
-                if (existsAnnotation(new Class[]{serviceInterface})) {
+                if (exitsGlobalTransaction(new Class[]{serviceInterface})) {
                     initTmClient = true;
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Need to init tm client.");
