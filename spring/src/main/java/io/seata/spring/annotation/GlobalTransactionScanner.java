@@ -296,13 +296,15 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (disableGlobalTransaction) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Global transaction is disabled.");
+        if (event.getApplicationContext().getParent() == null) {
+            if (disableGlobalTransaction) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Global transaction is disabled.");
+                }
+                return;
             }
-            return;
+            initClient();
         }
-        initClient();
     }
 
     @Override
