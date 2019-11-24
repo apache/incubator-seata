@@ -172,7 +172,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         this.initTmClient = initTmClient;
     }
 
-    public void initClient() {
+    private void initClient() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Initializing Global Transaction Clients ... ");
         }

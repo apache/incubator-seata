@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.context.event.ContextRefreshedEvent;
 
+import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
 /**
@@ -84,8 +85,17 @@ public class GlobalTransactionScannerTest {
      */
     @Test
     public void testInitClient() {
-        globalTransactionScanner.setInitTmClient(true);
-        globalTransactionScanner.initClient();
+        try {
+            Class<? extends GlobalTransactionScanner> aClass = globalTransactionScanner.getClass();
+            Method setInitTmClientMethod = aClass.getDeclaredMethod("setInitTmClient", Boolean.TYPE);
+            setInitTmClientMethod.setAccessible(true);
+            Method initClientMethod = aClass.getDeclaredMethod("initClient");
+            initClientMethod.setAccessible(true);
+            setInitTmClientMethod.invoke(globalTransactionScanner, true);
+            initClientMethod.invoke(globalTransactionScanner);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
