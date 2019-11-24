@@ -182,22 +182,21 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         }
 
         // Not every service needs to initialize tm client.
-        // Need to initialize tm client when use @GlobalTransactional.
+        // Need to initialize tm client when use @GlobalTransactional and @GlobalLock.
         if (initTmClient) {
             //init TM
             TMClient.init(applicationId, txServiceGroup);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info(
-                    "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
-                        + txServiceGroup + "]");
+                    "Transaction Manager Client is initialized.applicationId[{}],txServiceGroup[{}]",
+                    applicationId, txServiceGroup);
             }
         }
         //init RM
         RMClient.init(applicationId, txServiceGroup);
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(
-                "Resource Manager is initialized. applicationId[" + applicationId + "] txServiceGroup[" + txServiceGroup
-                    + "]");
+                "Resource Manager is initialized..applicationId[{}],txServiceGroup[{}]", applicationId, txServiceGroup);
         }
 
         if (LOGGER.isInfoEnabled()) {
@@ -245,9 +244,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     }
                 }
 
-                LOGGER.info(
-                    "Bean[" + bean.getClass().getName() + "] with name [" + beanName + "] would use interceptor ["
-                        + interceptor.getClass().getName() + "]");
+                LOGGER.info("Bean[{}] with name [{}] would use interceptor [{}]",
+                    bean.getClass().getName(), beanName, interceptor.getClass().getName());
                 if (!AopUtils.isAopProxy(bean)) {
                     bean = super.wrapIfNecessary(bean, beanName, cacheKey);
                 } else {
