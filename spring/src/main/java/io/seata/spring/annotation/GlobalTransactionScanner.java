@@ -327,7 +327,9 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     }
                 }
             } catch (Exception e) {
-                throw new RuntimeException(e);
+                LOGGER.warn("This bean [{}] find GlobalTransactional annotation error, " +
+                    "if this bean has GlobalTransactional annotation, may cause TM client not to be initialized",
+                    bean.getClass().getName());
             }
         }
         return super.postProcessBeforeInitialization(bean, beanName);
