@@ -168,6 +168,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         ShutdownHook.getInstance().destroyAll();
     }
 
+    public void setInitTmClient(boolean initTmClient) {
+        this.initTmClient = initTmClient;
+    }
+
     public void initClient() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Initializing Global Transaction Clients ... ");

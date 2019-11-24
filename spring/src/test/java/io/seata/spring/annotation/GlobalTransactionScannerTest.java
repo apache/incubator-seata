@@ -80,10 +80,11 @@ public class GlobalTransactionScannerTest {
     }
 
     /**
-     * Test after properties set.
+     * Test initClient.
      */
     @Test
-    public void testAfterPropertiesSet() {
+    public void testInitClient() {
+        globalTransactionScanner.setInitTmClient(true);
         globalTransactionScanner.initClient();
     }
 
