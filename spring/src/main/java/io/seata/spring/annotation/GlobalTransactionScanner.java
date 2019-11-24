@@ -45,11 +45,12 @@ import org.springframework.aop.support.AopUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
-import org.springframework.beans.factory.InitializingBean;
 import org.springframework.cglib.proxy.Enhancer;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_AUTOPROXY;
 
@@ -60,7 +61,7 @@ import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_AUTOPROXY;
  * @date 2018 /12/28
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
-    implements InitializingBean, ApplicationContextAware,
+    implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>,
     DisposableBean {
 
     /**
@@ -90,6 +91,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final FailureHandler failureHandlerHook;
 
     private ApplicationContext applicationContext;
+
+    private boolean initTmClient = false;
 
     /**
      * Instantiates a new Global transaction scanner.
@@ -165,7 +168,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         ShutdownHook.getInstance().destroyAll();
     }
 
-    private void initClient() {
+    public void initClient() {
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Initializing Global Transaction Clients ... ");
         }
@@ -173,12 +176,17 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             throw new IllegalArgumentException(
                 "applicationId: " + applicationId + ", txServiceGroup: " + txServiceGroup);
         }
-        //init TM
-        TMClient.init(applicationId, txServiceGroup);
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(
-                "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
-                    + txServiceGroup + "]");
+
+        // Not every service needs to initialize tm client.
+        // Need to initialize tm client when use @GlobalTransactional.
+        if (initTmClient) {
+            //init TM
+            TMClient.init(applicationId, txServiceGroup);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info(
+                    "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
+                        + txServiceGroup + "]");
+            }
         }
         //init RM
         RMClient.init(applicationId, txServiceGroup);
@@ -287,7 +295,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     @Override
-    public void afterPropertiesSet() {
+    public void onApplicationEvent(ContextRefreshedEvent event) {
         if (disableGlobalTransaction) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Global transaction is disabled.");
@@ -295,13 +303,30 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             return;
         }
         initClient();
-
     }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
         this.setBeanFactory(applicationContext);
+    }
+
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) {
+        if (!initTmClient && !disableGlobalTransaction) {
+            try {
+                Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
+                if (existsAnnotation(new Class[]{serviceInterface})) {
+                    initTmClient = true;
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Need to init tm client.");
+                    }
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return super.postProcessBeforeInitialization(bean, beanName);
     }
 
     @Override
