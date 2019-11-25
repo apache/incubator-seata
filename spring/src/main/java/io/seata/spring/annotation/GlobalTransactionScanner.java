@@ -64,9 +64,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     implements ApplicationContextAware, ApplicationListener<ContextRefreshedEvent>,
     DisposableBean {
 
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GlobalTransactionScanner.class);
@@ -286,7 +283,13 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         return false;
     }
 
-    private boolean exitsGlobalTransaction(Class<?>[] classes) {
+    /**
+     * Determine if there is a GlobalTransactional annotation in the bean's method
+     *
+     * @param classes bean target classes
+     * @return true: exists, false: not exists
+     */
+    private boolean existsGlobalTransaction(Class<?>[] classes) {
         if (classes != null && classes.length > 0) {
             for (Class clazz : classes) {
                 if (clazz == null) {
@@ -338,7 +341,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
         if (!initTmClient && !disableGlobalTransaction) {
             try {
                 Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
-                if (exitsGlobalTransaction(new Class[]{serviceInterface})) {
+                if (existsGlobalTransaction(new Class[]{serviceInterface})) {
                     initTmClient = true;
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Need to init tm client.");
