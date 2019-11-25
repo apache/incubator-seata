@@ -81,7 +81,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             databaseMetaData = dataSourceProxy.getPlainConnection().getMetaData();
         } catch (SQLException e) {
             LOGGER.error("Could not get connection, use default cache key", e.getMessage(), e);
-            return cacheKey.append(cacheKey.append(defaultTableName)).toString();
+            return cacheKey.append(defaultTableName).toString();
         }
 
         try {
@@ -93,7 +93,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             }
         } catch (SQLException e) {
             LOGGER.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key", e.getMessage(), e);
-            return cacheKey.append(cacheKey.append(defaultTableName)).toString();
+            return cacheKey.append(defaultTableName).toString();
         }
 
         return cacheKey.toString();
