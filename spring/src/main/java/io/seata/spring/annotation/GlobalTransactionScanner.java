@@ -337,7 +337,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName) {
+    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (!initTmClient && !disableGlobalTransaction) {
             try {
                 Class<?> serviceInterface = SpringProxyUtils.findTargetClass(bean);
@@ -349,15 +349,10 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 }
             } catch (Exception e) {
                 LOGGER.warn("This bean [{}] find GlobalTransactional annotation error, " +
-                    "if this bean has GlobalTransactional annotation, may cause TM client not to be initialized",
+                        "if this bean has GlobalTransactional annotation, may cause TM client not to be initialized",
                     bean.getClass().getName());
             }
         }
-        return super.postProcessBeforeInitialization(bean, beanName);
-    }
-
-    @Override
-    public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         if (bean instanceof DataSource && !(bean instanceof DataSourceProxy) && ConfigurationFactory.getInstance().getBoolean(DATASOURCE_AUTOPROXY, false)) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Auto proxy of [{}]", beanName);
