@@ -24,7 +24,6 @@ import io.seata.core.rpc.DefaultServerMessageListenerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeoutException;
 
@@ -177,7 +176,7 @@ public class RpcServer extends AbstractRpcRemotingServer {
      * @throws TimeoutException the timeout exception
      */
     @Override
-    public Object sendASyncRequest(Channel channel, Object message) throws IOException, TimeoutException {
-       return sendAsyncRequestWithoutResponse(channel, message);
+    public Object sendASyncRequest(Channel channel, Object message) throws TimeoutException {
+        return sendAsyncRequestWithoutResponse(channel, message);
     }
 }
