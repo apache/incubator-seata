@@ -90,7 +90,7 @@ public abstract class AbstractLocker implements Locker {
     }
 
     @Override
-    public boolean releaseGlobalLock(String xid, List<Long> branchIds) {
+    public boolean releaseBranchLock(String xid, List<Long> branchIds) {
         return false;
     }
 

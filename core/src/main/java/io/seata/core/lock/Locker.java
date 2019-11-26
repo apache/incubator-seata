@@ -57,7 +57,7 @@ public interface Locker {
      * @param branchIds the branchIds
      * @return the boolean
      */
-    boolean releaseGlobalLock(String xid, List<Long> branchIds);
+    boolean releaseBranchLock(String xid, List<Long> branchIds);
 
     /**
      * Is lockable boolean.
