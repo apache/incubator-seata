@@ -35,6 +35,7 @@ public class UndoExecutorFactory {
     static {
         UNDO_LOG_SUPPORT_SET.add(JdbcConstants.MYSQL);
         UNDO_LOG_SUPPORT_SET.add(JdbcConstants.ORACLE);
+        UNDO_LOG_SUPPORT_SET.add(JdbcConstants.POSTGRESQL);
     }
 
     /**
