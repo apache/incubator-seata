@@ -228,7 +228,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                     Channel sendChannel = null;
                     try {
                         sendChannel = clientChannelManager.acquireChannel(address);
-                        defaultSendRequest(sendChannel, mergeMessage);
+                        AbstractRpcRemotingClient.super.defaultSendRequest(sendChannel, mergeMessage);
                     } catch (FrameworkException e) {
                         if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable && sendChannel != null) {
                             destroyChannel(address, sendChannel);
@@ -344,7 +344,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                         if (LOGGER.isDebugEnabled()) {
                             LOGGER.debug("will send ping msg,channel {}", ctx.channel());
                         }
-                        defaultSendRequest(ctx.channel(), HeartbeatMessage.PING);
+                        AbstractRpcRemotingClient.super.defaultSendRequest(ctx.channel(), HeartbeatMessage.PING);
                     } catch (Throwable throwable) {
                         LOGGER.error("send request error: {}", throwable.getMessage(), throwable);
                     }

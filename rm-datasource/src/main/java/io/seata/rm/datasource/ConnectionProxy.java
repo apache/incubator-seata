@@ -232,7 +232,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     private void register() throws TransactionException {
         Long branchId = DefaultResourceManager.get().branchRegister(BranchType.AT, getDataSourceProxy().getResourceId(),
             null, context.getXid(), null, context.buildLockKeys());
-        context.setBranchId  (branchId);
+        context.setBranchId(branchId);
     }
 
     @Override
