@@ -39,11 +39,10 @@ public class GlobalReportRequestCodec extends AbstractGlobalEndRequestCodec {
 
         GlobalReportRequest reportRequest = (GlobalReportRequest)t;
         GlobalStatus globalStatus = reportRequest.getGlobalStatus();
-        if(globalStatus != null){
+        if (globalStatus != null) {
             out.writeByte((byte)globalStatus.getCode());
-        }
-        else{
-            out.writeByte((byte) -1);
+        } else {
+            out.writeByte((byte)-1);
         }
     }
 
@@ -53,7 +52,7 @@ public class GlobalReportRequestCodec extends AbstractGlobalEndRequestCodec {
 
         GlobalReportRequest reportRequest = (GlobalReportRequest)t;
         byte b = in.get();
-        if(b > -1){
+        if (b > -1) {
             reportRequest.setGlobalStatus(GlobalStatus.get(b));
         }
     }
