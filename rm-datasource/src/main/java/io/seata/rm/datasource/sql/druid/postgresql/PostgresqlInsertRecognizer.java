@@ -115,7 +115,7 @@ public class PostgresqlInsertRecognizer extends BasePostgresqlRecognizer impleme
                 } else if (expr instanceof SQLMethodInvokeExpr) {
                     row.add(new SqlMethodExpr());
                 } else if (expr instanceof SQLSequenceExpr) {
-                    SQLSequenceExpr sequenceExpr = ((SQLSequenceExpr) expr);
+                    SQLSequenceExpr sequenceExpr = (SQLSequenceExpr)expr;
                     String sequence = sequenceExpr.getSequence().getSimpleName();
                     String function = sequenceExpr.getFunction().name;
                     row.add(new SqlSequenceExpr(sequence, function));
