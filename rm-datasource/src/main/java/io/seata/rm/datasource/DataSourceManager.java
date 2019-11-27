@@ -26,6 +26,9 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.util.NetUtil;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.RmTransactionException;
 import io.seata.core.exception.TransactionException;
@@ -61,6 +64,8 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     private ResourceManagerInbound asyncWorker;
 
     private Map<String, Resource> dataSourceCache = new ConcurrentHashMap<>();
+
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
      * Sets async worker.
@@ -180,7 +185,8 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
             UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).undo(dataSourceProxy, xid, branchId);
         } catch (TransactionException te) {
             if (LOGGER.isInfoEnabled()) {
-                if (System.currentTimeMillis() % 10000 == 0) {
+                int rate = CONFIG.getInt(ConfigurationKeys.TRANSACTION_UNDO_LOG_EXCEPTION_RATE, 100);
+                if (System.currentTimeMillis() % rate == 0) {
                     LOGGER.info("[stacktrace]branchRollback failed. branchType:[{}], xid:[{}], branchId:[{}], resourceId:[{}], applicationData:[{}]. stacktrace:[{}]",
                         branchType, xid, branchId, resourceId, applicationData, te.getMessage(), te);
                 } else {
