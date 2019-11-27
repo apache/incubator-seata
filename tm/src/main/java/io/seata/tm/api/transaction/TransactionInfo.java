@@ -66,6 +66,7 @@ public final class TransactionInfo implements Serializable {
                 int depth = rule.getDepth(ex);
                 if (depth >= 0) {
                     winner = rule;
+                    break;
                 }
             }
         }

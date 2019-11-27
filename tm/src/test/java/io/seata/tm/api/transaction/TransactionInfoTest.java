@@ -50,6 +50,8 @@ public class TransactionInfoTest {
                 "\t\t\"exceptionName\":\""+ IO_EXCEPTION_SHORT_NAME +"\"\n" +
                 "\t},{\n" +
                 "\t\t\"exceptionName\":\""+ NullPointerException.class.getName() +"\"\n" +
+                "\t},{\n" +
+                "\t\t\"exceptionName\":\""+ MyIllegalArgumentException.class.getName() +"\"\n" +
                 "\t}],\n" +
                 "\t\"timeOut\":30000\n" +
                 "}";
@@ -81,6 +83,7 @@ public class TransactionInfoTest {
         txInfo.setRollbackRules(sets);
 
         assertThat(txInfo.rollbackOn(new IllegalArgumentException())).isTrue();
+        assertThat(txInfo.rollbackOn(new MyIllegalArgumentException("test")));
         assertThat(txInfo.rollbackOn(new IllegalStateException())).isTrue();
         assertThat(txInfo.rollbackOn(new IOException())).isFalse();
         assertThat(txInfo.rollbackOn(new NullPointerException())).isFalse();
@@ -97,6 +100,7 @@ public class TransactionInfoTest {
         sets.add(new RollbackRule(IllegalArgumentException.class));
         sets.add(new NoRollbackRule(IO_EXCEPTION_SHORT_NAME));
         sets.add(new NoRollbackRule(NullPointerException.class));
+        sets.add(new NoRollbackRule(MyIllegalArgumentException.class));
         return sets;
     }
 }
