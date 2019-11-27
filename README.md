@@ -144,7 +144,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
 
 <div style='vertical-align: middle'>
     <img alt='Alibaba Group' height='40'  src='https://docs.alibabagroup.com/assets2/images/en/global/logo_header.png'  /img>
-    <img alt='蚂蚁金服' height='40'  src='https://img.alicdn.com/tfs/TB1Du1couL2gK0jSZFmXXc7iXXa-250-120.jpg'  /img>
+    <img alt='蚂蚁金服' height='40'  src='https://img.alicdn.com/tfs/TB1wuuCoET1gK0jSZFhXXaAtVXa-496-202.jpg'  /img>
     <img alt='阿里云' height='40'  src='https://img.alicdn.com/tfs/TB1Ly5oS3HqK1RjSZFPXXcwapXa-238-54.png'  /img>
     <img alt='中航信' height='40'  src='http://www.travelsky.net/publish/main/images/logo.gif'  /img>
     <img alt='中国铁塔' height='40'  src='https://www.china-tower.com/static/web/images/tower-logo.png'  /img>
