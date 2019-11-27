@@ -147,9 +147,12 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='蚂蚁金服' height='40'  src='https://img.alicdn.com/tfs/TB1Du1couL2gK0jSZFmXXc7iXXa-250-120.jpg'  /img>
     <img alt='阿里云' height='40'  src='https://img.alicdn.com/tfs/TB1Ly5oS3HqK1RjSZFPXXcwapXa-238-54.png'  /img>
     <img alt='中航信' height='40'  src='http://www.travelsky.net/publish/main/images/logo.gif'  /img>
+    <img alt='中国铁塔' height='40'  src='https://www.china-tower.com/static/web/images/tower-logo.png'  /img>
     <img alt='滴滴' height='40'  src='https://website.didiglobal.com/dist/media/logo-zh.a7abd90d.svg'  /img>
-    <img alt='浙江公安厅' height='40'  src='https://img.alicdn.com/tfs/TB1ctCaoEY1gK0jSZFMXXaWcVXa-255-150.jpg'  /img>
+    <img alt='太极计算机' height='40'  src='https://www.taiji.com.cn/TaijiCMS/r/cms/www/default/images/logo.png'  /img>
+    <img alt='政采云' height='40'  src='https://img.alicdn.com/tfs/TB1is9ooBv0gK0jSZKbXXbK2FXa-440-158.jpg'  /img>
     <img alt='中国邮政' height='40'  src='http://www.chinapost.com.cn/res/chinapostplan/structure/181041269.png'  /img>
+    <img alt='浙江公安厅' height='40'  src='https://img.alicdn.com/tfs/TB1ctCaoEY1gK0jSZFMXXaWcVXa-255-150.jpg'  /img>
     <img alt='特步' height='40'  src='https://www.xtep.com/images/logo.png'  /img>
     <img alt='中通快递' height='40'  src='https://www.zto.com/imgs/logo.png'  /img>
     <img alt='浙江烟草' height='40'  src='https://img.alicdn.com/tfs/TB1e7Wiovb2gK0jSZK9XXaEgFXa-1028-160.jpg'  /img>
@@ -173,15 +176,12 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='全房通' height='40'  src='https://img.alicdn.com/tfs/TB1Vz1loET1gK0jSZFhXXaAtVXa-200-200.jpg'  /img>
     <img alt='会通教育' height='40'  src='https://willclass.com/images/logo.png'  /img>
     <img alt='享住智慧' height='40'  src='http://image.xiangzhuzhihui.com/images/logo/logo_02.png'  /img>
-    <img alt='太极计算机' height='40'  src='https://www.taiji.com.cn/TaijiCMS/r/cms/www/default/images/logo.png'  /img>
     <img alt='兰亮网络' height='40'  src='https://img.alicdn.com/tfs/TB1_miroq61gK0jSZFlXXXDKFXa-283-70.png'  /img>
     <img alt='蓝天教育' height='40'  src='https://img.alicdn.com/tfs/TB1CaSroAT2gK0jSZPcXXcKkpXa-492-176.jpg'  /img>
-    <img alt='政采云' height='40'  src='https://img.alicdn.com/tfs/TB1is9ooBv0gK0jSZKbXXbK2FXa-440-158.jpg'  /img>
     <img alt='烟台欣合' height='40'  src='https://shinhoglobal.com/img/logo-shinho.svg'  /img>
     <img alt='阿康健康' height='40'  src='https://img.alicdn.com/tfs/TB1JNSqouH2gK0jSZFEXXcqMpXa-450-182.jpg'  /img>
     <img alt='新脉远' height='40'  src='https://img.alicdn.com/tfs/TB1NV1uouH2gK0jSZJnXXaT1FXa-462-172.jpg'  /img>
     <img alt='乾动新能源' height='40'  src='http://www.cangowin.com/images/logo.png'  /img>
-    <img alt='中国铁塔' height='40'  src='https://www.china-tower.com/static/web/images/tower-logo.png'  /img>
     <img alt='路客精品民宿' height='40'  src='https://img.alicdn.com/tfs/TB1CCavoBr0gK0jSZFnXXbRRXXa-240-100.png'  /img>
     <img alt='深圳好尔美' height='40'  src='https://img.alicdn.com/tfs/TB1IIivoxD1gK0jSZFyXXciOVXa-200-130.png'  /img>
 </div>
