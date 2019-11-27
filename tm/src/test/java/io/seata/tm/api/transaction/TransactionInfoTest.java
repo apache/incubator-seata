@@ -45,13 +45,13 @@ public class TransactionInfoTest {
                 "\t\"rollbackRules\":[{\n" +
                 "\t\t\"exceptionName\":\""+ IllegalStateException.class.getName() +"\"\n" +
                 "\t},{\n" +
-                "\t\t\"exceptionName\":\""+ IllegalArgumentException.class.getName() +"\"\n" +
-                "\t},{\n" +
                 "\t\t\"exceptionName\":\""+ MyIllegalArgumentException.class.getName() +"\"\n" +
                 "\t},{\n" +
                 "\t\t\"exceptionName\":\""+ IO_EXCEPTION_SHORT_NAME +"\"\n" +
                 "\t},{\n" +
                 "\t\t\"exceptionName\":\""+ NullPointerException.class.getName() +"\"\n" +
+                "\t},{\n" +
+                "\t\t\"exceptionName\":\""+ IllegalArgumentException.class.getName() +"\"\n" +
                 "\t}],\n" +
                 "\t\"timeOut\":30000\n" +
                 "}";
@@ -82,11 +82,11 @@ public class TransactionInfoTest {
         Set<RollbackRule> sets = getRollbackRules();
         txInfo.setRollbackRules(sets);
 
-        assertThat(txInfo.rollbackOn(new IllegalArgumentException())).isTrue();
         assertThat(txInfo.rollbackOn(new MyIllegalArgumentException("test"))).isTrue();
         assertThat(txInfo.rollbackOn(new IllegalStateException())).isTrue();
         assertThat(txInfo.rollbackOn(new IOException())).isFalse();
         assertThat(txInfo.rollbackOn(new NullPointerException())).isFalse();
+        assertThat(txInfo.rollbackOn(new IllegalArgumentException())).isFalse();
 
         // not found return false
         assertThat(txInfo.rollbackOn(new MyRuntimeException("test"))).isFalse();
@@ -97,10 +97,10 @@ public class TransactionInfoTest {
     private Set<RollbackRule> getRollbackRules() {
         Set<RollbackRule> sets = new LinkedHashSet<>();
         sets.add(new RollbackRule(IllegalStateException.class.getName()));
-        sets.add(new RollbackRule(IllegalArgumentException.class));
         sets.add(new RollbackRule(MyIllegalArgumentException.class));
         sets.add(new NoRollbackRule(IO_EXCEPTION_SHORT_NAME));
         sets.add(new NoRollbackRule(NullPointerException.class));
+        sets.add(new NoRollbackRule(IllegalArgumentException.class));
         return sets;
     }
 }
