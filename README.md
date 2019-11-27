@@ -143,4 +143,7 @@ These are only part of the companies using Seata, for reference only. If you are
 here](https://github.com/seata/seata/issues/1246) to tell us your scenario to make Seata better.
 
 ![Alibaba Group](https://docs.alibabagroup.com/assets2/images/en/global/logo_header.png)
+![蚂蚁金服](https://img.alicdn.com/tfs/TB1Du1couL2gK0jSZFmXXc7iXXa-250-120.jpg)
+![阿里云](https://img.alicdn.com/tfs/TB1Ly5oS3HqK1RjSZFPXXcwapXa-238-54.png)
+![滴滴](https://website.didiglobal.com/dist/media/logo-zh.a7abd90d.svg)
 
