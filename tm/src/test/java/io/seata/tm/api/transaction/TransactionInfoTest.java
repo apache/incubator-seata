@@ -83,7 +83,7 @@ public class TransactionInfoTest {
         txInfo.setRollbackRules(sets);
 
         assertThat(txInfo.rollbackOn(new IllegalArgumentException())).isTrue();
-        assertThat(txInfo.rollbackOn(new MyIllegalArgumentException("test")));
+        assertThat(txInfo.rollbackOn(new MyIllegalArgumentException("test"))).isTrue();
         assertThat(txInfo.rollbackOn(new IllegalStateException())).isTrue();
         assertThat(txInfo.rollbackOn(new IOException())).isFalse();
         assertThat(txInfo.rollbackOn(new NullPointerException())).isFalse();
