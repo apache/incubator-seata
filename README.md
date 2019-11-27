@@ -176,5 +176,13 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
 ![兰亮网络](https://img.alicdn.com/tfs/TB1_miroq61gK0jSZFlXXXDKFXa-283-70.png)
 ![蓝天教育](https://img.alicdn.com/tfs/TB1CaSroAT2gK0jSZPcXXcKkpXa-492-176.jpg)
 ![政采云](https://img.alicdn.com/tfs/TB1is9ooBv0gK0jSZKbXXbK2FXa-440-158.jpg)
+![烟台欣合](https://shinhoglobal.com/img/logo-shinho.svg)
+![阿康健康](https://img.alicdn.com/tfs/TB1JNSqouH2gK0jSZFEXXcqMpXa-450-182.jpg)
+![新脉远](https://img.alicdn.com/tfs/TB1NV1uouH2gK0jSZJnXXaT1FXa-462-172.jpg)
+![乾动新能源](http://www.cangowin.com/images/logo.png)
+![中国铁塔](https://www.china-tower.com/static/web/images/tower-logo.png)
+![路客精品民宿](https://img.alicdn.com/tfs/TB1CCavoBr0gK0jSZFnXXbRRXXa-240-100.png)
+![深圳好尔美](https://img.alicdn.com/tfs/TB1IIivoxD1gK0jSZFyXXciOVXa-200-130.png)
+
 
 
