@@ -160,7 +160,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='凯京科技' height='40'  src='https://img.alicdn.com/tfs/TB1j0dEop67gK0jSZPfXXahhFXa-400-208.jpg'  /img>
     <img alt='点购集团' height='40'  src='https://dgmall-1258058953.cos.ap-chengdu.myqcloud.com/img/logo_t.png'  /img>
     <img alt='求是创新健康' height='40'  src='http://www.truthai.cn/static/logo800.png'  /img>
-    <img alt='科蓝' height='40'  src='https://img.alicdn.com/tfs/TB1DAedopY7gK0jSZKzXXaikpXa-312-142.jpg'  /img>
+    <img alt='科蓝' height='40'  src='https://img.alicdn.com/tfs/TB1tuSyouT2gK0jSZFvXXXnFXXa-304-94.jpg'  /img>
     <img alt='康美药业' height='40'  src='https://www.kanghehealth.com/images/logo.png'  /img>
     <img alt='雁联' height='40'  src='https://img.alicdn.com/tfs/TB1FKuioAY2gK0jSZFgXXc5OFXa-200-200.png'  /img>
     <img alt='学两手' height='40'  src='https://img.xue2shou.com/g-xue2shou/website/0.8.2/static/logo.png'  /img>
