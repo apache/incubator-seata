@@ -162,7 +162,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='求是创新健康' height='40'  src='http://www.truthai.cn/static/logo800.png'  /img>
     <img alt='科蓝' height='40'  src='https://img.alicdn.com/tfs/TB1tuSyouT2gK0jSZFvXXXnFXXa-304-94.jpg'  /img>
     <img alt='康美药业' height='40'  src='https://www.kanghehealth.com/images/logo.png'  /img>
-    <img alt='雁联' height='40'  src='https://img.alicdn.com/tfs/TB1FKuioAY2gK0jSZFgXXc5OFXa-200-200.png'  /img>
+    <img alt='雁联' height='40'  src='https://img.alicdn.com/tfs/TB1c8iCouL2gK0jSZFmXXc7iXXa-428-102.jpg'  /img>
     <img alt='学两手' height='40'  src='https://img.xue2shou.com/g-xue2shou/website/0.8.2/static/logo.png'  /img>
     <img alt='衣二三' height='40'  src='https://img.alicdn.com/tfs/TB1OCGioCf2gK0jSZFPXXXsopXa-500-179.jpg'  /img>
     <img alt='悦途出行' height='40'  src='http://yuetu365.com/uploads/allimg/20191016/d456dbbee0c54274a70d588af4ce6116.png'  /img>
