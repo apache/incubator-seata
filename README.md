@@ -156,7 +156,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='特步' height='40'  src='https://www.xtep.com/images/logo.png'  /img>
     <img alt='中通快递' height='40'  src='https://www.zto.com/imgs/logo.png'  /img>
     <img alt='浙江烟草' height='40'  src='https://img.alicdn.com/tfs/TB1e7Wiovb2gK0jSZK9XXaEgFXa-1028-160.jpg'  /img>
-    <img alt='波司登' height='40'  src='https://img.alicdn.com/tfs/TB1vVSjoAT2gK0jSZFkXXcIQFXa-314-170.jpg'  /img>
+    <img alt='波司登' height='40'  src='https://img.alicdn.com/tfs/TB12cmCouL2gK0jSZFmXXc7iXXa-310-110.jpg'  /img>
     <img alt='凯京科技' height='40'  src='https://img.alicdn.com/tfs/TB1j0dEop67gK0jSZPfXXahhFXa-400-208.jpg'  /img>
     <img alt='点购集团' height='40'  src='https://dgmall-1258058953.cos.ap-chengdu.myqcloud.com/img/logo_t.png'  /img>
     <img alt='求是创新健康' height='40'  src='http://www.truthai.cn/static/logo800.png'  /img>
