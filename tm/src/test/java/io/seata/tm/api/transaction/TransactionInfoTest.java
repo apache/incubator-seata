@@ -47,11 +47,11 @@ public class TransactionInfoTest {
                 "\t},{\n" +
                 "\t\t\"exceptionName\":\""+ IllegalArgumentException.class.getName() +"\"\n" +
                 "\t},{\n" +
+                "\t\t\"exceptionName\":\""+ MyIllegalArgumentException.class.getName() +"\"\n" +
+                "\t},{\n" +
                 "\t\t\"exceptionName\":\""+ IO_EXCEPTION_SHORT_NAME +"\"\n" +
                 "\t},{\n" +
                 "\t\t\"exceptionName\":\""+ NullPointerException.class.getName() +"\"\n" +
-                "\t},{\n" +
-                "\t\t\"exceptionName\":\""+ MyIllegalArgumentException.class.getName() +"\"\n" +
                 "\t}],\n" +
                 "\t\"timeOut\":30000\n" +
                 "}";
@@ -98,9 +98,9 @@ public class TransactionInfoTest {
         Set<RollbackRule> sets = new LinkedHashSet<>();
         sets.add(new RollbackRule(IllegalStateException.class.getName()));
         sets.add(new RollbackRule(IllegalArgumentException.class));
+        sets.add(new RollbackRule(MyIllegalArgumentException.class));
         sets.add(new NoRollbackRule(IO_EXCEPTION_SHORT_NAME));
         sets.add(new NoRollbackRule(NullPointerException.class));
-        sets.add(new NoRollbackRule(MyIllegalArgumentException.class));
         return sets;
     }
 }
