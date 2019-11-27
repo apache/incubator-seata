@@ -119,7 +119,7 @@ public class ExceptionUtils {
          */
         CONNECT_TIMEOUT_EXCEPTION,
         /**
-         * read timeout from remote（request has sent）
+         * read timeout from remote(request has sent)
          */
         READ_TIMEOUT_EXCEPTION,
         /**
