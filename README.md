@@ -136,3 +136,11 @@ This project exists thanks to all the people who contribute. [[Contributors](htt
 ## License
 
 Seata is under the Apache 2.0 license. See the [LICENSE](https://github.com/seata/seata/blob/master/LICENSE) file for details.
+
+## Who is using
+
+These are only part of the companies using Seata, for reference only. If you are using Seata, please [add your company 
+here](https://github.com/seata/seata/issues/1246) to tell us your scenario to make Seata better.
+
+![Alibaba Group](https://docs.alibabagroup.com/assets2/images/en/global/logo_header.png)
+
