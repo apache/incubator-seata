@@ -15,7 +15,6 @@
  */
 package io.seata.saga.statelang.domain;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
