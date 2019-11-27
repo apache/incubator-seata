@@ -166,7 +166,7 @@ here](https://github.com/seata/seata/issues/1246) to tell us your scenario to ma
     <img alt='学两手' height='40'  src='https://img.xue2shou.com/g-xue2shou/website/0.8.2/static/logo.png'  /img>
     <img alt='衣二三' height='40'  src='https://img.alicdn.com/tfs/TB1OCGioCf2gK0jSZFPXXXsopXa-500-179.jpg'  /img>
     <img alt='悦途出行' height='40'  src='http://yuetu365.com/uploads/allimg/20191016/d456dbbee0c54274a70d588af4ce6116.png'  /img>
-    <img alt='睿颐软件' height='40'  src='http://ruiyicloud.com.cn/images/LOGO.png'  /img>
+    <img alt='睿颐软件' height='40'  src='https://img.alicdn.com/tfs/TB1JkCGorj1gK0jSZFOXXc7GpXa-232-244.jpg'  /img>
     <img alt='赛维' height='40'  src='http://www.savor.com.cn/common/img/logo.png'  /img>
     <img alt='有利网' height='40'  src='https://www.yooli.com/v2/local/img/common/logo.png?version=20191126190304'  /img>
     <img alt='安心保险' height='40'  src='https://query.95303.com/webins/images/logo.png'  /img>
