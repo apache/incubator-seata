@@ -454,8 +454,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(asyncCommittingSession, true);
             } catch (TransactionException ex) {
-                LOGGER.info("Failed to async committing [{}] {} {}", asyncCommittingSession.getXid(), ex.getCode(),
-                    ex.getMessage());
+                LOGGER.error("Failed to async committing [{}] {} {}", asyncCommittingSession.getXid(), ex.getCode(),
+                    ex.getMessage(), ex);
             }
         }
     }
