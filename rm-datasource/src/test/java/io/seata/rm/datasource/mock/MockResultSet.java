@@ -77,12 +77,12 @@ public class MockResultSet extends ResultSetBase {
     }
 
     public void mockResultSetMetaData(Object[][] mockColumnsMetasReturnValue) {
-        ColumnMeta columnMeta = new ColumnMeta();
         for (Object[] meta : mockColumnsMetasReturnValue) {
+            ColumnMeta columnMeta = new ColumnMeta();
             columnMeta.setTableName(meta[2].toString());
             columnMeta.setColumnName(meta[3].toString());
+            this.columnMetas.add(columnMeta);
         }
-        this.columnMetas.add(columnMeta);
     }
 
     @Override
