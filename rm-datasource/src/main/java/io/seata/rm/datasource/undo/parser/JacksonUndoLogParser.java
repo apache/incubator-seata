@@ -42,6 +42,7 @@ import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
 import oracle.sql.CLOB;
+import org.apache.commons.lang.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -193,6 +194,8 @@ public class JacksonUndoLogParser implements UndoLogParser {
                     jgen.writeObject("");// 直接输出为空字符串
                 }
             });
+            //oracle.sql.TIMESTAMP  转string
+            simpleModule.addSerializer(oracle.sql.TIMESTAMP.class, new OracleTimestampToStringSerializer());
             objectMapper.registerModule(simpleModule);
 
             String context = objectMapper.writeValueAsString(branchUndoLog);
@@ -376,4 +379,32 @@ public class JacksonUndoLogParser implements UndoLogParser {
         }
     }
 
+
+    /**
+     * if necessary
+     * extend {@link ArraySerializerBase}
+     */
+    private static class OracleTimestampToStringSerializer extends JsonSerializer<oracle.sql.TIMESTAMP> {
+
+        @Override
+        public void serializeWithType(oracle.sql.TIMESTAMP timestamp, JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSerializer) throws IOException {
+            WritableTypeId typeId = typeSerializer.writeTypePrefix(gen, typeSerializer.typeId(timestamp, JsonToken.VALUE_STRING));
+            serialize(timestamp, gen, serializers);
+            gen.writeTypeSuffix(typeId);
+        }
+
+        @Override
+        public void serialize(oracle.sql.TIMESTAMP timestamp, JsonGenerator gen, SerializerProvider serializers) {
+            try {
+               if(timestamp!=null&&timestamp.dateValue()!=null) {
+                   gen.writeString(DateFormatUtils.format(timestamp.dateValue(), "yyyy-MM-dd HH:mm:ss"));
+               } else {
+                   gen.writeString("");
+               }
+            } catch (Exception e) {
+                LOGGER.error("OracleTimestampToStringSerializer oralce.sql.Timestamp error : {}", e.getMessage(), e);
+            }
+
+        }
+    }
 }
