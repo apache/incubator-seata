@@ -88,4 +88,12 @@ public interface RegistryService<T> {
      * @throws Exception
      */
     void close() throws Exception;
+
+    /**
+     * Get current service group name
+     *
+     * @param key service group
+     * @return the service group name
+     */
+    String getServiceGroup(String key);
 }

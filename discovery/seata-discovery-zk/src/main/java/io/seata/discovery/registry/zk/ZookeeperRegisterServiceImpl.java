@@ -296,10 +296,10 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         return FILE_CONFIG.getConfig(clusterConfigName);
     }
 
-    private String getServiceGroup(String key) {
+    @Override
+    public String getServiceGroup(String key) {
         Configuration configuration = ConfigurationFactory.getInstance();
-        String clusterNameKey = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
-        return configuration.getConfig(clusterNameKey);
+        return configuration.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
     }
 
     private String getRegisterPathByPath(InetSocketAddress address) {

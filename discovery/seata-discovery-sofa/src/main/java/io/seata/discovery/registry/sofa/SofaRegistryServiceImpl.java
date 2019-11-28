@@ -158,8 +158,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
-        Configuration config = ConfigurationFactory.getInstance();
-        String clusterName = config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
+        String clusterName = getServiceGroup(key);
         if (null == clusterName) {
             return null;
         }
@@ -314,4 +313,11 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         }
         return application;
     }
+
+    @Override
+    public String getServiceGroup(String key) {
+        Configuration config = ConfigurationFactory.getInstance();
+        return config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
+    }
+
 }
