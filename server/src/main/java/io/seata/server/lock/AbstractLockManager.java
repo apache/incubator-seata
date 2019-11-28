@@ -67,7 +67,7 @@ public abstract class AbstractLockManager implements LockManager {
         }
         List<RowLock> locks = collectRowLocks(branchSession);
         try {
-            return getLocker(branchSession).releaseBranchLock(locks);
+            return getLocker(branchSession).releaseLock(locks);
         } catch (Exception t) {
             LOGGER.error("unLock error, branchSession:{}", branchSession, t);
             return false;

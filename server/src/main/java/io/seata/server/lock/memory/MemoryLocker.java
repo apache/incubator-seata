@@ -116,7 +116,7 @@ public class MemoryLocker extends AbstractLocker {
     }
 
     @Override
-    public boolean releaseBranchLock(List<RowLock> rowLock) {
+    public boolean releaseLock(List<RowLock> rowLock) {
         if (CollectionUtils.isEmpty(rowLock)) {
             //no lock
             return true;

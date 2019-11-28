@@ -72,7 +72,7 @@ public class DataBaseLocker extends AbstractLocker {
     }
 
     @Override
-    public boolean releaseBranchLock(List<RowLock> locks) {
+    public boolean releaseLock(List<RowLock> locks) {
         if (CollectionUtils.isEmpty(locks)) {
             //no lock
             return true;
@@ -88,7 +88,7 @@ public class DataBaseLocker extends AbstractLocker {
     }
 
     @Override
-    public boolean releaseBranchLock(String xid, Long branchId) {
+    public boolean releaseLock(String xid, Long branchId) {
         try {
             return lockStore.unLock(xid, branchId);
         } catch (StoreException e) {
@@ -100,7 +100,7 @@ public class DataBaseLocker extends AbstractLocker {
     }
 
     @Override
-    public boolean releaseBranchLock(String xid, List<Long> branchIds) {
+    public boolean releaseLock(String xid, List<Long> branchIds) {
         if (CollectionUtils.isEmpty(branchIds)) {
             //no lock
             return true;

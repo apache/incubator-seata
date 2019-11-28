@@ -36,7 +36,7 @@ public class DataBaseLockManager extends AbstractLockManager {
     @Override
     public boolean releaseLock(BranchSession branchSession) throws TransactionException {
         try {
-            return getLocker().releaseBranchLock(branchSession.getXid(), branchSession.getBranchId());
+            return getLocker().releaseLock(branchSession.getXid(), branchSession.getBranchId());
         } catch (Exception t) {
             LOGGER.error("unLock error, xid {}, branchId:{}", branchSession.getXid(), branchSession.getBranchId(), t);
             return false;
@@ -51,7 +51,7 @@ public class DataBaseLockManager extends AbstractLockManager {
         }
         List<Long> branchIds = branchSessions.stream().map(BranchSession::getBranchId).collect(Collectors.toList());
         try {
-            return getLocker().releaseBranchLock(globalSession.getXid(), branchIds);
+            return getLocker().releaseLock(globalSession.getXid(), branchIds);
         } catch (Exception t) {
             LOGGER.error("unLock globalSession error, xid:{} branchIds:{}", globalSession.getXid(),
                 CollectionUtils.toString(branchIds), t);

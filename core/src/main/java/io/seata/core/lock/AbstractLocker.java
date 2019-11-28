@@ -85,12 +85,12 @@ public abstract class AbstractLocker implements Locker {
     }
 
     @Override
-    public boolean releaseBranchLock(String xid, Long branchId) {
+    public boolean releaseLock(String xid, Long branchId) {
         return false;
     }
 
     @Override
-    public boolean releaseBranchLock(String xid, List<Long> branchIds) {
+    public boolean releaseLock(String xid, List<Long> branchIds) {
         return false;
     }
 

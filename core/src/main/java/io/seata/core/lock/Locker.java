@@ -39,7 +39,7 @@ public interface Locker {
      * @param rowLock the row lock
      * @return the boolean
      */
-    boolean releaseBranchLock(List<RowLock> rowLock);
+    boolean releaseLock(List<RowLock> rowLock);
 
     /**
      * Un lock boolean.
@@ -48,7 +48,7 @@ public interface Locker {
      * @param branchId the branchId
      * @return the boolean
      */
-    boolean releaseBranchLock(String xid, Long branchId);
+    boolean releaseLock(String xid, Long branchId);
 
     /**
      * Un lock boolean.
@@ -57,7 +57,7 @@ public interface Locker {
      * @param branchIds the branchIds
      * @return the boolean
      */
-    boolean releaseBranchLock(String xid, List<Long> branchIds);
+    boolean releaseLock(String xid, List<Long> branchIds);
 
     /**
      * Is lockable boolean.
