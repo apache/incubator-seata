@@ -17,3 +17,8 @@ CREATE TABLE "undo_log" (
 PRIMARY KEY ("id"),
 UNIQUE ("branch_id", "xid")
 );
+
+-- the sequence of undo_log
+CREATE SEQUENCE undo_log_seq
+START 1
+INCREMENT 1;
