@@ -102,6 +102,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
     private TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
         throws SQLException {
+        //always "" for mysql
         String schemaName = rsmd.getSchemaName(1);
         String catalogName = rsmd.getCatalogName(1);
 
@@ -121,6 +122,9 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         if (tableName.contains("`")) {
             tableName = tableName.replace("`", "");
         }
+
+        String[] catalogTable = tableName.split("\\.");
+        tableName = catalogTable.length > 1 ? catalogTable[1] : tableName;
 
         ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
         ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
