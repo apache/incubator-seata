@@ -185,7 +185,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
             simpleModule.addSerializer(TableRecords.EmptyTableRecords.class,new JsonSerializer<Object>() {
                 @Override
                 public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
-                    jgen.writeObject("");// 直接输出为空字符串
+                    jgen.writeObject(null);// 直接输出为空字符串
                 }
             });
             simpleModule.addSerializer(TableMeta.class,new JsonSerializer<Object>() {
@@ -196,6 +196,9 @@ public class JacksonUndoLogParser implements UndoLogParser {
             });
             //oracle.sql.TIMESTAMP  转string
             simpleModule.addSerializer(oracle.sql.TIMESTAMP.class, new OracleTimestampToStringSerializer());
+
+            simpleModule.addSerializer(SerialBlob.class, BLOB_SERIALIZER);
+            simpleModule.addSerializer(SerialClob.class, CLOB_SERIALIZER);
             objectMapper.registerModule(simpleModule);
 
             String context = objectMapper.writeValueAsString(branchUndoLog);
