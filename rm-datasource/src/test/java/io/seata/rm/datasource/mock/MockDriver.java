@@ -72,7 +72,7 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
         this.mockReturnValue = mockReturnValue;
         this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
         this.mockIndexMetasReturnValue = mockIndexMetasReturnValue;
-        this.setMockExecuteHandler(new MockExecuteHandlerImpl(mockReturnValueColumnLabels, mockReturnValue));
+        this.setMockExecuteHandler(new MockExecuteHandlerImpl(mockReturnValueColumnLabels, mockReturnValue, mockColumnsMetasReturnValue));
     }
 
     /**
