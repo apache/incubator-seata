@@ -13,23 +13,30 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.saga.engine.invoker;
-
-import io.seata.saga.statelang.domain.ServiceTaskState;
+package io.seata.saga.engine.mock;
 
 /**
- * Service invoker
  *
  * @author lorne.cl
  */
-public interface ServiceInvoker {
+public class DemoException extends RuntimeException {
 
-    /**
-     * invoke service
-     * @param serviceTaskState
-     * @param input
-     * @return
-     * @throws Throwable
-     */
-    Object invoke(ServiceTaskState serviceTaskState, Object... input) throws Throwable;
+    public DemoException() {
+    }
+
+    public DemoException(String message) {
+        super(message);
+    }
+
+    public DemoException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public DemoException(Throwable cause) {
+        super(cause);
+    }
+
+    public DemoException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+        super(message, cause, enableSuppression, writableStackTrace);
+    }
 }
