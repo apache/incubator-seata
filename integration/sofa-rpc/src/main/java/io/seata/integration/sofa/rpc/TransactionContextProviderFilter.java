@@ -86,6 +86,7 @@ public class TransactionContextProviderFilter extends Filter {
 
     /**
      * get rpc xid
+     *
      * @return
      */
     private String getRpcXid(SofaRequest sofaRequest) {

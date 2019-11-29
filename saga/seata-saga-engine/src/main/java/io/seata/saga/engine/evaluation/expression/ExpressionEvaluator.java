@@ -15,8 +15,6 @@
  */
 package io.seata.saga.engine.evaluation.expression;
 
-import java.util.Map;
-
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.saga.engine.evaluation.Evaluator;
 import io.seata.saga.engine.exception.EngineExecutionException;
@@ -25,6 +23,8 @@ import io.seata.saga.statelang.domain.DomainConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
+
+import java.util.Map;
 
 /**
  * Expression evaluator
@@ -71,7 +71,7 @@ public class ExpressionEvaluator implements Evaluator {
                 "Evaluation returns non-Boolean: " + result + " (" + result.getClass().getName() + ")",
                 FrameworkErrorCode.EvaluationReturnsNonBoolean);
         }
-        return (Boolean)result;
+        return (Boolean) result;
     }
 
     public Expression getExpression() {

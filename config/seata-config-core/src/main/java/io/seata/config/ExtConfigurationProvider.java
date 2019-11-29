@@ -17,12 +17,14 @@ package io.seata.config;
 
 /**
  * the interface ext configuration provider
+ *
  * @author xingfudeshi@gmail.com
  * @date 2019/10/03
  */
 public interface ExtConfigurationProvider {
     /**
      * provide a AbstractConfiguration implementation instance
+     *
      * @param originalConfiguration
      * @return configuration
      */

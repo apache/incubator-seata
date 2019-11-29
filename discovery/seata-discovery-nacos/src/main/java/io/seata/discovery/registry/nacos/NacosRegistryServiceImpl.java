@@ -15,24 +15,23 @@
  */
 package io.seata.discovery.registry.nacos;
 
-import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
 import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alibaba.nacos.client.naming.utils.CollectionUtils;
-
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
 import io.seata.discovery.registry.RegistryService;
+
+import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * The type Nacos registry service.
@@ -134,7 +133,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
                         CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
                     }
                     subscribe(clusterName, event -> {
-                        List<Instance> instances = ((NamingEvent)event).getInstances();
+                        List<Instance> instances = ((NamingEvent) event).getInstances();
                         if (null == instances && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
                             CLUSTER_ADDRESS_MAP.remove(clusterName);
                         } else if (!CollectionUtils.isEmpty(instances)) {

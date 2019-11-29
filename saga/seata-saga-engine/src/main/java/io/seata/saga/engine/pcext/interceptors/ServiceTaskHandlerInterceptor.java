@@ -127,7 +127,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
             }
             return value;
         } else if (valueExpression instanceof Map) {
-            Map<String, Object> mapValueExpression = (Map<String, Object>)valueExpression;
+            Map<String, Object> mapValueExpression = (Map<String, Object>) valueExpression;
             Map<String, Object> mapValue = new LinkedHashMap<>();
             for (String paramName : mapValueExpression.keySet()) {
                 Object value = getValue(mapValueExpression.get(paramName), variablesFrom, stateInstance);
@@ -137,7 +137,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
             }
             return mapValue;
         } else if (valueExpression instanceof List) {
-            List<Object> listValueExpression = (List<Object>)valueExpression;
+            List<Object> listValueExpression = (List<Object>) valueExpression;
             List<Object> listValue = new ArrayList<>(listValueExpression.size());
             for (Object aValueExpression : listValueExpression) {
                 listValue.add(getValue(aValueExpression, variablesFrom, stateInstance));
@@ -170,9 +170,9 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                 paramList.add(createValueExpression(expressionFactoryManager, aParamAssignment));
             }
             valueExpression = paramList;
-        } else if (paramAssignment instanceof String && ((String)paramAssignment).startsWith("$")) {
+        } else if (paramAssignment instanceof String && ((String) paramAssignment).startsWith("$")) {
 
-            String expressionStr = (String)paramAssignment;
+            String expressionStr = (String) paramAssignment;
             int expTypeStart = expressionStr.indexOf("$");
             int expTypeEnd = expressionStr.indexOf(".", expTypeStart);
 
@@ -203,16 +203,16 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
 
-        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
+        StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
-        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+        StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
         StateInstanceImpl stateInstance = new StateInstanceImpl();
 
-        Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
+        Map<String, Object> contextVariables = (Map<String, Object>) context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
-        ServiceTaskStateImpl state = (ServiceTaskStateImpl)instruction.getState(context);
+        ServiceTaskStateImpl state = (ServiceTaskStateImpl) instruction.getState(context);
         List<Object> serviceInputParams = null;
         if (contextVariables != null) {
             try {
@@ -232,7 +232,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
             }
         }
 
-        ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_INPUT_PARAMS,
+        ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_INPUT_PARAMS,
             serviceInputParams);
 
         stateInstance.setMachineInstanceId(stateMachineInstance.getId());
@@ -242,11 +242,11 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         stateInstance.setStatus(ExecutionStatus.RU);
 
         stateInstance.setStateIdRetriedFor(
-            (String)context.getVariable(state.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID));
+            (String) context.getVariable(state.getName() + DomainConstants.VAR_NAME_RETRIED_STATE_INST_ID));
 
         if (StringUtils.hasLength(stateInstance.getBusinessKey())) {
 
-            ((Map<String, Object>)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT)).put(
+            ((Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT)).put(
                 state.getName() + DomainConstants.VAR_NAME_BUSINESSKEY, stateInstance.getBusinessKey());
         }
 
@@ -258,7 +258,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         stateInstance.setServiceType(state.getServiceType());
 
         Object isForCompensation = state.isForCompensation();
-        if (isForCompensation != null && (Boolean)isForCompensation) {
+        if (isForCompensation != null && (Boolean) isForCompensation) {
             CompensationHolder compensationHolder = CompensationHolder.getCurrent(context, true);
             StateInstance stateToBeCompensated = compensationHolder.getStatesNeedCompensation().get(state.getName());
             if (stateToBeCompensated != null) {
@@ -302,27 +302,27 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
             stateInstance.setId(stateMachineConfig.getSeqGenerator().generate(DomainConstants.SEQ_ENTITY_STATE_INST));
         }
         stateMachineInstance.putStateInstance(stateInstance.getId(), stateInstance);
-        ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_STATE_INST, stateInstance);
+        ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_STATE_INST, stateInstance);
     }
 
     @Override
     public void postProcess(ProcessContext context, Exception exp) throws EngineExecutionException {
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
-        ServiceTaskStateImpl state = (ServiceTaskStateImpl)instruction.getState(context);
+        ServiceTaskStateImpl state = (ServiceTaskStateImpl) instruction.getState(context);
 
-        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
+        StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
-        StateInstance stateInstance = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
+        StateInstance stateInstance = (StateInstance) context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
         if (stateInstance == null) {
             return;
         }
 
-        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+        StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
         if (exp == null) {
-            exp = (Exception)context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+            exp = (Exception) context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
         }
         stateInstance.setException(exp);
 
@@ -338,7 +338,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
             context.removeVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
         }
 
-        Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
+        Map<String, Object> contextVariables = (Map<String, Object>) context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
         Object serviceOutputParams = context.getVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
         if (serviceOutputParams != null) {
@@ -378,7 +378,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
         }
 
         if (exp != null && context.getVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH) != null
-            && (Boolean)context.getVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH)) {
+            && (Boolean) context.getVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH)) {
             //If there is an exception and there is no catch, need to exit the state machine to execute.
 
             context.removeVariable(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH);
@@ -402,7 +402,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                 }
             } else {
 
-                StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+                StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
                     DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
                 Map<Object, String> statusEvaluators = state.getStatusEvaluators();
@@ -426,7 +426,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
                 }
 
                 for (Object evaluatorObj : statusEvaluators.keySet()) {
-                    Evaluator evaluator = (Evaluator)evaluatorObj;
+                    Evaluator evaluator = (Evaluator) evaluatorObj;
                     String statusVal = statusEvaluators.get(evaluator);
                     if (evaluator.evaluate(context.getVariables())) {
                         stateInstance.setStatus(ExecutionStatus.valueOf(statusVal));
@@ -521,7 +521,7 @@ public class ServiceTaskHandlerInterceptor implements StateHandlerInterceptor {
             }
             evaluator = evaluatorFactory.createEvaluator(expressionContent);
             if (evaluator instanceof ExpressionEvaluator) {
-                ((ExpressionEvaluator)evaluator).setRootObjectName(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
+                ((ExpressionEvaluator) evaluator).setRootObjectName(DomainConstants.VAR_NAME_OUTPUT_PARAMS);
             }
         }
         return evaluator;

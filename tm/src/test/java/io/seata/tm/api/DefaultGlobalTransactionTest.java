@@ -39,7 +39,7 @@ class DefaultGlobalTransactionTest {
         TransactionManagerHolder.set(new TransactionManager() {
             @Override
             public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
-                    throws TransactionException {
+                throws TransactionException {
                 return DEFAULT_XID;
             }
 
@@ -55,7 +55,7 @@ class DefaultGlobalTransactionTest {
 
             @Override
             public GlobalStatus getStatus(String xid) throws TransactionException {
-              throw new MyRuntimeException("");
+                throw new MyRuntimeException("");
             }
 
             @Override
@@ -72,7 +72,8 @@ class DefaultGlobalTransactionTest {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         tx.begin();
         Assertions.assertThrows(TransactionException.class, () -> {
-            tx.commit();});
+            tx.commit();
+        });
     }
 
     @Test

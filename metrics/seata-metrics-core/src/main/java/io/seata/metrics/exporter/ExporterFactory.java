@@ -15,16 +15,16 @@
  */
 package io.seata.metrics.exporter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Exporter Factory for load all configured exporters
@@ -47,7 +47,7 @@ public class ExporterFactory {
                     exporters.add(
                         EnhancedServiceLoader.load(Exporter.class, Objects.requireNonNull(exporterType).name()));
                 } catch (Exception exx) {
-                    LOGGER.error("not support metrics exporter type: {}",exporterTypeName, exx);
+                    LOGGER.error("not support metrics exporter type: {}", exporterTypeName, exx);
                 }
             }
         }

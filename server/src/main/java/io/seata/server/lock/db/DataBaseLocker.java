@@ -67,7 +67,7 @@ public class DataBaseLocker extends AbstractLocker {
         } catch (StoreException e) {
             throw e;
         } catch (Exception t) {
-            LOGGER.error("AcquireLock error, locks:{}",CollectionUtils.toString(locks), t);
+            LOGGER.error("AcquireLock error, locks:{}", CollectionUtils.toString(locks), t);
             return false;
         }
     }
@@ -83,7 +83,7 @@ public class DataBaseLocker extends AbstractLocker {
         } catch (StoreException e) {
             throw e;
         } catch (Exception t) {
-            LOGGER.error("unLock error, locks:{}",CollectionUtils.toString(locks), t);
+            LOGGER.error("unLock error, locks:{}", CollectionUtils.toString(locks), t);
             return false;
         }
     }

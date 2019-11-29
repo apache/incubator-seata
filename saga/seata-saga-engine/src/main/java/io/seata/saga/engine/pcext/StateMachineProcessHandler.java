@@ -53,7 +53,7 @@ public class StateMachineProcessHandler implements ProcessHandler {
 
         List<StateHandlerInterceptor> interceptors = null;
         if (stateHandler instanceof InterceptibleStateHandler) {
-            interceptors = ((InterceptibleStateHandler)stateHandler).getInterceptors();
+            interceptors = ((InterceptibleStateHandler) stateHandler).getInterceptors();
         }
 
         List<StateHandlerInterceptor> executedInterceptors = null;

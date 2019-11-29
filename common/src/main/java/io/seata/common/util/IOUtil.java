@@ -22,6 +22,7 @@ public class IOUtil {
 
     /**
      * close Closeable
+     *
      * @param closeables the closeables
      */
     public static void close(AutoCloseable... closeables) {
@@ -34,6 +35,7 @@ public class IOUtil {
 
     /**
      * close Closeable
+     *
      * @param closeable the closeable
      */
     public static void close(AutoCloseable closeable) {

@@ -251,13 +251,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                         + ", cannot find channel by resourceId[" + sagaResourceId + "]");
                     return BranchStatus.PhaseTwo_CommitFailed_Retryable;
                 }
-                BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(sagaChannel,
+                BranchCommitResponse response = (BranchCommitResponse) messageSender.sendSyncRequest(sagaChannel,
                     request);
                 return response.getBranchStatus();
             } else {
                 BranchSession branchSession = globalSession.getBranch(branchId);
                 if (null != branchSession) {
-                    BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
+                    BranchCommitResponse response = (BranchCommitResponse) messageSender.sendSyncRequest(resourceId,
                         branchSession.getClientId(), request);
                     return response.getBranchStatus();
                 } else {
@@ -302,7 +302,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                         + ", cannot find channel by resourceId[" + sagaResourceId + "]");
                     return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
                 }
-                BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSyncRequest(sagaChannel,
+                BranchRollbackResponse response = (BranchRollbackResponse) messageSender.sendSyncRequest(sagaChannel,
                     request);
                 return response.getBranchStatus();
             } else {

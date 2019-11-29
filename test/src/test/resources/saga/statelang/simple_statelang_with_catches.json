@@ -48,7 +48,7 @@
             "Catch": [
                 {
                     "Exceptions": [
-                        "io.seata.saga.engine.mock.DemoException"
+                      "io.seata.saga.engine.mock.DemoException"
                     ],
                     "Next": "Fail"
                 }

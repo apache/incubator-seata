@@ -74,7 +74,7 @@ public class StateMachineParserImpl implements StateMachineParser {
         for (String name : stateMap.keySet()) {
             State state = stateMap.get(name);
             if (state instanceof AbstractTaskState) {
-                AbstractTaskState taskState = (AbstractTaskState)state;
+                AbstractTaskState taskState = (AbstractTaskState) state;
                 if (StringUtils.isNotBlank(taskState.getCompensateState())) {
                     taskState.setForUpdate(true);
 

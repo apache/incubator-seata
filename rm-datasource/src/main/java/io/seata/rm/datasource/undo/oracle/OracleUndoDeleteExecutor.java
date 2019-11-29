@@ -15,8 +15,6 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
-import com.alibaba.druid.util.JdbcConstants;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;

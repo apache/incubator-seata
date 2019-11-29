@@ -62,19 +62,19 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
 
     @Override
     public Configuration provide(Configuration originalConfiguration) {
-        return (Configuration)Enhancer.create(originalConfiguration.getClass(), new MethodInterceptor() {
+        return (Configuration) Enhancer.create(originalConfiguration.getClass(), new MethodInterceptor() {
             @Override
             public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy)
                 throws Throwable {
                 if (method.getName().startsWith(INTERCEPT_METHOD_PREFIX) && args.length > 0) {
                     Object result = null;
-                    String rawDataId = (String)args[0];
+                    String rawDataId = (String) args[0];
                     if (args.length == 1) {
                         result = get(convertDataId(rawDataId));
                     } else if (args.length == 2) {
                         result = get(convertDataId(rawDataId), args[1]);
                     } else if (args.length == 3) {
-                        result = get(convertDataId(rawDataId), args[1], (Long)args[2]);
+                        result = get(convertDataId(rawDataId), args[1], (Long) args[2]);
                     }
                     if (null != result) {
                         return result;

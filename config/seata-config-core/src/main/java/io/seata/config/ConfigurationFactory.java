@@ -15,12 +15,12 @@
  */
 package io.seata.config;
 
-import java.util.Objects;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
 
 /**
  * The type Configuration factory.
@@ -118,7 +118,7 @@ public final class ConfigurationFactory {
             } catch (Exception e) {
                 LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
             }
-            
+
             return null == extConfiguration ? configuration : extConfiguration;
         } else {
             return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())

@@ -216,7 +216,7 @@ public class FileTransactionStoreManager extends AbstractTransactionStoreManager
             result = findTimeoutAndSave();
             StoreRequest request = new CloseFileRequest(currFileChannel, currRaf);
             writeDataFileRunnable.putRequest(request);
-            ((CloseFileRequest)request).waitForClose(MAX_WAIT_FOR_CLOSE_TIME_MILLS);
+            ((CloseFileRequest) request).waitForClose(MAX_WAIT_FOR_CLOSE_TIME_MILLS);
             Files.move(currDataFile.toPath(), new File(hisFullFileName).toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException exx) {
             LOGGER.error("save history data file error, {}", exx.getMessage(), exx);

@@ -42,7 +42,7 @@ public class GlobalReportRequestCodec extends AbstractGlobalEndRequestCodec {
         if (globalStatus != null) {
             out.writeByte((byte)globalStatus.getCode());
         } else {
-            out.writeByte((byte)-1);
+            out.writeByte((byte) -1);
         }
     }
 

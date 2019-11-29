@@ -53,7 +53,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
             state = stateInstruction.getTemporaryState();
             stateInstruction.setTemporaryState(null);
         } else {
-            StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+            StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
                 DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
             StateMachine stateMachine = stateMachineConfig.getStateMachineRepository().getStateMachine(
                 stateInstruction.getStateMachineName(), stateInstruction.getTenantId());
@@ -68,7 +68,7 @@ public class StateMachineProcessRouter implements ProcessRouter {
 
         List<StateRouterInterceptor> interceptors = null;
         if (router instanceof InterceptibleStateRouter) {
-            interceptors = ((InterceptibleStateRouter)router).getInterceptors();
+            interceptors = ((InterceptibleStateRouter) router).getInterceptors();
         }
 
         List<StateRouterInterceptor> executedInterceptors = null;

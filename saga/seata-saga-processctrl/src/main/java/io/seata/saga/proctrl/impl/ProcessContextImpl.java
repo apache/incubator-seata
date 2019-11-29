@@ -128,7 +128,7 @@ public class ProcessContextImpl implements HierarchicalProcessContext, ProcessCo
 
     @Override
     public <T extends Instruction> T getInstruction(Class<T> clazz) {
-        return (T)instruction;
+        return (T) instruction;
     }
 
     @Override

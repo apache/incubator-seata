@@ -15,17 +15,6 @@
  */
 package io.seata.core.store.db;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
-
-import javax.sql.DataSource;
-
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
@@ -41,6 +30,16 @@ import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
 
 /**
  * The type Log store data base dao.
@@ -482,7 +481,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         try (Connection conn = logStoreDataSource.getConnection()) {
             DatabaseMetaData dbmd = conn.getMetaData();
             String schema = getSchema(conn);
-            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[] {"TABLE"});
+            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[]{"TABLE"});
             while (tableRs.next()) {
                 String table = tableRs.getString("TABLE_NAME");
                 if (StringUtils.equalsIgnoreCase(table, tableName)) {

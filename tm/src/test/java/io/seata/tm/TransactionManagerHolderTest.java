@@ -29,8 +29,10 @@ class TransactionManagerHolderTest {
 
     @Test
     void getTest() {
-        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {   TransactionManagerHolder.set(null);
-            TransactionManagerHolder.get();});
+        Assertions.assertThrows(ShouldNeverHappenException.class, () -> {
+            TransactionManagerHolder.set(null);
+            TransactionManagerHolder.get();
+        });
     }
 
 }

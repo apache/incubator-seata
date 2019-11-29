@@ -70,23 +70,23 @@ public class SubStateMachineHandler implements StateHandler, InterceptibleStateH
     public void process(ProcessContext context) throws EngineExecutionException {
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
-        SubStateMachineImpl subStateMachine = (SubStateMachineImpl)instruction.getState(context);
+        SubStateMachineImpl subStateMachine = (SubStateMachineImpl) instruction.getState(context);
 
-        StateMachineEngine engine = (StateMachineEngine)context.getVariable(
+        StateMachineEngine engine = (StateMachineEngine) context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_ENGINE);
-        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
+        StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
-        StateInstance stateInstance = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
+        StateInstance stateInstance = (StateInstance) context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
 
         Object inputParamsObj = context.getVariable(DomainConstants.VAR_NAME_INPUT_PARAMS);
         Map<String, Object> startParams = new HashMap<>(0);
         if (inputParamsObj instanceof List) {
-            List<Object> listInputParams = (List<Object>)inputParamsObj;
+            List<Object> listInputParams = (List<Object>) inputParamsObj;
             if (listInputParams.size() > 0) {
-                startParams = (Map<String, Object>)listInputParams.get(0);
+                startParams = (Map<String, Object>) listInputParams.get(0);
             }
         } else if (inputParamsObj instanceof Map) {
-            startParams = (Map<String, Object>)inputParamsObj;
+            startParams = (Map<String, Object>) inputParamsObj;
         }
 
         startParams.put(DomainConstants.VAR_NAME_PARENT_ID, EngineUtils.generateParentId(stateInstance));
@@ -169,7 +169,7 @@ public class SubStateMachineHandler implements StateHandler, InterceptibleStateH
     private StateMachineInstance forwardStateMachine(Map<String, Object> startParams, StateMachineEngine engine,
                                                      ProcessContext context, StateInstance stateInstance,
                                                      SubStateMachine subStateMachine) {
-        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+        StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
         StateLogStore statePersister = stateMachineConfig.getStateLogStore();
         if (statePersister == null) {

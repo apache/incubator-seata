@@ -58,7 +58,7 @@ public class SagaResourceManager extends AbstractResourceManager {
      */
     @Override
     public void registerResource(Resource resource) {
-        SagaResource sagaResource = (SagaResource)resource;
+        SagaResource sagaResource = (SagaResource) resource;
         sagaResourceCache.put(sagaResource.getResourceId(), sagaResource);
         super.registerResource(sagaResource);
     }
