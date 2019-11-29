@@ -19,7 +19,6 @@ import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.undo.KeywordChecker;
 
 import java.util.Arrays;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
