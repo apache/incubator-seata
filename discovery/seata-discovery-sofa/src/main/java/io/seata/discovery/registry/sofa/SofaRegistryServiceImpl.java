@@ -313,11 +313,4 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
         }
         return application;
     }
-
-    @Override
-    public String getServiceGroup(String key) {
-        Configuration config = ConfigurationFactory.getInstance();
-        return config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
-    }
-
 }

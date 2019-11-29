@@ -271,12 +271,6 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         return client;
     }
 
-    @Override
-    public String getServiceGroup(String key) {
-        String clusterNameKey = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
-        return ConfigurationFactory.getInstance().getConfig(clusterNameKey);
-    }
-
     /**
      * get cluster name
      *

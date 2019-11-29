@@ -258,11 +258,4 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private String getEurekaInstanceWeightFileKey() {
         return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR + REGISTRY_WEIGHT;
     }
-
-    @Override
-    public String getServiceGroup(String key) {
-        Configuration config = ConfigurationFactory.getInstance();
-        return config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
-    }
-
 }

@@ -104,9 +104,4 @@ public class FileRegistryServiceImpl implements RegistryService<ConfigChangeList
     public void close() throws Exception {
 
     }
-
-    @Override
-    public String getServiceGroup(String key) {
-        return CONFIG.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
-    }
 }

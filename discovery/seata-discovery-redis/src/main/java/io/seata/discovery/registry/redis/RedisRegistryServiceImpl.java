@@ -257,10 +257,4 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
         return REDIS_FILEKEY_PREFIX + REDIS_DB;
     }
 
-    @Override
-    public String getServiceGroup(String key) {
-        Configuration config = ConfigurationFactory.getInstance();
-        return config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
-    }
-
 }

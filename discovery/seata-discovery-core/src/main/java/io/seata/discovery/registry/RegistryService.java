@@ -15,6 +15,9 @@
  */
 package io.seata.discovery.registry;
 
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+
 import java.net.InetSocketAddress;
 import java.util.List;
 
@@ -95,5 +98,8 @@ public interface RegistryService<T> {
      * @param key service group
      * @return the service group name
      */
-    String getServiceGroup(String key);
+    default String getServiceGroup(String key) {
+        Configuration config = ConfigurationFactory.getInstance();
+        return config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
+    }
 }

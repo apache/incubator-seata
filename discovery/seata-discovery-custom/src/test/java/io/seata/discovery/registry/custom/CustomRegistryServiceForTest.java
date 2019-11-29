@@ -52,8 +52,4 @@ public class CustomRegistryServiceForTest implements RegistryService<ConfigChang
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    public String getServiceGroup(String key) {
-        throw new UnsupportedOperationException();
-    }
 }
