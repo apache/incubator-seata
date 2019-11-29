@@ -15,15 +15,16 @@
  */
 package io.seata.saga.statelang.parser.impl;
 
+import java.util.List;
+import java.util.Map;
+
 import io.seata.saga.statelang.domain.ServiceTaskState;
 import io.seata.saga.statelang.domain.impl.ServiceTaskStateImpl;
 import io.seata.saga.statelang.parser.StateParser;
 
-import java.util.List;
-import java.util.Map;
-
 /**
  * ServcieTaskTask parser
+ *
  * @author lorne.cl
  */
 public class ServiceTaskStateParser extends AbstractTaskStateParser implements StateParser<ServiceTaskState> {
@@ -40,6 +41,10 @@ public class ServiceTaskStateParser extends AbstractTaskStateParser implements S
         serviceTaskState.setServiceMethod((String)nodeMap.get("ServiceMethod"));
         serviceTaskState.setServiceType((String)nodeMap.get("ServiceType"));
         serviceTaskState.setParameterTypes((List<String>)nodeMap.get("ParameterTypes"));
+        Object isAsync = nodeMap.get("IsAsync");
+        if (isAsync != null && Boolean.TRUE.equals(isAsync)) {
+            serviceTaskState.setAsync(true);
+        }
 
         return serviceTaskState;
     }

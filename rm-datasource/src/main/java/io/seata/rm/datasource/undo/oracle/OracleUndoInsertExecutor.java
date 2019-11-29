@@ -30,6 +30,7 @@ import java.util.List;
 
 /**
  * The type oralce undo insert executor.
+ *
  * @author ccg
  * @date 2019/3/25
  */
@@ -54,7 +55,8 @@ public class OracleUndoInsertExecutor extends AbstractUndoExecutor {
     }
 
     @Override
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue) throws SQLException {
+    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue)
+        throws SQLException {
         undoPST.setObject(1, pkValue.getValue(), pkValue.getType());
     }
 

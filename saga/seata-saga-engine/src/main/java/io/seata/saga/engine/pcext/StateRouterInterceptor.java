@@ -23,8 +23,8 @@ import io.seata.saga.statelang.domain.State;
 /**
  * StateRouter Interceptor
  *
- * @see StateRouter
  * @author lorne.cl
+ * @see StateRouter
  */
 public interface StateRouterInterceptor {
 
@@ -46,5 +46,6 @@ public interface StateRouterInterceptor {
      * @param e
      * @throws EngineExecutionException
      */
-    void postRoute(ProcessContext context, State state, Instruction instruction, Exception e) throws EngineExecutionException;
+    void postRoute(ProcessContext context, State state, Instruction instruction, Exception e)
+        throws EngineExecutionException;
 }

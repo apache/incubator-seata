@@ -15,6 +15,8 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
+import com.alibaba.druid.util.JdbcConstants;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 
 /**
  * The type oracle undo delete executor.
+ *
  * @author ccg
  * @date 2019/3/25
  */

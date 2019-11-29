@@ -43,24 +43,19 @@ public class BranchRollbackResponseConvertor
 
         final String msg = branchRollbackResponse.getMsg();
         final AbstractResultMessageProto abstractResultMessageProto = AbstractResultMessageProto.newBuilder().setMsg(
-            msg == null ? "" : msg)
-            .setResultCode(ResultCodeProto.valueOf(branchRollbackResponse.getResultCode().name())).setAbstractMessage(
-                abstractMessage).build();
+            msg == null ? "" : msg).setResultCode(
+            ResultCodeProto.valueOf(branchRollbackResponse.getResultCode().name())).setAbstractMessage(abstractMessage)
+            .build();
 
         final AbstractTransactionResponseProto abstractTransactionRequestProto = AbstractTransactionResponseProto
-            .newBuilder()
-            .setAbstractResultMessage(abstractResultMessageProto)
-            .setTransactionExceptionCode(
+            .newBuilder().setAbstractResultMessage(abstractResultMessageProto).setTransactionExceptionCode(
                 TransactionExceptionCodeProto.valueOf(branchRollbackResponse.getTransactionExceptionCode().name()))
             .build();
 
-        final AbstractBranchEndResponseProto abstractBranchEndResponse = AbstractBranchEndResponseProto
-            .newBuilder().
-                setAbstractTransactionResponse(abstractTransactionRequestProto)
-            .setXid(branchRollbackResponse.getXid())
-            .setBranchId(branchRollbackResponse.getBranchId())
-            .setBranchStatus(BranchStatusProto.forNumber(branchRollbackResponse.getBranchStatus().getCode()))
-            .build();
+        final AbstractBranchEndResponseProto abstractBranchEndResponse = AbstractBranchEndResponseProto.newBuilder().
+            setAbstractTransactionResponse(abstractTransactionRequestProto).setXid(branchRollbackResponse.getXid())
+            .setBranchId(branchRollbackResponse.getBranchId()).setBranchStatus(
+                BranchStatusProto.forNumber(branchRollbackResponse.getBranchStatus().getCode())).build();
 
         BranchRollbackResponseProto result = BranchRollbackResponseProto.newBuilder().setAbstractBranchEndResponse(
             abstractBranchEndResponse).build();

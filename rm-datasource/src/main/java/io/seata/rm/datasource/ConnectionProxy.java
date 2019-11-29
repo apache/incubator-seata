@@ -50,6 +50,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     private static final int REPORT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_REPORT_RETRY_COUNT, DEFAULT_REPORT_RETRY_COUNT);
 
+    public static final boolean IS_REPORT_SUCCESS_ENABLE = ConfigurationFactory.getInstance().getBoolean(
+        ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, true);
+
     private final static LockRetryPolicy LOCK_RETRY_POLICY = new LockRetryPolicy();
 
     /**
@@ -220,7 +223,9 @@ public class ConnectionProxy extends AbstractConnectionProxy {
             report(false);
             throw new SQLException(ex);
         }
-        report(true);
+        if (IS_REPORT_SUCCESS_ENABLE) {
+            report(true);
+        }
         context.reset();
     }
 
@@ -243,7 +248,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
 
     @Override
     public void setAutoCommit(boolean autoCommit) throws SQLException {
-        if ((autoCommit) && !getAutoCommit()) {
+        if (autoCommit && !getAutoCommit()) {
             // change autocommit from false to true, we should commit() first according to JDBC spec.
             doCommit();
         }
@@ -255,7 +260,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         while (retry > 0) {
             try {
                 DefaultResourceManager.get().branchReport(BranchType.AT, context.getXid(), context.getBranchId(),
-                    (commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed), null);
+                    commitDone ? BranchStatus.PhaseOne_Done : BranchStatus.PhaseOne_Failed, null);
                 return;
             } catch (Throwable ex) {
                 LOGGER.error("Failed to report [" + context.getBranchId() + "/" + context.getXid() + "] commit done ["
@@ -270,8 +275,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     public static class LockRetryPolicy {
-        protected final static boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT =
-                ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, true);
+        protected final static boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = ConfigurationFactory
+            .getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, true);
 
         public <T> T execute(Callable<T> callable) throws Exception {
             if (LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT) {

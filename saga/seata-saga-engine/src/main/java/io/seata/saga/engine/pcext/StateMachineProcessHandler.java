@@ -15,6 +15,10 @@
  */
 package io.seata.saga.engine.pcext;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.exception.FrameworkException;
 import io.seata.saga.engine.pcext.handlers.ChoiceStateHandler;
@@ -28,16 +32,12 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.proctrl.handler.ProcessHandler;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.State;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * StateMachine ProcessHandler
  *
- * @see ProcessHandler
  * @author lorne.cl
+ * @see ProcessHandler
  */
 public class StateMachineProcessHandler implements ProcessHandler {
 
@@ -53,7 +53,7 @@ public class StateMachineProcessHandler implements ProcessHandler {
 
         List<StateHandlerInterceptor> interceptors = null;
         if (stateHandler instanceof InterceptibleStateHandler) {
-            interceptors = ((InterceptibleStateHandler) stateHandler).getInterceptors();
+            interceptors = ((InterceptibleStateHandler)stateHandler).getInterceptors();
         }
 
         List<StateHandlerInterceptor> executedInterceptors = null;
@@ -84,8 +84,8 @@ public class StateMachineProcessHandler implements ProcessHandler {
 
     }
 
-    public void initDefaultHandlers(){
-        if(stateHandlers.size() == 0){
+    public void initDefaultHandlers() {
+        if (stateHandlers.size() == 0) {
 
             //ServiceTask
             ServiceTaskStateHandler serviceTaskStateHandler = new ServiceTaskStateHandler();
