@@ -174,7 +174,7 @@ public class DesignerJsonTransformer {
     }
 
     public static boolean isDesignerJson(Map<String, Object> jsonObject) {
-        return (jsonObject != null && jsonObject.containsKey("nodes") && jsonObject.containsKey("edges"));
+        return jsonObject != null && jsonObject.containsKey("nodes") && jsonObject.containsKey("edges");
     }
 
     private static JSONObject getCatchAttachedNode(JSONObject catchNode, List<Object> nodes) {
