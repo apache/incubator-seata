@@ -16,16 +16,14 @@
 package io.seata.rm.datasource.sql.druid.postgresql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
-import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
+import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.druid.BaseRecognizer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * @author will
@@ -64,40 +62,22 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
     }
 
     public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder,
-        final ArrayList<List<Object>> paramAppenderList) {
-        if (where == null) {
-            return "";
+                                    final ArrayList<List<Object>> paramAppenderList) {
+        if (Objects.isNull(where)) {
+            return StringUtils.EMPTY;
         }
         StringBuilder sb = new StringBuilder();
-        PGOutputVisitor visitor = createOutputVisitor(parametersHolder, paramAppenderList, sb);
-        if (where instanceof SQLBinaryOpExpr) {
-            visitor.visit((SQLBinaryOpExpr) where);
-        } else if (where instanceof SQLInListExpr) {
-            visitor.visit((SQLInListExpr) where);
-        } else if (where instanceof SQLBetweenExpr) {
-            visitor.visit((SQLBetweenExpr) where);
-        } else {
-            throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
-        }
+        executeVisit(where, createOutputVisitor(parametersHolder, paramAppenderList, sb));
         return sb.toString();
     }
 
     public String getWhereCondition(SQLExpr where) {
-        if (where == null) {
-            return "";
+        if (Objects.isNull(where)) {
+            return StringUtils.EMPTY;
         }
 
         StringBuilder sb = new StringBuilder();
-        OracleOutputVisitor visitor = new OracleOutputVisitor(sb);
-        if (where instanceof SQLBinaryOpExpr) {
-            visitor.visit((SQLBinaryOpExpr) where);
-        } else if (where instanceof SQLInListExpr) {
-            visitor.visit((SQLInListExpr) where);
-        } else if (where instanceof SQLBetweenExpr) {
-            visitor.visit((SQLBetweenExpr) where);
-        } else {
-            throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
-        }
+        executeVisit(where, new PGOutputVisitor(sb));
         return sb.toString();
     }
 }
