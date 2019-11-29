@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.Constants;
-import io.seata.common.util.BlobUtils;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ClientTableColumnsName;
@@ -30,8 +29,6 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.Blob;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -286,8 +283,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
 
                     String contextString = rs.getString(ClientTableColumnsName.UNDO_LOG_CONTEXT);
                     Map<String, String> context = parseContext(contextString);
-                    Blob b = rs.getBlob(ClientTableColumnsName.UNDO_LOG_ROLLBACK_INFO);
-                    byte[] rollbackInfo = BlobUtils.blob2Bytes(b);
+                    byte[] rollbackInfo = getRollbackInfo(rs);
 
                     String serializer = context == null ? null : context.get(UndoLogConstants.SERIALIZER_KEY);
                     UndoLogParser parser = serializer == null ? UndoLogParserFactory.getInstance()
@@ -403,4 +399,13 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      */
     protected abstract void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx,
                                                     byte[] undoLogContent, Connection conn) throws SQLException;
+
+    /**
+     * RollbackInfo to bytes
+     *
+     * @param rs
+     * @return
+     * @throws SQLException
+     */
+    protected abstract byte[] getRollbackInfo(ResultSet rs) throws SQLException;
 }
