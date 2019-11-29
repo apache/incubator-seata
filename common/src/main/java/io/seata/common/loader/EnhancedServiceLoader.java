@@ -197,7 +197,7 @@ public class EnhancedServiceLoader {
 
     @SuppressWarnings("rawtypes")
     private static <S> S loadFile(Class<S> service, String activateName, ClassLoader loader, Class[] argTypes,
-                                  Object[] args) {
+        Object[] args) {
         try {
             boolean foundFromCache = true;
             List<Class> extensions = providers.get(service);
@@ -349,6 +349,7 @@ public class EnhancedServiceLoader {
         if (argTypes != null && args != null) {
             // Constructor with arguments
             Constructor<S> constructor = implClazz.getDeclaredConstructor(argTypes);
+            constructor.setAccessible(true);
             s = service.cast(constructor.newInstance(args));
         } else {
             // default Constructor
