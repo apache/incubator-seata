@@ -20,6 +20,7 @@ import java.util.Map;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.parser.Feature;
 
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import io.seata.common.util.StringUtils;
 import io.seata.saga.statelang.domain.State;
 import io.seata.saga.statelang.domain.StateMachine;
@@ -29,6 +30,9 @@ import io.seata.saga.statelang.domain.impl.StateMachineImpl;
 import io.seata.saga.statelang.parser.StateMachineParser;
 import io.seata.saga.statelang.parser.StateParser;
 import io.seata.saga.statelang.parser.StateParserFactory;
+import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * State machine language parser
@@ -37,10 +41,16 @@ import io.seata.saga.statelang.parser.StateParserFactory;
  */
 public class StateMachineParserImpl implements StateMachineParser {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StateMachineParserImpl.class);
+
     @Override
     public StateMachine parse(String json) {
 
         Map<String, Object> node = JSON.parseObject(json, Map.class, Feature.IgnoreAutoType, Feature.OrderedField);
+        if(DesignerJsonTransformer.isDesignerJson(node)){
+            node = DesignerJsonTransformer.toStandardJson(node);
+            LOGGER.info("===== Transformed standard state language:\n{}", JSON.toJSONString(node, SerializerFeature.PrettyFormat));
+        }
         StateMachineImpl stateMachine = new StateMachineImpl();
         stateMachine.setName((String)node.get("Name"));
         stateMachine.setComment((String)node.get("Comment"));

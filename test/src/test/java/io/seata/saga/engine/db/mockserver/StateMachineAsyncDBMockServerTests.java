@@ -40,14 +40,15 @@ public class StateMachineAsyncDBMockServerTests {
 
     @BeforeAll
     public static void initApplicationContext() throws InterruptedException {
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_db_mockserver_test.xml");
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+                "classpath:saga/spring/statemachine_engine_db_mockserver_test.xml");
         stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
     }
 
     @Test
     public void testSimpleCatchesStateMachine() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -62,7 +63,6 @@ public class StateMachineAsyncDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-
         Assertions.assertNotNull(inst.getException());
         Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
     }
@@ -70,7 +70,7 @@ public class StateMachineAsyncDBMockServerTests {
     @Test
     public void testStatusMatchingStateMachine() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -85,7 +85,6 @@ public class StateMachineAsyncDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-
         Assertions.assertNotNull(inst.getException());
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
     }
@@ -93,7 +92,7 @@ public class StateMachineAsyncDBMockServerTests {
     @Test
     public void testCompensationStateMachine() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -115,7 +114,7 @@ public class StateMachineAsyncDBMockServerTests {
     @Test
     public void testCompensationAndSubStateMachine() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 2);
@@ -134,9 +133,30 @@ public class StateMachineAsyncDBMockServerTests {
     }
 
     @Test
+    public void testCompensationAndSubStateMachineWithLayout() throws Exception {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 2);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine_layout";
+
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+
+        waittingForFinish(inst);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+    }
+
+    @Test
     public void testStateMachineWithComplextParams() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         People people = new People();
@@ -152,7 +172,7 @@ public class StateMachineAsyncDBMockServerTests {
 
         long cost = System.currentTimeMillis() - start;
 
-        People peopleResult = (People)inst.getEndParams().get("complexParameterMethodResult");
+        People peopleResult = (People) inst.getEndParams().get("complexParameterMethodResult");
         Assertions.assertNotNull(peopleResult);
         Assertions.assertTrue(people.getName().equals(people.getName()));
 
@@ -164,7 +184,7 @@ public class StateMachineAsyncDBMockServerTests {
     @Test
     public void testSimpleStateMachineWithAsyncState() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -187,9 +207,9 @@ public class StateMachineAsyncDBMockServerTests {
         }
     }
 
-    private void waittingForFinish(StateMachineInstance inst){
-        synchronized (lock){
-            if(ExecutionStatus.RU.equals(inst.getStatus())){
+    private void waittingForFinish(StateMachineInstance inst) {
+        synchronized (lock) {
+            if (ExecutionStatus.RU.equals(inst.getStatus())) {
                 try {
                     lock.wait();
                 } catch (InterruptedException e) {
@@ -199,18 +219,18 @@ public class StateMachineAsyncDBMockServerTests {
         }
     }
 
-    private volatile Object lock = new Object();
-    private AsyncCallback callback = new AsyncCallback() {
+    private volatile Object        lock     = new Object();
+    private          AsyncCallback callback = new AsyncCallback() {
         @Override
         public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
-            synchronized (lock){
+            synchronized (lock) {
                 lock.notifyAll();
             }
         }
 
         @Override
         public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
-            synchronized (lock){
+            synchronized (lock) {
                 lock.notifyAll();
             }
         }
