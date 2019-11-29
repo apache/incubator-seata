@@ -152,6 +152,26 @@ public class StateMachineDBMockServerTests {
     }
 
     @Test
+    public void testSimpleRetryStateMachine() {
+
+        long start  = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleRetryStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+    }
+
+    @Test
     public void testStatusMatchingStateMachine() throws Exception {
 
         long start = System.currentTimeMillis();

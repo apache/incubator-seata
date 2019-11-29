@@ -1,6 +1,6 @@
 {
-    "Name": "simpleStateMachineWithCompensationAndSubMachine",
-    "Comment": "带补偿定义和调用子状态机",
+    "Name": "simpleRetryStateMachine",
+    "Comment": "带异常重试的测试状态机定义",
     "StartState": "FirstState",
     "Version": "0.0.1",
     "States": {
@@ -8,14 +8,13 @@
             "Type": "ServiceTask",
             "ServiceName": "demoService",
             "ServiceMethod": "foo",
-            "CompensateState": "CompensateFirstState",
             "Next": "ChoiceState",
             "Input": [
                 {
                     "fooInput": "$.[a]"
                 }
             ],
-            "Output": {
+            "output": {
                 "fooResult": "$.#root"
             }
         },
@@ -28,7 +27,7 @@
                 },
                 {
                     "Expression":"[a] == 2",
-                    "Next":"CallSubStateMachine"
+                    "Next":"ThirdState"
                 }
             ],
             "Default":"Fail"
@@ -36,60 +35,52 @@
         "SecondState": {
             "Type": "ServiceTask",
             "ServiceName": "demoService",
-            "ServiceMethod": "bar",
+            "ServiceMethod": "randomExceptionMethod",
             "Input": [
                 {
                     "barInput": "$.[fooResult]",
                     "throwException": "$.[barThrowException]"
                 }
             ],
-            "Output": {
+            "output": {
                 "barResult": "$.#root"
             },
-            "Status": {
-                "#root != null": "SU",
-                "#root == null": "FA",
-                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN"
-            },
+            "Retry": [
+                {
+                    "Exceptions": ["io.seata.saga.engine.mock.DemoException"],
+                    "IntervalSeconds": 1.5,
+                    "MaxAttempts": 3,
+                    "BackoffRate": 1.5
+                },
+                {
+                    "IntervalSeconds": 1,
+                    "MaxAttempts": 3,
+                    "BackoffRate": 1.5
+                }
+            ],
             "Catch": [
                 {
                     "Exceptions": [
                         "io.seata.saga.engine.mock.DemoException"
                     ],
-                    "Next": "CompensationTrigger"
+                    "Next": "Fail"
                 }
             ],
             "Next": "Succeed"
         },
-        "CallSubStateMachine": {
-            "Type": "SubStateMachine",
-            "StateMachineName": "simpleCompensationStateMachine",
+        "ThirdState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
             "Input": [
                 {
-                    "a": "$.1",
-                    "barThrowException": "$.[barThrowException]",
-                    "fooThrowException": "$.[fooThrowException]",
-                    "compensateFooThrowException": "$.[compensateFooThrowException]"
+                    "fooInput": "$.[fooResult]"
                 }
             ],
-            "Output": {
+            "output": {
                 "fooResult": "$.#root"
             },
             "Next": "Succeed"
-        },
-        "CompensateFirstState": {
-            "Type": "ServiceTask",
-            "ServiceName": "demoService",
-            "ServiceMethod": "compensateFoo",
-            "Input": [
-                {
-                    "compensateFooInput": "$.[fooResult]"
-                }
-            ]
-        },
-        "CompensationTrigger": {
-            "Type": "CompensationTrigger",
-            "Next": "Fail"
         },
         "Succeed": {
             "Type":"Succeed"
