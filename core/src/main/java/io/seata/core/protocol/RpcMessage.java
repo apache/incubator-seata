@@ -15,6 +15,8 @@
  */
 package io.seata.core.protocol;
 
+import io.seata.common.util.StringUtils;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -165,5 +167,10 @@ public class RpcMessage {
      */
     public void setMessageType(byte messageType) {
         this.messageType = messageType;
+    }
+
+    @Override
+    public String toString() {
+        return StringUtils.toString(this);
     }
 }

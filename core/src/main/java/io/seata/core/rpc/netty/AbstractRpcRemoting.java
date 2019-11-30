@@ -26,8 +26,10 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.PositiveAtomicCounter;
+import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeMessage;
+import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
@@ -230,19 +232,35 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         futures.put(rpcMessage.getId(), messageFuture);
 
         if (address != null) {
-            ConcurrentHashMap<String, BlockingQueue<RpcMessage>> map = basketMap;
-            BlockingQueue<RpcMessage> basket = map.get(address);
-            if (basket == null) {
-                map.putIfAbsent(address, new LinkedBlockingQueue<>());
-                basket = map.get(address);
-            }
-            basket.offer(rpcMessage);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("offer message: " + rpcMessage.getBody());
-            }
-            if (!isSending) {
-                synchronized (mergeLock) {
-                    mergeLock.notifyAll();
+            /*
+            The batch send.
+            Object From big to small: RpcMessage -> MergedWarpMessage -> AbstractMessage
+            @see AbstractRpcRemotingClient.MergedSendRunnable
+            */
+            if (NettyClientConfig.isEnableClientBatchSendRequest()) {
+                ConcurrentHashMap<String, BlockingQueue<RpcMessage>> map = basketMap;
+                BlockingQueue<RpcMessage> basket = map.get(address);
+                if (basket == null) {
+                    map.putIfAbsent(address, new LinkedBlockingQueue<>());
+                    basket = map.get(address);
+                }
+                basket.offer(rpcMessage);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("offer message: {}", rpcMessage.getBody());
+                }
+                if (!isSending) {
+                    synchronized (mergeLock) {
+                        mergeLock.notifyAll();
+                    }
+                }
+            } else {
+                // the single send.
+                MergedWarpMessage mergeMessage = new MergedWarpMessage();
+                mergeMessage.msgs.add((AbstractMessage) rpcMessage.getBody());
+                mergeMessage.msgIds.add(rpcMessage.getId());
+                sendRequest(channel, mergeMessage);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("send this msg[{}] by single send.", rpcMessage.getBody());
                 }
             }
         } else {
@@ -266,7 +284,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
             try {
                 return messageFuture.get(timeout, TimeUnit.MILLISECONDS);
             } catch (Exception exx) {
-                LOGGER.error("wait response error:" + exx.getMessage() + ",ip:" + address + ",request:" + msg);
+                LOGGER.error("wait response error:{},ip:{},request:{}" + msg, exx.getMessage(), address, msg);
                 if (exx instanceof TimeoutException) {
                     throw (TimeoutException) exx;
                 } else {
