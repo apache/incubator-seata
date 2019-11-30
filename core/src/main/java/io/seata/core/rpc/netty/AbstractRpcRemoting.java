@@ -258,10 +258,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                 MergedWarpMessage mergeMessage = new MergedWarpMessage();
                 mergeMessage.msgs.add((AbstractMessage) rpcMessage.getBody());
                 mergeMessage.msgIds.add(rpcMessage.getId());
-                sendRequest(channel, mergeMessage);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("send this msg[{}] by single send.", rpcMessage.getBody());
-                }
+                sendMergeRequest(address, channel, mergeMessage);
             }
         } else {
             ChannelFuture future;
@@ -293,6 +290,24 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
             }
         } else {
             return null;
+        }
+    }
+
+    protected void sendMergeRequest(String address, Channel channel, MergedWarpMessage mergeMessage) {
+        try {
+            sendRequest(channel, mergeMessage);
+        } catch (FrameworkException e) {
+            if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable && channel != null) {
+                destroyChannel(address, channel);
+            }
+            // fast fail
+            for (Integer msgId : mergeMessage.msgIds) {
+                MessageFuture messageFuture = futures.remove(msgId);
+                if (messageFuture != null) {
+                    messageFuture.setResultMessage(null);
+                }
+            }
+            LOGGER.error("client merge call failed: {}", e.getMessage(), e);
         }
     }
 
