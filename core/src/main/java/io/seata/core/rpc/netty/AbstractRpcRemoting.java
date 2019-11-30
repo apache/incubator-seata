@@ -260,6 +260,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                 mergeMessage.msgIds.add(rpcMessage.getId());
                 try {
                     sendRequest(channel, mergeMessage);
+                    LOGGER.info("send this msg[{}] by single send.", rpcMessage.getBody());
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("send this msg[{}] by single send.", rpcMessage.getBody());
                     }

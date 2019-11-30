@@ -317,7 +317,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                     if (mergeMessage.msgIds.size() > 1) {
                         printMergeMessageLog(mergeMessage);
                     }
-                    Channel sendChannel = clientChannelManager.acquireChannel(address);
+                    Channel sendChannel = null;
                     try {
                         sendChannel = clientChannelManager.acquireChannel(address);
                         sendRequest(sendChannel, mergeMessage);
