@@ -318,7 +318,22 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                         printMergeMessageLog(mergeMessage);
                     }
                     Channel sendChannel = clientChannelManager.acquireChannel(address);
-                    sendMergeRequest(address, sendChannel, mergeMessage);
+                    try {
+                        sendChannel = clientChannelManager.acquireChannel(address);
+                        sendRequest(sendChannel, mergeMessage);
+                    } catch (FrameworkException e) {
+                        if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable && sendChannel != null) {
+                            destroyChannel(address, sendChannel);
+                        }
+                        // fast fail
+                        for (Integer msgId : mergeMessage.msgIds) {
+                            MessageFuture messageFuture = futures.remove(msgId);
+                            if (messageFuture != null) {
+                                messageFuture.setResultMessage(null);
+                            }
+                        }
+                        LOGGER.error("client merge call failed: {}", e.getMessage(), e);
+                    }
                 }
                 isSending = false;
             }
