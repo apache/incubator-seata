@@ -15,6 +15,8 @@
  */
 package io.seata.saga.engine.utils;
 
+import java.util.Map;
+
 import io.seata.saga.engine.AsyncCallback;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.StateMachineEngine;
@@ -25,8 +27,6 @@ import io.seata.saga.proctrl.impl.ProcessContextImpl;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
-
-import java.util.Map;
 
 /**
  * Process Context Builder
@@ -73,7 +73,8 @@ public class ProcessContextBuilder {
     public ProcessContextBuilder withStateMachineInstance(StateMachineInstance stateMachineInstance) {
         if (stateMachineInstance != null) {
             this.processContext.setVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST, stateMachineInstance);
-            this.processContext.setVariable(DomainConstants.VAR_NAME_STATEMACHINE, stateMachineInstance.getStateMachine());
+            this.processContext.setVariable(DomainConstants.VAR_NAME_STATEMACHINE,
+                stateMachineInstance.getStateMachine());
         }
         return this;
     }

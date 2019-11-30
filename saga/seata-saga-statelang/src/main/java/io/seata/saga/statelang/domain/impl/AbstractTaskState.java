@@ -15,27 +15,28 @@
  */
 package io.seata.saga.statelang.domain.impl;
 
-import io.seata.common.util.StringUtils;
-import io.seata.saga.statelang.domain.TaskState;
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
+import io.seata.common.util.StringUtils;
+import io.seata.saga.statelang.domain.TaskState;
+
 /**
  * The state of the execution task (abstract class), the specific task to be executed is determined by the subclass
+ *
  * @author lorne.cl
  */
 public abstract class AbstractTaskState extends BaseState implements TaskState {
 
-    private String                    compensateState;
-    private boolean                   isForCompensation;
-    private boolean                   isForUpdate;
-    private Retry                     retry;
-    private List<ExceptionMatch>      catches;
-    private List<Object>              input;
-    private Map<String, Object>       output;
-    private Map<String, String>       status;//Map<String/* expression */, String /* status */>
-    private boolean                   isPersist = true;
+    private String compensateState;
+    private boolean isForCompensation;
+    private boolean isForUpdate;
+    private List<Retry> retry;
+    private List<ExceptionMatch> catches;
+    private List<Object> input;
+    private Map<String, Object> output;
+    private Map<String, String> status;//Map<String/* expression */, String /* status */>
+    private boolean isPersist = true;
 
     @Override
     public String getCompensateState() {
@@ -45,7 +46,7 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
     public void setCompensateState(String compensateState) {
         this.compensateState = compensateState;
 
-        if(StringUtils.isNotBlank(this.compensateState)){
+        if (StringUtils.isNotBlank(this.compensateState)) {
             setForUpdate(true);
         }
     }
@@ -69,14 +70,15 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
     }
 
     @Override
-    public Retry getRetry() {
+    public List<Retry> getRetry() {
         return retry;
     }
 
-    public void setRetry(Retry retry) {
+    public void setRetry(List<Retry> retry) {
         this.retry = retry;
     }
 
+    @Override
     public List<ExceptionMatch> getCatches() {
         return catches;
     }
@@ -120,43 +122,11 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
 
     public static class RetryImpl implements Retry {
 
-        private int        intervalSeconds;
-        private int        maxAttempts;
-        private BigDecimal backoffRate;
-
-        @Override
-        public int getIntervalSeconds() {
-            return intervalSeconds;
-        }
-
-        public void setIntervalSeconds(int intervalSeconds) {
-            this.intervalSeconds = intervalSeconds;
-        }
-
-        @Override
-        public int getMaxAttempts() {
-            return maxAttempts;
-        }
-
-        public void setMaxAttempts(int maxAttempts) {
-            this.maxAttempts = maxAttempts;
-        }
-
-        @Override
-        public BigDecimal getBackoffRate() {
-            return backoffRate;
-        }
-
-        public void setBackoffRate(BigDecimal backoffRate) {
-            this.backoffRate = backoffRate;
-        }
-    }
-
-    public static class ExceptionMatchImpl implements ExceptionMatch {
-
-        List<String>                     exceptions;
-        List<Class<? extends Exception>> exceptionClasses;
-        String                           next;
+        private List<String> exceptions;
+        private List<Class<? extends Exception>> exceptionClasses;
+        private double intervalSeconds;
+        private int maxAttempts;
+        private double backoffRate;
 
         @Override
         public List<String> getExceptions() {
@@ -172,6 +142,60 @@ public abstract class AbstractTaskState extends BaseState implements TaskState {
             return exceptionClasses;
         }
 
+        @Override
+        public void setExceptionClasses(List<Class<? extends Exception>> exceptionClasses) {
+            this.exceptionClasses = exceptionClasses;
+        }
+
+        @Override
+        public double getIntervalSeconds() {
+            return intervalSeconds;
+        }
+
+        public void setIntervalSeconds(double intervalSeconds) {
+            this.intervalSeconds = intervalSeconds;
+        }
+
+        @Override
+        public int getMaxAttempts() {
+            return maxAttempts;
+        }
+
+        public void setMaxAttempts(int maxAttempts) {
+            this.maxAttempts = maxAttempts;
+        }
+
+        @Override
+        public double getBackoffRate() {
+            return backoffRate;
+        }
+
+        public void setBackoffRate(double backoffRate) {
+            this.backoffRate = backoffRate;
+        }
+    }
+
+    public static class ExceptionMatchImpl implements ExceptionMatch {
+
+        List<String> exceptions;
+        List<Class<? extends Exception>> exceptionClasses;
+        String next;
+
+        @Override
+        public List<String> getExceptions() {
+            return exceptions;
+        }
+
+        public void setExceptions(List<String> exceptions) {
+            this.exceptions = exceptions;
+        }
+
+        @Override
+        public List<Class<? extends Exception>> getExceptionClasses() {
+            return exceptionClasses;
+        }
+
+        @Override
         public void setExceptionClasses(List<Class<? extends Exception>> exceptionClasses) {
             this.exceptionClasses = exceptionClasses;
         }

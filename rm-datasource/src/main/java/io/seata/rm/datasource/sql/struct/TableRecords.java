@@ -15,8 +15,6 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import io.seata.common.exception.ShouldNeverHappenException;
-
 import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.JDBCType;
@@ -28,6 +26,8 @@ import java.util.List;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
+
+import io.seata.common.exception.ShouldNeverHappenException;
 
 /**
  * The type Table records.
@@ -198,7 +198,7 @@ public class TableRecords {
 
                 } else if (col.getDataType() == JDBCType.CLOB.getVendorTypeNumber()) {
                     Clob clob = resultSet.getClob(i);
-                    if (clob != null){
+                    if (clob != null) {
                         field.setValue(new SerialClob(clob));
                     }
                 } else {

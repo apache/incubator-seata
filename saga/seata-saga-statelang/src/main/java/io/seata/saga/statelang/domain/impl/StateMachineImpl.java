@@ -15,33 +15,34 @@
  */
 package io.seata.saga.statelang.domain.impl;
 
-import io.seata.saga.statelang.domain.State;
-import io.seata.saga.statelang.domain.StateMachine;
-
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import io.seata.saga.statelang.domain.State;
+import io.seata.saga.statelang.domain.StateMachine;
+
 /**
  * state machine
+ *
  * @author lorne.cl
  */
 public class StateMachineImpl implements StateMachine {
 
-    private           String id;
-    private           String tenantId;
-    private           String appName  = "SEATA";
-    private           String name;
-    private           String comment;
-    private           String version;
-    private           String startState;
-    private           Status status = Status.AC;
-    private           String recoverStrategy;
-    private           boolean isPersist = true;
-    private           String  type      = "STATE_LANG";
-    private transient String  content;
-    private           Date    gmtCreate;
-    private Map<String, State> states    = new LinkedHashMap<>();
+    private String id;
+    private String tenantId;
+    private String appName = "SEATA";
+    private String name;
+    private String comment;
+    private String version;
+    private String startState;
+    private Status status = Status.AC;
+    private String recoverStrategy;
+    private boolean isPersist = true;
+    private String type = "STATE_LANG";
+    private transient String content;
+    private Date gmtCreate;
+    private Map<String, State> states = new LinkedHashMap<>();
 
     @Override
     public String getName() {
@@ -66,6 +67,7 @@ public class StateMachineImpl implements StateMachine {
         return startState;
     }
 
+    @Override
     public void setStartState(String startState) {
         this.startState = startState;
     }
@@ -85,19 +87,19 @@ public class StateMachineImpl implements StateMachine {
         return states;
     }
 
+    public void setStates(Map<String, State> states) {
+        this.states = states;
+    }
+
     @Override
     public State getState(String name) {
         return states.get(name);
     }
 
-    public void setStates(Map<String, State> states) {
-        this.states = states;
-    }
-
     public void putState(String stateName, State state) {
         this.states.put(stateName, state);
         if (state instanceof BaseState) {
-            ((BaseState) state).setStateMachine(this);
+            ((BaseState)state).setStateMachine(this);
         }
     }
 
@@ -163,6 +165,7 @@ public class StateMachineImpl implements StateMachine {
         return content;
     }
 
+    @Override
     public void setContent(String content) {
         this.content = content;
     }

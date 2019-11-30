@@ -16,8 +16,11 @@
 package io.seata.server.store.db;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
 
@@ -105,21 +108,20 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
     @Override
     public boolean writeSession(LogOperation logOperation, SessionStorable session) {
         if (LogOperation.GLOBAL_ADD.equals(logOperation)) {
-            logStore.insertGlobalTransactionDO(convertGlobalTransactionDO(session));
+            return logStore.insertGlobalTransactionDO(convertGlobalTransactionDO(session));
         } else if (LogOperation.GLOBAL_UPDATE.equals(logOperation)) {
-            logStore.updateGlobalTransactionDO(convertGlobalTransactionDO(session));
+            return logStore.updateGlobalTransactionDO(convertGlobalTransactionDO(session));
         } else if (LogOperation.GLOBAL_REMOVE.equals(logOperation)) {
-            logStore.deleteGlobalTransactionDO(convertGlobalTransactionDO(session));
+            return logStore.deleteGlobalTransactionDO(convertGlobalTransactionDO(session));
         } else if (LogOperation.BRANCH_ADD.equals(logOperation)) {
-            logStore.insertBranchTransactionDO(convertBranchTransactionDO(session));
+            return logStore.insertBranchTransactionDO(convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_UPDATE.equals(logOperation)) {
-            logStore.updateBranchTransactionDO(convertBranchTransactionDO(session));
+            return logStore.updateBranchTransactionDO(convertBranchTransactionDO(session));
         } else if (LogOperation.BRANCH_REMOVE.equals(logOperation)) {
-            logStore.deleteBranchTransactionDO(convertBranchTransactionDO(session));
+            return logStore.deleteBranchTransactionDO(convertBranchTransactionDO(session));
         } else {
             throw new StoreException("Unknown LogOperation:" + logOperation.name());
         }
-        return true;
     }
 
     /**
@@ -185,18 +187,18 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
         for (int i = 0; i < statuses.length; i++) {
             states[i] = statuses[i].getCode();
         }
-        List<GlobalSession> globalSessions = new ArrayList<GlobalSession>();
         //global transaction
         List<GlobalTransactionDO> globalTransactionDOs = logStore.queryGlobalTransactionDO(states, logQueryLimit);
         if (CollectionUtils.isEmpty(globalTransactionDOs)) {
             return null;
         }
-        for (GlobalTransactionDO globalTransactionDO : globalTransactionDOs) {
-            List<BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(
-                globalTransactionDO.getXid());
-            globalSessions.add(getGlobalSession(globalTransactionDO, branchTransactionDOs));
-        }
-        return globalSessions;
+        List<String> xids = globalTransactionDOs.stream().map(GlobalTransactionDO::getXid).collect(Collectors.toList());
+        List<BranchTransactionDO> branchTransactionDOs = logStore.queryBranchTransactionDO(xids);
+        Map<String, List<BranchTransactionDO>> branchTransactionDOsMap = branchTransactionDOs.stream()
+            .collect(Collectors.groupingBy(BranchTransactionDO::getXid, LinkedHashMap::new, Collectors.toList()));
+        return globalTransactionDOs.stream().map(globalTransactionDO ->
+            getGlobalSession(globalTransactionDO, branchTransactionDOsMap.get(globalTransactionDO.getXid())))
+            .collect(Collectors.toList());
     }
 
     @Override

@@ -15,6 +15,8 @@
  */
 package io.seata.saga.engine.pcext.routers;
 
+import java.util.Stack;
+
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.pcext.StateInstruction;
@@ -32,9 +34,6 @@ import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachine;
 import io.seata.saga.statelang.domain.SubStateMachine;
 import io.seata.saga.statelang.domain.impl.AbstractTaskState;
-
-import java.util.Stack;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
@@ -54,19 +53,23 @@ public class TaskStateRouter implements StateRouter {
         StateInstruction stateInstruction = context.getInstruction(StateInstruction.class);
         if (stateInstruction.isEnd()) {
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("StateInstruction is ended, Stop the StateMachine executing. StateMachine[{}] Current State[{}]", stateInstruction.getStateMachineName(), state.getName());
+                LOGGER.info(
+                    "StateInstruction is ended, Stop the StateMachine executing. StateMachine[{}] Current State[{}]",
+                    stateInstruction.getStateMachineName(), state.getName());
             }
             return null;
         }
 
-        //The current CompensationTriggerState can mark the compensation process is started and perform compensation route processing.
-        State compensationTriggerState = (State) context.getVariable(DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
+        //The current CompensationTriggerState can mark the compensation process is started and perform compensation
+        // route processing.
+        State compensationTriggerState = (State)context.getVariable(
+            DomainConstants.VAR_NAME_CURRENT_COMPEN_TRIGGER_STATE);
         if (compensationTriggerState != null) {
             return compensateRoute(context, compensationTriggerState);
         }
 
         //There is an exception route, indicating that an exception is thrown, and the exception route is prioritized.
-        String next = (String) context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
+        String next = (String)context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
 
         if (StringUtils.hasLength(next)) {
             context.removeVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE);
@@ -76,7 +79,7 @@ public class TaskStateRouter implements StateRouter {
 
         //If next is empty, the state selected by the Choice state was taken.
         if (!StringUtils.hasLength(next) && context.hasVariable(DomainConstants.VAR_NAME_CURRENT_CHOICE)) {
-            next = (String) context.getVariable(DomainConstants.VAR_NAME_CURRENT_CHOICE);
+            next = (String)context.getVariable(DomainConstants.VAR_NAME_CURRENT_CHOICE);
             context.removeVariable(DomainConstants.VAR_NAME_CURRENT_CHOICE);
         }
 
@@ -88,14 +91,14 @@ public class TaskStateRouter implements StateRouter {
 
         State nextState = stateMachine.getState(next);
         if (nextState == null) {
-            throw new EngineExecutionException("Next state[" + next + "] is not exits", FrameworkErrorCode.ObjectNotExists);
+            throw new EngineExecutionException("Next state[" + next + "] is not exits",
+                FrameworkErrorCode.ObjectNotExists);
         }
 
         stateInstruction.setStateName(next);
 
         return stateInstruction;
     }
-
 
     private Instruction compensateRoute(ProcessContext context, State compensationTriggerState) {
 
@@ -104,29 +107,30 @@ public class TaskStateRouter implements StateRouter {
         // and the compensation process is interrupted.
         if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_FIRST_COMPENSATION_STATE_STARTED))) {
 
-            Exception exception = (Exception) context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+            Exception exception = (Exception)context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
             if (exception != null) {
                 EngineUtils.endStateMachine(context);
                 return null;
             }
 
-            StateInstance stateInstance = (StateInstance) context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
+            StateInstance stateInstance = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
             if (stateInstance != null && (!ExecutionStatus.SU.equals(stateInstance.getStatus()))) {
                 EngineUtils.endStateMachine(context);
                 return null;
             }
         }
 
-        Stack<StateInstance> stateStackToBeCompensated = CompensationHolder.getCurrent(context, true).getStateStackNeedCompensation();
+        Stack<StateInstance> stateStackToBeCompensated = CompensationHolder.getCurrent(context, true)
+            .getStateStackNeedCompensation();
         if (!stateStackToBeCompensated.isEmpty()) {
 
             StateInstance stateToBeCompensated = stateStackToBeCompensated.pop();
 
-            StateMachine stateMachine = (StateMachine) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE);
+            StateMachine stateMachine = (StateMachine)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE);
             State state = stateMachine.getState(stateToBeCompensated.getName());
             if (state != null && state instanceof AbstractTaskState) {
 
-                AbstractTaskState taskState = (AbstractTaskState) state;
+                AbstractTaskState taskState = (AbstractTaskState)state;
 
                 StateInstruction instruction = context.getInstruction(StateInstruction.class);
 
@@ -137,7 +141,7 @@ public class TaskStateRouter implements StateRouter {
                 }
 
                 if (compensateState == null && (taskState instanceof SubStateMachine)) {
-                    compensateState = ((SubStateMachine) taskState).getCompensateStateObject();
+                    compensateState = ((SubStateMachine)taskState).getCompensateStateObject();
                     instruction.setTemporaryState(compensateState);
                 }
 
@@ -148,12 +152,16 @@ public class TaskStateRouter implements StateRouter {
 
                 instruction.setStateName(compensateState.getName());
 
-                CompensationHolder.getCurrent(context, true).addToBeCompensatedState(compensateState.getName(), stateToBeCompensated);
+                CompensationHolder.getCurrent(context, true).addToBeCompensatedState(compensateState.getName(),
+                    stateToBeCompensated);
 
-                ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_FIRST_COMPENSATION_STATE_STARTED, true);
+                ((HierarchicalProcessContext)context).setVariableLocally(
+                    DomainConstants.VAR_NAME_FIRST_COMPENSATION_STATE_STARTED, true);
 
                 if (compensateState instanceof CompensateSubStateMachineState) {
-                    ((HierarchicalProcessContext) context).setVariableLocally(compensateState.getName() + DomainConstants.VAR_NAME_SUB_MACHINE_PARENT_ID, EngineUtils.generateParentId(stateToBeCompensated));
+                    ((HierarchicalProcessContext)context).setVariableLocally(
+                        compensateState.getName() + DomainConstants.VAR_NAME_SUB_MACHINE_PARENT_ID,
+                        EngineUtils.generateParentId(stateToBeCompensated));
                 }
 
                 return instruction;
