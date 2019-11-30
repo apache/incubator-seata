@@ -264,7 +264,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                         LOGGER.debug("send this msg[{}] by single send.", rpcMessage.getBody());
                     }
                 } catch (FrameworkException e) {
-                    if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable && channel != null) {
+                    if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable) {
                         destroyChannel(channel);
                     }
                     MessageFuture msgFuture = futures.remove(rpcMessage.getId());
