@@ -113,12 +113,12 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                 clientChannelManager.reconnect(getTransactionServiceGroup());
             }
         }, SCHEDULE_INTERVAL_MILLS, SCHEDULE_INTERVAL_MILLS, TimeUnit.SECONDS);
-        mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
-            MAX_MERGE_SEND_THREAD,
-            KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
-            new LinkedBlockingQueue<>(),
-            new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
         if (NettyClientConfig.isEnableClientBatchSendRequest()) {
+            mergeSendExecutorService = new ThreadPoolExecutor(MAX_MERGE_SEND_THREAD,
+                MAX_MERGE_SEND_THREAD,
+                KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<>(),
+                new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
             mergeSendExecutorService.submit(new MergedSendRunnable());
         }
         super.init();
@@ -127,7 +127,9 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     @Override
     public void destroy() {
         clientBootstrap.shutdown();
-        mergeSendExecutorService.shutdown();
+        if (NettyClientConfig.isEnableClientBatchSendRequest()) {
+            mergeSendExecutorService.shutdown();
+        }
     }
     
     @Override
