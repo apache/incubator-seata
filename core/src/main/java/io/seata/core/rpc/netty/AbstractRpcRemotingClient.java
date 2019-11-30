@@ -118,7 +118,9 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
             KEEP_ALIVE_TIME, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<>(),
             new NamedThreadFactory(getThreadPrefix(), MAX_MERGE_SEND_THREAD));
-        mergeSendExecutorService.submit(new MergedSendRunnable());
+        if (NettyClientConfig.isEnableClientBatchSendRequest()) {
+            mergeSendExecutorService.submit(new MergedSendRunnable());
+        }
         super.init();
     }
     
