@@ -258,9 +258,19 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                 MergedWarpMessage mergeMessage = new MergedWarpMessage();
                 mergeMessage.msgs.add((AbstractMessage) rpcMessage.getBody());
                 mergeMessage.msgIds.add(rpcMessage.getId());
-                sendRequest(channel, mergeMessage);
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("send this msg[{}] by single send.", rpcMessage.getBody());
+                try {
+                    sendRequest(channel, mergeMessage);
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("send this msg[{}] by single send.", rpcMessage.getBody());
+                    }
+                } catch (FrameworkException e) {
+                    if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable && channel != null) {
+                        destroyChannel(channel);
+                    }
+                    MessageFuture msgFuture = futures.remove(rpcMessage.getId());
+                    if (msgFuture != null) {
+                        messageFuture.setResultMessage(null);
+                    }
                 }
             }
         } else {
