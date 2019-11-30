@@ -284,7 +284,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
             try {
                 return messageFuture.get(timeout, TimeUnit.MILLISECONDS);
             } catch (Exception exx) {
-                LOGGER.error("wait response error:{},ip:{},request:{}" + msg, exx.getMessage(), address, msg);
+                LOGGER.error("wait response error:{},ip:{},request:{}", exx.getMessage(), address, msg);
                 if (exx instanceof TimeoutException) {
                     throw (TimeoutException) exx;
                 } else {
