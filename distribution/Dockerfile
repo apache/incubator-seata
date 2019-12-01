@@ -29,8 +29,7 @@ ENV SEATA_IP ${SEATA_IP}
 ENV SEATA_PORT ${SEATA_PORT:-8091}
 ENV STORE_MODE ${STORE_MODE:-file}
 ENV SERVER_NODE {SERVER_NODE:-1}
-ENV SEATA_CONFIG_NAME ${SEATA_CONFIG_NAME}
 ENV EXTRA_JVM_ARGUMENTS="-XX:MaxDirectMemorySize=1024M"
 
-ENTRYPOINT ["sh","/opt/seata/bin/seata-server.sh"]
+CMD ["sh","/opt/seata/bin/seata-server.sh"]
 EXPOSE ${SEATA_PORT}
