@@ -18,8 +18,7 @@ RUN set -x \
     && yum update -y \
     && yum install -y java-1.8.0-openjdk java-1.8.0-openjdk-devel wget iputils nc vim libcurl \
     && wget  https://github.com/seata/seata/releases/download/v${SEATA_VERSION}/seata-server-${SEATA_VERSION}.tar.gz -P /home \
-    && mkdir /opt/seata \
-    && tar -xzvf /home/seata-server-${SEATA_VERSION}.tar.gz -C /opt/seata \
+    && tar -xzvf /home/seata-server-${SEATA_VERSION}.tar.gz -C /opt \
     && rm -rf /home/seata-server-${SEATA_VERSION}.tar.gz \
     && ln -snf /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo '$TIME_ZONE' > /etc/timezone \
     && yum clean all
