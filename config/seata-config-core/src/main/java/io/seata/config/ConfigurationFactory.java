@@ -17,7 +17,6 @@ package io.seata.config;
 
 import java.util.Objects;
 
-import com.typesafe.config.ConfigFactory;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 
