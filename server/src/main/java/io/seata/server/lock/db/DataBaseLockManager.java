@@ -29,7 +29,6 @@ import io.seata.server.session.GlobalSession;
  * The type db lock manager.
  *
  * @author zjinlei
- * @data 2019 -11-15
  */
 public class DataBaseLockManager extends AbstractLockManager {
 

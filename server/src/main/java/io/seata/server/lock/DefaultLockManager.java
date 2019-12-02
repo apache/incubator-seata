@@ -25,7 +25,6 @@ import io.seata.server.session.GlobalSession;
  * The type Default lock manager.
  *
  * @author zhangsen
- * @data 2019 -05-15
  */
 public class DefaultLockManager extends AbstractLockManager {
 

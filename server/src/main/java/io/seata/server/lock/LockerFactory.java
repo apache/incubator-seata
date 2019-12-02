@@ -15,7 +15,12 @@
  */
 package io.seata.server.lock;
 
+import javax.sql.DataSource;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -26,10 +31,6 @@ import io.seata.server.lock.db.DataBaseLockManager;
 import io.seata.server.session.BranchSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.sql.DataSource;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The type Lock manager factory.
@@ -70,7 +71,7 @@ public class LockerFactory {
      */
     public static final LockManager getLockManager() {
         if (lockManager == null) {
-            if (StoreMode.DB.name().equalsIgnoreCase(CONFIG.getConfig(ConfigurationKeys.STORE_MODE))) {
+            if (StringUtils.equalsIgnoreCase(StoreMode.DB.name(), CONFIG.getConfig(ConfigurationKeys.STORE_MODE))) {
                 lockManager = new DataBaseLockManager();
             } else {
                 lockManager = new DefaultLockManager();
@@ -87,7 +88,7 @@ public class LockerFactory {
      */
     public static final Locker get(BranchSession branchSession) {
         String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
-        if (StoreMode.DB.name().equalsIgnoreCase(storeMode)) {
+        if (StringUtils.equalsIgnoreCase(StoreMode.DB.name(), storeMode)) {
             if (lockerMap.get(storeMode) != null) {
                 return lockerMap.get(storeMode);
             }
@@ -99,7 +100,7 @@ public class LockerFactory {
             locker = EnhancedServiceLoader.load(Locker.class, storeMode, new Class[] {DataSource.class},
                 new Object[] {logStoreDataSource});
             lockerMap.putIfAbsent(storeMode, locker);
-        } else if (StoreMode.FILE.name().equalsIgnoreCase(storeMode)) {
+        } else if (StringUtils.equalsIgnoreCase(StoreMode.FILE.name(), storeMode)) {
             locker = EnhancedServiceLoader.load(Locker.class, storeMode,
                 new Class[] {BranchSession.class}, new Object[] {branchSession});
         } else {

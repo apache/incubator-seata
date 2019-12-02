@@ -32,7 +32,6 @@ import io.seata.core.store.StoreMode;
  * The type Data base locker.
  *
  * @author zhangsen
- * @data 2019 -05-15
  */
 @LoadLevel(name = "db")
 public class DataBaseLocker extends AbstractLocker {
