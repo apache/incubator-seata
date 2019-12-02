@@ -16,7 +16,11 @@
 
 package io.seata.config;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -38,23 +42,15 @@ class FileConfigurationTest {
 
     @Test
     void addConfigListener() throws InterruptedException {
-
-
-        //System.out.println(fileConfig.getConfig("service.disableGlobalTransaction"));
-        //Thread.sleep(30*1000);
-        //fileConfig = ConfigurationFactory.refersh();
-        //System.out.println(fileConfig.getConfig("service.disableGlobalTransaction"));
-        fileConfig.addConfigListener("service.disableGlobalTransaction", new ConfigurationChangeListener() {
-            @Override
-            public void onChangeEvent(ConfigurationChangeEvent event) {
-                System.out.println("old:" + event.getOldValue() + ", new:" + event.getNewValue());
-            }
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        boolean value = fileConfig.getBoolean("service.disableGlobalTransaction");
+        fileConfig.addConfigListener("service.disableGlobalTransaction", (event) -> {
+            Assertions.assertTrue(
+                Boolean.parseBoolean(event.getNewValue()) == !Boolean.parseBoolean(event.getOldValue()));
+            countDownLatch.countDown();
         });
-        for(int i=0;i<100;i++) {
-            System.setProperty("service.disableGlobalTransaction", String.valueOf(!fileConfig.getBoolean("service" +
-                ".disableGlobalTransaction")));
-            Thread.sleep(200);
-        }
+        System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));
+        Assertions.assertTrue(countDownLatch.await(2000, TimeUnit.MILLISECONDS));
     }
 
 }

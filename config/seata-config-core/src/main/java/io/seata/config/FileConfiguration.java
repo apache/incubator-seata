@@ -43,7 +43,7 @@ public class FileConfiguration extends AbstractConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfiguration.class);
 
-    private final Config fileConfig;
+    private Config fileConfig;
 
     private ExecutorService configOperateExecutor;
 
@@ -62,12 +62,11 @@ public class FileConfiguration extends AbstractConfiguration {
 
     private final ConcurrentMap<String, String> listenedConfigMap = new ConcurrentHashMap<>(8);
 
-    /**
-     * Instantiates a new File configuration.
-     */
-    public FileConfiguration() {
-        this(null);
-    }
+    private final String targetFilePath;
+
+    private volatile long targetFileLastModified;
+
+    private final String name;
 
     /**
      * Instantiates a new File configuration.
@@ -76,14 +75,17 @@ public class FileConfiguration extends AbstractConfiguration {
      */
     public FileConfiguration(String name) {
         if (null == name) {
-            fileConfig = ConfigFactory.load();
+            throw new IllegalArgumentException("name can't be null");
         } else if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
-            Config appConfig = ConfigFactory.parseFileAnySyntax(
-                new File(name.substring(SYS_FILE_RESOURCE_PREFIX.length())));
+            targetFilePath = name.substring(SYS_FILE_RESOURCE_PREFIX.length());
+            Config appConfig = ConfigFactory.parseFileAnySyntax(new File(targetFilePath));
             fileConfig = ConfigFactory.load(appConfig);
         } else {
+            targetFilePath = this.getClass().getClassLoader().getResource(name).getPath();
             fileConfig = ConfigFactory.load(name);
         }
+        this.name = name;
+        targetFileLastModified = new File(targetFilePath).lastModified();
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
             new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD));
@@ -180,6 +182,20 @@ public class FileConfiguration extends AbstractConfiguration {
                     return;
                 }
                 try {
+                    long tempLastModified = new File(targetFilePath).lastModified();
+                    if (tempLastModified > targetFileLastModified) {
+                        Config tempConfig;
+                        if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
+                            Config appConfig = ConfigFactory.parseFileAnySyntax(new File(targetFilePath));
+                            tempConfig = ConfigFactory.load(appConfig);
+                        } else {
+                            tempConfig = ConfigFactory.load(name);
+                        }
+                        if (null != tempConfig) {
+                            fileConfig = tempConfig;
+                            targetFileLastModified = tempLastModified;
+                        }
+                    }
                     if (configFuture.getOperation() == ConfigOperation.GET) {
                         String result = fileConfig.getString(configFuture.getDataId());
                         configFuture.setResult(result);

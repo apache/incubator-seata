@@ -84,14 +84,6 @@ public final class ConfigurationFactory {
         return instance;
     }
 
-    public static Configuration refersh() {
-        if (null != instance) {
-            ConfigFactory.invalidateCaches();
-            instance = buildConfiguration();
-        }
-        return instance;
-    }
-
     private static Configuration buildConfiguration() {
         ConfigType configType = null;
         String configTypeName = null;
