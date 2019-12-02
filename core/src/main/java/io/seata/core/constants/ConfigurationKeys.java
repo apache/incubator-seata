@@ -306,7 +306,7 @@ public class ConfigurationKeys {
     /**
      * The constant TRANSACTION_UNDO_LOG_EXCEPTION_RATE
      */
-    public static final String TRANSACTION_UNDO_LOG_EXCEPTION_RATE = CLIENT_UNDO_PREFIX + "log.exception-rate";
+    public static final String TRANSACTION_LOG_EXCEPTION_RATE = CLIENT_PREFIX + "log.exceptionRate";
 
     /**
      * The constant TRANSACTION_UNDO_LOG_DEFAULT_TABLE.

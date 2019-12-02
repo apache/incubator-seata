@@ -31,7 +31,6 @@ public class UndoProperties {
     private boolean undoDataValidation = true;
     private String undoLogSerialization = "jackson";
     private String undoLogTable = TRANSACTION_UNDO_LOG_DEFAULT_TABLE;
-    private int undoLogExceptionRate = 100;
 
     public boolean isUndoDataValidation() {
         return undoDataValidation;
@@ -60,12 +59,4 @@ public class UndoProperties {
         return this;
     }
 
-    public int getUndoLogExceptionRate() {
-        return undoLogExceptionRate;
-    }
-
-    public UndoProperties setUndoLogExceptionRate(int undoLogExceptionRate) {
-        this.undoLogExceptionRate = undoLogExceptionRate;
-        return this;
-    }
 }

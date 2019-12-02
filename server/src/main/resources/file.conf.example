@@ -57,7 +57,9 @@ client {
     data.validation = true
     log.serialization = "jackson"
     log.table = "undo_log"
-    log.exception-rate = 100
+  }
+  log {
+    exceptionRate = 100
   }
   support {
     # auto proxy the DataSource bean
