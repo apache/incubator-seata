@@ -44,7 +44,7 @@ public class KeywordCheckerFactory {
                     Map<String, KeywordChecker> initializedMap = new HashMap<>();
                     List<KeywordChecker> checkerList = EnhancedServiceLoader.loadAll(KeywordChecker.class);
                     for (KeywordChecker checker : checkerList) {
-                        initializedMap.put(checker.getDbType().toLowerCase(), checker);
+                        initializedMap.put(checker.getDbType(), checker);
                     }
                     keywordCheckerMap = initializedMap;
                 }
