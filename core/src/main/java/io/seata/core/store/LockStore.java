@@ -58,6 +58,10 @@ public interface LockStore {
      */
     boolean unLock(List<LockDO> lockDOs);
 
+    boolean unLock(String xid, Long branchId);
+
+    boolean unLock(String xid, List<Long> branchIds);
+
     /**
      * Is lockable boolean.
      *

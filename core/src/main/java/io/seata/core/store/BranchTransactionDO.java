@@ -38,8 +38,6 @@ public class BranchTransactionDO {
 
     private String resourceId;
 
-    private String lockKey;
-
     private String branchType;
 
     private int status = BranchStatus.Unknown.getCode();
@@ -140,24 +138,6 @@ public class BranchTransactionDO {
      */
     public void setResourceId(String resourceId) {
         this.resourceId = resourceId;
-    }
-
-    /**
-     * Gets lock key.
-     *
-     * @return the lock key
-     */
-    public String getLockKey() {
-        return lockKey;
-    }
-
-    /**
-     * Sets lock key.
-     *
-     * @param lockKey the lock key
-     */
-    public void setLockKey(String lockKey) {
-        this.lockKey = lockKey;
     }
 
     /**

@@ -108,11 +108,6 @@ public class ServerTableColumnsName {
     public static final String BRANCH_TABLE_RESOURCE_ID = "resource_id";
 
     /**
-     * The constant branch_table column name lock_key
-     */
-    public static final String BRANCH_TABLE_LOCK_KEY = "lock_key";
-
-    /**
      * The constant branch_table column name branch_type
      */
     public static final String BRANCH_TABLE_BRANCH_TYPE = "branch_type";

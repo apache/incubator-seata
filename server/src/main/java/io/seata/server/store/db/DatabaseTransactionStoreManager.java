@@ -263,7 +263,6 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
         branchSession.setBranchType(BranchType.valueOf(branchTransactionDO.getBranchType()));
         branchSession.setResourceId(branchTransactionDO.getResourceId());
         branchSession.setClientId(branchTransactionDO.getClientId());
-        branchSession.setLockKey(branchTransactionDO.getLockKey());
         branchSession.setResourceGroupId(branchTransactionDO.getResourceGroupId());
         branchSession.setStatus(BranchStatus.get(branchTransactionDO.getStatus()));
         return branchSession;
@@ -301,7 +300,6 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
         branchTransactionDO.setBranchId(branchSession.getBranchId());
         branchTransactionDO.setBranchType(branchSession.getBranchType().name());
         branchTransactionDO.setClientId(branchSession.getClientId());
-        branchTransactionDO.setLockKey(branchSession.getLockKey());
         branchTransactionDO.setResourceGroupId(branchSession.getResourceGroupId());
         branchTransactionDO.setTransactionId(branchSession.getTransactionId());
         branchTransactionDO.setApplicationData(branchSession.getApplicationData());
