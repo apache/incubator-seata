@@ -74,6 +74,20 @@ public class LockStoreSqls {
         + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " in (" + IN_PARAMS_PLACEHOLD + ") ";
 
     /**
+     * The constant BATCH_DELETE_LOCK_BY_BRANCH_SQL.
+     */
+    public static final String BATCH_DELETE_LOCK_BY_BRANCH_SQL = "delete from " + LOCK_TABLE_PLACEHOLD
+        + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and " + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID +  " = ? ";
+
+
+    /**
+     * The constant BATCH_DELETE_LOCK_BY_BRANCHS_SQL.
+     */
+    public static final String BATCH_DELETE_LOCK_BY_BRANCHS_SQL = "delete from " + LOCK_TABLE_PLACEHOLD
+        + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and " + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID + " in (" + IN_PARAMS_PLACEHOLD + ") ";
+
+
+    /**
      * The constant QUERY_LOCK_SQL.
      */
     public static final String QUERY_LOCK_SQL = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACEHOLD
@@ -125,6 +139,31 @@ public class LockStoreSqls {
      */
     public static String getBatchDeleteLockSql(String lockTable, String paramPlaceHold, String dbType) {
         return BATCH_DELETE_LOCK_SQL.replace(LOCK_TABLE_PLACEHOLD, lockTable).replace(IN_PARAMS_PLACEHOLD,
+            paramPlaceHold);
+    }
+
+
+    /**
+     * Get batch delete lock sql string.
+     *
+     * @param lockTable      the lock table
+     * @param dbType         the db type
+     * @return the string
+     */
+    public static String getBatchDeleteLockSqlByBranch(String lockTable, String dbType) {
+        return BATCH_DELETE_LOCK_BY_BRANCH_SQL.replace(LOCK_TABLE_PLACEHOLD, lockTable);
+    }
+
+    /**
+     * Get batch delete lock sql string.
+     *
+     * @param lockTable      the lock table
+     * @param paramPlaceHold the param place hold
+     * @param dbType         the db type
+     * @return the string
+     */
+    public static String getBatchDeleteLockSqlByBranchs(String lockTable, String paramPlaceHold, String dbType) {
+        return BATCH_DELETE_LOCK_BY_BRANCHS_SQL.replace(LOCK_TABLE_PLACEHOLD, lockTable).replace(IN_PARAMS_PLACEHOLD,
             paramPlaceHold);
     }
 
