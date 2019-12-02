@@ -275,7 +275,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
             }
         } else {
             ChannelFuture future;
-            channelWriteableCheck(channel, msg);
+            channelWritableCheck(channel, msg);
             future = channel.writeAndFlush(rpcMessage);
             future.addListener(new ChannelFutureListener() {
                 @Override
@@ -324,7 +324,7 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         if (msg instanceof MergeMessage) {
             mergeMsgMap.put(rpcMessage.getId(), (MergeMessage) msg);
         }
-        channelWriteableCheck(channel, msg);
+        channelWritableCheck(channel, msg);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("write message:" + rpcMessage.getBody() + ", channel:" + channel + ",active?"
                 + channel.isActive() + ",writable?" + channel.isWritable() + ",isopen?" + channel.isOpen());
@@ -348,14 +348,14 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         rpcMessage.setCompressor(request.getCompressor());
         rpcMessage.setBody(msg);
         rpcMessage.setId(request.getId());
-        channelWriteableCheck(channel, msg);
+        channelWritableCheck(channel, msg);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("send response:" + rpcMessage.getBody() + ",channel:" + channel);
         }
         channel.writeAndFlush(rpcMessage);
     }
 
-    private void channelWriteableCheck(Channel channel, Object msg) {
+    private void channelWritableCheck(Channel channel, Object msg) {
         int tryTimes = 0;
         synchronized (lock) {
             while (!channel.isWritable()) {
