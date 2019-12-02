@@ -37,9 +37,12 @@ import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
+
 import java.util.Arrays;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -151,8 +154,10 @@ public class JacksonUndoLogParser implements UndoLogParser {
     private static class TimestampSerializer extends JsonSerializer<Timestamp> {
 
         @Override
-        public void serializeWithType(Timestamp timestamp, JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSerializer) throws IOException {
-            WritableTypeId typeId = typeSerializer.writeTypePrefix(gen, typeSerializer.typeId(timestamp, JsonToken.START_ARRAY));
+        public void serializeWithType(Timestamp timestamp, JsonGenerator gen, SerializerProvider serializers,
+                                      TypeSerializer typeSerializer) throws IOException {
+            WritableTypeId typeId = typeSerializer.writeTypePrefix(gen,
+                typeSerializer.typeId(timestamp, JsonToken.START_ARRAY));
             serialize(timestamp, gen, serializers);
             gen.writeTypeSuffix(typeId);
         }
@@ -177,7 +182,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
 
         @Override
         public Timestamp deserialize(JsonParser p, DeserializationContext ctxt) {
-            if(p.isExpectedStartArrayToken()){
+            if (p.isExpectedStartArrayToken()) {
                 ArrayNode arrayNode;
                 try {
                     arrayNode = p.getCodec().readTree(p);
@@ -201,7 +206,8 @@ public class JacksonUndoLogParser implements UndoLogParser {
         @Override
         public void serializeWithType(SerialBlob blob, JsonGenerator gen, SerializerProvider serializers,
                                       TypeSerializer typeSer) throws IOException {
-            WritableTypeId typeIdDef = typeSer.writeTypePrefix(gen, typeSer.typeId(blob, JsonToken.VALUE_EMBEDDED_OBJECT));
+            WritableTypeId typeIdDef = typeSer.writeTypePrefix(gen,
+                typeSer.typeId(blob, JsonToken.VALUE_EMBEDDED_OBJECT));
             serialize(blob, gen, serializers);
             typeSer.writeTypeSuffix(gen, typeIdDef);
         }
@@ -209,7 +215,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
         @Override
         public void serialize(SerialBlob blob, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             try {
-                gen.writeBinary(blob.getBytes(1, (int) blob.length()));
+                gen.writeBinary(blob.getBytes(1, (int)blob.length()));
             } catch (SerialException e) {
                 LOGGER.error("serialize java.sql.Blob error : {}", e.getMessage(), e);
             }
@@ -222,8 +228,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
     private static class BlobDeserializer extends JsonDeserializer<SerialBlob> {
 
         @Override
-        public SerialBlob deserialize(JsonParser p, DeserializationContext ctxt)
-            throws IOException {
+        public SerialBlob deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             try {
                 return new SerialBlob(p.getBinaryValue());
             } catch (SQLException e) {
@@ -241,7 +246,8 @@ public class JacksonUndoLogParser implements UndoLogParser {
         @Override
         public void serializeWithType(SerialClob clob, JsonGenerator gen, SerializerProvider serializers,
                                       TypeSerializer typeSer) throws IOException {
-            WritableTypeId typeIdDef = typeSer.writeTypePrefix(gen, typeSer.typeId(clob, JsonToken.VALUE_EMBEDDED_OBJECT));
+            WritableTypeId typeIdDef = typeSer.writeTypePrefix(gen,
+                typeSer.typeId(clob, JsonToken.VALUE_EMBEDDED_OBJECT));
             serialize(clob, gen, serializers);
             typeSer.writeTypeSuffix(gen, typeIdDef);
         }
@@ -249,7 +255,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
         @Override
         public void serialize(SerialClob clob, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             try {
-                gen.writeString(clob.getCharacterStream(), (int) clob.length());
+                gen.writeString(clob.getCharacterStream(), (int)clob.length());
             } catch (SerialException e) {
                 LOGGER.error("serialize java.sql.Blob error : {}", e.getMessage(), e);
             }
@@ -259,8 +265,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
     private static class ClobDeserializer extends JsonDeserializer<SerialClob> {
 
         @Override
-        public SerialClob deserialize(JsonParser p, DeserializationContext ctxt)
-            throws IOException {
+        public SerialClob deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
             try {
                 return new SerialClob(p.getValueAsString().toCharArray());
 

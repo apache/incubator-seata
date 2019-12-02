@@ -62,7 +62,7 @@ public class LogStoreSqls {
     protected static final String ALL_BRANCH_COLUMNS
         = ServerTableColumnsName.BRANCH_TABLE_XID + ", " + ServerTableColumnsName.BRANCH_TABLE_TRANSACTION_ID + ", "
         + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + ", " + ServerTableColumnsName.BRANCH_TABLE_RESOURCE_GROUP_ID + ", "
-        + ServerTableColumnsName.BRANCH_TABLE_RESOURCE_ID + ", " + ServerTableColumnsName.BRANCH_TABLE_LOCK_KEY + ", "
+        + ServerTableColumnsName.BRANCH_TABLE_RESOURCE_ID + ", "
         + ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE + ", " + ServerTableColumnsName.BRANCH_TABLE_STATUS + ", "
         + ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID + ", " + ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA + ", "
         + ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE + ", " + ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED;
@@ -143,14 +143,14 @@ public class LogStoreSqls {
      */
     public static final String INSERT_BRANCH_TRANSACTION_MYSQL = "insert into " + BRANCH_TABLE_PLACEHOLD + "("
         + ALL_BRANCH_COLUMNS + ")" +
-        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())";
+        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())";
 
     /**
      * The constant INSERT_BRANCH_TRANSACTION_ORACLE.
      */
     public static final String INSERT_BRANCH_TRANSACTION_ORACLE = "insert into " + BRANCH_TABLE_PLACEHOLD + "("
         + ALL_BRANCH_COLUMNS + ")" +
-        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, sysdate, sysdate)";
+        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, sysdate, sysdate)";
 
     /**
      * The constant UPDATE_BRANCH_TRANSACTION_STATUS_MYSQL.
@@ -185,6 +185,13 @@ public class LogStoreSqls {
      */
     public static final String QUREY_BRANCH_TRANSACTION = "select " + ALL_BRANCH_COLUMNS + " from "
         + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " = ? order by "
+        + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " asc";
+
+    /**
+     * The constant QUREY_BRANCH_TRANSACTION_XIDS.
+     */
+    public static final String QUREY_BRANCH_TRANSACTION_XIDS = "select " + ALL_BRANCH_COLUMNS + " from "
+        + BRANCH_TABLE_PLACEHOLD + " where " + ServerTableColumnsName.BRANCH_TABLE_XID + " in (" + PRAMETER_PLACEHOLD + ") order by "
         + ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID + " asc";
 
     /**
@@ -383,6 +390,20 @@ public class LogStoreSqls {
      */
     public static String getQureyBranchTransaction(String branchTable, String dbType) {
         return QUREY_BRANCH_TRANSACTION.replace(BRANCH_TABLE_PLACEHOLD, branchTable);
+    }
+
+    /**
+     * Get qurey branch transaction string.
+     *
+     * @param branchTable the branch table
+     * @param dbType      the db type
+     * @param paramsPlaceHolder the params place holder
+     * @return the string
+     */
+    public static String getQureyBranchTransaction(String branchTable, String dbType,
+                                                   String paramsPlaceHolder) {
+        return QUREY_BRANCH_TRANSACTION_XIDS.replace(BRANCH_TABLE_PLACEHOLD, branchTable)
+            .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
 
     /**

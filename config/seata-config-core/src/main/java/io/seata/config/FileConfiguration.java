@@ -74,6 +74,7 @@ public class FileConfiguration extends AbstractConfiguration {
      * @param name the name
      */
     public FileConfiguration(String name) {
+        LOGGER.info("The file name of the operation is {}", name);
         if (null == name) {
             throw new IllegalArgumentException("name can't be null");
         } else if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {

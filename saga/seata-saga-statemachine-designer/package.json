@@ -1,0 +1,95 @@
+{
+  "name": "seata-saga-statemachine-designer",
+  "version": "0.0.1",
+  "description": "A visual graph designer for Seata Saga StateMachine based on GGEdior 2.0.4",
+  "keywords": [
+    "react",
+    "graphics",
+    "designer",
+    "seata",
+    "saga",
+    "state machine"
+  ],
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "types": "typings/index.d.ts",
+  "files": [
+    "src",
+    "es",
+    "cjs",
+    "dist",
+    "*.md",
+    "typings"
+  ],
+  "scripts": {
+    "start": "webpack-dev-server --config ./tools/webpack.config.dev.js --open",
+    "build": "rimraf ./dist && webpack --config ./tools/webpack.config.prod.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/seata/seata.git"
+  },
+  "authors": [
+    {
+      "name": "陈龙",
+      "email": "long_187@126.com"
+    },
+    {
+      "name": "高力",
+      "email": "3071730@qq.com"
+    }
+  ],
+  "license": "Apache License, Version 2.0",
+  "bugs": {
+    "url": "https://github.com/seata/seata/issues"
+  },
+  "homepage": "http://seata.io/",
+  "peerDependencies": {
+    "react": "^16.3.0"
+  },
+  "dependencies": {
+    "@antv/g6": "^2.2.6",
+    "codemirror": "^5.49.2",
+    "core-js": "^3.0.0",
+    "gg-editor-core": "1.3.4",
+    "lodash": "^4.17.10",
+    "react-codemirror": "^1.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/plugin-proposal-class-properties": "^7.2.3",
+    "@babel/plugin-transform-modules-commonjs": "^7.2.0",
+    "@babel/plugin-transform-runtime": "^7.2.0",
+    "@babel/polyfill": "^7.2.5",
+    "@babel/preset-env": "^7.2.3",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/runtime": "^7.2.0",
+    "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.4",
+    "babel-plugin-module-resolver": "^3.1.1",
+    "babel-plugin-transform-inline-environment-variables": "^0.4.3",
+    "cross-env": "^5.2.0",
+    "css-loader": "^2.1.0",
+    "cz-conventional-changelog": "^2.1.0",
+    "eslint": "^5.11.1",
+    "eslint-config-airbnb": "^17.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-react": "^7.11.1",
+    "less": "^3.9.0",
+    "less-loader": "^4.1.0",
+    "postcss-loader": "^3.0.0",
+    "postcss-preset-env": "^6.5.0",
+    "rimraf": "^2.6.2",
+    "style-loader": "^0.23.1",
+    "webpack": "^4.28.2",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.14"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  }
+}

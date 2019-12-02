@@ -15,7 +15,6 @@
  */
 package io.seata.saga.statelang.domain;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -34,7 +33,7 @@ public interface TaskState extends State {
     String getCompensateState();
 
     /**
-     * Is this state is used to compensate an other state，default false
+     * Is this state is used to compensate an other state, default false
      *
      * @return
      */
@@ -52,7 +51,7 @@ public interface TaskState extends State {
      *
      * @return
      */
-    Retry getRetry();
+    List<Retry> getRetry();
 
     /**
      * exception handling strategy
@@ -74,11 +73,31 @@ public interface TaskState extends State {
     interface Retry {
 
         /**
+         * exceptions
+         *
+         * @return
+         */
+        List<String> getExceptions();
+
+        /**
+         * exception classes
+         *
+         * @return
+         */
+        List<Class<? extends Exception>> getExceptionClasses();
+
+        /**
+         * set exception classes
+         * @param exceptionClasses
+         */
+        void setExceptionClasses(List<Class<? extends Exception>> exceptionClasses);
+
+        /**
          * getIntervalSeconds
          *
          * @return
          */
-        int getIntervalSeconds();
+        double getIntervalSeconds();
 
         /**
          * getMaxAttempts
@@ -88,11 +107,11 @@ public interface TaskState extends State {
         int getMaxAttempts();
 
         /**
-         * get BackoffRate，default 1
+         * get BackoffRate, default 1
          *
          * @return
          */
-        BigDecimal getBackoffRate();
+        double getBackoffRate();
     }
 
     /**
@@ -113,6 +132,12 @@ public interface TaskState extends State {
          * @return
          */
         List<Class<? extends Exception>> getExceptionClasses();
+
+        /**
+         * set exception classes
+         * @param exceptionClasses
+         */
+        void setExceptionClasses(List<Class<? extends Exception>> exceptionClasses);
 
         /**
          * next state name
