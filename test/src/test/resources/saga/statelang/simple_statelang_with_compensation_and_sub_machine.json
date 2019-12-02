@@ -37,7 +37,6 @@
             "Type": "ServiceTask",
             "ServiceName": "demoService",
             "ServiceMethod": "bar",
-            "CompensateState": "CompensateSecondState",
             "Input": [
                 {
                     "barInput": "$.[fooResult]",
