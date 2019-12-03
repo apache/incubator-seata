@@ -15,10 +15,11 @@
  */
 package io.seata.rm.datasource.undo;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker;
-import io.seata.rm.datasource.undo.oracle.keyword.OracleKeywordChecker;
+import io.seata.common.loader.EnhancedServiceLoader;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * The type Keyword checker factory.
@@ -28,6 +29,8 @@ import io.seata.rm.datasource.undo.oracle.keyword.OracleKeywordChecker;
  */
 public class KeywordCheckerFactory {
 
+    private static volatile Map<String,KeywordChecker> keywordCheckerMap;
+
     /**
      * get keyword checker
      *
@@ -35,13 +38,22 @@ public class KeywordCheckerFactory {
      * @return keyword checker
      */
     public static KeywordChecker getKeywordChecker(String dbType) {
-        if (dbType.equals(JdbcConstants.MYSQL)) {
-            return MySQLKeywordChecker.getInstance();
-        } else  if (dbType.equals(JdbcConstants.ORACLE)) {
-            return OracleKeywordChecker.getInstance();
-        } else {
-            throw new NotSupportYetException(dbType);
+        if (keywordCheckerMap == null) {
+            synchronized (KeywordCheckerFactory.class) {
+                if (keywordCheckerMap == null) {
+                    Map<String, KeywordChecker> initializedMap = new HashMap<>();
+                    List<KeywordChecker> checkerList = EnhancedServiceLoader.loadAll(KeywordChecker.class);
+                    for (KeywordChecker checker : checkerList) {
+                        initializedMap.put(checker.getDbType(), checker);
+                    }
+                    keywordCheckerMap = initializedMap;
+                }
+            }
         }
+        if (keywordCheckerMap.containsKey(dbType)) {
+            return keywordCheckerMap.get(dbType);
+        }
+        throw new NotSupportYetException(dbType);
 
     }
 }
