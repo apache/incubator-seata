@@ -35,6 +35,7 @@ import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.NetUtil;
 import io.seata.core.protocol.AbstractMessage;
+import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeResultMessage;
 import io.seata.core.protocol.MergedWarpMessage;
@@ -159,6 +160,17 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
                 }
             }
             return;
+        } else {
+            // the single send response message
+            MessageFuture future = futures.remove(rpcMessage.getId());
+            if (future == null) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("msg: {} is not found in futures.", rpcMessage.getId());
+                }
+            } else {
+                AbstractResultMessage result = (AbstractResultMessage) rpcMessage.getBody();
+                future.setResultMessage(result);
+            }
         }
         super.channelRead(ctx, msg);
     }

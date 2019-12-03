@@ -26,10 +26,8 @@ import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.PositiveAtomicCounter;
-import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.HeartbeatMessage;
 import io.seata.core.protocol.MergeMessage;
-import io.seata.core.protocol.MergedWarpMessage;
 import io.seata.core.protocol.MessageFuture;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
@@ -255,40 +253,13 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
                 }
             } else {
                 // the single send.
-                MergedWarpMessage mergeMessage = new MergedWarpMessage();
-                mergeMessage.msgs.add((AbstractMessage) rpcMessage.getBody());
-                mergeMessage.msgIds.add(rpcMessage.getId());
-                try {
-                    sendRequest(channel, mergeMessage);
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("send this msg[{}] by single send.", rpcMessage.getBody());
-                    }
-                } catch (FrameworkException e) {
-                    if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable) {
-                        destroyChannel(channel);
-                    }
-                    MessageFuture msgFuture = futures.remove(rpcMessage.getId());
-                    if (msgFuture != null) {
-                        messageFuture.setResultMessage(null);
-                    }
+                sendSingleRequest(channel, msg, rpcMessage);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("send this msg[{}] by single send.", msg);
                 }
             }
         } else {
-            ChannelFuture future;
-            channelWritableCheck(channel, msg);
-            future = channel.writeAndFlush(rpcMessage);
-            future.addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) {
-                    if (!future.isSuccess()) {
-                        MessageFuture messageFuture = futures.remove(rpcMessage.getId());
-                        if (messageFuture != null) {
-                            messageFuture.setResultMessage(future.cause());
-                        }
-                        destroyChannel(future.channel());
-                    }
-                }
-            });
+            sendSingleRequest(channel, msg, rpcMessage);
         }
         if (timeout > 0) {
             try {
@@ -304,6 +275,24 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         } else {
             return null;
         }
+    }
+
+    private void sendSingleRequest(Channel channel, Object msg, RpcMessage rpcMessage) {
+        ChannelFuture future;
+        channelWritableCheck(channel, msg);
+        future = channel.writeAndFlush(rpcMessage);
+        future.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) {
+                if (!future.isSuccess()) {
+                    MessageFuture messageFuture = futures.remove(rpcMessage.getId());
+                    if (messageFuture != null) {
+                        messageFuture.setResultMessage(future.cause());
+                    }
+                    destroyChannel(future.channel());
+                }
+            }
+        });
     }
 
     /**
