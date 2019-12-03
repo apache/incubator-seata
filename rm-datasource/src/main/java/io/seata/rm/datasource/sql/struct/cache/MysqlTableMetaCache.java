@@ -74,7 +74,9 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
     protected String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
         StringBuilder cacheKey = new StringBuilder(dataSourceProxy.getResourceId());
         cacheKey.append(".");
-        String defaultTableName = tableName.replace("`", "");
+        //remove single quote and separate it to catalogName and tableName
+        String[] tableNameWithCatalog = tableName.replace("`", "").split("\\.");
+        String defaultTableName = tableNameWithCatalog.length > 1 ? tableNameWithCatalog[1] : tableNameWithCatalog[0];
 
         DatabaseMetaData databaseMetaData = null;
         try {

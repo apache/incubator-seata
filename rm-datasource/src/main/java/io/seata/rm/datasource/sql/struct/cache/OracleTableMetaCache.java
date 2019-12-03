@@ -64,11 +64,16 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
         StringBuilder cacheKey = new StringBuilder(dataSourceProxy.getResourceId());
         cacheKey.append(".");
 
+        //separate it to schemaName and tableName
+        String[] tableNameWithSchema = tableName.split("\\.");
+        String defaultTableName = tableNameWithSchema.length > 1 ? tableNameWithSchema[1] : tableNameWithSchema[0];
+
         //oracle does not implement supportsMixedCaseIdentifiers in DatabaseMetadata
-        if (tableName.contains("\"")) {
-            cacheKey.append(tableName.replace("\"", ""));
+        if (defaultTableName.contains("\"")) {
+            cacheKey.append(defaultTableName.replace("\"", ""));
         } else {
-            cacheKey.append(tableName.toLowerCase());
+            // oracle default store in upper case
+            cacheKey.append(defaultTableName.toUpperCase());
         }
 
         return cacheKey.toString();
