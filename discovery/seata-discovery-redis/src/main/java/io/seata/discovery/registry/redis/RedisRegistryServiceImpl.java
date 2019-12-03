@@ -22,6 +22,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -178,8 +179,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
 
     @Override
     public List<InetSocketAddress> lookup(String key) {
-        Configuration config = ConfigurationFactory.getInstance();
-        String clusterName = config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
+        String clusterName = getServiceGroup(key);
         if (null == clusterName) {
             return null;
         }
@@ -212,7 +212,7 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 }
             });
         }
-        return new ArrayList<>(CLUSTER_ADDRESS_MAP.get(clusterName));
+        return new ArrayList<>(CLUSTER_ADDRESS_MAP.getOrDefault(clusterName, Collections.emptySet()));
     }
 
     @Override
@@ -256,4 +256,5 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
     private String getRedisDbFileKey() {
         return REDIS_FILEKEY_PREFIX + REDIS_DB;
     }
+
 }

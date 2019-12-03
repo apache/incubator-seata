@@ -113,8 +113,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
-        Configuration config = ConfigurationFactory.getInstance();
-        String clusterName = config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
+        String clusterName = getServiceGroup(key);
         if (null == clusterName) {
             return null;
         }
