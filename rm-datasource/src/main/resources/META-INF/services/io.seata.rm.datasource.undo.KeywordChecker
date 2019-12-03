@@ -1,0 +1,2 @@
+io.seata.rm.datasource.undo.oracle.keyword.OracleKeywordChecker
+io.seata.rm.datasource.undo.mysql.keyword.MySQLKeywordChecker
