@@ -38,12 +38,18 @@ public class MockExecuteHandlerImpl implements MockExecuteHandler {
     private List<String> mockReturnValueColumnLabels;
 
     /**
+     * the mock column meta
+     */
+    private Object[][] mockColumnsMetasReturnValue;
+
+    /**
      * Instantiate MockExecuteHandlerImpl
      * @param mockReturnValue
      */
-    public MockExecuteHandlerImpl(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue) {
+    public MockExecuteHandlerImpl(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue) {
         this.mockReturnValueColumnLabels = mockReturnValueColumnLabels;
         this.mockReturnValue = mockReturnValue;
+        this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
     }
 
     @Override
@@ -52,7 +58,8 @@ public class MockExecuteHandlerImpl implements MockExecuteHandler {
 
         //mock the return value
         resultSet.mockResultSet(mockReturnValueColumnLabels, mockReturnValue);
-
+        //mock the rs meta data
+        resultSet.mockResultSetMetaData(mockColumnsMetasReturnValue);
         return resultSet;
     }
 }
