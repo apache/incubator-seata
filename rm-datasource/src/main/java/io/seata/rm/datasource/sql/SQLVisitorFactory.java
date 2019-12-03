@@ -53,9 +53,7 @@ public class SQLVisitorFactory {
         } else if (ast instanceof SQLDeleteStatement) {
             recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
         } else if (ast instanceof SQLSelectStatement) {
-            if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
-                recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
-            }
+            recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
         }
         return recognizer;
     }
