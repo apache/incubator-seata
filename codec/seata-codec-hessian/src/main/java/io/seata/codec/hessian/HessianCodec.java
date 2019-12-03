@@ -1,6 +1,10 @@
 package io.seata.codec.hessian;
 
-import com.caucho.hessian.io.*;
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.hessian.io.HessianProtocolException;
+import com.caucho.hessian.io.Serializer;
+import com.caucho.hessian.io.SerializerFactory;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.codec.Codec;
 import org.slf4j.Logger;
