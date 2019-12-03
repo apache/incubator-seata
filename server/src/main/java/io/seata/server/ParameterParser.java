@@ -93,7 +93,7 @@ public class ParameterParser {
                 this.seataEnv = StringUtils.trimToNull(System.getenv(ENV_SYSTEM_KEY));
                 this.host = StringUtils.trimToNull(System.getenv(ENV_SEATA_IP_KEY));
                 this.serverNode = NumberUtils.toInt(System.getenv(ENV_SERVER_NODE_KEY), SERVER_DEFAULT_NODE);
-                this.port = NumberUtils.toInt(System.getProperty(ENV_SEATA_PORT_KEY), SERVER_DEFAULT_PORT);
+                this.port = NumberUtils.toInt(System.getenv(ENV_SEATA_PORT_KEY), SERVER_DEFAULT_PORT);
                 this.storeMode = StringUtils.trimToNull(System.getenv(ENV_STORE_MODE_KEY));
             } else {
                 JCommander jCommander = JCommander.newBuilder().addObject(this).build();
