@@ -20,33 +20,18 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.alibaba.druid.util.JdbcConstants;
+
 /**
  * The type postgresql keyword checker.
  *
  * @author japsercloud
  */
 public class PostgresqlKeywordChecker implements KeywordChecker {
-    private static volatile KeywordChecker keywordChecker = null;
-    private Set<String> keywordSet;
+    private static Set<String> keywordSet;
 
-    private PostgresqlKeywordChecker() {
+    static {
         keywordSet = Arrays.stream(PostgresqlKeywordChecker.PostgresqlKeyword.values()).map(PostgresqlKeywordChecker.PostgresqlKeyword::name).collect(Collectors.toSet());
-    }
-
-    /**
-     * get instance of type postgresql keyword checker
-     *
-     * @return instance
-     */
-    public static KeywordChecker getInstance() {
-        if (keywordChecker == null) {
-            synchronized (PostgresqlKeywordChecker.class) {
-                if (keywordChecker == null) {
-                    keywordChecker = new PostgresqlKeywordChecker();
-                }
-            }
-        }
-        return keywordChecker;
     }
 
     /**
@@ -386,6 +371,11 @@ public class PostgresqlKeywordChecker implements KeywordChecker {
     @Override
     public String checkAndReplace(String fieldOrTableName) {
         return check(fieldOrTableName) ? replace(fieldOrTableName) : fieldOrTableName;
+    }
+
+    @Override
+    public String getDbType() {
+        return JdbcConstants.POSTGRESQL;
     }
 
     private String replace(String fieldOrTableName) {
