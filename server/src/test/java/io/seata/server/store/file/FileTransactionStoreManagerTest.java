@@ -78,6 +78,7 @@ public class FileTransactionStoreManagerTest {
         File seataFile = Files.newTemporaryFile();
         Method findTimeoutAndSaveMethod = FileTransactionStoreManager.class.getDeclaredMethod("findTimeoutAndSave");
         findTimeoutAndSaveMethod.setAccessible(true);
+        FileBasedSessionManager sessionManager = null;
         FileTransactionStoreManager fileTransactionStoreManager = null;
         try {
             List<GlobalSession> timeoutSessions = new ArrayList<>();
@@ -100,10 +101,11 @@ public class FileTransactionStoreManagerTest {
             SessionManager sessionManagerMock = Mockito.mock(SessionManager.class);
             Mockito.when(sessionManagerMock.findGlobalSessions(Mockito.any()))
                     .thenReturn(timeoutSessions);
-            fileTransactionStoreManager = new FileTransactionStoreManager(seataFile.getAbsolutePath(), sessionManagerMock);
+            fileTransactionStoreManager = new FileTransactionStoreManager(
+                seataFile.getAbsolutePath(), sessionManagerMock);
             Assertions.assertTrue((boolean) findTimeoutAndSaveMethod.invoke(fileTransactionStoreManager));
 
-            FileBasedSessionManager sessionManager = new FileBasedSessionManager(seataFile.getName(), seataFile.getParent());
+            sessionManager = new FileBasedSessionManager(seataFile.getName(), seataFile.getParent());
             sessionManager.reload();
             Collection<GlobalSession> globalSessions = sessionManager.allSessions();
             Assertions.assertNotNull(globalSessions);
@@ -118,6 +120,9 @@ public class FileTransactionStoreManagerTest {
             findTimeoutAndSaveMethod.setAccessible(false);
             if (null != fileTransactionStoreManager) {
                 fileTransactionStoreManager.shutdown();
+            }
+            if (null != sessionManager) {
+                sessionManager.destroy();
             }
             Assertions.assertTrue(seataFile.delete());
         }
