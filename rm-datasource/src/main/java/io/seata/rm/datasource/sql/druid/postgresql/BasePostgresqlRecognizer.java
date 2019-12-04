@@ -21,6 +21,7 @@ import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.druid.BaseRecognizer;
+import io.seata.rm.datasource.sql.struct.Null;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -51,7 +52,8 @@ public abstract class BasePostgresqlRecognizer extends BaseRecognizer {
                         oneParamValues.stream().forEach(t -> paramAppenderList.add(new ArrayList<>()));
                     }
                     for (int i = 0; i < oneParamValues.size(); i++) {
-                        paramAppenderList.get(i).add(oneParamValues.get(i));
+                        Object o = oneParamValues.get(i);
+                        paramAppenderList.get(i).add(o instanceof Null ? null : o);
                     }
 
                 }
