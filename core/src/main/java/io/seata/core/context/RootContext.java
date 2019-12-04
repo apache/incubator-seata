@@ -16,8 +16,8 @@
 package io.seata.core.context;
 
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.core.model.BranchType;
 import io.seata.common.util.StringUtils;
+import io.seata.core.model.BranchType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,19 +30,14 @@ import java.util.Map;
  */
 public class RootContext {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RootContext.class);
-
     /**
      * The constant KEY_XID.
      */
     public static final String KEY_XID = "TX_XID";
-
+    public static final String KEY_XID_ANNOTATION_TYPE = "tx-xid-annotation-type";
     public static final String KEY_XID_INTERCEPTOR_TYPE = "tx-xid-interceptor-type";
-
-    public static final String KEY_XID_FILTER_TYPE = "tx-xid-filter-type";
-
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(RootContext.class);
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
 
     /**
@@ -55,15 +50,27 @@ public class RootContext {
         if (StringUtils.isNotBlank(xid)) {
             return xid;
         }
+
         String xidInterceptorType = CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
         if (StringUtils.isNotBlank(xidInterceptorType) && xidInterceptorType.indexOf("_") > -1) {
             return xidInterceptorType.split("_")[0];
         }
-        String xidFilterType = CONTEXT_HOLDER.get(KEY_XID_FILTER_TYPE);
-        if (StringUtils.isNotBlank(xidFilterType) && xidFilterType.indexOf("_") > -1) {
-            return xidFilterType.split("_")[0];
+
+        String xidAnnotationType = CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
+        if (StringUtils.isNotBlank(xidAnnotationType) && xidAnnotationType.indexOf("_") > -1) {
+            return xidAnnotationType.split("_")[0];
         }
+
         return null;
+    }
+
+    /**
+     * Gets xid.
+     *
+     * @return the xid
+     */
+    public static String getXIDAnnotationType() {
+        return CONTEXT_HOLDER.get(KEY_XID_ANNOTATION_TYPE);
     }
 
     /**
@@ -73,15 +80,6 @@ public class RootContext {
      */
     public static String getXIDInterceptorType() {
         return CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE);
-    }
-
-    /**
-     * Gets xid.
-     *
-     * @return the xid
-     */
-    public static String getXIDFilterType() {
-        return CONTEXT_HOLDER.get(KEY_XID_FILTER_TYPE);
     }
 
     /**
@@ -110,18 +108,24 @@ public class RootContext {
 
     /**
      * Bind interceptor type
+     *
+     * @param xidType
      */
-    public static void bindFilterType(String xidType) {
+    public static void bindAnnotationType(String xidType) {
         if (StringUtils.isNotBlank(xidType)) {
             String[] xidTypes = xidType.split("_");
             if (xidTypes.length == 2) {
-                bindFilterType(xidTypes[0], BranchType.valueOf(xidTypes[1]));
+                bindAnnotationType(xidTypes[0], BranchType.valueOf(xidTypes[1]));
             }
         }
     }
 
+
     /**
      * Bind interceptor type
+     *
+     * @param xid
+     * @param branchType
      */
     public static void bindInterceptorType(String xid, BranchType branchType) {
         String xidType = String.format("%s_%s", xid, branchType.name());
@@ -133,13 +137,16 @@ public class RootContext {
 
     /**
      * Bind filter type
+     *
+     * @param xid
+     * @param branchType
      */
-    public static void bindFilterType(String xid, BranchType branchType) {
+    public static void bindAnnotationType(String xid, BranchType branchType) {
         String xidType = String.format("%s_%s", xid, branchType.name());
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("bind filter type xid={} branchType={}", xid, branchType);
         }
-        CONTEXT_HOLDER.put(KEY_XID_FILTER_TYPE, xidType);
+        CONTEXT_HOLDER.put(KEY_XID_ANNOTATION_TYPE, xidType);
     }
 
     /**
@@ -174,10 +181,10 @@ public class RootContext {
      *
      * @return the string
      */
-    public static String unbindInterceptorType() {
-        String xidType = CONTEXT_HOLDER.remove(KEY_XID_INTERCEPTOR_TYPE);
+    public static String unbindAnnotationType() {
+        String xidType = CONTEXT_HOLDER.remove(KEY_XID_ANNOTATION_TYPE);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind inteceptor type {}", xidType);
+            LOGGER.debug("unbind annotation type {}", xidType);
         }
         return xidType;
     }
@@ -187,10 +194,10 @@ public class RootContext {
      *
      * @return the string
      */
-    public static String unbindFilterType() {
-        String xidType = CONTEXT_HOLDER.remove(KEY_XID_FILTER_TYPE);
+    public static String unbindInterceptorType() {
+        String xidType = CONTEXT_HOLDER.remove(KEY_XID_INTERCEPTOR_TYPE);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("unbind filter type {}", xidType);
+            LOGGER.debug("unbind inteceptor type {}", xidType);
         }
         return xidType;
     }
@@ -212,7 +219,18 @@ public class RootContext {
     }
 
     /**
+     * In global transaction boolean.
+     *
+     * @return the boolean
+     */
+    public static boolean inGlobalTransactionSagaTcc() {
+        return CONTEXT_HOLDER.get(KEY_XID_ANNOTATION_TYPE) != null || CONTEXT_HOLDER.get(KEY_XID_INTERCEPTOR_TYPE) != null;
+    }
+
+    /**
      * requires global lock check
+     *
+     * @return
      */
     public static boolean requireGlobalLock() {
         return CONTEXT_HOLDER.get(KEY_GLOBAL_LOCK_FLAG) != null;

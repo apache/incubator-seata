@@ -24,6 +24,7 @@ import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcException;
 import com.alibaba.dubbo.rpc.RpcInvocation;
 import com.alibaba.dubbo.rpc.RpcResult;
+import io.seata.common.executor.Callback;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
@@ -38,10 +39,8 @@ import java.util.Map;
 public class TccReferenceAnnotationFilter implements Filter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TccReferenceAnnotationFilter.class);
-
-    private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
-
     private final static String DUBBO_GENERIC_SERVICE_INVOKE = "$invoke";
+    private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
@@ -70,10 +69,14 @@ public class TccReferenceAnnotationFilter implements Filter {
                 RootContext.unbind();
                 RootContext.bindAnnotationType(xid, BranchType.TCC);
                 try {
-                    Map<String, Object> ret = actionInterceptorHandler.proceed(method, arguments, xid, businessAction,
-                            () -> invoker.invoke(invocation));
+                    Map<String, Object> ret = actionInterceptorHandler.proceed(method, arguments, xid, businessAction, new Callback<Object>() {
+                        @Override
+                        public Object execute() throws Throwable {
+                            return invoker.invoke(invocation);
+                        }
+                    });
                     return (Result) ret.get(io.seata.common.Constants.TCC_METHOD_RESULT);
-                }  finally {
+                } finally {
                     //recovery the context
                     RootContext.unbindAnnotationType();
                     RootContext.bind(xid);
