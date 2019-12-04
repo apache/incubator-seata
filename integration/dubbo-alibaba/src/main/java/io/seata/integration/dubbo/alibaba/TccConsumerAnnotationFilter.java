@@ -36,9 +36,9 @@ import java.lang.reflect.Method;
 import java.util.Map;
 
 @Activate(group = {Constants.CONSUMER}, order = 95)
-public class TccReferenceAnnotationFilter implements Filter {
+public class TccConsumerAnnotationFilter implements Filter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TccReferenceAnnotationFilter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TccConsumerAnnotationFilter.class);
     private final static String DUBBO_GENERIC_SERVICE_INVOKE = "$invoke";
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
