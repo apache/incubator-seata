@@ -15,11 +15,11 @@
  */
 package io.seata.rm.datasource.sql.druid.postgresql;
 
-import java.util.List;
-
-import com.alibaba.druid.sql.SQLUtils;
-import com.alibaba.druid.sql.ast.SQLStatement;
-
+import java.util.ArrayList;
+import io.seata.rm.datasource.ParametersHolder;
+import io.seata.rm.datasource.sql.SQLType;
+import io.seata.rm.datasource.sql.SQLVisitorFactory;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -32,9 +32,46 @@ public class PostgresqlSelectForUpdateRecognizerTest {
     @Test
     public void testGetSqlType() {
         String sql = "select * from t where id = ? for update";
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, DB_TYPE);
 
-        //PostgresqlSelectForUpdateRecognizer recognizer = (PostgresqlSelectForUpdateRecognizer)SQLVisitorFactory.get(sql, DB_TYPE);
-        //Assertions.assertEquals(recognizer.getSQLType(), SQLType.SELECT_FOR_UPDATE);
+        PostgresqlSelectForUpdateRecognizer recognizer = (PostgresqlSelectForUpdateRecognizer)SQLVisitorFactory.get(sql, DB_TYPE);
+        Assertions.assertEquals(recognizer.getSQLType(), SQLType.SELECT_FOR_UPDATE);
+    }
+
+    @Test
+    public void testGetWhereCondition_0() {
+        String sql = "select * from t for update";
+
+        PostgresqlSelectForUpdateRecognizer recognizer = (PostgresqlSelectForUpdateRecognizer)SQLVisitorFactory.get(sql, DB_TYPE);
+        String whereCondition = recognizer.getWhereCondition(new ParametersHolder() {
+            @Override
+            public ArrayList<Object>[] getParameters() {
+                return null;
+            }
+        }, new ArrayList<>());
+        Assertions.assertEquals("", whereCondition);
+    }
+
+    @Test
+    public void testGetWhereCondition_1() {
+        String sql = "select * from t for update";
+
+        PostgresqlSelectForUpdateRecognizer recognizer = (PostgresqlSelectForUpdateRecognizer)SQLVisitorFactory.get(sql, DB_TYPE);
+        String whereCondition = recognizer.getWhereCondition();
+
+        Assertions.assertEquals("", whereCondition);
+    }
+
+    @Test
+    public void testGetTableAlias() {
+        String sql = "select * from t where id = ? for update";
+        PostgresqlSelectForUpdateRecognizer recognizer = (PostgresqlSelectForUpdateRecognizer)SQLVisitorFactory.get(sql, DB_TYPE);
+        Assertions.assertNull(recognizer.getTableAlias());
+    }
+
+    @Test
+    public void testGetTableName() {
+        String sql = "select * from t where id = ? for update";
+        PostgresqlSelectForUpdateRecognizer recognizer = (PostgresqlSelectForUpdateRecognizer)SQLVisitorFactory.get(sql, DB_TYPE);
+        Assertions.assertEquals(recognizer.getTableName(), "t");
     }
 }
