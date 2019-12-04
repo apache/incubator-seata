@@ -23,7 +23,6 @@ import io.seata.core.constants.ServerTableColumnsName;
  * database log store SQLs
  *
  * @author zhangsen
- * @date 2019 /4/2
  */
 public class LogStoreSqls {
 
@@ -43,8 +42,8 @@ public class LogStoreSqls {
     public static final String PRAMETER_PLACEHOLD = " #PRAMETER_PLACEHOLD# ";
 
     /**
-     * The constant ALL_GLOBAL_COLUMNS.
-     * xid, transaction_id, status, application_id, transaction_service_group, transaction_name, timeout, begin_time, application_data, gmt_create, gmt_modified
+     * The constant ALL_GLOBAL_COLUMNS. xid, transaction_id, status, application_id, transaction_service_group,
+     * transaction_name, timeout, begin_time, application_data, gmt_create, gmt_modified
      */
     public static final String ALL_GLOBAL_COLUMNS
         = ServerTableColumnsName.GLOBAL_TABLE_XID + ", " + ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID + ", "
@@ -54,10 +53,9 @@ public class LogStoreSqls {
         + ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA + ", " + ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE + ", "
         + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED;
 
-
     /**
-     * The constant ALL_BRANCH_COLUMNS.
-     * xid, transaction_id, branch_id, resource_group_id, resource_id, lock_key, branch_type, status, client_id, application_data, gmt_create, gmt_modified
+     * The constant ALL_BRANCH_COLUMNS. xid, transaction_id, branch_id, resource_group_id, resource_id, lock_key,
+     * branch_type, status, client_id, application_data, gmt_create, gmt_modified
      */
     protected static final String ALL_BRANCH_COLUMNS
         = ServerTableColumnsName.BRANCH_TABLE_XID + ", " + ServerTableColumnsName.BRANCH_TABLE_TRANSACTION_ID + ", "
@@ -126,9 +124,9 @@ public class LogStoreSqls {
      * The constant QUERY_GLOBAL_TRANSACTION_BY_STATUS.
      */
     public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_MYSQL =
-            "select " + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD
-                    + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
-                    + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
+        "select " + ALL_GLOBAL_COLUMNS + " from " + GLOBAL_TABLE_PLACEHOLD
+            + " where " + ServerTableColumnsName.GLOBAL_TABLE_STATUS + " in (" + PRAMETER_PLACEHOLD + ")"
+            + " order by " + ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED + " limit ?";
 
     public static final String QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE =
         "select t.* from ("
@@ -181,7 +179,7 @@ public class LogStoreSqls {
      */
     public static final String INSERT_BRANCH_TRANSACTION_POSTGRESQL = "insert into " + BRANCH_TABLE_PLACEHOLD + "("
         + ALL_BRANCH_COLUMNS + ")" +
-        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())";
+        "values (?, ?, ?, ?, ?, ?, ?, ?, ?, now(), now())";
 
     /**
      * The constant UPDATE_BRANCH_TRANSACTION_STATUS_MYSQL.
@@ -249,7 +247,7 @@ public class LogStoreSqls {
      * Get insert global transaction sql string.
      *
      * @param globalTable the global table
-     * @param dbType      the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getInsertGlobalTransactionSQL(String globalTable, String dbType) {
@@ -270,7 +268,7 @@ public class LogStoreSqls {
      * Get update global transaction status sql string.
      *
      * @param globalTable the global table
-     * @param dbType      the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getUpdateGlobalTransactionStatusSQL(String globalTable, String dbType) {
@@ -291,7 +289,7 @@ public class LogStoreSqls {
      * Get delete global transaction sql string.
      *
      * @param globalTable the global table
-     * @param dbType      the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getDeleteGlobalTransactionSQL(String globalTable, String dbType) {
@@ -302,7 +300,7 @@ public class LogStoreSqls {
      * Get query global transaction sql string.
      *
      * @param globalTable the global table
-     * @param dbType      the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getQueryGlobalTransactionSQL(String globalTable, String dbType) {
@@ -313,7 +311,7 @@ public class LogStoreSqls {
      * Get query global transaction sql by transaction id string.
      *
      * @param globalTable the global table
-     * @param dbType      the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getQueryGlobalTransactionSQLByTransactionId(String globalTable, String dbType) {
@@ -323,18 +321,18 @@ public class LogStoreSqls {
     /**
      * Get query global transaction sql by status string.
      *
-     * @param globalTable       the global table
-     * @param dbType            the db type
+     * @param globalTable the global table
+     * @param dbType the db type
      * @param paramsPlaceHolder the params place holder
      * @return the string
      */
     public static String getQueryGlobalTransactionSQLByStatus(String globalTable, String dbType,
-                                                              String paramsPlaceHolder) {
+        String paramsPlaceHolder) {
         if (DBType.MYSQL.name().equalsIgnoreCase(dbType)
             || DBType.OCEANBASE.name().equalsIgnoreCase(dbType)
             || DBType.H2.name().equalsIgnoreCase(dbType)) {
             return QUERY_GLOBAL_TRANSACTION_BY_STATUS_MYSQL.replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(
-                    PRAMETER_PLACEHOLD, paramsPlaceHolder);
+                PRAMETER_PLACEHOLD, paramsPlaceHolder);
         } else if (DBType.ORACLE.name().equalsIgnoreCase(dbType)) {
             return QUERY_GLOBAL_TRANSACTION_BY_STATUS_ORACLE.replace(GLOBAL_TABLE_PLACEHOLD, globalTable).replace(
                 PRAMETER_PLACEHOLD, paramsPlaceHolder);
@@ -350,7 +348,7 @@ public class LogStoreSqls {
      * Get query global transaction for recovery sql string.
      *
      * @param globalTable the global table
-     * @param dbType      the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getQueryGlobalTransactionForRecoverySQL(String globalTable, String dbType) {
@@ -371,7 +369,7 @@ public class LogStoreSqls {
      * Get insert branch transaction sql string.
      *
      * @param branchTable the branch table
-     * @param dbType      the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getInsertBranchTransactionSQL(String branchTable, String dbType) {
@@ -392,7 +390,7 @@ public class LogStoreSqls {
      * Get update branch transaction status sql string.
      *
      * @param branchTable the branch table
-     * @param dbType      the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getUpdateBranchTransactionStatusSQL(String branchTable, String dbType) {
@@ -413,7 +411,7 @@ public class LogStoreSqls {
      * Get delete branch transaction by branch id sql string.
      *
      * @param branchTable the branch table
-     * @param dbType      the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getDeleteBranchTransactionByBranchIdSQL(String branchTable, String dbType) {
@@ -424,7 +422,7 @@ public class LogStoreSqls {
      * Get delete branch transaction by x id string.
      *
      * @param branchTable the branch table
-     * @param dbType      the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getDeleteBranchTransactionByXId(String branchTable, String dbType) {
@@ -435,7 +433,7 @@ public class LogStoreSqls {
      * Get qurey branch transaction string.
      *
      * @param branchTable the branch table
-     * @param dbType      the db type
+     * @param dbType the db type
      * @return the string
      */
     public static String getQureyBranchTransaction(String branchTable, String dbType) {
@@ -446,12 +444,12 @@ public class LogStoreSqls {
      * Get qurey branch transaction string.
      *
      * @param branchTable the branch table
-     * @param dbType      the db type
+     * @param dbType the db type
      * @param paramsPlaceHolder the params place holder
      * @return the string
      */
     public static String getQureyBranchTransaction(String branchTable, String dbType,
-                                                   String paramsPlaceHolder) {
+        String paramsPlaceHolder) {
         return QUREY_BRANCH_TRANSACTION_XIDS.replace(BRANCH_TABLE_PLACEHOLD, branchTable)
             .replace(PRAMETER_PLACEHOLD, paramsPlaceHolder);
     }
@@ -460,7 +458,7 @@ public class LogStoreSqls {
      * Gets qurey global max.
      *
      * @param globalTable the global table
-     * @param dbType      the db type
+     * @param dbType the db type
      * @return the qurey global max
      */
     public static String getQureyGlobalMax(String globalTable, String dbType) {
@@ -471,7 +469,7 @@ public class LogStoreSqls {
      * Gets qurey branch max.
      *
      * @param branchTable the branch table
-     * @param dbType      the db type
+     * @param dbType the db type
      * @return the qurey branch max
      */
     public static String getQureyBranchMax(String branchTable, String dbType) {
