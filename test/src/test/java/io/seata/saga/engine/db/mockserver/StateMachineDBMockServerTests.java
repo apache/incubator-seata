@@ -40,7 +40,8 @@ public class StateMachineDBMockServerTests {
 
     @BeforeAll
     public static void initApplicationContext() throws InterruptedException {
-        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_db_mockserver_test.xml");
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext(
+                "classpath:saga/spring/statemachine_engine_db_mockserver_test.xml");
         stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
     }
 
@@ -53,7 +54,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testSimpleStateMachineWithChoice() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -71,7 +72,7 @@ public class StateMachineDBMockServerTests {
         Assertions.assertNotNull(inst);
         Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
 
-        start  = System.currentTimeMillis();
+        start = System.currentTimeMillis();
         paramMap.put("a", 2);
         inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
@@ -84,7 +85,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testSimpleStateMachineWithChoiceAndEnd() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -96,7 +97,7 @@ public class StateMachineDBMockServerTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        start  = System.currentTimeMillis();
+        start = System.currentTimeMillis();
 
         paramMap.put("a", 3);
         stateMachineEngine.start(stateMachineName, null, paramMap);
@@ -108,7 +109,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testSimpleInputAssignmentStateMachine() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -121,7 +122,8 @@ public class StateMachineDBMockServerTests {
         Assertions.assertNotNull(businessKey);
         System.out.println("====== businessKey :" + businessKey);
 
-        String contextBusinessKey = (String)instance.getEndParams().get(instance.getStateList().get(0).getName()+ DomainConstants.VAR_NAME_BUSINESSKEY);
+        String contextBusinessKey = (String) instance.getEndParams().get(
+                instance.getStateList().get(0).getName() + DomainConstants.VAR_NAME_BUSINESSKEY);
         Assertions.assertNotNull(contextBusinessKey);
         System.out.println("====== context businessKey :" + businessKey);
 
@@ -132,7 +134,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testSimpleCatchesStateMachine() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -150,9 +152,29 @@ public class StateMachineDBMockServerTests {
     }
 
     @Test
-    public void testStatusMatchingStateMachine() throws Exception {
+    public void testSimpleRetryStateMachine() {
 
         long start  = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleRetryStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+    }
+
+    @Test
+    public void testStatusMatchingStateMachine() throws Exception {
+
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -169,11 +191,10 @@ public class StateMachineDBMockServerTests {
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
     }
 
-
     @Test
     public void testCompensationStateMachine() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -193,7 +214,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testSubStateMachine() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 2);
@@ -208,7 +229,36 @@ public class StateMachineDBMockServerTests {
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
 
-        start  = System.currentTimeMillis();
+        start = System.currentTimeMillis();
+
+        paramMap.put("barThrowException", "false");
+        inst = stateMachineEngine.forward(inst.getId(), paramMap);
+
+        cost = System.currentTimeMillis() - start;
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+    }
+
+    @Test
+    public void testSubStateMachineWithLayout() throws Exception {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 2);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine_layout";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+
+        start = System.currentTimeMillis();
 
         paramMap.put("barThrowException", "false");
         inst = stateMachineEngine.forward(inst.getId(), paramMap);
@@ -222,7 +272,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testForwardSubStateMachine() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 2);
@@ -237,7 +287,36 @@ public class StateMachineDBMockServerTests {
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
 
-        start  = System.currentTimeMillis();
+        start = System.currentTimeMillis();
+
+        paramMap.put("fooThrowException", "false");
+        inst = stateMachineEngine.forward(inst.getId(), paramMap);
+
+        cost = System.currentTimeMillis() - start;
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+    }
+
+    @Test
+    public void testForwardSubStateMachineWithLayout() throws Exception {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 2);
+        paramMap.put("fooThrowException", "true");
+
+        String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine_layout";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+
+        start = System.currentTimeMillis();
 
         paramMap.put("fooThrowException", "false");
         inst = stateMachineEngine.forward(inst.getId(), paramMap);
@@ -251,7 +330,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testCompensateSubStateMachine() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 2);
@@ -267,7 +346,36 @@ public class StateMachineDBMockServerTests {
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
 
-        start  = System.currentTimeMillis();
+        start = System.currentTimeMillis();
+
+        inst = stateMachineEngine.compensate(inst.getId(), paramMap);
+
+        cost = System.currentTimeMillis() - start;
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getCompensationStatus()));
+    }
+
+    @Test
+    public void testCompensateSubStateMachineWithLayout() throws Exception {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 2);
+        paramMap.put("barThrowException", "true");
+        paramMap.put("compensateFooThrowException", "true");
+
+        String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine_layout";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+
+        start = System.currentTimeMillis();
 
         inst = stateMachineEngine.compensate(inst.getId(), paramMap);
 
@@ -280,7 +388,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testUserDefCompensateSubStateMachine() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 2);
@@ -296,7 +404,7 @@ public class StateMachineDBMockServerTests {
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
 
-        start  = System.currentTimeMillis();
+        start = System.currentTimeMillis();
 
         paramMap.put("compensateFooThrowException", "false");
         inst = stateMachineEngine.compensate(inst.getId(), paramMap);
@@ -310,7 +418,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testCommitRetryingThenRetryCommitted() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -321,19 +429,18 @@ public class StateMachineDBMockServerTests {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== XID: "+ inst.getId() +" cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
 
-
         paramMap.put("fooThrowException", "false");
 
-        start  = System.currentTimeMillis();
+        start = System.currentTimeMillis();
 
         inst = stateMachineEngine.forward(inst.getId(), paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== XID: "+ inst.getId() +" cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
         Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
     }
@@ -341,7 +448,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testCommitRetryingThenRetryRollbacked() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -352,20 +459,19 @@ public class StateMachineDBMockServerTests {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== XID: "+ inst.getId() +" cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
-
 
         paramMap.put("fooThrowException", "false");
         paramMap.put("barThrowException", "true");
 
-        start  = System.currentTimeMillis();
+        start = System.currentTimeMillis();
 
         inst = stateMachineEngine.forward(inst.getId(), paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== XID: "+ inst.getId() +" cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
         Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
     }
@@ -373,7 +479,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testRollbackRetryingThenRetryRollbacked() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -385,21 +491,20 @@ public class StateMachineDBMockServerTests {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== XID: "+ inst.getId() +" cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getCompensationStatus()));
 
-
         paramMap.put("barThrowException", "false");
         paramMap.put("compensateFooThrowException", "false");
 
-        start  = System.currentTimeMillis();
+        start = System.currentTimeMillis();
 
         inst = stateMachineEngine.compensate(inst.getId(), paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== XID: "+ inst.getId() +" cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
         Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
     }
@@ -407,7 +512,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testRollbackRetryingTwiceThenRetryRollbacked() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -419,17 +524,17 @@ public class StateMachineDBMockServerTests {
         StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== XID: "+ inst.getId() +" cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getCompensationStatus()));
 
-        start  = System.currentTimeMillis();
+        start = System.currentTimeMillis();
 
         inst = stateMachineEngine.compensate(inst.getId(), paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== XID: "+ inst.getId() +" cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getCompensationStatus()));
@@ -437,12 +542,12 @@ public class StateMachineDBMockServerTests {
         paramMap.put("barThrowException", "false");
         paramMap.put("compensateFooThrowException", "false");
 
-        start  = System.currentTimeMillis();
+        start = System.currentTimeMillis();
 
         inst = stateMachineEngine.compensate(inst.getId(), paramMap);
 
         cost = System.currentTimeMillis() - start;
-        System.out.println("====== XID: "+ inst.getId() +" cost :" + cost);
+        System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
         Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getCompensationStatus()));
     }
@@ -450,7 +555,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testStateMachineWithComplextParams() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         People people = new People();
@@ -467,12 +572,12 @@ public class StateMachineDBMockServerTests {
 
         StateMachineInstance instance = stateMachineEngine.start(stateMachineName, null, paramMap);
 
-        People peopleResult = (People)instance.getEndParams().get("complexParameterMethodResult");
+        People peopleResult = (People) instance.getEndParams().get("complexParameterMethodResult");
         Assertions.assertNotNull(peopleResult);
         Assertions.assertTrue(people.getName().equals(people.getName()));
 
         long cost = System.currentTimeMillis() - start;
-        System.out.println("====== XID: "+ instance.getId() +" cost :" + cost);
+        System.out.println("====== XID: " + instance.getId() + " cost :" + cost);
 
         Assertions.assertTrue(ExecutionStatus.SU.equals(instance.getStatus()));
     }
@@ -480,7 +585,7 @@ public class StateMachineDBMockServerTests {
     @Test
     public void testSimpleStateMachineWithAsyncState() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -502,8 +607,9 @@ public class StateMachineDBMockServerTests {
     }
 
     @Test
-    public void testReloadStateMachineInstance(){
-        StateMachineInstance instance = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance("10.15.232.93:8091:2019567124");
+    public void testReloadStateMachineInstance() {
+        StateMachineInstance instance = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(
+                "10.15.232.93:8091:2019567124");
         System.out.println(instance);
     }
 }
