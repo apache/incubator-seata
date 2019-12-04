@@ -15,6 +15,7 @@
  */
 package io.seata.integration.dubbo;
 
+import io.seata.common.executor.Callback;
 import io.seata.core.context.RootContext;
 import io.seata.core.model.BranchType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
@@ -27,23 +28,27 @@ import org.apache.dubbo.rpc.Invoker;
 import org.apache.dubbo.rpc.Result;
 import org.apache.dubbo.rpc.RpcException;
 import org.apache.dubbo.rpc.RpcInvocation;
+import org.apache.dubbo.rpc.RpcResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.lang.reflect.Method;
 import java.util.Map;
 
 @Activate(group = {Constants.CONSUMER}, order = 95)
-public class TccReferenceAnnotationFilter implements Filter {
+public class TccConsumerAnnotationFilter implements Filter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TccReferenceAnnotationFilter.class);
-
-    private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
-
+    private static final Logger LOGGER = LoggerFactory.getLogger(TccConsumerAnnotationFilter.class);
     private final static String DUBBO_GENERIC_SERVICE_INVOKE = "$invoke";
+    private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
 
     @Override
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         try {
+            if (!RootContext.inGlobalTransaction() && !RootContext.inGlobalTransactionSagaTcc()) {
+                return invoker.invoke(invocation);
+            }
+
             RpcInvocation rpcInvocation = (RpcInvocation) invocation;
             String methodName = rpcInvocation.getMethodName();
             Class<?>[] parameterTypes = rpcInvocation.getParameterTypes();
@@ -54,10 +59,6 @@ public class TccReferenceAnnotationFilter implements Filter {
             }
 
             Method method = interfaceClass.getMethod(methodName, parameterTypes);
-            //not in transaction
-            if (!RootContext.inGlobalTransaction()) {
-                return invoker.invoke(invocation);
-            }
 
             TwoPhaseBusinessAction businessAction = method.getAnnotation(TwoPhaseBusinessAction.class);
             //try method
@@ -66,20 +67,27 @@ public class TccReferenceAnnotationFilter implements Filter {
                 String xid = RootContext.getXID();
                 //clear the context
                 RootContext.unbind();
-                RootContext.bindFilterType(xid, BranchType.TCC);
+                RootContext.bindAnnotationType(xid, BranchType.TCC);
                 try {
-                    Map<String, Object> ret = actionInterceptorHandler.proceed(method, arguments, xid, businessAction,
-                            () -> invoker.invoke(invocation));
+                    Map<String, Object> ret = actionInterceptorHandler.proceed(method, arguments, xid, businessAction, new Callback<Object>() {
+                        @Override
+                        public Object execute() throws Throwable {
+                            return invoker.invoke(invocation);
+                        }
+                    });
                     return (Result) ret.get(io.seata.common.Constants.TCC_METHOD_RESULT);
-                }  finally {
+                } finally {
                     //recovery the context
-                    RootContext.unbindFilterType();
+                    RootContext.unbindAnnotationType();
                     RootContext.bind(xid);
                 }
             }
         } catch (Throwable e) {
             LOGGER.error("Tcc dubbo invokes service to register branch transaction exception:{}", e.getMessage(), e);
-            throw new RpcException(e);
+            RpcResult result = new RpcResult();
+            result.setValue(false);
+            result.setException(e);
+            return result;
         }
         return invoker.invoke(invocation);
     }
