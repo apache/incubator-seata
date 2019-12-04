@@ -5,7 +5,7 @@
 -- 注意此处0.3.0+ 增加唯一索引 ux_undo_log
 DROP TABLE IF	EXISTS "undo_log";
 CREATE TABLE "undo_log" (
-"id" INT8 NOT NULL,
+"id" INT8 NOT NULL DEFAULT nextval('undo_log_seq'),
 "branch_id" INT8 NOT NULL,
 "xid" VARCHAR (100) NOT NULL,
 "context" VARCHAR (128) NOT NULL,
