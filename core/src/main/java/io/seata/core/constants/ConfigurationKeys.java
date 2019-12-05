@@ -335,4 +335,9 @@ public class ConfigurationKeys {
      * The constant MAX_ROLLBACK_RETRY_TIMEOUT.
      */
     public static final String MAX_ROLLBACK_RETRY_TIMEOUT = SERVER_PREFIX + "max.rollback.retry.timeout";
+
+    /**
+     * The constant DISABLE_GLOBAL_TRANSACTION.
+     */
+    public static final String DISABLE_GLOBAL_TRANSACTION = SERVICE_PREFIX + "disableGlobalTransaction";
 }

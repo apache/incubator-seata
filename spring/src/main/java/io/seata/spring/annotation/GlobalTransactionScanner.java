@@ -21,7 +21,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.netty.RmRpcClient;
 import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.core.rpc.netty.TmRpcClient;
@@ -84,8 +86,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final String applicationId;
     private final String txServiceGroup;
     private final int mode;
-    private final boolean disableGlobalTransaction =
-        ConfigurationFactory.getInstance().getBoolean("service.disableGlobalTransaction", false);
+    private final boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
+        ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, false);
 
     private final FailureHandler failureHandlerHook;
 
@@ -230,6 +232,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
                     if (interceptor == null) {
                         interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
+                        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,(ConfigurationChangeListener)interceptor);
                     }
                 }
 
