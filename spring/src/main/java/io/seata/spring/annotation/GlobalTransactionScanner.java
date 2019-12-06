@@ -16,7 +16,9 @@
 package io.seata.spring.annotation;
 
 import javax.sql.DataSource;
+import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,6 +44,7 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -308,7 +311,26 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Auto proxy of [{}]", beanName);
             }
-            return DataSourceProxyHolder.get().putDataSource((DataSource) bean);
+            DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
+            return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), bean.getClass().getInterfaces(), new InvocationHandler() {
+                @Override
+                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                    Method m = BeanUtils.findDeclaredMethod(DataSourceProxy.class, method.getName(), method.getParameterTypes());
+                    if (null != m) {
+                        return m.invoke(dataSourceProxy, args);
+                    } else {
+                        boolean oldAccessible = method.isAccessible();
+                        try {
+                            method.setAccessible(true);
+                            return method.invoke(bean, args);
+                        } finally {
+                            //recover the original accessible for security reason
+                            method.setAccessible(oldAccessible);
+                        }
+                    }
+                }
+            });
+
         }
         return super.postProcessAfterInitialization(bean, beanName);
     }
