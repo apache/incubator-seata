@@ -17,7 +17,6 @@ package io.seata.codec.hessian;
 
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
-import com.caucho.hessian.io.HessianProtocolException;
 import com.caucho.hessian.io.Serializer;
 import com.caucho.hessian.io.SerializerFactory;
 import io.seata.common.loader.LoadLevel;
@@ -34,7 +33,7 @@ import java.io.IOException;
  */
 @LoadLevel(name = "HESSIAN")
 public class HessianCodec implements Codec {
-    private final Logger logger = LoggerFactory.getLogger(HessianCodec.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HessianCodec.class);
 
     @Override
     public <T> byte[] encode(T t) {
@@ -47,32 +46,22 @@ public class HessianCodec implements Codec {
             serializer.writeObject(t, output);
             output.close();
             stream = baos.toByteArray();
-        } catch (HessianProtocolException e) {
-            logger.error("Hessian encode error", e);
         } catch (IOException e) {
-            logger.error("Hessian encode error", e);
+            LOGGER.error("Hessian encode error", e);
         }
         return stream;
     }
 
     @Override
     public <T> T decode(byte[] bytes) {
-        Hessian2Input input = null;
-        try {
-            ByteArrayInputStream is = new ByteArrayInputStream(bytes);
-            input = new Hessian2Input(is);
-            try {
-                return (T) input.readObject();
-            } catch (IOException e) {
-                logger.error("Hessian decode error", e);
-            }
-        } finally {
-            try {
-                input.close();
-            } catch (IOException e) {
-                logger.error("Hessian decode error", e);
-            }
+        T obj = null;
+        try (ByteArrayInputStream is = new ByteArrayInputStream(bytes);) {
+            Hessian2Input input = new Hessian2Input(is);
+            obj = (T) input.readObject();
+            input.close();
+        } catch (IOException e) {
+            LOGGER.error("Hessian decode error", e);
         }
-        return null;
+        return obj;
     }
 }
