@@ -42,11 +42,9 @@ import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.framework.autoproxy.AbstractAutoProxyCreator;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -310,22 +308,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Auto proxy of [{}]", beanName);
             }
-            DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
-            return Enhancer.create(bean.getClass(), (org.springframework.cglib.proxy.MethodInterceptor) (o, method, args, methodProxy) -> {
-                Method m = BeanUtils.findDeclaredMethod(DataSourceProxy.class, method.getName(), method.getParameterTypes());
-                if (null != m) {
-                    return m.invoke(dataSourceProxy, args);
-                } else {
-                    boolean oldAccessible = method.isAccessible();
-                    try {
-                        method.setAccessible(true);
-                        return method.invoke(bean, args);
-                    } finally {
-                        //recover the original accessible for security reason
-                        method.setAccessible(oldAccessible);
-                    }
-                }
-            });
+            return DataSourceProxyHolder.get().putDataSource((DataSource) bean);
         }
         return super.postProcessAfterInitialization(bean, beanName);
     }
