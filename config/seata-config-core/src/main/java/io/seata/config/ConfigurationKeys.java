@@ -29,7 +29,11 @@ public final class ConfigurationKeys {
     /**
      * The constant FILE_ROOT_CONFIG.
      */
-    public static final String FILE_ROOT_CONFIG = "seata";
+    public static final String FILE_ROOT_CONFIG = "config";
+    /**
+     * The constant SEATA_FILE_ROOT_CONFIG
+     */
+    public static final String SEATA_FILE_ROOT_CONFIG = "seata";
     /**
      * The constant FILE_CONFIG_SPLIT_CHAR.
      */
