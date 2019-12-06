@@ -47,7 +47,7 @@ public class HessianCodec implements Codec {
             output.close();
             stream = baos.toByteArray();
         } catch (IOException e) {
-            LOGGER.error("Hessian encode error", e);
+            LOGGER.error("Hessian encode error:{}", e.getMessage(), e);
         }
         return stream;
     }
@@ -60,7 +60,7 @@ public class HessianCodec implements Codec {
             obj = (T) input.readObject();
             input.close();
         } catch (IOException e) {
-            LOGGER.error("Hessian decode error", e);
+            LOGGER.error("Hessian decode error:{}", e.getMessage(), e);
         }
         return obj;
     }
