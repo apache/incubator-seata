@@ -20,6 +20,9 @@ dependency-reduced-pom.xml
 *.iml
 *.iws
 
+# vs code
+.vscode/
+*.factorypath
 # temp ignore
 *.log
 *.cache
