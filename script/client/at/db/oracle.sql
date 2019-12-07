@@ -9,7 +9,6 @@ CREATE TABLE undo_log
     log_status    NUMBER(10)    NOT NULL,
     log_created   TIMESTAMP(0)  NOT NULL,
     log_modified  TIMESTAMP(0)  NOT NULL,
-    ext           VARCHAR2(100) DEFAULT NULL,
     PRIMARY KEY (id),
     CONSTRAINT ux_undo_log UNIQUE (xid, branch_id)
 );

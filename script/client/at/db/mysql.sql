@@ -9,7 +9,6 @@ CREATE TABLE IF NOT EXISTS `undo_log`
     `log_status`    INT(11)      NOT NULL COMMENT '0:normal status,1:defense status',
     `log_created`   DATETIME     NOT NULL COMMENT 'create datetime',
     `log_modified`  DATETIME     NOT NULL COMMENT 'modify datetime',
-    `ext`           VARCHAR(100) DEFAULT NULL COMMENT 'reserved field',
     PRIMARY KEY (`id`),
     UNIQUE KEY `ux_undo_log` (`xid`, `branch_id`)
 ) ENGINE = InnoDB
