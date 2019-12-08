@@ -1,2 +1,2 @@
 zkAddr=localhost:2181
-zkHome=/Users/zhangchenghui/ztoware/zookeeper-3.4.14
+zkHome=/Users/zookeeper-3.4.14

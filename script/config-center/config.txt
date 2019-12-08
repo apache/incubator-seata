@@ -16,7 +16,6 @@ service.default.grouplist=127.0.0.1:8091
 service.enableDegrade=false
 service.disable=false
 service.max.commit.retry.timeout=-1
-config.etcd3.serverAddr=127.0.0.1:2379
 service.max.rollback.retry.timeout=-1
 service.disableGlobalTransaction=false
 client.rm.async.commit.buffer.limit=10000
