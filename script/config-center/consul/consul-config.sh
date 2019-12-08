@@ -19,38 +19,34 @@
 #   reserved.
 
 if [[ $# != 1 ]]; then
-	echo "./nacos-config.sh nacosAddr"
+	echo "./consul-config.sh consulAddr"
 	exit -1
 fi
-
-nacosAddr=$1
-echo "set nacosAddr=$nacosAddr"
-error=0
+consulAddr=$1
 contentType="Content-type:application/json;charset=UTF-8"
+echo "set consulAddr=$consulAddr"
 
+error=0
 for line in $(cat $(dirname "$PWD")/config.txt); do
-	key=${line%%=*}
+    key=${line%%=*}
 	value=${line#*=}
-	echo "\r\n set "${key}" = "${value}
-
-	result=$(curl -X POST -H ${contentType} "http://$nacosAddr/nacos/v1/cs/configs?dataId=$key&group=SEATA_GROUP&content=$value")
+	echo "set" "${key}" "=" "${value}"
+    result=$(curl -X PUT -H ${contentType} -d ${value} "http://$consulAddr/v1/kv/$key")
+    echo "response:$result"
 
     if [[ -z ${result} ]]; then
         echo "Please check the cluster status."
         exit -1
     fi
 
-	if [[ "$result"x == "true"x ]]; then
-		echo "\033[42;37m $result \033[0m"
-	else
-		echo "\033[41;37 $result \033[0m"
-		let error++
+    if [[ ! ${result} =~ "true" ]]; then
+		(( error ++ ))
 	fi
 done
 
 if [[ ${error} -eq 0 ]]; then
-	echo "\r\n\033[42;37m init nacos config finished, please start seata-server. \033[0m"
+	echo "init consul config finished, please start seata-server."
 else
-	echo "\r\n\033[41;33m init nacos config fail. \033[0m"
+	echo "init consul config fail."
 fi
 exit 0

@@ -18,39 +18,43 @@
 #   Copyright (c) 2001-2006 The Apache Software Foundation.  All rights
 #   reserved.
 
+# etcd REST API v3.
+
 if [[ $# != 1 ]]; then
-	echo "./nacos-config.sh nacosAddr"
+	echo "./etcd3-config.sh etcd3Addr"
 	exit -1
 fi
-
-nacosAddr=$1
-echo "set nacosAddr=$nacosAddr"
-error=0
+etcd3Addr=$1
 contentType="Content-type:application/json;charset=UTF-8"
+echo "set etcd3Addr=$etcd3Addr"
 
+error=0
 for line in $(cat $(dirname "$PWD")/config.txt); do
-	key=${line%%=*}
+    key=${line%%=*}
 	value=${line#*=}
-	echo "\r\n set "${key}" = "${value}
+	echo "set" "${key}" "=" "${value}"
 
-	result=$(curl -X POST -H ${contentType} "http://$nacosAddr/nacos/v1/cs/configs?dataId=$key&group=SEATA_GROUP&content=$value")
+	keyBase64=$(printf "%s""$key" | base64)
+	valueBase64=$(printf "%s""$value" | base64)
+	echo "base64 >>>" "${keyBase64}" "=" "${valueBase64}"
+
+    result=$(curl -X POST -H ${contentType} -d "{\"key\": \"$keyBase64\", \"value\": \"$valueBase64\"}" "http://$etcd3Addr/v3/kv/put")
+
+    echo "response:$result"
 
     if [[ -z ${result} ]]; then
         echo "Please check the cluster status."
         exit -1
     fi
 
-	if [[ "$result"x == "true"x ]]; then
-		echo "\033[42;37m $result \033[0m"
-	else
-		echo "\033[41;37 $result \033[0m"
-		let error++
+    if [[ ${result} =~ "error" || ${result} =~ "code" ]]; then
+		(( error++ ))
 	fi
 done
 
 if [[ ${error} -eq 0 ]]; then
-	echo "\r\n\033[42;37m init nacos config finished, please start seata-server. \033[0m"
+	echo "init etcd3 config finished, please start seata-server."
 else
-	echo "\r\n\033[41;33m init nacos config fail. \033[0m"
+	echo "init etcd3 config fail."
 fi
 exit 0
