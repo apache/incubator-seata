@@ -13,7 +13,7 @@ install: true
 
 before_script:
   - if [ "$TRAVIS_JDK_VERSION" == "openjdk8" ]; then
-    export IMAGE_NAME="openjdk:8u232-jre-stretch";
+    export IMAGE_NAME="openjdk:8u212-jre-alpine";
     fi
   - if [ "$TRAVIS_JDK_VERSION" == "openjdk11" ]; then
     export IMAGE_NAME="openjdk:11-jre-stretch";
@@ -21,9 +21,9 @@ before_script:
 
 script:
   - if [ "$TRAVIS_BRANCH" == "develop" ] && [ "$TRAVIS_PULL_REQUEST" == false ]; then
-    ./mvnw clean install -DskipTests=false -P image -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+    travis_wait 30 ./mvnw clean install -DskipTests=false -P image -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
     else
-    ./mvnw clean install -DskipTests=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+    travis_wait 30 ./mvnw clean install -DskipTests=false -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
     fi
 after_success:
   - bash <(curl -s https://codecov.io/bash)

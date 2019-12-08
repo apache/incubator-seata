@@ -56,7 +56,7 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
 
     private List<StateHandlerInterceptor> interceptors;
 
-    public static void handleException(ProcessContext context, AbstractTaskState state, Exception e) {
+    public static void handleException(ProcessContext context, AbstractTaskState state, Throwable e) {
         List<TaskState.ExceptionMatch> catches = state.getCatches();
         if (catches != null && catches.size() > 0) {
             for (TaskState.ExceptionMatch exceptionMatch : catches) {
@@ -75,20 +75,20 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
 
                                     Class<? extends Exception> expClass = null;
                                     try {
-                                        expClass = (Class<? extends Exception>)ServiceTaskStateHandler.class
-                                            .getClassLoader().loadClass(expStr);
+                                        expClass = (Class<? extends Exception>) ServiceTaskStateHandler.class
+                                                .getClassLoader().loadClass(expStr);
                                     } catch (Exception e1) {
 
                                         LOGGER.warn("Cannot Load Exception Class by getClass().getClassLoader()", e1);
 
                                         try {
-                                            expClass = (Class<? extends Exception>)Thread.currentThread()
-                                                .getContextClassLoader().loadClass(expStr);
+                                            expClass = (Class<? extends Exception>) Thread.currentThread()
+                                                    .getContextClassLoader().loadClass(expStr);
                                         } catch (Exception e2) {
                                             LOGGER.warn(
-                                                "Cannot Load Exception Class by Thread.currentThread()"
-                                                    + ".getContextClassLoader()",
-                                                e2);
+                                                    "Cannot Load Exception Class by Thread.currentThread()"
+                                                            + ".getContextClassLoader()",
+                                                    e2);
                                         }
                                     }
 
@@ -96,15 +96,15 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
                                         exceptionClasses.add(expClass);
                                     }
                                 }
-
+                                exceptionMatch.setExceptionClasses(exceptionClasses);
                             }
                         }
                     }
 
                     for (Class<? extends Exception> expClass : exceptionClasses) {
                         if (expClass.isAssignableFrom(e.getClass())) {
-                            ((HierarchicalProcessContext)context).setVariableLocally(
-                                DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE, exceptionMatch.getNext());
+                            ((HierarchicalProcessContext) context).setVariableLocally(
+                                    DomainConstants.VAR_NAME_CURRENT_EXCEPTION_ROUTE, exceptionMatch.getNext());
                             return;
                         }
                     }
@@ -114,50 +114,50 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
         }
 
         LOGGER.error("Task execution failed and no catches configured");
-        ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH, true);
+        ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_IS_EXCEPTION_NOT_CATCH, true);
     }
 
     @Override
     public void process(ProcessContext context) throws EngineExecutionException {
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
-        ServiceTaskStateImpl state = (ServiceTaskStateImpl)instruction.getState(context);
+        ServiceTaskStateImpl state = (ServiceTaskStateImpl) instruction.getState(context);
 
         String serviceName = state.getServiceName();
         String methodName = state.getServiceMethod();
-        StateInstance stateInstance = (StateInstance)context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
+        StateInstance stateInstance = (StateInstance) context.getVariable(DomainConstants.VAR_NAME_STATE_INST);
 
         Object result;
         try {
 
-            List<Object> input = (List<Object>)context.getVariable(DomainConstants.VAR_NAME_INPUT_PARAMS);
+            List<Object> input = (List<Object>) context.getVariable(DomainConstants.VAR_NAME_INPUT_PARAMS);
 
             //Set the current task execution status to RU (Running)
             stateInstance.setStatus(ExecutionStatus.RU);
 
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info(">>>>>>>>>>>>>>>>>>>>>> Start to execute State[{}], ServiceName[{}], Method[{}], Input:{}",
-                    state.getName(), serviceName, methodName, input);
+                        state.getName(), serviceName, methodName, input);
             }
 
             if (state instanceof CompensateSubStateMachineState) {
                 //If it is the compensation of the substate machine,
                 // directly call the state machine's compensate method
                 result = compensateSubStateMachine(context, state, input, stateInstance,
-                    (StateMachineEngine)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_ENGINE));
+                        (StateMachineEngine) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_ENGINE));
             } else {
-                StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
-                    DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+                StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
+                        DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
                 ServiceInvoker serviceInvoker = stateMachineConfig.getServiceInvokerManager().getServiceInvoker(
-                    state.getServiceType());
+                        state.getServiceType());
                 if (serviceInvoker == null) {
                     throw new EngineExecutionException("No such ServiceInvoker[" + state.getServiceType() + "]",
-                        FrameworkErrorCode.ObjectNotExists);
+                            FrameworkErrorCode.ObjectNotExists);
                 }
                 if (serviceInvoker instanceof ApplicationContextAware) {
-                    ((ApplicationContextAware)serviceInvoker).setApplicationContext(
-                        stateMachineConfig.getApplicationContext());
+                    ((ApplicationContextAware) serviceInvoker).setApplicationContext(
+                            stateMachineConfig.getApplicationContext());
                 }
 
                 result = serviceInvoker.invoke(state, input.toArray());
@@ -165,21 +165,21 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
 
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("<<<<<<<<<<<<<<<<<<<<<< State[{}], ServiceName[{}], Method[{}] Execute finish. result: {}",
-                    state.getName(), serviceName, methodName, result);
+                        state.getName(), serviceName, methodName, result);
             }
 
             if (result != null) {
                 stateInstance.setOutputParams(result);
-                ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_OUTPUT_PARAMS,
-                    result);
+                ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_OUTPUT_PARAMS,
+                        result);
             }
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
 
             LOGGER.error("<<<<<<<<<<<<<<<<<<<<<< State[{}], ServiceName[{}], Method[{}] Execute failed.",
-                state.getName(), serviceName, methodName, e);
+                    state.getName(), serviceName, methodName, e);
 
-            ((HierarchicalProcessContext)context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, e);
+            ((HierarchicalProcessContext) context).setVariableLocally(DomainConstants.VAR_NAME_CURRENT_EXCEPTION, e);
 
             handleException(context, state, e);
         }
@@ -189,21 +189,21 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
     private Object compensateSubStateMachine(ProcessContext context, ServiceTaskState state, Object input,
                                              StateInstance stateInstance, StateMachineEngine engine) {
 
-        String subStateMachineParentId = (String)context.getVariable(
-            state.getName() + DomainConstants.VAR_NAME_SUB_MACHINE_PARENT_ID);
+        String subStateMachineParentId = (String) context.getVariable(
+                state.getName() + DomainConstants.VAR_NAME_SUB_MACHINE_PARENT_ID);
         if (StringUtils.isEmpty(subStateMachineParentId)) {
             throw new EngineExecutionException("sub statemachine parentId is required",
-                FrameworkErrorCode.ObjectNotExists);
+                    FrameworkErrorCode.ObjectNotExists);
         }
 
-        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
-            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+        StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
+                DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
         List<StateMachineInstance> subInst = stateMachineConfig.getStateLogStore().queryStateMachineInstanceByParentId(
-            subStateMachineParentId);
+                subStateMachineParentId);
         if (subInst == null || subInst.size() <= 0) {
             throw new EngineExecutionException(
-                "cannot find sub statemachine instance by parentId:" + subStateMachineParentId,
-                FrameworkErrorCode.ObjectNotExists);
+                    "cannot find sub statemachine instance by parentId:" + subStateMachineParentId,
+                    FrameworkErrorCode.ObjectNotExists);
         }
 
         String subStateMachineInstId = subInst.get(0).getId();
@@ -214,12 +214,12 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
 
         Map<String, Object> startParams = new HashMap<>(0);
         if (input instanceof List) {
-            List<Object> listInputParams = (List<Object>)input;
+            List<Object> listInputParams = (List<Object>) input;
             if (listInputParams.size() > 0) {
-                startParams = (Map<String, Object>)listInputParams.get(0);
+                startParams = (Map<String, Object>) listInputParams.get(0);
             }
         } else if (input instanceof Map) {
-            startParams = (Map<String, Object>)input;
+            startParams = (Map<String, Object>) input;
         }
 
         StateMachineInstance compensateInst = engine.compensate(subStateMachineInstId, startParams);
@@ -227,9 +227,9 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
 
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(
-                ">>>>>>>>>>>>>>>>>>>>>> Compensate sub statemachine [id:{}] finished with status[{}], "
-                    + "compensateState[{}]",
-                subStateMachineInstId, compensateInst.getStatus(), compensateInst.getCompensationStatus());
+                    ">>>>>>>>>>>>>>>>>>>>>> Compensate sub statemachine [id:{}] finished with status[{}], "
+                            + "compensateState[{}]",
+                    subStateMachineInstId, compensateInst.getStatus(), compensateInst.getCompensationStatus());
         }
         return compensateInst.getEndParams();
     }
