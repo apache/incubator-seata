@@ -178,14 +178,12 @@
                         <ports>
                             <port>8091</port>
                         </ports>
-                        <environment>
-                            <SEATA_PORT>8091</SEATA_PORT>
-                            <STORE_MODE>file</STORE_MODE>
-                        </environment>
                         <jvmFlags>
                             <jvmFlag>-Djava.security.egd=file:/dev/./urandom</jvmFlag>
                             <jvmFlag>-server</jvmFlag>
                             <jvmFlag>-Xss512k</jvmFlag>
+                            <jvmFlag>-XX:+UnlockExperimentalVMOptions</jvmFlag>
+                            <jvmFlag>-XX:+UseContainerSupport</jvmFlag>
                             <jvmFlag>-XX:SurvivorRatio=10</jvmFlag>
                             <jvmFlag>-XX:MetaspaceSize=128m</jvmFlag>
                             <jvmFlag>-XX:MaxMetaspaceSize=256m</jvmFlag>
