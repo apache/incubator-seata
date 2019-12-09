@@ -16,6 +16,7 @@
 package io.seata.core.rpc.netty;
 
 import io.netty.channel.Channel;
+import io.seata.core.constants.ConfigurationKeys;
 
 /**
  * The type Netty client config.
@@ -342,7 +343,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the client selector thread size
      */
     public int getClientSelectorThreadSize() {
-        return CONFIG.getInt("transport.thread-factory.client-selector-thread-size", DEFAULT_SELECTOR_THREAD_SIZE);
+        return CONFIG.getInt(ConfigurationKeys.CLIENT_SELECTOR_THREAD_SIZE, DEFAULT_SELECTOR_THREAD_SIZE);
     }
 
     /**
@@ -360,8 +361,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getClientSelectorThreadPrefix() {
-        return CONFIG.getConfig("transport.thread-factory.client-selector-thread-prefix",
-            DEFAULT_SELECTOR_THREAD_PREFIX);
+        return CONFIG.getConfig(ConfigurationKeys.CLIENT_SELECTOR_THREAD_PREFIX, DEFAULT_SELECTOR_THREAD_PREFIX);
     }
 
     /**
@@ -370,7 +370,7 @@ public class NettyClientConfig extends NettyBaseConfig {
      * @return the string
      */
     public String getClientWorkerThreadPrefix() {
-        return CONFIG.getConfig("transport.thread-factory.client-worker-thread-prefix", DEFAULT_WORKER_THREAD_PREFIX);
+        return CONFIG.getConfig(ConfigurationKeys.CLIENT_WORKER_THREAD_PREFIX, DEFAULT_WORKER_THREAD_PREFIX);
     }
 
     /**
