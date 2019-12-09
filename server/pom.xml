@@ -183,7 +183,7 @@
                             <jvmFlag>-server</jvmFlag>
                             <jvmFlag>-Xss512k</jvmFlag>
                             <jvmFlag>-XX:+UnlockExperimentalVMOptions</jvmFlag>
-                            <jvmFlag>-XX:+UseCGroupMemoryLimitForHeap</jvmFlag>
+                            <jvmFlag>-XX:+UseContainerSupport</jvmFlag>
                             <jvmFlag>-XX:SurvivorRatio=10</jvmFlag>
                             <jvmFlag>-XX:MetaspaceSize=128m</jvmFlag>
                             <jvmFlag>-XX:MaxMetaspaceSize=256m</jvmFlag>
