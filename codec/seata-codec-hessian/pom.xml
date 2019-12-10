@@ -18,21 +18,24 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
+        <artifactId>seata-codec</artifactId>
         <groupId>io.seata</groupId>
-        <artifactId>seata-parent</artifactId>
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>seata-codec</artifactId>
-    <packaging>pom</packaging>
-    <name>seata-codec ${project.version}</name>
 
-    <modules>
-        <module>seata-codec-all</module>
-        <module>seata-codec-protobuf</module>
-        <module>seata-codec-seata</module>
-        <module>seata-codec-kryo</module>
-        <module>seata-codec-hessian</module>
-    </modules>
+    <artifactId>seata-codec-hessian</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>com.caucho</groupId>
+            <artifactId>hessian</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-core</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 
 </project>
