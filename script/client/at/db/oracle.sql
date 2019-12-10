@@ -16,14 +16,4 @@ CREATE TABLE undo_log
 COMMENT ON TABLE undo_log IS 'AT transaction mode undo table';
 
 -- Generate ID using sequence and trigger
-CREATE SEQUENCE undo_log_seq START WITH 1 INCREMENT BY 1;
-
-CREATE OR REPLACE TRIGGER undo_log_seq_tr
-                                                 BEFORE INSERT
-                                                            ON undo_log
-                                                            FOR EACH ROW
-                                                            WHEN (NEW.id IS NULL)
-BEGIN
-SELECT undo_log_seq.NEXTVAL INTO :NEW.id FROM DUAL;
-END;
-/
+CREATE SEQUENCE UNDO_LOG_SEQ START WITH 1 INCREMENT BY 1;
