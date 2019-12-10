@@ -445,7 +445,6 @@ public class LogStoreDataBaseDAOTest {
             branchTransactionDO.setBranchId(345465676);
             branchTransactionDO.setBranchType("TCC");
             branchTransactionDO.setResourceGroupId("abc");
-            branchTransactionDO.setLockKey("t:1,2,3;t2,4,5,6");
             branchTransactionDO.setResourceGroupId("a");
             branchTransactionDO.setClientId("1.1.1.1");
             branchTransactionDO.setStatus(1);
@@ -464,7 +463,6 @@ public class LogStoreDataBaseDAOTest {
             branchTransactionDO.setBranchId(78563453);
             branchTransactionDO.setBranchType("TCC");
             branchTransactionDO.setResourceGroupId("abc");
-            branchTransactionDO.setLockKey("t:6;t2:7");
             branchTransactionDO.setResourceGroupId("a");
             branchTransactionDO.setClientId("1.1.1.1");
             branchTransactionDO.setStatus(1);
@@ -508,7 +506,6 @@ public class LogStoreDataBaseDAOTest {
         branchTransactionDO.setBranchId(1234508);
         branchTransactionDO.setBranchType("TCC");
         branchTransactionDO.setResourceGroupId("abc");
-        branchTransactionDO.setLockKey("t:1,2,3;t2,4,5,6");
         branchTransactionDO.setResourceGroupId("a");
         branchTransactionDO.setClientId("1.1.1.1");
         branchTransactionDO.setStatus(1);
@@ -548,7 +545,6 @@ public class LogStoreDataBaseDAOTest {
         branchTransactionDO.setBranchId(343434318);
         branchTransactionDO.setBranchType("TCC");
         branchTransactionDO.setResourceGroupId("abc");
-        branchTransactionDO.setLockKey("t:1,2,3;t2,4,5,6");
         branchTransactionDO.setResourceGroupId("a");
         branchTransactionDO.setClientId("1.1.1.1");
         branchTransactionDO.setStatus(1);
@@ -590,7 +586,6 @@ public class LogStoreDataBaseDAOTest {
         branchTransactionDO.setBranchId(34567798);
         branchTransactionDO.setBranchType("TCC");
         branchTransactionDO.setResourceGroupId("abc");
-        branchTransactionDO.setLockKey("t:1,2,3;t2,4,5,6");
         branchTransactionDO.setResourceGroupId("a");
         branchTransactionDO.setClientId("1.1.1.1");
         branchTransactionDO.setStatus(1);

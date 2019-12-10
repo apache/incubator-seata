@@ -80,7 +80,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             ResultSetMetaData rsmd = rs.getMetaData();
             DatabaseMetaData dbmd = conn.getMetaData();
 
-            return resultSetMetaToSchema(rsmd, dbmd, tableName);
+            return resultSetMetaToSchema(rsmd, dbmd);
         } catch (Exception e) {
             if (e instanceof SQLException) {
                 throw e;
@@ -100,28 +100,31 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         }
     }
 
-    private TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
+    private TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd)
         throws SQLException {
+        //always "" for mysql
         String schemaName = rsmd.getSchemaName(1);
         String catalogName = rsmd.getCatalogName(1);
+        /*
+         * use ResultSetMetaData to get the pure table name
+         * can avoid the problem below
+         *
+         * select * from account_tbl
+         * select * from account_TBL
+         * select * from `account_tbl`
+         * select * from account.account_tbl
+         */
+        String tableName = rsmd.getTableName(1);
 
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
 
         /*
-         * when set the useInformationSchema true just like jdbc:mysql://127.0.0.1:3306/xxx?useInformationSchema=true
-         * mysql will use DatabaseMetaDataUsingInfoSchema instead of DatabaseMetaData
-         * so
-         * the type of get table meta will change from
-         * show full columns from xxx from xxx
-         * to
-         * select xxx from xxx where catalog_name like ? and table_name like ?
-         * in the second type we have to remove the "`"
+         * here has two different type to get the data
+         * make sure the table name was right
+         * 1. show full columns from xxx from xxx(normal)
+         * 2. select xxx from xxx where catalog_name like ? and table_name like ?(informationSchema=true)
          */
-        if (tableName.contains("`")) {
-            tableName = tableName.replace("`", "");
-        }
-
         ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
         ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
 
