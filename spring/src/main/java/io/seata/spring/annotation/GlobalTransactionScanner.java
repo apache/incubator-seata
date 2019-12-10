@@ -22,6 +22,7 @@ import java.lang.reflect.Proxy;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.rpc.netty.RmRpcClient;
@@ -303,6 +304,15 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
         this.setBeanFactory(applicationContext);
+    }
+
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) {
+        if (bean instanceof DataSourceProxy && ConfigurationFactory.getInstance().getBoolean(DATASOURCE_AUTOPROXY, false)) {
+            throw new ShouldNeverHappenException("Auto proxy of DataSource can't be enabled as you've created a DataSourceProxy bean." +
+                "Please consider removing DataSourceProxy bean or disabling auto proxy of DataSource.");
+        }
+        return super.postProcessBeforeInitialization(bean, beanName);
     }
 
     @Override
