@@ -195,18 +195,20 @@ public class FileConfiguration extends AbstractConfiguration {
                     return;
                 }
                 try {
-                    long tempLastModified = new File(targetFilePath).lastModified();
-                    if (allowDynamicRefresh && tempLastModified > targetFileLastModified) {
-                        Config tempConfig;
-                        if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
-                            Config appConfig = ConfigFactory.parseFileAnySyntax(new File(targetFilePath));
-                            tempConfig = ConfigFactory.load(appConfig);
-                        } else {
-                            tempConfig = ConfigFactory.load(name);
-                        }
-                        if (null != tempConfig) {
-                            fileConfig = tempConfig;
-                            targetFileLastModified = tempLastModified;
+                    if (allowDynamicRefresh) {
+                        long tempLastModified = new File(targetFilePath).lastModified();
+                        if (tempLastModified > targetFileLastModified) {
+                            Config tempConfig;
+                            if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
+                                Config appConfig = ConfigFactory.parseFileAnySyntax(new File(targetFilePath));
+                                tempConfig = ConfigFactory.load(appConfig);
+                            } else {
+                                tempConfig = ConfigFactory.load(name);
+                            }
+                            if (null != tempConfig) {
+                                fileConfig = tempConfig;
+                                targetFileLastModified = tempLastModified;
+                            }
                         }
                     }
                     if (configFuture.getOperation() == ConfigOperation.GET) {
