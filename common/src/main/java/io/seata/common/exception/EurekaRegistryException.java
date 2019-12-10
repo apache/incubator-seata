@@ -54,6 +54,6 @@ public class EurekaRegistryException extends RuntimeException {
      * @param cause the cause
      */
     public EurekaRegistryException(Throwable cause) {
-        super(cause);
+        super(cause.getMessage(), cause);
     }
 }
