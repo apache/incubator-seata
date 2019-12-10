@@ -43,7 +43,7 @@ public class ShouldNeverHappenExceptionTest {
 
     @Test
     public void testConstructorWithThrowable() {
-        exceptionAsserts(new ShouldNeverHappenException(new Throwable(FrameworkErrorCode.UnknownAppError.getErrMessage())));
+        assertThat(new ShouldNeverHappenException(new Throwable(FrameworkErrorCode.UnknownAppError.getErrMessage()))).isInstanceOf(ShouldNeverHappenException.class).hasMessage("java.lang.Throwable: " + FrameworkErrorCode.UnknownAppError.getErrMessage());
     }
 
     private static void exceptionAsserts(ShouldNeverHappenException exception) {

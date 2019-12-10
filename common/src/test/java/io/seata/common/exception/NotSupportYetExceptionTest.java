@@ -43,7 +43,7 @@ public class NotSupportYetExceptionTest {
 
     @Test
     public void testConstructorWithThrowable() {
-        exceptionAsserts(new NotSupportYetException(new Throwable(FrameworkErrorCode.UnknownAppError.getErrMessage())));
+        assertThat(new NotSupportYetException(new Throwable(FrameworkErrorCode.UnknownAppError.getErrMessage()))).isInstanceOf(NotSupportYetException.class).hasMessage("java.lang.Throwable: " + FrameworkErrorCode.UnknownAppError.getErrMessage());
     }
 
     private static void exceptionAsserts(NotSupportYetException exception) {

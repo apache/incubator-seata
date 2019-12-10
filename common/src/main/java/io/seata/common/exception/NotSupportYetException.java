@@ -54,6 +54,6 @@ public class NotSupportYetException extends RuntimeException {
      * @param cause the cause
      */
     public NotSupportYetException(Throwable cause) {
-        super(cause.getMessage(), cause);
+        super(cause);
     }
 }
