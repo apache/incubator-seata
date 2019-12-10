@@ -54,6 +54,6 @@ public class ShouldNeverHappenException extends RuntimeException {
      * @param cause the cause
      */
     public ShouldNeverHappenException(Throwable cause) {
-        super(cause);
+        super(cause.getMessage(), cause);
     }
 }
