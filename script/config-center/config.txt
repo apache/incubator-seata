@@ -14,7 +14,6 @@ transport.shutdown.wait=3
 service.vgroup_mapping.my_test_tx_group=default
 service.default.grouplist=127.0.0.1:8091
 service.enableDegrade=false
-service.disable=false
 service.max.commit.retry.timeout=-1
 service.max.rollback.retry.timeout=-1
 service.disableGlobalTransaction=false

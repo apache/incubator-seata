@@ -1,22 +1,18 @@
 #!/usr/bin/env bash
-# ----------------------------------------------------------------------------
-#  Copyright 2001-2006 The Apache Software Foundation.
+# Copyright 1999-2019 Seata.io Group.
 #
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at、
 #
-#       http://www.apache.org/licenses/LICENSE-2.0
+#      http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-# ----------------------------------------------------------------------------
-#
-#   Copyright (c) 2001-2006 The Apache Software Foundation.  All rights
-#   reserved.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 
 # apollo open api, click on the link for details:
 # https://github.com/ctripcorp/apollo/wiki/Apollo%E5%BC%80%E6%94%BE%E5%B9%B3%E5%8F%B0
@@ -54,7 +50,7 @@ for line in $(cat apollo-params.txt); do
 		token=${value}
 		;;
 	*)
-		echo "invalid param"
+		echo "Invalid param，please refer to apollo-params.txt"
 		exit -1
 		;;
 	esac
@@ -67,18 +63,18 @@ if [[ -z ${portalAddr} || -z ${env} || -z ${appId} || -z ${clusterName} || -z ${
 	exit -1
 fi
 
-contentType="Content-type:application/json;charset=UTF-8"
+contentType="content-type:application/json;charset=UTF-8"
 authorization="Authorization:$token"
 publishBody="{\"releaseTitle\":\"$(date +%Y%m%d%H%M%S)\",\"releaseComment\":\"\",\"releasedBy\":\"${releasedBy}\"}"
 
-echo "portal address is ${portalAddr}"
-echo "env is ${env}"
-echo "appId is ${appId}"
-echo "clusterName is ${clusterName}"
-echo "namespaceName is ${namespaceName}"
-echo "dataChangeCreatedBy is ${dataChangeCreatedBy}"
-echo "releasedBy is ${releasedBy}"
-echo "token is ${token}"
+echo "Portal address is ${portalAddr}"
+echo "Env is ${env}"
+echo "AppId is ${appId}"
+echo "ClusterName is ${clusterName}"
+echo "NamespaceName is ${namespaceName}"
+echo "DataChangeCreatedBy is ${dataChangeCreatedBy}"
+echo "ReleasedBy is ${releasedBy}"
+echo "Token is ${token}"
 
 failCount=0
 function addConfig() {

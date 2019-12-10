@@ -1,36 +1,22 @@
 #!/usr/bin/env bash
-# ----------------------------------------------------------------------------
-#  Copyright 2001-2006 The Apache Software Foundation.
+# Copyright 1999-2019 Seata.io Group.
 #
-#  Licensed under the Apache License, Version 2.0 (the "License");
-#  you may not use this file except in compliance with the License.
-#  You may obtain a copy of the License at
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at、
 #
-#       http://www.apache.org/licenses/LICENSE-2.0
+#      http://www.apache.org/licenses/LICENSE-2.0
 #
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-#  See the License for the specific language governing permissions and
-#  limitations under the License.
-# ----------------------------------------------------------------------------
-#
-#   Copyright (c) 2001-2006 The Apache Software Foundation.  All rights
-#   reserved.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 
 # The purpose is to sync the local configuration(config.txt) to zk.
 # This script need to rely on zk.
 
-#if [[ -z "$1" ]]; then
-#	echo "zk address is empty, Please enter zk address!"
-#	exit 1
-#fi
-#
-#if [[ -z "$2" ]]; then
-#	echo "zkHome is empty, please enter zk home!"
-#	exit 1
-#fi
 
 for line in $(cat zk-params.txt); do
 	key=${line%%=*}
@@ -43,7 +29,7 @@ for line in $(cat zk-params.txt); do
 		zkHome=${value}
 		;;
 	*)
-		echo "invalid param"
+		echo "Invalid param，please refer to zk-params.txt"
 		exit -1
 		;;
 	esac
@@ -57,9 +43,9 @@ fi
 root="/seata"
 tempLog=$(mktemp -t zk-config.log)
 
-echo "zk address is $zkAddr"
-echo "zk home is $zkHome"
-echo "zk config root node is $root"
+echo "ZK address is $zkAddr"
+echo "ZK home is $zkHome"
+echo "ZK config root node is $root"
 
 function check_node() {
 	$2/bin/zkCli.sh -server $1 ls ${root} >/dev/null 2>${tempLog}
@@ -80,7 +66,7 @@ function delete_node() {
 check_node ${zkAddr} ${zkHome}
 
 if [[ $(cat ${tempLog}) =~ "No such file or directory" ]]; then
-	echo "zk home is error, please enter correct zk home!"
+	echo "ZK home is error, please enter correct zk home!"
 	exit -1
 elif [[ $(cat ${tempLog}) =~ "Exception" ]]; then
 	echo "Exception error, please check zk cluster status or if the zk address is entered correctly!"
@@ -90,7 +76,7 @@ elif [[ $(cat ${tempLog}) =~ "Node does not exist" ]]; then
 else
 	read -p "${root} node already exists, now delete ${root} node in zk, y/n: " result
 	if [[ ${result} == "y" ]]; then
-		echo "delete ${root} node..."
+		echo "Delete ${root} node..."
 		delete_node ${zkAddr} ${zkHome}
 		create_node ${zkAddr} ${zkHome}
 	else
@@ -101,7 +87,7 @@ fi
 for line in $(cat $(dirname "$PWD")/config.txt); do
 	key=${line%%=*}
 	value=${line#*=}
-	echo "\r\n set" "${key}" "=" "${value}"
+	echo "Set" "${key}" "=" "${value}"
 	create_subNode ${zkAddr} ${zkHome} ${key} ${value}
 done
 exit 0
