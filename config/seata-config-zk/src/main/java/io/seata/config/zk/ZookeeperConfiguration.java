@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
+import static io.seata.config.ConfigurationKeys.SEATA_FILE_ROOT_CONFIG;
 
 /**
  * @author crazier.huang
@@ -47,7 +48,7 @@ public class ZookeeperConfiguration extends AbstractConfiguration<IZkDataListene
 
     private static final String CONFIG_TYPE = "zk";
     private static final String ZK_PATH_SPLIT_CHAR = "/";
-    private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + FILE_ROOT_CONFIG;
+    private static final String ROOT_PATH = ZK_PATH_SPLIT_CHAR + SEATA_FILE_ROOT_CONFIG;
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String SESSION_TIMEOUT_KEY = "session.timeout";
