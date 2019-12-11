@@ -68,12 +68,23 @@ public class FileConfiguration extends AbstractConfiguration {
 
     private final String name;
 
+    private final boolean allowDynamicRefresh;
+
     /**
      * Instantiates a new File configuration.
      *
      * @param name the name
      */
     public FileConfiguration(String name) {
+        this(name,true);
+    }
+    /**
+     * Instantiates a new File configuration.
+     *
+     * @param name                the name
+     * @param allowDynamicRefresh the allow dynamic refresh
+     */
+    public FileConfiguration(String name, boolean allowDynamicRefresh) {
         LOGGER.info("The file name of the operation is {}", name);
         if (null == name) {
             throw new IllegalArgumentException("name can't be null");
@@ -86,6 +97,7 @@ public class FileConfiguration extends AbstractConfiguration {
             fileConfig = ConfigFactory.load(name);
         }
         this.name = name;
+        this.allowDynamicRefresh = allowDynamicRefresh;
         targetFileLastModified = new File(targetFilePath).lastModified();
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
@@ -183,18 +195,20 @@ public class FileConfiguration extends AbstractConfiguration {
                     return;
                 }
                 try {
-                    long tempLastModified = new File(targetFilePath).lastModified();
-                    if (tempLastModified > targetFileLastModified) {
-                        Config tempConfig;
-                        if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
-                            Config appConfig = ConfigFactory.parseFileAnySyntax(new File(targetFilePath));
-                            tempConfig = ConfigFactory.load(appConfig);
-                        } else {
-                            tempConfig = ConfigFactory.load(name);
-                        }
-                        if (null != tempConfig) {
-                            fileConfig = tempConfig;
-                            targetFileLastModified = tempLastModified;
+                    if (allowDynamicRefresh) {
+                        long tempLastModified = new File(targetFilePath).lastModified();
+                        if (tempLastModified > targetFileLastModified) {
+                            Config tempConfig;
+                            if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
+                                Config appConfig = ConfigFactory.parseFileAnySyntax(new File(targetFilePath));
+                                tempConfig = ConfigFactory.load(appConfig);
+                            } else {
+                                tempConfig = ConfigFactory.load(name);
+                            }
+                            if (null != tempConfig) {
+                                fileConfig = tempConfig;
+                                targetFileLastModified = tempLastModified;
+                            }
                         }
                     }
                     if (configFuture.getOperation() == ConfigOperation.GET) {
