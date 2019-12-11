@@ -15,7 +15,6 @@
  */
 package io.seata.core.protocol.transaction;
 
-import java.nio.ByteBuffer;
 
 /**
  * The type Abstract transaction request to rm.
@@ -23,11 +22,6 @@ import java.nio.ByteBuffer;
  * @author sharajava
  */
 public abstract class AbstractTransactionRequestToRM extends AbstractTransactionRequest {
-
-    /**
-     * The Byte buffer.
-     */
-    protected ByteBuffer byteBuffer = ByteBuffer.allocate(1024);
 
     /**
      * The Handler.

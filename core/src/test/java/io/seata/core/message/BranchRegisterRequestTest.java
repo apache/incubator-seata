@@ -15,8 +15,6 @@
  */
 package io.seata.core.message;
 
-import java.nio.ByteBuffer;
-
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.BranchRegisterRequest;
 
@@ -42,27 +40,4 @@ public class BranchRegisterRequestTest {
 
     }
 
-    /**
-     * Test decode.
-     */
-    @Test
-    public void testDecode() {
-        BranchRegisterRequest branchRegisterRequest = new BranchRegisterRequest();
-        branchRegisterRequest.setXid("127.0.0.1:8091:1249853");
-        branchRegisterRequest.setBranchType(BranchType.AT);
-        branchRegisterRequest.setResourceId("resource1");
-        branchRegisterRequest.setLockKey("lock_key_1");
-        branchRegisterRequest.setApplicationData("test app data");
-        byte[] encodeResult = branchRegisterRequest.encode();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(encodeResult.length);
-        byteBuffer.put(encodeResult);
-        byteBuffer.flip();
-        BranchRegisterRequest decodeBranchRegisterRequest = new BranchRegisterRequest();
-        decodeBranchRegisterRequest.decode(byteBuffer);
-        Assertions.assertEquals(branchRegisterRequest.getXid(), decodeBranchRegisterRequest.getXid());
-        Assertions.assertEquals(branchRegisterRequest.getLockKey(), decodeBranchRegisterRequest.getLockKey());
-        Assertions.assertEquals(branchRegisterRequest.getResourceId(), decodeBranchRegisterRequest.getResourceId());
-        Assertions.assertEquals(branchRegisterRequest.getApplicationData(),
-            decodeBranchRegisterRequest.getApplicationData());
-    }
 }

@@ -16,10 +16,13 @@
 package io.seata.core.store.db;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.IOUtil;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import org.apache.commons.dbcp.BasicDataSource;
 
+import org.h2.store.fs.FileUtils;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
@@ -33,7 +36,7 @@ import java.util.List;
 
 /**
  * @author zhangsen
- * @data 2019/4/26
+ * @date 2019/4/26
  */
 public class LogStoreDataBaseDAOTest {
 
@@ -67,7 +70,7 @@ public class LogStoreDataBaseDAOTest {
             } catch (Exception e) {
             }
 //            xid, transaction_id, status, application_id, transaction_service_group, transaction_name, timeout, begin_time, application_data, gmt_create, gmt_modified
-            s.execute("CREATE TABLE global_table ( xid varchar(96) primary key,  transaction_id long , STATUS int,  application_id varchar(32), transaction_service_group varchar(32) ,transaction_name varchar(32) ,timeout int,  begin_time long, application_data varchar(500), gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
+            s.execute("CREATE TABLE global_table ( xid varchar(96) primary key,  transaction_id long , STATUS int,  application_id varchar(32), transaction_service_group varchar(32) ,transaction_name varchar(128) ,timeout int,  begin_time long, application_data varchar(500), gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
             System.out.println("create table global_table success.");
 
             try {
@@ -81,13 +84,7 @@ public class LogStoreDataBaseDAOTest {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -129,9 +126,7 @@ public class LogStoreDataBaseDAOTest {
             //delete
             conn.createStatement().execute(delSql);
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
 
     }
@@ -173,9 +168,7 @@ public class LogStoreDataBaseDAOTest {
             //delete
             conn.createStatement().execute(delSql);
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
 
     }
@@ -245,9 +238,7 @@ public class LogStoreDataBaseDAOTest {
             conn = dataSource.getConnection();
             conn.createStatement().execute(delSql);
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -314,9 +305,7 @@ public class LogStoreDataBaseDAOTest {
             conn = dataSource.getConnection();
             conn.createStatement().execute(delSql);
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
 
     }
@@ -352,9 +341,7 @@ public class LogStoreDataBaseDAOTest {
             conn.createStatement().execute(delSql);
 
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -405,9 +392,7 @@ public class LogStoreDataBaseDAOTest {
             conn.createStatement().execute(delSql);
 
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
 
     }
@@ -445,9 +430,7 @@ public class LogStoreDataBaseDAOTest {
             }
             rs.close();
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -462,7 +445,6 @@ public class LogStoreDataBaseDAOTest {
             branchTransactionDO.setBranchId(345465676);
             branchTransactionDO.setBranchType("TCC");
             branchTransactionDO.setResourceGroupId("abc");
-            branchTransactionDO.setLockKey("t:1,2,3;t2,4,5,6");
             branchTransactionDO.setResourceGroupId("a");
             branchTransactionDO.setClientId("1.1.1.1");
             branchTransactionDO.setStatus(1);
@@ -481,7 +463,6 @@ public class LogStoreDataBaseDAOTest {
             branchTransactionDO.setBranchId(78563453);
             branchTransactionDO.setBranchType("TCC");
             branchTransactionDO.setResourceGroupId("abc");
-            branchTransactionDO.setLockKey("t:6;t2:7");
             branchTransactionDO.setResourceGroupId("a");
             branchTransactionDO.setClientId("1.1.1.1");
             branchTransactionDO.setStatus(1);
@@ -512,9 +493,7 @@ public class LogStoreDataBaseDAOTest {
             conn.createStatement().execute(delSql);
 
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -527,7 +506,6 @@ public class LogStoreDataBaseDAOTest {
         branchTransactionDO.setBranchId(1234508);
         branchTransactionDO.setBranchType("TCC");
         branchTransactionDO.setResourceGroupId("abc");
-        branchTransactionDO.setLockKey("t:1,2,3;t2,4,5,6");
         branchTransactionDO.setResourceGroupId("a");
         branchTransactionDO.setClientId("1.1.1.1");
         branchTransactionDO.setStatus(1);
@@ -553,9 +531,7 @@ public class LogStoreDataBaseDAOTest {
 
             conn.createStatement().execute(delSql);
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
 
     }
@@ -569,7 +545,6 @@ public class LogStoreDataBaseDAOTest {
         branchTransactionDO.setBranchId(343434318);
         branchTransactionDO.setBranchType("TCC");
         branchTransactionDO.setResourceGroupId("abc");
-        branchTransactionDO.setLockKey("t:1,2,3;t2,4,5,6");
         branchTransactionDO.setResourceGroupId("a");
         branchTransactionDO.setClientId("1.1.1.1");
         branchTransactionDO.setStatus(1);
@@ -598,9 +573,7 @@ public class LogStoreDataBaseDAOTest {
 
             conn.createStatement().execute(delSql);
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -613,7 +586,6 @@ public class LogStoreDataBaseDAOTest {
         branchTransactionDO.setBranchId(34567798);
         branchTransactionDO.setBranchType("TCC");
         branchTransactionDO.setResourceGroupId("abc");
-        branchTransactionDO.setLockKey("t:1,2,3;t2,4,5,6");
         branchTransactionDO.setResourceGroupId("a");
         branchTransactionDO.setClientId("1.1.1.1");
         branchTransactionDO.setStatus(1);
@@ -650,10 +622,13 @@ public class LogStoreDataBaseDAOTest {
             rs.close();
 
         }finally {
-            if(conn != null){
-                conn.close();
-            }
+            IOUtil.close(conn);
         }
+    }
+
+    @AfterAll
+    public static void clearStoreDB(){
+        FileUtils.deleteRecursive("db_store", true);
     }
 
 }

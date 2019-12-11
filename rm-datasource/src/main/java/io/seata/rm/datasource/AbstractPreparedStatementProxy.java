@@ -246,7 +246,7 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
 
     @Override
     public void addBatch() throws SQLException {
-
+        targetStatement.addBatch();
     }
 
     @Override

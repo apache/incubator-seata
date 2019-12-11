@@ -43,15 +43,12 @@ public class SpringProxyUtils {
             if (AopUtils.isJdkDynamicProxy(proxy)) {
                 TargetSource targetSource = advised.getTargetSource();
                 return targetSource instanceof EmptyTargetSource ? getFirstInterfaceByAdvised(advised)
-                    : targetSource.getTarget().getClass();
+                    : targetSource.getTargetClass();
             }
             Object target = advised.getTargetSource().getTarget();
             return findTargetClass(target);
         } else {
-            if (proxy == null) {
-                return null;
-            }
-            return proxy.getClass();
+            return proxy == null ? null : proxy.getClass();
         }
     }
 
@@ -115,8 +112,8 @@ public class SpringProxyUtils {
         }
         //check dubbo proxy ?
         String proxyClassName = bean.getClass().getName();
-        if (proxyClassName.startsWith("com.alibaba.dubbo.common.bytecode.proxy")
-            || proxyClassName.startsWith("org.apache.dubbo.common.bytecode.proxy")) {
+        if (proxyClassName.startsWith("com.alibaba.dubbo.common.bytecode.proxy") || proxyClassName.startsWith(
+            "org.apache.dubbo.common.bytecode.proxy")) {
             return true;
         }
         return Proxy.class.isAssignableFrom(bean.getClass()) || AopUtils.isAopProxy(bean);

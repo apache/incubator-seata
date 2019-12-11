@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+option java_multiple_files = true;
+option java_outer_classname = "BranchStatus";
+option java_package = "io.seata.codec.protobuf.generated";
+
+// PublishRequest is a publish request.
+enum BranchStatusProto {
+
+    /**
+     * Unknown branch status.
+     */
+    // special for Unknown
+    BUnknown = 0;
+
+    /**
+     * The Registered.
+     */
+    // Registered to TC.
+    Registered = 1;
+
+    /**
+     * The Phase one done.
+     */
+    // Branch logic is successfully done at phase one.
+    PhaseOne_Done = 2;
+
+    /**
+     * The Phase one failed.
+     */
+    // Branch logic is failed at phase one.
+    PhaseOne_Failed = 3;
+
+    /**
+     * The Phase one timeout.
+     */
+    // Branch logic is NOT reported for a timeout.
+    PhaseOne_Timeout = 4;
+
+    /**
+     * The Phase two committed.
+     */
+    // Commit logic is successfully done at phase two.
+    PhaseTwo_Committed = 5;
+
+    /**
+     * The Phase two commit failed retryable.
+     */
+    // Commit logic is failed but retryable.
+    PhaseTwo_CommitFailed_Retryable = 6;
+
+    /**
+     * The Phase two commit failed unretryable.
+     */
+    // Commit logic is failed and NOT retryable.
+    PhaseTwo_CommitFailed_Unretryable = 7;
+
+    /**
+     * The Phase two rollbacked.
+     */
+    // Rollback logic is successfully done at phase two.
+    PhaseTwo_Rollbacked = 8;
+
+    /**
+     * The Phase two rollback failed retryable.
+     */
+    // Rollback logic is failed but retryable.
+    PhaseTwo_RollbackFailed_Retryable = 9;
+
+    /**
+     * The Phase two rollback failed unretryable.
+     */
+    // Rollback logic is failed but NOT retryable.
+    PhaseTwo_RollbackFailed_Unretryable = 10;
+
+}

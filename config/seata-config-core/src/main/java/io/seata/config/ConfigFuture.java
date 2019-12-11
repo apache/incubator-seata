@@ -80,7 +80,6 @@ public class ConfigFuture {
      * Get object.
      *
      * @return the object
-     * @throws InterruptedException the interrupted exception
      */
     public Object get() {
         return get(this.timeoutMills, TimeUnit.MILLISECONDS);
@@ -92,7 +91,6 @@ public class ConfigFuture {
      * @param timeout the timeout
      * @param unit    the unit
      * @return the object
-     * @throws InterruptedException the interrupted exception
      */
     public Object get(long timeout, TimeUnit unit) {
         this.timeoutMills = unit.toMillis(timeout);

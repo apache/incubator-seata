@@ -16,33 +16,51 @@
 package io.seata.core.store.db;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import javax.sql.DataSource;
 
+import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.constants.ServerTableColumnsName;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Log store data base dao.
  *
  * @author zhangsen
- * @data 2019 /4/2
+ * @date 2019 /4/2
  */
 @LoadLevel(name = "db")
 public class LogStoreDataBaseDAO implements LogStore, Initialize {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(LogStoreDataBaseDAO.class);
+
+    /**
+     * The transaction name key
+     */
+    private static final String TRANSACTION_NAME_KEY = "TRANSACTION_NAME";
+    /**
+     * The transaction name default size is 128
+     */
+    private static final int TRANSACTION_NAME_DEFAULT_SIZE = 128;
 
     /**
      * The constant CONFIG.
@@ -65,6 +83,8 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
     protected String brachTable;
 
     private String dbType;
+
+    private int transactionNameColumnSize = TRANSACTION_NAME_DEFAULT_SIZE;
 
     /**
      * Instantiates a new Log store data base dao.
@@ -94,6 +114,8 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         if (logStoreDataSource == null) {
             throw new StoreException("there must be logStoreDataSource.");
         }
+        // init transaction_name size
+        initTransactionNameSize();
     }
 
     @Override
@@ -114,26 +136,9 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
                 return null;
             }
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(rs, ps, conn);
         }
     }
 
@@ -155,32 +160,15 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
                 return null;
             }
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(rs, ps, conn);
         }
     }
 
     @Override
     public List<GlobalTransactionDO> queryGlobalTransactionDO(int[] statuses, int limit) {
-        List<GlobalTransactionDO> ret = new ArrayList<GlobalTransactionDO>();
+        List<GlobalTransactionDO> ret = new ArrayList<>();
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -209,26 +197,9 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             }
             return ret;
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(rs, ps, conn);
         }
     }
 
@@ -246,7 +217,10 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps.setInt(3, globalTransactionDO.getStatus());
             ps.setString(4, globalTransactionDO.getApplicationId());
             ps.setString(5, globalTransactionDO.getTransactionServiceGroup());
-            ps.setString(6, globalTransactionDO.getTransactionName());
+            String transactionName = globalTransactionDO.getTransactionName();
+            transactionName = transactionName.length() > transactionNameColumnSize ? transactionName.substring(0,
+                transactionNameColumnSize) : transactionName;
+            ps.setString(6, transactionName);
             ps.setInt(7, globalTransactionDO.getTimeout());
             ps.setLong(8, globalTransactionDO.getBeginTime());
             ps.setString(9, globalTransactionDO.getApplicationData());
@@ -254,18 +228,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps, conn);
         }
     }
 
@@ -284,18 +247,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps, conn);
         }
     }
 
@@ -313,18 +265,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps, conn);
         }
     }
 
@@ -334,6 +275,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         String sql = LogStoreSqls.getQureyBranchTransaction(brachTable, dbType);
         Connection conn = null;
         PreparedStatement ps = null;
+        ResultSet rs = null;
         try {
             conn = logStoreDataSource.getConnection();
             conn.setAutoCommit(true);
@@ -341,26 +283,45 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps = conn.prepareStatement(sql);
             ps.setString(1, xid);
 
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
             while (rs.next()) {
                 rets.add(convertBranchTransactionDO(rs));
             }
             return rets;
         } catch (SQLException e) {
-            throw new StoreException(e);
+            throw new DataAccessException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
+            IOUtil.close(rs, ps, conn);
+        }
+    }
+
+    @Override
+    public List<BranchTransactionDO> queryBranchTransactionDO(List<String> xids) {
+        int length = xids.size();
+        int retsSize = length * 3;
+        List<BranchTransactionDO> rets = new ArrayList<>(retsSize);
+        StringJoiner sj = new StringJoiner(",");
+        xids.stream().forEach(xid -> sj.add("?"));
+        String sql = LogStoreSqls.getQureyBranchTransaction(brachTable, dbType, sj.toString());
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            ps = conn.prepareStatement(sql);
+            for (int i = 0; i < length; i++) {
+                ps.setString(i + 1, xids.get(i));
             }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                rets.add(convertBranchTransactionDO(rs));
             }
+            return rets;
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        } finally {
+            IOUtil.close(rs, ps, conn);
         }
     }
 
@@ -378,27 +339,15 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps.setLong(3, branchTransactionDO.getBranchId());
             ps.setString(4, branchTransactionDO.getResourceGroupId());
             ps.setString(5, branchTransactionDO.getResourceId());
-            ps.setString(6, branchTransactionDO.getLockKey());
-            ps.setString(7, branchTransactionDO.getBranchType());
-            ps.setInt(8, branchTransactionDO.getStatus());
-            ps.setString(9, branchTransactionDO.getClientId());
-            ps.setString(10, branchTransactionDO.getApplicationData());
+            ps.setString(6, branchTransactionDO.getBranchType());
+            ps.setInt(7, branchTransactionDO.getStatus());
+            ps.setString(8, branchTransactionDO.getClientId());
+            ps.setString(9, branchTransactionDO.getApplicationData());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps, conn);
         }
     }
 
@@ -418,18 +367,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps, conn);
         }
     }
 
@@ -444,56 +382,137 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps = conn.prepareStatement(sql);
             ps.setString(1, branchTransactionDO.getXid());
             ps.setLong(2, branchTransactionDO.getBranchId());
-            return ps.executeUpdate() > 0;
+            ps.executeUpdate();
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps, conn);
         }
+        return true;
+    }
+
+    @Override
+    public long getCurrentMaxSessionId(long high, long low) {
+        String transMaxSql = LogStoreSqls.getQureyGlobalMax(globalTable, dbType);
+        String branchMaxSql = LogStoreSqls.getQureyBranchMax(brachTable, dbType);
+        long maxTransId = getCurrentMaxSessionId(transMaxSql, high, low);
+        long maxBranchId = getCurrentMaxSessionId(branchMaxSql, high, low);
+        return maxBranchId > maxTransId ? maxBranchId : maxTransId;
+    }
+
+    private long getCurrentMaxSessionId(String sql, long high, long low) {
+        long max = 0;
+        Connection conn = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        try {
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            ps = conn.prepareStatement(sql);
+            ps.setLong(1, high);
+            ps.setLong(2, low);
+
+            rs = ps.executeQuery();
+            while (rs.next()) {
+                max = rs.getLong(1);
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(e);
+        } finally {
+            IOUtil.close(rs, ps, conn);
+        }
+        return max;
     }
 
     private GlobalTransactionDO convertGlobalTransactionDO(ResultSet rs) throws SQLException {
         GlobalTransactionDO globalTransactionDO = new GlobalTransactionDO();
-        globalTransactionDO.setXid(rs.getString("xid"));
-        globalTransactionDO.setStatus(rs.getInt("status"));
-        globalTransactionDO.setApplicationId(rs.getString("application_id"));
-        globalTransactionDO.setBeginTime(rs.getLong("begin_time"));
-        globalTransactionDO.setTimeout(rs.getInt("timeout"));
-        globalTransactionDO.setTransactionId(rs.getLong("transaction_id"));
-        globalTransactionDO.setTransactionName(rs.getString("transaction_name"));
-        globalTransactionDO.setTransactionServiceGroup(rs.getString("transaction_service_group"));
-        globalTransactionDO.setApplicationData(rs.getString("application_data"));
-        globalTransactionDO.setGmtCreate(rs.getTimestamp("gmt_create"));
-        globalTransactionDO.setGmtModified(rs.getTimestamp("gmt_modified"));
+        globalTransactionDO.setXid(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_XID));
+        globalTransactionDO.setStatus(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_STATUS));
+        globalTransactionDO.setApplicationId(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_ID));
+        globalTransactionDO.setBeginTime(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_BEGIN_TIME));
+        globalTransactionDO.setTimeout(rs.getInt(ServerTableColumnsName.GLOBAL_TABLE_TIMEOUT));
+        globalTransactionDO.setTransactionId(rs.getLong(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_ID));
+        globalTransactionDO.setTransactionName(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_NAME));
+        globalTransactionDO.setTransactionServiceGroup(
+            rs.getString(ServerTableColumnsName.GLOBAL_TABLE_TRANSACTION_SERVICE_GROUP));
+        globalTransactionDO.setApplicationData(rs.getString(ServerTableColumnsName.GLOBAL_TABLE_APPLICATION_DATA));
+        globalTransactionDO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_CREATE));
+        globalTransactionDO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.GLOBAL_TABLE_GMT_MODIFIED));
         return globalTransactionDO;
     }
 
     private BranchTransactionDO convertBranchTransactionDO(ResultSet rs) throws SQLException {
         BranchTransactionDO branchTransactionDO = new BranchTransactionDO();
-        branchTransactionDO.setResourceGroupId(rs.getString("resource_group_id"));
-        branchTransactionDO.setStatus(rs.getInt("status"));
-        branchTransactionDO.setApplicationData(rs.getString("application_data"));
-        branchTransactionDO.setClientId(rs.getString("client_id"));
-        branchTransactionDO.setLockKey(rs.getString("lock_key"));
-        branchTransactionDO.setXid(rs.getString("xid"));
-        branchTransactionDO.setResourceId(rs.getString("resource_id"));
-        branchTransactionDO.setBranchId(rs.getLong("branch_id"));
-        branchTransactionDO.setBranchType(rs.getString("branch_type"));
-        branchTransactionDO.setTransactionId(rs.getLong("transaction_id"));
-        branchTransactionDO.setGmtCreate(rs.getTimestamp("gmt_create"));
-        branchTransactionDO.setGmtModified(rs.getTimestamp("gmt_modified"));
+        branchTransactionDO.setResourceGroupId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_GROUP_ID));
+        branchTransactionDO.setStatus(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_STATUS));
+        branchTransactionDO.setApplicationData(rs.getString(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA));
+        branchTransactionDO.setClientId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID));
+        branchTransactionDO.setXid(rs.getString(ServerTableColumnsName.BRANCH_TABLE_XID));
+        branchTransactionDO.setResourceId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_ID));
+        branchTransactionDO.setBranchId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID));
+        branchTransactionDO.setBranchType(rs.getString(ServerTableColumnsName.BRANCH_TABLE_BRANCH_TYPE));
+        branchTransactionDO.setTransactionId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_TRANSACTION_ID));
+        branchTransactionDO.setGmtCreate(rs.getTimestamp(ServerTableColumnsName.BRANCH_TABLE_GMT_CREATE));
+        branchTransactionDO.setGmtModified(rs.getTimestamp(ServerTableColumnsName.BRANCH_TABLE_GMT_MODIFIED));
         return branchTransactionDO;
+    }
+
+    /**
+     * the public modifier only for test
+     */
+    public void initTransactionNameSize() {
+        ColumnInfo columnInfo = queryTableStructure(globalTable, TRANSACTION_NAME_KEY);
+        if (columnInfo == null) {
+            LOGGER.warn("{} table or {} column not found", globalTable, TRANSACTION_NAME_KEY);
+            return;
+        }
+        this.transactionNameColumnSize = columnInfo.getColumnSize();
+    }
+
+    /**
+     * query column info from table
+     *
+     * @param tableName the table name
+     * @param colName   the column name
+     * @return the column info
+     */
+    private ColumnInfo queryTableStructure(final String tableName, String colName) {
+        try (Connection conn = logStoreDataSource.getConnection()) {
+            DatabaseMetaData dbmd = conn.getMetaData();
+            String schema = getSchema(conn);
+            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[] {"TABLE"});
+            while (tableRs.next()) {
+                String table = tableRs.getString("TABLE_NAME");
+                if (StringUtils.equalsIgnoreCase(table, tableName)) {
+                    ResultSet columnRs = conn.getMetaData().getColumns(null, schema, tableName, null);
+                    while (columnRs.next()) {
+                        ColumnInfo info = new ColumnInfo();
+                        String columnName = columnRs.getString("COLUMN_NAME");
+                        info.setColumnName(columnName);
+                        String typeName = columnRs.getString("TYPE_NAME");
+                        info.setTypeName(typeName);
+                        int columnSize = columnRs.getInt("COLUMN_SIZE");
+                        info.setColumnSize(columnSize);
+                        String remarks = columnRs.getString("REMARKS");
+                        info.setRemarks(remarks);
+                        if (StringUtils.equalsIgnoreCase(columnName, colName)) {
+                            return info;
+                        }
+                    }
+                    break;
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.error("query transaction_name size fail, {}", e.getMessage(), e);
+        }
+        return null;
+    }
+
+    private String getSchema(Connection conn) throws SQLException {
+        if ("h2".equalsIgnoreCase(dbType)) {
+            return null;
+        }
+        return conn.getMetaData().getUserName();
     }
 
     /**
@@ -530,5 +549,51 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
      */
     public void setDbType(String dbType) {
         this.dbType = dbType;
+    }
+
+    public int getTransactionNameColumnSize() {
+        return transactionNameColumnSize;
+    }
+
+    /**
+     * column info
+     */
+    private static class ColumnInfo {
+        private String columnName;
+        private String typeName;
+        private int columnSize;
+        private String remarks;
+
+        public String getColumnName() {
+            return columnName;
+        }
+
+        public void setColumnName(String columnName) {
+            this.columnName = columnName;
+        }
+
+        public String getTypeName() {
+            return typeName;
+        }
+
+        public void setTypeName(String typeName) {
+            this.typeName = typeName;
+        }
+
+        public int getColumnSize() {
+            return columnSize;
+        }
+
+        public void setColumnSize(int columnSize) {
+            this.columnSize = columnSize;
+        }
+
+        public String getRemarks() {
+            return remarks;
+        }
+
+        public void setRemarks(String remarks) {
+            this.remarks = remarks;
+        }
     }
 }

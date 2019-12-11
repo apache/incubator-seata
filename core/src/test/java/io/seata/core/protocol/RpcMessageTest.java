@@ -16,8 +16,9 @@
 package io.seata.core.protocol;
 
 import com.alibaba.fastjson.JSON;
-
 import org.junit.jupiter.api.Test;
+
+import java.util.HashMap;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -29,11 +30,12 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 public class RpcMessageTest {
 
-    private final boolean ASYNC_FIELD = false;
-    private final String BODY_FIELD = "test_body";
-    private final boolean HEART_BEAT_FIELD = true;
-    private final boolean REQUEST_FIELD = false;
-    private final long ID_FIELD = 100L;
+    private static final String BODY_FIELD = "test_body";
+    private static final int ID_FIELD = 100;
+    private static final byte CODEC_FIELD = 1;
+    private static final byte COMPRESS_FIELD = 2;
+    private static final byte MSG_TYPE_FIELD = 3;
+    private static final HashMap<String, String> HEAD_FIELD = new HashMap<>();
 
     /**
      * Test field get set from json.
@@ -41,39 +43,25 @@ public class RpcMessageTest {
     @Test
     public void testFieldGetSetFromJson() {
         String fromJson = "{\n" +
-            "\t\"async\":" + ASYNC_FIELD + ",\n" +
-            "\t\"body\":\"" + BODY_FIELD + "\",\n" +
-            "\t\"heartbeat\":" + HEART_BEAT_FIELD + ",\n" +
-            "\t\"id\":" + ID_FIELD + ",\n" +
-            "\t\"request\":" + REQUEST_FIELD + "\n" +
-            "}";
+                "\t\"body\":\"" + BODY_FIELD + "\",\n" +
+                "\t\"codec\":" + CODEC_FIELD + ",\n" +
+                "\t\"compressor\":" + COMPRESS_FIELD + ",\n" +
+                "\t\"headMap\":" + HEAD_FIELD + ",\n" +
+                "\t\"id\":" + ID_FIELD + ",\n" +
+                "\t\"messageType\":" + MSG_TYPE_FIELD + "\n" +
+                "}";
         RpcMessage fromJsonMessage = JSON.parseObject(fromJson, RpcMessage.class);
-        assertThat(fromJsonMessage.isAsync()).isEqualTo(ASYNC_FIELD);
-        assertThat(fromJsonMessage.isHeartbeat()).isEqualTo(HEART_BEAT_FIELD);
-        assertThat(fromJsonMessage.isRequest()).isEqualTo(REQUEST_FIELD);
         assertThat(fromJsonMessage.getBody()).isEqualTo(BODY_FIELD);
         assertThat(fromJsonMessage.getId()).isEqualTo(ID_FIELD);
 
         RpcMessage toJsonMessage = new RpcMessage();
-        toJsonMessage.setAsync(ASYNC_FIELD);
         toJsonMessage.setBody(BODY_FIELD);
-        toJsonMessage.setRequest(REQUEST_FIELD);
-        toJsonMessage.setHeartbeat(HEART_BEAT_FIELD);
         toJsonMessage.setId(ID_FIELD);
+        toJsonMessage.setMessageType(MSG_TYPE_FIELD);
+        toJsonMessage.setCodec(CODEC_FIELD);
+        toJsonMessage.setCompressor(COMPRESS_FIELD);
+        toJsonMessage.setHeadMap(HEAD_FIELD);
         String toJson = JSON.toJSONString(toJsonMessage, true);
         assertThat(fromJson).isEqualTo(toJson);
-    }
-
-    /**
-     * Test get next message id.
-     */
-    @Test
-    public void testGetNextMessageId() {
-        long startMessageId = RpcMessage.getNextMessageId();
-        assertThat(RpcMessage.getNextMessageId()).isEqualTo(1 + startMessageId);
-        assertThat(RpcMessage.getNextMessageId()).isEqualTo(2 + startMessageId);
-        assertThat(RpcMessage.getNextMessageId()).isEqualTo(3 + startMessageId);
-        assertThat(RpcMessage.getNextMessageId()).isEqualTo(4 + startMessageId);
-        assertThat(RpcMessage.getNextMessageId()).isEqualTo(5 + startMessageId);
     }
 }

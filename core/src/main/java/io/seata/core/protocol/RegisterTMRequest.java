@@ -57,7 +57,7 @@ public class RegisterTMRequest extends AbstractIdentifyRequest implements Serial
 
     @Override
     public short getTypeCode() {
-        return TYPE_REG_CLT;
+        return MessageType.TYPE_REG_CLT;
     }
 
     @Override

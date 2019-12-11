@@ -1,0 +1,94 @@
+{
+    "Name": "simpleRetryStateMachine",
+    "Comment": "带异常重试的测试状态机定义",
+    "StartState": "FirstState",
+    "Version": "0.0.1",
+    "States": {
+        "FirstState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
+            "Next": "ChoiceState",
+            "Input": [
+                {
+                    "fooInput": "$.[a]"
+                }
+            ],
+            "output": {
+                "fooResult": "$.#root"
+            }
+        },
+        "ChoiceState":{
+            "Type": "Choice",
+            "Choices":[
+                {
+                    "Expression":"[a] == 1",
+                    "Next":"SecondState"
+                },
+                {
+                    "Expression":"[a] == 2",
+                    "Next":"ThirdState"
+                }
+            ],
+            "Default":"Fail"
+        },
+        "SecondState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "randomExceptionMethod",
+            "Input": [
+                {
+                    "barInput": "$.[fooResult]",
+                    "throwException": "$.[barThrowException]"
+                }
+            ],
+            "output": {
+                "barResult": "$.#root"
+            },
+            "Retry": [
+                {
+                    "Exceptions": ["io.seata.saga.engine.mock.DemoException"],
+                    "IntervalSeconds": 1.5,
+                    "MaxAttempts": 3,
+                    "BackoffRate": 1.5
+                },
+                {
+                    "IntervalSeconds": 1,
+                    "MaxAttempts": 3,
+                    "BackoffRate": 1.5
+                }
+            ],
+            "Catch": [
+                {
+                    "Exceptions": [
+                        "io.seata.saga.engine.mock.DemoException"
+                    ],
+                    "Next": "Fail"
+                }
+            ],
+            "Next": "Succeed"
+        },
+        "ThirdState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
+            "Input": [
+                {
+                    "fooInput": "$.[fooResult]"
+                }
+            ],
+            "output": {
+                "fooResult": "$.#root"
+            },
+            "Next": "Succeed"
+        },
+        "Succeed": {
+            "Type":"Succeed"
+        },
+        "Fail": {
+            "Type":"Fail",
+            "ErrorCode": "NOT_FOUND",
+            "Message": "not found"
+        }
+    }
+}

@@ -15,11 +15,9 @@
  */
 package io.seata.core.rpc;
 
-import io.seata.core.protocol.RegisterRMRequest;
-import io.seata.core.protocol.RegisterTMRequest;
-import io.seata.core.rpc.netty.RegisterCheckAuthHandler;
-
 import io.netty.channel.ChannelHandlerContext;
+import io.seata.core.protocol.RpcMessage;
+import io.seata.core.rpc.netty.RegisterCheckAuthHandler;
 
 /**
  * The interface Server message listener.
@@ -32,44 +30,41 @@ public interface ServerMessageListener {
     /**
      * On trx message.
      *
-     * @param msgId   the msg id
+     * @param request the msg id
      * @param ctx     the ctx
-     * @param message the message
      * @param sender  the sender
      */
-    void onTrxMessage(long msgId, ChannelHandlerContext ctx, Object message, ServerMessageSender sender);
+    void onTrxMessage(RpcMessage request, ChannelHandlerContext ctx, ServerMessageSender sender);
 
     /**
      * On reg rm message.
      *
-     * @param msgId            the msg id
+     * @param request          the msg id
      * @param ctx              the ctx
-     * @param message          the message
      * @param sender           the sender
      * @param checkAuthHandler the check auth handler
      */
-    void onRegRmMessage(long msgId, ChannelHandlerContext ctx, RegisterRMRequest message,
+    void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx,
                         ServerMessageSender sender, RegisterCheckAuthHandler checkAuthHandler);
 
     /**
      * On reg tm message.
      *
-     * @param msgId            the msg id
+     * @param request          the msg id
      * @param ctx              the ctx
-     * @param message          the message
      * @param sender           the sender
      * @param checkAuthHandler the check auth handler
      */
-    void onRegTmMessage(long msgId, ChannelHandlerContext ctx, RegisterTMRequest message,
+    void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx,
                         ServerMessageSender sender, RegisterCheckAuthHandler checkAuthHandler);
 
     /**
      * On check message.
      *
-     * @param msgId  the msg id
-     * @param ctx    the ctx
-     * @param sender the sender
+     * @param request the msg id
+     * @param ctx     the ctx
+     * @param sender  the sender
      */
-    void onCheckMessage(long msgId, ChannelHandlerContext ctx, ServerMessageSender sender);
+    void onCheckMessage(RpcMessage request, ChannelHandlerContext ctx, ServerMessageSender sender);
 
 }

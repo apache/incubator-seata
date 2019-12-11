@@ -15,9 +15,6 @@
  */
 package io.seata.core.protocol.transaction;
 
-import java.nio.ByteBuffer;
-
-import io.netty.buffer.ByteBuf;
 import io.seata.core.model.BranchStatus;
 
 /**
@@ -93,63 +90,6 @@ public abstract class AbstractBranchEndResponse extends AbstractTransactionRespo
      */
     public void setBranchStatus(BranchStatus branchStatus) {
         this.branchStatus = branchStatus;
-    }
-
-    @Override
-    protected void doEncode() {
-        super.doEncode();
-        if (this.xid != null) {
-            byte[] bs = xid.getBytes(UTF8);
-            byteBuffer.putShort((short)bs.length);
-            if (bs.length > 0) {
-                byteBuffer.put(bs);
-            }
-        } else {
-            byteBuffer.putShort((short)0);
-        }
-        byteBuffer.putLong(this.branchId);
-        byteBuffer.put((byte)branchStatus.getCode());
-    }
-
-    @Override
-    public void decode(ByteBuffer byteBuffer) {
-        super.decode(byteBuffer);
-        short xidLen = byteBuffer.getShort();
-        if (xidLen > 0) {
-            byte[] bs = new byte[xidLen];
-            byteBuffer.get(bs);
-            this.setXid(new String(bs, UTF8));
-        }
-        branchId = byteBuffer.getLong();
-        branchStatus = BranchStatus.get(byteBuffer.get());
-    }
-
-    @Override
-    public boolean decode(ByteBuf in) {
-        boolean s = super.decode(in);
-        if (!s) {
-            return s;
-        }
-        short xidLen;
-        if (in.readableBytes() < 2) {
-            return false;
-        }
-        xidLen = in.readShort();
-        if (in.readableBytes() < xidLen) {
-            return false;
-        }
-        byte[] bs = new byte[xidLen];
-        in.readBytes(bs);
-        this.setXid(new String(bs, UTF8));
-        if (in.readableBytes() < 8) {
-            return false;
-        }
-        branchId = in.readLong();
-        if (in.readableBytes() < 1) {
-            return false;
-        }
-        branchStatus = BranchStatus.get(in.readByte());
-        return true;
     }
 
     @Override
