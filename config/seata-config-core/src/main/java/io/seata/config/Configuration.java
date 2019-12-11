@@ -16,16 +16,15 @@
 package io.seata.config;
 
 import java.time.Duration;
-import java.util.List;
+import java.util.Set;
 
 /**
  * The interface Configuration.
  *
- * @param <T> the type parameter
  * @author jimin.jm @alibaba-inc.com
  * @date 2018 /12/20
  */
-public interface Configuration<T> {
+public interface Configuration {
 
     /**
      * Gets short.
@@ -259,7 +258,7 @@ public interface Configuration<T> {
      * @param dataId   the data id
      * @param listener the listener
      */
-    void addConfigListener(String dataId, T listener);
+    void addConfigListener(String dataId, ConfigurationChangeListener listener);
 
     /**
      * Remove config listener.
@@ -267,7 +266,7 @@ public interface Configuration<T> {
      * @param dataId   the data id
      * @param listener the listener
      */
-    void removeConfigListener(String dataId, T listener);
+    void removeConfigListener(String dataId, ConfigurationChangeListener listener);
 
     /**
      * Gets config listeners.
@@ -275,7 +274,7 @@ public interface Configuration<T> {
      * @param dataId the data id
      * @return the config listeners
      */
-    List<T> getConfigListeners(String dataId);
+    Set<ConfigurationChangeListener> getConfigListeners(String dataId);
 
     /**
      * Gets config from sys pro.

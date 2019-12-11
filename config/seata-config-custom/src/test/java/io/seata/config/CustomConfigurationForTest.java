@@ -17,10 +17,10 @@ package io.seata.config;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
-public class CustomConfigurationForTest extends AbstractConfiguration<ConfigChangeListener> {
+public class CustomConfigurationForTest extends AbstractConfiguration {
     private Properties properties;
 
     public CustomConfigurationForTest(String name) {
@@ -58,17 +58,17 @@ public class CustomConfigurationForTest extends AbstractConfiguration<ConfigChan
     }
 
     @Override
-    public void addConfigListener(String dataId, ConfigChangeListener listener) {
+    public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void removeConfigListener(String dataId, ConfigChangeListener listener) {
+    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<ConfigChangeListener> getConfigListeners(String dataId) {
+    public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
         throw new UnsupportedOperationException();
     }
 }

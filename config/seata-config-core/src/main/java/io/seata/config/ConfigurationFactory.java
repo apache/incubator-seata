@@ -55,8 +55,8 @@ public final class ConfigurationFactory {
         if (null == envValue) {
             envValue = System.getenv(ENV_SYSTEM_KEY);
         }
-        Configuration configuration = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX)
-            : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX);
+        Configuration configuration = (null == envValue) ? new FileConfiguration(seataConfigName + REGISTRY_CONF_SUFFIX,
+            false) : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
         Configuration extConfiguration = null;
         try {
             extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
@@ -104,8 +104,7 @@ public final class ConfigurationFactory {
         }
         if (ConfigType.File == configType) {
             String pathDataId = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + FILE_TYPE + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + NAME_KEY;
+                + FILE_TYPE + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + NAME_KEY;
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             Configuration configuration = new FileConfiguration(name);
             Configuration extConfiguration = null;
@@ -118,7 +117,7 @@ public final class ConfigurationFactory {
             } catch (Exception e) {
                 LOGGER.warn("failed to load extConfiguration:{}", e.getMessage(), e);
             }
-            
+
             return null == extConfiguration ? configuration : extConfiguration;
         } else {
             return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
