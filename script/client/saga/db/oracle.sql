@@ -17,7 +17,7 @@ CREATE TABLE seata_state_machine_def
 
 CREATE TABLE seata_state_machine_inst
 (
-    id                  VARCHAR2(32)                      NOT NULL,
+    id                  VARCHAR2(46)                      NOT NULL,
     machine_id          VARCHAR2(32)                      NOT NULL,
     tenant_id           VARCHAR2(32)                      NOT NULL,
     parent_id           VARCHAR2(46),
@@ -38,7 +38,7 @@ CREATE TABLE seata_state_machine_inst
 CREATE TABLE seata_state_inst
 (
     id                       VARCHAR2(32)  NOT NULL,
-    machine_inst_id          VARCHAR2(32)  NOT NULL,
+    machine_inst_id          VARCHAR2(46)  NOT NULL,
     name                     VARCHAR2(255) NOT NULL,
     type                     VARCHAR2(20),
     service_name             VARCHAR2(255),

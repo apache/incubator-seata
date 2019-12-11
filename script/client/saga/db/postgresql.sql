@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS public.seata_state_machine_def
 
 CREATE TABLE IF NOT EXISTS public.seata_state_machine_inst
 (
-    id                  VARCHAR(32)                NOT NULL,
+    id                  VARCHAR(46)                NOT NULL,
     machine_id          VARCHAR(32)                NOT NULL,
     tenant_id           VARCHAR(32)                NOT NULL,
     parent_id           VARCHAR(46),
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS public.seata_state_machine_inst
 CREATE TABLE IF NOT EXISTS public.seata_state_inst
 (
     id                       VARCHAR(32)  NOT NULL,
-    machine_inst_id          VARCHAR(32)  NOT NULL,
+    machine_inst_id          VARCHAR(46)  NOT NULL,
     name                     VARCHAR(255) NOT NULL,
     type                     VARCHAR(20),
     service_name             VARCHAR(255),

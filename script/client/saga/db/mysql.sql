@@ -18,10 +18,10 @@ CREATE TABLE IF NOT EXISTS `seata_state_machine_def`
 
 CREATE TABLE IF NOT EXISTS `seata_state_machine_inst`
 (
-    `id`                  VARCHAR(32)             NOT NULL COMMENT 'id',
+    `id`                  VARCHAR(46)             NOT NULL COMMENT 'id',
     `machine_id`          VARCHAR(32)             NOT NULL COMMENT 'state machine definition id',
     `tenant_id`           VARCHAR(32)             NOT NULL COMMENT 'tenant id',
-    `parent_id`           VARCHAR(46) COMMENT 'parentid',
+    `parent_id`           VARCHAR(46) COMMENT 'parent id',
     `gmt_started`         TIMESTAMP               NOT NULL COMMENT 'start time',
     `business_key`        VARCHAR(48) COMMENT 'business key',
     `start_params`        TEXT COMMENT 'start parameters',
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `seata_state_machine_inst`
 CREATE TABLE IF NOT EXISTS `seata_state_inst`
 (
     `id`                       VARCHAR(32)  NOT NULL COMMENT 'id',
-    `machine_inst_id`          VARCHAR(32)  NOT NULL COMMENT 'state machine instance id',
+    `machine_inst_id`          VARCHAR(46)  NOT NULL COMMENT 'state machine instance id',
     `name`                     VARCHAR(255) NOT NULL COMMENT 'state name',
     `type`                     VARCHAR(20) COMMENT 'state type',
     `service_name`             VARCHAR(255) COMMENT 'service name',
