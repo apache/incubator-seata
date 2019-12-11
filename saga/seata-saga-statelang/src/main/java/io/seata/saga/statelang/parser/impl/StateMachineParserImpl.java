@@ -49,7 +49,9 @@ public class StateMachineParserImpl implements StateMachineParser {
         Map<String, Object> node = JSON.parseObject(json, Map.class, Feature.IgnoreAutoType, Feature.OrderedField);
         if (DesignerJsonTransformer.isDesignerJson(node)) {
             node = DesignerJsonTransformer.toStandardJson(node);
-            LOGGER.info("===== Transformed standard state language:\n{}", JSON.toJSONString(node, SerializerFeature.PrettyFormat));
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("===== Transformed standard state language:\n{}", JSON.toJSONString(node, SerializerFeature.PrettyFormat));
+            }
         }
         StateMachineImpl stateMachine = new StateMachineImpl();
         stateMachine.setName((String) node.get("Name"));
