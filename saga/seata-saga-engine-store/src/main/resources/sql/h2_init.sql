@@ -16,10 +16,10 @@ create table if not exists seata_state_machine_def
 
 create table if not exists seata_state_machine_inst
 (
-    id varchar(32) not null comment 'id',
+    id varchar(46) not null comment 'id',
     machine_id varchar(32) not null comment 'state machine definition id',
     tenant_id varchar(32) not null comment 'tenant id',
-    parent_id varchar(46) comment 'parentid',
+    parent_id varchar(46) comment 'parent id',
     gmt_started timestamp not null comment 'start time',
     business_key varchar(48) comment 'business key',
     start_params clob comment 'start parameters',
@@ -37,7 +37,7 @@ create table if not exists seata_state_machine_inst
 create table if not exists seata_state_inst
 (
     id varchar(32) not null comment 'id',
-    machine_inst_id varchar(32) not null  comment 'state machine instance id',
+    machine_inst_id varchar(46) not null  comment 'state machine instance id',
     name varchar(255) not null comment 'state name',
     type varchar(20) comment 'state type',
     service_name varchar(255) comment 'service name',

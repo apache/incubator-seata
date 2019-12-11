@@ -87,4 +87,6 @@ public class DomainConstants {
     public static final String EXPRESSION_TYPE_SEQUENCE = "Sequence";
     public static final String EVALUATOR_TYPE_EXCEPTION = "Exception";
 
+    public static final String SEPERATOR_PARENT_ID      = ":";
+
 }
