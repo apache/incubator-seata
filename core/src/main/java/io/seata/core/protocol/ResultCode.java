@@ -20,7 +20,7 @@ package io.seata.core.protocol;
  *
  * @author sharajava
  */
-public enum ResultCode {
+public enum  ResultCode {
 
     /**
      * Failed result code.

@@ -68,6 +68,11 @@ public class SessionHolder {
      */
     public static final String RETRY_ROLLBACKING_SESSION_MANAGER_NAME = "retry.rollback.data";
 
+    /**
+     * The default session store dir
+     */
+    public static final String DEFAULT_SESSION_STORE_FILE_DIR = "sessionStore";
+
     private static SessionManager ROOT_SESSION_MANAGER;
     private static SessionManager ASYNC_COMMITTING_SESSION_MANAGER;
     private static SessionManager RETRY_COMMITTING_SESSION_MANAGER;
@@ -76,7 +81,7 @@ public class SessionHolder {
     /**
      * Init.
      *
-     * @param mode the store mode: file、db
+     * @param mode the store mode: file, db
      * @throws IOException the io exception
      */
     public static void init(String mode) throws IOException {
@@ -91,16 +96,14 @@ public class SessionHolder {
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.name());
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.name(),
                 new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
-            ;
             RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.name(),
                 new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
-            ;
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.DB.name(),
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
-            ;
         } else if (StoreMode.FILE.equals(storeMode)) {
             //file store
-            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR);
+            String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
+                DEFAULT_SESSION_STORE_FILE_DIR);
             if (sessionStorePath == null) {
                 throw new StoreException("the {store.file.dir} is empty.");
             }
@@ -108,13 +111,10 @@ public class SessionHolder {
                 new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
             ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, DEFAULT,
                 new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
-            ;
             RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, DEFAULT,
                 new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
-            ;
             RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, DEFAULT,
                 new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
-            ;
         } else {
             //unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);
@@ -167,8 +167,7 @@ public class SessionHolder {
                                 case Committing:
                                 case CommitRetrying:
                                     try {
-                                        globalSession.addSessionLifecycleListener(
-                                            getRetryCommittingSessionManager());
+                                        globalSession.addSessionLifecycleListener(getRetryCommittingSessionManager());
                                         getRetryCommittingSessionManager().addGlobalSession(globalSession);
                                     } catch (TransactionException e) {
                                         throw new ShouldNeverHappenException(e);
@@ -179,8 +178,7 @@ public class SessionHolder {
                                 case TimeoutRollbacking:
                                 case TimeoutRollbackRetrying:
                                     try {
-                                        globalSession.addSessionLifecycleListener(
-                                            getRetryRollbackingSessionManager());
+                                        globalSession.addSessionLifecycleListener(getRetryRollbackingSessionManager());
                                         getRetryRollbackingSessionManager().addGlobalSession(globalSession);
                                     } catch (TransactionException e) {
                                         throw new ShouldNeverHappenException(e);
@@ -258,10 +256,21 @@ public class SessionHolder {
      * @return the global session
      */
     public static GlobalSession findGlobalSession(String xid) {
-        return getRootSessionManager().findGlobalSession(xid);
+        return findGlobalSession(xid, true);
     }
 
-    public static void destory() {
+    /**
+     * Find global session.
+     *
+     * @param xid                the xid
+     * @param withBranchSessions the withBranchSessions
+     * @return the global session
+     */
+    public static GlobalSession findGlobalSession(String xid, boolean withBranchSessions) {
+        return getRootSessionManager().findGlobalSession(xid, withBranchSessions);
+    }
+
+    public static void destroy() {
         ROOT_SESSION_MANAGER.destroy();
         ASYNC_COMMITTING_SESSION_MANAGER.destroy();
         RETRY_COMMITTING_SESSION_MANAGER.destroy();

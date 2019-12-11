@@ -18,7 +18,6 @@ package io.seata.config.nacos;
 import io.seata.common.loader.LoadLevel;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationProvider;
-import com.alibaba.nacos.api.exception.NacosException;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -28,10 +27,6 @@ import com.alibaba.nacos.api.exception.NacosException;
 public class NacosConfigurationProvider implements ConfigurationProvider {
     @Override
     public Configuration provide() {
-        try {
-            return new NacosConfiguration();
-        } catch (NacosException e) {
-            throw new RuntimeException(e);
-        }
+        return NacosConfiguration.getInstance();
     }
 }

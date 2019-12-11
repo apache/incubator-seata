@@ -15,11 +15,17 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.JDBCType;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 
@@ -155,27 +161,7 @@ public class TableRecords {
      * @return the table records
      */
     public static TableRecords empty(TableMeta tableMeta) {
-        return new TableRecords(tableMeta) {
-            @Override
-            public int size() {
-                return 0;
-            }
-
-            @Override
-            public List<Field> pkRows() {
-                return new ArrayList<>();
-            }
-
-            @Override
-            public void add(Row row) {
-                throw new UnsupportedOperationException("xxx");
-            }
-
-            @Override
-            public TableMeta getTableMeta() {
-                throw new UnsupportedOperationException("xxx");
-            }
-        };
+        return new EmptyTableRecords(tableMeta);
     }
 
     /**
@@ -198,11 +184,27 @@ public class TableRecords {
                 ColumnMeta col = tmeta.getColumnMeta(colName);
                 Field field = new Field();
                 field.setName(col.getColumnName());
-                if (tmeta.getPkName().equals(field.getName())) {
+                if (tmeta.getPkName().equalsIgnoreCase(field.getName())) {
                     field.setKeyType(KeyType.PrimaryKey);
                 }
                 field.setType(col.getDataType());
-                field.setValue(resultSet.getObject(i));
+                // mysql will not run in this code
+                // cause mysql does not use java.sql.Blob, java.sql.sql.Clob to process Blob and Clob column
+                if (col.getDataType() == JDBCType.BLOB.getVendorTypeNumber()) {
+                    Blob blob = resultSet.getBlob(i);
+                    if (blob != null) {
+                        field.setValue(new SerialBlob(blob));
+                    }
+
+                } else if (col.getDataType() == JDBCType.CLOB.getVendorTypeNumber()) {
+                    Clob clob = resultSet.getClob(i);
+                    if (clob != null) {
+                        field.setValue(new SerialClob(clob));
+                    }
+                } else {
+                    field.setValue(resultSet.getObject(i));
+                }
+
                 fields.add(field);
             }
 
@@ -212,5 +214,34 @@ public class TableRecords {
             records.add(row);
         }
         return records;
+    }
+
+    public static class EmptyTableRecords extends TableRecords {
+
+        public EmptyTableRecords() {}
+
+        public EmptyTableRecords(TableMeta tableMeta) {
+            this.setTableMeta(tableMeta);
+        }
+
+        @Override
+        public int size() {
+            return 0;
+        }
+
+        @Override
+        public List<Field> pkRows() {
+            return new ArrayList<>();
+        }
+
+        @Override
+        public void add(Row row) {
+            throw new UnsupportedOperationException("xxx");
+        }
+
+        @Override
+        public TableMeta getTableMeta() {
+            throw new UnsupportedOperationException("xxx");
+        }
     }
 }

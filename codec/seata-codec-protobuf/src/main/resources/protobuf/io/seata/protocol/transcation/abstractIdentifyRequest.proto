@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+import "abstractMessage.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "AbstractIdentifyRequest";
+option java_package = "io.seata.codec.protobuf.generated";
+
+// PublishRequest is a publish request.
+message AbstractIdentifyRequestProto {
+
+    AbstractMessageProto abstractMessage=1;
+
+    string version = 2;
+
+    string applicationId = 3;
+
+    string transactionServiceGroup = 4;
+
+    string extraData = 5;
+
+}

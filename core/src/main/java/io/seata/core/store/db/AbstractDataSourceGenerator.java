@@ -26,7 +26,7 @@ import io.seata.core.constants.DBType;
  * The type Abstract data source generator.
  *
  * @author zhangsen
- * @data 2019 /4/24
+ * @date 2019 /4/24
  */
 public abstract class AbstractDataSourceGenerator implements DataSourceGenerator {
 
@@ -34,6 +34,10 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      * The constant CONFIG.
      */
     protected static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
+    private static final int DEFAULT_DB_MAX_CONN = 10;
+
+    private static final int DEFAULT_DB_MIN_CONN = 1;
 
     /**
      * Get db type db type.
@@ -45,6 +49,20 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     }
 
     /**
+     * get db driver class name
+     *
+     * @return the db driver class name
+     */
+    protected String getDriverClassName() {
+        String driverClassName = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME);
+        if (StringUtils.isBlank(driverClassName)) {
+            throw new StoreException(
+                String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_DRIVER_CLASS_NAME));
+        }
+        return driverClassName;
+    }
+
+    /**
      * Get url string.
      *
      * @return the string
@@ -52,7 +70,7 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     protected String getUrl() {
         String url = CONFIG.getConfig(ConfigurationKeys.STORE_DB_URL);
         if (StringUtils.isBlank(url)) {
-            throw new StoreException("the {store.db.url} can't empty.");
+            throw new StoreException(String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_URL));
         }
         return url;
     }
@@ -65,7 +83,7 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
     protected String getUser() {
         String user = CONFIG.getConfig(ConfigurationKeys.STORE_DB_USER);
         if (StringUtils.isBlank(user)) {
-            throw new StoreException("the {store.db.user} can't empty.");
+            throw new StoreException(String.format("the {%s} can't be empty", ConfigurationKeys.STORE_DB_USER));
         }
         return user;
     }
@@ -86,8 +104,8 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      * @return the int
      */
     protected int getMinConn() {
-        int minConn = CONFIG.getInt(ConfigurationKeys.STORE_DB_MIN_CONN);
-        return minConn < 0 ? 0 : minConn;
+        int minConn = CONFIG.getInt(ConfigurationKeys.STORE_DB_MIN_CONN, DEFAULT_DB_MIN_CONN);
+        return minConn < 0 ? DEFAULT_DB_MIN_CONN : minConn;
     }
 
     /**
@@ -96,8 +114,8 @@ public abstract class AbstractDataSourceGenerator implements DataSourceGenerator
      * @return the int
      */
     protected int getMaxConn() {
-        int maxConn = CONFIG.getInt(ConfigurationKeys.STORE_DB_MAX_CONN);
-        return maxConn < 0 ? 1 : maxConn;
+        int maxConn = CONFIG.getInt(ConfigurationKeys.STORE_DB_MAX_CONN, DEFAULT_DB_MAX_CONN);
+        return maxConn < 0 ? DEFAULT_DB_MAX_CONN : maxConn;
     }
 
     /**

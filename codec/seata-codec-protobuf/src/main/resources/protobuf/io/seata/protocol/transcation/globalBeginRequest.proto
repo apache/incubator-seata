@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+import "abstractTransactionRequest.proto";
+
+
+option java_multiple_files = true;
+option java_outer_classname = "GlobalBeginRequest";
+option java_package = "io.seata.codec.protobuf.generated";
+
+message GlobalBeginRequestProto {
+    AbstractTransactionRequestProto abstractTransactionRequest=1;
+    int32 timeout = 2;
+    string transactionName = 3;
+}

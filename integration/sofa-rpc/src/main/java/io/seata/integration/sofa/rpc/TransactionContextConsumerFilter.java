@@ -45,7 +45,7 @@ public class TransactionContextConsumerFilter extends Filter {
     @Override
     public SofaResponse invoke(FilterInvoker filterInvoker, SofaRequest sofaRequest) throws SofaRpcException {
         String xid = RootContext.getXID();
-        String rpcXid = (String) RpcInternalContext.getContext().getAttachment(RootContext.KEY_XID);
+        String rpcXid = getRpcXid();
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RootContext[" + xid + "] xid in RpcContext[" + rpcXid + "]");
         }
@@ -83,4 +83,17 @@ public class TransactionContextConsumerFilter extends Filter {
             }
         }
     }
+
+    /**
+     * get rpc xid
+     * @return
+     */
+    private String getRpcXid() {
+        String rpcXid = (String) RpcInternalContext.getContext().getAttachment(RootContext.KEY_XID);
+        if (rpcXid == null) {
+            rpcXid = (String) RpcInternalContext.getContext().getAttachment(RootContext.KEY_XID.toLowerCase());
+        }
+        return rpcXid;
+    }
+
 }

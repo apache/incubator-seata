@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+option java_multiple_files = true;
+option java_outer_classname = "BranchType";
+option java_package = "io.seata.codec.protobuf.generated";
+
+// PublishRequest is a publish request.
+enum BranchTypeProto {
+
+    AT = 0;
+
+    TCC = 1;
+
+    SAGA = 2;
+}
