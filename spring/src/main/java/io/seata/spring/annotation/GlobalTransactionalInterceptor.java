@@ -180,9 +180,9 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
 
     @Override
     public void onChangeEvent(ConfigurationChangeEvent event) {
-        if (event.getDataId().equals(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION)) {
+        if (ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION.equals(event.getDataId())) {
             LOGGER.info("{} config changed, old value:{}, new value:{}", ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,
-                event.getOldValue(), event.getNewValue());
+                disable, event.getNewValue());
             disable = Boolean.parseBoolean(event.getNewValue().trim());
         }
     }
