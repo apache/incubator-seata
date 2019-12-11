@@ -91,8 +91,8 @@ public class SubStateMachineHandler implements StateHandler, InterceptibleStateH
 
         startParams.put(DomainConstants.VAR_NAME_PARENT_ID, EngineUtils.generateParentId(stateInstance));
         try {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(">>>>>>>>>>>>>>>>>>>>>> Start to execute SubStateMachine [{}] by state[{}]",
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(">>>>>>>>>>>>>>>>>>>>>> Start to execute SubStateMachine [{}] by state[{}]",
                     subStateMachine.getStateMachineName(), subStateMachine.getName());
             }
             StateMachineInstance subStateMachineInstance = callSubStateMachine(startParams, engine, context,
@@ -107,8 +107,8 @@ public class SubStateMachineHandler implements StateHandler, InterceptibleStateH
             context.setVariable(DomainConstants.VAR_NAME_OUTPUT_PARAMS, outputParams);
             stateInstance.setOutputParams(outputParams);
 
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(
                     "<<<<<<<<<<<<<<<<<<<<<< SubStateMachine[{}] execute finish with status[{}], compensateStatus[{}]",
                     subStateMachine.getStateMachineName(), subStateMachineInstance.getStatus(),
                     subStateMachineInstance.getCompensationStatus());
