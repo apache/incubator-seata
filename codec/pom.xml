@@ -32,6 +32,7 @@
         <module>seata-codec-protobuf</module>
         <module>seata-codec-seata</module>
         <module>seata-codec-kryo</module>
+        <module>seata-codec-hessian</module>
     </modules>
 
 </project>
