@@ -1,34 +1,18 @@
 # https://hub.docker.com/_/openjdk
-FROM centos:7.5.1804
+FROM openjdk:8u232-jre-stretch
 
 # set label
 LABEL maintainer="seata <niao.shuai123@163.com>"
 
-# set environment
-ENV SEATA_USER="seata" \
-    JAVA_HOME="/usr/lib/jvm/java-1.8.0-openjdk" \
-    JAVA="/usr/lib/jvm/java-1.8.0-openjdk/bin/java" \
-    TIME_ZONE="Asia/Shanghai" 
-
-ARG SEATA_VERSION=0.9.0
-
 WORKDIR /$BASE_DIR
 
-RUN set -x \
-    && yum update -y \
-    && yum install -y java-1.8.0-openjdk java-1.8.0-openjdk-devel wget iputils nc vim libcurl \
-    && wget  https://github.com/seata/seata/releases/download/v${SEATA_VERSION}/seata-server-${SEATA_VERSION}.tar.gz -P /home \
-    && tar -xzvf /home/seata-server-${SEATA_VERSION}.tar.gz -C /opt \
-    && rm -rf /home/seata-server-${SEATA_VERSION}.tar.gz \
-    && ln -snf /usr/share/zoneinfo/$TIME_ZONE /etc/localtime && echo '$TIME_ZONE' > /etc/timezone \
-    && yum clean all
+# ADD FORM distribution
+ADD bin/ /seata-server/bin
+ADD lib/ /seata-server/lib
+ADD conf/ /seata-server/conf
+ADD LICENSE-BIN /seata-server/LICENSE
 
 # set extra environment
-ENV SEATA_IP ${SEATA_IP}
-ENV SEATA_PORT ${SEATA_PORT:-8091}
-ENV STORE_MODE ${STORE_MODE:-file}
-ENV SERVER_NODE {SERVER_NODE:-1}
-ENV EXTRA_JVM_ARGUMENTS="-XX:MaxDirectMemorySize=1024M"
+ENV EXTRA_JVM_ARGUMENTS="-Djava.security.egd=file:/dev/./urandom -server -Xss512k -XX:+UnlockExperimentalVMOptions -XX:+UseContainerSupport XX:SurvivorRatio=10 -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=256m -XX:MaxDirectMemorySize=1024m -XX:-OmitStackTraceInFastThrow -XX:-UseAdaptiveSizePolicy -XX:+HeapDumpOnOutOfMemoryError -XX:+DisableExplicitGC -XX:+CMSParallelRemarkEnabled -XX:+UseCMSInitiatingOccupancyOnly -XX:CMSInitiatingOccupancyFraction=75 -Xloggc:/var/log/seata_gc.log -verbose:gc -Dio.netty.leakDetectionLevel=advanced"
 
-CMD ["sh","/opt/seata/bin/seata-server.sh"]
-EXPOSE ${SEATA_PORT}
+CMD ["sh","/seata-server/bin/seata-server.sh"]
