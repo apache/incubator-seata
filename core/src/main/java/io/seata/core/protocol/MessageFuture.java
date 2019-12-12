@@ -32,8 +32,7 @@ public class MessageFuture {
     private RpcMessage requestMessage;
     private long timeout;
     private long start = System.currentTimeMillis();
-    private static final Object NULL = new Object();
-    private transient CompletableFuture origin = new CompletableFuture();
+    private transient CompletableFuture<Object> origin = new CompletableFuture<>();
 
     /**
      * Is timeout boolean.
