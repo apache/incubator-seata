@@ -237,9 +237,14 @@
             <artifactId>seata-grpc</artifactId>
             <version>${project.version}</version>
         </dependency>
-      <dependency>
+        <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-codec-kryo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-codec-hessian</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -494,6 +499,11 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
+            <groupId>com.caucho</groupId>
+            <artifactId>hessian</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>de.javakaffee</groupId>
             <artifactId>kryo-serializers</artifactId>
             <scope>provided</scope>
@@ -604,6 +614,8 @@
                                     <include>io.seata:seata-tm</include>
                                     <include>io.seata:seata-codec-seata</include>
                                     <include>io.seata:seata-codec-protobuf</include>
+                                    <include>io.seata:seata-codec-kryo</include>
+                                    <include>io.seata:seata-codec-hessian</include>
                                     <!-- saga -->
                                     <include>io.seata:seata-saga-processctrl</include>
                                     <include>io.seata:seata-saga-statelang</include>
@@ -611,8 +623,6 @@
                                     <include>io.seata:seata-saga-rm</include>
                                     <include>io.seata:seata-saga-tm</include>
                                     <include>io.seata:seata-saga-engine-store</include>
-
-                                    <include>io.seata:seata-codec-kryo</include>
                                     <include>io.seata:seata-compressor-gzip</include>
                                 </includes>
                             </artifactSet>

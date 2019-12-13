@@ -43,7 +43,7 @@ public class EngineUtils {
      * @return
      */
     public static String generateParentId(StateInstance stateInstance) {
-        return stateInstance.getMachineInstanceId() + ":" + stateInstance.getId();
+        return stateInstance.getMachineInstanceId() + DomainConstants.SEPERATOR_PARENT_ID + stateInstance.getId();
     }
 
     /**

@@ -135,9 +135,9 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
             //Set the current task execution status to RU (Running)
             stateInstance.setStatus(ExecutionStatus.RU);
 
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info(">>>>>>>>>>>>>>>>>>>>>> Start to execute State[{}], ServiceName[{}], Method[{}], Input:{}",
-                    state.getName(), serviceName, methodName, input);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(">>>>>>>>>>>>>>>>>>>>>> Start to execute State[{}], ServiceName[{}], Method[{}], Input:{}",
+                        state.getName(), serviceName, methodName, input);
             }
 
             if (state instanceof CompensateSubStateMachineState) {
@@ -163,9 +163,9 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
                 result = serviceInvoker.invoke(state, input.toArray());
             }
 
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("<<<<<<<<<<<<<<<<<<<<<< State[{}], ServiceName[{}], Method[{}] Execute finish. result: {}",
-                    state.getName(), serviceName, methodName, result);
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("<<<<<<<<<<<<<<<<<<<<<< State[{}], ServiceName[{}], Method[{}] Execute finish. result: {}",
+                        state.getName(), serviceName, methodName, result);
             }
 
             if (result != null) {
@@ -208,8 +208,8 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
 
         String subStateMachineInstId = subInst.get(0).getId();
 
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(">>>>>>>>>>>>>>>>>>>>>> Start to compensate sub statemachine [id:{}]", subStateMachineInstId);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(">>>>>>>>>>>>>>>>>>>>>> Start to compensate sub statemachine [id:{}]", subStateMachineInstId);
         }
 
         Map<String, Object> startParams = new HashMap<>(0);
@@ -225,11 +225,11 @@ public class ServiceTaskStateHandler implements StateHandler, InterceptibleState
         StateMachineInstance compensateInst = engine.compensate(subStateMachineInstId, startParams);
         stateInstance.setStatus(compensateInst.getCompensationStatus());
 
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(
-                ">>>>>>>>>>>>>>>>>>>>>> Compensate sub statemachine [id:{}] finished with status[{}], "
-                    + "compensateState[{}]",
-                subStateMachineInstId, compensateInst.getStatus(), compensateInst.getCompensationStatus());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                    "<<<<<<<<<<<<<<<<<<<<<< Compensate sub statemachine [id:{}] finished with status[{}], "
+                            + "compensateState[{}]",
+                    subStateMachineInstId, compensateInst.getStatus(), compensateInst.getCompensationStatus());
         }
         return compensateInst.getEndParams();
     }
