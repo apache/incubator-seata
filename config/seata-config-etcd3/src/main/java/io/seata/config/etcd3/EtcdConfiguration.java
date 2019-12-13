@@ -155,6 +155,9 @@ public class EtcdConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (null == dataId || null == listener) {
+            return;
+        }
         configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
         EtcdListener etcdListener = new EtcdListener(dataId, listener);
         configListenersMap.get(dataId).add(etcdListener);
