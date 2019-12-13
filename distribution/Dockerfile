@@ -1,8 +1,8 @@
-# https://hub.docker.com/_/openjdk
+# https://hub.docker.com/orgs/seataio
 FROM openjdk:8u232-jre-stretch
 
 # set label
-LABEL maintainer="seata <niao.shuai123@163.com>"
+LABEL maintainer="Seata <seata.io>"
 
 WORKDIR /$BASE_DIR
 
