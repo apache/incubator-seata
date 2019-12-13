@@ -17,6 +17,7 @@ package io.seata.rm.datasource.sql.struct.cache;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
+import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
@@ -56,6 +57,26 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
             }
         }
         return tableMetaCache;
+    }
+
+    @Override
+    protected String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
+        StringBuilder cacheKey = new StringBuilder(dataSourceProxy.getResourceId());
+        cacheKey.append(".");
+
+        //separate it to schemaName and tableName
+        String[] tableNameWithSchema = tableName.split("\\.");
+        String defaultTableName = tableNameWithSchema.length > 1 ? tableNameWithSchema[1] : tableNameWithSchema[0];
+
+        //oracle does not implement supportsMixedCaseIdentifiers in DatabaseMetadata
+        if (defaultTableName.contains("\"")) {
+            cacheKey.append(defaultTableName.replace("\"", ""));
+        } else {
+            // oracle default store in upper case
+            cacheKey.append(defaultTableName.toUpperCase());
+        }
+
+        return cacheKey.toString();
     }
 
     @Override
