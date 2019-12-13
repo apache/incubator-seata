@@ -138,6 +138,9 @@ public class FileConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (null == dataId || null == listener) {
+            return;
+        }
         configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
         configListenersMap.get(dataId).add(listener);
         listenedConfigMap.put(dataId, getConfig(dataId));

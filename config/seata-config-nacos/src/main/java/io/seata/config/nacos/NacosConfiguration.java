@@ -128,6 +128,9 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (null == dataId || null == listener) {
+            return;
+        }
         try {
             configListenersMap.putIfAbsent(dataId, new ConcurrentHashMap<>());
             NacosListener nacosListener = new NacosListener(dataId, listener);
