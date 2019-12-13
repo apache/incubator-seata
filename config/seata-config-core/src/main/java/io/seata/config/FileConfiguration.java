@@ -16,6 +16,7 @@
 package io.seata.config;
 
 import java.io.File;
+import java.net.URL;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -71,6 +72,16 @@ public class FileConfiguration extends AbstractConfiguration {
     private final boolean allowDynamicRefresh;
 
     /**
+     * Note that:this constructor is only used to create proxy with CGLIB
+     * see io.seata.spring.boot.autoconfigure.provider.SpringBootConfigurationProvider#provide
+     */
+    public FileConfiguration() {
+        this.name = null;
+        this.targetFilePath = null;
+        this.allowDynamicRefresh = false;
+    }
+
+    /**
      * Instantiates a new File configuration.
      *
      * @param name the name
@@ -92,13 +103,22 @@ public class FileConfiguration extends AbstractConfiguration {
             targetFilePath = name.substring(SYS_FILE_RESOURCE_PREFIX.length());
             Config appConfig = ConfigFactory.parseFileAnySyntax(new File(targetFilePath));
             fileConfig = ConfigFactory.load(appConfig);
+            this.allowDynamicRefresh = allowDynamicRefresh;
         } else {
-            targetFilePath = this.getClass().getClassLoader().getResource(name).getPath();
-            fileConfig = ConfigFactory.load(name);
+            //conf files may not exist when using seata-spring-boot-starter
+            URL resource = this.getClass().getClassLoader().getResource(name);
+            if (null != resource) {
+                targetFilePath = resource.getPath();
+                fileConfig = ConfigFactory.load(name);
+                targetFileLastModified = new File(targetFilePath).lastModified();
+                this.allowDynamicRefresh = allowDynamicRefresh;
+            } else {
+                targetFilePath = null;
+                fileConfig = ConfigFactory.load();
+                this.allowDynamicRefresh = false;
+            }
         }
         this.name = name;
-        this.allowDynamicRefresh = allowDynamicRefresh;
-        targetFileLastModified = new File(targetFilePath).lastModified();
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
             new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD));
