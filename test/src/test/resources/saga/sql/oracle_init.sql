@@ -16,7 +16,7 @@ create table seata_state_machine_def
 
 create table seata_state_machine_inst
 (
-    id varchar(32) not null,
+    id varchar(46) not null,
     machine_id varchar(32) not null,
     tenant_id varchar(32) not null,
     parent_id varchar(46),
@@ -43,7 +43,7 @@ create unique index state_machine_inst_unibuzkey on seata_state_machine_inst(uni
 create table seata_state_inst
 (
     id varchar(32) not null,
-    machine_inst_id varchar(32) not null,
+    machine_inst_id varchar(46) not null,
     name varchar(255) not null,
     type varchar(20),
     service_name varchar(255),
