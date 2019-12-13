@@ -107,9 +107,7 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
      * @param tableName
      * @return
      */
-    private String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
-        return dataSourceProxy.getResourceId() + "." + tableName;
-    }
+    protected abstract String getCacheKey(DataSourceProxy dataSourceProxy, String tableName);
 
     /**
      * get scheme from datasource and tableName

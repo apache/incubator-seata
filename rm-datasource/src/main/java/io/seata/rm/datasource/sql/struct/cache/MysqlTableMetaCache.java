@@ -18,6 +18,7 @@ package io.seata.rm.datasource.sql.struct.cache;
 import com.alibaba.druid.util.JdbcConstants;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
@@ -25,6 +26,8 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 
@@ -41,6 +44,8 @@ import java.sql.Statement;
  * @author sharajava
  */
 public class MysqlTableMetaCache extends AbstractTableMetaCache {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MysqlTableMetaCache.class);
 
     private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
 
@@ -63,6 +68,37 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             }
         }
         return tableMetaCache;
+    }
+
+    @Override
+    protected String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
+        StringBuilder cacheKey = new StringBuilder(dataSourceProxy.getResourceId());
+        cacheKey.append(".");
+        //remove single quote and separate it to catalogName and tableName
+        String[] tableNameWithCatalog = tableName.replace("`", "").split("\\.");
+        String defaultTableName = tableNameWithCatalog.length > 1 ? tableNameWithCatalog[1] : tableNameWithCatalog[0];
+
+        DatabaseMetaData databaseMetaData = null;
+        try {
+            databaseMetaData = dataSourceProxy.getPlainConnection().getMetaData();
+        } catch (SQLException e) {
+            LOGGER.error("Could not get connection, use default cache key", e.getMessage(), e);
+            return cacheKey.append(defaultTableName).toString();
+        }
+
+        try {
+            //prevent duplicated cache key
+            if (databaseMetaData.supportsMixedCaseIdentifiers()) {
+                cacheKey.append(defaultTableName);
+            } else {
+                cacheKey.append(defaultTableName.toLowerCase());
+            }
+        } catch (SQLException e) {
+            LOGGER.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key", e.getMessage(), e);
+            return cacheKey.append(defaultTableName).toString();
+        }
+
+        return cacheKey.toString();
     }
 
     @Override
