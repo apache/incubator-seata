@@ -25,17 +25,16 @@ CREATE TABLE IF NOT EXISTS public.seata_state_machine_inst
     business_key        VARCHAR(48),
     start_params        TEXT,
     gmt_end             TIMESTAMP(0) DEFAULT now(),
-    excep BYTEA,
+    excep               BYTEA,
     end_params          TEXT,
     status              VARCHAR(2),
     compensation_status VARCHAR(2),
-    is_running          SMALLINT,
+    is_running          BOOLEAN,
     gmt_updated         TIMESTAMP(0) DEFAULT now() NOT NULL,
     CONSTRAINT pk_seata_state_machine_inst PRIMARY KEY (id),
     CONSTRAINT unikey_buz_tenant UNIQUE (business_key, tenant_id)
 )
 ;
-
 CREATE TABLE IF NOT EXISTS public.seata_state_inst
 (
     id                       VARCHAR(32)  NOT NULL,
@@ -49,7 +48,7 @@ CREATE TABLE IF NOT EXISTS public.seata_state_inst
     state_id_compensated_for VARCHAR(32),
     state_id_retried_for     VARCHAR(32),
     gmt_started              TIMESTAMP(0) NOT NULL,
-    is_for_update            SMALLINT,
+    is_for_update            BOOLEAN,
     input_params             TEXT,
     output_params            TEXT,
     status                   VARCHAR(2)   NOT NULL,
