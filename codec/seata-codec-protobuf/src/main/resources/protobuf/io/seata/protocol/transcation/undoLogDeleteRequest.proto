@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+import "abstractTransactionRequest.proto";
+import "branchType.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "UndoLogDeleteRequest";
+option java_package = "io.seata.codec.protobuf.generated";
+
+// PublishRequest is a publish request.
+message UndoLogDeleteRequestProto {
+    AbstractTransactionRequestProto abstractTransactionRequest = 1;
+
+    /**
+    * The Resource id.
+    */
+    string resourceId = 2;
+
+    /**
+     * The SaveDays data.
+     */
+    int32 saveDays = 3;
+
+    /**
+     * The Branch type.
+     */
+    BranchTypeProto branchType = 4;
+}

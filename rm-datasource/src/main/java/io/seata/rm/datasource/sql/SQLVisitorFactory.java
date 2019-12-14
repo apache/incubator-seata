@@ -21,12 +21,6 @@ import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.rm.datasource.sql.druid.MySQLDeleteRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLInsertRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLUpdateRecognizer;
-
 import java.util.List;
 
 /**
@@ -50,20 +44,16 @@ public class SQLVisitorFactory {
         }
         SQLRecognizer recognizer = null;
         SQLStatement ast = asts.get(0);
-        if (JdbcConstants.MYSQL.equalsIgnoreCase(dbType)) {
-            if (ast instanceof SQLInsertStatement) {
-                recognizer = new MySQLInsertRecognizer(sql, ast);
-            } else if (ast instanceof SQLUpdateStatement) {
-                recognizer = new MySQLUpdateRecognizer(sql, ast);
-            } else if (ast instanceof SQLDeleteStatement) {
-                recognizer = new MySQLDeleteRecognizer(sql, ast);
-            } else if (ast instanceof SQLSelectStatement) {
-                if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
-                    recognizer = new MySQLSelectForUpdateRecognizer(sql, ast);
-                }
-            }
-        } else {
-            throw new UnsupportedOperationException("Just support MySQL by now!");
+        SQLOperateRecognizerHolder recognizerHolder =
+            SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
+        if (ast instanceof SQLInsertStatement) {
+            recognizer = recognizerHolder.getInsertRecognizer(sql, ast);
+        } else if (ast instanceof SQLUpdateStatement) {
+            recognizer = recognizerHolder.getUpdateRecognizer(sql, ast);
+        } else if (ast instanceof SQLDeleteStatement) {
+            recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
+        } else if (ast instanceof SQLSelectStatement) {
+            recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
         }
         return recognizer;
     }

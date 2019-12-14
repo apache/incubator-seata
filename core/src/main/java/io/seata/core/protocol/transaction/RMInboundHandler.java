@@ -37,4 +37,11 @@ public interface RMInboundHandler {
      * @return the branch rollback response
      */
     BranchRollbackResponse handle(BranchRollbackRequest request);
+
+    /**
+     * Handle delete undo log .
+     *
+     * @param request the request
+     */
+    void handle(UndoLogDeleteRequest request);
 }

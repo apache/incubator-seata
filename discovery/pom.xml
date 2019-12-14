@@ -30,6 +30,7 @@
     <modules>
         <module>seata-discovery-consul</module>
         <module>seata-discovery-core</module>
+        <module>seata-discovery-custom</module>
         <module>seata-discovery-all</module>
         <module>seata-discovery-eureka</module>
         <module>seata-discovery-zk</module>

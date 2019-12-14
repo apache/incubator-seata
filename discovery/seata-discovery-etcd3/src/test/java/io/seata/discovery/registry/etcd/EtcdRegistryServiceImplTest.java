@@ -22,8 +22,8 @@ import io.etcd.jetcd.launcher.junit.EtcdClusterResource;
 import io.etcd.jetcd.options.DeleteOption;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.watch.WatchResponse;
-import io.seata.discovery.registery.etcd.EtcdRegistryProvider;
-import io.seata.discovery.registery.etcd.EtcdRegistryServiceImpl;
+import io.seata.discovery.registry.etcd3.EtcdRegistryProvider;
+import io.seata.discovery.registry.etcd3.EtcdRegistryServiceImpl;
 import io.seata.discovery.registry.RegistryService;
 import org.junit.Rule;
 import org.junit.jupiter.api.AfterAll;
@@ -165,7 +165,7 @@ public class EtcdRegistryServiceImplTest {
     /**
      * etcd listener
      */
-    private class EtcdListener implements Watch.Listener {
+    private static class EtcdListener implements Watch.Listener {
         private boolean notified = false;
 
         @Override

@@ -15,20 +15,7 @@
  */
 package io.seata.config.consul;
 
-import com.ecwid.consul.v1.ConsulClient;
-import com.ecwid.consul.v1.QueryParams;
-import com.ecwid.consul.v1.Response;
-import com.ecwid.consul.v1.kv.model.GetValue;
-import com.ecwid.consul.v1.kv.model.PutParams;
-import io.seata.common.thread.NamedThreadFactory;
-import io.seata.config.AbstractConfiguration;
-import io.seata.config.ConfigChangeListener;
-import io.seata.config.ConfigFuture;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -36,27 +23,43 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import com.ecwid.consul.v1.ConsulClient;
+import com.ecwid.consul.v1.QueryParams;
+import com.ecwid.consul.v1.Response;
+import com.ecwid.consul.v1.kv.model.GetValue;
+import com.ecwid.consul.v1.kv.model.PutParams;
+import io.netty.util.internal.ConcurrentSet;
+import io.seata.common.thread.NamedThreadFactory;
+import io.seata.config.AbstractConfiguration;
+import io.seata.config.ConfigFuture;
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.ConfigurationFactory;
+
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
 
 /**
- * @author xingfudeshi@gmail.com
- * @date 2019/05/05
+ * The type Consul configuration.
+ *
+ * @author xingfudeshi @gmail.com
+ * @date 2019 /05/05
  */
-public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListener> {
+public class ConsulConfiguration extends AbstractConfiguration {
     private volatile static ConsulConfiguration instance;
     private volatile static ConsulClient client;
 
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String CONFIG_TYPE = "consul";
-    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE + FILE_CONFIG_SPLIT_CHAR;
+    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
+        + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
-    private static ExecutorService consulConfigExecutor = null;
-    private static ExecutorService consulNotifierExecutor = null;
-    private static ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = null;
-    private static ConcurrentMap<String, List<ConfigChangeNotifier>> configChangeNotifiersMap = null;
+    private ExecutorService consulNotifierExecutor;
+    private ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(
+        MAP_INITIAL_CAPACITY);
 
     /**
      * default watch timeout in second
@@ -64,117 +67,103 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
     private static final int DEFAULT_WATCH_TIMEOUT = 60;
     private static final long CAS = 0L;
 
-
     private ConsulConfiguration() {
+        consulNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM, Integer.MAX_VALUE,
+            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+            new NamedThreadFactory("consul-config-executor", THREAD_POOL_NUM));
     }
 
     /**
      * get instance
      *
-     * @return
+     * @return instance
      */
     public static ConsulConfiguration getInstance() {
         if (null == instance) {
             synchronized (ConsulConfiguration.class) {
                 if (null == instance) {
-                    consulConfigExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-                        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("consul-config-executor", THREAD_POOL_NUM));
-                    consulNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-                        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("consul-notifier-executor", THREAD_POOL_NUM));
-                    configListenersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    configChangeNotifiersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
                     instance = new ConsulConfiguration();
                 }
             }
-
         }
         return instance;
     }
 
-
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
-        ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET, timeoutMills);
-        consulConfigExecutor.execute(() -> {
+        String value;
+        if ((value = getConfigFromSysPro(dataId)) != null) {
+            return value;
+        }
+        ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
+            timeoutMills);
+        consulNotifierExecutor.execute(() -> {
             complete(getConsulClient().getKVValue(dataId), configFuture);
         });
-        return (String) configFuture.get();
+        return (String)configFuture.get();
     }
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUT, timeoutMills);
-        consulConfigExecutor.execute(() -> {
+        consulNotifierExecutor.execute(() -> {
             complete(getConsulClient().setKVValue(dataId, content), configFuture);
         });
-        return (Boolean) configFuture.get();
+        return (Boolean)configFuture.get();
     }
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
-        ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUTIFABSENT, timeoutMills);
-        consulConfigExecutor.execute(() -> {
+        ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUTIFABSENT,
+            timeoutMills);
+        consulNotifierExecutor.execute(() -> {
             PutParams putParams = new PutParams();
             //Setting CAS to 0 means that this is an atomic operation, created when key does not exist.
             putParams.setCas(CAS);
             complete(getConsulClient().setKVValue(dataId, content, putParams), configFuture);
         });
-        return (Boolean) configFuture.get();
+        return (Boolean)configFuture.get();
     }
 
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigFuture.ConfigOperation.REMOVE, timeoutMills);
-        consulConfigExecutor.execute(() -> {
+        consulNotifierExecutor.execute(() -> {
             complete(getConsulClient().deleteKVValue(dataId), configFuture);
         });
-        return (Boolean) configFuture.get();
+        return (Boolean)configFuture.get();
     }
 
     @Override
-    public void addConfigListener(String dataId, ConfigChangeListener listener) {
-        configListenersMap.putIfAbsent(dataId, new ArrayList<>());
-        configChangeNotifiersMap.putIfAbsent(dataId, new ArrayList<>());
-        ConfigChangeNotifier configChangeNotifier = new ConfigChangeNotifier(dataId, listener);
-        configChangeNotifiersMap.get(dataId).add(configChangeNotifier);
-        if (null != listener.getExecutor()) {
-            listener.getExecutor().submit(configChangeNotifier);
-        } else {
-            consulConfigExecutor.submit(configChangeNotifier);
-        }
-    }
-
-    @Override
-    public void removeConfigListener(String dataId, ConfigChangeListener listener) {
-        List<ConfigChangeListener> configChangeListeners = getConfigListeners(dataId);
-        if (configChangeListeners == null) {
+    public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (null == dataId || null == listener) {
             return;
         }
-        List<ConfigChangeListener> newChangeListenerList = new ArrayList<>();
-        for (ConfigChangeListener changeListener : configChangeListeners) {
-            if (!changeListener.equals(listener)) {
-                newChangeListenerList.add(changeListener);
-            }
-        }
-        configListenersMap.put(dataId, newChangeListenerList);
-        if (null != listener.getExecutor()) {
-            listener.getExecutor().shutdownNow();
-        }
-        //remove and stop the configChangeNotifier
-        List<ConfigChangeNotifier> configChangeNotifiers = configChangeNotifiersMap.get(dataId);
-        List<ConfigChangeNotifier> newConfigChangeNotifiers = new ArrayList<>();
-        for (ConfigChangeNotifier configChangeNotifier : configChangeNotifiers) {
-            if (!listener.equals(configChangeNotifier.getListener())) {
-                newConfigChangeNotifiers.add(configChangeNotifier);
-            } else {
-                configChangeNotifier.stop();
-            }
-        }
-        configChangeNotifiersMap.put(dataId, newConfigChangeNotifiers);
+        configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
+        ConsulListener consulListener = new ConsulListener(dataId, listener);
+        configListenersMap.get(dataId).add(consulListener);
+        consulListener.onProcessEvent(new ConfigurationChangeEvent());
+
     }
 
     @Override
-    public List<ConfigChangeListener> getConfigListeners(String dataId) {
+    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
+        Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
+        if (configChangeListeners == null || listener == null) {
+            return;
+        }
+        for (ConfigurationChangeListener entry : configChangeListeners) {
+            ConfigurationChangeListener target = ((ConsulListener)entry).getTargetListener();
+            if (listener.equals(target)) {
+                entry.onShutDown();
+                configChangeListeners.remove(entry);
+                break;
+            }
+        }
+    }
+
+    @Override
+    public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
         return configListenersMap.get(dataId);
     }
 
@@ -182,7 +171,6 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
     public String getTypeName() {
         return CONFIG_TYPE;
     }
-
 
     /**
      * get consul client
@@ -207,70 +195,69 @@ public class ConsulConfiguration extends AbstractConfiguration<ConfigChangeListe
      * @param configFuture
      */
     private void complete(Response response, ConfigFuture configFuture) {
-        Object value = response.getValue();
-        if (null != response && null != value) {
+        if (null != response && null != response.getValue()) {
+            Object value = response.getValue();
             if (value instanceof GetValue) {
-                configFuture.setResult(((GetValue) response.getValue()).getDecodedValue());
+                configFuture.setResult(((GetValue)value).getDecodedValue());
             } else {
-                configFuture.setResult(response.getValue());
+                configFuture.setResult(value);
             }
         }
     }
 
     /**
-     * the type config change notifier
+     * The type Consul listener.
      */
-    private static class ConfigChangeNotifier implements Runnable {
-        private final String dataId;
-        private final ConfigChangeListener listener;
-        private long consulIndex;
-        private boolean running;
+    public class ConsulListener implements ConfigurationChangeListener {
 
-        public ConfigChangeNotifier(String dataId, ConfigChangeListener listener) {
-            this.dataId = dataId;
-            this.listener = listener;
-            this.consulIndex = getConsulClient().getKVValue(this.dataId).getConsulIndex();
-            this.running = true;
-        }
+        private final ConfigurationChangeListener listener;
+        private final String dataId;
+        private long consulIndex;
+        private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
+            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+            new NamedThreadFactory("consulListener", MAX_LISTENER_THREAD));
 
         /**
-         * get the listener
+         * Instantiates a new Consul listener.
          *
-         * @return
+         * @param dataId   the data id
+         * @param listener the listener
          */
-        public ConfigChangeListener getListener() {
-            return this.listener;
+        public ConsulListener(String dataId, ConfigurationChangeListener listener) {
+            this.dataId = dataId;
+            this.listener = listener;
+            this.consulIndex = getConsulClient().getKVValue(dataId).getConsulIndex();
         }
 
         @Override
-        public void run() {
-            while (running) {
-                process();
-            }
-        }
-
-        /**
-         * process
-         */
-        private void process() {
-            QueryParams queryParams = new QueryParams(DEFAULT_WATCH_TIMEOUT, consulIndex);
-            Response<GetValue> response = getConsulClient().getKVValue(this.dataId, queryParams);
-            Long currentIndex = response.getConsulIndex();
-            if (currentIndex != null && currentIndex > consulIndex) {
-                GetValue getValue = response.getValue();
-                consulIndex = currentIndex;
-                for (ConfigChangeListener listener : configListenersMap.get(this.dataId)) {
-                    listener.receiveConfigInfo(getValue.getDecodedValue());
+        public void onChangeEvent(ConfigurationChangeEvent event) {
+            if (null != listener) {
+                while (true) {
+                    QueryParams queryParams = new QueryParams(DEFAULT_WATCH_TIMEOUT, consulIndex);
+                    Response<GetValue> response = getConsulClient().getKVValue(this.dataId, queryParams);
+                    Long currentIndex = response.getConsulIndex();
+                    if (currentIndex != null && currentIndex > consulIndex) {
+                        GetValue getValue = response.getValue();
+                        consulIndex = currentIndex;
+                        event.setDataId(dataId).setNewValue(getValue.getDecodedValue());
+                        listener.onChangeEvent(event);
+                    }
                 }
             }
+        }
 
+        @Override
+        public ExecutorService getExecutorService() {
+            return executor;
         }
 
         /**
-         * stop the notifier
+         * Gets target listener.
+         *
+         * @return the target listener
          */
-        public void stop() {
-            this.running = false;
+        public ConfigurationChangeListener getTargetListener() {
+            return this.listener;
         }
     }
 }

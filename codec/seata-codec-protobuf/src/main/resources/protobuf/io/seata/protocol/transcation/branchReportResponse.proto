@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+import "abstractTransactionResponse.proto";
+
+
+option java_multiple_files = true;
+option java_outer_classname = "BranchReportResponse";
+option java_package = "io.seata.codec.protobuf.generated";
+
+message BranchReportResponseProto {
+    AbstractTransactionResponseProto abstractTransactionResponse = 1;
+}

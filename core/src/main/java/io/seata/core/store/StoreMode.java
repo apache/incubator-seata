@@ -19,7 +19,7 @@ package io.seata.core.store;
  * transaction log store mode
  *
  * @author zhangsen
- * @data 2019 /4/2
+ * @date 2019 /4/2
  */
 public enum StoreMode {
 

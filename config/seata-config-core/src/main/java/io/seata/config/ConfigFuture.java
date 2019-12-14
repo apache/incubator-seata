@@ -15,11 +15,15 @@
  */
 package io.seata.config;
 
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
+import io.seata.common.exception.ShouldNeverHappenException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * The type Config future.
@@ -32,11 +36,10 @@ public class ConfigFuture {
     private static final long DEFAULT_CONFIG_TIMEOUT = 5 * 1000;
     private long timeoutMills;
     private long start = System.currentTimeMillis();
-    private volatile Object result;
     private String dataId;
     private String content;
     private ConfigOperation operation;
-    private final CountDownLatch latch = new CountDownLatch(1);
+    private transient CompletableFuture<Object> origin = new CompletableFuture<>();
 
     /**
      * Instantiates a new Config future.
@@ -77,7 +80,6 @@ public class ConfigFuture {
      * Get object.
      *
      * @return the object
-     * @throws InterruptedException the interrupted exception
      */
     public Object get() {
         return get(this.timeoutMills, TimeUnit.MILLISECONDS);
@@ -89,19 +91,20 @@ public class ConfigFuture {
      * @param timeout the timeout
      * @param unit    the unit
      * @return the object
-     * @throws InterruptedException the interrupted exception
      */
     public Object get(long timeout, TimeUnit unit) {
         this.timeoutMills = unit.toMillis(timeout);
+        Object result;
         try {
-            boolean success = latch.await(timeout, unit);
-            if (!success) {
-                LOGGER.error(
+            result = origin.get(timeout, unit);
+        } catch (ExecutionException e) {
+            throw new ShouldNeverHappenException("Should not get results in a multi-threaded environment", e);
+        } catch (TimeoutException e) {
+            LOGGER.error(
                     "config operation timeout,cost:" + (System.currentTimeMillis() - start) + " ms,op:" + operation
-                        .name()
-                        + ",dataId:" + dataId);
-                return getFailResult();
-            }
+                            .name()
+                            + ",dataId:" + dataId);
+            return getFailResult();
         } catch (InterruptedException exx) {
             LOGGER.error("config operate interrupted,error:" + exx.getMessage());
             return getFailResult();
@@ -127,8 +130,7 @@ public class ConfigFuture {
      * @param result the result
      */
     public void setResult(Object result) {
-        this.result = result;
-        latch.countDown();
+        origin.complete(result);
     }
 
     /**

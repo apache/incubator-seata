@@ -62,7 +62,7 @@ public class BlobUtilsTest {
     @Test
     void bytes2Blob() throws UnsupportedEncodingException, SQLException {
         assertNull(BlobUtils.bytes2Blob(null));
-        byte[] bs = "xxa哈哈dd".getBytes(Constants.DEFAULT_CHARSET_NAME);
+        byte[] bs = "xxaaadd".getBytes(Constants.DEFAULT_CHARSET_NAME);
         assertThat(BlobUtils.bytes2Blob(bs)).isEqualTo(
                 new SerialBlob(bs));
     }
@@ -70,7 +70,7 @@ public class BlobUtilsTest {
     @Test
     void blob2Bytes() throws UnsupportedEncodingException, SQLException {
         assertNull(BlobUtils.blob2Bytes(null));
-        byte[] bs = "xxa哈哈dd".getBytes(Constants.DEFAULT_CHARSET_NAME);
+        byte[] bs = "xxaaadd".getBytes(Constants.DEFAULT_CHARSET_NAME);
         assertThat(BlobUtils.blob2Bytes(new SerialBlob(bs))).isEqualTo(
                 bs);
     }

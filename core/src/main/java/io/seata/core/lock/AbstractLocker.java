@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * The type Abstract locker.
  *
  * @author zhangsen
- * @data 2019 -05-15
+ * @date 2019 -05-15
  */
 public abstract class AbstractLocker implements Locker {
 
@@ -83,4 +83,15 @@ public abstract class AbstractLocker implements Locker {
     public void cleanAllLocks() {
 
     }
+
+    @Override
+    public boolean releaseLock(String xid, Long branchId) {
+        return false;
+    }
+
+    @Override
+    public boolean releaseLock(String xid, List<Long> branchIds) {
+        return false;
+    }
+
 }

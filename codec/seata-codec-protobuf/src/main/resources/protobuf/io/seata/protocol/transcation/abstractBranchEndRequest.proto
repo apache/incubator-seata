@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package io.seata.protocol.protobuf;
+
+import "abstractTransactionRequest.proto";
+import "branchType.proto";
+
+option java_multiple_files = true;
+option java_outer_classname = "AbstractBranchEndRequest";
+option java_package = "io.seata.codec.protobuf.generated";
+
+// PublishRequest is a publish request.
+message AbstractBranchEndRequestProto {
+    AbstractTransactionRequestProto abstractTransactionRequest = 1;
+    string xid = 2;
+    /**
+    * The Branch id.
+    */
+    int64 branchId = 3;
+
+    /**
+     * The Branch type.
+     */
+    BranchTypeProto branchType = 4;
+
+    /**
+     * The Resource id.
+     */
+    string resourceId = 5;
+
+    /**
+     * The Application data.
+     */
+    string applicationData = 6;
+}

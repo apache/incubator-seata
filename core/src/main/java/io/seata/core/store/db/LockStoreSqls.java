@@ -17,12 +17,13 @@ package io.seata.core.store.db;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.core.constants.DBType;
+import io.seata.core.constants.ServerTableColumnsName;
 
 /**
  * The type Lock store sqls.
  *
  * @author zhangsen
- * @data 2019 /4/26
+ * @date 2019 /4/26
  */
 public class LockStoreSqls {
 
@@ -38,9 +39,14 @@ public class LockStoreSqls {
 
     /**
      * The constant ALL_COLUMNS.
+     * xid, transaction_id, branch_id, resource_id, table_name, pk, row_key, gmt_create, gmt_modified
      */
     public static final String ALL_COLUMNS
-        = "xid, transaction_id, branch_id, resource_id, table_name, pk, row_key, gmt_create, gmt_modified";
+        = ServerTableColumnsName.LOCK_TABLE_XID + ", " + ServerTableColumnsName.LOCK_TABLE_TRANSACTION_ID + ", "
+        + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID + ", " + ServerTableColumnsName.LOCK_TABLE_RESOURCE_ID + ", "
+        + ServerTableColumnsName.LOCK_TABLE_TABLE_NAME + ", " + ServerTableColumnsName.LOCK_TABLE_PK + ", "
+        + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + ", " + ServerTableColumnsName.LOCK_TABLE_GMT_CREATE + ", "
+        + ServerTableColumnsName.LOCK_TABLE_GMT_MODIFIED;
 
     /**
      * The constant INSERT_LOCK_SQL_MYSQL.
@@ -59,25 +65,39 @@ public class LockStoreSqls {
      * The constant DELETE_LOCK_SQL.
      */
     public static final String DELETE_LOCK_SQL = "delete from " + LOCK_TABLE_PLACEHOLD
-        + " where row_key = ? and xid = ?";
+        + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " = ? and " + ServerTableColumnsName.LOCK_TABLE_XID + " = ?";
 
     /**
      * The constant BATCH_DELETE_LOCK_SQL.
      */
     public static final String BATCH_DELETE_LOCK_SQL = "delete from " + LOCK_TABLE_PLACEHOLD
-        + " where xid = ? and row_key in (" + IN_PARAMS_PLACEHOLD + ") ";
+        + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " in (" + IN_PARAMS_PLACEHOLD + ") ";
+
+    /**
+     * The constant BATCH_DELETE_LOCK_BY_BRANCH_SQL.
+     */
+    public static final String BATCH_DELETE_LOCK_BY_BRANCH_SQL = "delete from " + LOCK_TABLE_PLACEHOLD
+        + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and " + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID +  " = ? ";
+
+
+    /**
+     * The constant BATCH_DELETE_LOCK_BY_BRANCHS_SQL.
+     */
+    public static final String BATCH_DELETE_LOCK_BY_BRANCHS_SQL = "delete from " + LOCK_TABLE_PLACEHOLD
+        + " where " + ServerTableColumnsName.LOCK_TABLE_XID + " = ? and " + ServerTableColumnsName.LOCK_TABLE_BRANCH_ID + " in (" + IN_PARAMS_PLACEHOLD + ") ";
+
 
     /**
      * The constant QUERY_LOCK_SQL.
      */
     public static final String QUERY_LOCK_SQL = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACEHOLD
-        + " where row_key = ? ";
+        + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " = ? ";
 
     /**
      * The constant CHECK_LOCK_SQL.
      */
     public static final String CHECK_LOCK_SQL = "select " + ALL_COLUMNS + " from " + LOCK_TABLE_PLACEHOLD
-        + " where row_key in (" + IN_PARAMS_PLACEHOLD + ")";
+        + " where " + ServerTableColumnsName.LOCK_TABLE_ROW_KEY + " in (" + IN_PARAMS_PLACEHOLD + ")";
 
     /**
      * Get insert lock sql string.
@@ -119,6 +139,31 @@ public class LockStoreSqls {
      */
     public static String getBatchDeleteLockSql(String lockTable, String paramPlaceHold, String dbType) {
         return BATCH_DELETE_LOCK_SQL.replace(LOCK_TABLE_PLACEHOLD, lockTable).replace(IN_PARAMS_PLACEHOLD,
+            paramPlaceHold);
+    }
+
+
+    /**
+     * Get batch delete lock sql string.
+     *
+     * @param lockTable      the lock table
+     * @param dbType         the db type
+     * @return the string
+     */
+    public static String getBatchDeleteLockSqlByBranch(String lockTable, String dbType) {
+        return BATCH_DELETE_LOCK_BY_BRANCH_SQL.replace(LOCK_TABLE_PLACEHOLD, lockTable);
+    }
+
+    /**
+     * Get batch delete lock sql string.
+     *
+     * @param lockTable      the lock table
+     * @param paramPlaceHold the param place hold
+     * @param dbType         the db type
+     * @return the string
+     */
+    public static String getBatchDeleteLockSqlByBranchs(String lockTable, String paramPlaceHold, String dbType) {
+        return BATCH_DELETE_LOCK_BY_BRANCHS_SQL.replace(LOCK_TABLE_PLACEHOLD, lockTable).replace(IN_PARAMS_PLACEHOLD,
             paramPlaceHold);
     }
 

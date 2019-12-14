@@ -32,7 +32,7 @@ public interface RedisListener {
     String UN_REGISTER = "unregister";
 
     /**
-     * 用于订阅redis事件
+     * use for redis event
      *
      * @param event the event
      */
