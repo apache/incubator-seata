@@ -16,8 +16,8 @@
 # etcd REST API v3.
 
 if [[ $# != 1 ]]; then
-	echo "./etcd3-config.sh etcd3Addr"
-	exit -1
+	echo "USAGE: $0 etcd3Addr"
+	exit 1
 fi
 etcd3Addr=$1
 contentType="content-type:application/json;charset=UTF-8"
@@ -39,7 +39,7 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 
     if [[ -z ${result} ]]; then
         echo "Please check the cluster status."
-        exit -1
+        exit 1
     fi
 
     if [[ ${result} =~ "error" || ${result} =~ "code" ]]; then

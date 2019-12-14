@@ -14,8 +14,8 @@
 # limitations under the License.
 
 if [[ $# != 1 ]]; then
-	echo "./consul-config.sh consulAddr"
-	exit -1
+	echo "USAGE: $0 consulAddr"
+	exit 1
 fi
 consulAddr=$1
 contentType="content-type:application/json;charset=UTF-8"
@@ -31,7 +31,7 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 
     if [[ -z ${result} ]]; then
         echo "Please check the cluster status."
-        exit -1
+        exit 1
     fi
 
     if [[ ! ${result} =~ "true" ]]; then

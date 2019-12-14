@@ -14,8 +14,8 @@
 # limitations under the License.
 
 if [[ $# != 1 ]]; then
-	echo "./nacos-config.sh nacosAddr"
-	exit -1
+	echo "USAGE: $0 nacosAddr"
+	exit 1
 fi
 
 nacosAddr=$1
@@ -32,14 +32,14 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 
     if [[ -z ${result} ]]; then
         echo "Please check the cluster status."
-        exit -1
+        exit 1
     fi
 
 	if [[ "$result"x == "true"x ]]; then
 		echo "\033[42;37m $result \033[0m"
 	else
 		echo "\033[41;37 $result \033[0m"
-		let error++
+		(( error ++ ))
 	fi
 done
 

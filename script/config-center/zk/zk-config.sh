@@ -29,15 +29,15 @@ for line in $(cat zk-params.txt); do
 		zkHome=${value}
 		;;
 	*)
-		echo "Invalid param，please refer to zk-params.txt"
-		exit -1
+		echo "Invalid parameter，please refer to zk-params.txt"
+		exit 1
 		;;
 	esac
 done
 
 if [[ -z ${zkAddr} || -z ${zkHome} ]]; then
 	echo "Incomplete parameters, please fill in the complete parameters: zkAddr:$zkAddr, zkHome:$zkHome"
-	exit -1
+	exit 1
 fi
 
 root="/seata"
@@ -67,10 +67,10 @@ check_node ${zkAddr} ${zkHome}
 
 if [[ $(cat ${tempLog}) =~ "No such file or directory" ]]; then
 	echo "ZK home is error, please enter correct zk home!"
-	exit -1
+	exit 1
 elif [[ $(cat ${tempLog}) =~ "Exception" ]]; then
 	echo "Exception error, please check zk cluster status or if the zk address is entered correctly!"
-	exit -1
+	exit 1
 elif [[ $(cat ${tempLog}) =~ "Node does not exist" ]]; then
 	create_node ${zkAddr} ${zkHome}
 else

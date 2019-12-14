@@ -50,8 +50,8 @@ for line in $(cat apollo-params.txt); do
 		token=${value}
 		;;
 	*)
-		echo "Invalid param，please refer to apollo-params.txt"
-		exit -1
+		echo "Invalid parameter，please refer to apollo-params.txt"
+		exit 1
 		;;
 	esac
 done
@@ -60,7 +60,7 @@ if [[ -z ${portalAddr} || -z ${env} || -z ${appId} || -z ${clusterName} || -z ${
 	echo "Incomplete parameters, please fill in the complete parameters: portalAddr:$portalAddr,
             env:$env, appId:$appId, clusterName:$clusterName, namespaceName:$namespaceName,
             dataChangeCreatedBy:$dataChangeCreatedBy, releasedBy:$releasedBy, token:$token"
-	exit -1
+	exit 1
 fi
 
 contentType="content-type:application/json;charset=UTF-8"
