@@ -42,8 +42,9 @@ public class FileTransactionStoreManagerTest {
     @Test
     public void testBigDataWrite() throws Exception {
         File seataFile = Files.newTemporaryFile();
+        FileTransactionStoreManager fileTransactionStoreManager = null;
         try {
-            FileTransactionStoreManager fileTransactionStoreManager = new FileTransactionStoreManager(seataFile.getAbsolutePath(), null);
+            fileTransactionStoreManager = new FileTransactionStoreManager(seataFile.getAbsolutePath(), null);
             BranchSession branchSessionA = Mockito.mock(BranchSession.class);
             GlobalSession global = new GlobalSession();
             Mockito.when(branchSessionA.encode())
@@ -65,6 +66,9 @@ public class FileTransactionStoreManagerTest {
             BranchSession loadedBranchSessionB = (BranchSession) list.get(1).getSessionRequest();
             Assertions.assertEquals(branchSessionB.getApplicationData(), loadedBranchSessionB.getApplicationData());
         } finally {
+            if (null != fileTransactionStoreManager) {
+                fileTransactionStoreManager.shutdown();
+            }
             Assertions.assertTrue(seataFile.delete());
         }
     }
@@ -74,6 +78,8 @@ public class FileTransactionStoreManagerTest {
         File seataFile = Files.newTemporaryFile();
         Method findTimeoutAndSaveMethod = FileTransactionStoreManager.class.getDeclaredMethod("findTimeoutAndSave");
         findTimeoutAndSaveMethod.setAccessible(true);
+        FileBasedSessionManager sessionManager = null;
+        FileTransactionStoreManager fileTransactionStoreManager = null;
         try {
             List<GlobalSession> timeoutSessions = new ArrayList<>();
             for (int i = 0; i < 100; i++) {
@@ -95,10 +101,11 @@ public class FileTransactionStoreManagerTest {
             SessionManager sessionManagerMock = Mockito.mock(SessionManager.class);
             Mockito.when(sessionManagerMock.findGlobalSessions(Mockito.any()))
                     .thenReturn(timeoutSessions);
-            FileTransactionStoreManager fileTransactionStoreManager = new FileTransactionStoreManager(seataFile.getAbsolutePath(), sessionManagerMock);
+            fileTransactionStoreManager = new FileTransactionStoreManager(
+                seataFile.getAbsolutePath(), sessionManagerMock);
             Assertions.assertTrue((boolean) findTimeoutAndSaveMethod.invoke(fileTransactionStoreManager));
 
-            FileBasedSessionManager sessionManager = new FileBasedSessionManager(seataFile.getName(), seataFile.getParent());
+            sessionManager = new FileBasedSessionManager(seataFile.getName(), seataFile.getParent());
             sessionManager.reload();
             Collection<GlobalSession> globalSessions = sessionManager.allSessions();
             Assertions.assertNotNull(globalSessions);
@@ -111,6 +118,12 @@ public class FileTransactionStoreManagerTest {
             });
         } finally {
             findTimeoutAndSaveMethod.setAccessible(false);
+            if (null != fileTransactionStoreManager) {
+                fileTransactionStoreManager.shutdown();
+            }
+            if (null != sessionManager) {
+                sessionManager.destroy();
+            }
             Assertions.assertTrue(seataFile.delete());
         }
     }

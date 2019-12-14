@@ -233,6 +233,52 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
     }
 
     @Override
+    public boolean unLock(String xid, Long branchId) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            //batch release lock by branch
+            String batchDeleteSQL = LockStoreSqls.getBatchDeleteLockSqlByBranch(lockTable, dbType);
+            ps = conn.prepareStatement(batchDeleteSQL);
+            ps.setString(1, xid);
+            ps.setLong(2, branchId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps, conn);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean unLock(String xid, List<Long> branchIds) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            StringJoiner sj = new StringJoiner(",");
+            branchIds.stream().forEach(branchId -> sj.add("?"));
+            //batch release lock by branch list
+            String batchDeleteSQL = LockStoreSqls.getBatchDeleteLockSqlByBranchs(lockTable, sj.toString(), dbType);
+            ps = conn.prepareStatement(batchDeleteSQL);
+            ps.setString(1, xid);
+            for (int i = 0; i < branchIds.size(); i++) {
+                ps.setLong(i + 2, branchIds.get(i));
+            }
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps, conn);
+        }
+        return true;
+    }
+
+    @Override
     public boolean isLockable(List<LockDO> lockDOs) {
         Connection conn = null;
         try {

@@ -18,6 +18,7 @@ package io.seata.rm.datasource.sql.struct.cache;
 import com.alibaba.druid.util.JdbcConstants;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
@@ -25,6 +26,8 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
 
@@ -41,6 +44,8 @@ import java.sql.Statement;
  * @author sharajava
  */
 public class MysqlTableMetaCache extends AbstractTableMetaCache {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MysqlTableMetaCache.class);
 
     private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
 
@@ -66,6 +71,37 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
     }
 
     @Override
+    protected String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
+        StringBuilder cacheKey = new StringBuilder(dataSourceProxy.getResourceId());
+        cacheKey.append(".");
+        //remove single quote and separate it to catalogName and tableName
+        String[] tableNameWithCatalog = tableName.replace("`", "").split("\\.");
+        String defaultTableName = tableNameWithCatalog.length > 1 ? tableNameWithCatalog[1] : tableNameWithCatalog[0];
+
+        DatabaseMetaData databaseMetaData = null;
+        try (Connection connection = dataSourceProxy.getPlainConnection()) {
+            databaseMetaData = connection.getMetaData();
+        } catch (SQLException e) {
+            LOGGER.error("Could not get connection, use default cache key", e.getMessage(), e);
+            return cacheKey.append(defaultTableName).toString();
+        }
+
+        try {
+            //prevent duplicated cache key
+            if (databaseMetaData.supportsMixedCaseIdentifiers()) {
+                cacheKey.append(defaultTableName);
+            } else {
+                cacheKey.append(defaultTableName.toLowerCase());
+            }
+        } catch (SQLException e) {
+            LOGGER.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key", e.getMessage(), e);
+            return cacheKey.append(defaultTableName).toString();
+        }
+
+        return cacheKey.toString();
+    }
+
+    @Override
     protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
         Connection conn = null;
         Statement stmt = null;
@@ -80,7 +116,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             ResultSetMetaData rsmd = rs.getMetaData();
             DatabaseMetaData dbmd = conn.getMetaData();
 
-            return resultSetMetaToSchema(rsmd, dbmd, tableName);
+            return resultSetMetaToSchema(rsmd, dbmd);
         } catch (Exception e) {
             if (e instanceof SQLException) {
                 throw e;
@@ -100,28 +136,31 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         }
     }
 
-    private TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd, String tableName)
+    private TableMeta resultSetMetaToSchema(ResultSetMetaData rsmd, DatabaseMetaData dbmd)
         throws SQLException {
+        //always "" for mysql
         String schemaName = rsmd.getSchemaName(1);
         String catalogName = rsmd.getCatalogName(1);
+        /*
+         * use ResultSetMetaData to get the pure table name
+         * can avoid the problem below
+         *
+         * select * from account_tbl
+         * select * from account_TBL
+         * select * from `account_tbl`
+         * select * from account.account_tbl
+         */
+        String tableName = rsmd.getTableName(1);
 
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
 
         /*
-         * when set the useInformationSchema true just like jdbc:mysql://127.0.0.1:3306/xxx?useInformationSchema=true
-         * mysql will use DatabaseMetaDataUsingInfoSchema instead of DatabaseMetaData
-         * so
-         * the type of get table meta will change from
-         * show full columns from xxx from xxx
-         * to
-         * select xxx from xxx where catalog_name like ? and table_name like ?
-         * in the second type we have to remove the "`"
+         * here has two different type to get the data
+         * make sure the table name was right
+         * 1. show full columns from xxx from xxx(normal)
+         * 2. select xxx from xxx where catalog_name like ? and table_name like ?(informationSchema=true)
          */
-        if (tableName.contains("`")) {
-            tableName = tableName.replace("`", "");
-        }
-
         ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
         ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
 
