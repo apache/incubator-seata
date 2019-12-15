@@ -184,6 +184,11 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-http</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-dubbo-alibaba</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -606,6 +611,7 @@
                                     <include>io.seata:seata-dubbo-alibaba</include>
                                     <include>io.seata:seata-motan</include>
                                     <include>io.seata:seata-grpc</include>
+                                    <include>io.seata:seata-http</include>
                                     <include>io.seata:seata-rm</include>
                                     <include>io.seata:seata-rm-datasource</include>
                                     <include>io.seata:seata-sofa-rpc</include>
