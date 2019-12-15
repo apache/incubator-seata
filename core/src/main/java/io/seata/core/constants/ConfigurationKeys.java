@@ -411,4 +411,9 @@ public class ConfigurationKeys {
      */
     public static final String SHUNDOWN_WAIT = SHUTDOWN_PREFIX + "wait";
 
+
+    /**
+     * The constant DISABLE_GLOBAL_TRANSACTION.
+     */
+    public static final String DISABLE_GLOBAL_TRANSACTION = SERVICE_PREFIX + "disableGlobalTransaction";
 }
