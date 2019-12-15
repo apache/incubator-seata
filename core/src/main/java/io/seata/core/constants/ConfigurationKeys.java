@@ -416,4 +416,8 @@ public class ConfigurationKeys {
      */
     public static final String ENABLE_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enable-client-batch-send-request";
 
+    /**
+     * The constant DISABLE_GLOBAL_TRANSACTION.
+     */
+    public static final String DISABLE_GLOBAL_TRANSACTION = SERVICE_PREFIX + "disableGlobalTransaction";
 }
