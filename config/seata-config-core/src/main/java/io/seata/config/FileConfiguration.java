@@ -87,8 +87,9 @@ public class FileConfiguration extends AbstractConfiguration {
      * @param name the name
      */
     public FileConfiguration(String name) {
-        this(name,true);
+        this(name, true);
     }
+
     /**
      * Instantiates a new File configuration.
      *
@@ -100,24 +101,36 @@ public class FileConfiguration extends AbstractConfiguration {
         if (null == name) {
             throw new IllegalArgumentException("name can't be null");
         } else if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
-            targetFilePath = name.substring(SYS_FILE_RESOURCE_PREFIX.length());
-            Config appConfig = ConfigFactory.parseFileAnySyntax(new File(targetFilePath));
-            fileConfig = ConfigFactory.load(appConfig);
-            this.allowDynamicRefresh = allowDynamicRefresh;
+            File targetFile = new File(name.substring(SYS_FILE_RESOURCE_PREFIX.length()));
+            if (targetFile.exists()) {
+                targetFilePath = targetFile.getPath();
+                Config appConfig = ConfigFactory.parseFileAnySyntax(targetFile);
+                fileConfig = ConfigFactory.load(appConfig);
+            } else {
+                targetFilePath = null;
+            }
         } else {
-            //conf files may not exist when using seata-spring-boot-starter
             URL resource = this.getClass().getClassLoader().getResource(name);
             if (null != resource) {
                 targetFilePath = resource.getPath();
                 fileConfig = ConfigFactory.load(name);
-                targetFileLastModified = new File(targetFilePath).lastModified();
-                this.allowDynamicRefresh = allowDynamicRefresh;
+
             } else {
                 targetFilePath = null;
-                fileConfig = ConfigFactory.load();
-                this.allowDynamicRefresh = false;
             }
         }
+        /**
+         * For seata-server side the conf file should always exists.
+         * For application(or client) side,conf file may not exists when using seata-spring-boot-starter
+         */
+        if (null == targetFilePath) {
+            fileConfig = ConfigFactory.load();
+            this.allowDynamicRefresh = false;
+        } else {
+            targetFileLastModified = new File(targetFilePath).lastModified();
+            this.allowDynamicRefresh = allowDynamicRefresh;
+        }
+
         this.name = name;
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
@@ -132,28 +145,28 @@ public class FileConfiguration extends AbstractConfiguration {
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigOperation.GET, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (String)configFuture.get();
+        return (String) configFuture.get();
     }
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigOperation.PUT, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigOperation.PUTIFABSENT, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigOperation.REMOVE, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (Boolean)configFuture.get();
+        return (Boolean) configFuture.get();
     }
 
     @Override
