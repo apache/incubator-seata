@@ -139,6 +139,9 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (null == dataId || null == listener) {
+            return;
+        }
         LISTENER_SERVICE_MAP.putIfAbsent(dataId, new ConcurrentSet<>());
         LISTENER_SERVICE_MAP.get(dataId).add(listener);
     }
