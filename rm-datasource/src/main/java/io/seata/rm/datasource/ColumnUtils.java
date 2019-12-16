@@ -66,7 +66,6 @@ public final class ColumnUtils {
      * del escape
      * @param cols the cols
      * @param escape the escape
-     * @throws NullPointerException if cols is null
      * @return delete the column list element left and right escape.
      */
     public static List<String> delEscape(List<String> cols, Escape escape) {
