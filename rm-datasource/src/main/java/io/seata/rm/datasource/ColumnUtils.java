@@ -161,7 +161,9 @@ public final class ColumnUtils {
         buf[0] = escape.value;
         buf[buf.length - 1] = escape.value;
 
-        System.arraycopy(colName.toCharArray(), 0, buf, 1, colName.length());
+        for (int i = 0; i < colName.length(); i++) {
+            buf[i + 1] = colName.charAt(i);
+        }
 
         return new String(buf);
     }
