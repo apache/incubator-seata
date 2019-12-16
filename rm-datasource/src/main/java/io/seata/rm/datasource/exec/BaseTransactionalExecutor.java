@@ -18,6 +18,7 @@ package io.seata.rm.datasource.exec;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
@@ -190,6 +191,29 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         tableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
                 .getTableMeta(connectionProxy.getDataSourceProxy(), tableName);
         return tableMeta;
+    }
+
+    /**
+     * the columns contains table meta pk
+     * @param columns the column name list
+     * @return true: contains pk false: not contains pk
+     */
+    protected boolean containsPK(List<String> columns) {
+        if (columns == null || columns.isEmpty()) {
+            return false;
+        }
+        List<String> newColumns = ColumnUtils.delEscape(columns, getDbType());
+        return getTableMeta().containsPK(newColumns);
+    }
+
+    /**
+     * compare column name and primary key name
+     * @param columnName the primary key column name
+     * @return true: equal false: not equal
+     */
+    protected boolean equalsPK(String columnName) {
+        String newColumnName = ColumnUtils.delEscape(columnName, getDbType());
+        return StringUtils.equalsIgnoreCase(getTableMeta().getPkName(), newColumnName);
     }
 
     /**

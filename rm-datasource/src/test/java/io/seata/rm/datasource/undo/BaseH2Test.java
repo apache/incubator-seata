@@ -106,6 +106,7 @@ public abstract class BaseH2Test {
     protected static TableMeta mockTableMeta() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
         Mockito.when(tableMeta.getPkName()).thenReturn("ID");
+        Mockito.when(tableMeta.getEscapePkName("h2")).thenReturn("`ID`");
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
         ColumnMeta meta0 = Mockito.mock(ColumnMeta.class);
         Mockito.when(meta0.getDataType()).thenReturn(Types.INTEGER);

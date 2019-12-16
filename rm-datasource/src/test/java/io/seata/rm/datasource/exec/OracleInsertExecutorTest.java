@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -69,15 +68,16 @@ public class OracleInsertExecutorTest {
 
     @BeforeEach
     public void init() {
+        connectionProxy = mock(ConnectionProxy.class);
+        when(connectionProxy.getDbType()).thenReturn(JdbcConstants.ORACLE);
+
         statementProxy = mock(PreparedStatementProxy.class);
+        when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
+
         statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
-
-        connectionProxy = mock(ConnectionProxy.class);
-        when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
-        when(connectionProxy.getDbType()).thenReturn(JdbcConstants.ORACLE);
     }
 
     @Test
@@ -90,6 +90,8 @@ public class OracleInsertExecutorTest {
         pkValuesSeq.add(PK_VALUE);
 
         doReturn(pkValuesSeq).when(insertExecutor).getPkValuesBySequence(expr);
+        doReturn(0).when(insertExecutor).getPkIndex();
+
         List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         verify(insertExecutor).getPkValuesBySequence(expr);
         Assertions.assertEquals(pkValuesByColumn, pkValuesSeq);
@@ -117,9 +119,10 @@ public class OracleInsertExecutorTest {
         mockStatementInsertRows();
 
         statementProxy = mock(StatementProxy.class);
-        insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.ORACLE);
+
+        insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
 
         doReturn(tableMeta).when(insertExecutor).getTableMeta();
 

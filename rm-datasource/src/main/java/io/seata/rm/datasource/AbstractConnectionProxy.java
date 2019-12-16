@@ -110,7 +110,7 @@ public abstract class AbstractConnectionProxy implements Connection {
         if (RootContext.inGlobalTransaction()) {
             SQLRecognizer sqlRecognizer = SQLVisitorFactory.get(sql, dbType);
             if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
-                final String tableName = sqlRecognizer.getTableName();
+                String tableName = ColumnUtils.delEscape(sqlRecognizer.getTableName(), dbType);
                 TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(getDataSourceProxy()).getTableMeta(getDataSourceProxy(), tableName);
                 targetPreparedStatement = getTargetConnection().prepareStatement(sql, new String[]{tableMeta.getPkName()});
             }

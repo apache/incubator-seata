@@ -15,7 +15,9 @@
  */
 package io.seata.rm.datasource.exec;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
+import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.struct.Null;
@@ -50,6 +52,9 @@ public class BatchInsertExecutorTest {
     private static final String USER_STATUS_COLUMN = "user_status";
     private static final List<Integer> PK_VALUES = Arrays.asList(100000001, 100000002, 100000003, 100000004, 100000005);
 
+
+    private ConnectionProxy connectionProxy;
+
     private PreparedStatementProxy statementProxy;
 
     private SQLInsertRecognizer sqlInsertRecognizer;
@@ -62,11 +67,18 @@ public class BatchInsertExecutorTest {
 
     @BeforeEach
     public void init() {
+        connectionProxy = mock(ConnectionProxy.class);
+        when(connectionProxy.getDbType()).thenReturn(JdbcConstants.MYSQL);
+
         statementProxy = mock(PreparedStatementProxy.class);
+        when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
+
         statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
+
+        doReturn(1).when(insertExecutor).getPkIndex();
     }
 
     @Test
