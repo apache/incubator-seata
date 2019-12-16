@@ -119,18 +119,13 @@ public final class ColumnUtils {
      * @return
      */
     public static List<String> addEscape(List<String> cols, String dbType) {
-        if (cols == null) {
-            throw new NullPointerException("cols is null");
-        }
-        if (cols.isEmpty()) {
-            return new ArrayList<>();
+        if (CollectionUtils.isEmpty(cols)) {
+            return cols;
         }
         List<String> newCols = new ArrayList<>(cols.size());
         for (int i = 0, len = cols.size(); i < len; i++) {
             String col = cols.get(i);
-            if (col != null) {
-                col = addEscape(col, dbType);
-            }
+            col = addEscape(col, dbType);
             newCols.add(col);
         }
         return newCols;
@@ -156,10 +151,7 @@ public final class ColumnUtils {
      * @return
      */
     public static String addEscape(String colName, Escape escape) {
-        if (colName == null) {
-            throw new NullPointerException("colName is null");
-        }
-        if (colName.isEmpty()) {
+        if (colName == null || colName.isEmpty()) {
             return colName;
         }
         if (colName.charAt(0) == escape.value && colName.charAt(colName.length() - 1) == escape.value) {

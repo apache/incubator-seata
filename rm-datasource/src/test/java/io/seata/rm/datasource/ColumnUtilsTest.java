@@ -84,9 +84,7 @@ public class ColumnUtilsTest {
         String newCol3 = ColumnUtils.addEscape(col3, ColumnUtils.Escape.MYSQL);
         Assertions.assertEquals(col3, newCol3);
 
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            ColumnUtils.addEscape(null, ColumnUtils.Escape.MYSQL);
-        });
+        Assertions.assertNull(ColumnUtils.addEscape(null, ColumnUtils.Escape.MYSQL));
 
     }
 
