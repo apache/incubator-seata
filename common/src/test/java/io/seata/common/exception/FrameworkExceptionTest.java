@@ -15,10 +15,10 @@
  */
 package io.seata.common.exception;
 
+import java.sql.SQLException;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,7 +41,7 @@ public class FrameworkExceptionTest {
             message.print4();
         });
         assertThat(throwable).hasMessage(FrameworkErrorCode.UnknownAppError.getErrMessage());
-        assertThat(((FrameworkException) throwable).getErrcode()).isEqualTo(FrameworkErrorCode.UnknownAppError);
+        assertThat(((FrameworkException)throwable).getErrcode()).isEqualTo(FrameworkErrorCode.UnknownAppError);
     }
 
     /**

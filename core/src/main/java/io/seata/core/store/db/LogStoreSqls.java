@@ -395,8 +395,8 @@ public class LogStoreSqls {
     /**
      * Get qurey branch transaction string.
      *
-     * @param branchTable       the branch table
-     * @param dbType            the db type
+     * @param branchTable the branch table
+     * @param dbType      the db type
      * @param paramsPlaceHolder the params place holder
      * @return the string
      */

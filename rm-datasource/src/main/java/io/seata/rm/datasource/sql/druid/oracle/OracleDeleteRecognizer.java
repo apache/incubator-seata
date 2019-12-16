@@ -20,6 +20,7 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleDeleteStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
+
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.SQLDeleteRecognizer;
 import io.seata.rm.datasource.sql.SQLType;
@@ -45,7 +46,7 @@ public class OracleDeleteRecognizer extends BaseOracleRecognizer implements SQLD
      */
     public OracleDeleteRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (OracleDeleteStatement) ast;
+        this.ast = (OracleDeleteStatement)ast;
     }
 
     @Override
@@ -69,7 +70,7 @@ public class OracleDeleteRecognizer extends BaseOracleRecognizer implements SQLD
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource) ast.getTableSource());
+        visitor.visit((SQLExprTableSource)ast.getTableSource());
         return sb.toString();
     }
 

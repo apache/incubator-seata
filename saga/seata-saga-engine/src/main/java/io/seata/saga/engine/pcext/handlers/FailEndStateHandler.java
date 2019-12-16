@@ -37,8 +37,8 @@ public class FailEndStateHandler implements StateHandler {
         context.setVariable(DomainConstants.VAR_NAME_FAIL_END_STATE_FLAG, true);
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
-        FailEndState state = (FailEndState) instruction.getState(context);
-        Map<String, Object> contextVariables = (Map<String, Object>) context.getVariable(
+        FailEndState state = (FailEndState)instruction.getState(context);
+        Map<String, Object> contextVariables = (Map<String, Object>)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT);
         contextVariables.put(DomainConstants.VAR_NAME_STATEMACHINE_ERROR_CODE, state.getErrorCode());
         contextVariables.put(DomainConstants.VAR_NAME_STATEMACHINE_ERROR_MSG, state.getMessage());

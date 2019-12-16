@@ -17,12 +17,13 @@ package io.seata.rm.datasource.sql.druid.oracle;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLSelect;
 import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
+import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
+
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLSelectRecognizer;
@@ -50,7 +51,7 @@ public class OracleSelectForUpdateRecognizer extends BaseOracleRecognizer implem
      */
     public OracleSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (SQLSelectStatement) ast;
+        this.ast = (SQLSelectStatement)ast;
     }
 
     @Override
@@ -105,7 +106,7 @@ public class OracleSelectForUpdateRecognizer extends BaseOracleRecognizer implem
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource) tableSource);
+        visitor.visit((SQLExprTableSource)tableSource);
         return sb.toString();
     }
 

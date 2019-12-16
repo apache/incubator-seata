@@ -66,7 +66,7 @@ public class StateInstruction implements Instruction {
             throw new EngineExecutionException("StateMachineName is required", FrameworkErrorCode.ParameterRequired);
         }
 
-        StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
+        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
         StateMachine stateMachine = stateMachineConfig.getStateMachineRepository().getStateMachine(stateMachineName,
             tenantId);

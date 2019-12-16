@@ -75,7 +75,6 @@ public class MotanTransactionFilter implements Filter {
 
     /**
      * get rpc xid
-     *
      * @param request
      * @return
      */

@@ -15,12 +15,12 @@
  */
 package io.seata.config;
 
+import java.util.Objects;
+
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Objects;
 
 /**
  * The type Configuration factory.

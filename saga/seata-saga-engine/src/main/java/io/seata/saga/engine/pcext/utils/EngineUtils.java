@@ -53,12 +53,12 @@ public class EngineUtils {
      */
     public static void endStateMachine(ProcessContext context) {
 
-        StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(
+        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
 
         stateMachineInstance.setGmtEnd(new Date());
 
-        Exception exp = (Exception) context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+        Exception exp = (Exception)context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
         if (exp != null) {
             stateMachineInstance.setException(exp);
             if (LOGGER.isDebugEnabled()) {
@@ -66,25 +66,25 @@ public class EngineUtils {
             }
         }
 
-        StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
+        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
         stateMachineConfig.getStatusDecisionStrategy().decideOnEndState(context, stateMachineInstance, exp);
 
         stateMachineInstance.setRunning(false);
         stateMachineInstance.getEndParams().putAll(
-            (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT));
+            (Map<String, Object>)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT));
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         instruction.setEnd(true);
 
         if (stateMachineInstance.getStateMachine().isPersist() && stateMachineConfig.getStateLogStore() != null) {
             stateMachineInstance.getEndParams().putAll(
-                (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT));
+                (Map<String, Object>)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT));
             stateMachineConfig.getStateLogStore().recordStateMachineFinished(stateMachineInstance, context);
         }
 
-        AsyncCallback callback = (AsyncCallback) context.getVariable(DomainConstants.VAR_NAME_ASYNC_CALLBACK);
+        AsyncCallback callback = (AsyncCallback)context.getVariable(DomainConstants.VAR_NAME_ASYNC_CALLBACK);
         if (callback != null) {
             if (exp != null) {
                 callback.onError(context, stateMachineInstance, exp);
@@ -102,16 +102,16 @@ public class EngineUtils {
      */
     public static void failStateMachine(ProcessContext context, Exception exp) {
 
-        StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(
+        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_INST);
 
-        StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
+        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
         stateMachineConfig.getStatusDecisionStrategy().decideOnTaskStateFail(context, stateMachineInstance, exp);
 
         stateMachineInstance.getEndParams().putAll(
-            (Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT));
+            (Map<String, Object>)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT));
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         instruction.setEnd(true);
@@ -120,7 +120,7 @@ public class EngineUtils {
             stateMachineConfig.getStateLogStore().recordStateMachineFinished(stateMachineInstance, context);
         }
 
-        AsyncCallback callback = (AsyncCallback) context.getVariable(DomainConstants.VAR_NAME_ASYNC_CALLBACK);
+        AsyncCallback callback = (AsyncCallback)context.getVariable(DomainConstants.VAR_NAME_ASYNC_CALLBACK);
         if (callback != null) {
             callback.onError(context, stateMachineInstance, exp);
         }

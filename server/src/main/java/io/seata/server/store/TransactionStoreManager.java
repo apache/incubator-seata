@@ -48,7 +48,7 @@ public interface TransactionStoreManager {
     /**
      * Read session global session.
      *
-     * @param xid                the xid
+     * @param xid the xid
      * @param withBranchSessions the withBranchSessions
      * @return the global session
      */

@@ -26,7 +26,6 @@ public interface ServiceInvoker {
 
     /**
      * invoke service
-     *
      * @param serviceTaskState
      * @param input
      * @return

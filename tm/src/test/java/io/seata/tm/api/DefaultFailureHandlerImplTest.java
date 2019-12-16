@@ -47,7 +47,7 @@ class DefaultFailureHandlerImplTest {
         TransactionManagerHolder.set(new TransactionManager() {
             @Override
             public String begin(String applicationId, String transactionServiceGroup, String name, int timeout)
-                throws TransactionException {
+                    throws TransactionException {
                 return DEFAULT_XID;
             }
 
@@ -82,7 +82,7 @@ class DefaultFailureHandlerImplTest {
     }
 
     @Test
-    void onCommitFailure() throws Exception {
+    void onCommitFailure() throws Exception{
 
         RootContext.bind(DEFAULT_XID);
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
@@ -96,14 +96,14 @@ class DefaultFailureHandlerImplTest {
         HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
         // assert timer pendingCount: first time is 1
         Long pendingTimeout = timer.pendingTimeouts();
-        Assertions.assertEquals(pendingTimeout, 1L);
+        Assertions.assertEquals(pendingTimeout,1L);
         //set globalStatus
-        globalStatus = GlobalStatus.Committed;
-        Thread.sleep(25 * 1000L);
+        globalStatus= GlobalStatus.Committed;
+        Thread.sleep(25*1000L);
         pendingTimeout = timer.pendingTimeouts();
-        LOGGER.info("pendingTimeout {}", pendingTimeout);
+        LOGGER.info("pendingTimeout {}" ,pendingTimeout);
         //all timer is done
-        Assertions.assertEquals(pendingTimeout, 0L);
+        Assertions.assertEquals(pendingTimeout,0L);
     }
 
     @Test
@@ -122,14 +122,14 @@ class DefaultFailureHandlerImplTest {
         HashedWheelTimer timer = (HashedWheelTimer) field.get(failureHandler);
         // assert timer pendingCount: first time is 1
         Long pendingTimeout = timer.pendingTimeouts();
-        Assertions.assertEquals(pendingTimeout, 1L);
+        Assertions.assertEquals(pendingTimeout,1L);
         //set globalStatus
-        globalStatus = GlobalStatus.Rollbacked;
-        Thread.sleep(25 * 1000L);
+        globalStatus= GlobalStatus.Rollbacked;
+        Thread.sleep(25*1000L);
         pendingTimeout = timer.pendingTimeouts();
-        LOGGER.info("pendingTimeout {}", pendingTimeout);
+        LOGGER.info("pendingTimeout {}" ,pendingTimeout);
         //all timer is done
-        Assertions.assertEquals(pendingTimeout, 0L);
+        Assertions.assertEquals(pendingTimeout,0L);
 
 
     }

@@ -204,7 +204,7 @@ public class APITest {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         tx.globalReport(tx.getStatus());
 
-        Assertions.assertThrows(IllegalStateException.class, () -> tx.globalReport(null));
+        Assertions.assertThrows(IllegalStateException.class, () ->  tx.globalReport(null));
         Assertions.assertThrows(IllegalStateException.class, () -> {
             RootContext.unbind();
             GlobalTransaction tx2 = GlobalTransactionContext.getCurrentOrCreate();

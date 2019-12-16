@@ -8,7 +8,7 @@
             "Type": "ServiceTask",
             "ServiceName": "demoService",
             "ServiceMethod": "foo",
-          "Next": "ReturnNullState",
+            "Next": "ReturnNullState",
             "Input": [
                 {
                     "fooInput": "$.[a]"
@@ -18,18 +18,18 @@
                 "fooResult": "$.#root"
             }
         },
-      "ReturnNullState": {
-        "Type": "ServiceTask",
-        "ServiceName": "demoService",
-        "ServiceMethod": "foo",
-        "Next": "ChoiceState",
-        "Status": {
-          "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
-          "$Exception{java.lang.Exception}": "FA",
-          "#root != null &&  #root.size() > 0": "SU",
-          "#root == null || #root.size() == 0": "FA"
-        }
-      },
+        "ReturnNullState": {
+            "Type": "ServiceTask",
+            "ServiceName": "demoService",
+            "ServiceMethod": "foo",
+            "Next": "ChoiceState",
+            "Status": {
+                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
+                "$Exception{java.lang.Exception}": "FA",
+                "#root != null &&  #root.size() > 0": "SU",
+                "#root == null || #root.size() == 0": "FA"
+            }
+        },
         "ChoiceState":{
             "Type": "Choice",
             "Choices":[
@@ -58,7 +58,7 @@
                 "barResult": "$.#root"
             },
             "Status": {
-              "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
+                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
                 "$Exception{java.lang.Exception}": "FA",
                 "#root != null &&  #root.size() > 0": "SU",
                 "#root == null || #root.size() == 0": "FA"
@@ -66,7 +66,7 @@
             "Catch": [
                 {
                     "Exceptions": [
-                      "io.seata.saga.engine.mock.DemoException"
+                        "io.seata.saga.engine.mock.DemoException"
                     ],
                     "Next": "Fail"
                 }

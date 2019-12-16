@@ -70,7 +70,7 @@ public class RmMessageListener implements ClientMessageListener {
         } else if (msg instanceof BranchRollbackRequest) {
             handleBranchRollback(request, serverAddress, (BranchRollbackRequest)msg, sender);
         } else if (msg instanceof UndoLogDeleteRequest) {
-            handleUndoLogDelete((UndoLogDeleteRequest) msg);
+            handleUndoLogDelete((UndoLogDeleteRequest)msg);
         }
     }
 

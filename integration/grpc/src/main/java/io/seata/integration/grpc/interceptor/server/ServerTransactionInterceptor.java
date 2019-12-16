@@ -37,7 +37,6 @@ public class ServerTransactionInterceptor implements ServerInterceptor {
 
     /**
      * get rpc xid
-     *
      * @param metadata
      * @return
      */

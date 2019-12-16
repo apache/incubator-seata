@@ -31,8 +31,7 @@ public class MockGlobalTransaction implements GlobalTransaction {
 
     private static SpringJvmUUIDSeqGenerator uuidSeqGenerator = new SpringJvmUUIDSeqGenerator();
 
-    public MockGlobalTransaction() {
-    }
+    public MockGlobalTransaction() {}
 
     public MockGlobalTransaction(String xid) {
         this.xid = xid;

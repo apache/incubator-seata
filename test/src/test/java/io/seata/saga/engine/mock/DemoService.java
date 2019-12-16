@@ -97,7 +97,8 @@ public class DemoService {
         double random = Math.random();
         if (random > 0.5) {
             throw new DemoException("randomExceptionMethod execute failed");
-        } else {
+        }
+        else {
             throw new RuntimeException(new ConnectException("Connect Exception"));
         }
     }

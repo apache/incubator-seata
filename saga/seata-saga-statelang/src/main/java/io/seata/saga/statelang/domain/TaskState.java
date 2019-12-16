@@ -88,7 +88,6 @@ public interface TaskState extends State {
 
         /**
          * set exception classes
-         *
          * @param exceptionClasses
          */
         void setExceptionClasses(List<Class<? extends Exception>> exceptionClasses);
@@ -136,7 +135,6 @@ public interface TaskState extends State {
 
         /**
          * set exception classes
-         *
          * @param exceptionClasses
          */
         void setExceptionClasses(List<Class<? extends Exception>> exceptionClasses);

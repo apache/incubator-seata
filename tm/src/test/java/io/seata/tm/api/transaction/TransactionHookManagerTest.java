@@ -58,7 +58,6 @@ public class TransactionHookManagerTest {
         TransactionHookManager.clear();
         assertThat(TransactionHookManager.getHooks()).isEmpty();
     }
-
     @Test
     public void testNPE() {
         Assertions.assertThrows(NullPointerException.class, () -> TransactionHookManager.registerHook(null));

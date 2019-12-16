@@ -54,6 +54,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
         return JdbcConstants.MYSQL;
     }
 
+
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
         PreparedStatement deletePST = null;

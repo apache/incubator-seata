@@ -167,7 +167,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             startParams.put(DomainConstants.VAR_NAME_BUSINESSKEY, businessKey);
         }
 
-        if (StringUtils.hasText((String) startParams.get(DomainConstants.VAR_NAME_PARENT_ID))) {
+        if (StringUtils.hasText((String)startParams.get(DomainConstants.VAR_NAME_PARENT_ID))) {
             inst.setParentId((String)startParams.get(DomainConstants.VAR_NAME_PARENT_ID));
             startParams.remove(DomainConstants.VAR_NAME_PARENT_ID);
         }
@@ -209,7 +209,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             return stateMachineInstance;
         }
 
-        ExecutionStatus[] acceptStatus = new ExecutionStatus[]{ExecutionStatus.FA, ExecutionStatus.UN};
+        ExecutionStatus[] acceptStatus = new ExecutionStatus[] {ExecutionStatus.FA, ExecutionStatus.UN};
         checkStatus(stateMachineInstance, acceptStatus, null, stateMachineInstance.getStatus(), null, "forward");
 
         List<StateInstance> actList = stateMachineInstance.getStateList();
@@ -322,7 +322,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
             for (StateInstance stateInstance : stateInstanceList) {
                 Object serviceOutputParams = stateInstance.getOutputParams();
                 if (serviceOutputParams != null) {
-                    ServiceTaskStateImpl state = (ServiceTaskStateImpl) stateMachineInstance.getStateMachine().getState(
+                    ServiceTaskStateImpl state = (ServiceTaskStateImpl)stateMachineInstance.getStateMachine().getState(
                         stateInstance.getName());
                     if (state == null) {
                         throw new EngineExecutionException(
@@ -341,7 +341,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
 
                             if (StringUtils.hasLength(stateInstance.getBusinessKey())) {
 
-                                ((Map<String, Object>) context.getVariable(
+                                ((Map<String, Object>)context.getVariable(
                                     DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT)).put(
                                     state.getName() + DomainConstants.VAR_NAME_BUSINESSKEY,
                                     stateInstance.getBusinessKey());
@@ -443,7 +443,7 @@ public class ProcessCtrlStateMachineEngine implements StateMachineEngine {
         }
 
         if (stateMachineInstance.getCompensationStatus() != null) {
-            ExecutionStatus[] denyStatus = new ExecutionStatus[]{ExecutionStatus.SU};
+            ExecutionStatus[] denyStatus = new ExecutionStatus[] {ExecutionStatus.SU};
             checkStatus(stateMachineInstance, null, denyStatus, null, stateMachineInstance.getCompensationStatus(),
                 "compensate");
         }

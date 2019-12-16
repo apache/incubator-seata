@@ -162,7 +162,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Test
     public void testSimpleRetryStateMachine() {
 
-        long start = System.currentTimeMillis();
+        long start  = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -366,7 +366,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Test
     public void testSimpleRetryStateMachineAsync() {
 
-        long start = System.currentTimeMillis();
+        long start  = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);

@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.undo.oracle;
 
 import com.alibaba.druid.util.JdbcConstants;
-
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogParser;
 import org.slf4j.Logger;

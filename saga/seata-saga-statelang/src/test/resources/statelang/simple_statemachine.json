@@ -51,9 +51,7 @@
       },
       "Retry": [
         {
-          "Exceptions": [
-            "java.lang.Exception"
-          ],
+          "Exceptions": ["java.lang.Exception"],
           "IntervalSeconds": 2,
           "MaxAttempts": 3,
           "BackoffRate": 1.5

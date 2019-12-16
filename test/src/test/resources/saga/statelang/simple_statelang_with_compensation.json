@@ -51,12 +51,12 @@
             "Status": {
                 "#root != null": "SU",
                 "#root == null": "FA",
-              "$Exception{io.seata.saga.engine.mock.DemoException}": "UN"
+                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN"
             },
             "Catch": [
                 {
                     "Exceptions": [
-                      "io.seata.saga.engine.mock.DemoException"
+                        "io.seata.saga.engine.mock.DemoException"
                     ],
                     "Next": "CompensationTrigger"
                 }

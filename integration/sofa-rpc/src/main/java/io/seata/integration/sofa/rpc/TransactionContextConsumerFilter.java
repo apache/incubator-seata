@@ -86,7 +86,6 @@ public class TransactionContextConsumerFilter extends Filter {
 
     /**
      * get rpc xid
-     *
      * @return
      */
     private String getRpcXid() {

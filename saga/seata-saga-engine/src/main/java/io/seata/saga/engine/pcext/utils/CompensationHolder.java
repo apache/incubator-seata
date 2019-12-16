@@ -60,12 +60,12 @@ public class CompensationHolder {
 
     public static CompensationHolder getCurrent(ProcessContext context, boolean forceCreate) {
 
-        CompensationHolder compensationholder = (CompensationHolder) context.getVariable(
+        CompensationHolder compensationholder = (CompensationHolder)context.getVariable(
             DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
         if (compensationholder == null && forceCreate) {
             synchronized (context) {
 
-                compensationholder = (CompensationHolder) context.getVariable(
+                compensationholder = (CompensationHolder)context.getVariable(
                     DomainConstants.VAR_NAME_CURRENT_COMPENSATION_HOLDER);
                 if (compensationholder == null) {
                     compensationholder = new CompensationHolder();
@@ -82,8 +82,8 @@ public class CompensationHolder {
         if (stateInstanceList != null && stateInstanceList.size() > 0) {
             stateListToBeCompensated = new ArrayList<>(stateInstanceList.size());
 
-            StateMachine stateMachine = (StateMachine) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE);
-            StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(
+            StateMachine stateMachine = (StateMachine)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE);
+            StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
                 DomainConstants.VAR_NAME_STATEMACHINE_INST);
 
             for (StateInstance stateInstance : stateInstanceList) {

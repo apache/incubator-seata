@@ -15,6 +15,9 @@
  */
 package io.seata.rm.datasource.sql.druid;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
@@ -23,13 +26,11 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
+
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLSelectRecognizer;
 import io.seata.rm.datasource.sql.SQLType;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The type My sql select for update recognizer.
@@ -48,7 +49,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseMySQLRecognizer implemen
      */
     public MySQLSelectForUpdateRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (SQLSelectStatement) ast;
+        this.ast = (SQLSelectStatement)ast;
     }
 
     @Override
@@ -103,7 +104,7 @@ public class MySQLSelectForUpdateRecognizer extends BaseMySQLRecognizer implemen
                 return false;
             }
         };
-        visitor.visit((SQLExprTableSource) tableSource);
+        visitor.visit((SQLExprTableSource)tableSource);
         return sb.toString();
     }
 

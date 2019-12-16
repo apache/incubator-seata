@@ -66,7 +66,7 @@ public class ChoiceStateHandler implements StateHandler {
         }
 
         for (Object choiceEvaluatorObj : choiceEvaluators.keySet()) {
-            Evaluator evaluator = (Evaluator) choiceEvaluatorObj;
+            Evaluator evaluator = (Evaluator)choiceEvaluatorObj;
             if (evaluator.evaluate(context.getVariables())) {
                 context.setVariable(DomainConstants.VAR_NAME_CURRENT_CHOICE, choiceEvaluators.get(evaluator));
                 return;
@@ -77,7 +77,7 @@ public class ChoiceStateHandler implements StateHandler {
     }
 
     public EvaluatorFactory getEvaluatorFactory(ProcessContext context) {
-        StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
+        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
             DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
         return stateMachineConfig.getEvaluatorFactoryManager().getEvaluatorFactory(
             EvaluatorFactoryManager.EVALUATOR_TYPE_DEFAULT);
