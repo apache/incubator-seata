@@ -109,12 +109,29 @@ public class ColumnMeta {
     }
 
     /**
+     * Gets table schema name
+     * @return
+     */
+    protected String getTableSchemaName() {
+        return tableSchemaName;
+    }
+
+    /**
      * Sets table name.
      *
      * @param tableName the table name
      */
     public void setTableName(String tableName) {
         this.tableName = tableName;
+    }
+
+
+    /**
+     * Gets table name
+     * @return
+     */
+    protected String getTableName() {
+        return tableName;
     }
 
     /**
