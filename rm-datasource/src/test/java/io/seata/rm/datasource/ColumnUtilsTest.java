@@ -42,10 +42,7 @@ public class ColumnUtilsTest {
         cols2 = ColumnUtils.delEscape(cols2, ColumnUtils.Escape.STANDARD);
         Assertions.assertEquals("id", cols2.get(0));
 
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            ColumnUtils.delEscape((String) null, ColumnUtils.Escape.MYSQL);
-        });
-
+        Assertions.assertNull(ColumnUtils.delEscape((String) null, ColumnUtils.Escape.MYSQL));
     }
 
     @Test

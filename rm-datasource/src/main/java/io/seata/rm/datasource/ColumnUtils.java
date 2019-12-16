@@ -16,6 +16,7 @@
 package io.seata.rm.datasource;
 
 import com.alibaba.druid.util.JdbcConstants;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 
 import java.util.ArrayList;
@@ -69,18 +70,13 @@ public final class ColumnUtils {
      * @return delete the column list element left and right escape.
      */
     public static List<String> delEscape(List<String> cols, Escape escape) {
-        if (cols == null) {
-            throw new NullPointerException("cols is null");
-        }
-        if (cols.isEmpty()) {
-            return new ArrayList<>();
+        if (CollectionUtils.isEmpty(cols)) {
+            return cols;
         }
         List<String> newCols = new ArrayList<>(cols.size());
         for (int i = 0, len = cols.size(); i < len; i++) {
             String col = cols.get(i);
-            if (col != null && col.charAt(0) == escape.value && col.charAt(col.length() - 1) == escape.value) {
-                col = delEscape(col, escape);
-            }
+            col = delEscape(col, escape);
             newCols.add(col);
         }
         return newCols;
@@ -107,10 +103,7 @@ public final class ColumnUtils {
      * @return
      */
     public static String delEscape(String colName, Escape escape) {
-        if (colName == null) {
-            throw new NullPointerException("colName is null");
-        }
-        if (colName.isEmpty()) {
+        if (colName == null || colName.isEmpty()) {
             return colName;
         }
         if (colName.charAt(0) == escape.value && colName.charAt(colName.length() - 1) == escape.value) {

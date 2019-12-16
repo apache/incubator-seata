@@ -272,8 +272,9 @@ public abstract class AbstractUndoExecutor {
             replace.append("?,");
         }
         // build check sql
-        String checkSQL = String.format(CHECK_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), getDbType(conn)),
-                tableMeta.getEscapePkName(getDbType(conn)), replace.substring(0, replace.length() - 1));
+        String dbType = getDbType(conn);
+        String checkSQL = String.format(CHECK_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), dbType),
+                tableMeta.getEscapePkName(dbType), replace.substring(0, replace.length() - 1));
 
         PreparedStatement statement = null;
         ResultSet checkSet = null;
