@@ -19,12 +19,8 @@ import javax.sql.DataSource;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-
-
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
@@ -330,7 +326,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             }
             DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
 
-            Class<?>[] interfaces = getInterfaces(bean.getClass());
+            Class<?>[] interfaces = SpringProxyUtils.getAllInterfaces(bean);
             return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), interfaces, new InvocationHandler() {
                 @Override
                 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -352,17 +348,5 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
         }
         return super.postProcessAfterInitialization(bean, beanName);
-    }
-
-    private Class<?>[] getInterfaces(Class<?> clazz) {
-        Set<Class<?>> interfaces = new HashSet<>();
-        if (clazz != null) {
-            while (clazz.getName().equalsIgnoreCase(Object.class.getName())) {
-                Class<?>[] clazzInterfaces = clazz.getInterfaces();
-                interfaces.addAll(Arrays.asList(clazzInterfaces));
-                clazz = clazz.getSuperclass();
-            }
-        }
-        return interfaces.toArray(new Class[]{});
     }
 }
