@@ -22,6 +22,6 @@
 - nacos: Initialize script for Nacos
 - zk: Initialize script for ZooKeeper, the script need related script in Zookeeper, you need download yourself. You can modify `zk-params.txt` to change the ZooKeeper server configuration, or input when execute also
 - apollo: Initialize script for Apollo. You can modify `apollo-params.txt` to change the Apollo server configuration, or input when execute also
-- etcd3: Initialize script for Etcd
+- etcd3: Initialize script for Etcd3
 - consul: Initialize script for consul
 

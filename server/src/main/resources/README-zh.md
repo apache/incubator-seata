@@ -22,6 +22,6 @@
 - nacos: 用于向 Nacos 中添加配置
 - zk: 用于向 Zookeeper 中添加配置，脚本依赖 Zookeeper 的相关脚本，需要手动下载；ZooKeeper相关的配置可以写在 `zk-params.txt` 中，也可以在执行的时候输入
 - apollo: 向 Apollo 中添加配置，Apollo 的地址端口等可以写在 `apollo-params.txt`，也可以在执行的时候输入
-- etcd3: 用于向 Etcd 中添加配置
+- etcd3: 用于向 Etcd3 中添加配置
 - consul: 用于向 consul 中添加配置
 
