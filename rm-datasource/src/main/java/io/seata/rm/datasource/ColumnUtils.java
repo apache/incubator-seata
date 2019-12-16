@@ -156,7 +156,14 @@ public final class ColumnUtils {
         if (colName.charAt(0) == escape.value && colName.charAt(colName.length() - 1) == escape.value) {
             return colName;
         }
-        return String.format("%s%s%s", escape.value, colName, escape.value);
+
+        char[] buf = new char[colName.length() + 2];
+        buf[0] = escape.value;
+        buf[buf.length - 1] = escape.value;
+
+        System.arraycopy(colName.toCharArray(), 0, buf, 1, colName.length());
+
+        return new String(buf);
     }
 
     private static boolean isMysqlSeries(String dbType) {
