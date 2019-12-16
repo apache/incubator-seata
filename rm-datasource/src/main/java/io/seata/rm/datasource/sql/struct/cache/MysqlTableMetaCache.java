@@ -79,8 +79,8 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         String defaultTableName = tableNameWithCatalog.length > 1 ? tableNameWithCatalog[1] : tableNameWithCatalog[0];
 
         DatabaseMetaData databaseMetaData = null;
-        try {
-            databaseMetaData = dataSourceProxy.getPlainConnection().getMetaData();
+        try (Connection connection = dataSourceProxy.getPlainConnection()) {
+            databaseMetaData = connection.getMetaData();
         } catch (SQLException e) {
             LOGGER.error("Could not get connection, use default cache key", e.getMessage(), e);
             return cacheKey.append(defaultTableName).toString();
