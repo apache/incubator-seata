@@ -180,16 +180,16 @@ public class SpringProxyUtils {
      * @return
      */
     public static Class<?>[] getAllInterfaces(Object bean) {
-        Set<Class<?>> set = new HashSet<>();
+        Set<Class<?>> interfaces = new HashSet<>();
         if (bean != null) {
             Class<?> clazz = bean.getClass();
             while (!Object.class.getName().equalsIgnoreCase(clazz.getName())) {
                 Class<?>[] clazzInterfaces = clazz.getInterfaces();
-                set.addAll(Arrays.asList(clazzInterfaces));
+                interfaces.addAll(Arrays.asList(clazzInterfaces));
                 clazz = clazz.getSuperclass();
             }
         }
-        return set.toArray(new Class[0]);
+        return interfaces.toArray(new Class[0]);
     }
 
 }
