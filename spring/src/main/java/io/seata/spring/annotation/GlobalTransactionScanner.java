@@ -325,7 +325,6 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 LOGGER.info("Auto proxy of [{}]", beanName);
             }
             DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
-
             Class<?>[] interfaces = SpringProxyUtils.getAllInterfaces(bean);
             return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), interfaces, new InvocationHandler() {
                 @Override
