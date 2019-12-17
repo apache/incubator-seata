@@ -58,5 +58,4 @@ public class UndoProperties {
         this.undoLogTable = undoLogTable;
         return this;
     }
-
 }
