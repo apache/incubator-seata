@@ -53,7 +53,6 @@ client.undo.log.serialization=jackson
 server.undo.log.save.days=7
 server.undo.log.delete.period=86400000
 client.undo.log.table=undo_log
-client.log.exceptionRate=100
 transport.serialization=seata
 transport.compressor=none
 metrics.enabled=false
