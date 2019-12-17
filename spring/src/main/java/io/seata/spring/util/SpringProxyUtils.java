@@ -17,6 +17,9 @@ package io.seata.spring.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AdvisedSupport;
@@ -169,6 +172,24 @@ public class SpringProxyUtils {
         } else {
             return getTargetClass(target);
         }
+    }
+
+    /**
+     * get the all interfaces of bean, if the bean is null, then return empty array
+     * @param bean
+     * @return
+     */
+    public static Class<?>[] getAllInterfaces(Object bean) {
+        Set<Class<?>> interfaces = new HashSet<>();
+        if (bean != null) {
+            Class<?> clazz = bean.getClass();
+            while (!Object.class.getName().equalsIgnoreCase(clazz.getName())) {
+                Class<?>[] clazzInterfaces = clazz.getInterfaces();
+                interfaces.addAll(Arrays.asList(clazzInterfaces));
+                clazz = clazz.getSuperclass();
+            }
+        }
+        return interfaces.toArray(new Class[0]);
     }
 
 }
