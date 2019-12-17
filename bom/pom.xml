@@ -117,6 +117,7 @@
         <junit.version>4.12</junit.version>
         <kryo.version>4.0.2</kryo.version>
         <kryo-serializers.version>0.42</kryo-serializers.version>
+        <hessian.version>4.0.63</hessian.version>
     </properties>
 
     <dependencyManagement>
@@ -441,6 +442,11 @@
                 <groupId>de.javakaffee</groupId>
                 <artifactId>kryo-serializers</artifactId>
                 <version>${kryo-serializers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.caucho</groupId>
+                <artifactId>hessian</artifactId>
+                <version>${hessian.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-dbcp</groupId>
