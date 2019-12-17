@@ -346,9 +346,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected TableRecords buildTableRecords(List<Object> pkValues) throws SQLException {
         TableRecords afterImage;
         String pk = getTableMeta().getPkName();
-        StringJoiner pkValuesJoiner =
-            new StringJoiner(" , ", "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (",
-            ")");
+        StringJoiner pkValuesJoiner = new StringJoiner(" , ",
+            "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (", ")");
         for (Object pkValue : pkValues) {
             pkValuesJoiner.add("?");
         }
