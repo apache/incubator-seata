@@ -37,7 +37,6 @@ import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
 /**
@@ -347,9 +346,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected TableRecords buildTableRecords(List<Object> pkValues) throws SQLException {
         TableRecords afterImage;
         String pk = getTableMeta().getPkName();
-        String tableName = KeywordCheckerFactory.getKeywordChecker(getDbType()).checkAndReplace(
-            getTableMeta().getTableName());
-        StringJoiner pkValuesJoiner = new StringJoiner(" , ", "SELECT * FROM " + tableName + " WHERE " + pk + " in (",
+        StringJoiner pkValuesJoiner =
+            new StringJoiner(" , ", "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (",
             ")");
         for (Object pkValue : pkValues) {
             pkValuesJoiner.add("?");
