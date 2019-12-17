@@ -56,7 +56,8 @@ for line in $(cat apollo-params.txt); do
 	esac
 done
 
-if [[ -z ${portalAddr} || -z ${env} || -z ${appId} || -z ${clusterName} || -z ${namespaceName} || -z ${dataChangeCreatedBy} || -z ${releasedBy} || -z ${token} ]]; then
+if [[ -z ${portalAddr} || -z ${env} || -z ${appId} || -z ${clusterName} || -z ${namespaceName}
+      || -z ${dataChangeCreatedBy} || -z ${releasedBy} || -z ${token} ]]; then
 	echo "Incomplete parameters, please fill in the complete parameters: portalAddr:$portalAddr,
             env:$env, appId:$appId, clusterName:$clusterName, namespaceName:$namespaceName,
             dataChangeCreatedBy:$dataChangeCreatedBy, releasedBy:$releasedBy, token:$token"
@@ -77,37 +78,51 @@ echo "ReleasedBy is ${releasedBy}"
 echo "Token is ${token}"
 
 failCount=0
+tempLog=$(mktemp -t apollo-config.log)
 function addConfig() {
-	result=$(curl -X POST -H ${1} -H ${2} -d ${3} "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/items")
-	if [[ ${result} =~ "400" || ${result} =~ "401" || ${result} =~ "403" || ${result} =~ "404" || ${result} =~ "405" || ${result} =~ "500" || ! ${result} =~ "{" ]]; then
-		((failCount++))
+	curl -X POST -H ${1} -H ${2} -d ${3} "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/items" >${tempLog} 2>/dev/null
+	if [[ $(cat ${tempLog}) =~ ":401" || $(cat ${tempLog}) =~ ":403"
+	    || $(cat ${tempLog}) =~ ":404" || $(cat ${tempLog}) =~ ":405"
+	      || $(cat ${tempLog}) =~ ":500" || ! $(cat ${tempLog}) =~ "{" ]]; then
+	  echo "set" "${9}" "=" "${10} >>> fail"
+		(( failCount++ ))
+	else
+	  echo "set" "${9}" "=" "${10} >>> success"
 	fi
-	echo ${result}
 }
 
 function publishConfig() {
-	result=$(curl -X POST -H ${1} -H ${2} -d ${3} "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/releases")
-	echo ${result}
+	curl -X POST -H ${1} -H ${2} -d ${3} "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/releases" >${tempLog} 2>/dev/null
+	if [[ $(cat ${tempLog}) =~ ":401" || $(cat ${tempLog}) =~ ":403"
+	    || $(cat ${tempLog}) =~ ":404" || $(cat ${tempLog}) =~ ":405"
+	      || $(cat ${tempLog}) =~ ":500" || ! $(cat ${tempLog}) =~ "{" ]]; then
+	  echo "Publish fail"
+	  exit 1
+	else
+	  echo "Publish successfully, please start seata-server."
+	fi
 }
 
 count=0
 for line in $(cat $(dirname "$PWD")/config.txt); do
-	((count++))
+	(( count++ ))
 	key=${line%%=*}
 	value=${line#*=}
-	echo "\r\n set" "${key}" "=" "${value}"
 	body="{\"key\":\"${key}\",\"value\":\"${value}\",\"comment\":\"\",\"dataChangeCreatedBy\":\"${dataChangeCreatedBy}\"}"
-	echo "$body"
-	addConfig ${contentType} ${authorization} ${body} ${portalAddr} ${env} ${appId} ${clusterName} ${namespaceName}
+	addConfig ${contentType} ${authorization} ${body} ${portalAddr} ${env} ${appId} ${clusterName} ${namespaceName} ${key} ${value}
 done
-echo "=================================================================="
-echo " Init params success, total count:$count, fail count:$failCount "
-echo "=================================================================="
 
-read -p "Publish now, y/n: " result
-if [[ ${result} == "y" ]]; then
-	publishConfig ${contentType} ${authorization} ${publishBody} ${portalAddr} ${env} ${appId} ${clusterName} ${namespaceName}
+echo "========================================================================="
+echo "  Parameters initialized successfully, total-count:$count, failure-count:$failCount "
+echo "========================================================================="
+
+if [[ $failCount -eq 0 ]]; then
+  read -p "Publish now, y/n: " result
+  if [[ ${result} == "y" ]]; then
+    publishConfig ${contentType} ${authorization} ${publishBody} ${portalAddr} ${env} ${appId} ${clusterName} ${namespaceName}
+  else
+    echo "Remember to publish later..."
+  fi
 else
-	echo "Remember to publish later..."
+  echo "init apollo config fail."
 fi
-exit 0

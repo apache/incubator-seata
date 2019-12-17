@@ -14,34 +14,43 @@
 # limitations under the License.
 
 if [[ $# != 1 ]]; then
-	echo "USAGE: $0 consulAddr"
-	exit 1
+ echo "USAGE: $0 consulAddr"
+ exit 1
 fi
 consulAddr=$1
 contentType="content-type:application/json;charset=UTF-8"
 echo "Set consulAddr=$consulAddr"
 
-error=0
+failCount=0
+tempLog=$(mktemp -t consul-config.log)
+function addConfig() {
+  curl -X PUT -H ${1} -d ${2} "http://$3/v1/kv/$4" >${tempLog} 2>/dev/null
+  if [[ -z $(cat ${tempLog}) ]]; then
+    echo "Please check the cluster status."
+    exit 1
+  fi
+  if [[ $(cat ${tempLog}) =~ "true" ]]; then
+    echo "Set" "${2}" "=" "${4} >>> success"
+  else
+    echo "Set" "${2}" "=" "${4} >>> fail"
+    (( failCount++ ))
+ fi
+}
+
+count=0
 for line in $(cat $(dirname "$PWD")/config.txt); do
-    key=${line%%=*}
-	value=${line#*=}
-	echo "Set" "${key}" "=" "${value}"
-    result=$(curl -X PUT -H ${contentType} -d ${value} "http://$consulAddr/v1/kv/$key")
-    echo "Response:$result"
-
-    if [[ -z ${result} ]]; then
-        echo "Please check the cluster status."
-        exit 1
-    fi
-
-    if [[ ! ${result} =~ "true" ]]; then
-		(( error ++ ))
-	fi
+  (( count++ ))
+  key=${line%%=*}
+  value=${line#*=}
+  addConfig ${contentType} ${value} ${consulAddr} ${key}
 done
 
-if [[ ${error} -eq 0 ]]; then
-	echo "Init consul config finished, please start seata-server."
+echo "========================================================================="
+echo "  Parameters initialized successfully, total-count:$count, failure-count:$failCount "
+echo "========================================================================="
+
+if [[ ${failCount} -eq 0 ]]; then
+  echo "Init consul config finished, please start seata-server."
 else
-	echo "Init consul config fail."
+  echo "Init consul config fail."
 fi
-exit 0

@@ -23,33 +23,38 @@ etcd3Addr=$1
 contentType="content-type:application/json;charset=UTF-8"
 echo "Set etcd3Addr=$etcd3Addr"
 
-error=0
-for line in $(cat $(dirname "$PWD")/config.txt); do
-    key=${line%%=*}
-	value=${line#*=}
-	echo "Set" "${key}" "=" "${value}"
+failCount=0
+tempLog=$(mktemp -t etcd-config.log)
+function addConfig() {
+  curl -X POST -H ${1} -d "{\"key\": \"$2\", \"value\": \"$3\"}" "http://$4/v3/kv/put" >${tempLog} 2>/dev/null
+  if [[ -z $(cat ${tempLog}) ]]; then
+    echo "Please check the cluster status."
+    exit 1
+  fi
+  if [[ $(cat ${tempLog}) =~ "error" || $(cat ${tempLog}) =~ "code" ]]; then
+    echo "Set" "${5}" "=" "${6} >>> fail"
+    (( failCount++ ))
+  else
+    echo "Set" "${5}" "=" "${6} >>> success"
+ fi
+}
 
+count=0
+for line in $(cat $(dirname "$PWD")/config.txt); do
+  (( count++ ))
+  key=${line%%=*}
+	value=${line#*=}
 	keyBase64=$(printf "%s""$key" | base64)
 	valueBase64=$(printf "%s""$value" | base64)
-	echo "base64 >>>" "${keyBase64}" "=" "${valueBase64}"
-
-    result=$(curl -X POST -H ${contentType} -d "{\"key\": \"$keyBase64\", \"value\": \"$valueBase64\"}" "http://$etcd3Addr/v3/kv/put")
-
-    echo "Response:$result"
-
-    if [[ -z ${result} ]]; then
-        echo "Please check the cluster status."
-        exit 1
-    fi
-
-    if [[ ${result} =~ "error" || ${result} =~ "code" ]]; then
-		(( error++ ))
-	fi
+	addConfig ${contentType} ${keyBase64} ${valueBase64} ${etcd3Addr} ${key} ${value}
 done
 
-if [[ ${error} -eq 0 ]]; then
+echo "========================================================================="
+echo "  Parameters initialized successfully, total-count:$count, failure-count:$failCount "
+echo "========================================================================="
+
+if [[ ${failCount} -eq 0 ]]; then
 	echo "Init etcd3 config finished, please start seata-server."
 else
 	echo "Init etcd3 config fail."
 fi
-exit 0

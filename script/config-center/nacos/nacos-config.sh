@@ -20,32 +20,38 @@ fi
 
 nacosAddr=$1
 echo "set nacosAddr=$nacosAddr"
-error=0
 contentType="content-type:application/json;charset=UTF-8"
 
+failCount=0
+tempLog=$(mktemp -t nacos-config.log)
+function addConfig() {
+  curl -X POST -H ${1} "http://$2/nacos/v1/cs/configs?dataId=$3&group=SEATA_GROUP&content=$4" >${tempLog} 2>/dev/null
+  if [[ -z $(cat ${tempLog}) ]]; then
+    echo "Please check the cluster status."
+    exit 1
+  fi
+  if [[ $(cat ${tempLog}) =~ "true" ]]; then
+    echo "Set" "${3}" "=" "${4} >>> success"
+  else
+    echo "Set" "${3}" "=" "${4} >>> fail"
+    (( failCount++ ))
+  fi
+}
+
+count=0
 for line in $(cat $(dirname "$PWD")/config.txt); do
+  (( count++ ))
 	key=${line%%=*}
 	value=${line#*=}
-	echo "\r\n set "${key}" = "${value}
-
-	result=$(curl -X POST -H ${contentType} "http://$nacosAddr/nacos/v1/cs/configs?dataId=$key&group=SEATA_GROUP&content=$value")
-
-    if [[ -z ${result} ]]; then
-        echo "Please check the cluster status."
-        exit 1
-    fi
-
-	if [[ "$result"x == "true"x ]]; then
-		echo "\033[42;37m $result \033[0m"
-	else
-		echo "\033[41;37 $result \033[0m"
-		(( error ++ ))
-	fi
+	addConfig ${contentType} ${nacosAddr} ${key} ${value}
 done
 
-if [[ ${error} -eq 0 ]]; then
+echo "========================================================================="
+echo "  Parameters initialized successfully, total-count:$count, failure-count:$failCount "
+echo "========================================================================="
+
+if [[ ${failCount} -eq 0 ]]; then
 	echo "\r\n\033[42;37m init nacos config finished, please start seata-server. \033[0m"
 else
 	echo "\r\n\033[41;33m init nacos config fail. \033[0m"
 fi
-exit 0

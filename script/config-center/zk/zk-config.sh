@@ -90,4 +90,3 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 	echo "Set" "${key}" "=" "${value}"
 	create_subNode ${zkAddr} ${zkHome} ${key} ${value}
 done
-exit 0
