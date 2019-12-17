@@ -175,7 +175,7 @@ public class SpringProxyUtils {
     }
 
     /**
-     * get the all interfaces of  bean, if the bean is null , then return empty array
+     * get the all interfaces of bean, if the bean is null, then return empty array
      * @param bean
      * @return
      */
