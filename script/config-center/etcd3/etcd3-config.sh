@@ -26,16 +26,18 @@ echo "Set etcd3Addr=$etcd3Addr"
 failCount=0
 tempLog=$(mktemp -t etcd-config.log)
 function addConfig() {
-  curl -X POST -H ${1} -d "{\"key\": \"$2\", \"value\": \"$3\"}" "http://$4/v3/kv/put" >${tempLog} 2>/dev/null
+  keyBase64=$(printf "%s""$2" | base64)
+	valueBase64=$(printf "%s""$3" | base64)
+  curl -X POST -H ${1} -d "{\"key\": \"$keyBase64\", \"value\": \"$valueBase64\"}" "http://$4/v3/kv/put" >${tempLog} 2>/dev/null
   if [[ -z $(cat ${tempLog}) ]]; then
     echo "Please check the cluster status."
     exit 1
   fi
   if [[ $(cat ${tempLog}) =~ "error" || $(cat ${tempLog}) =~ "code" ]]; then
-    echo "Set" "${5}" "=" "${6} >>> fail"
+    echo "Set" "${2}" "=" "${3} >>> fail"
     (( failCount++ ))
   else
-    echo "Set" "${5}" "=" "${6} >>> success"
+    echo "Set" "${2}" "=" "${3} >>> success"
  fi
 }
 
@@ -44,9 +46,7 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
   (( count++ ))
   key=${line%%=*}
 	value=${line#*=}
-	keyBase64=$(printf "%s""$key" | base64)
-	valueBase64=$(printf "%s""$value" | base64)
-	addConfig ${contentType} ${keyBase64} ${valueBase64} ${etcd3Addr} ${key} ${value}
+	addConfig ${contentType} ${key} ${value} ${etcd3Addr}
 done
 
 echo "========================================================================="

@@ -14,8 +14,8 @@
 # limitations under the License.
 
 if [[ $# != 1 ]]; then
- echo "USAGE: $0 consulAddr"
- exit 1
+  echo "USAGE: $0 consulAddr"
+  exit 1
 fi
 consulAddr=$1
 contentType="content-type:application/json;charset=UTF-8"
