@@ -1,6 +1,7 @@
 transport.type=TCP
 transport.server=NIO
 transport.heartbeat=true
+transport.enable-client-batch-send-request=false
 transport.thread-factory.boss-thread-prefix=NettyBoss
 transport.thread-factory.worker-thread-prefix=NettyServerNIOWorker
 transport.thread-factory.server-executor-thread-prefix=NettyServerBizHandler
