@@ -36,7 +36,7 @@ for line in $(cat zk-params.txt); do
 done
 
 if [[ -z ${zkAddr} || -z ${zkHome} ]]; then
-	echo -e " \033[31m Incomplete parameters, please fill in the complete parameters: zkAddr:$zkAddr, zkHome:$zkHome \033[0m"
+	echo " \033[31m Incomplete parameters, please fill in the complete parameters: zkAddr:$zkAddr, zkHome:$zkHome \033[0m"
 	exit 1
 fi
 
@@ -66,10 +66,10 @@ function delete_node() {
 check_node ${zkAddr} ${zkHome}
 
 if [[ $(cat ${tempLog}) =~ "No such file or directory" ]]; then
-	echo -e "\033[31m ZK home is error, please enter correct zk home! \033[0m"
+	echo "\033[31m ZK home is error, please enter correct zk home! \033[0m"
 	exit 1
 elif [[ $(cat ${tempLog}) =~ "Exception" ]]; then
-	echo -e "\033[31m Exception error, please check zk cluster status or if the zk address is entered correctly! \033[0m"
+	echo "\033[31m Exception error, please check zk cluster status or if the zk address is entered correctly! \033[0m"
 	exit 1
 elif [[ $(cat ${tempLog}) =~ "Node does not exist" ]]; then
 	create_node ${zkAddr} ${zkHome}
