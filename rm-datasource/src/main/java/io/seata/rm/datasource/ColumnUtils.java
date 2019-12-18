@@ -161,9 +161,7 @@ public final class ColumnUtils {
         buf[0] = escape.value;
         buf[buf.length - 1] = escape.value;
 
-        for (int i = 0; i < colName.length(); i++) {
-            buf[i + 1] = colName.charAt(i);
-        }
+        colName.getChars(0,colName.length(),buf,1);
 
         return new String(buf);
     }
