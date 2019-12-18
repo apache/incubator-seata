@@ -34,10 +34,10 @@ function addConfig() {
     exit 1
   fi
   if [[ $(cat ${tempLog}) =~ "error" || $(cat ${tempLog}) =~ "code" ]]; then
-    echo "Set" "${2}" "=" "${3} >>> fail"
+    echo "Set $2=$3 >>> failure"
     (( failCount++ ))
   else
-    echo "Set" "${2}" "=" "${3} >>> success"
+    echo "Set $2=$3 >>> successfully"
  fi
 }
 

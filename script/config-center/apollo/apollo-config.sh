@@ -84,10 +84,10 @@ function addConfig() {
 	if [[ $(cat ${tempLog}) =~ ":401" || $(cat ${tempLog}) =~ ":403"
 	    || $(cat ${tempLog}) =~ ":404" || $(cat ${tempLog}) =~ ":405"
 	      || $(cat ${tempLog}) =~ ":500" || ! $(cat ${tempLog}) =~ "{" ]]; then
-	  echo "set" "${9}" "=" "${10} >>> fail"
+	  echo "set $9=${10} >>> failure"
 		(( failCount++ ))
 	else
-	  echo "set" "${9}" "=" "${10} >>> success"
+	  echo "set $9=${10} >>> successfully"
 	fi
 }
 
