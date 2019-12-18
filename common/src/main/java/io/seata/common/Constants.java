@@ -20,7 +20,7 @@ import java.nio.charset.Charset;
 /**
  * The type Constants.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class Constants {
     /**

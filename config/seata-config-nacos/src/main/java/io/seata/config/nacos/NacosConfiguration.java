@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Nacos configuration.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class NacosConfiguration extends AbstractConfiguration {
     private static volatile NacosConfiguration instance;

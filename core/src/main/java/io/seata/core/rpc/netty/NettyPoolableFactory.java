@@ -29,7 +29,7 @@ import java.net.InetSocketAddress;
 /**
  * The type Netty key poolable factory.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoolKey, Channel> {
 

@@ -18,7 +18,7 @@ package io.seata.common;
 /**
  * The type Xid.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class XID {
 

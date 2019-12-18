@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Rpc client handler.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class RpcClientHandler extends ChannelDuplexHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcClientHandler.class);

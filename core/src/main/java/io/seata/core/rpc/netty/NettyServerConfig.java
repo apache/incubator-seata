@@ -24,7 +24,7 @@ import io.seata.core.constants.ConfigurationKeys;
 /**
  * The type Netty server config.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class NettyServerConfig extends NettyBaseConfig {
 

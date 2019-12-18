@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 /**
  * The type Netty base config test.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class NettyBaseConfigTest {
     /**

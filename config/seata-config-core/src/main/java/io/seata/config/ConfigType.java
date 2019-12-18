@@ -18,7 +18,7 @@ package io.seata.config;
 /**
  * The enum Config type.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public enum ConfigType {
     /**

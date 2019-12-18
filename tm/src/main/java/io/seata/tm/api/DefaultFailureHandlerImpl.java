@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Default failure handler.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class DefaultFailureHandlerImpl implements FailureHandler {
 

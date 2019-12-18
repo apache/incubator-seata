@@ -20,7 +20,7 @@ import io.seata.core.protocol.AbstractMessage;
 /**
  * The type Netty pool key.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class NettyPoolKey {
 

@@ -19,7 +19,7 @@ package io.seata.config;
 /**
  * The type Configuration change event.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class ConfigurationChangeEvent {
 

@@ -44,7 +44,7 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 /**
  * The type Rm rpc client.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author zhaojun
  */
 @Sharable

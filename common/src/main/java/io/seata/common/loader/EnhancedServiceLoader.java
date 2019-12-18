@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Enhanced service loader.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class EnhancedServiceLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancedServiceLoader.class);

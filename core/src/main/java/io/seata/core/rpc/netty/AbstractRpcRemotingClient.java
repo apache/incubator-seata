@@ -52,7 +52,7 @@ import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 /**
  * The type Rpc remoting client.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author zhaojun
  */
 public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting

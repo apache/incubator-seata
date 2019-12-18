@@ -20,7 +20,7 @@ import io.netty.channel.Channel;
 /**
  * The interface Channel event listener.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public interface ChannelEventListener {
     /**

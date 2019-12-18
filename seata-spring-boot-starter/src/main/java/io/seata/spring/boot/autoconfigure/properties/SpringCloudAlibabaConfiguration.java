@@ -26,7 +26,7 @@ import org.springframework.context.ApplicationContextAware;
 /**
  * The type Spring cloud alibaba configuration.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 @ConfigurationProperties(prefix = StarterConstants.SEATA_SPRING_CLOUD_ALIBABA_PREFIX)
 public class SpringCloudAlibabaConfiguration implements ApplicationContextAware {

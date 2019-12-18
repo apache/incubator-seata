@@ -20,7 +20,7 @@ import java.io.Serializable;
 /**
  * The type Register rm request.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class RegisterRMRequest extends AbstractIdentifyRequest implements Serializable {
 

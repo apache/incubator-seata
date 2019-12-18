@@ -18,7 +18,7 @@ package io.seata.core.constants;
 /**
  * The type Configuration keys.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class ConfigurationKeys {
 

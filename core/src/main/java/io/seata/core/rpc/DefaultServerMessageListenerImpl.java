@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Default server message listener.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultServerMessageListenerImpl.class);

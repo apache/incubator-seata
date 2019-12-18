@@ -20,7 +20,7 @@ import java.lang.reflect.Method;
 /**
  * The type Method desc.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class MethodDesc {
     private GlobalTransactional transactionAnnotation;

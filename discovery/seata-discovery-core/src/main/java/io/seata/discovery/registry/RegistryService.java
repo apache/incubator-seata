@@ -25,7 +25,7 @@ import java.util.List;
  * The interface Registry service.
  *
  * @param <T> the type parameter
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public interface RegistryService<T> {
 

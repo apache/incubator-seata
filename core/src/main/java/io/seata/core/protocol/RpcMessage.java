@@ -21,7 +21,7 @@ import java.util.Map;
 /**
  * The type Rpc message.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class RpcMessage {
 

@@ -28,7 +28,7 @@ import java.util.List;
 /**
  * The type File registry service.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class FileRegistryServiceImpl implements RegistryService<ConfigChangeListener> {
     private static volatile FileRegistryServiceImpl instance;

@@ -18,7 +18,7 @@ package io.seata.core.protocol;
 /**
  * The interface Merge message.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public interface MergeMessage {
 }

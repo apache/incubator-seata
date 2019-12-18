@@ -23,7 +23,7 @@ import java.time.Duration;
 /**
  * The type Abstract configuration.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public abstract class AbstractConfiguration implements Configuration {
 

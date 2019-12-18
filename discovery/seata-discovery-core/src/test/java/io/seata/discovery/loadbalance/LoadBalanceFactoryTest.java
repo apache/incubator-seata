@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 /**
  * The type Load balance factory test.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class LoadBalanceFactoryTest {
 

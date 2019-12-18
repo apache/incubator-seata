@@ -23,7 +23,7 @@ import io.seata.common.loader.LoadLevel;
 /**
  * The type Round robin load balance.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 @LoadLevel(name = "RoundRobinLoadBalance", order = 1)
 public class RoundRobinLoadBalance extends AbstractLoadBalance {

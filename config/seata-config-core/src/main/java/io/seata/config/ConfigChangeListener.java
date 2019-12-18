@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutorService;
 /**
  * The interface Config change listener.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public interface ConfigChangeListener {
 

@@ -20,7 +20,7 @@ import io.seata.core.protocol.RpcMessage;
 /**
  * The interface Client message listener.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public interface ClientMessageListener {
     /**

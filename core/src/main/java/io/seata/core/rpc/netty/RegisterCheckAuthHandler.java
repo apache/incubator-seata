@@ -21,7 +21,7 @@ import io.seata.core.protocol.RegisterTMRequest;
 /**
  * The interface Register check auth handler.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public interface RegisterCheckAuthHandler {
 

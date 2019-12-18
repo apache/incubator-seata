@@ -20,7 +20,7 @@ import io.seata.common.loader.EnhancedServiceLoader;
 /**
  * The type Load balance factory.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class LoadBalanceFactory {
 

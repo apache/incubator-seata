@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * The type channel manager.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class ChannelManager {
 

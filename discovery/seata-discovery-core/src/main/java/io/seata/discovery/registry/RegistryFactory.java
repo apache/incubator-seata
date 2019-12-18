@@ -28,7 +28,7 @@ import java.util.Objects;
 /**
  * The type Registry factory.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class RegistryFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(RegistryFactory.class);

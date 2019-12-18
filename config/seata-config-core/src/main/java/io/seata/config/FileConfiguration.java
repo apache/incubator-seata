@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type FileConfiguration.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class FileConfiguration extends AbstractConfiguration {
 

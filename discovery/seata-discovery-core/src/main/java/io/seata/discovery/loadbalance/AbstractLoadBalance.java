@@ -22,7 +22,7 @@ import io.seata.common.util.CollectionUtils;
 /**
  * The type Abstract load balance.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public abstract class AbstractLoadBalance implements LoadBalance {
 

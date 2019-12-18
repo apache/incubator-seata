@@ -44,7 +44,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Rpc remoting server.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author xingfudeshi@gmail.com
  */
 public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements RemotingServer {

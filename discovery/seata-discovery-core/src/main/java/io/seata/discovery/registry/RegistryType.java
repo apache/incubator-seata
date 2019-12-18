@@ -20,7 +20,7 @@ import io.seata.common.exception.NotSupportYetException;
 /**
  * The enum Registry type.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public enum RegistryType {
     /**

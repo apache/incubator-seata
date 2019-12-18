@@ -28,7 +28,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * The type Config future.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class ConfigFuture {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigFuture.class);

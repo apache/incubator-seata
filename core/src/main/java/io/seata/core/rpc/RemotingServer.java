@@ -18,7 +18,7 @@ package io.seata.core.rpc;
 /**
  * The interface Remoting server.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public interface RemotingServer extends RemotingService {
 }

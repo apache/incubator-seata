@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * The interface Load balance.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public interface LoadBalance {
 

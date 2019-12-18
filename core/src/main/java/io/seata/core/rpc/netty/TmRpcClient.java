@@ -39,7 +39,7 @@ import java.util.function.Function;
 /**
  * The type Rpc client.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author zhaojun
  */
 @Sharable

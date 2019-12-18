@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The type Server test.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class ServerTest {
 

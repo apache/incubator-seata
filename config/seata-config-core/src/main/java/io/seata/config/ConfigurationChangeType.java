@@ -19,7 +19,7 @@ package io.seata.config;
 /**
  * The enum Configuration change type.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public enum ConfigurationChangeType {
     /**
