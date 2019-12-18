@@ -17,6 +17,7 @@ package io.seata.rm.datasource.undo.mysql;
 
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.util.BlobUtils;
+import io.seata.common.util.IOUtil;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogParser;
@@ -54,7 +55,6 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
         return JdbcConstants.MYSQL;
     }
 
-
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
         PreparedStatement deletePST = null;
@@ -73,9 +73,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
             }
             throw (SQLException) e;
         } finally {
-            if (deletePST != null) {
-                deletePST.close();
-            }
+            IOUtil.close(deletePST);
         }
     }
 
@@ -108,9 +106,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
             }
             throw (SQLException) e;
         } finally {
-            if (pst != null) {
-                pst.close();
-            }
+            IOUtil.close(pst);
         }
     }
 

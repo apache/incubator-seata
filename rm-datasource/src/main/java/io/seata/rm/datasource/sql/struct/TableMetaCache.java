@@ -41,4 +41,11 @@ public interface TableMetaCache {
      */
     void refresh(DataSourceProxy dataSourceProxy);
 
+    /**
+     * Get the SQL type of the current TableMetaCache
+     *
+     * @return the db type string
+     */
+    String getDbType();
+
 }

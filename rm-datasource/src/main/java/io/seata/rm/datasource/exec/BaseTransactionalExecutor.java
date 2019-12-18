@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.exec;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ColumnUtils;
@@ -323,15 +324,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             }
             tableRecords = TableRecords.buildRecords(tableMeta, rs);
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (st != null) {
-                st.close();
-            }
-            if (ps != null) {
-                ps.close();
-            }
+            IOUtil.close(rs, st, ps);
         }
         return tableRecords;
     }
@@ -363,12 +356,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             afterImage = TableRecords.buildRecords(getTableMeta(), rs);
 
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (ps != null) {
-                ps.close();
-            }
+            IOUtil.close(rs, ps);
         }
         return afterImage;
     }

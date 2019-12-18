@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import io.seata.common.util.IOUtil;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLUpdateRecognizer;
@@ -104,12 +105,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             afterImage = TableRecords.buildRecords(tmeta, rs);
 
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (pst != null) {
-                pst.close();
-            }
+            IOUtil.close(rs, pst);
         }
         return afterImage;
     }

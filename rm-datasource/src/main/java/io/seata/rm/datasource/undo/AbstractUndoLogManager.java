@@ -18,6 +18,7 @@ package io.seata.rm.datasource.undo;
 import io.seata.common.Constants;
 import io.seata.common.util.BlobUtils;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.IOUtil;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.core.constants.ConfigurationKeys;
@@ -100,13 +101,6 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     }
 
     /**
-     * get db type
-     *
-     * @return the db type
-     */
-    public abstract String getDbType();
-
-    /**
      * Delete undo log.
      *
      * @param xid      the xid
@@ -128,9 +122,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             }
             throw (SQLException)e;
         } finally {
-            if (deletePST != null) {
-                deletePST.close();
-            }
+            IOUtil.close(deletePST);
         }
     }
 
@@ -169,9 +161,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             }
             throw (SQLException)e;
         } finally {
-            if (deletePST != null) {
-                deletePST.close();
-            }
+            IOUtil.close(deletePST);
         }
 
     }
@@ -302,7 +292,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                             Collections.reverse(sqlUndoLogs);
                         }
                         for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
-                            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy).getTableMeta(
+                            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy.getDbType()).getTableMeta(
                                 dataSourceProxy, sqlUndoLog.getTableName());
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(

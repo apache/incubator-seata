@@ -16,27 +16,20 @@
 package io.seata.rm.datasource.sql.struct.cache;
 
 import com.alibaba.druid.util.JdbcConstants;
-
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.IOUtil;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 /**
  * The type Table meta cache.
@@ -48,27 +41,6 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
     private static final Logger LOGGER = LoggerFactory.getLogger(MysqlTableMetaCache.class);
 
     private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-
-    private static volatile TableMetaCache tableMetaCache = null;
-
-    private MysqlTableMetaCache() {
-    }
-
-    /**
-     * get instance of type MySQL keyword checker
-     *
-     * @return instance
-     */
-    public static TableMetaCache getInstance() {
-        if (tableMetaCache == null) {
-            synchronized (MysqlTableMetaCache.class) {
-                if (tableMetaCache == null) {
-                    tableMetaCache = new MysqlTableMetaCache();
-                }
-            }
-        }
-        return tableMetaCache;
-    }
 
     @Override
     protected String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
@@ -124,15 +96,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             throw new SQLException("Failed to fetch schema of " + tableName, e);
 
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
+            IOUtil.close(rs, stmt, conn);
         }
     }
 
@@ -223,14 +187,13 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                 throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
             }
         } finally {
-            if (rsColumns != null) {
-                rsColumns.close();
-            }
-            if (rsIndex != null) {
-                rsIndex.close();
-            }
+            IOUtil.close(rsColumns, rsIndex);
         }
         return tm;
     }
 
+    @Override
+    public String getDbType() {
+        return JdbcConstants.MYSQL;
+    }
 }

@@ -15,17 +15,17 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
 
 import javax.sql.DataSource;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -37,27 +37,6 @@ import java.sql.SQLException;
  * @author ygy
  */
 public class OracleTableMetaCache extends AbstractTableMetaCache {
-
-    private static volatile TableMetaCache tableMetaCache = null;
-
-    private OracleTableMetaCache() {
-    }
-
-    /**
-     * get instance of type MySQL keyword checker
-     *
-     * @return instance
-     */
-    public static TableMetaCache getInstance() {
-        if (tableMetaCache == null) {
-            synchronized (OracleTableMetaCache.class) {
-                if (tableMetaCache == null) {
-                    tableMetaCache = new OracleTableMetaCache();
-                }
-            }
-        }
-        return tableMetaCache;
-    }
 
     @Override
     protected String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
@@ -95,12 +74,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
             throw new SQLException("Failed to fetch schema of " + tableName, e);
 
         } finally {
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
+            IOUtil.close(stmt, conn);
         }
     }
 
@@ -187,18 +161,14 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                 throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
             }
         } finally {
-            if (rsColumns != null) {
-                rsColumns.close();
-            }
-            if (rsIndex != null) {
-                rsIndex.close();
-            }
-            if (rsPrimary != null) {
-                rsPrimary.close();
-            }
+            IOUtil.close(rsColumns, rsIndex, rsPrimary);
         }
 
         return tm;
     }
 
+    @Override
+    public String getDbType() {
+        return JdbcConstants.ORACLE;
+    }
 }

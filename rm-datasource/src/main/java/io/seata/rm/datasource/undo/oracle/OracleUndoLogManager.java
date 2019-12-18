@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo.oracle;
 
 import com.alibaba.druid.util.JdbcConstants;
+import io.seata.common.util.IOUtil;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogParser;
 import org.slf4j.Logger;
@@ -66,9 +67,7 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
             }
             throw (SQLException) e;
         } finally {
-            if (deletePST != null) {
-                deletePST.close();
-            }
+            IOUtil.close(deletePST);
         }
     }
 
@@ -103,9 +102,7 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
             }
             throw (SQLException) e;
         } finally {
-            if (pst != null) {
-                pst.close();
-            }
+            IOUtil.close(pst);
         }
     }
 
