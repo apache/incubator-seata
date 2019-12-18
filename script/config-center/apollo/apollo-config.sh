@@ -50,7 +50,7 @@ for line in $(cat apollo-params.txt); do
 		token=${value}
 		;;
 	*)
-		echo "Invalid parameter，please refer to apollo-params.txt"
+		echo "\033[31m Invalid parameter，please refer to apollo-params.txt \033[0m"
 		exit 1
 		;;
 	esac
@@ -58,9 +58,9 @@ done
 
 if [[ -z ${portalAddr} || -z ${env} || -z ${appId} || -z ${clusterName} || -z ${namespaceName}
       || -z ${dataChangeCreatedBy} || -z ${releasedBy} || -z ${token} ]]; then
-	echo "Incomplete parameters, please fill in the complete parameters: portalAddr:$portalAddr,
+	echo "\033[31m Incomplete parameters, please fill in the complete parameters: portalAddr:$portalAddr,
             env:$env, appId:$appId, clusterName:$clusterName, namespaceName:$namespaceName,
-            dataChangeCreatedBy:$dataChangeCreatedBy, releasedBy:$releasedBy, token:$token"
+            dataChangeCreatedBy:$dataChangeCreatedBy, releasedBy:$releasedBy, token:$token \033[0m"
 	exit 1
 fi
 
@@ -81,25 +81,27 @@ failCount=0
 tempLog=$(mktemp -t apollo-config.log)
 function addConfig() {
 	curl -X POST -H ${1} -H ${2} -d ${3} "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/items" >${tempLog} 2>/dev/null
-	if [[ $(cat ${tempLog}) =~ ":401" || $(cat ${tempLog}) =~ ":403"
-	    || $(cat ${tempLog}) =~ ":404" || $(cat ${tempLog}) =~ ":405"
-	      || $(cat ${tempLog}) =~ ":500" || ! $(cat ${tempLog}) =~ "{" ]]; then
-	  echo "set $9=${10} >>> failure"
+	log=$(cat ${tempLog})
+	if [[ ${log} =~ ":401" || ${log} =~ ":403"
+	    || ${log} =~ ":404" || ${log} =~ ":405"
+	      || ${log} =~ ":500" || ! ${log} =~ "{" ]]; then
+	  echo "set $9=${10}\033[31m failure \033[0m"
 		(( failCount++ ))
 	else
-	  echo "set $9=${10} >>> successfully"
+	  echo "set $9=${10}\033[32m successfully \033[0m"
 	fi
 }
 
 function publishConfig() {
 	curl -X POST -H ${1} -H ${2} -d ${3} "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/releases" >${tempLog} 2>/dev/null
-	if [[ $(cat ${tempLog}) =~ ":401" || $(cat ${tempLog}) =~ ":403"
-	    || $(cat ${tempLog}) =~ ":404" || $(cat ${tempLog}) =~ ":405"
-	      || $(cat ${tempLog}) =~ ":500" || ! $(cat ${tempLog}) =~ "{" ]]; then
-	  echo "Publish fail"
+	log=$(cat ${tempLog})
+	if [[ ${log} =~ ":401" || ${log} =~ ":403"
+	    || ${log} =~ ":404" || ${log} =~ ":405"
+	      || ${log} =~ ":500" || ! ${log} =~ "{" ]]; then
+	  echo "\033[31m Publish fail \033[0m"
 	  exit 1
 	else
-	  echo "Publish successfully, please start seata-server."
+	  echo "\033[32m Publish successfully, please start seata-server. \033[0m"
 	fi
 }
 
@@ -113,7 +115,7 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 done
 
 echo "========================================================================="
-echo "  Complete initialization parameters, total-count:$count, failure-count:$failCount "
+echo " Complete initialization parameters, \033[32m total-count:$count \033[0m, \033[31m failure-count:$failCount \033[0m"
 echo "========================================================================="
 
 if [[ $failCount -eq 0 ]]; then
@@ -124,5 +126,5 @@ if [[ $failCount -eq 0 ]]; then
     echo "Remember to publish later..."
   fi
 else
-  echo "init apollo config fail."
+  echo "\033[31m init apollo config fail. \033[0m"
 fi

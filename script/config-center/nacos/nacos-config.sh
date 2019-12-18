@@ -27,13 +27,13 @@ tempLog=$(mktemp -t nacos-config.log)
 function addConfig() {
   curl -X POST -H ${1} "http://$2/nacos/v1/cs/configs?dataId=$3&group=SEATA_GROUP&content=$4" >${tempLog} 2>/dev/null
   if [[ -z $(cat ${tempLog}) ]]; then
-    echo "Please check the cluster status."
+    echo "\033[31m Please check the cluster status. \033[0m"
     exit 1
   fi
   if [[ $(cat ${tempLog}) =~ "true" ]]; then
-    echo "Set $3=$4 >>> successfuly"
+    echo "Set $3=$4\033[32m successfully \033[0m"
   else
-    echo "Set $3=$4 >>> failure"
+    echo "Set $3=$4\033[31m failure \033[0m"
     (( failCount++ ))
   fi
 }
@@ -47,11 +47,11 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 done
 
 echo "========================================================================="
-echo "  Complete initialization parameters, total-count:$count, failure-count:$failCount "
+echo " Complete initialization parameters, \033[32m total-count:$count \033[0m, \033[31m failure-count:$failCount \033[0m"
 echo "========================================================================="
 
 if [[ ${failCount} -eq 0 ]]; then
-	echo "Init nacos config finished, please start seata-server."
+	echo "\033[32m Init nacos config finished, please start seata-server. \033[0m"
 else
-	echo "init nacos config fail."
+	echo "\033[31m init nacos config fail. \033[0m"
 fi

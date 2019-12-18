@@ -30,14 +30,14 @@ function addConfig() {
 	valueBase64=$(printf "%s""$3" | base64)
   curl -X POST -H ${1} -d "{\"key\": \"$keyBase64\", \"value\": \"$valueBase64\"}" "http://$4/v3/kv/put" >${tempLog} 2>/dev/null
   if [[ -z $(cat ${tempLog}) ]]; then
-    echo "Please check the cluster status."
+    echo "\033[31m Please check the cluster status. \033[0m"
     exit 1
   fi
   if [[ $(cat ${tempLog}) =~ "error" || $(cat ${tempLog}) =~ "code" ]]; then
-    echo "Set $2=$3 >>> failure"
+    echo "Set $2=$3\033[31m failure \033[0m"
     (( failCount++ ))
   else
-    echo "Set $2=$3 >>> successfully"
+    echo "Set $2=$3\033[32m successfully \033[0m"
  fi
 }
 
@@ -50,11 +50,11 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 done
 
 echo "========================================================================="
-echo "  Complete initialization parameters, total-count:$count, failure-count:$failCount "
+echo " Complete initialization parameters, \033[32m total-count:$count \033[0m, \033[31m failure-count:$failCount \033[0m"
 echo "========================================================================="
 
 if [[ ${failCount} -eq 0 ]]; then
-	echo "Init etcd3 config finished, please start seata-server."
+	echo "\033[32m Init etcd3 config finished, please start seata-server. \033[0m"
 else
-	echo "Init etcd3 config fail."
+	echo "\033[31m Init etcd3 config fail. \033[0m"
 fi
