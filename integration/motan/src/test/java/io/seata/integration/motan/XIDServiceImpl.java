@@ -19,7 +19,6 @@ import io.seata.core.context.RootContext;
 
 /**
  * @author jimin.jm@alibaba-inc.com
- * @date 2019/05/27
  */
 public class XIDServiceImpl implements XIDService {
 

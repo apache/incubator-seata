@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author: jimin.jm@alibaba-inc.com
- * @date 2019/04/12
  */
 public class NettyPoolKeyTest {
 

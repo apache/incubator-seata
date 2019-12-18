@@ -21,7 +21,6 @@ import java.io.Serializable;
  * The type Heartbeat message.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/14
  */
 public class HeartbeatMessage implements Serializable {
     private static final long serialVersionUID = -985316399527884899L;

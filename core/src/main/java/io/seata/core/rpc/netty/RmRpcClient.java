@@ -46,7 +46,6 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
  *
  * @author jimin.jm @alibaba-inc.com
  * @author zhaojun
- * @date 2018 /10/10
  */
 @Sharable
 public final class RmRpcClient extends AbstractRpcRemotingClient {

@@ -26,7 +26,6 @@ import java.util.List;
  *
  * @param <T> the type parameter
  * @author jimin.jm @alibaba-inc.com
- * @date 2019 /1/31
  */
 public interface RegistryService<T> {
 

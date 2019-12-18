@@ -19,7 +19,6 @@ package io.seata.common;
  * The type Xid.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/10
  */
 public class XID {
 

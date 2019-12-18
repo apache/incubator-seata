@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
  * The type Netty base config test.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2019 /1/7
  */
 public class NettyBaseConfigTest {
     /**

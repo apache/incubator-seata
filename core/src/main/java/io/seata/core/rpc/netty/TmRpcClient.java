@@ -41,7 +41,6 @@ import java.util.function.Function;
  *
  * @author jimin.jm @alibaba-inc.com
  * @author zhaojun
- * @date 2018 /10/23
  */
 @Sharable
 public final class TmRpcClient extends AbstractRpcRemotingClient {

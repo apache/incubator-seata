@@ -27,7 +27,6 @@ import io.seata.common.thread.NamedThreadFactory;
  * The interface Configuration change listener.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2019 /11/13
  */
 public interface ConfigurationChangeListener {
 

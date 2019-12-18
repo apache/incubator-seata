@@ -54,7 +54,6 @@ import java.util.concurrent.TimeoutException;
  * The type Abstract rpc remoting.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/12
  */
 public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implements Disposable {
 

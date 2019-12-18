@@ -43,7 +43,6 @@ import org.slf4j.LoggerFactory;
  * The type Enhanced service loader.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/10
  */
 public class EnhancedServiceLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancedServiceLoader.class);

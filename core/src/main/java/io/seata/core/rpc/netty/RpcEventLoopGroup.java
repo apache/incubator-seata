@@ -23,7 +23,6 @@ import io.netty.channel.EventLoopGroup;
  * The interface Rpc event loop group.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/12
  */
 public interface RpcEventLoopGroup {
 

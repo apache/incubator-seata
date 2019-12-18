@@ -21,7 +21,6 @@ import io.netty.channel.Channel;
  * The interface Channel event listener.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/12
  */
 public interface ChannelEventListener {
     /**

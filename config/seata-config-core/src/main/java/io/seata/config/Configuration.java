@@ -22,7 +22,6 @@ import java.util.Set;
  * The interface Configuration.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/20
  */
 public interface Configuration {
 

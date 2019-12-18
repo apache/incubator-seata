@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
  * The type Method desc.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/28
  */
 public class MethodDesc {
     private GlobalTransactional transactionAnnotation;

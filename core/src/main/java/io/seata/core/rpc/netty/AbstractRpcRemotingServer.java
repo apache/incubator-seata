@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author jimin.jm @alibaba-inc.com
  * @author xingfudeshi@gmail.com
- * @date 2018 /9/12
  */
 public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements RemotingServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingServer.class);

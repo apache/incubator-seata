@@ -28,7 +28,6 @@ import java.nio.charset.Charset;
  * The type Abstract message.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/14
  */
 public abstract class AbstractMessage implements MessageTypeAware, Serializable {
 

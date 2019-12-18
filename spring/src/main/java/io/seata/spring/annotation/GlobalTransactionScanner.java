@@ -61,7 +61,6 @@ import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_AUTOPROXY;
  * The type Global transaction scanner.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/28
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     implements InitializingBean, ApplicationContextAware,

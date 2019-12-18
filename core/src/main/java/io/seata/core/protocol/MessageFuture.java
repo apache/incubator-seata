@@ -26,7 +26,6 @@ import java.util.concurrent.TimeoutException;
  * The type Message future.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/9
  */
 public class MessageFuture {
     private RpcMessage requestMessage;

@@ -20,7 +20,6 @@ package io.seata.config;
  * The type Configuration change event.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2019 /11/13
  */
 public class ConfigurationChangeEvent {
 

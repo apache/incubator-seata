@@ -20,7 +20,6 @@ package io.seata.core.protocol;
  * The type Merge result message.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/10
  */
 public class MergeResultMessage extends AbstractMessage implements MergeMessage {
 

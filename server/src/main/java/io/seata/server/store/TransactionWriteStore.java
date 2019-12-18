@@ -26,7 +26,6 @@ import io.seata.server.store.TransactionStoreManager.LogOperation;
  * The type Transaction write store.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/11
  */
 public class TransactionWriteStore implements SessionStorable {
     private SessionStorable sessionRequest;

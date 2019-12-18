@@ -27,7 +27,6 @@ import java.util.concurrent.TimeUnit;
  * The type Server test.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/4
  */
 public class ServerTest {
 

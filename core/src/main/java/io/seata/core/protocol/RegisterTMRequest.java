@@ -21,7 +21,6 @@ import java.io.Serializable;
  * The type Register tm request.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/15
  */
 public class RegisterTMRequest extends AbstractIdentifyRequest implements Serializable {
     private static final long serialVersionUID = -5929081344190543690L;

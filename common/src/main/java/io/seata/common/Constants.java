@@ -21,7 +21,6 @@ import java.nio.charset.Charset;
  * The type Constants.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/9 17:14
  */
 public class Constants {
     /**

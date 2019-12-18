@@ -45,7 +45,6 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperP
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/09/30
  */
 public class StarterConstants {
     private static final int MAP_CAPACITY = 64;

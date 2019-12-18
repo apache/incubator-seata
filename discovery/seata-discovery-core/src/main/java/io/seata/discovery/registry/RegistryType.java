@@ -21,7 +21,6 @@ import io.seata.common.exception.NotSupportYetException;
  * The enum Registry type.
  *
  * @author jimin.jm @alibaba-inc.com
- * @date 2019 /02/26
  */
 public enum RegistryType {
     /**
