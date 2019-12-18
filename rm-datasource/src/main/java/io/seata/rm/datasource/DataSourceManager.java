@@ -15,13 +15,17 @@
  */
 package io.seata.rm.datasource;
 
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
+
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.util.NetUtil;
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.RmTransactionException;
 import io.seata.core.exception.TransactionException;
@@ -44,12 +48,6 @@ import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
-
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
 /**
@@ -64,8 +62,6 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     private ResourceManagerInbound asyncWorker;
 
     private Map<String, Resource> dataSourceCache = new ConcurrentHashMap<>();
-
-    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
 
     /**
      * Sets async worker.
