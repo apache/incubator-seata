@@ -113,7 +113,7 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 done
 
 echo "========================================================================="
-echo "  Parameters initialized successfully, total-count:$count, failure-count:$failCount "
+echo "  Complete initialization parameters, total-count:$count, failure-count:$failCount "
 echo "========================================================================="
 
 if [[ $failCount -eq 0 ]]; then

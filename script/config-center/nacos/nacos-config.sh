@@ -42,16 +42,16 @@ count=0
 for line in $(cat $(dirname "$PWD")/config.txt); do
   (( count++ ))
 	key=${line%%=*}
-	value=${line#*=}
+  value=${line#*=}
 	addConfig ${contentType} ${nacosAddr} ${key} ${value}
 done
 
 echo "========================================================================="
-echo "  Parameters initialized successfully, total-count:$count, failure-count:$failCount "
+echo "  Complete initialization parameters, total-count:$count, failure-count:$failCount "
 echo "========================================================================="
 
 if [[ ${failCount} -eq 0 ]]; then
-	echo "\r\n\033[42;37m init nacos config finished, please start seata-server. \033[0m"
+	echo "Init nacos config finished, please start seata-server."
 else
-	echo "\r\n\033[41;33m init nacos config fail. \033[0m"
+	echo "init nacos config fail."
 fi

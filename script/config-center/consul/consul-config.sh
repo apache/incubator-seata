@@ -30,9 +30,9 @@ function addConfig() {
     exit 1
   fi
   if [[ $(cat ${tempLog}) =~ "true" ]]; then
-    echo "Set" "${2}" "=" "${4} >>> success"
+    echo "Set" "${4}" "=" "${2} >>> success"
   else
-    echo "Set" "${2}" "=" "${4} >>> fail"
+    echo "Set" "${4}" "=" "${2} >>> fail"
     (( failCount++ ))
  fi
 }
@@ -46,7 +46,7 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 done
 
 echo "========================================================================="
-echo "  Parameters initialized successfully, total-count:$count, failure-count:$failCount "
+echo "  Complete initialization parameters, total-count:$count, failure-count:$failCount "
 echo "========================================================================="
 
 if [[ ${failCount} -eq 0 ]]; then
