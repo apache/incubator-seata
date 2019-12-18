@@ -17,6 +17,8 @@ package io.seata.config;
 
 import java.io.File;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -61,7 +63,7 @@ public class FileConfiguration extends AbstractConfiguration {
     private final ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(
         8);
 
-    private final ConcurrentMap<String, String> listenedConfigMap = new ConcurrentHashMap<>(8);
+    private final Map<String, String> listenedConfigMap = new HashMap<>(8);
 
     private final String targetFilePath;
 
