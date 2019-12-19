@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.sql.struct.cache;
 
 import com.alibaba.druid.util.JdbcConstants;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
@@ -30,7 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.DataSource;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -82,7 +80,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         try (Connection connection = dataSourceProxy.getPlainConnection()) {
             databaseMetaData = connection.getMetaData();
         } catch (SQLException e) {
-            LOGGER.error("Could not get connection, use default cache key", e.getMessage(), e);
+            LOGGER.error("Could not get connection, use default cache key {}", e.getMessage(), e);
             return cacheKey.append(defaultTableName).toString();
         }
 
@@ -94,7 +92,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                 cacheKey.append(defaultTableName.toLowerCase());
             }
         } catch (SQLException e) {
-            LOGGER.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key", e.getMessage(), e);
+            LOGGER.error("Could not get supportsMixedCaseIdentifiers in connection metadata, use default cache key {}", e.getMessage(), e);
             return cacheKey.append(defaultTableName).toString();
         }
 
@@ -103,36 +101,13 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
     @Override
     protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            conn = dataSource.getConnection();
-            stmt = conn.createStatement();
-            StringBuilder builder = new StringBuilder("SELECT * FROM ");
-            builder.append(keywordChecker.checkAndReplace(tableName));
-            builder.append(" LIMIT 1");
-            rs = stmt.executeQuery(builder.toString());
-            ResultSetMetaData rsmd = rs.getMetaData();
-            DatabaseMetaData dbmd = conn.getMetaData();
-
-            return resultSetMetaToSchema(rsmd, dbmd);
+        String builder = "SELECT * FROM " + keywordChecker.checkAndReplace(tableName) + " LIMIT 1";
+        try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(builder)) {
+            return resultSetMetaToSchema(rs.getMetaData(), conn.getMetaData());
+        } catch (SQLException sqlEx) {
+            throw sqlEx;
         } catch (Exception e) {
-            if (e instanceof SQLException) {
-                throw e;
-            }
             throw new SQLException("Failed to fetch schema of " + tableName, e);
-
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
         }
     }
 
@@ -161,10 +136,8 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
          * 1. show full columns from xxx from xxx(normal)
          * 2. select xxx from xxx where catalog_name like ? and table_name like ?(informationSchema=true)
          */
-        ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
-        ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
 
-        try {
+        try (ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%"); ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -221,13 +194,6 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             }
             if (tm.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
-            }
-        } finally {
-            if (rsColumns != null) {
-                rsColumns.close();
-            }
-            if (rsIndex != null) {
-                rsIndex.close();
             }
         }
         return tm;
