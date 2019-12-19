@@ -72,6 +72,7 @@ class DefaultFailureHandlerImplTest {
             }
         });
     }
+
     @Test
     void onBeginFailure() {
         RootContext.bind(DEFAULT_XID);

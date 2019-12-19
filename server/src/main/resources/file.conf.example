@@ -58,6 +58,9 @@ client {
     log.serialization = "jackson"
     log.table = "undo_log"
   }
+  log {
+    exceptionRate = 100
+  }
   support {
     # auto proxy the DataSource bean
     spring.datasource.autoproxy = false

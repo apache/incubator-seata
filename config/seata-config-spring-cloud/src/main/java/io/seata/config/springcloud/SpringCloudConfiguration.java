@@ -15,18 +15,18 @@
  */
 package io.seata.config.springcloud;
 
+import java.util.Set;
+
 import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
-import io.seata.config.ConfigChangeListener;
+import io.seata.config.ConfigurationChangeListener;
 
-import java.util.List;
-
-
-public class SpringCloudConfiguration extends AbstractConfiguration<ConfigChangeListener> {
+public class SpringCloudConfiguration extends AbstractConfiguration {
 
     private static final String CONFIG_TYPE = "SpringCloudConfig";
     private static volatile SpringCloudConfiguration instance;
     private static final String PREFIX = "seata.";
+
     public static SpringCloudConfiguration getInstance() {
         if (null == instance) {
             synchronized (SpringCloudConfiguration.class) {
@@ -38,7 +38,7 @@ public class SpringCloudConfiguration extends AbstractConfiguration<ConfigChange
         return instance;
     }
 
-    private SpringCloudConfiguration(){
+    private SpringCloudConfiguration() {
 
     }
 
@@ -72,17 +72,17 @@ public class SpringCloudConfiguration extends AbstractConfiguration<ConfigChange
     }
 
     @Override
-    public void addConfigListener(String dataId, ConfigChangeListener listener) {
+    public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void removeConfigListener(String dataId, ConfigChangeListener listener) {
+    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<ConfigChangeListener> getConfigListeners(String dataId) {
+    public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
         throw new UnsupportedOperationException();
     }
 }
