@@ -14,36 +14,35 @@
 # limitations under the License.
 
 if [[ $# != 1 ]]; then
-	echo "USAGE: $0 nacosAddr"
-	exit 1
+  echo "USAGE: $0 consulAddr"
+  exit 1
 fi
-
-nacosAddr=$1
-echo "set nacosAddr=$nacosAddr"
+consulAddr=$1
 contentType="content-type:application/json;charset=UTF-8"
+echo "Set consulAddr=$consulAddr"
 
 failCount=0
-tempLog=$(mktemp -t nacos-config.log)
+tempLog=$(mktemp -t consul-config.log)
 function addConfig() {
-  curl -X POST -H ${1} "http://$2/nacos/v1/cs/configs?dataId=$3&group=SEATA_GROUP&content=$4" >${tempLog} 2>/dev/null
+  curl -X PUT -H ${1} -d ${2} "http://$3/v1/kv/$4" >${tempLog} 2>/dev/null
   if [[ -z $(cat ${tempLog}) ]]; then
     echo "\033[31m Please check the cluster status. \033[0m"
     exit 1
   fi
   if [[ $(cat ${tempLog}) =~ "true" ]]; then
-    echo "Set $3=$4\033[32m successfully \033[0m"
+    echo "Set $4=$2\033[32m successfully \033[0m"
   else
-    echo "Set $3=$4\033[31m failure \033[0m"
+    echo "Set $4=$2\033[31m failure \033[0m"
     (( failCount++ ))
-  fi
+ fi
 }
 
 count=0
 for line in $(cat $(dirname "$PWD")/config.txt); do
   (( count++ ))
-	key=${line%%=*}
+  key=${line%%=*}
   value=${line#*=}
-	addConfig ${contentType} ${nacosAddr} ${key} ${value}
+  addConfig ${contentType} ${value} ${consulAddr} ${key}
 done
 
 echo "========================================================================="
@@ -51,7 +50,7 @@ echo " Complete initialization parameters, \033[32m total-count:$count \033[0m, 
 echo "========================================================================="
 
 if [[ ${failCount} -eq 0 ]]; then
-	echo "\033[32m Init nacos config finished, please start seata-server. \033[0m"
+  echo "\033[32m Init consul config finished, please start seata-server. \033[0m"
 else
-	echo "\033[31m init nacos config fail. \033[0m"
+  echo "\033[31m Init consul config fail. \033[0m"
 fi
