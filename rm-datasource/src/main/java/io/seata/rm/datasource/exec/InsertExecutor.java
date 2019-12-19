@@ -107,7 +107,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         final int pkIndex = getPkIndex();
         if (pkIndex == -1) {
-            throw new ShouldNeverHappenException("pkIndex is " + pkIndex);
+            throw new ShouldNeverHappenException(String.format("pkIndex is %d", pkIndex));
         }
         List<Object> pkValues = null;
         if (statementProxy instanceof PreparedStatementProxy) {
@@ -168,7 +168,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         boolean b = this.checkPkValues(pkValues);
         if (!b) {
-            throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+            throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
         }
         if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
             pkValues = getPkValuesBySequence(pkValues.get(0));
@@ -271,10 +271,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (pkParameterHasExpr) {
             return false;
         }
-        if (pkParameterHasNull && pkParameterHasNotNull) {
-            return false;
-        }
-        return true;
+        return !pkParameterHasNull || !pkParameterHasNotNull;
     }
 
     /**
@@ -293,7 +290,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             throw new ShouldNeverHappenException();
         }
 
-        ResultSet genKeys = null;
+        ResultSet genKeys;
         try {
             genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
         } catch (SQLException e) {
@@ -337,7 +334,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             pkValues.add(v);
         }
         if (pkValues.isEmpty()) {
-            throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+            throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
         }
         return pkValues;
     }
