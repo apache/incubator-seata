@@ -25,7 +25,6 @@ client.rm.table.meta.check.enable=true
 client.rm.report.success.enable=true
 client.tm.commit.retry.count=5
 client.tm.rollback.retry.count=5
-client.log.exceptionRate=100
 store.mode=file
 store.file.dir=file_store/data
 store.file.max-branch-session-size=16384
