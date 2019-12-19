@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.sql.struct.cache;
 
 import com.alibaba.druid.util.JdbcConstants;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
@@ -27,7 +26,6 @@ import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 
 import javax.sql.DataSource;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -67,36 +65,13 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
     @Override
     protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
-        Connection conn = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            conn = dataSource.getConnection();
-            stmt = conn.createStatement();
-            StringBuilder builder = new StringBuilder("SELECT * FROM ");
-            builder.append(keywordChecker.checkAndReplace(tableName));
-            builder.append(" LIMIT 1");
-            rs = stmt.executeQuery(builder.toString());
-            ResultSetMetaData rsmd = rs.getMetaData();
-            DatabaseMetaData dbmd = conn.getMetaData();
-
-            return resultSetMetaToSchema(rsmd, dbmd, tableName);
+        String builder = "SELECT * FROM " + keywordChecker.checkAndReplace(tableName) + " LIMIT 1";
+        try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(builder)) {
+            return resultSetMetaToSchema(rs.getMetaData(), conn.getMetaData(), tableName);
+        } catch (SQLException sqlEx) {
+            throw sqlEx;
         } catch (Exception e) {
-            if (e instanceof SQLException) {
-                throw e;
-            }
             throw new SQLException("Failed to fetch schema of " + tableName, e);
-
-        } finally {
-            if (rs != null) {
-                rs.close();
-            }
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
         }
     }
 
@@ -122,10 +97,7 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             tableName = tableName.replace("`", "");
         }
 
-        ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
-        ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true);
-
-        try {
+        try (ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%"); ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -182,13 +154,6 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             }
             if (tm.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
-            }
-        } finally {
-            if (rsColumns != null) {
-                rsColumns.close();
-            }
-            if (rsIndex != null) {
-                rsIndex.close();
             }
         }
         return tm;

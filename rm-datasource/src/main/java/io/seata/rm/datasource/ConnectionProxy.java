@@ -15,10 +15,6 @@
  */
 package io.seata.rm.datasource;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.concurrent.Callable;
-
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -33,6 +29,10 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.Callable;
 
 /**
  * The type Connection proxy.
@@ -144,7 +144,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
         if (te.getCode() == TransactionExceptionCode.LockKeyConflict) {
             StringBuilder reasonBuilder = new StringBuilder("get global lock fail, xid:" + context.getXid());
             if (StringUtils.isNotBlank(lockKeys)) {
-                reasonBuilder.append(", lockKeys:" + lockKeys);
+                reasonBuilder.append(", lockKeys:").append(lockKeys);
             }
             throw new LockConflictException(reasonBuilder.toString());
         } else {
@@ -238,10 +238,8 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     @Override
     public void rollback() throws SQLException {
         targetConnection.rollback();
-        if (context.inGlobalTransaction()) {
-            if (context.isBranchRegistered()) {
-                report(false);
-            }
+        if (context.inGlobalTransaction() && context.isBranchRegistered()) {
+            report(false);
         }
         context.reset();
     }
@@ -275,7 +273,7 @@ public class ConnectionProxy extends AbstractConnectionProxy {
     }
 
     public static class LockRetryPolicy {
-        protected final static boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = ConfigurationFactory
+        protected static final boolean LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT = ConfigurationFactory
             .getInstance().getBoolean(ConfigurationKeys.CLIENT_LOCK_RETRY_POLICY_BRANCH_ROLLBACK_ON_CONFLICT, true);
 
         public <T> T execute(Callable<T> callable) throws Exception {

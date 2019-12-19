@@ -84,7 +84,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
      * @throws Throwable the throwable
      */
     protected T executeAutoCommitTrue(Object[] args) throws Throwable {
-        AbstractConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         try {
             connectionProxy.setAutoCommit(false);
             return new LockRetryPolicy(connectionProxy.getTargetConnection()).execute(() -> {
@@ -100,7 +100,7 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
             }
             throw e;
         } finally {
-            ((ConnectionProxy) connectionProxy).getContext().reset();
+            connectionProxy.getContext().reset();
             connectionProxy.setAutoCommit(true);
         }
     }

@@ -57,9 +57,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
-        PreparedStatement deletePST = null;
-        try {
-            deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL);
+        try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL)) {
             deletePST.setDate(1, new java.sql.Date(logCreated.getTime()));
             deletePST.setInt(2, limitRows);
             int deleteRows = deletePST.executeUpdate();
@@ -72,10 +70,6 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
                 e = new SQLException(e);
             }
             throw (SQLException) e;
-        } finally {
-            if (deletePST != null) {
-                deletePST.close();
-            }
         }
     }
 
@@ -93,9 +87,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
     private void insertUndoLog(String xid, long branchID, String rollbackCtx,
                                       byte[] undoLogContent, State state, Connection conn) throws SQLException {
-        PreparedStatement pst = null;
-        try {
-            pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL);
+        try (PreparedStatement pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL)) {
             pst.setLong(1, branchID);
             pst.setString(2, xid);
             pst.setString(3, rollbackCtx);
@@ -107,10 +99,6 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
                 e = new SQLException(e);
             }
             throw (SQLException) e;
-        } finally {
-            if (pst != null) {
-                pst.close();
-            }
         }
     }
 

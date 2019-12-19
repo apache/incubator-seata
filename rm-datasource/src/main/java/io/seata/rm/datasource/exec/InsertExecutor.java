@@ -15,14 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -39,6 +31,14 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * The type Insert executor.
@@ -118,8 +118,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                     if (PLACEHOLDER.equals(pkValue)) {
                         pkValues = parameters[pkIndex];
                     } else {
-                        int finalPkIndex = pkIndex;
-                        pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
+                        pkValues = insertRows.stream().map(insertRow -> insertRow.get(pkIndex)).collect(Collectors.toList());
                     }
                 } else {
                     int totalPlaceholderNum = -1;
@@ -140,9 +139,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                                 idx = totalPlaceholderNum - currentRowPlaceholderNum + pkIndex;
                             }
                             ArrayList<Object> parameter = parameters[idx];
-                            for (Object obj : parameter) {
-                                pkValues.add(obj);
-                            }
+                            pkValues.addAll(parameter);
                         } else {
                             pkValues.add(pkValue);
                         }
@@ -163,7 +160,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (!b) {
             throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
         }
-        if (pkValues.size() > 0 && pkValues.get(0) instanceof SqlSequenceExpr) {
+        if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
             pkValues = getPkValuesBySequence(pkValues.get(0));
         }
         // pk auto generated while single insert primary key is expression
@@ -171,7 +168,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             pkValues = getPkValuesByAuto();
         }
         // pk auto generated while column exists and value is null
-        else if (pkValues.size() > 0 && pkValues.get(0) instanceof Null) {
+        else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
             pkValues = getPkValuesByAuto();
         }
         return pkValues;
@@ -185,7 +182,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         } catch (NotSupportYetException | SQLException ignore) {
         }
 
-        ResultSet genKeys = null;
+        ResultSet genKeys;
         if (expr instanceof SqlSequenceExpr) {
             SqlSequenceExpr sequenceExpr = (SqlSequenceExpr) expr;
             final String sql = "SELECT " + sequenceExpr.getSequence() + ".currval FROM DUAL";
@@ -324,12 +321,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (pkMetaMap.size() != 1) {
             throw new NotSupportYetException();
         }
-        ResultSet genKeys = null;
-        try {
-            genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
-        } catch (SQLException e) {
-            throw e;
-        }
+        ResultSet genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
         List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);

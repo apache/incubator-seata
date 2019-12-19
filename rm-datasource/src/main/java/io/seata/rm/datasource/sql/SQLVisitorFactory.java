@@ -21,6 +21,7 @@ import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
+
 import java.util.List;
 
 /**
@@ -52,10 +53,8 @@ public class SQLVisitorFactory {
             recognizer = recognizerHolder.getUpdateRecognizer(sql, ast);
         } else if (ast instanceof SQLDeleteStatement) {
             recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
-        } else if (ast instanceof SQLSelectStatement) {
-            if (((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
-                recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
-            }
+        } else if (ast instanceof SQLSelectStatement && ((SQLSelectStatement) ast).getSelect().getFirstQueryBlock().isForUpdate()) {
+            recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
         }
         return recognizer;
     }

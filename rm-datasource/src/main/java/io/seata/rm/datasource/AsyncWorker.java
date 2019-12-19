@@ -107,8 +107,6 @@ public class AsyncWorker implements ResourceManagerInbound {
     private static final BlockingQueue<Phase2Context> ASYNC_COMMIT_BUFFER = new LinkedBlockingQueue<>(
         ASYNC_COMMIT_BUFFER_LIMIT);
 
-    private static ScheduledExecutorService timerExecutor;
-
     @Override
     public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
                                      String applicationData) throws TransactionException {
@@ -123,38 +121,30 @@ public class AsyncWorker implements ResourceManagerInbound {
      * Init.
      */
     public synchronized void init() {
-        LOGGER.info("Async Commit Buffer Limit: " + ASYNC_COMMIT_BUFFER_LIMIT);
-        timerExecutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("AsyncWorker", 1, true));
-        timerExecutor.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                try {
+        LOGGER.info("Async Commit Buffer Limit: {}", ASYNC_COMMIT_BUFFER_LIMIT);
+        ScheduledExecutorService timerExecutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("AsyncWorker", 1, true));
+        timerExecutor.scheduleAtFixedRate(() -> {
+            try {
 
-                    doBranchCommits();
+                doBranchCommits();
 
-                } catch (Throwable e) {
-                    LOGGER.info("Failed at async committing ... " + e.getMessage());
+            } catch (Throwable e) {
+                LOGGER.info("Failed at async committing ... {}", e.getMessage());
 
-                }
             }
-        }, 10, 1000 * 1, TimeUnit.MILLISECONDS);
+        }, 10, 1000, TimeUnit.MILLISECONDS);
     }
 
     private void doBranchCommits() {
-        if (ASYNC_COMMIT_BUFFER.size() == 0) {
+        if (ASYNC_COMMIT_BUFFER.isEmpty()) {
             return;
         }
 
         Map<String, List<Phase2Context>> mappedContexts = new HashMap<>(DEFAULT_RESOURCE_SIZE);
         while (!ASYNC_COMMIT_BUFFER.isEmpty()) {
             Phase2Context commitContext = ASYNC_COMMIT_BUFFER.poll();
-            List<Phase2Context> contextsGroupedByResourceId = mappedContexts.get(commitContext.resourceId);
-            if (contextsGroupedByResourceId == null) {
-                contextsGroupedByResourceId = new ArrayList<>();
-                mappedContexts.put(commitContext.resourceId, contextsGroupedByResourceId);
-            }
+            List<Phase2Context> contextsGroupedByResourceId = mappedContexts.computeIfAbsent(commitContext.resourceId, k -> new ArrayList<>());
             contextsGroupedByResourceId.add(commitContext);
-
         }
 
         for (Map.Entry<String, List<Phase2Context>> entry : mappedContexts.entrySet()) {
@@ -179,7 +169,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                 for (Phase2Context commitContext : contextsGroupedByResourceId) {
                     xids.add(commitContext.xid);
                     branchIds.add(commitContext.branchId);
-                    int maxSize = xids.size() > branchIds.size() ? xids.size() : branchIds.size();
+                    int maxSize = Math.max(xids.size(), branchIds.size());
                     if (maxSize == UNDOLOG_DELETE_LIMIT_SIZE) {
                         try {
                             UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).batchDeleteUndoLog(

@@ -58,7 +58,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
     public T doExecute(Object... args) throws Throwable {
         Connection conn = statementProxy.getConnection();
         DatabaseMetaData dbmd = conn.getMetaData();
-        T rs = null;
+        T rs;
         Savepoint sp = null;
         LockRetryController lockRetryController = new LockRetryController();
         boolean originalAutoCommit = conn.getAutoCommit();

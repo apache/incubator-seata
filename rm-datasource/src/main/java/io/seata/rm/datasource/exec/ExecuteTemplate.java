@@ -74,7 +74,7 @@ public class ExecuteTemplate {
                     statementProxy.getTargetSQL(),
                     statementProxy.getConnectionProxy().getDbType());
         }
-        Executor<T> executor = null;
+        Executor<T> executor;
         if (sqlRecognizer == null) {
             executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
         } else {
@@ -96,7 +96,7 @@ public class ExecuteTemplate {
                     break;
             }
         }
-        T rs = null;
+        T rs;
         try {
             rs = executor.execute(args);
         } catch (Throwable ex) {

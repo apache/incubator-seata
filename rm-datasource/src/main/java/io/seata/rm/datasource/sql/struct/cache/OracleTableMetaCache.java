@@ -24,7 +24,6 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
 
 import javax.sql.DataSource;
-
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -60,26 +59,12 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
 
     @Override
     protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
-        Connection conn = null;
-        java.sql.Statement stmt = null;
-        try {
-            conn = dataSource.getConnection();
-            stmt = conn.createStatement();
-            DatabaseMetaData dbmd = conn.getMetaData();
-            return resultSetMetaToSchema(dbmd, tableName);
+        try (Connection conn = dataSource.getConnection()) {
+            return resultSetMetaToSchema(conn.getMetaData(), tableName);
+        } catch (SQLException sqlEx) {
+            throw sqlEx;
         } catch (Exception e) {
-            if (e instanceof SQLException) {
-                throw e;
-            }
             throw new SQLException("Failed to fetch schema of " + tableName, e);
-
-        } finally {
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
         }
     }
 
@@ -96,11 +81,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
             tableName = tableName.toUpperCase();
         }
 
-        ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
-        ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
-        ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName);
-
-        try {
+        try (ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%"); ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true); ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -164,16 +145,6 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
             }
             if (tm.getAllIndexes().isEmpty()) {
                 throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
-            }
-        } finally {
-            if (rsColumns != null) {
-                rsColumns.close();
-            }
-            if (rsIndex != null) {
-                rsIndex.close();
-            }
-            if (rsPrimary != null) {
-                rsPrimary.close();
             }
         }
 
