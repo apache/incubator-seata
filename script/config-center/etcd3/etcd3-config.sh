@@ -13,37 +13,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# etcd REST API v3.
+
 if [[ $# != 1 ]]; then
-	echo "USAGE: $0 nacosAddr"
+	echo "USAGE: $0 etcd3Addr"
 	exit 1
 fi
-
-nacosAddr=$1
-echo "set nacosAddr=$nacosAddr"
+etcd3Addr=$1
 contentType="content-type:application/json;charset=UTF-8"
+echo "Set etcd3Addr=$etcd3Addr"
 
 failCount=0
-tempLog=$(mktemp -t nacos-config.log)
+tempLog=$(mktemp -t etcd-config.log)
 function addConfig() {
-  curl -X POST -H ${1} "http://$2/nacos/v1/cs/configs?dataId=$3&group=SEATA_GROUP&content=$4" >${tempLog} 2>/dev/null
+  keyBase64=$(printf "%s""$2" | base64)
+	valueBase64=$(printf "%s""$3" | base64)
+  curl -X POST -H ${1} -d "{\"key\": \"$keyBase64\", \"value\": \"$valueBase64\"}" "http://$4/v3/kv/put" >${tempLog} 2>/dev/null
   if [[ -z $(cat ${tempLog}) ]]; then
     echo "\033[31m Please check the cluster status. \033[0m"
     exit 1
   fi
-  if [[ $(cat ${tempLog}) =~ "true" ]]; then
-    echo "Set $3=$4\033[32m successfully \033[0m"
-  else
-    echo "Set $3=$4\033[31m failure \033[0m"
+  if [[ $(cat ${tempLog}) =~ "error" || $(cat ${tempLog}) =~ "code" ]]; then
+    echo "Set $2=$3\033[31m failure \033[0m"
     (( failCount++ ))
-  fi
+  else
+    echo "Set $2=$3\033[32m successfully \033[0m"
+ fi
 }
 
 count=0
 for line in $(cat $(dirname "$PWD")/config.txt); do
   (( count++ ))
-	key=${line%%=*}
-  value=${line#*=}
-	addConfig ${contentType} ${nacosAddr} ${key} ${value}
+  key=${line%%=*}
+	value=${line#*=}
+	addConfig ${contentType} ${key} ${value} ${etcd3Addr}
 done
 
 echo "========================================================================="
@@ -51,7 +54,7 @@ echo " Complete initialization parameters, \033[32m total-count:$count \033[0m, 
 echo "========================================================================="
 
 if [[ ${failCount} -eq 0 ]]; then
-	echo "\033[32m Init nacos config finished, please start seata-server. \033[0m"
+	echo "\033[32m Init etcd3 config finished, please start seata-server. \033[0m"
 else
-	echo "\033[31m init nacos config fail. \033[0m"
+	echo "\033[31m Init etcd3 config fail. \033[0m"
 fi
