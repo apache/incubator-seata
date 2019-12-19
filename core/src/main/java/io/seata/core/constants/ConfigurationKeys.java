@@ -416,6 +416,10 @@ public class ConfigurationKeys {
      */
     public static final String SHUNDOWN_WAIT = SHUTDOWN_PREFIX + "wait";
 
+    /**
+     * The constant ENABLE_CLIENT_BATCH_SEND_REQUEST
+     */
+    public static final String ENABLE_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enable-client-batch-send-request";
 
     /**
      * The constant DISABLE_GLOBAL_TRANSACTION.
