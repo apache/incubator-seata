@@ -47,6 +47,11 @@ public class TransportProperties {
      */
     private String compressor = "none";
 
+    /**
+     * enable client batch send request
+     */
+    private boolean enableClientBatchSendRequest = true;
+
     public String getType() {
         return type;
     }
@@ -92,4 +97,12 @@ public class TransportProperties {
         return this;
     }
 
+    public boolean isEnableClientBatchSendRequest() {
+        return enableClientBatchSendRequest;
+    }
+
+    public TransportProperties setEnableClientBatchSendRequest(boolean enableClientBatchSendRequest) {
+        this.enableClientBatchSendRequest = enableClientBatchSendRequest;
+        return this;
+    }
 }
