@@ -111,8 +111,7 @@ public class AsyncWorker implements ResourceManagerInbound {
     public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
                                      String applicationData) throws TransactionException {
         if (!ASYNC_COMMIT_BUFFER.offer(new Phase2Context(branchType, xid, branchId, resourceId, applicationData))) {
-            LOGGER.warn("Async commit buffer is FULL. Rejected branch [" + branchId + "/" + xid
-                + "] will be handled by housekeeping later.");
+            LOGGER.warn("Async commit buffer is FULL. Rejected branch [{}/{}] will be handled by housekeeping later.", branchId, xid);
         }
         return BranchStatus.PhaseTwo_Committed;
     }
