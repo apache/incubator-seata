@@ -208,11 +208,11 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     public void flushUndoLogs(ConnectionProxy cp) throws SQLException {
         ConnectionContext connectionContext = cp.getContext();
         String xid = connectionContext.getXid();
-        long branchID = connectionContext.getBranchId();
+        long branchId = connectionContext.getBranchId();
 
         BranchUndoLog branchUndoLog = new BranchUndoLog();
         branchUndoLog.setXid(xid);
-        branchUndoLog.setBranchId(branchID);
+        branchUndoLog.setBranchId(branchId);
         branchUndoLog.setSqlUndoLogs(connectionContext.getUndoItems());
 
         UndoLogParser parser = UndoLogParserFactory.getInstance();
@@ -222,7 +222,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             LOGGER.debug("Flushing UNDO LOG: {}", new String(undoLogContent, Constants.DEFAULT_CHARSET));
         }
 
-        insertUndoLogWithNormal(xid, branchID, buildContext(parser.getName()), undoLogContent,
+        insertUndoLogWithNormal(xid, branchId, buildContext(parser.getName()), undoLogContent,
             cp.getTargetConnection());
     }
 
