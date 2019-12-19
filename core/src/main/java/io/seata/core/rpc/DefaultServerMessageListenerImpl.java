@@ -86,23 +86,28 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
             return;
         }
         if (message instanceof MergedWarpMessage) {
-            AbstractResultMessage[] results = new AbstractResultMessage[((MergedWarpMessage)message).msgs.size()];
+            AbstractResultMessage[] results = new AbstractResultMessage[((MergedWarpMessage) message).msgs.size()];
             for (int i = 0; i < results.length; i++) {
-                final AbstractMessage subMessage = ((MergedWarpMessage)message).msgs.get(i);
+                final AbstractMessage subMessage = ((MergedWarpMessage) message).msgs.get(i);
                 results[i] = transactionMessageHandler.onRequest(subMessage, rpcContext);
             }
             MergeResultMessage resultMessage = new MergeResultMessage();
             resultMessage.setMsgs(results);
             sender.sendResponse(request, ctx.channel(), resultMessage);
         } else if (message instanceof AbstractResultMessage) {
-            transactionMessageHandler.onResponse((AbstractResultMessage)message, rpcContext);
+            transactionMessageHandler.onResponse((AbstractResultMessage) message, rpcContext);
+        } else {
+            // the single send request message
+            final AbstractMessage msg = (AbstractMessage) message;
+            AbstractResultMessage result = transactionMessageHandler.onRequest(msg, rpcContext);
+            sender.sendResponse(request, ctx.channel(), result);
         }
     }
 
     @Override
     public void onRegRmMessage(RpcMessage request, ChannelHandlerContext ctx, ServerMessageSender sender,
                                RegisterCheckAuthHandler checkAuthHandler) {
-        RegisterRMRequest message = (RegisterRMRequest)request.getBody();
+        RegisterRMRequest message = (RegisterRMRequest) request.getBody();
         boolean isSuccess = false;
         try {
             if (null == checkAuthHandler || checkAuthHandler.regResourceManagerCheckAuth(message)) {
@@ -123,7 +128,7 @@ public class DefaultServerMessageListenerImpl implements ServerMessageListener {
     @Override
     public void onRegTmMessage(RpcMessage request, ChannelHandlerContext ctx, ServerMessageSender sender,
                                RegisterCheckAuthHandler checkAuthHandler) {
-        RegisterTMRequest message = (RegisterTMRequest)request.getBody();
+        RegisterTMRequest message = (RegisterTMRequest) request.getBody();
         String ipAndPort = NetUtil.toStringAddress(ctx.channel().remoteAddress());
         Version.putChannelVersion(ctx.channel(), message.getVersion());
         boolean isSuccess = false;

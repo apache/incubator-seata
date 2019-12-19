@@ -45,6 +45,7 @@ seata:
     heartbeat: true
     serialization: seata
     compressor: none
+    enable-client-batch-send-request: true
   config:
     type: file
     file:
