@@ -47,7 +47,6 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
  * The type SOFARegistry registry service.
  *
  * @author leizhiyuan
- * @date 2019 /4/15
  */
 public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataObserver> {
 

@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
  * The type Log store data base dao.
  *
  * @author zhangsen
- * @date 2019 /4/2
  */
 @LoadLevel(name = "db")
 public class LogStoreDataBaseDAO implements LogStore, Initialize {

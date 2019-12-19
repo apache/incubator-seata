@@ -23,7 +23,6 @@ import java.util.List;
 
 /**
  * @author will
- * @date 2019/8/28
  */
 public class MockResultSetMetaData implements ResultSetMetaData {
 

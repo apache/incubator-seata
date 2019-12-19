@@ -49,7 +49,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author guoyao
- * @date 2019/3/21
  */
 public class InsertExecutorTest {
 

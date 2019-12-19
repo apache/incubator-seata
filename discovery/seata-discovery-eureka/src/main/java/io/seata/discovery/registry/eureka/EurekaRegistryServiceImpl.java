@@ -48,7 +48,6 @@ import java.util.concurrent.ConcurrentMap;
  * The type Eureka registry service.
  *
  * @author: rui_849217@163.com
- * @date: 2018/3/6
  */
 public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventListener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EurekaRegistryServiceImpl.class);
