@@ -185,8 +185,9 @@ public class StateMachineRepositoryImpl implements StateMachineRepository {
                         stateMachine.setTenantId(tenantId);
                     }
                     registryStateMachine(stateMachine);
-
-                    LOGGER.info("===== StateMachine Loaded: \n{}", json);
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("===== StateMachine Loaded: \n{}", json);
+                    }
                 }
             }
         }
