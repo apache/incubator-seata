@@ -24,7 +24,6 @@ import io.seata.core.model.BranchStatus;
  * branch transaction data object
  *
  * @author zhangsen
- * @date 2019 /3/26
  */
 public class BranchTransactionDO {
 

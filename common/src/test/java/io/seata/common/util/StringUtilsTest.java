@@ -30,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  *
  * @author Otis.z
  * @author Geng Zhang
- * @date 2019 /2/20
  */
 public class StringUtilsTest {
 

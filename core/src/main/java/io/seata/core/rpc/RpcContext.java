@@ -32,8 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type rpc context.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/07
+ * @author slievrly
  */
 public class RpcContext {
 

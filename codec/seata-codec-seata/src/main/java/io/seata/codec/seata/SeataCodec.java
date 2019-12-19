@@ -27,7 +27,6 @@ import io.seata.core.protocol.AbstractMessage;
  * The Seata codec.
  *
  * @author zhangsen
- * @data 2019 /5/6
  */
 @LoadLevel(name = "SEATA")
 public class SeataCodec implements Codec {

@@ -24,8 +24,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author jimin.jm@alibaba-inc.com
- * @date 2019/05/27
+ * @author slievrly
  */
 class MotanTransactionFilterTest {
 

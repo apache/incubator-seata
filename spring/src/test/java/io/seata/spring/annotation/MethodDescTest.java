@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Wu
- * @date 2019/3/8
  */
 public class MethodDescTest {
 

@@ -24,7 +24,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/09/30
  */
 @Component
 @ConfigurationProperties(prefix = SEATA_PREFIX)

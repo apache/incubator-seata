@@ -24,8 +24,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author jimin.jm@alibaba-inc.com
- * @date 2019/11/18
+ * @author slievrly
  */
 class FileConfigurationTest {
 

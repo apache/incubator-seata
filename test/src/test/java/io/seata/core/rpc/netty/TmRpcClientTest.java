@@ -32,8 +32,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
- * @author jimin.jm@alibaba-inc.com
- * @date 2019/01/25
+ * @author slievrly
  */
 @Disabled
 public class TmRpcClientTest {

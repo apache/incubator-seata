@@ -46,7 +46,6 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
  * The type Apollo configuration.
  *
  * @author: kl @kailing.pub
- * @date: 2019 /2/27
  */
 public class ApolloConfiguration extends AbstractConfiguration {
 

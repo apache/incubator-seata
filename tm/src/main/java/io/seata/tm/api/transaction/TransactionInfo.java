@@ -22,7 +22,6 @@ import java.util.Set;
 
 /**
  * @author guoyao
- * @date 2019/4/17
  */
 public final class TransactionInfo implements Serializable {
 

@@ -48,7 +48,6 @@ import org.slf4j.LoggerFactory;
  * The type Data base lock store.
  *
  * @author zhangsen
- * @date 2019 /4/25
  */
 @LoadLevel(name = "db")
 public class LockStoreDataBaseDAO implements LockStore, Initialize {

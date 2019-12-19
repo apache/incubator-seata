@@ -27,7 +27,6 @@ import com.alibaba.druid.mock.MockStatementBase;
 
 /**
   * @author will
-  * @date 2019/8/14
   */
 public class MockDatabaseMetaData implements DatabaseMetaData {
 

@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * The interface Transaction store manager.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public interface TransactionStoreManager {
 

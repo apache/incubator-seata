@@ -19,7 +19,6 @@ package io.seata.rm.datasource.undo;
  * The interface Keyword checker.
  *
  * @author Wu
- * @date 2019 /3/5 The interface Keyword checker
  */
 public interface KeywordChecker {
     /**

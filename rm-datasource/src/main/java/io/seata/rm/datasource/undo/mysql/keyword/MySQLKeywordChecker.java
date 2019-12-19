@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
  * The type MySQL keyword checker.
  *
  * @author xingfudeshi@gmail.com
- * @date 2019/3/5 MySQL keyword checker
  */
 public class MySQLKeywordChecker implements KeywordChecker {
     private static Set<String> keywordSet;

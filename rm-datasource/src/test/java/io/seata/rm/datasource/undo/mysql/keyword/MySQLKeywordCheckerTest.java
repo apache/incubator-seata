@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Test;
  * The type My sql keyword checker test.
  *
  * @author Wu
- * @date 2019 /3/5 The type MySQL keyword checker test.
  */
 public class MySQLKeywordCheckerTest {
 

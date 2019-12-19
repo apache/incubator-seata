@@ -57,7 +57,6 @@ import static io.netty.util.CharsetUtil.UTF_8;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/04/18
  */
 public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EtcdRegistryServiceImpl.class);

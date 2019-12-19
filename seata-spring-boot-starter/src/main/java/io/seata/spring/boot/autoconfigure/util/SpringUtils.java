@@ -21,7 +21,6 @@ import org.springframework.context.ApplicationContextAware;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/10/03
  */
 public class SpringUtils implements ApplicationContextAware {
 

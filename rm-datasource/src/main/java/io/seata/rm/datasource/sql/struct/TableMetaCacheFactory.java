@@ -23,7 +23,6 @@ import io.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache;
 
 /**
  * @author guoyao
- * @date 2019-10-11
  */
 public class TableMetaCacheFactory {
 

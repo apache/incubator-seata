@@ -44,7 +44,6 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
  * The type Consul configuration.
  *
  * @author xingfudeshi @gmail.com
- * @date 2019 /05/05
  */
 public class ConsulConfiguration extends AbstractConfiguration {
     private volatile static ConsulConfiguration instance;

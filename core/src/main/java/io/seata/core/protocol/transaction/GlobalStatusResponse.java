@@ -20,7 +20,7 @@ import io.seata.core.protocol.MessageType;
 /**
  * The type Global status response.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class GlobalStatusResponse extends AbstractGlobalEndResponse {
 

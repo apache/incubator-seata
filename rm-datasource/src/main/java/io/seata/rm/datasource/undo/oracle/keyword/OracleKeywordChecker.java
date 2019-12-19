@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
  * The type oracle sql keyword checker.
  *
  * @author ccg
- * @date 2019/3/25 oracle keyword checker
  */
 public class OracleKeywordChecker implements KeywordChecker {
     private static Set<String> keywordSet;

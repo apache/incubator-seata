@@ -25,7 +25,6 @@ import io.seata.rm.datasource.exec.LockConflictException;
 
 /**
  * @author will
- * @date 2019/9/18
  */
 public class MockLockConflictConnectionProxy extends ConnectionProxy {
     /**

@@ -22,7 +22,6 @@ import io.seata.discovery.registry.RegistryService;
 
 /**
  * @author leizhiyuan
- * @date 2019/04/15
  */
 @LoadLevel(name = "Sofa", order = 1)
 public class SofaRegistryProvider implements RegistryProvider {

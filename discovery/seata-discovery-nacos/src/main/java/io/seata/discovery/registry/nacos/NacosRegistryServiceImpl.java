@@ -37,8 +37,7 @@ import io.seata.discovery.registry.RegistryService;
 /**
  * The type Nacos registry service.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /1/31
+ * @author slievrly
  */
 public class NacosRegistryServiceImpl implements RegistryService<EventListener> {
     private static final String DEFAULT_NAMESPACE = "";

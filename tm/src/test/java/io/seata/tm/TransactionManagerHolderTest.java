@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author wangwei
- * @date 2019/10/24
  */
 class TransactionManagerHolderTest {
 

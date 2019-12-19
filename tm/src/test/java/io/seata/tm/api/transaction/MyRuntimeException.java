@@ -17,7 +17,6 @@ package io.seata.tm.api.transaction;
 
 /**
  * @author guoyao
- * @date 2019/4/18
  */
 public class MyRuntimeException extends RuntimeException {
 

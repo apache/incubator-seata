@@ -24,7 +24,6 @@ import java.util.List;
  * The type Abstract transaction store manager.
  *
  * @author zhangsen
- * @data 2019 /4/25
  */
 public abstract class AbstractTransactionStoreManager implements TransactionStoreManager {
 

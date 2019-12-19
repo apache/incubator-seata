@@ -18,8 +18,7 @@ package io.seata.core.rpc.netty;
 /**
  * The enum Transport server type.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/10
+ * @author slievrly
  */
 public enum TransportServerType {
     /**

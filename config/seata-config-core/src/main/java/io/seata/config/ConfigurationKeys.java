@@ -18,8 +18,7 @@ package io.seata.config;
 /**
  * The type Configuration keys.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /02/26
+ * @author slievrly
  */
 public final class ConfigurationKeys {
     /**

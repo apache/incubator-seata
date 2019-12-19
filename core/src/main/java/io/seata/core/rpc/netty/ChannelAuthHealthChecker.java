@@ -23,8 +23,7 @@ import io.netty.util.concurrent.Future;
 /**
  * The interface Channel auth health checker.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/25
+ * @author slievrly
  */
 public interface ChannelAuthHealthChecker extends ChannelHealthChecker {
     /**

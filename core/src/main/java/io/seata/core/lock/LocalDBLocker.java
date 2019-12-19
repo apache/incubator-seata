@@ -21,7 +21,6 @@ import java.util.List;
  * The type Local db locker.
  *
  * @author zhangsen
- * @date 2019 -05-15
  */
 public class LocalDBLocker extends AbstractLocker {
 

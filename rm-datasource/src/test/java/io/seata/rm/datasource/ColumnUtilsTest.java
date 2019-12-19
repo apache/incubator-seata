@@ -24,7 +24,6 @@ import java.util.List;
 
 /**
  * @author jsbxyyx
- * @date 2019/09/17
  */
 public class ColumnUtilsTest {
 

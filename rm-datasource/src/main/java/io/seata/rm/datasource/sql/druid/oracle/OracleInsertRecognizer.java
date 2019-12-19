@@ -42,7 +42,6 @@ import io.seata.rm.datasource.sql.struct.SqlSequenceExpr;
  * The type oracle insert recognizer.
  *
  * @author ccg
- * @date 2019/3/25
  */
 public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLInsertRecognizer {
 

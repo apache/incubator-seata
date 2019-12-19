@@ -23,7 +23,6 @@ import io.seata.core.constants.ServerTableColumnsName;
  * database log store SQLs
  *
  * @author zhangsen
- * @date 2019 /4/2
  */
 public class LogStoreSqls {
 

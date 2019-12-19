@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 
 /**
   * @author l81893521
-  * @date 2019/8/9
   */
 public class NoRollbackRuleTest {
 

@@ -18,7 +18,7 @@ package io.seata.core.rpc;
 /**
  * The enum Client type.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public enum ClientType {
 

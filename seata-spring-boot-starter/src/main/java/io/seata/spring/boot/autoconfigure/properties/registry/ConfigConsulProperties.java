@@ -22,7 +22,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_CONSUL_
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/10/11
  */
 @Component
 @ConfigurationProperties(prefix = CONFIG_CONSUL_PREFIX)

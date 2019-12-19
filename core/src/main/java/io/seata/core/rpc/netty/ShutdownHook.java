@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
  * ensure the shutdownHook is singleton
  *
  * @author 563868273@qq.com
- * @date 2019/3/29
  */
 public class ShutdownHook extends Thread {
 

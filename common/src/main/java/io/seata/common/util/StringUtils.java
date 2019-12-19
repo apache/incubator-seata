@@ -29,7 +29,7 @@ import java.util.Map;
 /**
  * The type String utils.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author Geng Zhang
  */
 public class StringUtils {

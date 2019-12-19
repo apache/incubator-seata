@@ -33,7 +33,6 @@ import java.lang.reflect.Field;
 
 /**
  * @author wangwei
- * @date 2019/10/24
  */
 class DefaultFailureHandlerImplTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultFailureHandlerImplTest.class);

@@ -54,7 +54,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type File transaction store manager.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 @LoadLevel(name = "file")
 public class FileTransactionStoreManager extends AbstractTransactionStoreManager

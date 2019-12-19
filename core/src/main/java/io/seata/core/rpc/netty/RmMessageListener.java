@@ -32,8 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Rm message listener.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/11
+ * @author slievrly
  */
 public class RmMessageListener implements ClientMessageListener {
 

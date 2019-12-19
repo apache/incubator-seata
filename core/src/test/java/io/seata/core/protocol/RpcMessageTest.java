@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The type Rpc message test.
  *
  * @author guoyao
- * @date 2019 /3/2
  */
 public class RpcMessageTest {
 

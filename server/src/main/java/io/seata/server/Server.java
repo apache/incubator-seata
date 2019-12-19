@@ -35,7 +35,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * The type Server.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class Server {
 

@@ -37,7 +37,6 @@ import static io.seata.config.ConfigurationFactory.ENV_PROPERTY_KEY;
  * The type Parameter parser.
  *
  * @author xingfudeshi@gmail.com
- * @date 2019/05/30
  */
 public class ParameterParser {
 

@@ -39,7 +39,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author will
- * @date 2019/10/15
  */
 public class SelectForUpdateExecutorTest {
 

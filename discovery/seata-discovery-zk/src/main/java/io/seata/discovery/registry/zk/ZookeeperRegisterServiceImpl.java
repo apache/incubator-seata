@@ -45,7 +45,6 @@ import static io.seata.common.Constants.IP_PORT_SPLIT_CHAR;
  * zookeeper path as /registry/zk/
  *
  * @author crazier.huang
- * @date 2019/2/15
  */
 public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildListener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZookeeperRegisterServiceImpl.class);

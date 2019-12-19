@@ -22,7 +22,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CONFIG_APOLLO_
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/10/03
  */
 @Component
 @ConfigurationProperties(prefix = CONFIG_APOLLO_PREFIX)

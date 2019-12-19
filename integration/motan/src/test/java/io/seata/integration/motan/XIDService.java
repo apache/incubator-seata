@@ -16,8 +16,7 @@
 package io.seata.integration.motan;
 
 /**
- * @author jimin.jm@alibaba-inc.com
- * @date 2019/05/27
+ * @author slievrly
  */
 public interface XIDService {
     String getXid();

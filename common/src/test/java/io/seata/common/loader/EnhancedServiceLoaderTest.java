@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The type Enhanced service loader test.
  *
  * @author Otis.z
- * @date 2019 /2/26
  */
 public class EnhancedServiceLoaderTest {
 

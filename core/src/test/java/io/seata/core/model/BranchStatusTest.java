@@ -23,7 +23,6 @@ import org.junit.jupiter.api.Test;
  * A unit test for {@link BranchStatus}
  *
  * @author Lay
- * @date 2019/3/6
  */
 public class BranchStatusTest {
 

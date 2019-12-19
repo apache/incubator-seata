@@ -21,7 +21,6 @@ import java.util.List;
  * The interface Reloadable store.
  *
  * @author zhangsen
- * @data 2019 /4/24
  */
 public interface ReloadableStore {
 

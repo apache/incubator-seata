@@ -26,7 +26,6 @@ import static org.mockito.Mockito.verify;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/04/04
  */
 public class ConsulRegistryServiceImplTest {
 

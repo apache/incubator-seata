@@ -22,7 +22,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.REGISTRY_CONSU
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/10/03
  */
 @Component
 @ConfigurationProperties(prefix = REGISTRY_CONSUL_PREFIX)

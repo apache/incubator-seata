@@ -47,7 +47,6 @@ import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFai
 
 /**
  * @author jsbxyyx
- * @date 2019/09/07
  */
 public abstract class AbstractUndoLogManager implements UndoLogManager {
 

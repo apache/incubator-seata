@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
  * The Data base session manager.
  *
  * @author zhangsen
- * @data 2019 /4/4
  */
 @LoadLevel(name = "db")
 public class DataBaseSessionManager extends AbstractSessionManager

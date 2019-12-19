@@ -21,7 +21,6 @@ import io.seata.config.ConfigurationProvider;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/04/12
  */
 @LoadLevel(name = "Etcd3", order = 1)
 public class EtcdConfigurationProvider implements ConfigurationProvider {

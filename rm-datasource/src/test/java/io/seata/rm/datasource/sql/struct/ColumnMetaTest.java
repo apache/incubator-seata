@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author will
- * @date 2019/9/28
  */
 public class ColumnMetaTest {
 

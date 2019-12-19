@@ -21,7 +21,6 @@ import com.netflix.appinfo.MyDataCenterInstanceConfig;
 
 /**
  * @author: rui_849217@163.com
- * @date: 2018/2/18
  * override MyDataCenterInstanceConfig for set value,
  * eg: instanceId \ipAddress \ applicationName...
  */

@@ -23,7 +23,6 @@ import java.util.Properties;
 /**
  * Mock connection
  * @author will
- * @date 2019/8/14
  */
 public class MockConnection extends com.alibaba.druid.mock.MockConnection {
 

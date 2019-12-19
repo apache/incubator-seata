@@ -20,7 +20,7 @@ import io.seata.core.rpc.netty.TmRpcClient;
 /**
  * The type Tm client.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class TMClient {
 

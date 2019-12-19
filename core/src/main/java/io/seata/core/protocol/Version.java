@@ -24,7 +24,7 @@ import io.seata.common.util.NetUtil;
 /**
  * The type Version.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class Version {
 

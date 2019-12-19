@@ -38,7 +38,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author guoyao
- * @date 2019/3/6
  */
 public class TransactionTemplateTest {
 

@@ -24,7 +24,6 @@ import io.seata.common.loader.LoadLevel;
  * The type Random load balance.
  *
  * @author yuoyao
- * @date 2019 /02/14
  */
 @LoadLevel(name = "RandomLoadBalance", order = 2)
 public class RandomLoadBalance extends AbstractLoadBalance {

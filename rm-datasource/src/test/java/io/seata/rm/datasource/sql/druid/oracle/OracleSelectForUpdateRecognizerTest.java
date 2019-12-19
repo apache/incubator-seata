@@ -31,7 +31,6 @@ import java.util.List;
 
 /**
  * @author will
- * @date 2019/9/24
  */
 public class OracleSelectForUpdateRecognizerTest {
 

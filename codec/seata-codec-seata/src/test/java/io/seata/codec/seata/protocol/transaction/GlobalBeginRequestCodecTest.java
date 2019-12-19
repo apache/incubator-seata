@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The type Global begin request codec test.
  *
  * @author zhangsen
- * @data 2019 /5/8
  */
 public class GlobalBeginRequestCodecTest {
 

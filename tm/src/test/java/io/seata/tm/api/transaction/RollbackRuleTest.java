@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author guoyao
- * @date 2019/4/18
  */
 public class RollbackRuleTest {
 
