@@ -122,6 +122,14 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         return (System.currentTimeMillis() - beginTime) > timeout;
     }
 
+    /**
+     * prevent could not handle rollbacking transaction
+     * @return if true force roll back
+     */
+    public boolean isRollbackingDead() {
+        return (System.currentTimeMillis() - beginTime) > (2 * 6000);
+    }
+
     @Override
     public void begin() throws TransactionException {
         this.status = GlobalStatus.Begin;
