@@ -118,7 +118,7 @@ public class ConnectionContext {
      * @return the boolean
      */
     public boolean hasUndoLog() {
-        return sqlUndoItemsBuffer.size() > 0;
+        return !sqlUndoItemsBuffer.isEmpty();
     }
 
     /**
