@@ -13,24 +13,28 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config;
+package io.seata.spring.boot.autoconfigure.properties.file;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
+
+import static io.seata.spring.boot.autoconfigure.StarterConstants.LOG_PREFIX;
 
 /**
- * The enum Configuration change type.
- *
- * @author slievrly
+ * @author jsbxyyx
  */
-public enum ConfigurationChangeType {
-    /**
-     * Add configuration change type.
-     */
-    ADD,
-    /**
-     * Modify configuration change type.
-     */
-    MODIFY,
-    /**
-     * Delete configuration change type.
-     */
-    DELETE
+@Component
+@ConfigurationProperties(prefix = LOG_PREFIX)
+public class LogProperties {
+
+    private int exceptionRate = 100;
+
+    public int getExceptionRate() {
+        return exceptionRate;
+    }
+
+    public LogProperties setExceptionRate(int exceptionRate) {
+        this.exceptionRate = exceptionRate;
+        return this;
+    }
 }
