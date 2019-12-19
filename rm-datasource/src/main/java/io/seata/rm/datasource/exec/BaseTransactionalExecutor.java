@@ -47,7 +47,7 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
  * @param <T> the type parameter
  * @param <S> the type parameter
  */
-public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor {
+public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor<T> {
 
     /**
      * The Statement proxy.
@@ -81,7 +81,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     @Override
-    public Object execute(Object... args) throws Throwable {
+    public T execute(Object... args) throws Throwable {
         if (RootContext.inGlobalTransaction()) {
             String xid = RootContext.getXID();
             statementProxy.getConnectionProxy().bind(xid);
@@ -98,7 +98,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @return the object
      * @throws Throwable the throwable
      */
-    protected abstract Object doExecute(Object... args) throws Throwable;
+    protected abstract T doExecute(Object... args) throws Throwable;
 
     /**
      * Build where condition by p ks string.
