@@ -128,7 +128,9 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
     public void destroy() {
         clientBootstrap.shutdown();
         if (NettyClientConfig.isEnableClientBatchSendRequest()) {
-            mergeSendExecutorService.shutdown();
+            if (mergeSendExecutorService != null) {
+                mergeSendExecutorService.shutdown();
+            }
         }
     }
     
