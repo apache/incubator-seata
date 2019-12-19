@@ -127,7 +127,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return if true force roll back
      */
     public boolean isRollbackingDead() {
-        return (System.currentTimeMillis() - 1576742291583L) > (3 * 6000);
+        return (System.currentTimeMillis() - beginTime) > (3 * 6000);
     }
 
     @Override
