@@ -382,7 +382,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         for (GlobalSession rollbackingSession : rollbackingSessions) {
             try {
                 //prevent repeated rollback
-                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isTimeout()) {
+                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isRollbackingDead()) {
                     continue;
                 }
                 if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT.toMillis(), rollbackingSession.getBeginTime())) {
