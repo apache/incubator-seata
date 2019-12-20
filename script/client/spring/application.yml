@@ -5,7 +5,7 @@ seata:
   client:
     rm-async-commit-buffer-limit: 1000
     rm-report-retry-count: 5
-    rm-table-meta-check-enable: true
+    rm-table-meta-check-enable: false
     rm-report-success-enable: true
     rm:
       lock:
