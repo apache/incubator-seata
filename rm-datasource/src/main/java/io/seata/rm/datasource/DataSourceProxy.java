@@ -50,7 +50,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * Enable the table meta checker
      */
     private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, true);
+        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, false);
 
     /**
      * Table meta checker interval
@@ -94,7 +94,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
                 try (Connection connection = dataSource.getConnection()) {
                     TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
                         .refresh(connection, DataSourceProxy.this.getResourceId());
-                } catch (SQLException e) {
+                } catch (Exception e) {
                 }
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }
