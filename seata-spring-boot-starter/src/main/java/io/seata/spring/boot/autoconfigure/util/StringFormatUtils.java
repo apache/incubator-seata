@@ -17,7 +17,6 @@ package io.seata.spring.boot.autoconfigure.util;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/10/03
  */
 public class StringFormatUtils {
     private static final char MINUS = '-';

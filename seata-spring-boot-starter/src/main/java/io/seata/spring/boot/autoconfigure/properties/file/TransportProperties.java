@@ -22,7 +22,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.TRANSPORT_PREF
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/09/30
  */
 @Component
 @ConfigurationProperties(prefix = TRANSPORT_PREFIX)
@@ -47,6 +46,11 @@ public class TransportProperties {
      * compressor
      */
     private String compressor = "none";
+
+    /**
+     * enable client batch send request
+     */
+    private boolean enableClientBatchSendRequest = true;
 
     public String getType() {
         return type;
@@ -93,4 +97,12 @@ public class TransportProperties {
         return this;
     }
 
+    public boolean isEnableClientBatchSendRequest() {
+        return enableClientBatchSendRequest;
+    }
+
+    public TransportProperties setEnableClientBatchSendRequest(boolean enableClientBatchSendRequest) {
+        this.enableClientBatchSendRequest = enableClientBatchSendRequest;
+        return this;
+    }
 }

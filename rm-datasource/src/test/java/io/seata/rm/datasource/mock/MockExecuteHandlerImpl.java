@@ -23,7 +23,6 @@ import com.alibaba.druid.mock.handler.MockExecuteHandler;
 
 /**
   * @author will
-  * @date 2019/8/16
   */
 public class MockExecuteHandlerImpl implements MockExecuteHandler {
 

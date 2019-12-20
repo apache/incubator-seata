@@ -45,7 +45,7 @@ import org.springframework.util.ClassUtils;
 /**
  * The type Global transactional interceptor.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class GlobalTransactionalInterceptor implements ConfigurationChangeListener,MethodInterceptor {
 
