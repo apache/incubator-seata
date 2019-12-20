@@ -102,8 +102,9 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
     /**
      * generate cache key
      *
-     * @param dataSourceProxy
+     * @param connection
      * @param tableName
+     * @param resourceId
      * @return
      */
     protected abstract String getCacheKey(Connection connection, String tableName, String resourceId);
@@ -111,7 +112,7 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
     /**
      * get scheme from datasource and tableName
      *
-     * @param dataSource
+     * @param connection
      * @param tableName
      * @return
      * @throws SQLException

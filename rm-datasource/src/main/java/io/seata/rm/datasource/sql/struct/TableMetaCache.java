@@ -17,8 +17,6 @@ package io.seata.rm.datasource.sql.struct;
 
 import java.sql.Connection;
 
-import io.seata.rm.datasource.DataSourceProxy;
-
 /**
  * The type Table meta cache.
  *
