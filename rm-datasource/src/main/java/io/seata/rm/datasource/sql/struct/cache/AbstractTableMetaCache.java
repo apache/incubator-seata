@@ -15,23 +15,21 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.util.StringUtils;
-import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
+import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Table meta cache.
@@ -85,7 +83,7 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
     public void refresh(final Connection connection, String resourceId) {
         ConcurrentMap<String, TableMeta> tableMetaMap = TABLE_META_CACHE.asMap();
         for (Map.Entry<String, TableMeta> entry : tableMetaMap.entrySet()) {
-            String key = getCacheKey(connection, entry.getValue().getTableName(),resourceId);
+            String key = getCacheKey(connection, entry.getValue().getTableName(), resourceId);
             if (entry.getKey().equals(key)) {
                 try {
                     TableMeta tableMeta = fetchSchema(connection, entry.getValue().getTableName());
