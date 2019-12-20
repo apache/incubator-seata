@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The type Framework exception test.
  *
  * @author Otis.z
- * @date 2019 /3/1
  */
 public class FrameworkExceptionTest {
 

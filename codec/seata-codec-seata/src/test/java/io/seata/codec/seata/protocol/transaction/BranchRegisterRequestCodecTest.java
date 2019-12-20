@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The type Branch register request codec test.
  *
  * @author zhangsen
- * @data 2019 /5/8
  */
 public class BranchRegisterRequestCodecTest {
 

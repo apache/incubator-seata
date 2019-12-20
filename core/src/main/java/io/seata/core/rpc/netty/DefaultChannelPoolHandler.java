@@ -23,8 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Default channel pool handler.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/10
+ * @author slievrly
  */
 public class DefaultChannelPoolHandler extends AbstractChannelPoolHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultChannelPoolHandler.class);

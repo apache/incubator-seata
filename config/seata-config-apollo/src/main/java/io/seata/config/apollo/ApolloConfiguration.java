@@ -46,7 +46,6 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
  * The type Apollo configuration.
  *
  * @author: kl @kailing.pub
- * @date: 2019 /2/27
  */
 public class ApolloConfiguration extends AbstractConfiguration {
 
@@ -139,6 +138,9 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (null == dataId || null == listener) {
+            return;
+        }
         LISTENER_SERVICE_MAP.putIfAbsent(dataId, new ConcurrentSet<>());
         LISTENER_SERVICE_MAP.get(dataId).add(listener);
     }

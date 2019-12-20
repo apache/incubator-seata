@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.config;
 
 import java.util.concurrent.ExecutorService;
@@ -26,8 +25,7 @@ import io.seata.common.thread.NamedThreadFactory;
 /**
  * The interface Configuration change listener.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /11/13
+ * @author slievrly
  */
 public interface ConfigurationChangeListener {
 

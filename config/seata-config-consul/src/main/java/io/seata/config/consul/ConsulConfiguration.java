@@ -44,7 +44,6 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
  * The type Consul configuration.
  *
  * @author xingfudeshi @gmail.com
- * @date 2019 /05/05
  */
 public class ConsulConfiguration extends AbstractConfiguration {
     private volatile static ConsulConfiguration instance;
@@ -136,6 +135,9 @@ public class ConsulConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (null == dataId || null == listener) {
+            return;
+        }
         configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
         ConsulListener consulListener = new ConsulListener(dataId, listener);
         configListenersMap.get(dataId).add(consulListener);

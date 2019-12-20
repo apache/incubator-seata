@@ -59,14 +59,13 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
  * The type Etcd configuration.
  *
  * @author xingfudeshi @gmail.com
- * @date 2019 /05/10
  */
 public class EtcdConfiguration extends AbstractConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(EtcdConfiguration.class);
     private static volatile EtcdConfiguration instance;
     private static volatile Client client;
 
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.getInstance();
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String CONFIG_TYPE = "etcd3";
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
@@ -155,6 +154,9 @@ public class EtcdConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (null == dataId || null == listener) {
+            return;
+        }
         configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
         EtcdListener etcdListener = new EtcdListener(dataId, listener);
         configListenersMap.get(dataId).add(etcdListener);
