@@ -31,7 +31,6 @@ import org.springframework.context.annotation.DependsOn;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/09/30
  */
 @ComponentScan(basePackages = "io.seata.spring.boot.autoconfigure.properties")
 @ConditionalOnProperty(prefix = StarterConstants.SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)

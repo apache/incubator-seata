@@ -27,7 +27,6 @@ import org.springframework.context.ApplicationContext;
  * parser TCC bean
  *
  * @author zhangsen
- * @data 2019 /3/18
  */
 public class TCCBeanParserUtils {
 

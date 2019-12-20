@@ -21,7 +21,6 @@ import java.util.List;
  * The interface Lock store.
  *
  * @author zhangsen
- * @data 2019 /4/25
  */
 public interface LockStore {
 

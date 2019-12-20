@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author wangwei
- * @date 2019/10/24
  */
 class DefaultGlobalTransactionTest {
     private static final String DEFAULT_XID = "1234567890";

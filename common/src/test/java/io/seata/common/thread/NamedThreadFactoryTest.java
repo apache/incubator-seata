@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author Otis.z
- * @date 2019/2/26
  */
 public class NamedThreadFactoryTest {
 
