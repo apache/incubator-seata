@@ -40,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/04/26
  */
 @Disabled
 public class EtcdRegistryServiceImplTest {

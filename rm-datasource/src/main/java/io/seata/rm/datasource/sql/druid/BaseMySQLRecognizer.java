@@ -28,7 +28,6 @@ import java.util.Objects;
 
 /**
  * @author will
- * @date 2019/9/26
  */
 public abstract class BaseMySQLRecognizer extends BaseRecognizer {
 
