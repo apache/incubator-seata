@@ -15,6 +15,8 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
+import java.sql.Connection;
+
 import io.seata.rm.datasource.DataSourceProxy;
 
 /**
@@ -32,13 +34,13 @@ public interface TableMetaCache {
      * @param tableName       the table name
      * @return the table meta
      */
-    TableMeta getTableMeta(DataSourceProxy dataSourceProxy, String tableName);
+    TableMeta getTableMeta(Connection connection, String tableName, String resourceId);
 
     /**
      * Clear the table meta cache
      *
      * @param dataSourceProxy
      */
-    void refresh(DataSourceProxy dataSourceProxy);
+    void refresh(Connection connection, String resourceId);
 
 }
