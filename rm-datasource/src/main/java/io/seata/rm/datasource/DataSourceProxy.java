@@ -30,8 +30,6 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * The type Data source proxy.
@@ -39,8 +37,6 @@ import org.slf4j.LoggerFactory;
  * @author sharajava
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProxy.class);
 
     private String resourceGroupId;
 
