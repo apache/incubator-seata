@@ -91,9 +91,9 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         DefaultResourceManager.get().registerResource(this);
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
             tableMetaExcutor.scheduleAtFixedRate(() -> {
-                try {
+                try (Connection connection = dataSource.getConnection()) {
                     TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
-                        .refresh(dataSource.getConnection(), DataSourceProxy.this.getResourceId());
+                        .refresh(connection, DataSourceProxy.this.getResourceId());
                 } catch (SQLException e) {
                 }
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
