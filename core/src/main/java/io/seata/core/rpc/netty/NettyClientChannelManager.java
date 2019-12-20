@@ -27,16 +27,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Netty client pool manager.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author zhaojun
  */
 class NettyClientChannelManager {
@@ -159,11 +160,14 @@ class NettyClientChannelManager {
         List<String> availList = null;
         try {
             availList = getAvailServerList(transactionServiceGroup);
-        } catch (Exception exx) {
-            LOGGER.error("Failed to get available servers: {}", exx.getMessage());
+        } catch (Exception e) {
+            LOGGER.error("Failed to get available servers: {}", e.getMessage(), e);
+            return;
         }
         if (CollectionUtils.isEmpty(availList)) {
-            LOGGER.error("no available server to connect.");
+            String serviceGroup = RegistryFactory.getInstance()
+                                                 .getServiceGroup(transactionServiceGroup);
+            LOGGER.error("no available service '{}' found, please make sure registry config correct", serviceGroup);
             return;
         }
         for (String serverAddress : availList) {
@@ -209,15 +213,15 @@ class NettyClientChannelManager {
     }
     
     private List<String> getAvailServerList(String transactionServiceGroup) throws Exception {
-        List<String> availList = new ArrayList<>();
-        List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance().lookup(
-            transactionServiceGroup);
-        if (!CollectionUtils.isEmpty(availInetSocketAddressList)) {
-            for (InetSocketAddress address : availInetSocketAddressList) {
-                availList.add(NetUtil.toStringAddress(address));
-            }
+        List<InetSocketAddress> availInetSocketAddressList = RegistryFactory.getInstance()
+                                                                            .lookup(transactionServiceGroup);
+        if (CollectionUtils.isEmpty(availInetSocketAddressList)) {
+            return Collections.emptyList();
         }
-        return availList;
+
+        return availInetSocketAddressList.stream()
+                                         .map(NetUtil::toStringAddress)
+                                         .collect(Collectors.toList());
     }
     
     private Channel getExistAliveChannel(Channel rmChannel, String serverAddress) {

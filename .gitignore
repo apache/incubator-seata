@@ -29,13 +29,19 @@ dependency-reduced-pom.xml
 /distribution/bin
 /distribution/conf
 /distribution/lib
+/distribution/logs
 /server/*root.*
 /server/.root.*
 /server/sessionStore/
 /server/db_store/
 /sessionStore/
+/test/sessionStore/
+/distribution/sessionStore/
 
 # system ignore
 .DS_Store
 Thumbs.db
 *.orig
+
+#h2
+*.db

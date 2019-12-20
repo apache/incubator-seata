@@ -34,13 +34,14 @@ import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.discovery.registry.RegistryService;
-import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,7 +57,6 @@ import static io.netty.util.CharsetUtil.UTF_8;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/04/18
  */
 public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EtcdRegistryServiceImpl.class);
@@ -213,7 +213,8 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             });
 
         }
-        return clusterAddressMap.get(cluster).getValue();
+        Pair<Long, List<InetSocketAddress>> pair = clusterAddressMap.get(cluster);
+        return Objects.isNull(pair) ? Collections.emptyList() : pair.getValue();
     }
 
     @Override
@@ -267,17 +268,6 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             }
         }
         return client;
-    }
-
-    /**
-     * get service group
-     *
-     * @param key
-     * @return clusterNameKey
-     */
-    private String getServiceGroup(String key) {
-        String clusterNameKey = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
-        return ConfigurationFactory.getInstance().getConfig(clusterNameKey);
     }
 
     /**

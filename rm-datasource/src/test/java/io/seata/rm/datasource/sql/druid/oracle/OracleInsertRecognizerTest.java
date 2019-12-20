@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author will
- * @date 2019/9/23
  */
 public class OracleInsertRecognizerTest {
 

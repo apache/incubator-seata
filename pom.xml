@@ -34,6 +34,7 @@
         <module>integration/dubbo-alibaba</module>
         <module>integration/sofa-rpc</module>
         <module>integration/motan</module>
+        <module>integration/grpc</module>
         <module>rm</module>
         <module>rm-datasource</module>
         <module>server</module>
@@ -43,6 +44,8 @@
         <module>tm</module>
         <module>metrics</module>
         <module>codec</module>
+        <module>seata-spring-boot-starter</module>
+        <module>compressor</module>
         <module>saga</module>
     </modules>
     <packaging>pom</packaging>
@@ -86,7 +89,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>0.9.0</revision>
+        <revision>1.0.0</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -113,6 +116,9 @@
         <assertj-core.version>3.12.2</assertj-core.version>
         <junit-platform-launcher.version>1.4.2</junit-platform-launcher.version>
 
+        <!-- for docker image-->
+        <image.publish.skip>true</image.publish.skip>
+        <image.tags>latest</image.tags>
     </properties>
 
     <!--test-->
@@ -232,7 +238,10 @@
                     <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
                 </repository>
             </distributionManagement>
-
+            <properties>
+                <image.publish.skip>false</image.publish.skip>
+                <image.tags>${project.version},latest</image.tags>
+            </properties>
         </profile>
         <profile>
             <id>licenseCheck</id>
@@ -268,6 +277,13 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>image</id>
+            <properties>
+                <image.publish.skip>false</image.publish.skip>
+                <image.tags>latest</image.tags>
+            </properties>
         </profile>
     </profiles>
 
@@ -451,9 +467,10 @@
                             <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
                             <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>
-                            <failsOnError>false</failsOnError>
+                            <failsOnError>true</failsOnError>
                             <failOnViolation>false</failOnViolation>
-                            <excludes>**/generated/**</excludes>
+                            <excludes>**/generated/**/*</excludes>
+                            <excludes>io/seata/integration/grpc/interceptor/</excludes>
                         </configuration>
                         <goals>
                             <goal>check</goal>

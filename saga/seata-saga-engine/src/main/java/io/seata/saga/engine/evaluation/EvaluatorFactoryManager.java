@@ -15,16 +15,17 @@
  */
 package io.seata.saga.engine.evaluation;
 
-import io.seata.common.util.StringUtils;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.seata.common.util.StringUtils;
 
 /**
  * Evaluator Factory Manager
  *
+ * @author lorne.cl
  * @see EvaluatorFactory
  * @see Evaluator
- * @author lorne.cl
  */
 public class EvaluatorFactoryManager {
 
@@ -32,9 +33,9 @@ public class EvaluatorFactoryManager {
 
     private Map<String, EvaluatorFactory> evaluatorFactoryMap = new ConcurrentHashMap<>();
 
-    public EvaluatorFactory getEvaluatorFactory(String type){
+    public EvaluatorFactory getEvaluatorFactory(String type) {
 
-        if(StringUtils.isBlank(type)){
+        if (StringUtils.isBlank(type)) {
             type = EVALUATOR_TYPE_DEFAULT;
         }
         return this.evaluatorFactoryMap.get(type);
@@ -48,7 +49,7 @@ public class EvaluatorFactoryManager {
         this.evaluatorFactoryMap.putAll(evaluatorFactoryMap);
     }
 
-    public void putEvaluatorFactory(String type, EvaluatorFactory factory){
+    public void putEvaluatorFactory(String type, EvaluatorFactory factory) {
         this.evaluatorFactoryMap.put(type, factory);
     }
 }

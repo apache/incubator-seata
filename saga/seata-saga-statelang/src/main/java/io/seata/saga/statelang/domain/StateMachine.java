@@ -20,9 +20,150 @@ import java.util.Map;
 
 /**
  * StateMachine
+ *
  * @author lorne.cl
  */
 public interface StateMachine {
+
+    /**
+     * name
+     *
+     * @return
+     */
+    String getName();
+
+    /**
+     * comment
+     *
+     * @return
+     */
+    String getComment();
+
+    /**
+     * start state name
+     *
+     * @return
+     */
+    String getStartState();
+
+    void setStartState(String startState);
+
+    /**
+     * version
+     *
+     * @return
+     */
+    String getVersion();
+
+    /**
+     * set version
+     *
+     * @param version
+     */
+    void setVersion(String version);
+
+    /**
+     * states
+     *
+     * @return
+     */
+    Map<String/** state machine name **/, State> getStates();
+
+    /**
+     * get state
+     *
+     * @param name
+     * @return
+     */
+    State getState(String name);
+
+    /**
+     * get id
+     *
+     * @return
+     */
+    String getId();
+
+    void setId(String id);
+
+    /**
+     * get tenantId
+     *
+     * @return
+     */
+    String getTenantId();
+
+    /**
+     * set tenantId
+     *
+     * @param tenantId
+     */
+    void setTenantId(String tenantId);
+
+    /**
+     * app name
+     *
+     * @return
+     */
+    String getAppName();
+
+    /**
+     * type, there is only one type: SSL(SEATA state language)
+     *
+     * @return
+     */
+    String getType();
+
+    /**
+     * statue (Active|Inactive)
+     *
+     * @return
+     */
+    Status getStatus();
+
+    /**
+     * recover strategy: prefer compensation or forward when error occurred
+     *
+     * @return
+     */
+    String getRecoverStrategy();
+
+    /**
+     * set RecoverStrategy
+     *
+     * @param recoverStrategy
+     */
+    void setRecoverStrategy(String recoverStrategy);
+
+    /**
+     * Is it persist execution log to storage?, default true
+     *
+     * @return
+     */
+    boolean isPersist();
+
+    /**
+     * State language text
+     *
+     * @return
+     */
+    String getContent();
+
+    void setContent(String content);
+
+    /**
+     * get create time
+     *
+     * @return
+     */
+    Date getGmtCreate();
+
+    /**
+     * set create time
+     *
+     * @param date
+     */
+    void setGmtCreate(Date date);
 
     enum Status {
         /**
@@ -36,7 +177,7 @@ public interface StateMachine {
 
         private String statusString;
 
-        Status(String statusString){
+        Status(String statusString) {
             this.statusString = statusString;
         }
 
@@ -44,125 +185,4 @@ public interface StateMachine {
             return statusString;
         }
     }
-
-    void setId(String id);
-
-    void setStartState(String startState);
-
-    /**
-     * name
-     * @return
-     */
-    String getName();
-
-    /**
-     * comment
-     * @return
-     */
-    String getComment();
-
-    /**
-     * start state name
-     * @return
-     */
-    String getStartState();
-
-    /**
-     * version
-     * @return
-     */
-    String getVersion();
-
-    /**
-     * set version
-     * @param version
-     */
-    void setVersion(String version);
-
-    /**
-     * states
-     * @return
-     */
-    Map<String/** 状态机名称 **/, State> getStates();
-
-    /**
-     * get state
-     * @param name
-     * @return
-     */
-    State getState(String name);
-
-    /**
-     * get id
-     * @return
-     */
-    String getId();
-
-    /**
-     * get tenantId
-     * @return
-     */
-    String getTenantId();
-
-    /**
-     * set tenantId
-     * @param tenantId
-     */
-    void setTenantId(String tenantId);
-
-    /**
-     * app name
-     * @return
-     */
-    String getAppName();
-
-    /**
-     * type, there is only one type: SSL(SEATA state language)
-     * @return
-     */
-    String getType();
-
-    /**
-     * statue（Active|Inactive）
-     * @return
-     */
-    Status getStatus();
-
-    /**
-     * recover strategy: prefer compensation or forward when error occurred
-     * @return
-     */
-    String getRecoverStrategy();
-
-    /**
-     * set RecoverStrategy
-     * @param recoverStrategy
-     */
-    void setRecoverStrategy(String recoverStrategy);
-
-    /**
-     * Is it persist execution log to storage?, default true
-     * @return
-     */
-    boolean isPersist();
-
-    /**
-     * State language text
-     * @return
-     */
-    String getContent();
-
-    void setContent(String content);
-
-    /**
-     * get create time
-     * @return
-     */
-    Date getGmtCreate();
-
-    /**
-     * set create time
-     * @param date
-     */
-    void setGmtCreate(Date date);
 }

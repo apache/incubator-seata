@@ -31,6 +31,7 @@ import io.netty.util.NettyRuntime;
 import io.netty.util.internal.PlatformDependent;
 import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Netty base config.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/24
+ * @author slievrly
  */
 public class NettyBaseConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyBaseConfig.class);
@@ -51,18 +51,17 @@ public class NettyBaseConfig {
     /**
      * The constant BOSS_THREAD_PREFIX.
      */
-    protected static final String BOSS_THREAD_PREFIX = CONFIG.getConfig("transport.thread-factory.boss-thread-prefix");
+    protected static final String BOSS_THREAD_PREFIX = CONFIG.getConfig(ConfigurationKeys.BOSS_THREAD_PREFIX);
 
     /**
      * The constant WORKER_THREAD_PREFIX.
      */
-    protected static final String WORKER_THREAD_PREFIX = CONFIG.getConfig(
-        "transport.thread-factory.worker-thread-prefix");
+    protected static final String WORKER_THREAD_PREFIX = CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_PREFIX);
 
     /**
      * The constant SHARE_BOSS_WORKER.
      */
-    protected static final boolean SHARE_BOSS_WORKER = CONFIG.getBoolean("transport.thread-factory.share-boss-worker");
+    protected static final boolean SHARE_BOSS_WORKER = CONFIG.getBoolean(ConfigurationKeys.SHARE_BOSS_WORKER);
 
     /**
      * The constant WORKER_THREAD_SIZE.
@@ -108,8 +107,8 @@ public class NettyBaseConfig {
     protected static final int MAX_ALL_IDLE_SECONDS = 0;
 
     static {
-        TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.valueOf(CONFIG.getConfig("transport.type",TransportProtocolType.TCP.name()));
-        String workerThreadSize = CONFIG.getConfig("transport.thread-factory.worker-thread-size");
+        TRANSPORT_PROTOCOL_TYPE = TransportProtocolType.valueOf(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_TYPE, TransportProtocolType.TCP.name()));
+        String workerThreadSize = CONFIG.getConfig(ConfigurationKeys.WORKER_THREAD_SIZE);
         if (StringUtils.isNotBlank(workerThreadSize) && StringUtils.isNumeric(workerThreadSize)) {
             WORKER_THREAD_SIZE = Integer.parseInt(workerThreadSize);
         } else if (null != WorkThreadMode.getModeByName(workerThreadSize)) {
@@ -117,7 +116,7 @@ public class NettyBaseConfig {
         } else {
             WORKER_THREAD_SIZE = WorkThreadMode.Default.getValue();
         }
-        TRANSPORT_SERVER_TYPE = TransportServerType.valueOf(CONFIG.getConfig("transport.server",TransportServerType.NIO.name()));
+        TRANSPORT_SERVER_TYPE = TransportServerType.valueOf(CONFIG.getConfig(ConfigurationKeys.TRANSPORT_SERVER, TransportServerType.NIO.name()));
         switch (TRANSPORT_SERVER_TYPE) {
             case NIO:
                 if (TRANSPORT_PROTOCOL_TYPE == TransportProtocolType.TCP) {
@@ -161,7 +160,7 @@ public class NettyBaseConfig {
             default:
                 throw new IllegalArgumentException("unsupported.");
         }
-        boolean enableHeartbeat = CONFIG.getBoolean("transport.heartbeat", false);
+        boolean enableHeartbeat = CONFIG.getBoolean(ConfigurationKeys.TRANSPORT_HEARTBEAT, false);
         if (enableHeartbeat) {
             MAX_WRITE_IDLE_SECONDS = DEFAULT_WRITE_IDLE_SECONDS;
         } else {

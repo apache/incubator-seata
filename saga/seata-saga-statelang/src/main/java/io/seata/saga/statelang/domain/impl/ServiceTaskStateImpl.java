@@ -15,26 +15,29 @@
  */
 package io.seata.saga.statelang.domain.impl;
 
-import io.seata.saga.statelang.domain.DomainConstants;
-import io.seata.saga.statelang.domain.ServiceTaskState;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
+import io.seata.saga.statelang.domain.DomainConstants;
+import io.seata.saga.statelang.domain.ServiceTaskState;
+
 /**
  * A state used to invoke a service
+ *
  * @author lorne.cl
  */
 public class ServiceTaskStateImpl extends AbstractTaskState implements ServiceTaskState {
 
-    private String              serviceType;
-    private String              serviceName;
-    private String              serviceMethod;
-    private List<String>        parameterTypes;
-    private Method              method;
-    private List<Object>        inputExpressions;
+    private String serviceType;
+    private String serviceName;
+    private String serviceMethod;
+    private List<String> parameterTypes;
+    private Method method;
+    private List<Object> inputExpressions;
     private Map<String, Object> outputExpressions;
     private Map<Object, String> statusEvaluators;
+    private boolean isAsync;
 
     public ServiceTaskStateImpl() {
         setType(DomainConstants.STATE_TYPE_SERVICE_TASK);
@@ -106,5 +109,13 @@ public class ServiceTaskStateImpl extends AbstractTaskState implements ServiceTa
 
     public void setStatusEvaluators(Map<Object, String> statusEvaluators) {
         this.statusEvaluators = statusEvaluators;
+    }
+
+    public boolean isAsync() {
+        return isAsync;
+    }
+
+    public void setAsync(boolean async) {
+        isAsync = async;
     }
 }

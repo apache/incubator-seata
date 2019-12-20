@@ -15,22 +15,21 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
-import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.sql.DataSource;
-import java.sql.SQLException;
-import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The type Table meta cache.
@@ -50,16 +49,16 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
 
 
     @Override
-    public TableMeta getTableMeta(final DataSourceProxy dataSourceProxy, final String tableName) {
+    public TableMeta getTableMeta(final Connection connection, final String tableName, String resourceId) {
         if (StringUtils.isNullOrEmpty(tableName)) {
             throw new IllegalArgumentException("TableMeta cannot be fetched without tableName");
         }
 
         TableMeta tmeta;
-        final String key = getCacheKey(dataSourceProxy, tableName);
+        final String key = getCacheKey(connection, tableName, resourceId);
         tmeta = TABLE_META_CACHE.get(key, mappingFunction -> {
             try {
-                return fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
+                return fetchSchema(connection, tableName);
             } catch (SQLException e) {
                 LOGGER.error("get cache error:{}", e.getMessage(), e);
                 return null;
@@ -68,7 +67,7 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
 
         if (tmeta == null) {
             try {
-                tmeta = fetchSchema(dataSourceProxy.getTargetDataSource(), tableName);
+                tmeta = fetchSchema(connection, tableName);
             } catch (SQLException e) {
                 LOGGER.error("get table meta error:{}", e.getMessage(), e);
             }
@@ -81,13 +80,13 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
     }
 
     @Override
-    public void refresh(final DataSourceProxy dataSourceProxy) {
+    public void refresh(final Connection connection, String resourceId) {
         ConcurrentMap<String, TableMeta> tableMetaMap = TABLE_META_CACHE.asMap();
         for (Map.Entry<String, TableMeta> entry : tableMetaMap.entrySet()) {
-            String key = getCacheKey(dataSourceProxy, entry.getValue().getTableName());
+            String key = getCacheKey(connection, entry.getValue().getTableName(), resourceId);
             if (entry.getKey().equals(key)) {
                 try {
-                    TableMeta tableMeta = fetchSchema(dataSourceProxy, entry.getValue().getTableName());
+                    TableMeta tableMeta = fetchSchema(connection, entry.getValue().getTableName());
                     if (!tableMeta.equals(entry.getValue())) {
                         TABLE_META_CACHE.put(entry.getKey(), tableMeta);
                         LOGGER.info("table meta change was found, update table meta cache automatically.");
@@ -103,22 +102,21 @@ public abstract class AbstractTableMetaCache implements TableMetaCache {
     /**
      * generate cache key
      *
-     * @param dataSourceProxy
+     * @param connection
      * @param tableName
+     * @param resourceId
      * @return
      */
-    private String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
-        return dataSourceProxy.getResourceId() + "." + tableName;
-    }
+    protected abstract String getCacheKey(Connection connection, String tableName, String resourceId);
 
     /**
      * get scheme from datasource and tableName
      *
-     * @param dataSource
+     * @param connection
      * @param tableName
      * @return
      * @throws SQLException
      */
-    protected abstract TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException;
+    protected abstract TableMeta fetchSchema(Connection connection, String tableName) throws SQLException;
 
 }

@@ -21,7 +21,7 @@
 
     <groupId>io.seata</groupId>
     <artifactId>seata-all</artifactId>
-    <version>0.9.0</version>
+    <version>1.0.0</version>
 
     <name>Seata All-in-one ${project.version}</name>
     <url>http://seata.io</url>
@@ -234,7 +234,22 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-grpc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-codec-kryo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-codec-hessian</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-compressor-gzip</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -454,6 +469,21 @@
         </dependency>
 
         <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <scope>provided</scope>
@@ -466,6 +496,11 @@
         <dependency>
             <groupId>com.esotericsoftware</groupId>
             <artifactId>kryo</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.caucho</groupId>
+            <artifactId>hessian</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -570,6 +605,7 @@
                                     <include>io.seata:seata-dubbo</include>
                                     <include>io.seata:seata-dubbo-alibaba</include>
                                     <include>io.seata:seata-motan</include>
+                                    <include>io.seata:seata-grpc</include>
                                     <include>io.seata:seata-rm</include>
                                     <include>io.seata:seata-rm-datasource</include>
                                     <include>io.seata:seata-sofa-rpc</include>
@@ -578,6 +614,8 @@
                                     <include>io.seata:seata-tm</include>
                                     <include>io.seata:seata-codec-seata</include>
                                     <include>io.seata:seata-codec-protobuf</include>
+                                    <include>io.seata:seata-codec-kryo</include>
+                                    <include>io.seata:seata-codec-hessian</include>
                                     <!-- saga -->
                                     <include>io.seata:seata-saga-processctrl</include>
                                     <include>io.seata:seata-saga-statelang</include>
@@ -585,8 +623,7 @@
                                     <include>io.seata:seata-saga-rm</include>
                                     <include>io.seata:seata-saga-tm</include>
                                     <include>io.seata:seata-saga-engine-store</include>
-
-                                    <include>io.seata:seata-codec-kryo</include>
+                                    <include>io.seata:seata-compressor-gzip</include>
                                 </includes>
                             </artifactSet>
                             <transformers>

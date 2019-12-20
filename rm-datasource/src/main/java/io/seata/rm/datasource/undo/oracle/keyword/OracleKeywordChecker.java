@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.oracle.keyword;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.undo.KeywordChecker;
 
 import java.util.Arrays;
@@ -25,30 +26,12 @@ import java.util.stream.Collectors;
  * The type oracle sql keyword checker.
  *
  * @author ccg
- * @date 2019/3/25 oracle keyword checker
  */
 public class OracleKeywordChecker implements KeywordChecker {
-    private static volatile KeywordChecker keywordChecker = null;
-    private Set<String> keywordSet;
+    private static Set<String> keywordSet;
 
-    private OracleKeywordChecker() {
+    static {
         keywordSet = Arrays.stream(OracleKeyword.values()).map(OracleKeyword::name).collect(Collectors.toSet());
-    }
-
-    /**
-     * get instance of type oracle keyword checker
-     *
-     * @return instance
-     */
-    public static KeywordChecker getInstance() {
-        if (keywordChecker == null) {
-            synchronized (OracleKeywordChecker.class) {
-                if (keywordChecker == null) {
-                    keywordChecker = new OracleKeywordChecker();
-                }
-            }
-        }
-        return keywordChecker;
     }
 
     /**
@@ -505,7 +488,6 @@ public class OracleKeywordChecker implements KeywordChecker {
         }
     }
 
-
     @Override
     public boolean check(String fieldOrTableName) {
         if (keywordSet.contains(fieldOrTableName)) {
@@ -520,7 +502,13 @@ public class OracleKeywordChecker implements KeywordChecker {
 
     @Override
     public String checkAndReplace(String fieldOrTableName) {
-        return check(fieldOrTableName)? fieldOrTableName :fieldOrTableName;
-//        return check(fieldOrTableName)?"`" + fieldOrTableName + "`":fieldOrTableName;
+        return check(fieldOrTableName) ? fieldOrTableName : fieldOrTableName;
+        //        return check(fieldOrTableName)?"`" + fieldOrTableName + "`":fieldOrTableName;
+    }
+
+    @Override
+    public String getDbType()
+    {
+        return JdbcConstants.ORACLE;
     }
 }

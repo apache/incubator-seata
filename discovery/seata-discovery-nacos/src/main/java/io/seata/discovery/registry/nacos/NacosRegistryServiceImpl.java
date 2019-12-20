@@ -22,23 +22,22 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import io.seata.config.Configuration;
-import io.seata.config.ConfigurationFactory;
-import io.seata.config.ConfigurationKeys;
-import io.seata.discovery.registry.RegistryService;
 import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
-import com.alibaba.nacos.api.naming.listener.Event;
 import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alibaba.nacos.client.naming.utils.CollectionUtils;
 
+import io.seata.config.Configuration;
+import io.seata.config.ConfigurationFactory;
+import io.seata.config.ConfigurationKeys;
+import io.seata.discovery.registry.RegistryService;
+
 /**
  * The type Nacos registry service.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /1/31
+ * @author slievrly
  */
 public class NacosRegistryServiceImpl implements RegistryService<EventListener> {
     private static final String DEFAULT_NAMESPACE = "";
@@ -52,6 +51,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
     private static final ConcurrentMap<String, List<EventListener>> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, List<InetSocketAddress>> CLUSTER_ADDRESS_MAP = new ConcurrentHashMap<>();
     private static volatile NacosRegistryServiceImpl instance;
+    private static final Object LOCK_OBJ = new Object();
 
     private NacosRegistryServiceImpl() {
     }
@@ -112,41 +112,41 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
-        Configuration config = ConfigurationFactory.getInstance();
-        String clusterName = config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
+        String clusterName = getServiceGroup(key);
         if (null == clusterName) {
             return null;
         }
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
-            List<String> clusters = new ArrayList<>();
-            clusters.add(clusterName);
-            List<Instance> firstAllInstances = getNamingInstance().getAllInstances(PRO_SERVER_ADDR_KEY, clusters);
-            if (null != firstAllInstances) {
-                List<InetSocketAddress> newAddressList = new ArrayList<>();
-                for (Instance instance : firstAllInstances) {
-                    if (instance.isEnabled() && instance.isHealthy()) {
-                        newAddressList.add(new InetSocketAddress(instance.getIp(), instance.getPort()));
-                    }
-                }
-                CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
-            }
-            subscribe(clusterName, new EventListener() {
-                @Override
-                public void onEvent(Event event) {
-                    List<Instance> instances = ((NamingEvent) event).getInstances();
-                    if (null == instances && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
-                        CLUSTER_ADDRESS_MAP.remove(clusterName);
-                    } else if (!CollectionUtils.isEmpty(instances)) {
+            synchronized (LOCK_OBJ) {
+                if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
+                    List<String> clusters = new ArrayList<>();
+                    clusters.add(clusterName);
+                    List<Instance> firstAllInstances = getNamingInstance().getAllInstances(PRO_SERVER_ADDR_KEY, clusters);
+                    if (null != firstAllInstances) {
                         List<InetSocketAddress> newAddressList = new ArrayList<>();
-                        for (Instance instance : instances) {
+                        for (Instance instance : firstAllInstances) {
                             if (instance.isEnabled() && instance.isHealthy()) {
                                 newAddressList.add(new InetSocketAddress(instance.getIp(), instance.getPort()));
                             }
                         }
                         CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
                     }
+                    subscribe(clusterName, event -> {
+                        List<Instance> instances = ((NamingEvent)event).getInstances();
+                        if (null == instances && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
+                            CLUSTER_ADDRESS_MAP.remove(clusterName);
+                        } else if (!CollectionUtils.isEmpty(instances)) {
+                            List<InetSocketAddress> newAddressList = new ArrayList<>();
+                            for (Instance instance : instances) {
+                                if (instance.isEnabled() && instance.isHealthy()) {
+                                    newAddressList.add(new InetSocketAddress(instance.getIp(), instance.getPort()));
+                                }
+                            }
+                            CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
+                        }
+                    });
                 }
-            });
+            }
         }
         return CLUSTER_ADDRESS_MAP.get(clusterName);
     }

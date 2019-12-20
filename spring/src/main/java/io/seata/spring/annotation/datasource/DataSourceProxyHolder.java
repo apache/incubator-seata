@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * the type data source proxy holder
  *
  * @author xingfudeshi@gmail.com
- * @date 2019/08/23
  */
 public class DataSourceProxyHolder {
     private static final int MAP_INITIAL_CAPACITY = 8;

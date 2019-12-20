@@ -49,10 +49,10 @@ public class StateMachineDBTests extends AbstractServerTest {
         stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
     }
 
-    private GlobalTransaction getGlobalTransaction(StateMachineInstance instance){
+    private GlobalTransaction getGlobalTransaction(StateMachineInstance instance) {
         Map<String, Object> params = instance.getContext();
-        if(params != null){
-            return (GlobalTransaction)params.get(DomainConstants.VAR_NAME_GLOBAL_TX);
+        if (params != null) {
+            return (GlobalTransaction) params.get(DomainConstants.VAR_NAME_GLOBAL_TX);
         }
         return null;
     }
@@ -66,7 +66,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Test
     public void testSimpleStateMachineWithChoice() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>();
         paramMap.put("a", 1);
@@ -78,7 +78,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        start  = System.currentTimeMillis();
+        start = System.currentTimeMillis();
         paramMap.put("a", 2);
         stateMachineEngine.start(stateMachineName, null, paramMap);
 
@@ -89,7 +89,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Test
     public void testSimpleStateMachineWithChoiceAndEnd() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -101,7 +101,7 @@ public class StateMachineDBTests extends AbstractServerTest {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-        start  = System.currentTimeMillis();
+        start = System.currentTimeMillis();
 
         paramMap.put("a", 3);
         stateMachineEngine.start(stateMachineName, null, paramMap);
@@ -113,7 +113,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Test
     public void testSimpleInputAssignmentStateMachine() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -126,7 +126,8 @@ public class StateMachineDBTests extends AbstractServerTest {
         Assertions.assertNotNull(businessKey);
         System.out.println("====== businessKey :" + businessKey);
 
-        String contextBusinessKey = (String)instance.getEndParams().get(instance.getStateList().get(0).getName()+ DomainConstants.VAR_NAME_BUSINESSKEY);
+        String contextBusinessKey = (String) instance.getEndParams().get(
+                instance.getStateList().get(0).getName() + DomainConstants.VAR_NAME_BUSINESSKEY);
         Assertions.assertNotNull(contextBusinessKey);
         System.out.println("====== context businessKey :" + businessKey);
 
@@ -137,7 +138,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Test
     public void testSimpleCatchesStateMachine() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -159,9 +160,29 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
-    public void testStatusMatchingStateMachine() throws Exception {
+    public void testSimpleRetryStateMachine() {
 
         long start  = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleRetryStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+    }
+
+    @Test
+    public void testStatusMatchingStateMachine() throws Exception {
+
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -183,11 +204,10 @@ public class StateMachineDBTests extends AbstractServerTest {
         Assertions.assertTrue(GlobalStatus.CommitRetrying.equals(globalTransaction.getStatus()));
     }
 
-
     @Test
     public void testCompensationStateMachine() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -212,7 +232,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Test
     public void testCompensationAndSubStateMachine() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 2);
@@ -233,9 +253,32 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
+    public void testCompensationAndSubStateMachineLayout() throws Exception {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 2);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine_layout";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+
+        GlobalTransaction globalTransaction = getGlobalTransaction(inst);
+        Assertions.assertNotNull(globalTransaction);
+        Assertions.assertTrue(GlobalStatus.CommitRetrying.equals(globalTransaction.getStatus()));
+    }
+
+    @Test
     public void testCompensationStateMachineForRecovery() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -253,26 +296,51 @@ public class StateMachineDBTests extends AbstractServerTest {
 
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
         Assertions.assertNotNull(globalTransaction);
-        System.out.println("====== GlobalStatus: "+globalTransaction.getStatus());
+        System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
 
         // waiting for global transaction recover
-        while (!(ExecutionStatus.SU.equals(inst.getStatus()) || ExecutionStatus.SU.equals(inst.getCompensationStatus()))){
-            System.out.println("====== GlobalStatus: "+globalTransaction.getStatus());
+        while (!(ExecutionStatus.SU.equals(inst.getStatus()) || ExecutionStatus.SU.equals(inst.getCompensationStatus()))) {
+            System.out.println("====== GlobalStatus: " + globalTransaction.getStatus());
             Thread.sleep(2000);
             inst = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(inst.getId());
         }
     }
 
     @Test
-    public void testReloadStateMachineInstance(){
-        StateMachineInstance instance = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance("10.15.232.93:8091:2019567124");
+    public void testReloadStateMachineInstance() {
+        StateMachineInstance instance = stateMachineEngine.getStateMachineConfig().getStateLogStore().getStateMachineInstance(
+                "10.15.232.93:8091:2019567124");
         System.out.println(instance);
+    }
+
+    @Test
+    public void testSimpleStateMachineWithAsyncState() {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+
+        String stateMachineName = "simpleStateMachineWithAsyncState";
+
+        StateMachineInstance inst = stateMachineEngine.start(stateMachineName, null, paramMap);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
     public void testSimpleCatchesStateMachineAsync() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -287,7 +355,6 @@ public class StateMachineDBTests extends AbstractServerTest {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-
         Assertions.assertNotNull(inst.getException());
         Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
 
@@ -297,9 +364,32 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
-    public void testStatusMatchingStateMachineAsync() throws Exception {
+    public void testSimpleRetryStateMachineAsync() {
 
         long start  = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleRetryStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+
+        waittingForFinish(inst);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+    }
+
+    @Test
+    public void testStatusMatchingStateMachineAsync() throws Exception {
+
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -314,7 +404,6 @@ public class StateMachineDBTests extends AbstractServerTest {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-
         Assertions.assertNotNull(inst.getException());
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
 
@@ -326,7 +415,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Test
     public void testCompensationStateMachineAsync() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -352,7 +441,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     @Test
     public void testCompensationAndSubStateMachineAsync() throws Exception {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 2);
@@ -374,9 +463,59 @@ public class StateMachineDBTests extends AbstractServerTest {
         Assertions.assertTrue(GlobalStatus.CommitRetrying.equals(globalTransaction.getStatus()));
     }
 
-    private void waittingForFinish(StateMachineInstance inst){
-        synchronized (lock){
-            if(ExecutionStatus.RU.equals(inst.getStatus())){
+    @Test
+    public void testCompensationAndSubStateMachineAsyncWithLayout() throws Exception {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 2);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine_layout";
+
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+
+        waittingForFinish(inst);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+
+        GlobalTransaction globalTransaction = getGlobalTransaction(inst);
+        Assertions.assertNotNull(globalTransaction);
+        Assertions.assertTrue(GlobalStatus.CommitRetrying.equals(globalTransaction.getStatus()));
+    }
+
+    @Test
+    public void testAsyncStartSimpleStateMachineWithAsyncState() {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+
+        String stateMachineName = "simpleStateMachineWithAsyncState";
+
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+
+        waittingForFinish(inst);
+
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void waittingForFinish(StateMachineInstance inst) {
+        synchronized (lock) {
+            if (ExecutionStatus.RU.equals(inst.getStatus())) {
                 try {
                     lock.wait();
                 } catch (InterruptedException e) {
@@ -390,14 +529,14 @@ public class StateMachineDBTests extends AbstractServerTest {
     private          AsyncCallback callback = new AsyncCallback() {
         @Override
         public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
-            synchronized (lock){
+            synchronized (lock) {
                 lock.notifyAll();
             }
         }
 
         @Override
         public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
-            synchronized (lock){
+            synchronized (lock) {
                 lock.notifyAll();
             }
         }

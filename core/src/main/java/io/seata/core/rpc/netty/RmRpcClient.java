@@ -30,7 +30,6 @@ import io.netty.util.concurrent.EventExecutorGroup;
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.thread.NamedThreadFactory;
-import io.seata.common.util.StringUtils;
 import io.seata.core.model.Resource;
 import io.seata.core.model.ResourceManager;
 import io.seata.core.protocol.AbstractMessage;
@@ -45,9 +44,8 @@ import static io.seata.common.Constants.DBKEYS_SPLIT_CHAR;
 /**
  * The type Rm rpc client.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author zhaojun
- * @date 2018 /10/10
  */
 @Sharable
 public final class RmRpcClient extends AbstractRpcRemotingClient {
@@ -147,17 +145,7 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
     protected Function<String, NettyPoolKey> getPoolKeyFunction() {
         return (serverAddress) -> {
             String resourceIds = getMergedResourceKeys();
-            synchronized (ResourceManager.RESOURCE_LOCK) {
-                while (StringUtils.isNullOrEmpty(resourceIds)) {
-                    try {
-                        ResourceManager.RESOURCE_LOCK.wait();
-                    } catch (InterruptedException exx) {
-                        LOGGER.error("wait resourceIds interrupted error:{}", exx.getMessage(), exx);
-                    }
-                    resourceIds = getMergedResourceKeys();
-                }
-            }
-            if (LOGGER.isInfoEnabled()) {
+            if (null != resourceIds && LOGGER.isInfoEnabled()) {
                 LOGGER.info("RM will register :{}", resourceIds);
             }
             RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
@@ -206,9 +194,6 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
      * @param resourceId      the db key
      */
     public void registerResource(String resourceGroupId, String resourceId) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("register to RM resourceId:{}", resourceId);
-        }
         if (getClientChannelManager().getChannels().isEmpty()) {
             getClientChannelManager().reconnect(transactionServiceGroup);
             return;
@@ -218,26 +203,26 @@ public final class RmRpcClient extends AbstractRpcRemotingClient {
                 String serverAddress = entry.getKey();
                 Channel rmChannel = entry.getValue();
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("register resource, resourceId:{}", resourceId);
+                    LOGGER.info("will register resourceId:{}", resourceId);
                 }
                 sendRegisterMessage(serverAddress, rmChannel, resourceId);
             }
         }
     }
 
-    private void sendRegisterMessage(String serverAddress, Channel channel, String dbKey) {
+    private void sendRegisterMessage(String serverAddress, Channel channel, String resourceId) {
         RegisterRMRequest message = new RegisterRMRequest(applicationId, transactionServiceGroup);
-        message.setResourceIds(dbKey);
+        message.setResourceIds(resourceId);
         try {
             super.sendAsyncRequestWithoutResponse(channel, message);
         } catch (FrameworkException e) {
             if (e.getErrcode() == FrameworkErrorCode.ChannelIsNotWritable && serverAddress != null) {
                 getClientChannelManager().releaseChannel(channel, serverAddress);
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("remove channel:{}", channel);
+                    LOGGER.info("remove not writable channel:{}", channel);
                 }
             } else {
-                LOGGER.error("register RM failed, channel:{}", channel, e);
+                LOGGER.error("register resource failed, channel:{},resourceId:{}", channel, resourceId, e);
             }
         } catch (TimeoutException e) {
             LOGGER.error(e.getMessage());

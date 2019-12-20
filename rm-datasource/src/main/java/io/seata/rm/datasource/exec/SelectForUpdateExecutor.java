@@ -16,8 +16,10 @@
 package io.seata.rm.datasource.exec;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,15 +29,18 @@ import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLSelectRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Select for update executor.
  *
- * @author sharajava
- *
  * @param <S> the type parameter
+ * @author sharajava
  */
 public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransactionalExecutor<T, S> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SelectForUpdateExecutor.class);
 
     /**
      * Instantiates a new Select for update executor.
@@ -52,6 +57,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
     @Override
     public T doExecute(Object... args) throws Throwable {
         Connection conn = statementProxy.getConnection();
+        DatabaseMetaData dbmd = conn.getMetaData();
         T rs = null;
         Savepoint sp = null;
         LockRetryController lockRetryController = new LockRetryController();
@@ -60,9 +66,21 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         String selectPKSQL = buildSelectSQL(paramAppenderList);
         try {
             if (originalAutoCommit) {
+                /*
+                 * In order to hold the local db lock during global lock checking
+                 * set auto commit value to false first if original auto commit was true
+                 */
                 conn.setAutoCommit(false);
+            } else if (dbmd.supportsSavepoints()) {
+                /*
+                 * In order to release the local db lock when global lock conflict
+                 * create a save point if original auto commit was false, then use the save point here to release db
+                 * lock during global lock checking if necessary
+                 */
+                sp = conn.setSavepoint();
+            } else {
+                throw new SQLException("not support savepoint. please check your db version");
             }
-            sp = conn.setSavepoint();
 
             while (true) {
                 try {
@@ -90,13 +108,23 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
                     }
                     break;
                 } catch (LockConflictException lce) {
-                    conn.rollback(sp);
+                    if (sp != null) {
+                        conn.rollback(sp);
+                    } else {
+                        conn.rollback();
+                    }
                     lockRetryController.sleep(lce);
                 }
             }
         } finally {
             if (sp != null) {
-                conn.releaseSavepoint(sp);
+                try {
+                    conn.releaseSavepoint(sp);
+                } catch (SQLException e) {
+                    if (LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("{} does not support release save point, but this is not a error.", getDbType());
+                    }
+                }
             }
             if (originalAutoCommit) {
                 conn.setAutoCommit(true);
@@ -105,14 +133,14 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
         return rs;
     }
 
-    private String buildSelectSQL(ArrayList<List<Object>> paramAppenderList){
+    private String buildSelectSQL(ArrayList<List<Object>> paramAppenderList) {
         SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
         StringBuilder selectSQLAppender = new StringBuilder("SELECT ");
         selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
-        selectSQLAppender.append(" FROM " + getFromTableInSQL());
+        selectSQLAppender.append(" FROM ").append(getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
         if (StringUtils.isNotBlank(whereCondition)) {
-            selectSQLAppender.append(" WHERE " + whereCondition);
+            selectSQLAppender.append(" WHERE ").append(whereCondition);
         }
         selectSQLAppender.append(" FOR UPDATE");
         return selectSQLAppender.toString();

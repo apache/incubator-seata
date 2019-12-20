@@ -15,7 +15,6 @@
  */
 package io.seata.server.lock.memory;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,19 +34,15 @@ import io.seata.server.session.BranchSession;
  * The type Memory locker.
  *
  * @author zhangsen
- * @data 2019 -05-15
  */
 @LoadLevel(name = "file")
 public class MemoryLocker extends AbstractLocker {
 
     private static final int BUCKET_PER_TABLE = 128;
 
-    private static final ConcurrentMap<String/* resourceId */,
-        ConcurrentMap<String/* tableName */,
-            ConcurrentMap<Integer/* bucketId */,
-                BucketLockMap>>>
-        LOCK_MAP
-        = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String/* resourceId */, ConcurrentMap<String/* tableName */,
+        ConcurrentMap<Integer/* bucketId */, BucketLockMap>>>
+        LOCK_MAP = new ConcurrentHashMap<>();
 
     /**
      * The Branch session.
@@ -75,8 +70,7 @@ public class MemoryLocker extends AbstractLocker {
         ConcurrentMap<BucketLockMap, Set<String>> bucketHolder = branchSession.getLockHolder();
         ConcurrentMap<String, ConcurrentMap<Integer, BucketLockMap>> dbLockMap = LOCK_MAP.get(resourceId);
         if (dbLockMap == null) {
-            LOCK_MAP.putIfAbsent(resourceId,
-                new ConcurrentHashMap<>());
+            LOCK_MAP.putIfAbsent(resourceId, new ConcurrentHashMap<>());
             dbLockMap = LOCK_MAP.get(resourceId);
         }
 
@@ -122,6 +116,10 @@ public class MemoryLocker extends AbstractLocker {
 
     @Override
     public boolean releaseLock(List<RowLock> rowLock) {
+        if (CollectionUtils.isEmpty(rowLock)) {
+            //no lock
+            return true;
+        }
         ConcurrentMap<BucketLockMap, Set<String>> lockHolder = branchSession.getLockHolder();
         if (lockHolder == null || lockHolder.size() == 0) {
             return true;

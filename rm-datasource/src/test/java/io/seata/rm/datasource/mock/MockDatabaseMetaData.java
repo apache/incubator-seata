@@ -27,7 +27,6 @@ import com.alibaba.druid.mock.MockStatementBase;
 
 /**
   * @author will
-  * @date 2019/8/14
   */
 public class MockDatabaseMetaData implements DatabaseMetaData {
 
@@ -704,8 +703,8 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     @Override
     public ResultSet getColumns(String catalog, String schemaPattern, String tableNamePattern, String columnNamePattern)
         throws SQLException {
-        return new MockResultSet((MockStatementBase)this.connection.createStatement(), columnMetaColumnLabels)
-                .mockResultSet(columnsMetasReturnValue);
+        return new MockResultSet((MockStatementBase)this.connection.createStatement())
+                .mockResultSet(columnMetaColumnLabels, columnsMetasReturnValue);
     }
 
     @Override
@@ -761,8 +760,8 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
     @Override
     public ResultSet getIndexInfo(String catalog, String schema, String table, boolean unique, boolean approximate)
         throws SQLException {
-        return new MockResultSet((MockStatementBase)this.connection.createStatement(), indexMetaColumnLabels)
-                .mockResultSet(indexMetasReturnValue);
+        return new MockResultSet((MockStatementBase)this.connection.createStatement())
+                .mockResultSet(indexMetaColumnLabels, indexMetasReturnValue);
     }
 
     @Override
@@ -838,7 +837,7 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public boolean supportsSavepoints() throws SQLException {
-        return false;
+        return true;
     }
 
     @Override

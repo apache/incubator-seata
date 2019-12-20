@@ -30,6 +30,10 @@ import io.seata.tm.api.transaction.TransactionInfo;
  */
 public class MockSagaTransactionTemplate implements SagaTransactionalTemplate {
 
+    static {
+        UUIDGenerator.init(0);
+    }
+
     @Override
     public void commitTransaction(GlobalTransaction tx) throws ExecutionException {
 
@@ -49,6 +53,11 @@ public class MockSagaTransactionTemplate implements SagaTransactionalTemplate {
             e.printStackTrace();
         }
         return globalTransaction;
+    }
+
+    @Override
+    public GlobalTransaction reloadTransaction(String xid) throws ExecutionException, TransactionException {
+        return new MockGlobalTransaction(xid, GlobalStatus.UnKnown);
     }
 
     @Override

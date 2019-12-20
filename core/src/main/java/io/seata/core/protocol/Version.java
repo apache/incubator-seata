@@ -24,14 +24,14 @@ import io.seata.common.util.NetUtil;
 /**
  * The type Version.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class Version {
 
     /**
      * The constant CURRENT.
      */
-    public static final String CURRENT = "0.9.0";
+    public static final String CURRENT = "1.0.0";
 
     /**
      * The constant VERSION_MAP.

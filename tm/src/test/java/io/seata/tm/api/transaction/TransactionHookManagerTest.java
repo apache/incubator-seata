@@ -16,6 +16,7 @@
 package io.seata.tm.api.transaction;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -24,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author guoyao
- * @date 2019/3/5
  */
 public class TransactionHookManagerTest {
 
@@ -57,5 +57,8 @@ public class TransactionHookManagerTest {
         TransactionHookManager.clear();
         assertThat(TransactionHookManager.getHooks()).isEmpty();
     }
-
+    @Test
+    public void testNPE() {
+        Assertions.assertThrows(NullPointerException.class, () -> TransactionHookManager.registerHook(null));
+    }
 }

@@ -15,17 +15,22 @@
  */
 package io.seata.saga.statelang.parser;
 
+import java.io.IOException;
+import java.util.Map;
+
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.SerializerFeature;
+
 import io.seata.saga.statelang.domain.StateMachine;
+import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
-import java.io.IOException;
-
 /**
  * StateParser tests
+ *
  * @author lorne.cl
  */
 public class StateParserTests {
@@ -43,5 +48,17 @@ public class StateParserTests {
 
         Assertions.assertEquals(stateMachine.getName(), "simpleTestStateMachine");
         Assertions.assertTrue(stateMachine.getStates().size() > 0);
+    }
+
+    @Test
+    public void testDesignerJsonTransformer() throws IOException {
+
+        ClassPathResource resource = new ClassPathResource("statelang/simple_statemachine_with_layout.json");
+        String json = io.seata.saga.statelang.parser.utils.IOUtils.toString(resource.getInputStream(), "UTF-8");
+        Map<String, Object> parsedObj = DesignerJsonTransformer.toStandardJson(JSON.parseObject(json, Feature.OrderedField));
+        Assertions.assertNotNull(parsedObj);
+
+        String outputJson = JSON.toJSONString(parsedObj, SerializerFeature.PrettyFormat);
+        System.out.println(outputJson);
     }
 }

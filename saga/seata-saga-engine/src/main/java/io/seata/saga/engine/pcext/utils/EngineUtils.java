@@ -15,6 +15,9 @@
  */
 package io.seata.saga.engine.pcext.utils;
 
+import java.util.Date;
+import java.util.Map;
+
 import io.seata.saga.engine.AsyncCallback;
 import io.seata.saga.engine.StateMachineConfig;
 import io.seata.saga.engine.pcext.StateInstruction;
@@ -23,13 +26,10 @@ import io.seata.saga.proctrl.ProcessContext;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.StateInstance;
 import io.seata.saga.statelang.domain.StateMachineInstance;
-import java.util.Date;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author lorne.cl
  */
 public class EngineUtils {
@@ -42,21 +42,23 @@ public class EngineUtils {
      * @param stateInstance
      * @return
      */
-    public static String generateParentId(StateInstance stateInstance){
-        return stateInstance.getMachineInstanceId() + ":" + stateInstance.getId();
+    public static String generateParentId(StateInstance stateInstance) {
+        return stateInstance.getMachineInstanceId() + DomainConstants.SEPERATOR_PARENT_ID + stateInstance.getId();
     }
 
     /**
      * end StateMachine
+     *
      * @param context
      */
     public static void endStateMachine(ProcessContext context) {
 
-        StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
+        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_INST);
 
         stateMachineInstance.setGmtEnd(new Date());
 
-        Exception exp = (Exception) context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
+        Exception exp = (Exception)context.getVariable(DomainConstants.VAR_NAME_CURRENT_EXCEPTION);
         if (exp != null) {
             stateMachineInstance.setException(exp);
             if (LOGGER.isDebugEnabled()) {
@@ -64,27 +66,29 @@ public class EngineUtils {
             }
         }
 
-        StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
         stateMachineConfig.getStatusDecisionStrategy().decideOnEndState(context, stateMachineInstance, exp);
 
         stateMachineInstance.setRunning(false);
-        stateMachineInstance.getEndParams().putAll((Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT));
+        stateMachineInstance.getEndParams().putAll(
+            (Map<String, Object>)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT));
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         instruction.setEnd(true);
 
         if (stateMachineInstance.getStateMachine().isPersist() && stateMachineConfig.getStateLogStore() != null) {
-            stateMachineInstance.getEndParams().putAll((Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT));
+            stateMachineInstance.getEndParams().putAll(
+                (Map<String, Object>)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT));
             stateMachineConfig.getStateLogStore().recordStateMachineFinished(stateMachineInstance, context);
         }
 
-        AsyncCallback callback = (AsyncCallback) context.getVariable(DomainConstants.VAR_NAME_ASYNC_CALLBACK);
-        if(callback != null){
-            if(exp != null){
+        AsyncCallback callback = (AsyncCallback)context.getVariable(DomainConstants.VAR_NAME_ASYNC_CALLBACK);
+        if (callback != null) {
+            if (exp != null) {
                 callback.onError(context, stateMachineInstance, exp);
-            }
-            else{
+            } else {
                 callback.onFinished(context, stateMachineInstance);
             }
         }
@@ -92,28 +96,32 @@ public class EngineUtils {
 
     /**
      * fail StateMachine
+     *
      * @param context
      * @param exp
      */
     public static void failStateMachine(ProcessContext context, Exception exp) {
 
-        StateMachineInstance stateMachineInstance = (StateMachineInstance) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_INST);
+        StateMachineInstance stateMachineInstance = (StateMachineInstance)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_INST);
 
-        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+        StateMachineConfig stateMachineConfig = (StateMachineConfig)context.getVariable(
+            DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
 
         stateMachineConfig.getStatusDecisionStrategy().decideOnTaskStateFail(context, stateMachineInstance, exp);
 
-        stateMachineInstance.getEndParams().putAll((Map<String, Object>) context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT));
+        stateMachineInstance.getEndParams().putAll(
+            (Map<String, Object>)context.getVariable(DomainConstants.VAR_NAME_STATEMACHINE_CONTEXT));
 
         StateInstruction instruction = context.getInstruction(StateInstruction.class);
         instruction.setEnd(true);
 
-        if(stateMachineInstance.getStateMachine().isPersist() && stateMachineConfig.getStateLogStore() != null){
+        if (stateMachineInstance.getStateMachine().isPersist() && stateMachineConfig.getStateLogStore() != null) {
             stateMachineConfig.getStateLogStore().recordStateMachineFinished(stateMachineInstance, context);
         }
 
-        AsyncCallback callback = (AsyncCallback) context.getVariable(DomainConstants.VAR_NAME_ASYNC_CALLBACK);
-        if(callback != null){
+        AsyncCallback callback = (AsyncCallback)context.getVariable(DomainConstants.VAR_NAME_ASYNC_CALLBACK);
+        if (callback != null) {
             callback.onError(context, stateMachineInstance, exp);
         }
     }

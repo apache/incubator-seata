@@ -15,15 +15,18 @@
  */
 package io.seata.saga.engine;
 
+import java.util.concurrent.ThreadPoolExecutor;
+
 import io.seata.saga.engine.evaluation.EvaluatorFactoryManager;
 import io.seata.saga.engine.expression.ExpressionFactoryManager;
 import io.seata.saga.engine.invoker.ServiceInvokerManager;
-import io.seata.saga.engine.store.StateLangStore;
-import io.seata.saga.proctrl.eventing.impl.ProcessCtrlEventPublisher;
-import io.seata.saga.engine.store.StateLogStore;
+import io.seata.saga.engine.repo.StateLogRepository;
 import io.seata.saga.engine.repo.StateMachineRepository;
 import io.seata.saga.engine.sequence.SeqGenerator;
-import java.util.concurrent.ThreadPoolExecutor;
+import io.seata.saga.engine.store.StateLangStore;
+import io.seata.saga.engine.store.StateLogStore;
+import io.seata.saga.engine.strategy.StatusDecisionStrategy;
+import io.seata.saga.proctrl.eventing.impl.ProcessCtrlEventPublisher;
 import org.springframework.context.ApplicationContext;
 
 /**
@@ -32,6 +35,13 @@ import org.springframework.context.ApplicationContext;
  * @author lorne.cl
  */
 public interface StateMachineConfig {
+
+    /**
+     * Gets state log store.
+     *
+     * @return the StateLogRepository
+     */
+    StateLogRepository getStateLogRepository();
 
     /**
      * Gets get state log store.
@@ -133,6 +143,7 @@ public interface StateMachineConfig {
 
     /**
      * get ServiceInvokerManager
+     *
      * @return
      */
     ServiceInvokerManager getServiceInvokerManager();

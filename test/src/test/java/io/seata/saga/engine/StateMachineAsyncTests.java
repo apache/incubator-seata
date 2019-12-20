@@ -37,7 +37,7 @@ public class StateMachineAsyncTests {
     private static StateMachineEngine stateMachineEngine;
 
     @BeforeAll
-    public static void initApplicationContext(){
+    public static void initApplicationContext() {
         ApplicationContext applicationContext = new ClassPathXmlApplicationContext("classpath:saga/spring/statemachine_engine_test.xml");
         stateMachineEngine = applicationContext.getBean("stateMachineEngine", StateMachineEngine.class);
     }
@@ -45,13 +45,35 @@ public class StateMachineAsyncTests {
     @Test
     public void testSimpleCatchesStateMachine() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
         paramMap.put("barThrowException", "true");
 
         String stateMachineName = "simpleCachesStateMachine";
+
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+
+        waittingForFinish(inst);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertNotNull(inst.getException());
+        Assertions.assertTrue(ExecutionStatus.FA.equals(inst.getStatus()));
+    }
+
+    @Test
+    public void testSimpleRetryStateMachine() {
+
+        long start  = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleRetryStateMachine";
 
         StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
 
@@ -68,7 +90,7 @@ public class StateMachineAsyncTests {
     @Test
     public void testStatusMatchingStateMachine() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -83,7 +105,6 @@ public class StateMachineAsyncTests {
         long cost = System.currentTimeMillis() - start;
         System.out.println("====== cost :" + cost);
 
-
         Assertions.assertNotNull(inst.getException());
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
     }
@@ -91,7 +112,7 @@ public class StateMachineAsyncTests {
     @Test
     public void testCompensationStateMachine() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 1);
@@ -113,7 +134,7 @@ public class StateMachineAsyncTests {
     @Test
     public void testCompensationAndSubStateMachine() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         paramMap.put("a", 2);
@@ -132,9 +153,30 @@ public class StateMachineAsyncTests {
     }
 
     @Test
+    public void testCompensationAndSubStateMachineWithLayout() {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 2);
+        paramMap.put("barThrowException", "true");
+
+        String stateMachineName = "simpleStateMachineWithCompensationAndSubMachine_layout";
+
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+
+        waittingForFinish(inst);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
+    }
+
+    @Test
     public void testStateMachineWithComplextParams() {
 
-        long start  = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
 
         Map<String, Object> paramMap = new HashMap<>(1);
         People people = new People();
@@ -150,7 +192,7 @@ public class StateMachineAsyncTests {
 
         long cost = System.currentTimeMillis() - start;
 
-        People peopleResult = (People)inst.getEndParams().get("complexParameterMethodResult");
+        People peopleResult = (People) inst.getEndParams().get("complexParameterMethodResult");
         Assertions.assertNotNull(peopleResult);
         Assertions.assertTrue(people.getName().equals(people.getName()));
 
@@ -159,9 +201,35 @@ public class StateMachineAsyncTests {
         Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
     }
 
-    private void waittingForFinish(StateMachineInstance inst){
-        synchronized (lock){
-            if(ExecutionStatus.RU.equals(inst.getStatus())){
+    @Test
+    public void testSimpleStateMachineWithAsyncState() {
+
+        long start = System.currentTimeMillis();
+
+        Map<String, Object> paramMap = new HashMap<>(1);
+        paramMap.put("a", 1);
+
+        String stateMachineName = "simpleStateMachineWithAsyncState";
+
+        StateMachineInstance inst = stateMachineEngine.startAsync(stateMachineName, null, paramMap, callback);
+
+        waittingForFinish(inst);
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
+
+        Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+
+        try {
+            Thread.sleep(500);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void waittingForFinish(StateMachineInstance inst) {
+        synchronized (lock) {
+            if (ExecutionStatus.RU.equals(inst.getStatus())) {
                 try {
                     lock.wait();
                 } catch (InterruptedException e) {
@@ -171,18 +239,18 @@ public class StateMachineAsyncTests {
         }
     }
 
-    private volatile Object lock = new Object();
-    private AsyncCallback callback = new AsyncCallback() {
+    private volatile Object        lock     = new Object();
+    private          AsyncCallback callback = new AsyncCallback() {
         @Override
         public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
-            synchronized (lock){
+            synchronized (lock) {
                 lock.notifyAll();
             }
         }
 
         @Override
         public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
-            synchronized (lock){
+            synchronized (lock) {
                 lock.notifyAll();
             }
         }

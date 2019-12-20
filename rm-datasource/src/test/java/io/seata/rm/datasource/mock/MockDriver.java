@@ -17,54 +17,61 @@ package io.seata.rm.datasource.mock;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Properties;
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.mock.handler.MockExecuteHandler;
 
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Mock driver
  * @author will
- * @date 2019/8/14
  */
 public class MockDriver extends com.alibaba.druid.mock.MockDriver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockDriver.class);
 
     /**
+     * the mock column labels of return value
+     */
+    private List<String> mockReturnValueColumnLabels;
+
+    /**
      * the mock value of return value
      */
-    private Object[][] mockReturnValue = null;
+    private Object[][] mockReturnValue;
 
     /**
      * the mock value of columns meta return value
      */
-    private Object[][] mockColumnsMetasReturnValue = null;
+    private Object[][] mockColumnsMetasReturnValue;
 
     /**
      *  the mock value of index meta return value
      */
-    private Object[][] mockIndexMetasReturnValue = null;
+    private Object[][] mockIndexMetasReturnValue;
 
     /**
      * the mock execute handler
      */
-    private MockExecuteHandler mockExecuteHandler = null;
+    private MockExecuteHandler mockExecuteHandler;
 
     public MockDriver(Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue) {
-        this(new Object[][]{}, mockColumnsMetasReturnValue, mockIndexMetasReturnValue);
+        this(Lists.newArrayList(), new Object[][]{}, mockColumnsMetasReturnValue, mockIndexMetasReturnValue);
     }
 
     /**
      * Instantiate a new MockDriver
      */
-    public MockDriver(Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue) {
+    public MockDriver(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue, Object[][] mockIndexMetasReturnValue) {
+        this.mockReturnValueColumnLabels = mockReturnValueColumnLabels;
         this.mockReturnValue = mockReturnValue;
         this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
         this.mockIndexMetasReturnValue = mockIndexMetasReturnValue;
-        this.setMockExecuteHandler(new MockExecuteHandlerImpl(mockReturnValue));
+        this.setMockExecuteHandler(new MockExecuteHandlerImpl(mockReturnValueColumnLabels, mockReturnValue, mockColumnsMetasReturnValue));
     }
 
     /**
@@ -85,6 +92,10 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
         return this.mockExecuteHandler.executeQuery(stmt, sql);
     }
 
+    public MockPreparedStatement createSeataMockPreparedStatement(MockConnection conn, String sql) {
+        return new MockPreparedStatement(conn, sql);
+    }
+
     /**
      * mock the return value
      * @return
@@ -98,7 +109,7 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      * @param mockReturnValue
      */
     public void setMockReturnValue(Object[][] mockReturnValue) {
-        this.mockReturnValue = mockReturnValue;
+        this.mockReturnValue = mockReturnValue == null ? new Object[][]{} : mockReturnValue;
     }
 
     /**
@@ -106,7 +117,7 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      * @param mockColumnsMetasReturnValue
      */
     public void setMockColumnsMetasReturnValue(Object[][] mockColumnsMetasReturnValue) {
-        this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
+        this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue == null ? new Object[][]{} : mockColumnsMetasReturnValue;
     }
 
     /**
@@ -122,7 +133,7 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      * @param mockIndexMetasReturnValue
      */
     public void setMockIndexMetasReturnValue(Object[][] mockIndexMetasReturnValue) {
-        this.mockIndexMetasReturnValue = mockIndexMetasReturnValue;
+        this.mockIndexMetasReturnValue = mockIndexMetasReturnValue == null ? new Object[][]{} : mockIndexMetasReturnValue;
     }
 
     /**

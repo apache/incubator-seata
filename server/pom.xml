@@ -49,6 +49,11 @@
             <artifactId>seata-codec-all</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-compressor-all</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -109,6 +114,7 @@
                         <windows>.bat</windows>
                     </binFileExtensions>
                     <assembleDirectory>../distribution</assembleDirectory>
+                    <logsDirectory>logs</logsDirectory>
                     <programs>
                         <program>
                             <mainClass>io.seata.server.Server</mainClass>
@@ -125,27 +131,16 @@
                                     <extraArgument>-XX:MaxMetaspaceSize=256m</extraArgument>
                                     <extraArgument>-XX:MaxDirectMemorySize=1024m</extraArgument>
                                     <extraArgument>-XX:-OmitStackTraceInFastThrow</extraArgument>
-                                    <extraArgument>-XX:+AggressiveOpts</extraArgument>
-                                    <extraArgument>-XX:+UseFastAccessorMethods</extraArgument>
                                     <extraArgument>-XX:-UseAdaptiveSizePolicy</extraArgument>
                                     <extraArgument>-XX:+HeapDumpOnOutOfMemoryError</extraArgument>
-                                    <extraArgument>-XX:HeapDumpPath=${BASEDIR}/logs/java_heapdump.hprof</extraArgument>
+                                    <extraArgument>-XX:HeapDumpPath=@BASEDIR@/logs/java_heapdump.hprof</extraArgument>
                                     <!--gc-->
                                     <extraArgument>-XX:+DisableExplicitGC</extraArgument>
-                                    <extraArgument>-XX:+UseParNewGC</extraArgument>
-                                    <extraArgument>-XX:+UseConcMarkSweepGC</extraArgument>
                                     <extraArgument>-XX:+CMSParallelRemarkEnabled</extraArgument>
-                                    <extraArgument>-XX:+UseCMSCompactAtFullCollection</extraArgument>
                                     <extraArgument>-XX:+UseCMSInitiatingOccupancyOnly</extraArgument>
                                     <extraArgument>-XX:CMSInitiatingOccupancyFraction=75</extraArgument>
-                                    <extraArgument>-Xloggc:${BASEDIR}/logs/seata_gc.log</extraArgument>
+                                    <extraArgument>-Xloggc:@BASEDIR@/logs/seata_gc.log</extraArgument>
                                     <extraArgument>-verbose:gc</extraArgument>
-                                    <extraArgument>-XX:+PrintGCDetails</extraArgument>
-                                    <extraArgument>-XX:+PrintGCDateStamps</extraArgument>
-                                    <extraArgument>-XX:+PrintGCTimeStamps</extraArgument>
-                                    <extraArgument>-XX:+UseGCLogFileRotation</extraArgument>
-                                    <extraArgument>-XX:NumberOfGCLogFiles=10</extraArgument>
-                                    <extraArgument>-XX:GCLogFileSize=100M</extraArgument>
                                     <!--netty-->
                                     <extraArgument>-Dio.netty.leakDetectionLevel=advanced</extraArgument>
                                 </extraArguments>
@@ -157,6 +152,71 @@
                         </program>
                     </programs>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>1.7.0</version>
+                <configuration>
+                    <from>
+                        <image>${IMAGE_NAME}</image>
+                    </from>
+                    <to>
+                        <image>docker.io/seataio/seata-server</image>
+                        <tags>
+                            ${image.tags}
+                        </tags>
+                        <auth>
+                            <username>${REGISTRY_USERNAME}</username>
+                            <password>${REGISTRY_PASSWORD}</password>
+                        </auth>
+                    </to>
+                    <container>
+                        <appRoot>/seata-server</appRoot>
+                        <workingDirectory>/seata-server</workingDirectory>
+                        <mainClass>io.seata.server.Server</mainClass>
+                        <ports>
+                            <port>8091</port>
+                        </ports>
+                        <jvmFlags>
+                            <jvmFlag>-Djava.security.egd=file:/dev/./urandom</jvmFlag>
+                            <jvmFlag>-server</jvmFlag>
+                            <jvmFlag>-Xss512k</jvmFlag>
+                            <jvmFlag>-XX:+UnlockExperimentalVMOptions</jvmFlag>
+                            <jvmFlag>-XX:+UseContainerSupport</jvmFlag>
+                            <jvmFlag>-XX:SurvivorRatio=10</jvmFlag>
+                            <jvmFlag>-XX:MetaspaceSize=128m</jvmFlag>
+                            <jvmFlag>-XX:MaxMetaspaceSize=256m</jvmFlag>
+                            <jvmFlag>-XX:MaxDirectMemorySize=1024m</jvmFlag>
+                            <jvmFlag>-XX:-OmitStackTraceInFastThrow</jvmFlag>
+                            <jvmFlag>-XX:-UseAdaptiveSizePolicy</jvmFlag>
+                            <jvmFlag>-XX:+HeapDumpOnOutOfMemoryError</jvmFlag>
+                            <jvmFlag>-XX:HeapDumpPath=/var/log/seata_heapdump.hprof</jvmFlag>
+                            <!--gc-->
+                            <jvmFlag>-XX:+DisableExplicitGC</jvmFlag>
+                            <jvmFlag>-XX:+CMSParallelRemarkEnabled</jvmFlag>
+                            <jvmFlag>-XX:+UseCMSInitiatingOccupancyOnly</jvmFlag>
+                            <jvmFlag>-XX:CMSInitiatingOccupancyFraction=75</jvmFlag>
+                            <jvmFlag>-Xloggc:/var/log/seata_gc.log</jvmFlag>
+                            <jvmFlag>-verbose:gc</jvmFlag>
+                            <!--netty-->
+                            <jvmFlag>-Dio.netty.leakDetectionLevel=advanced</jvmFlag>
+                        </jvmFlags>
+                        <labels>
+                            <name>seata-server</name>
+                        </labels>
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                    </container>
+                    <skip>${image.publish.skip}</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -15,6 +15,8 @@
  */
 package io.seata.saga.proctrl.process.impl;
 
+import java.util.Map;
+
 import io.seata.common.exception.FrameworkErrorCode;
 import io.seata.common.exception.FrameworkException;
 import io.seata.saga.proctrl.ProcessContext;
@@ -23,7 +25,6 @@ import io.seata.saga.proctrl.handler.ProcessHandler;
 import io.seata.saga.proctrl.handler.RouterHandler;
 import io.seata.saga.proctrl.impl.ProcessControllerImpl;
 import io.seata.saga.proctrl.process.BusinessProcessor;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,22 +40,30 @@ public class CustomizeBusinessProcessor implements BusinessProcessor {
 
     private Map<String, ProcessHandler> processHandlers;
 
-    private Map<String, RouterHandler>  routerHandlers;
+    private Map<String, RouterHandler> routerHandlers;
+
+    public static ProcessType matchProcessType(ProcessContext context) {
+        ProcessType processType = (ProcessType)context.getVariable(ProcessContext.VAR_NAME_PROCESS_TYPE);
+        if (processType == null) {
+            processType = ProcessType.STATE_LANG;
+        }
+        return processType;
+    }
 
     @Override
     public void process(ProcessContext context) throws FrameworkException {
 
         ProcessType processType = matchProcessType(context);
         if (processType == null) {
-            if(LOGGER.isWarnEnabled()){
-                LOGGER.warn("Process type not found, context=" + context);
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Process type not found, context= {}", context);
             }
             throw new FrameworkException(FrameworkErrorCode.ProcessTypeNotFound);
         }
 
         ProcessHandler processor = processHandlers.get(processType.getCode());
         if (processor == null) {
-            LOGGER.error("Cannot find process handler by type "+ processType.getCode() +", context=" + context);
+            LOGGER.error("Cannot find process handler by type {}, context= {}", processType.getCode(), context);
             throw new FrameworkException(FrameworkErrorCode.ProcessHandlerNotFound);
         }
 
@@ -66,27 +75,19 @@ public class CustomizeBusinessProcessor implements BusinessProcessor {
 
         ProcessType processType = matchProcessType(context);
         if (processType == null) {
-            if(LOGGER.isWarnEnabled()){
-                LOGGER.warn("Process type not found, the process is no longer advanced, context=" + context);
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn("Process type not found, the process is no longer advanced, context= {}", context);
             }
             return;
         }
 
         RouterHandler router = routerHandlers.get(processType.getCode());
         if (router == null) {
-            LOGGER.error("Cannot find router handler by type "+ processType.getCode() +", context=" + context);
+            LOGGER.error("Cannot find router handler by type {}, context= {}", processType.getCode(), context);
             return;
         }
 
         router.route(context);
-    }
-
-    public static ProcessType matchProcessType(ProcessContext context){
-        ProcessType processType = (ProcessType)context.getVariable(ProcessContext.VAR_NAME_PROCESS_TYPE);
-        if(processType == null){
-            processType = ProcessType.STATE_LANG;
-        }
-        return processType;
     }
 
     public void setProcessHandlers(Map<String, ProcessHandler> processHandlers) {

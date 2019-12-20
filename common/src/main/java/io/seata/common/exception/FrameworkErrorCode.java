@@ -18,8 +18,7 @@ package io.seata.common.exception;
 /**
  * The enum Framework error code.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/9
+ * @author slievrly
  */
 public enum FrameworkErrorCode {
     /**
@@ -100,7 +99,7 @@ public enum FrameworkErrorCode {
      */
     RegisterRM("0304", "Register RM failed", "Register RM failed"),
 
-    /** 0400~0499 Saga相关错误 **/
+    /** 0400~0499 Saga related error **/
 
     /**
      * Process type not found
