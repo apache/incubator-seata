@@ -85,14 +85,18 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         try (Connection connection = dataSource.getConnection()) {
             jdbcUrl = connection.getMetaData().getURL();
             dbType = JdbcUtils.getDbType(jdbcUrl, null);
-            DefaultResourceManager.get().registerResource(this);
-            if (ENABLE_TABLE_META_CHECKER_ENABLE) {
-                tableMetaExcutor.scheduleAtFixedRate(() -> {
-                    TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType()).refresh(connection, DataSourceProxy.this.getResourceId());
-                }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
-            }
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
+        }
+        DefaultResourceManager.get().registerResource(this);
+        if (ENABLE_TABLE_META_CHECKER_ENABLE) {
+            tableMetaExcutor.scheduleAtFixedRate(() -> {
+                try {
+                    TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
+                        .refresh(dataSource.getConnection(), DataSourceProxy.this.getResourceId());
+                } catch (SQLException e) {
+                }
+            }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }
     }
 
