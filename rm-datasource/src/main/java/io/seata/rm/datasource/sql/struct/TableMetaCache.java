@@ -30,8 +30,9 @@ public interface TableMetaCache {
     /**
      * Gets table meta.
      *
-     * @param dataSourceProxy the druid data source
+     * @param connection
      * @param tableName       the table name
+     * @param resourceId
      * @return the table meta
      */
     TableMeta getTableMeta(Connection connection, String tableName, String resourceId);
@@ -39,7 +40,8 @@ public interface TableMetaCache {
     /**
      * Clear the table meta cache
      *
-     * @param dataSourceProxy
+     * @param connection
+     * @param resourceId
      */
     void refresh(Connection connection, String resourceId);
 
