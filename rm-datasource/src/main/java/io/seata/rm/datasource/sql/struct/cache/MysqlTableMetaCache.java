@@ -99,18 +99,16 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
 
     @Override
     protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
-        Connection conn = null;
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            conn = connection;
-            stmt = conn.createStatement();
+            stmt = connection.createStatement();
             StringBuilder builder = new StringBuilder("SELECT * FROM ");
             builder.append(keywordChecker.checkAndReplace(tableName));
             builder.append(" LIMIT 1");
             rs = stmt.executeQuery(builder.toString());
             ResultSetMetaData rsmd = rs.getMetaData();
-            DatabaseMetaData dbmd = conn.getMetaData();
+            DatabaseMetaData dbmd = connection.getMetaData();
 
             return resultSetMetaToSchema(rsmd, dbmd);
         } catch (Exception e) {
