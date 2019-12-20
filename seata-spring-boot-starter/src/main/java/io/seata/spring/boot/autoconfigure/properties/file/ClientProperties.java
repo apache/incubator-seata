@@ -30,7 +30,7 @@ public class ClientProperties {
     private int rmReportRetryCount = 5;
     private int tmCommitRetryCount = 5;
     private int tmRollbackRetryCount = 5;
-    private boolean rmTableMetaCheckEnable = true;
+    private boolean rmTableMetaCheckEnable = false;
     private boolean rmReportSuccessEnable = true;
 
     public int getRmAsyncCommitBufferLimit() {
