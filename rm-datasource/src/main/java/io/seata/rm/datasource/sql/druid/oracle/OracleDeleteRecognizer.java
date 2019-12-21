@@ -32,7 +32,6 @@ import java.util.List;
  * The type oracle delete recognizer.
  *
  * @author ccg
- * @date 2019/3/25
  */
 public class OracleDeleteRecognizer extends BaseOracleRecognizer implements SQLDeleteRecognizer {
 

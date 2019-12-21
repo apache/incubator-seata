@@ -48,7 +48,6 @@ import static io.seata.core.exception.TransactionExceptionCode.BranchRollbackFai
 
 /**
  * @author jsbxyyx
- * @date 2019/09/07
  */
 public abstract class AbstractUndoLogManager implements UndoLogManager {
 
@@ -293,7 +292,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                         }
                         for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
                             TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy.getDbType()).getTableMeta(
-                                dataSourceProxy, sqlUndoLog.getTableName());
+                                conn, sqlUndoLog.getTableName(),dataSourceProxy.getResourceId());
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
                                 dataSourceProxy.getDbType(), sqlUndoLog);

@@ -25,7 +25,6 @@ import java.util.List;
 /**
  * column utils
  * @author jsbxyyx
- * @date 2019/09/17
  */
 public final class ColumnUtils {
 

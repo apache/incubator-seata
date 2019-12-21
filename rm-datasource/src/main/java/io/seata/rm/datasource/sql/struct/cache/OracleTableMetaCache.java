@@ -15,11 +15,15 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
@@ -39,8 +43,8 @@ import java.sql.SQLException;
 public class OracleTableMetaCache extends AbstractTableMetaCache {
 
     @Override
-    protected String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
-        StringBuilder cacheKey = new StringBuilder(dataSourceProxy.getResourceId());
+    protected String getCacheKey(Connection connection, String tableName, String resourceId) {
+        StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
 
         //separate it to schemaName and tableName
@@ -59,13 +63,11 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
     }
 
     @Override
-    protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
-        Connection conn = null;
+    protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
         java.sql.Statement stmt = null;
         try {
-            conn = dataSource.getConnection();
-            stmt = conn.createStatement();
-            DatabaseMetaData dbmd = conn.getMetaData();
+            stmt = connection.createStatement();
+            DatabaseMetaData dbmd = connection.getMetaData();
             return resultSetMetaToSchema(dbmd, tableName);
         } catch (Exception e) {
             if (e instanceof SQLException) {
@@ -74,7 +76,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
             throw new SQLException("Failed to fetch schema of " + tableName, e);
 
         } finally {
-            IOUtil.close(stmt, conn);
+            IOUtil.close(stmt);
         }
     }
 

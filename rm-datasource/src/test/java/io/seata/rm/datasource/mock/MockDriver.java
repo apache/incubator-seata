@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Mock driver
  * @author will
- * @date 2019/8/14
  */
 public class MockDriver extends com.alibaba.druid.mock.MockDriver {
 

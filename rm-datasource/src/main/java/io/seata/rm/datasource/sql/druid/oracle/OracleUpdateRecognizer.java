@@ -38,7 +38,6 @@ import io.seata.rm.datasource.sql.SQLUpdateRecognizer;
  * The type oracle update recognizer.
  *
  * @author ccg
- * @date 2019/3/25
  */
 public class OracleUpdateRecognizer extends BaseOracleRecognizer implements SQLUpdateRecognizer {
 

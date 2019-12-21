@@ -46,7 +46,7 @@ client {
       retry.policy.branch-rollback-on-conflict = true
     }
     report.retry.count = 5
-    table.meta.check.enable = true
+    table.meta.check.enable = false
     report.success.enable = true
   }
   tm {
@@ -57,6 +57,9 @@ client {
     data.validation = true
     log.serialization = "jackson"
     log.table = "undo_log"
+  }
+  log {
+    exceptionRate = 100
   }
   support {
     # auto proxy the DataSource bean

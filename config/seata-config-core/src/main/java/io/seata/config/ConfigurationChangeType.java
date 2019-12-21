@@ -13,14 +13,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package io.seata.config;
 
 /**
  * The enum Configuration change type.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /11/13
+ * @author slievrly
  */
 public enum ConfigurationChangeType {
     /**

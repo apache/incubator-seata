@@ -24,7 +24,6 @@ import java.util.Map;
 
 /**
  * @author jsbxyyx
- * @date 2019/09/07
  */
 public class UndoLogManagerFactory {
 
