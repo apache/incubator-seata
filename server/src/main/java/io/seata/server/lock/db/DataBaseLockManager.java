@@ -19,18 +19,39 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import io.seata.common.executor.Initialize;
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.lock.Locker;
+import io.seata.core.store.StoreMode;
+import io.seata.core.store.db.DataSourceGenerator;
 import io.seata.server.lock.AbstractLockManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
+
+import javax.sql.DataSource;
 
 /**
  * The type db lock manager.
  *
  * @author zjinlei
  */
-public class DataBaseLockManager extends AbstractLockManager {
+@LoadLevel(name = "db")
+public class DataBaseLockManager extends AbstractLockManager implements Initialize {
+
+    @Override
+    public void init() {
+        // init dataSource
+        String datasourceType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
+        DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, datasourceType);
+        DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
+        locker = EnhancedServiceLoader.load(Locker.class, StoreMode.DB.name(), new Class[] {DataSource.class},
+                new Object[] {logStoreDataSource});
+    }
 
     @Override
     public boolean releaseLock(BranchSession branchSession) throws TransactionException {

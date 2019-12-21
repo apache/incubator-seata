@@ -17,7 +17,11 @@ package io.seata.server.lock;
 
 import java.util.ArrayList;
 
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.loader.LoadLevel;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.lock.Locker;
+import io.seata.core.store.StoreMode;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 
@@ -26,7 +30,15 @@ import io.seata.server.session.GlobalSession;
  *
  * @author zhangsen
  */
+@LoadLevel(name = "file")
 public class DefaultLockManager extends AbstractLockManager {
+
+    @Override
+    protected Locker getLocker(BranchSession branchSession) {
+        locker = EnhancedServiceLoader.load(Locker.class, StoreMode.FILE.name(),
+                new Class[] {BranchSession.class}, new Object[] {branchSession});
+        return locker;
+    }
 
     @Override
     public boolean releaseGlobalSessionLock(GlobalSession globalSession) throws TransactionException {
