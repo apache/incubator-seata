@@ -18,6 +18,7 @@ package io.seata.rm.datasource.sql.druid.oracle;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.sql.SQLOperateRecognizerHolder;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 
@@ -27,7 +28,6 @@ import io.seata.rm.datasource.sql.SQLRecognizer;
  * @author: Zhibei Hao
  */
 public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder {
-    private static final String ORACLE = "oracle";
 
     @Override
     public SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast) {
@@ -54,6 +54,6 @@ public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder
 
     @Override
     public String getDbType() {
-        return ORACLE;
+        return JdbcConstants.ORACLE;
     }
 }
