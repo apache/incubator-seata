@@ -29,7 +29,6 @@ import java.util.Date;
 
 /**
  * @author jsbxyyx
- * @date 2019/09/07
  */
 public class OracleUndoLogManager extends AbstractUndoLogManager {
 

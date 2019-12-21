@@ -16,6 +16,9 @@
 package io.seata.config;
 
 import java.io.File;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -36,8 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type FileConfiguration.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/10
+ * @author slievrly
  */
 public class FileConfiguration extends AbstractConfiguration {
 
@@ -60,7 +62,7 @@ public class FileConfiguration extends AbstractConfiguration {
     private final ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(
         8);
 
-    private final ConcurrentMap<String, String> listenedConfigMap = new ConcurrentHashMap<>(8);
+    private final Map<String, String> listenedConfigMap = new HashMap<>(8);
 
     private final String targetFilePath;
 
@@ -71,13 +73,24 @@ public class FileConfiguration extends AbstractConfiguration {
     private final boolean allowDynamicRefresh;
 
     /**
+     * Note that:this constructor is only used to create proxy with CGLIB
+     * see io.seata.spring.boot.autoconfigure.provider.SpringBootConfigurationProvider#provide
+     */
+    public FileConfiguration() {
+        this.name = null;
+        this.targetFilePath = null;
+        this.allowDynamicRefresh = false;
+    }
+
+    /**
      * Instantiates a new File configuration.
      *
      * @param name the name
      */
     public FileConfiguration(String name) {
-        this(name,true);
+        this(name, true);
     }
+
     /**
      * Instantiates a new File configuration.
      *
@@ -89,16 +102,37 @@ public class FileConfiguration extends AbstractConfiguration {
         if (null == name) {
             throw new IllegalArgumentException("name can't be null");
         } else if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
-            targetFilePath = name.substring(SYS_FILE_RESOURCE_PREFIX.length());
-            Config appConfig = ConfigFactory.parseFileAnySyntax(new File(targetFilePath));
-            fileConfig = ConfigFactory.load(appConfig);
+            File targetFile = new File(name.substring(SYS_FILE_RESOURCE_PREFIX.length()));
+            if (targetFile.exists()) {
+                targetFilePath = targetFile.getPath();
+                Config appConfig = ConfigFactory.parseFileAnySyntax(targetFile);
+                fileConfig = ConfigFactory.load(appConfig);
+            } else {
+                targetFilePath = null;
+            }
         } else {
-            targetFilePath = this.getClass().getClassLoader().getResource(name).getPath();
-            fileConfig = ConfigFactory.load(name);
+            URL resource = this.getClass().getClassLoader().getResource(name);
+            if (null != resource) {
+                targetFilePath = resource.getPath();
+                fileConfig = ConfigFactory.load(name);
+
+            } else {
+                targetFilePath = null;
+            }
         }
+        /**
+         * For seata-server side the conf file should always exists.
+         * For application(or client) side,conf file may not exists when using seata-spring-boot-starter
+         */
+        if (null == targetFilePath) {
+            fileConfig = ConfigFactory.load();
+            this.allowDynamicRefresh = false;
+        } else {
+            targetFileLastModified = new File(targetFilePath).lastModified();
+            this.allowDynamicRefresh = allowDynamicRefresh;
+        }
+
         this.name = name;
-        this.allowDynamicRefresh = allowDynamicRefresh;
-        targetFileLastModified = new File(targetFilePath).lastModified();
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
             Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
             new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD));

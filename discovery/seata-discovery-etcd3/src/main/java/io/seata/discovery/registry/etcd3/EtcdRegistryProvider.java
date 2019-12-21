@@ -21,7 +21,6 @@ import io.seata.discovery.registry.RegistryService;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/04/18
  */
 @LoadLevel(name = "Etcd3", order = 1)
 public class EtcdRegistryProvider implements RegistryProvider {

@@ -49,7 +49,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author guoyao
- * @date 2019/3/21
  */
 public class InsertExecutorTest {
 
@@ -73,15 +72,16 @@ public class InsertExecutorTest {
 
     @BeforeEach
     public void init() {
+        connectionProxy = mock(ConnectionProxy.class);
+        when(connectionProxy.getDbType()).thenReturn(JdbcConstants.MYSQL);
+
         statementProxy = mock(PreparedStatementProxy.class);
+        when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
+
         statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));
-
-        connectionProxy = mock(ConnectionProxy.class);
-        when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
-        when(connectionProxy.getDbType()).thenReturn(JdbcConstants.MYSQL);
     }
 
     @Test
@@ -160,6 +160,7 @@ public class InsertExecutorTest {
         when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
         List<Object> pkValues = new ArrayList<>();
         pkValues.add(PK_VALUE);
+        doReturn(0).when(insertExecutor).getPkIndex();
         List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         Assertions.assertEquals(pkValuesByColumn, pkValues);
     }
@@ -186,6 +187,7 @@ public class InsertExecutorTest {
         pkValuesAuto.add(PK_VALUE);
         //mock getPkValuesByAuto
         doReturn(pkValuesAuto).when(insertExecutor).getPkValuesByAuto();
+        doReturn(0).when(insertExecutor).getPkIndex();
         List pkValuesByColumn = insertExecutor.getPkValuesByColumn();
         //pk value = Null so getPkValuesByAuto
         verify(insertExecutor).getPkValuesByAuto();
@@ -307,6 +309,14 @@ public class InsertExecutorTest {
         pkValues.add(PK_VALUE);
         List pkValuesByAuto = insertExecutor.getPkValuesByAuto();
         Assertions.assertEquals(pkValuesByAuto, pkValues);
+    }
+
+    @Test
+    public void test_getPkIndex() {
+        mockInsertColumns();
+        doReturn(tableMeta).when(insertExecutor).getTableMeta();
+        when(tableMeta.getPkName()).thenReturn(ID_COLUMN);
+        Assertions.assertEquals(0, insertExecutor.getPkIndex());
     }
 
     private List<String> mockInsertColumns() {

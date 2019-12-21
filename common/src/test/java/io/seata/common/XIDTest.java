@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The type Xid test.
  *
  * @author Otis.z
- * @date 2019 /2/22
  */
 public class XIDTest {
 

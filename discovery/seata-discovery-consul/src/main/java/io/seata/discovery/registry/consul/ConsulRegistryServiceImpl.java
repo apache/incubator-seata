@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/4/1
  */
 public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener> {
 
