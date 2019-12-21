@@ -27,7 +27,6 @@ import io.seata.core.rpc.netty.NettyPoolKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -94,7 +93,7 @@ public class ChannelManager {
     }
 
     private static String buildClientId(String applicationId, Channel channel) {
-        return applicationId + Constants.CLIENT_ID_SPLIT_CHAR + getAddressFromChannel(channel);
+        return applicationId + Constants.CLIENT_ID_SPLIT_CHAR + ChannelUtil.getAddressFromChannel(channel);
     }
 
     private static String[] readClientId(String clientId) {
@@ -130,7 +129,7 @@ public class ChannelManager {
             null, channel);
         rpcContext.holdInIdentifiedChannels(IDENTIFIED_CHANNELS);
         String clientIdentified = rpcContext.getApplicationId() + Constants.CLIENT_ID_SPLIT_CHAR
-            + getClientIpFromChannel(channel);
+            + ChannelUtil.getClientIpFromChannel(channel);
         TM_CHANNELS.putIfAbsent(clientIdentified, new ConcurrentHashMap<Integer, RpcContext>());
         ConcurrentMap<Integer, RpcContext> clientIdentifiedMap = TM_CHANNELS.get(clientIdentified);
         rpcContext.holdInClientChannels(clientIdentifiedMap);
@@ -162,7 +161,7 @@ public class ChannelManager {
             String clientIp;
             ConcurrentMap<Integer, RpcContext> portMap = RM_CHANNELS.computeIfAbsent(resourceId, resourceIdKey -> new ConcurrentHashMap<>())
                     .computeIfAbsent(resourceManagerRequest.getApplicationId(), applicationId -> new ConcurrentHashMap<>())
-                    .computeIfAbsent(clientIp = getClientIpFromChannel(channel), clientIpKey -> new ConcurrentHashMap<>());
+                    .computeIfAbsent(clientIp = ChannelUtil.getClientIpFromChannel(channel), clientIpKey -> new ConcurrentHashMap<>());
 
             rpcContext.holdInResourceManagerChannels(resourceId, portMap);
             updateChannelsResource(resourceId, clientIp, resourceManagerRequest.getApplicationId());
@@ -191,37 +190,6 @@ public class ChannelManager {
                 }
             }
         }
-    }
-
-    private static String getAddressFromChannel(Channel channel) {
-        SocketAddress socketAddress = channel.remoteAddress();
-        String address = socketAddress.toString();
-        if (socketAddress.toString().indexOf(Constants.ENDPOINT_BEGIN_CHAR) == 0) {
-            address = socketAddress.toString().substring(Constants.ENDPOINT_BEGIN_CHAR.length());
-        }
-        return address;
-    }
-
-    private static String getClientIpFromChannel(Channel channel) {
-        String address = getAddressFromChannel(channel);
-        String clientIp = address;
-        if (clientIp.contains(Constants.IP_PORT_SPLIT_CHAR)) {
-            clientIp = clientIp.substring(0, clientIp.lastIndexOf(Constants.IP_PORT_SPLIT_CHAR));
-        }
-        return clientIp;
-    }
-
-    private static Integer getClientPortFromChannel(Channel channel) {
-        String address = getAddressFromChannel(channel);
-        Integer port = 0;
-        try {
-            if (address.contains(Constants.IP_PORT_SPLIT_CHAR)) {
-                port = Integer.parseInt(address.substring(address.lastIndexOf(Constants.IP_PORT_SPLIT_CHAR) + 1));
-            }
-        } catch (NumberFormatException exx) {
-            LOGGER.error(exx.getMessage());
-        }
-        return port;
     }
 
     private static Set<String> dbKeytoSet(String dbkey) {
@@ -266,11 +234,11 @@ public class ChannelManager {
             //recheck
             return rpcContext.getChannel();
         }
-        Integer clientPort = getClientPortFromChannel(channel);
+        Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
         NettyPoolKey.TransactionRole clientRole = rpcContext.getClientRole();
         if (clientRole == NettyPoolKey.TransactionRole.TMROLE) {
             String clientIdentified = rpcContext.getApplicationId() + Constants.CLIENT_ID_SPLIT_CHAR
-                + getClientIpFromChannel(channel);
+                + ChannelUtil.getClientIpFromChannel(channel);
             if (!TM_CHANNELS.containsKey(clientIdentified)) {
                 return null;
             }
