@@ -21,6 +21,7 @@ import io.seata.saga.engine.mock.DemoService.People;
 import io.seata.saga.statelang.domain.DomainConstants;
 import io.seata.saga.statelang.domain.ExecutionStatus;
 import io.seata.saga.statelang.domain.StateMachineInstance;
+import io.seata.saga.statelang.parser.utils.DesignerJsonTransformer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -316,6 +317,10 @@ public class StateMachineDBMockServerTests {
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
 
+        String graphJson = DesignerJsonTransformer.generateTracingGraphJson(inst);
+        Assertions.assertNotNull(graphJson);
+        System.out.println(graphJson);
+
         start = System.currentTimeMillis();
 
         paramMap.put("fooThrowException", "false");
@@ -325,6 +330,10 @@ public class StateMachineDBMockServerTests {
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
         Assertions.assertTrue(ExecutionStatus.SU.equals(inst.getStatus()));
+
+        String graphJson2 = DesignerJsonTransformer.generateTracingGraphJson(inst);
+        Assertions.assertNotNull(graphJson2);
+        System.out.println(graphJson2);
     }
 
     @Test
@@ -375,6 +384,10 @@ public class StateMachineDBMockServerTests {
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getStatus()));
 
+        String graphJson = DesignerJsonTransformer.generateTracingGraphJson(inst);
+        Assertions.assertNotNull(graphJson);
+        System.out.println(graphJson);
+
         start = System.currentTimeMillis();
 
         inst = stateMachineEngine.compensate(inst.getId(), paramMap);
@@ -383,6 +396,10 @@ public class StateMachineDBMockServerTests {
         System.out.println("====== XID: " + inst.getId() + " cost :" + cost);
 
         Assertions.assertTrue(ExecutionStatus.UN.equals(inst.getCompensationStatus()));
+
+        String graphJson2 = DesignerJsonTransformer.generateTracingGraphJson(inst);
+        Assertions.assertNotNull(graphJson2);
+        System.out.println(graphJson2);
     }
 
     @Test

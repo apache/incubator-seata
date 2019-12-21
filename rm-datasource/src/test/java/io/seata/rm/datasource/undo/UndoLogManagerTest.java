@@ -34,7 +34,6 @@ import static org.mockito.Mockito.when;
 
 /**
  * @author guoyao
- * @date 2019/4/19
  */
 public class UndoLogManagerTest {
 

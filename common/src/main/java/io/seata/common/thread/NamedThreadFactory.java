@@ -25,7 +25,7 @@ import io.netty.util.concurrent.FastThreadLocalThread;
 /**
  * The type Named thread factory.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author ggndnn
  */
 public class NamedThreadFactory implements ThreadFactory {

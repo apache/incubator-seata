@@ -34,7 +34,6 @@ import java.util.List;
 
 /**
  * @author zhangsen
- * @date 2019/4/26
  */
 public class DataBaseLockStoreDAOTest {
 

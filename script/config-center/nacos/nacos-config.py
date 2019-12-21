@@ -5,7 +5,7 @@ import http.client
 import sys
 
 if len(sys.argv) != 2:
-    print ('python nacos-config.py nacosIp')
+    print ('python nacos-config.py nacosAddr')
     exit()
 
 headers = {
@@ -13,14 +13,18 @@ headers = {
 }
 
 hasError = False
-for line in open('nacos-config.txt'):
+for line in open('../config.txt'):
     pair = line.split('=')
     if len(pair) < 2:
         continue
     print (line),
-    url_prefix = sys.argv[1] + ':8848'
+    url_prefix = sys.argv[1]
     conn = http.client.HTTPConnection(url_prefix)
-    url_postfix = '/nacos/v1/cs/configs?dataId={}&group=SEATA_GROUP&content={}'.format(str(pair[0]),str(line[line.index('=')+1:])).strip()
+    if len(sys.argv) == 3:
+        namespace=sys.argv[2]
+        url_postfix = '/nacos/v1/cs/configs?dataId={0}&group=SEATA_GROUP&content={1}&tenant={2}'.format(str(pair[0]),str(line[line.index('=')+1:]).strip(),namespace)
+    else:
+        url_postfix = '/nacos/v1/cs/configs?dataId={}&group=SEATA_GROUP&content={}'.format(str(pair[0]),str(line[line.index('=')+1:])).strip()
     conn.request("POST", url_postfix, headers=headers)
     res = conn.getresponse()
     data = res.read()
