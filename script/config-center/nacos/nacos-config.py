@@ -4,8 +4,8 @@
 import http.client
 import sys
 
-if len(sys.argv) not in (2,3):
-    print ('python nacos-config.py nacosIp')
+if len(sys.argv) != 2:
+    print ('python nacos-config.py nacosAddr')
     exit()
 
 headers = {
@@ -13,11 +13,12 @@ headers = {
 }
 
 hasError = False
-for line in open('nacos-config.txt'):
+for line in open('../config.txt'):
     pair = line.split('=')
     if len(pair) < 2:
         continue
-    url_prefix = sys.argv[1] + ':8848'
+    print (line),
+    url_prefix = sys.argv[1]
     conn = http.client.HTTPConnection(url_prefix)
     if len(sys.argv) == 3:
         namespace=sys.argv[2]

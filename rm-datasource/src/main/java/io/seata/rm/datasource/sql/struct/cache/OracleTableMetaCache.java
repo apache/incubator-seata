@@ -15,20 +15,18 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
-import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * The type Table meta cache.
@@ -59,8 +57,8 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
     }
 
     @Override
-    protected String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
-        StringBuilder cacheKey = new StringBuilder(dataSourceProxy.getResourceId());
+    protected String getCacheKey(Connection connection, String tableName, String resourceId) {
+        StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
 
         //separate it to schemaName and tableName
@@ -79,13 +77,11 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
     }
 
     @Override
-    protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
-        try (Connection conn = dataSource.getConnection()) {
-            return resultSetMetaToSchema(conn.getMetaData(), tableName);
-        } catch (SQLException sqlEx) {
-            throw sqlEx;
+    protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
+        try (java.sql.Statement stmt = connection.createStatement()){
+            return resultSetMetaToSchema(connection.getMetaData(), tableName);
         } catch (Exception e) {
-            throw new SQLException("Failed to fetch schema of " + tableName, e);
+            throw new SQLException(String.format("Failed to fetch schema of %s", tableName), e);
         }
     }
 
@@ -102,7 +98,9 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
             tableName = tableName.toUpperCase();
         }
 
-        try (ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%"); ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true); ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
+        try (ResultSet rsColumns = dbmd.getColumns("", schemaName, tableName, "%");
+             ResultSet rsIndex = dbmd.getIndexInfo(null, schemaName, tableName, false, true);
+             ResultSet rsPrimary = dbmd.getPrimaryKeys(null, schemaName, tableName)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
@@ -165,7 +163,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
                 }
             }
             if (tm.getAllIndexes().isEmpty()) {
-                throw new ShouldNeverHappenException("Could not found any index in the table: " + tableName);
+                throw new ShouldNeverHappenException(String.format("Could not found any index in the table: %s", tableName));
             }
         }
 

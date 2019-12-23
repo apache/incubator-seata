@@ -46,7 +46,6 @@ import java.util.stream.Collectors;
  * @param <T> the type parameter
  * @param <S> the type parameter
  * @author yuanguoyao
- * @date 2019-03-21 21:30:02
  */
 public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 

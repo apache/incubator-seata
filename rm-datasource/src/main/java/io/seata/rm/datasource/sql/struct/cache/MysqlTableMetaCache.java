@@ -15,9 +15,15 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
+
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
@@ -27,14 +33,6 @@ import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  * The type Table meta cache.
@@ -69,15 +67,15 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
     }
 
     @Override
-    protected String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
-        StringBuilder cacheKey = new StringBuilder(dataSourceProxy.getResourceId());
+    protected String getCacheKey(Connection connection, String tableName, String resourceId) {
+        StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
         //remove single quote and separate it to catalogName and tableName
         String[] tableNameWithCatalog = tableName.replace("`", "").split("\\.");
         String defaultTableName = tableNameWithCatalog.length > 1 ? tableNameWithCatalog[1] : tableNameWithCatalog[0];
 
         DatabaseMetaData databaseMetaData = null;
-        try (Connection connection = dataSourceProxy.getPlainConnection()) {
+        try {
             databaseMetaData = connection.getMetaData();
         } catch (SQLException e) {
             LOGGER.error("Could not get connection, use default cache key {}", e.getMessage(), e);
@@ -100,14 +98,13 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
     }
 
     @Override
-    protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
-        String builder = "SELECT * FROM " + keywordChecker.checkAndReplace(tableName) + " LIMIT 1";
-        try (Connection conn = dataSource.getConnection(); Statement stmt = conn.createStatement(); ResultSet rs = stmt.executeQuery(builder)) {
-            return resultSetMetaToSchema(rs.getMetaData(), conn.getMetaData());
-        } catch (SQLException sqlEx) {
-            throw sqlEx;
+    protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
+        String sql = "SELECT * FROM " + keywordChecker.checkAndReplace(tableName) + " LIMIT 1";
+        try (Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData());
         } catch (Exception e) {
-            throw new SQLException("Failed to fetch schema of " + tableName, e);
+            throw new SQLException(String.format("Failed to fetch schema of %s", tableName), e);
         }
     }
 
@@ -137,7 +134,8 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
          * 2. select xxx from xxx where catalog_name like ? and table_name like ?(informationSchema=true)
          */
 
-        try (ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%"); ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true)) {
+        try (ResultSet rsColumns = dbmd.getColumns(catalogName, schemaName, tableName, "%");
+             ResultSet rsIndex = dbmd.getIndexInfo(catalogName, schemaName, tableName, false, true)) {
             while (rsColumns.next()) {
                 ColumnMeta col = new ColumnMeta();
                 col.setTableCat(rsColumns.getString("TABLE_CAT"));
