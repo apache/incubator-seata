@@ -15,33 +15,34 @@
  */
 package io.seata.rm.datasource.sql.druid;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.alibaba.druid.sql.ast.SQLExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
-
+import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ParametersHolder;
+import io.seata.rm.datasource.sql.struct.Null;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author will
- * @date 2019/9/26
  */
 public abstract class BaseMySQLRecognizer extends BaseRecognizer {
 
     /**
      * Instantiates a new mysql base recognizer
+     *
      * @param originalSql the original sql
      */
-    public BaseMySQLRecognizer(String originalSql){
+    public BaseMySQLRecognizer(String originalSql) {
         super(originalSql);
     }
 
-    public MySqlOutputVisitor createOutputVisitor(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList, final StringBuilder sb) {
+    public MySqlOutputVisitor createOutputVisitor(final ParametersHolder parametersHolder,
+                                                  final ArrayList<List<Object>> paramAppenderList,
+                                                  final StringBuilder sb) {
         MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
 
             @Override
@@ -52,7 +53,8 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
                         oneParamValues.stream().forEach(t -> paramAppenderList.add(new ArrayList<>()));
                     }
                     for (int i = 0; i < oneParamValues.size(); i++) {
-                        paramAppenderList.get(i).add(oneParamValues.get(i));
+                        Object o = oneParamValues.get(i);
+                        paramAppenderList.get(i).add(o instanceof Null ? null : o);
                     }
 
                 }
@@ -62,40 +64,26 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
         return visitor;
     }
 
-    public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
-        if (where == null) {
-            return "";
+    public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder,
+                                    final ArrayList<List<Object>> paramAppenderList) {
+        if (Objects.isNull(where)) {
+            return StringUtils.EMPTY;
         }
+
         StringBuilder sb = new StringBuilder();
-        MySqlOutputVisitor visitor = createOutputVisitor(parametersHolder, paramAppenderList, sb);
-        if (where instanceof SQLBinaryOpExpr) {
-            visitor.visit((SQLBinaryOpExpr) where);
-        } else if (where instanceof SQLInListExpr) {
-            visitor.visit((SQLInListExpr) where);
-        } else if (where instanceof SQLBetweenExpr) {
-            visitor.visit((SQLBetweenExpr) where);
-        } else {
-            throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
-        }
+
+        executeVisit(where, createOutputVisitor(parametersHolder, paramAppenderList, sb));
         return sb.toString();
     }
 
     public String getWhereCondition(SQLExpr where) {
-        if (where == null) {
-            return "";
+        if (Objects.isNull(where)) {
+            return StringUtils.EMPTY;
         }
 
         StringBuilder sb = new StringBuilder();
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb);
-        if (where instanceof SQLBinaryOpExpr) {
-            visitor.visit((SQLBinaryOpExpr) where);
-        } else if (where instanceof SQLInListExpr) {
-            visitor.visit((SQLInListExpr) where);
-        } else if (where instanceof SQLBetweenExpr) {
-            visitor.visit((SQLBetweenExpr) where);
-        } else {
-            throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
-        }
+
+        executeVisit(where, new MySqlOutputVisitor(sb));
         return sb.toString();
     }
 

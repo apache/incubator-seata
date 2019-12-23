@@ -40,6 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Collections;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -47,7 +48,6 @@ import java.util.concurrent.ConcurrentMap;
  * The type Eureka registry service.
  *
  * @author: rui_849217@163.com
- * @date: 2018/3/6
  */
 public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventListener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EurekaRegistryServiceImpl.class);
@@ -74,7 +74,6 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private static volatile CustomEurekaInstanceConfig instanceConfig;
     private static volatile EurekaRegistryServiceImpl instance;
     private static volatile EurekaClient eurekaClient;
-
 
     private EurekaRegistryServiceImpl() {
     }
@@ -125,8 +124,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
-        Configuration config = ConfigurationFactory.getInstance();
-        String clusterName = config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
+        String clusterName = getServiceGroup(key);
         if (null == clusterName) {
             return null;
         }
@@ -140,8 +138,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
                 }
             });
         }
-
-        return new ArrayList<>(clusterAddressMap.get(clusterName.toUpperCase()));
+        return new ArrayList<>(clusterAddressMap.getOrDefault(clusterName.toUpperCase(), Collections.emptySet()));
     }
 
     @Override
@@ -155,7 +152,7 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     private void refreshCluster() {
         List<Application> applications = getEurekaClient(false).getApplications().getRegisteredApplications();
 
-        if (CollectionUtils.isEmpty(applications)){
+        if (CollectionUtils.isEmpty(applications)) {
             clusterAddressMap.clear();
 
             if (LOGGER.isDebugEnabled()) {
@@ -218,16 +215,18 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     }
 
     private EurekaClient getEurekaClient(boolean needRegister) throws EurekaRegistryException {
-        if (eurekaClient == null) {
+        if (null == eurekaClient) {
             synchronized (EurekaRegistryServiceImpl.class) {
                 try {
-                    if (!needRegister) {
-                        instanceConfig = new CustomEurekaInstanceConfig();
+                    if (null == eurekaClient) {
+                        if (!needRegister) {
+                            instanceConfig = new CustomEurekaInstanceConfig();
+                        }
+                        ConfigurationManager.loadProperties(getEurekaProperties(needRegister));
+                        InstanceInfo instanceInfo = new EurekaConfigBasedInstanceInfoProvider(instanceConfig).get();
+                        applicationInfoManager = new ApplicationInfoManager(instanceConfig, instanceInfo);
+                        eurekaClient = new DiscoveryClient(applicationInfoManager, new DefaultEurekaClientConfig());
                     }
-                    ConfigurationManager.loadProperties(getEurekaProperties(needRegister));
-                    InstanceInfo instanceInfo = new EurekaConfigBasedInstanceInfoProvider(instanceConfig).get();
-                    applicationInfoManager = new ApplicationInfoManager(instanceConfig, instanceInfo);
-                    eurekaClient = new DiscoveryClient(applicationInfoManager, new DefaultEurekaClientConfig());
                 } catch (Exception e) {
                     clean();
                     throw new EurekaRegistryException("register eureka is error!", e);
@@ -254,13 +253,10 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     }
 
     private String getEurekaApplicationFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-            + CLUSTER;
+        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR + CLUSTER;
     }
 
     private String getEurekaInstanceWeightFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-            + REGISTRY_WEIGHT;
+        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR + REGISTRY_WEIGHT;
     }
-
 }

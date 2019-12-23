@@ -15,17 +15,19 @@
  */
 package io.seata.spring.boot.autoconfigure.properties;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SEATA_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/09/30
  */
 @Component
 @ConfigurationProperties(prefix = SEATA_PREFIX)
+@EnableConfigurationProperties(SpringCloudAlibabaConfiguration.class)
 public class SeataProperties {
     /**
      * whether enable auto configuration
@@ -40,6 +42,9 @@ public class SeataProperties {
      */
     private String txServiceGroup;
 
+    @Autowired
+    private SpringCloudAlibabaConfiguration springCloudAlibabaConfiguration;
+
     public boolean isEnabled() {
         return enabled;
     }
@@ -50,6 +55,9 @@ public class SeataProperties {
     }
 
     public String getApplicationId() {
+        if (null == applicationId) {
+            applicationId = springCloudAlibabaConfiguration.getApplicationId();
+        }
         return applicationId;
     }
 
@@ -59,6 +67,9 @@ public class SeataProperties {
     }
 
     public String getTxServiceGroup() {
+        if (null == txServiceGroup) {
+            txServiceGroup = springCloudAlibabaConfiguration.getTxServiceGroup();
+        }
         return txServiceGroup;
     }
 

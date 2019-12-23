@@ -15,25 +15,29 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The type oracle undo delete executor.
+ *
  * @author ccg
- * @date 2019/3/25
  */
 public class OracleUndoDeleteExecutor extends AbstractUndoExecutor {
+
+    /**
+     * INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)
+     */
+    private static final String INSERT_SQL_TEMPLATE = "INSERT INTO %s (%s) VALUES (%s)";
 
     /**
      * Instantiates a new oracle undo delete executor.
@@ -46,42 +50,25 @@ public class OracleUndoDeleteExecutor extends AbstractUndoExecutor {
 
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (beforeImageRows == null || beforeImageRows.size() == 0) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = beforeImageRows.get(0);
+        List<Field> fields = new ArrayList<>(row.nonPrimaryKeys());
+        Field pkField = row.primaryKeys().get(0);
+        // PK is at last one.
+        fields.add(pkField);
 
-        StringBuilder insertColumns = new StringBuilder();
-        StringBuilder insertValues = new StringBuilder();
-        Field pkField = null;
-        boolean first = true;
-        for (Field field : row.getFields()) {
-            if (field.getKeyType() == KeyType.PrimaryKey) {
-                pkField = field;
-                continue;
-            } else {
-                if (first) {
-                    first = false;
-                } else {
-                    insertColumns.append(", ");
-                    insertValues.append(", ");
-                }
-                insertColumns.append(keywordChecker.checkAndReplace(field.getName()));
-                insertValues.append("?");
-            }
+        String insertColumns = fields.stream()
+            .map(field -> ColumnUtils.addEscape(field.getName(), ColumnUtils.Escape.STANDARD))
+            .collect(Collectors.joining(", "));
+        String insertValues = fields.stream().map(field -> "?")
+            .collect(Collectors.joining(", "));
 
-        }
-        if (!first) {
-            insertColumns.append(", ");
-            insertValues.append(", ");
-        }
-        insertColumns.append(keywordChecker.checkAndReplace(pkField.getName()));
-        insertValues.append("?");
-
-        return "INSERT INTO " + keywordChecker.checkAndReplace(sqlUndoLog.getTableName()) + "(" + insertColumns.toString() + ") VALUES (" + insertValues.toString() + ")";
+        return String.format(INSERT_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), ColumnUtils.Escape.STANDARD),
+            insertColumns, insertValues);
     }
 
     @Override

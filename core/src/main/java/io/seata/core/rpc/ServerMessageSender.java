@@ -25,8 +25,7 @@ import io.seata.core.protocol.RpcMessage;
 /**
  * The interface Server message sender.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/15
+ * @author slievrly
  */
 public interface ServerMessageSender {
 

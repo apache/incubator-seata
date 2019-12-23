@@ -21,6 +21,7 @@ import java.util.Map;
 
 /**
  * StateMachine execution instance
+ *
  * @author lorne.cl
  */
 public interface StateMachineInstance {
@@ -112,7 +113,7 @@ public interface StateMachineInstance {
     /**
      * Put state instance.
      *
-     * @param stateId the state id
+     * @param stateId       the state id
      * @param stateInstance the state instance
      */
     void putStateInstance(String stateId, StateInstance stateInstance);
@@ -231,6 +232,7 @@ public interface StateMachineInstance {
 
     /**
      * Gets get context.
+     *
      * @return
      */
     Map<String, Object> getContext();

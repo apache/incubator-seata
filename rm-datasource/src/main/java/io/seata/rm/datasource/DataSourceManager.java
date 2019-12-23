@@ -30,6 +30,7 @@ import io.seata.core.context.RootContext;
 import io.seata.core.exception.RmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
+import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
@@ -145,9 +146,6 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
     public void registerResource(Resource resource) {
         DataSourceProxy dataSourceProxy = (DataSourceProxy)resource;
         dataSourceCache.put(dataSourceProxy.getResourceId(), dataSourceProxy);
-        synchronized (RESOURCE_LOCK) {
-            RESOURCE_LOCK.notifyAll();
-        }
         super.registerResource(dataSourceProxy);
     }
 
@@ -182,9 +180,10 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
         try {
             UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).undo(dataSourceProxy, xid, branchId);
         } catch (TransactionException te) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("branchRollback failed reason [{}]", te.getMessage());
-            }
+            StackTraceLogger.info(LOGGER, te,
+                "[stacktrace]branchRollback failed. branchType:[{}], xid:[{}], branchId:[{}], resourceId:[{}], applicationData:[{}]. stacktrace:[{}]",
+                new Object[]{branchType, xid, branchId, resourceId, applicationData, te.getMessage()},
+                "branchRollback failed reason [{}]", new Object[]{te.getMessage()});
             if (te.getCode() == TransactionExceptionCode.BranchRollbackFailed_Unretriable) {
                 return BranchStatus.PhaseTwo_RollbackFailed_Unretryable;
             } else {
