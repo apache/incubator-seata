@@ -18,6 +18,9 @@ package io.seata.spring.boot.autoconfigure.properties.file;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SERVICE_PREFIX;
 
 /**
@@ -42,6 +45,8 @@ public class ServiceProperties {
      * disable globalTransaction
      */
     private boolean disableGlobalTransaction = false;
+
+    private Map<String,Config> groups = new HashMap<>();
 
     public String getVgroupMapping() {
         return vgroupMapping;
@@ -77,5 +82,25 @@ public class ServiceProperties {
     public ServiceProperties setDisableGlobalTransaction(boolean disableGlobalTransaction) {
         this.disableGlobalTransaction = disableGlobalTransaction;
         return this;
+    }
+
+    public Map<String, Config> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(Map<String, Config> groups) {
+        this.groups = groups;
+    }
+
+    public static class Config {
+        private String grouplist;
+
+        public String getGrouplist() {
+            return grouplist;
+        }
+
+        public void setGrouplist(String grouplist) {
+            this.grouplist = grouplist;
+        }
     }
 }

@@ -24,6 +24,7 @@ import java.util.stream.Stream;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import io.seata.spring.boot.autoconfigure.StarterConstants;
+import io.seata.spring.boot.autoconfigure.properties.file.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.util.SpringUtils;
 import io.seata.spring.boot.autoconfigure.util.StringFormatUtils;
 import org.apache.commons.lang.StringUtils;
@@ -104,6 +105,12 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         Class propertyClass = getPropertyClass(getPropertyPrefix(dataId));
         if (null != propertyClass) {
             Object propertyObject = SpringUtils.getBean(propertyClass);
+
+            if (propertyObject instanceof ServiceProperties &&
+                    dataId.equals(StarterConstants.SERVICE_PREFIX + "." + NORMALIZED_KEY_GROUPLIST)) {
+                return getGroupListForMap((ServiceProperties) propertyObject);
+            }
+
             Optional<Field> fieldOptional = Stream.of(propertyObject.getClass().getDeclaredFields()).filter(
                 f -> f.getName().equalsIgnoreCase(propertySuffix)).findAny();
             if (fieldOptional.isPresent()) {
@@ -113,6 +120,15 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
             }
         }
         return null;
+    }
+
+    private Object getGroupListForMap(ServiceProperties serviceProperties) {
+        Map<String, ServiceProperties.Config> groups = serviceProperties.getGroups();
+        ServiceProperties.Config config = groups.get(serviceProperties.getVgroupMapping());
+        if (null != config && StringUtils.isNotBlank(config.getGrouplist())) {
+            return config.getGrouplist();
+        }
+        return serviceProperties.getGrouplist();
     }
 
     /**
