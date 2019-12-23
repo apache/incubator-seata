@@ -40,7 +40,7 @@ public class ConsistentHashLoadBalance extends AbstractLoadBalance {
     protected <T> T doSelect(List<T> invokers) {
         List<T> temp = new ArrayList<>(invokers);
         Collections.shuffle(temp);
-        return new ConsistentHashSelector<>(invokers, ConfigurationFactory.getInstance().getInt(
+        return new ConsistentHashSelector<>(invokers, ConfigurationFactory.CURRENT_FILE_INSTANCE.getInt(
                 ConfigurationKeys.VIRTUAL_NODES, 10)).select(getObjectKey(temp));
     }
 
