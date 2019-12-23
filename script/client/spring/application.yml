@@ -66,6 +66,8 @@ seata:
       connect-timeout: 2000
   registry:
     type: file
+    load-balance: RandomLoadBalance
+    load-balance-virtual-nodes: 10
     file:
       name: file.conf
     consul:

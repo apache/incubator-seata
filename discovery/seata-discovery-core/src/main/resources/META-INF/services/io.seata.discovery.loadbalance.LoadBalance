@@ -48,3 +48,4 @@
 
 io.seata.discovery.loadbalance.RoundRobinLoadBalance
 io.seata.discovery.loadbalance.RandomLoadBalance
+io.seata.discovery.loadbalance.ConsistentHashLoadBalance

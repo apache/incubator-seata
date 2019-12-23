@@ -30,6 +30,14 @@ public class RegistryProperties {
      * file, nacos, eureka, redis, zk, consul, etcd3, sofa
      */
     private String type = "file";
+    /**
+     * the load balance
+     */
+    private String loadBalance = "RandomLoadBalance";
+    /**
+     * the load balance virtual nodes
+     */
+    private int loadBalanceVirtualNodes = 10;
 
     public String getType() {
         return type;
@@ -37,6 +45,24 @@ public class RegistryProperties {
 
     public RegistryProperties setType(String type) {
         this.type = type;
+        return this;
+    }
+
+    public String getLoadBalance() {
+        return loadBalance;
+    }
+
+    public RegistryProperties setLoadBalance(String loadBalance) {
+        this.loadBalance = loadBalance;
+        return this;
+    }
+
+    public int getLoadBalanceVirtualNodes() {
+        return loadBalanceVirtualNodes;
+    }
+
+    public RegistryProperties setLoadBalanceVirtualNodes(int loadBalanceVirtualNodes) {
+        this.loadBalanceVirtualNodes = loadBalanceVirtualNodes;
         return this;
     }
 }

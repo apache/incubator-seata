@@ -21,6 +21,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -61,6 +62,34 @@ public class LoadBalanceTest {
         for (InetSocketAddress address : counter.keySet()) {
             Long count = counter.get(address).get();
             Assertions.assertTrue(Math.abs(count - runs / (0f + addresses.size())) < 1f, "abs diff shoud < 1");
+        }
+    }
+
+    /**
+     * Test consistent hash load load balance select.
+     *
+     * @param addresses the addresses
+     */
+    @ParameterizedTest
+    @MethodSource("addressProvider")
+    public void testConsistentHashLoadBalance_select(List<InetSocketAddress> addresses) {
+        {
+            int runs = 10000;
+            Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, addresses, new ConsistentHashLoadBalance());
+            for (InetSocketAddress address : counter.keySet()) {
+                Long count = counter.get(address).get();
+                Assertions.assertTrue(count > 0, "count is at least greater than 0");
+            }
+        }
+
+        {
+            int runs = 1;
+            Map<InetSocketAddress, AtomicLong> counter = getSelectedCounter(runs, Collections.singletonList(addresses.get(0)), new ConsistentHashLoadBalance());
+            for (InetSocketAddress address : counter.keySet()) {
+                Long count = counter.get(address).get();
+                Assertions.assertEquals(addresses.get(0), address, "select must be equal to address");
+                Assertions.assertEquals(1, count, "count must be equal to 1");
+            }
         }
     }
 
