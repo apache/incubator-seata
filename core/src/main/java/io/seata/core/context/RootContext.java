@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * The type Root context.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class RootContext {
 

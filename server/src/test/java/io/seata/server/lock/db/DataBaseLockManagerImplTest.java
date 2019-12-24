@@ -36,7 +36,6 @@ import java.sql.Statement;
 
 /**
  * @author zhangsen
- * @data 2019/4/28
  */
 public class DataBaseLockManagerImplTest {
 

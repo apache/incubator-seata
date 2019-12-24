@@ -39,8 +39,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Netty base config.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/24
+ * @author slievrly
  */
 public class NettyBaseConfig {
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyBaseConfig.class);

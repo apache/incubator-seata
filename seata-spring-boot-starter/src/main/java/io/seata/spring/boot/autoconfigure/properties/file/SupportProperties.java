@@ -22,7 +22,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SUPPORT_PREFIX
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/09/30
  */
 @Component
 @ConfigurationProperties(prefix = SUPPORT_PREFIX)

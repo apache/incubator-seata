@@ -55,7 +55,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VG
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/10/03
  */
 public class SpringBootConfigurationProvider implements ExtConfigurationProvider {
     private static final String INTERCEPT_METHOD_PREFIX = "get";

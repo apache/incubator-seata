@@ -24,7 +24,9 @@ import java.util.Set;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.netty.RmRpcClient;
 import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.core.rpc.netty.TmRpcClient;
@@ -58,8 +60,7 @@ import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_AUTOPROXY;
 /**
  * The type Global transaction scanner.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/28
+ * @author slievrly
  */
 public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     implements InitializingBean, ApplicationContextAware,
@@ -86,8 +87,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     private final String applicationId;
     private final String txServiceGroup;
     private final int mode;
-    private final boolean disableGlobalTransaction =
-        ConfigurationFactory.getInstance().getBoolean("service.disableGlobalTransaction", false);
+    private final boolean disableGlobalTransaction = ConfigurationFactory.getInstance().getBoolean(
+        ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION, false);
 
     private final FailureHandler failureHandlerHook;
 
@@ -232,6 +233,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
 
                     if (interceptor == null) {
                         interceptor = new GlobalTransactionalInterceptor(failureHandlerHook);
+                        ConfigurationFactory.getInstance().addConfigListener(ConfigurationKeys.DISABLE_GLOBAL_TRANSACTION,(ConfigurationChangeListener)interceptor);
                     }
                 }
 
@@ -322,7 +324,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                 LOGGER.info("Auto proxy of [{}]", beanName);
             }
             DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
-            return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), bean.getClass().getInterfaces(), new InvocationHandler() {
+            Class<?>[] interfaces = SpringProxyUtils.getAllInterfaces(bean);
+            return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), interfaces, new InvocationHandler() {
                 @Override
                 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                     Method m = BeanUtils.findDeclaredMethod(DataSourceProxy.class, method.getName(), method.getParameterTypes());

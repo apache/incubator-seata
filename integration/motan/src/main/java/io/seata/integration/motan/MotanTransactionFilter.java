@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author jimin.jm@alibaba-inc.com
+ * @author slievrly
  */
 @Spi(scope = Scope.SINGLETON)
 @Activation(key = {MotanConstants.NODE_TYPE_SERVICE, MotanConstants.NODE_TYPE_REFERER}, sequence = 100)

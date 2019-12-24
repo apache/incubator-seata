@@ -48,7 +48,6 @@ import static io.seata.config.ConfigurationKeys.SEATA_FILE_ROOT_CONFIG;
  * The type Zookeeper configuration.
  *
  * @author crazier.huang
- * @date 2019 /2/18
  */
 public class ZookeeperConfiguration extends AbstractConfiguration {
     private final static Logger LOGGER = LoggerFactory.getLogger(ZookeeperConfiguration.class);
@@ -168,8 +167,11 @@ public class ZookeeperConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (null == dataId || null == listener) {
+            return;
+        }
         String path = ROOT_PATH + ZK_PATH_SPLIT_CHAR + dataId;
-        if (null != listener && zkClient.exists(path)) {
+        if (zkClient.exists(path)) {
             configListenersMap.putIfAbsent(dataId, new ConcurrentHashMap<>());
             ZKListener zkListener = new ZKListener(path, listener);
             configListenersMap.get(dataId).put(listener, zkListener);

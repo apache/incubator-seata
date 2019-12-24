@@ -38,8 +38,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Nacos configuration.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /2/1
+ * @author slievrly
  */
 public class NacosConfiguration extends AbstractConfiguration {
     private static volatile NacosConfiguration instance;
@@ -128,6 +127,9 @@ public class NacosConfiguration extends AbstractConfiguration {
 
     @Override
     public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (null == dataId || null == listener) {
+            return;
+        }
         try {
             configListenersMap.putIfAbsent(dataId, new ConcurrentHashMap<>());
             NacosListener nacosListener = new NacosListener(dataId, listener);

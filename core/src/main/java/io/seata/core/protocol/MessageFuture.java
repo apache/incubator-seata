@@ -25,15 +25,13 @@ import java.util.concurrent.TimeoutException;
 /**
  * The type Message future.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/9
+ * @author slievrly
  */
 public class MessageFuture {
     private RpcMessage requestMessage;
     private long timeout;
     private long start = System.currentTimeMillis();
-    private static final Object NULL = new Object();
-    private transient CompletableFuture origin = new CompletableFuture();
+    private transient CompletableFuture<Object> origin = new CompletableFuture<>();
 
     /**
      * Is timeout boolean.

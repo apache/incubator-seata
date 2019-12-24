@@ -22,7 +22,6 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/09/30
  */
 @Component
 @ConfigurationProperties(prefix = CLIENT_PREFIX)
@@ -31,7 +30,7 @@ public class ClientProperties {
     private int rmReportRetryCount = 5;
     private int tmCommitRetryCount = 5;
     private int tmRollbackRetryCount = 5;
-    private boolean rmTableMetaCheckEnable = true;
+    private boolean rmTableMetaCheckEnable = false;
     private boolean rmReportSuccessEnable = true;
 
     public int getRmAsyncCommitBufferLimit() {

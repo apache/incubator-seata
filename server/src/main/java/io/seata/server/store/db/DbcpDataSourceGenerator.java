@@ -25,7 +25,6 @@ import javax.sql.DataSource;
  * The type Dbcp data source generator.
  *
  * @author zhangsen
- * @data 2019 /4/24
  */
 @LoadLevel(name = "dbcp")
 public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {

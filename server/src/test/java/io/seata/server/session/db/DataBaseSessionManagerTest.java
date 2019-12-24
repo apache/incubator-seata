@@ -44,7 +44,6 @@ import java.util.Collection;
  * The type Data base session manager test.
  *
  * @author zhangsen
- * @data 2019 /4/28
  */
 public class DataBaseSessionManagerTest {
 

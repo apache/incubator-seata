@@ -48,7 +48,6 @@ import java.util.concurrent.ConcurrentMap;
  * The type Eureka registry service.
  *
  * @author: rui_849217@163.com
- * @date: 2018/3/6
  */
 public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventListener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EurekaRegistryServiceImpl.class);
@@ -216,16 +215,18 @@ public class EurekaRegistryServiceImpl implements RegistryService<EurekaEventLis
     }
 
     private EurekaClient getEurekaClient(boolean needRegister) throws EurekaRegistryException {
-        if (eurekaClient == null) {
+        if (null == eurekaClient) {
             synchronized (EurekaRegistryServiceImpl.class) {
                 try {
-                    if (!needRegister) {
-                        instanceConfig = new CustomEurekaInstanceConfig();
+                    if (null == eurekaClient) {
+                        if (!needRegister) {
+                            instanceConfig = new CustomEurekaInstanceConfig();
+                        }
+                        ConfigurationManager.loadProperties(getEurekaProperties(needRegister));
+                        InstanceInfo instanceInfo = new EurekaConfigBasedInstanceInfoProvider(instanceConfig).get();
+                        applicationInfoManager = new ApplicationInfoManager(instanceConfig, instanceInfo);
+                        eurekaClient = new DiscoveryClient(applicationInfoManager, new DefaultEurekaClientConfig());
                     }
-                    ConfigurationManager.loadProperties(getEurekaProperties(needRegister));
-                    InstanceInfo instanceInfo = new EurekaConfigBasedInstanceInfoProvider(instanceConfig).get();
-                    applicationInfoManager = new ApplicationInfoManager(instanceConfig, instanceInfo);
-                    eurekaClient = new DiscoveryClient(applicationInfoManager, new DefaultEurekaClientConfig());
                 } catch (Exception e) {
                     clean();
                     throw new EurekaRegistryException("register eureka is error!", e);
