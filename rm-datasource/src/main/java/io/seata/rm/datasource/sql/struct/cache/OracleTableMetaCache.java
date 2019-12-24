@@ -81,7 +81,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
         try {
             return resultSetMetaToSchema(connection.getMetaData(), tableName);
         }
-        catch (SQLException sqlEx){
+        catch (SQLException sqlEx) {
             throw sqlEx;
         }
         catch (Exception e) {
