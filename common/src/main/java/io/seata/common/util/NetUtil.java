@@ -154,7 +154,7 @@ public class NetUtil {
                 return localAddress;
             }
         } catch (Throwable e) {
-            LOGGER.warn("Failed to retrieving ip address, " + e.getMessage(), e);
+            LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
         }
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
@@ -163,23 +163,25 @@ public class NetUtil {
                     try {
                         NetworkInterface network = interfaces.nextElement();
                         Enumeration<InetAddress> addresses = network.getInetAddresses();
-                        while (addresses.hasMoreElements()) {
-                            try {
-                                InetAddress address = addresses.nextElement();
-                                if (isValidAddress(address)) {
-                                    return address;
+                        if (addresses != null) {
+                            while (addresses.hasMoreElements()) {
+                                try {
+                                    InetAddress address = addresses.nextElement();
+                                    if (isValidAddress(address)) {
+                                        return address;
+                                    }
+                                } catch (Throwable e) {
+                                    LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
                                 }
-                            } catch (Throwable e) {
-                                LOGGER.warn("Failed to retrieving ip address, " + e.getMessage(), e);
                             }
                         }
                     } catch (Throwable e) {
-                        LOGGER.warn("Failed to retrieving ip address, " + e.getMessage(), e);
+                        LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
                     }
                 }
             }
         } catch (Throwable e) {
-            LOGGER.warn("Failed to retrieving ip address, " + e.getMessage(), e);
+            LOGGER.warn("Failed to retrieving ip address, {}", e.getMessage(), e);
         }
         LOGGER.error("Could not get local host ip address, will use 127.0.0.1 instead.");
         return localAddress;
