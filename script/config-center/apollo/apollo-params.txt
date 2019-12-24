@@ -1,0 +1,8 @@
+portalAddr=localhost:8070
+env=DEV
+appId=seata-server
+clusterName=default
+namespaceName=application
+dataChangeCreatedBy=apollo
+releasedBy=apollo
+token=3aa026fc8435d0fc4505b345b8fa4578fb646a2c

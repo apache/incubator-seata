@@ -22,7 +22,6 @@ import java.util.List;
  * the transaction log store
  *
  * @author zhangsen
- * @date 2019 /3/26
  */
 public interface LogStore {
 

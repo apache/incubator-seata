@@ -18,8 +18,7 @@ package io.seata.common.exception;
 /**
  * The enum Framework error code.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/9
+ * @author slievrly
  */
 public enum FrameworkErrorCode {
     /**

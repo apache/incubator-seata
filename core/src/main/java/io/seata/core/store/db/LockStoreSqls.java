@@ -23,7 +23,6 @@ import io.seata.core.constants.ServerTableColumnsName;
  * The type Lock store sqls.
  *
  * @author zhangsen
- * @date 2019 /4/26
  */
 public class LockStoreSqls {
 

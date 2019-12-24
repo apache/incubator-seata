@@ -15,8 +15,14 @@
  */
 package io.seata.rm.datasource;
 
-import com.alibaba.druid.util.JdbcUtils;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
+import com.alibaba.druid.util.JdbcUtils;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -24,15 +30,9 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.sql.DataSource;
-
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * The type Data source proxy.
@@ -40,8 +40,6 @@ import java.util.concurrent.TimeUnit;
  * @author sharajava
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProxy.class);
 
     private String resourceGroupId;
 
@@ -55,7 +53,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * Enable the table meta checker
      */
     private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
-        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, true);
+        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, false);
 
     /**
      * Table meta checker interval
@@ -96,7 +94,11 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         DefaultResourceManager.get().registerResource(this);
         if (ENABLE_TABLE_META_CHECKER_ENABLE) {
             tableMetaExcutor.scheduleAtFixedRate(() -> {
-                TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType()).refresh(DataSourceProxy.this);
+                try (Connection connection = dataSource.getConnection()) {
+                    TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
+                        .refresh(connection, DataSourceProxy.this.getResourceId());
+                } catch (Exception e) {
+                }
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }
     }
