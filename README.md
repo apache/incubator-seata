@@ -115,9 +115,7 @@ Contributors are welcomed to join the Seata project. Please check [CONTRIBUTING]
 * Mailing list: 
   * dev-seata@googlegroups.com , for dev/user discussion. [subscribe](mailto:dev-seata+subscribe@googlegroups.com), [unsubscribe](mailto:dev-seata+unsubscribe@googlegroups.com), [archive](https://groups.google.com/forum/#!forum/dev-seata)
   
-**Dingtalk**
-
-<img src="https://img.alicdn.com/tfs/TB1TYrmrQL0gK0jSZFtXXXQCXXa-1516-526.jpg"  height="100" width="300">
+<img src="https://img.alicdn.com/tfs/TB1TYrmrQL0gK0jSZFtXXXQCXXa-1516-526.jpg"  height="200" width="600">
 
 
 ## Seata ecosystem
