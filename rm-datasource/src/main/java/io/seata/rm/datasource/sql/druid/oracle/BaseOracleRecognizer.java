@@ -17,32 +17,34 @@ package io.seata.rm.datasource.sql.druid.oracle;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
-import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
-import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
 
+import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.druid.BaseRecognizer;
+import io.seata.rm.datasource.sql.struct.Null;
 
 /**
  * @author will
- * @date 2019/9/26
  */
 public abstract class BaseOracleRecognizer extends BaseRecognizer {
 
     /**
      * Instantiates a new oracle base recognizer
+     *
      * @param originalSql the original sql
      */
-    public BaseOracleRecognizer(String originalSql){
+    public BaseOracleRecognizer(String originalSql) {
         super(originalSql);
     }
 
-    public OracleOutputVisitor createOutputVisitor(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList, final StringBuilder sb) {
+    public OracleOutputVisitor createOutputVisitor(final ParametersHolder parametersHolder,
+                                                   final ArrayList<List<Object>> paramAppenderList,
+                                                   final StringBuilder sb) {
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
             @Override
@@ -53,7 +55,8 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
                         oneParamValues.stream().forEach(t -> paramAppenderList.add(new ArrayList<>()));
                     }
                     for (int i = 0; i < oneParamValues.size(); i++) {
-                        paramAppenderList.get(i).add(oneParamValues.get(i));
+                        Object o = oneParamValues.get(i);
+                        paramAppenderList.get(i).add(o instanceof Null ? null : o);
                     }
 
                 }
@@ -64,39 +67,22 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
     }
 
     public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
-        if (where == null) {
-            return "";
+        if (Objects.isNull(where)) {
+            return StringUtils.EMPTY;
         }
+
         StringBuilder sb = new StringBuilder();
-        OracleOutputVisitor visitor = createOutputVisitor(parametersHolder, paramAppenderList, sb);
-        if (where instanceof SQLBinaryOpExpr) {
-            visitor.visit((SQLBinaryOpExpr) where);
-        } else if (where instanceof SQLInListExpr) {
-            visitor.visit((SQLInListExpr) where);
-        } else if (where instanceof SQLBetweenExpr) {
-            visitor.visit((SQLBetweenExpr) where);
-        } else {
-            throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
-        }
+        executeVisit(where, createOutputVisitor(parametersHolder, paramAppenderList, sb));
         return sb.toString();
     }
 
     public String getWhereCondition(SQLExpr where) {
-        if (where == null) {
-            return "";
+        if (Objects.isNull(where)) {
+            return StringUtils.EMPTY;
         }
 
         StringBuilder sb = new StringBuilder();
-        OracleOutputVisitor visitor = new OracleOutputVisitor(sb);
-        if (where instanceof SQLBinaryOpExpr) {
-            visitor.visit((SQLBinaryOpExpr) where);
-        } else if (where instanceof SQLInListExpr) {
-            visitor.visit((SQLInListExpr) where);
-        } else if (where instanceof SQLBetweenExpr) {
-            visitor.visit((SQLBetweenExpr) where);
-        } else {
-            throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
-        }
+        executeVisit(where, new OracleOutputVisitor(sb));
         return sb.toString();
     }
 }

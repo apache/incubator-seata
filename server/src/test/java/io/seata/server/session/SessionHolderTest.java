@@ -31,7 +31,6 @@ import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
  * The type Session holder test.
  *
  * @author Wu
- * @date 2019 /3/6 The type Session holder test.
  */
 public class SessionHolderTest {
     private String pathname;

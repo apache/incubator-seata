@@ -34,15 +34,12 @@ public class GlobalStatusRequestConvertor implements PbConvertor<GlobalStatusReq
             MessageTypeProto.forNumber(typeCode)).build();
 
         final AbstractTransactionRequestProto abstractTransactionRequestProto = AbstractTransactionRequestProto
-            .newBuilder().setAbstractMessage(
-                abstractMessage).build();
+            .newBuilder().setAbstractMessage(abstractMessage).build();
 
         final String extraData = globalStatusRequest.getExtraData();
         AbstractGlobalEndRequestProto abstractGlobalEndRequestProto = AbstractGlobalEndRequestProto.newBuilder()
-            .setAbstractTransactionRequest(abstractTransactionRequestProto)
-            .setXid(globalStatusRequest.getXid())
-            .setExtraData(extraData==null?"":extraData)
-            .build();
+            .setAbstractTransactionRequest(abstractTransactionRequestProto).setXid(globalStatusRequest.getXid())
+            .setExtraData(extraData == null ? "" : extraData).build();
 
         GlobalStatusRequestProto result = GlobalStatusRequestProto.newBuilder().setAbstractGlobalEndRequest(
             abstractGlobalEndRequestProto).build();

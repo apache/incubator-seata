@@ -15,6 +15,7 @@
  */
 package io.seata.server.lock.db;
 
+import io.seata.common.util.IOUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.core.store.db.LockStoreDataBaseDAO;
@@ -35,7 +36,6 @@ import java.sql.Statement;
 
 /**
  * @author zhangsen
- * @data 2019/4/28
  */
 public class DataBaseLockManagerImplTest {
 
@@ -77,13 +77,7 @@ public class DataBaseLockManagerImplTest {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -125,12 +119,7 @@ public class DataBaseLockManagerImplTest {
 
             conn.createStatement().execute(delSql);
         } finally {
-            if(conn != null){
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -170,12 +159,7 @@ public class DataBaseLockManagerImplTest {
 
             conn.createStatement().execute(delSql);
         } finally {
-            if(conn != null){
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -226,12 +210,7 @@ public class DataBaseLockManagerImplTest {
             rs.close();
 
         } finally {
-            if(conn != null){
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(conn);
         }
 
 
@@ -274,12 +253,7 @@ public class DataBaseLockManagerImplTest {
 
             conn.createStatement().execute(delSql);
         } finally {
-            if(conn != null){
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(conn);
         }
     }
 

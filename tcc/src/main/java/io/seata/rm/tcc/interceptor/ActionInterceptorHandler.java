@@ -55,7 +55,7 @@ public class ActionInterceptorHandler {
      */
     public Map<String, Object> proceed(Method method, Object[] arguments, String xid, TwoPhaseBusinessAction businessAction,
                                        Callback<Object> targetCallback) throws Throwable {
-        Map<String, Object> ret = new HashMap<String, Object>(16);
+        Map<String, Object> ret = new HashMap<String, Object>(4);
 
         //TCC name
         String actionName = businessAction.name();
@@ -63,7 +63,6 @@ public class ActionInterceptorHandler {
         actionContext.setXid(xid);
         //set action anme
         actionContext.setActionName(actionName);
-        //TODO services
 
         //Creating Branch Record
         String branchId = doTccActionLogStore(method, arguments, businessAction, actionContext);

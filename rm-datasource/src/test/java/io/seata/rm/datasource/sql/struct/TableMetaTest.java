@@ -16,14 +16,12 @@
 package io.seata.rm.datasource.sql.struct;
 
 import com.google.common.collect.Lists;
-import com.sun.org.apache.xpath.internal.operations.String;
 import io.seata.common.exception.NotSupportYetException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author will
- * @date 2019/9/28
  */
 public class TableMetaTest {
 
@@ -52,8 +50,8 @@ public class TableMetaTest {
     public void testGetColumnMeta() {
         TableMeta tableMeta = new TableMeta();
         tableMeta.getAllColumns().put("id", new ColumnMeta());
-        tableMeta.getAllColumns().put("`name`", new ColumnMeta());
-        Assertions.assertNotNull(tableMeta.getColumnMeta("`id`"));
+        tableMeta.getAllColumns().put("name", new ColumnMeta());
+        Assertions.assertNull(tableMeta.getColumnMeta("`id`"));
         Assertions.assertNotNull(tableMeta.getColumnMeta("name"));
     }
 

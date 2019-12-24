@@ -381,6 +381,10 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         long now = System.currentTimeMillis();
         for (GlobalSession rollbackingSession : rollbackingSessions) {
             try {
+                //prevent repeated rollback
+                if (rollbackingSession.getStatus().equals(GlobalStatus.Rollbacking) && !rollbackingSession.isRollbackingDead()) {
+                    continue;
+                }
                 if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT.toMillis(), rollbackingSession.getBeginTime())) {
                     /**
                      * Prevent thread safety issues
@@ -454,8 +458,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                 asyncCommittingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
                 core.doGlobalCommit(asyncCommittingSession, true);
             } catch (TransactionException ex) {
-                LOGGER.info("Failed to async committing [{}] {} {}", asyncCommittingSession.getXid(), ex.getCode(),
-                    ex.getMessage());
+                LOGGER.error("Failed to async committing [{}] {} {}", asyncCommittingSession.getXid(), ex.getCode(),
+                    ex.getMessage(), ex);
             }
         }
     }

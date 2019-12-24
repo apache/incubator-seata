@@ -32,6 +32,7 @@ import io.seata.common.exception.StoreException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.LambdaUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -47,7 +48,6 @@ import org.slf4j.LoggerFactory;
  * The type Data base lock store.
  *
  * @author zhangsen
- * @date 2019 /4/25
  */
 @LoadLevel(name = "db")
 public class LockStoreDataBaseDAO implements LockStore, Initialize {
@@ -185,18 +185,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(rs, ps);
             if (conn != null) {
                 try {
                     if (originalAutoCommit) {
@@ -237,18 +226,53 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
+            IOUtil.close(ps, conn);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean unLock(String xid, Long branchId) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            //batch release lock by branch
+            String batchDeleteSQL = LockStoreSqls.getBatchDeleteLockSqlByBranch(lockTable, dbType);
+            ps = conn.prepareStatement(batchDeleteSQL);
+            ps.setString(1, xid);
+            ps.setLong(2, branchId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps, conn);
+        }
+        return true;
+    }
+
+    @Override
+    public boolean unLock(String xid, List<Long> branchIds) {
+        Connection conn = null;
+        PreparedStatement ps = null;
+        try {
+            conn = logStoreDataSource.getConnection();
+            conn.setAutoCommit(true);
+            StringJoiner sj = new StringJoiner(",");
+            branchIds.stream().forEach(branchId -> sj.add("?"));
+            //batch release lock by branch list
+            String batchDeleteSQL = LockStoreSqls.getBatchDeleteLockSqlByBranchs(lockTable, sj.toString(), dbType);
+            ps = conn.prepareStatement(batchDeleteSQL);
+            ps.setString(1, xid);
+            for (int i = 0; i < branchIds.size(); i++) {
+                ps.setLong(i + 2, branchIds.get(i));
             }
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new StoreException(e);
+        } finally {
+            IOUtil.close(ps, conn);
         }
         return true;
     }
@@ -266,12 +290,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -299,12 +318,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps);
         }
     }
 
@@ -337,12 +351,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
             //return false,let the caller go to conn.rollabck()
             return false;
         } finally {
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(ps);
         }
     }
 
@@ -379,18 +388,7 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
         } catch (SQLException e) {
             throw new DataAccessException(e);
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (ps != null) {
-                try {
-                    ps.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(rs, ps);
         }
     }
 

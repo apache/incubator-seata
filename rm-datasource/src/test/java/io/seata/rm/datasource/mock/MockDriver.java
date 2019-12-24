@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Mock driver
  * @author will
- * @date 2019/8/14
  */
 public class MockDriver extends com.alibaba.druid.mock.MockDriver {
 
@@ -72,7 +71,7 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
         this.mockReturnValue = mockReturnValue;
         this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
         this.mockIndexMetasReturnValue = mockIndexMetasReturnValue;
-        this.setMockExecuteHandler(new MockExecuteHandlerImpl(mockReturnValueColumnLabels, mockReturnValue));
+        this.setMockExecuteHandler(new MockExecuteHandlerImpl(mockReturnValueColumnLabels, mockReturnValue, mockColumnsMetasReturnValue));
     }
 
     /**
@@ -110,7 +109,7 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      * @param mockReturnValue
      */
     public void setMockReturnValue(Object[][] mockReturnValue) {
-        this.mockReturnValue = mockReturnValue;
+        this.mockReturnValue = mockReturnValue == null ? new Object[][]{} : mockReturnValue;
     }
 
     /**
@@ -118,7 +117,7 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      * @param mockColumnsMetasReturnValue
      */
     public void setMockColumnsMetasReturnValue(Object[][] mockColumnsMetasReturnValue) {
-        this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
+        this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue == null ? new Object[][]{} : mockColumnsMetasReturnValue;
     }
 
     /**
@@ -134,7 +133,7 @@ public class MockDriver extends com.alibaba.druid.mock.MockDriver {
      * @param mockIndexMetasReturnValue
      */
     public void setMockIndexMetasReturnValue(Object[][] mockIndexMetasReturnValue) {
-        this.mockIndexMetasReturnValue = mockIndexMetasReturnValue;
+        this.mockIndexMetasReturnValue = mockIndexMetasReturnValue == null ? new Object[][]{} : mockIndexMetasReturnValue;
     }
 
     /**

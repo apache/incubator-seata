@@ -41,8 +41,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * The type Abstract rpc server.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/15
+ * @author slievrly
  */
 @Sharable
 public class RpcServer extends AbstractRpcRemotingServer implements ServerMessageSender {
@@ -210,12 +209,11 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
      * @throws TimeoutException the timeout exception
      */
     @Override
-    public Object sendSyncRequest(String resourceId, String clientId, Object message,
-                                  long timeout) throws TimeoutException {
+    public Object sendSyncRequest(String resourceId, String clientId, Object message, long timeout)
+        throws TimeoutException {
         Channel clientChannel = ChannelManager.getChannel(resourceId, clientId);
         if (clientChannel == null) {
-            throw new RuntimeException("rm client is not connected. dbkey:" + resourceId
-                + ",clientId:" + clientId);
+            throw new RuntimeException("rm client is not connected. dbkey:" + resourceId + ",clientId:" + clientId);
 
         }
         return sendAsyncRequestWithResponse(null, clientChannel, message, timeout);
@@ -264,36 +262,34 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
      * @throws TimeoutException the timeout exception
      */
     @Override
-    public Object sendSyncRequest(String resourceId, String clientId, Object message)
-        throws TimeoutException {
+    public Object sendSyncRequest(String resourceId, String clientId, Object message) throws TimeoutException {
         return sendSyncRequest(resourceId, clientId, message, NettyServerConfig.getRpcRequestTimeout());
     }
 
     /**
      * Send request with response object.
      *
-     * @param channel   the channel
-     * @param message    the msg
+     * @param channel the channel
+     * @param message the msg
      * @return the object
      * @throws TimeoutException the timeout exception
      */
     @Override
     public Object sendASyncRequest(Channel channel, Object message) throws IOException, TimeoutException {
-       return sendAsyncRequestWithoutResponse(channel, message);
+        return sendAsyncRequestWithoutResponse(channel, message);
     }
 
     /**
      * Dispatch.
      *
      * @param request the request
-     * @param ctx   the ctx
+     * @param ctx     the ctx
      */
     @Override
     public void dispatch(RpcMessage request, ChannelHandlerContext ctx) {
         Object msg = request.getBody();
         if (msg instanceof RegisterRMRequest) {
-            serverMessageListener.onRegRmMessage(request, ctx, this,
-                checkAuthHandler);
+            serverMessageListener.onRegRmMessage(request, ctx, this, checkAuthHandler);
         } else {
             if (ChannelManager.isRegistered(ctx.channel())) {
                 serverMessageListener.onTrxMessage(request, ctx, this);
@@ -354,7 +350,7 @@ public class RpcServer extends AbstractRpcRemotingServer implements ServerMessag
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof RpcMessage) {
-            RpcMessage rpcMessage = (RpcMessage) msg;
+            RpcMessage rpcMessage = (RpcMessage)msg;
             debugLog("read:" + rpcMessage.getBody());
             if (rpcMessage.getBody() instanceof RegisterTMRequest) {
                 serverMessageListener.onRegTmMessage(rpcMessage, ctx, this, checkAuthHandler);

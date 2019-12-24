@@ -15,17 +15,16 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
-import java.util.HashMap;
-
 import io.seata.spring.boot.autoconfigure.properties.file.ClientProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.LockProperties;
+import io.seata.spring.boot.autoconfigure.properties.file.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.ShutdownProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.SpringProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.SupportProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.ThreadFactoryProperties;
-import io.seata.spring.boot.autoconfigure.properties.file.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.TransportProperties;
+import io.seata.spring.boot.autoconfigure.properties.file.UndoProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigApolloProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigConsulProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.ConfigEtcd3Properties;
@@ -43,13 +42,15 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisPrope
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
 
+import java.util.HashMap;
+
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/09/30
  */
 public class StarterConstants {
     private static final int MAP_CAPACITY = 64;
     public static final String SEATA_PREFIX = "seata";
+    public static final String SEATA_SPRING_CLOUD_ALIBABA_PREFIX = "spring.cloud.alibaba.seata";
     public static final String TRANSPORT_PREFIX = SEATA_PREFIX + ".transport";
     public static final String THREAD_FACTORY_PREFIX = TRANSPORT_PREFIX + ".thread-factory";
     public static final String SHUTDOWN_PREFIX = TRANSPORT_PREFIX + ".shutdown";
@@ -58,6 +59,7 @@ public class StarterConstants {
     public static final String CLIENT_RM_PREFIX = CLIENT_PREFIX + ".rm";
     public static final String LOCK_PREFIX = CLIENT_RM_PREFIX + ".lock";
     public static final String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
+    public static final String LOG_PREFIX = CLIENT_PREFIX + ".log";
     public static final String SUPPORT_PREFIX = CLIENT_PREFIX + ".support";
     public static final String SPRING_PREFIX = SUPPORT_PREFIX + ".spring";
 
@@ -91,6 +93,7 @@ public class StarterConstants {
             put(SUPPORT_PREFIX, SupportProperties.class);
             put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
             put(UNDO_PREFIX, UndoProperties.class);
+            put(LOG_PREFIX, LogProperties.class);
             put(TRANSPORT_PREFIX, TransportProperties.class);
             put(CONFIG_PREFIX, ConfigProperties.class);
             put(CONFIG_FILE_PREFIX, ConfigFileProperties.class);

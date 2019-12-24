@@ -23,7 +23,7 @@ import java.util.List;
 /**
  * The interface Transaction store manager.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public interface TransactionStoreManager {
 
@@ -66,6 +66,13 @@ public interface TransactionStoreManager {
      * Shutdown.
      */
     void shutdown();
+
+    /**
+     * Gets current max session id.
+     *
+     * @return the current max session id
+     */
+    long getCurrentMaxSessionId();
 
 
     /**

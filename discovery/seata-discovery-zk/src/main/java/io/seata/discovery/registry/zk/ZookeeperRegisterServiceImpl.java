@@ -45,7 +45,6 @@ import static io.seata.common.Constants.IP_PORT_SPLIT_CHAR;
  * zookeeper path as /registry/zk/
  *
  * @author crazier.huang
- * @date 2019/2/15
  */
 public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildListener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ZookeeperRegisterServiceImpl.class);
@@ -294,12 +293,6 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
         String clusterConfigName = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
             + REGISTRY_CLUSTER;
         return FILE_CONFIG.getConfig(clusterConfigName);
-    }
-
-    private String getServiceGroup(String key) {
-        Configuration configuration = ConfigurationFactory.getInstance();
-        String clusterNameKey = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
-        return configuration.getConfig(clusterNameKey);
     }
 
     private String getRegisterPathByPath(InetSocketAddress address) {

@@ -15,6 +15,11 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
@@ -22,12 +27,6 @@ import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 
 /**
  * The type Table meta cache.
@@ -58,13 +57,31 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
     }
 
     @Override
-    protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
-        Connection conn = null;
+    protected String getCacheKey(Connection connection, String tableName, String resourceId) {
+        StringBuilder cacheKey = new StringBuilder(resourceId);
+        cacheKey.append(".");
+
+        //separate it to schemaName and tableName
+        String[] tableNameWithSchema = tableName.split("\\.");
+        String defaultTableName = tableNameWithSchema.length > 1 ? tableNameWithSchema[1] : tableNameWithSchema[0];
+
+        //oracle does not implement supportsMixedCaseIdentifiers in DatabaseMetadata
+        if (defaultTableName.contains("\"")) {
+            cacheKey.append(defaultTableName.replace("\"", ""));
+        } else {
+            // oracle default store in upper case
+            cacheKey.append(defaultTableName.toUpperCase());
+        }
+
+        return cacheKey.toString();
+    }
+
+    @Override
+    protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
         java.sql.Statement stmt = null;
         try {
-            conn = dataSource.getConnection();
-            stmt = conn.createStatement();
-            DatabaseMetaData dbmd = conn.getMetaData();
+            stmt = connection.createStatement();
+            DatabaseMetaData dbmd = connection.getMetaData();
             return resultSetMetaToSchema(dbmd, tableName);
         } catch (Exception e) {
             if (e instanceof SQLException) {
@@ -76,9 +93,6 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
             if (stmt != null) {
                 stmt.close();
             }
-            if (conn != null) {
-                conn.close();
-            }
         }
     }
 
@@ -88,10 +102,10 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
         String[] schemaTable = tableName.split("\\.");
         String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
-        if(tableName.contains("\"")){
+        if (tableName.contains("\"")) {
             tableName = tableName.replace("\"", "");
             schemaName = schemaName.replace("\"", "");
-        }else{
+        } else {
             tableName = tableName.toUpperCase();
         }
 

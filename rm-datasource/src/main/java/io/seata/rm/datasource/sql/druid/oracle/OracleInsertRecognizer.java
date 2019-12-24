@@ -15,6 +15,9 @@
  */
 package io.seata.rm.datasource.sql.druid.oracle;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
@@ -27,21 +30,18 @@ import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.stmt.OracleInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
+
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLType;
-import io.seata.rm.datasource.sql.druid.BaseRecognizer;
 import io.seata.rm.datasource.sql.struct.Null;
 import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
 import io.seata.rm.datasource.sql.struct.SqlSequenceExpr;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * The type oracle insert recognizer.
+ *
  * @author ccg
- * @date 2019/3/25
  */
 public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLInsertRecognizer {
 
@@ -55,7 +55,7 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
      */
     public OracleInsertRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (OracleInsertStatement) ast;
+        this.ast = (OracleInsertStatement)ast;
     }
 
     @Override
@@ -119,7 +119,7 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
                 } else if (expr instanceof SQLMethodInvokeExpr) {
                     row.add(new SqlMethodExpr());
                 } else if (expr instanceof SQLSequenceExpr) {
-                    SQLSequenceExpr sequenceExpr = ((SQLSequenceExpr) expr);
+                    SQLSequenceExpr sequenceExpr = (SQLSequenceExpr)expr;
                     String sequence = sequenceExpr.getSequence().getSimpleName();
                     String function = sequenceExpr.getFunction().name;
                     row.add(new SqlSequenceExpr(sequence, function));

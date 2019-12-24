@@ -15,7 +15,6 @@
  */
 package io.seata.core.store;
 
-
 import io.seata.common.util.StringUtils;
 
 import java.util.Date;
@@ -24,7 +23,6 @@ import java.util.Date;
  * Global Transaction data object
  *
  * @author zhangsen
- * @date 2019 /3/26
  */
 public class GlobalTransactionDO {
 
@@ -249,7 +247,7 @@ public class GlobalTransactionDO {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return StringUtils.toString(this);
     }
 

@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import io.seata.common.Constants;
 import io.seata.common.executor.Initialize;
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.IOUtil;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
@@ -41,8 +42,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Enhanced service loader.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/10
+ * @author slievrly
  */
 public class EnhancedServiceLoader {
     private static final Logger LOGGER = LoggerFactory.getLogger(EnhancedServiceLoader.class);
@@ -322,12 +322,7 @@ public class EnhancedServiceLoader {
                 } catch (Throwable e) {
                     LOGGER.warn(e.getMessage());
                 } finally {
-                    try {
-                        if (reader != null) {
-                            reader.close();
-                        }
-                    } catch (IOException ioe) {
-                    }
+                    IOUtil.close(reader);
                 }
             }
         }
@@ -353,7 +348,6 @@ public class EnhancedServiceLoader {
         if (argTypes != null && args != null) {
             // Constructor with arguments
             Constructor<S> constructor = implClazz.getDeclaredConstructor(argTypes);
-            constructor.setAccessible(true);
             s = service.cast(constructor.newInstance(args));
         } else {
             // default Constructor
