@@ -27,7 +27,6 @@ import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.ResourceManagerInbound;
-import io.seata.core.rpc.ServerMessageSender;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.LockerManagerFactory;
@@ -56,7 +55,6 @@ public class DefaultCore implements Core {
     private LockManager lockManager = LockerManagerFactory.getLockManager();
 
     private ResourceManagerInbound resourceManagerInbound;
-    private ServerMessageSender messageSender;
 
     private EventBus eventBus = EventBusManager.get();
 

@@ -22,6 +22,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.rpc.netty.RpcServer;
 import io.seata.core.rpc.netty.ShutdownHook;
 import io.seata.server.coordinator.DefaultCoordinator;
+import io.seata.server.coordinator.DefaultCoordinator1;
 import io.seata.server.metrics.MetricsManager;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
@@ -74,7 +75,7 @@ public class Server {
         //log store mode : file, db
         SessionHolder.init(parameterParser.getStoreMode());
 
-        DefaultCoordinator coordinator = new DefaultCoordinator(rpcServer);
+        DefaultCoordinator1 coordinator = new DefaultCoordinator1(rpcServer);
         coordinator.init();
         rpcServer.setHandler(coordinator);
         // register ShutdownHook

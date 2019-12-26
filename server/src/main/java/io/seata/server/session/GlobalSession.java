@@ -646,4 +646,27 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     public ArrayList<BranchSession> getBranchSessions() {
         return branchSessions;
     }
+
+    public void asyncCommit() throws TransactionException {
+        this.addSessionLifecycleListener(SessionHolder.getAsyncCommittingSessionManager());
+        SessionHolder.getAsyncCommittingSessionManager().addGlobalSession(this);
+        this.changeStatus(GlobalStatus.AsyncCommitting);
+    }
+
+    public void queueToRetryCommit() throws TransactionException {
+        this.addSessionLifecycleListener(SessionHolder.getRetryCommittingSessionManager());
+        SessionHolder.getRetryCommittingSessionManager().addGlobalSession(this);
+        this.changeStatus(GlobalStatus.CommitRetrying);
+    }
+
+    public void queueToRetryRollback() throws TransactionException {
+        this.addSessionLifecycleListener(SessionHolder.getRetryRollbackingSessionManager());
+        SessionHolder.getRetryRollbackingSessionManager().addGlobalSession(this);
+        GlobalStatus currentStatus = this.getStatus();
+        if (SessionHelper.isTimeoutGlobalStatus(currentStatus)) {
+            this.changeStatus(GlobalStatus.TimeoutRollbackRetrying);
+        } else {
+            this.changeStatus(GlobalStatus.RollbackRetrying);
+        }
+    }
 }

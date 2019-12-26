@@ -166,6 +166,31 @@ public class EnhancedServiceLoader {
     }
 
     /**
+     * get all implements
+     *
+     * @param <S>     the type parameter
+     * @param service the service
+     * @param argsType     the args type
+     * @param args         the args
+     * @return list list
+     */
+    public static <S> List<S> loadAll(Class<S> service, Class[] argsType, Object[] args) {
+        List<S> allInstances = new ArrayList<>();
+        List<Class> allClazzs = getAllExtensionClass(service);
+        if (CollectionUtils.isEmpty(allClazzs)) {
+            return allInstances;
+        }
+        try {
+            for (Class clazz : allClazzs) {
+                allInstances.add(initInstance(service, clazz, argsType, args));
+            }
+        } catch (Throwable t) {
+            throw new EnhancedServiceNotFoundException(t);
+        }
+        return allInstances;
+    }
+
+    /**
      * Get all the extension classes, follow {@linkplain LoadLevel} defined and sort order
      *
      * @param <S>     the type parameter
