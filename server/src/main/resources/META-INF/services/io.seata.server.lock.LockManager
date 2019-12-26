@@ -1,2 +1,0 @@
-io.seata.server.lock.db.DataBaseLockManager
-io.seata.server.lock.DefaultLockManager
