@@ -15,10 +15,10 @@
  */
 package io.seata.spring.annotation.datasource;
 
-import io.seata.rm.datasource.DataSourceProxy;
-
 import javax.sql.DataSource;
 import java.util.concurrent.ConcurrentHashMap;
+
+import io.seata.rm.datasource.DataSourceProxy;
 
 /**
  * the type data source proxy holder
