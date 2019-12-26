@@ -21,8 +21,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.seata.common.loader.LoadLevel;
 import io.seata.core.exception.TransactionException;
+import io.seata.server.session.AbstractSessionManager;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 
@@ -31,7 +33,6 @@ import io.seata.server.store.SessionStorable;
  *
  * @author sharajava
  */
-@LoadLevel(name = "default")
 public class DefaultSessionManager extends AbstractSessionManager {
 
     /**

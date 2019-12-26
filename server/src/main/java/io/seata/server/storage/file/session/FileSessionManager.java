@@ -13,32 +13,39 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.session.file;
+package io.seata.server.storage.file.session;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.StoreMode;
 import io.seata.server.UUIDGenerator;
+import io.seata.server.session.AbstractSessionManager;
 import io.seata.server.session.BranchSession;
-import io.seata.server.session.DefaultSessionManager;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.Reloadable;
+import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
-import io.seata.server.store.ReloadableStore;
+import io.seata.server.storage.file.ReloadableStore;
+import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.store.TransactionWriteStore;
+import io.seata.server.storage.file.TransactionWriteStore;
 
 /**
  * The type File based session manager.
@@ -46,10 +53,14 @@ import io.seata.server.store.TransactionWriteStore;
  * @author slievrly
  */
 @LoadLevel(name = "file")
-public class FileBasedSessionManager extends DefaultSessionManager implements Reloadable {
+public class FileSessionManager extends AbstractSessionManager implements Reloadable {
 
     private static final int READ_SIZE = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.SERVICE_SESSION_RELOAD_READ_SIZE, 100);
+    /**
+     * The Session map.
+     */
+    private Map<String, GlobalSession> sessionMap = new ConcurrentHashMap<>();
 
     /**
      * Instantiates a new File based session manager.
@@ -58,17 +69,81 @@ public class FileBasedSessionManager extends DefaultSessionManager implements Re
      * @param sessionStoreFilePath the session store file path
      * @throws IOException the io exception
      */
-    public FileBasedSessionManager(String name, String sessionStoreFilePath) throws IOException {
+    public FileSessionManager(String name, String sessionStoreFilePath) throws IOException {
         super(name);
-        transactionStoreManager = EnhancedServiceLoader.load(TransactionStoreManager.class, StoreMode.FILE.name(),
-            new Class[] {String.class, SessionManager.class},
-            new Object[] {sessionStoreFilePath + File.separator + name, this});
+        if (StringUtils.isNotBlank(sessionStoreFilePath)) {
+            transactionStoreManager = EnhancedServiceLoader.load(TransactionStoreManager.class, StoreMode.FILE.name(),
+                    new Class[] {String.class, SessionManager.class},
+                    new Object[] {sessionStoreFilePath + File.separator + name, this});
+        } else {
+            transactionStoreManager = new AbstractTransactionStoreManager() {
+                @Override
+                public boolean writeSession(LogOperation logOperation, SessionStorable session) {
+                    return true;
+                }
+
+                @Override
+                public long getCurrentMaxSessionId() {
+                    long maxSessionId = 0L;
+                    for (Map.Entry<String, GlobalSession> entry : sessionMap.entrySet()) {
+                        GlobalSession globalSession = entry.getValue();
+                        if (globalSession.hasBranch()) {
+                            long maxBranchId = globalSession.getSortedBranches().get(globalSession.getSortedBranches().size() - 1)
+                                    .getBranchId();
+                            if (maxBranchId > maxSessionId) {
+                                maxSessionId = maxBranchId;
+                            }
+                        }
+                    }
+                    return maxSessionId;
+                }
+            };
+        }
     }
 
     @Override
     public void reload() {
         restoreSessions();
         washSessions();
+    }
+
+    @Override
+    public void addGlobalSession(GlobalSession session) throws TransactionException {
+        super.addGlobalSession(session);
+        sessionMap.put(session.getXid(), session);
+    }
+
+    @Override
+    public GlobalSession findGlobalSession(String xid)  {
+        return sessionMap.get(xid);
+    }
+
+    @Override
+    public GlobalSession findGlobalSession(String xid, boolean withBranchSessions) {
+        //withBranchSessions without process in memory
+        return sessionMap.get(xid);
+    }
+
+    @Override
+    public void removeGlobalSession(GlobalSession session) throws TransactionException {
+        super.removeGlobalSession(session);
+        sessionMap.remove(session.getXid());
+    }
+
+    @Override
+    public Collection<GlobalSession> allSessions() {
+        return sessionMap.values();
+    }
+
+    @Override
+    public List<GlobalSession> findGlobalSessions(SessionCondition condition) {
+        List<GlobalSession> found = new ArrayList<>();
+        for (GlobalSession globalSession : sessionMap.values()) {
+            if (System.currentTimeMillis() - globalSession.getBeginTime() > condition.getOverTimeAliveMills()) {
+                found.add(globalSession);
+            }
+        }
+        return found;
     }
 
     private void restoreSessions() {

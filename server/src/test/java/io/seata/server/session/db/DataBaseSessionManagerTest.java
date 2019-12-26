@@ -27,7 +27,8 @@ import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
-import io.seata.server.store.db.DatabaseTransactionStoreManager;
+import io.seata.server.storage.db.session.DataBaseSessionManager;
+import io.seata.server.storage.db.store.DataBaseTransactionStoreManager;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -56,7 +57,7 @@ public class DataBaseSessionManagerTest {
     @BeforeAll
     public static void start() throws Exception {
         DataBaseSessionManager tempSessionManager = new DataBaseSessionManager();
-        DatabaseTransactionStoreManager transactionStoreManager = new DatabaseTransactionStoreManager();
+        DataBaseTransactionStoreManager transactionStoreManager = new DataBaseTransactionStoreManager();
 
         dataSource =  new BasicDataSource();
         dataSource.setDriverClassName("org.h2.Driver");
@@ -452,7 +453,7 @@ public class DataBaseSessionManagerTest {
         Assertions.assertNotNull(rets);
         Assertions.assertEquals(1, rets.size());
 
-        GlobalSession globalSession_db = (io.seata.server.session.GlobalSession) new ArrayList(rets).get(0);
+        GlobalSession globalSession_db = (GlobalSession) new ArrayList(rets).get(0);
 
         Assertions.assertNotNull(globalSession_db.getReverseSortedBranches());
         Assertions.assertEquals(2, globalSession_db.getReverseSortedBranches().size());
@@ -534,7 +535,7 @@ public class DataBaseSessionManagerTest {
         Assertions.assertNotNull(rets);
         Assertions.assertEquals(1, rets.size());
 
-        GlobalSession globalSession_db = (io.seata.server.session.GlobalSession) new ArrayList(rets).get(0);
+        GlobalSession globalSession_db = (GlobalSession) new ArrayList(rets).get(0);
 
         Assertions.assertNotNull(globalSession_db.getReverseSortedBranches());
         Assertions.assertEquals(1, globalSession_db.getReverseSortedBranches().size());

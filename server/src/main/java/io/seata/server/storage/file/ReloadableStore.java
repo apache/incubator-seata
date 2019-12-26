@@ -13,20 +13,33 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.lock.memory;
+package io.seata.server.storage.file;
 
-import io.seata.core.lock.Locker;
-import io.seata.server.storage.file.lock.FileLockManager;
-import io.seata.server.storage.file.lock.FileLocker;
-import io.seata.server.session.BranchSession;
+import java.util.List;
 
 /**
+ * The interface Reloadable store.
+ *
  * @author zhangsen
  */
-public class MemoryLockManagerForTest extends FileLockManager {
+public interface ReloadableStore {
 
-    @Override
-    protected Locker getLocker(BranchSession branchSession) {
-        return new FileLocker(branchSession);
-    }
+    /**
+     * Read write store.
+     *
+     * @param readSize  the read size
+     * @param isHistory the is history
+     * @return the list
+     */
+    List<TransactionWriteStore> readWriteStore(int readSize, boolean isHistory);
+
+    /**
+     * Has remaining boolean.
+     *
+     * @param isHistory the is history
+     * @return the boolean
+     */
+    boolean hasRemaining(boolean isHistory);
+
+
 }

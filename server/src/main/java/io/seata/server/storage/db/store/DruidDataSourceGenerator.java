@@ -13,25 +13,25 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.store.db;
+package io.seata.server.storage.db.store;
 
+import com.alibaba.druid.pool.DruidDataSource;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.store.db.AbstractDataSourceGenerator;
-import org.apache.commons.dbcp.BasicDataSource;
 
 import javax.sql.DataSource;
 
 /**
- * The type Dbcp data source generator.
+ * The type Druid data source generator.
  *
  * @author zhangsen
  */
-@LoadLevel(name = "dbcp")
-public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {
+@LoadLevel(name = "druid")
+public class DruidDataSourceGenerator extends AbstractDataSourceGenerator {
 
     @Override
     public DataSource generateDataSource() {
-        BasicDataSource ds = new BasicDataSource();
+        DruidDataSource ds = new DruidDataSource();
         ds.setDriverClassName(getDriverClassName());
         ds.setUrl(getUrl());
         ds.setUsername(getUser());
@@ -39,15 +39,15 @@ public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {
         ds.setInitialSize(getMinConn());
         ds.setMaxActive(getMaxConn());
         ds.setMinIdle(getMinConn());
-        ds.setMaxIdle(getMinConn());
         ds.setMaxWait(5000);
         ds.setTimeBetweenEvictionRunsMillis(120000);
-        ds.setNumTestsPerEvictionRun(1);
+        ds.setMinEvictableIdleTimeMillis(300000);
         ds.setTestWhileIdle(true);
+        ds.setTestOnBorrow(true);
+        ds.setPoolPreparedStatements(true);
+        ds.setMaxPoolPreparedStatementPerConnectionSize(20);
         ds.setValidationQuery(getValidationQuery(getDBType()));
-        ds.setConnectionProperties("useUnicode=yes;characterEncoding=utf8;socketTimeout=5000;connectTimeout=500");
+        ds.setDefaultAutoCommit(true);
         return ds;
     }
-
-
 }

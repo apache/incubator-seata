@@ -15,18 +15,16 @@
  */
 package io.seata.server.coordinator;
 
-import java.util.ArrayList;
-
+import io.seata.common.exception.FrameworkException;
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.common.util.CollectionUtils;
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
-import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
-import io.seata.core.model.GlobalStatus;
-import io.seata.core.model.ResourceManagerInbound;
+import io.seata.core.model.*;
 import io.seata.core.rpc.ServerMessageSender;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.lock.LockManager;
@@ -38,20 +36,21 @@ import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static io.seata.core.exception.TransactionExceptionCode.BranchTransactionNotExist;
-import static io.seata.core.exception.TransactionExceptionCode.FailedToAddBranch;
-import static io.seata.core.exception.TransactionExceptionCode.GlobalTransactionNotActive;
-import static io.seata.core.exception.TransactionExceptionCode.GlobalTransactionStatusInvalid;
-import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import static io.seata.core.exception.TransactionExceptionCode.*;
 
 /**
  * The type Default core.
  *
  * @author sharajava
  */
-public class DefaultCore implements Core {
+public class DefaultCore1 implements Core {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCore.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCore1.class);
 
     private LockManager lockManager = LockerManagerFactory.getLockManager();
 
@@ -59,6 +58,32 @@ public class DefaultCore implements Core {
     private ServerMessageSender messageSender;
 
     private EventBus eventBus = EventBusManager.get();
+    protected static Map<BranchType, Core> resourceManagers = new ConcurrentHashMap<>();
+    private static final DefaultCore1 instance = new DefaultCore1();
+
+    public static DefaultCore1 getInstance() {
+        return instance;
+    }
+
+    private DefaultCore1() {
+        //init all resource managers
+        List<Core> allResourceManagers = EnhancedServiceLoader.loadAll(Core.class);
+        if (CollectionUtils.isNotEmpty(allResourceManagers)) {
+            for (Core rm : allResourceManagers) {
+                resourceManagers.put(rm.getBranchType(), rm);
+            }
+        }
+    }
+    public Core getResourceManager(BranchType branchType) {
+        Core rm = resourceManagers.get(branchType);
+        if (rm == null) {
+            throw new FrameworkException("No ResourceManager for BranchType:" + branchType.name());
+        }
+        return rm;
+    }
+    public void setMessageSender(ServerMessageSender messageSender) {
+        this.messageSender = messageSender;
+    }
 
     @Override
     public void setResourceManagerInbound(ResourceManagerInbound resourceManagerInbound) {
@@ -68,76 +93,21 @@ public class DefaultCore implements Core {
     @Override
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
-        GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
-        return globalSession.lockAndExcute(() -> {
-            if (!globalSession.isActive()) {
-                throw new GlobalTransactionException(GlobalTransactionNotActive, String
-                    .format("Could not register branch into global session xid = %s status = %s",
-                        globalSession.getXid(), globalSession.getStatus()));
-            }
-            //SAGA type accept forward(retry) operation, forward operation will register remaining branches
-            if (globalSession.getStatus() != GlobalStatus.Begin && !BranchType.SAGA.equals(branchType)) {
-                throw new GlobalTransactionException(GlobalTransactionStatusInvalid, String
-                    .format("Could not register branch into global session xid = %s status = %s while expecting %s",
-                        globalSession.getXid(), globalSession.getStatus(), GlobalStatus.Begin));
-            }
-            globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
-            BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
-                applicationData, lockKeys, clientId);
-            if (!branchSession.lock()) {
-                throw new BranchTransactionException(LockKeyConflict, String
-                    .format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
-                        branchSession.getBranchId()));
-            }
-            try {
-                globalSession.addBranch(branchSession);
-            } catch (RuntimeException ex) {
-                branchSession.unlock();
-                throw new BranchTransactionException(FailedToAddBranch, String
-                    .format("Failed to store branch xid = %s branchId = %s", globalSession.getXid(),
-                        branchSession.getBranchId()), ex);
-            }
-            LOGGER.info("Successfully register branch xid = {}, branchId = {}", globalSession.getXid(),
-                branchSession.getBranchId());
-            return branchSession.getBranchId();
-        });
-    }
-
-    private GlobalSession assertGlobalSessionNotNull(String xid, boolean withBranchSessions)
-        throws TransactionException {
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid, withBranchSessions);
-        if (globalSession == null) {
-            throw new GlobalTransactionException(TransactionExceptionCode.GlobalTransactionNotExist,
-                String.format("Could not found global transaction xid = %s", xid));
-        }
-        return globalSession;
+        return getResourceManager(branchType).branchRegister(branchType, resourceId, clientId, xid,
+                applicationData, lockKeys);
     }
 
     @Override
     public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status,
                              String applicationData) throws TransactionException {
-        GlobalSession globalSession = assertGlobalSessionNotNull(xid, true);
-        BranchSession branchSession = globalSession.getBranch(branchId);
-        if (branchSession == null) {
-            throw new BranchTransactionException(BranchTransactionNotExist,
-                String.format("Could not found branch session xid = %s branchId = %s", xid, branchId));
-        }
-        globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
-        globalSession.changeBranchStatus(branchSession, status);
-
-        LOGGER.info("Successfully branch report xid = {}, branchId = {}", globalSession.getXid(),
-            branchSession.getBranchId());
+        getResourceManager(branchType).branchReport(branchType, xid, branchId, status,
+                applicationData);
     }
 
     @Override
     public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
         throws TransactionException {
-        if (branchType == BranchType.AT) {
-            return lockManager.isLockable(xid, resourceId, lockKeys);
-        } else {
-            return true;
-        }
-
+        return getResourceManager(branchType).lockQuery(branchType, resourceId, xid, lockKeys);
     }
 
     @Override

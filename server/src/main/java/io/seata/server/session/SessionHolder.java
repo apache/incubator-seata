@@ -109,12 +109,12 @@ public class SessionHolder {
             }
             ROOT_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.name(),
                 new Object[] {ROOT_SESSION_MANAGER_NAME, sessionStorePath});
-            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, DEFAULT,
-                new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, DEFAULT,
-                new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME});
-            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, DEFAULT,
-                new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME});
+            ASYNC_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.name(),
+                new Object[] {ASYNC_COMMITTING_SESSION_MANAGER_NAME, null});
+            RETRY_COMMITTING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.name(),
+                new Object[] {RETRY_COMMITTING_SESSION_MANAGER_NAME, null});
+            RETRY_ROLLBACKING_SESSION_MANAGER = EnhancedServiceLoader.load(SessionManager.class, StoreMode.FILE.name(),
+                new Object[] {RETRY_ROLLBACKING_SESSION_MANAGER_NAME, null});
         } else {
             //unknown store
             throw new IllegalArgumentException("unknown store mode:" + mode);

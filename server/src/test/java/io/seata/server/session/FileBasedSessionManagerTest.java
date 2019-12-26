@@ -29,7 +29,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import io.seata.server.session.file.FileBasedSessionManager;
+import io.seata.server.storage.file.session.FileSessionManager;
 import java.util.stream.Stream;
 
 
@@ -50,7 +50,7 @@ public class FileBasedSessionManagerTest {
      */
     @BeforeEach
     public void setUp() throws Exception {
-        sessionManager = new FileBasedSessionManager("root.data", ".");
+        sessionManager = new FileSessionManager("root.data", ".");
     }
 
     /**

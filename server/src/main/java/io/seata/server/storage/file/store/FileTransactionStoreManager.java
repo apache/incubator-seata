@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.store.file;
+package io.seata.server.storage.file.store;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,12 +42,12 @@ import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionCondition;
 import io.seata.server.session.SessionManager;
 import io.seata.server.store.AbstractTransactionStoreManager;
-import io.seata.server.store.FlushDiskMode;
-import io.seata.server.store.ReloadableStore;
+import io.seata.server.storage.file.FlushDiskMode;
+import io.seata.server.storage.file.ReloadableStore;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.StoreConfig;
 import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.store.TransactionWriteStore;
+import io.seata.server.storage.file.TransactionWriteStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

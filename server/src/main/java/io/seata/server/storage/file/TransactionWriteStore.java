@@ -13,14 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.store;
+package io.seata.server.storage.file;
 
 import java.nio.ByteBuffer;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
-import io.seata.server.store.TransactionStoreManager.LogOperation;
+import io.seata.server.store.SessionStorable;
+import io.seata.server.store.TransactionStoreManager;
 
 /**
  * The type Transaction write store.
@@ -29,7 +30,7 @@ import io.seata.server.store.TransactionStoreManager.LogOperation;
  */
 public class TransactionWriteStore implements SessionStorable {
     private SessionStorable sessionRequest;
-    private LogOperation operate;
+    private TransactionStoreManager.LogOperation operate;
 
     /**
      * Instantiates a new Transaction write store.
@@ -37,7 +38,7 @@ public class TransactionWriteStore implements SessionStorable {
      * @param sessionRequest the session request
      * @param operate        the operate
      */
-    public TransactionWriteStore(SessionStorable sessionRequest, LogOperation operate) {
+    public TransactionWriteStore(SessionStorable sessionRequest, TransactionStoreManager.LogOperation operate) {
         this.sessionRequest = sessionRequest;
         this.operate = operate;
     }
@@ -70,7 +71,7 @@ public class TransactionWriteStore implements SessionStorable {
      *
      * @return the operate
      */
-    public LogOperation getOperate() {
+    public TransactionStoreManager.LogOperation getOperate() {
         return operate;
     }
 
@@ -79,7 +80,7 @@ public class TransactionWriteStore implements SessionStorable {
      *
      * @param operate the operate
      */
-    public void setOperate(LogOperation operate) {
+    public void setOperate(TransactionStoreManager.LogOperation operate) {
         this.operate = operate;
     }
 
@@ -101,13 +102,13 @@ public class TransactionWriteStore implements SessionStorable {
         byte[] bySessionRequest = new byte[src.length - 1];
         byteBuffer.get(bySessionRequest);
         byte byOpCode = byteBuffer.get();
-        this.operate = LogOperation.getLogOperationByCode(byOpCode);
+        this.operate = TransactionStoreManager.LogOperation.getLogOperationByCode(byOpCode);
         SessionStorable tmpSessionStorable = getSessionInstanceByOperation(this.operate);
         tmpSessionStorable.decode(bySessionRequest);
         this.sessionRequest = tmpSessionStorable;
     }
 
-    private SessionStorable getSessionInstanceByOperation(LogOperation logOperation) {
+    private SessionStorable getSessionInstanceByOperation(TransactionStoreManager.LogOperation logOperation) {
         SessionStorable sessionStorable = null;
         switch (logOperation) {
             case GLOBAL_ADD:

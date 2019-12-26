@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.lock.memory;
+package io.seata.server.storage.file.lock;
 
 import java.util.List;
 import java.util.Map;
@@ -36,7 +36,7 @@ import io.seata.server.session.BranchSession;
  * @author zhangsen
  */
 @LoadLevel(name = "file")
-public class MemoryLocker extends AbstractLocker {
+public class FileLocker extends AbstractLocker {
 
     private static final int BUCKET_PER_TABLE = 128;
 
@@ -54,7 +54,7 @@ public class MemoryLocker extends AbstractLocker {
      *
      * @param branchSession the branch session
      */
-    public MemoryLocker(BranchSession branchSession) {
+    public FileLocker(BranchSession branchSession) {
         this.branchSession = branchSession;
     }
 

@@ -19,8 +19,9 @@ import io.seata.common.util.IOUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
 import io.seata.core.store.db.LockStoreDataBaseDAO;
-import io.seata.server.lock.DefaultLockManager;
+import io.seata.server.storage.file.lock.FileLockManager;
 import io.seata.server.lock.LockManager;
+import io.seata.server.storage.db.lock.DataBaseLocker;
 import io.seata.server.session.BranchSession;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.junit.jupiter.api.BeforeAll;
@@ -257,7 +258,7 @@ public class DataBaseLockManagerImplTest {
         }
     }
 
-    public static class DBLockManagerForTest extends DefaultLockManager {
+    public static class DBLockManagerForTest extends FileLockManager {
 
         protected LockStoreDataBaseDAO lockStore;
 

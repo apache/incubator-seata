@@ -13,33 +13,31 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.store;
+package io.seata.server.lock;
 
-import java.util.List;
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 
 /**
- * The interface Reloadable store.
+ * The type Lock manager factory.
  *
- * @author zhangsen
+ * @author sharajava
  */
-public interface ReloadableStore {
+public class LockerManagerFactory {
 
     /**
-     * Read write store.
-     *
-     * @param readSize  the read size
-     * @param isHistory the is history
-     * @return the list
+     * the lock manager
      */
-    List<TransactionWriteStore> readWriteStore(int readSize, boolean isHistory);
+    private static final LockManager lockManager = EnhancedServiceLoader.load(LockManager.class,
+            ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_MODE));
 
     /**
-     * Has remaining boolean.
+     * Get lock manager.
      *
-     * @param isHistory the is history
-     * @return the boolean
+     * @return the lock manager
      */
-    boolean hasRemaining(boolean isHistory);
-
-
+    public static LockManager getLockManager() {
+        return lockManager;
+    }
 }

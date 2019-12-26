@@ -149,6 +149,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     private ServerMessageSender messageSender;
 
     private Core core = CoreFactory.get();
+    private Core core1 = DefaultCore1.getInstance();
 
     private EventBus eventBus = EventBusManager.get();
 
@@ -160,6 +161,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     public DefaultCoordinator(ServerMessageSender messageSender) {
         this.messageSender = messageSender;
         core.setResourceManagerInbound(this);
+        core1.setMessageSender(messageSender);
     }
 
     @Override

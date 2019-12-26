@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.store.db;
+package io.seata.server.storage.db.store;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -55,7 +55,7 @@ import io.seata.server.store.TransactionStoreManager;
  * @author zhangsen
  */
 @LoadLevel(name = "db")
-public class DatabaseTransactionStoreManager extends AbstractTransactionStoreManager
+public class DataBaseTransactionStoreManager extends AbstractTransactionStoreManager
     implements TransactionStoreManager, Initialize {
 
     /**
@@ -86,7 +86,7 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
     /**
      * Instantiates a new Database transaction store manager.
      */
-    public DatabaseTransactionStoreManager() {
+    public DataBaseTransactionStoreManager() {
     }
 
     @Override
