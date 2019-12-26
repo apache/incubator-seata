@@ -103,7 +103,11 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         try (Statement stmt = connection.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             return resultSetMetaToSchema(rs.getMetaData(), connection.getMetaData());
-        } catch (Exception e) {
+        }
+        catch (SQLException sqlEx) {
+            throw sqlEx;
+        }
+        catch (Exception e) {
             throw new SQLException(String.format("Failed to fetch schema of %s", tableName), e);
         }
     }
