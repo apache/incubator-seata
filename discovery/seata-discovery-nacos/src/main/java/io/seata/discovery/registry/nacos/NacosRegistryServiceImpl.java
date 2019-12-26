@@ -37,8 +37,7 @@ import io.seata.discovery.registry.RegistryService;
 /**
  * The type Nacos registry service.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /1/31
+ * @author slievrly
  */
 public class NacosRegistryServiceImpl implements RegistryService<EventListener> {
     private static final String DEFAULT_NAMESPACE = "";
@@ -113,8 +112,7 @@ public class NacosRegistryServiceImpl implements RegistryService<EventListener> 
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
-        Configuration config = ConfigurationFactory.getInstance();
-        String clusterName = config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
+        String clusterName = getServiceGroup(key);
         if (null == clusterName) {
             return null;
         }

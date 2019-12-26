@@ -34,7 +34,6 @@ import io.seata.server.session.BranchSession;
  * The type Memory locker.
  *
  * @author zhangsen
- * @data 2019 -05-15
  */
 @LoadLevel(name = "file")
 public class MemoryLocker extends AbstractLocker {

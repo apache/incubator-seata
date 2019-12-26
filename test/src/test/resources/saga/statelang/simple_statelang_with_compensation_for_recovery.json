@@ -21,7 +21,7 @@
                 "fooResult": "$.#root"
             },
             "Status": {
-                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN",
+                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
                 "#root != null &&  #root.size() > 0": "SU",
                 "#root == null || #root.size() == 0": "FA"
             }
@@ -56,14 +56,14 @@
                 "barResult": "$.#root"
             },
             "Status": {
-                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN",
+                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
                 "#root != null &&  #root.size() > 0": "SU",
                 "#root == null || #root.size() == 0": "FA"
             },
             "Catch": [
                 {
                     "Exceptions": [
-                        "io.seata.common.exception.FrameworkException"
+                        "io.seata.saga.engine.mock.DemoException"
                     ],
                     "Next": "CompensationTrigger"
                 }
@@ -83,7 +83,7 @@
                 "fooResult": "$.#root"
             },
             "Status": {
-                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN",
+                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
                 "#root != null &&  #root.size() > 0": "SU",
                 "#root == null || #root.size() == 0": "FA"
             },
@@ -101,7 +101,7 @@
                 }
             ],
             "Status": {
-                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN",
+                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
                 "#root != null &&  #root.size() > 0": "SU",
                 "#root == null || #root.size() == 0": "FA"
             }
@@ -118,7 +118,7 @@
                 }
             ],
             "Status": {
-                "$Exception{io.seata.saga.engine.exception.EngineExecutionException}": "UN",
+                "$Exception{io.seata.saga.engine.mock.DemoException}": "UN",
                 "#root != null &&  #root.size() > 0": "SU",
                 "#root == null || #root.size() == 0": "FA"
             }

@@ -41,8 +41,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * The type Abstract rpc server.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/15
+ * @author slievrly
  */
 @Sharable
 public class RpcServer extends AbstractRpcRemotingServer implements ServerMessageSender {
