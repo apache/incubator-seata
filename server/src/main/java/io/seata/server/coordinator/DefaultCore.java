@@ -48,11 +48,11 @@ public class DefaultCore implements Core {
 
     private ServerMessageSender messageSender;
 
-    private static final EventBus eventBus = EventBusManager.get();
+    private EventBus eventBus = EventBusManager.get();
 
     private static volatile Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
 
-    private static final DefaultCore instance = new DefaultCore();
+    private static DefaultCore instance = new DefaultCore();
 
     public static DefaultCore getInstance() {
         return instance;

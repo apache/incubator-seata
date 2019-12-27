@@ -133,9 +133,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private ServerMessageSender messageSender;
 
-    private static final DefaultCore core = DefaultCore.getInstance();
+    private DefaultCore core = DefaultCore.getInstance();
 
-    private static final EventBus eventBus = EventBusManager.get();
+    private EventBus eventBus = EventBusManager.get();
 
     /**
      * Instantiates a new Default coordinator.
