@@ -24,8 +24,8 @@ import java.io.IOException;
  */
 public interface HttpExecutor {
 
-    <T, K> K excutePost(String host, String path, T paramObject, Class<K> returnType) throws IOException;
+    <T, K> K executePost(String host, String path, T paramObject, Class<K> returnType) throws IOException;
 
-    <T, K> K excuteGet(String host, String path, T paramObject, Class<K> returnType) throws IOException;
+    <T, K> K executeGet(String host, String path, T paramObject, Class<K> returnType) throws IOException;
 
 }

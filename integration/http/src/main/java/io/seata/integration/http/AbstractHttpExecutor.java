@@ -37,7 +37,7 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * The abstract http executer.
+ * The abstract http executor.
  *
  * @author wangxb
  */
@@ -48,7 +48,7 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
 
     @Override
-    public <T, K> K excutePost(String host, String path, T paramObject, Class<K> returnType) throws IOException {
+    public <T, K> K executePost(String host, String path, T paramObject, Class<K> returnType) throws IOException {
 
         Args.notNull(returnType, "returnType");
         Args.notNull(host, "host");
@@ -90,7 +90,7 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
     }
 
     @Override
-    public <T, K> K excuteGet(String host, String path, T paramObject, Class<K> returnType) throws IOException {
+    public <T, K> K executeGet(String host, String path, T paramObject, Class<K> returnType) throws IOException {
 
         Args.notNull(returnType, "returnType");
         Args.notNull(host, "host");
