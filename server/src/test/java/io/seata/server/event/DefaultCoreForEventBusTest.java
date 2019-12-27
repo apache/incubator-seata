@@ -25,8 +25,8 @@ import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.server.coordinator.Core;
-import io.seata.server.coordinator.CoreFactory;
 import io.seata.server.coordinator.DefaultCoordinator;
+import io.seata.server.coordinator.DefaultCore;
 import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -61,7 +61,7 @@ public class DefaultCoreForEventBusTest {
         DefaultCoordinator coordinator = new DefaultCoordinator(null);
         coordinator.init();
         try {
-            Core core = CoreFactory.get();
+            DefaultCore core = DefaultCore.getInstance();
 
             GlobalTransactionEventSubscriber subscriber = new GlobalTransactionEventSubscriber();
             EventBusManager.get().register(subscriber);

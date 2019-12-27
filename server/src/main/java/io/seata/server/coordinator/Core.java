@@ -16,9 +16,7 @@
 package io.seata.server.coordinator;
 
 import io.seata.core.exception.TransactionException;
-import io.seata.core.model.ResourceManagerInbound;
-import io.seata.core.model.ResourceManagerOutbound;
-import io.seata.core.model.TransactionManager;
+import io.seata.core.model.*;
 import io.seata.server.session.GlobalSession;
 
 /**
@@ -26,14 +24,7 @@ import io.seata.server.session.GlobalSession;
  *
  * @author sharajava
  */
-public interface Core extends TransactionManager, ResourceManagerOutbound {
-
-    /**
-     * Sets resource manager inbound.
-     *
-     * @param resourceManagerInbound the resource manager inbound
-     */
-    void setResourceManagerInbound(ResourceManagerInbound resourceManagerInbound);
+public interface Core extends TransactionManager, ResourceManagerOutbound, ResourceManagerInbound {
 
     /**
      * Do global commit.
@@ -42,14 +33,20 @@ public interface Core extends TransactionManager, ResourceManagerOutbound {
      * @param retrying      the retrying
      * @throws TransactionException the transaction exception
      */
-    void doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException;
+    boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException;
 
     /**
      * Do global rollback.
      *
      * @param globalSession the global session
      * @param retrying      the retrying
+     * @return whether succeed
      * @throws TransactionException the transaction exception
      */
-    void doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException;
+    boolean doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException;
+
+    void doGlobalReport(GlobalSession globalSession, String xid, GlobalStatus globalStatus) throws TransactionException;
+
+    BranchType getBranchType();
 }
+

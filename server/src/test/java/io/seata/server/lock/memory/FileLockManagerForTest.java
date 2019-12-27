@@ -13,34 +13,20 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.server.coordinator;
+package io.seata.server.lock.memory;
+
+import io.seata.core.lock.Locker;
+import io.seata.server.storage.file.lock.FileLockManager;
+import io.seata.server.storage.file.lock.FileLocker;
+import io.seata.server.session.BranchSession;
 
 /**
- * The type Core factory.
- *
- * @author sharajava
+ * @author zhangsen
  */
-public class CoreFactory {
+public class FileLockManagerForTest extends FileLockManager {
 
-    private static class SingletonHolder {
-        private static Core INSTANCE = new DefaultCore();
-    }
-
-    /**
-     * Get core.
-     *
-     * @return the core
-     */
-    public static final Core get() {
-        return SingletonHolder.INSTANCE;
-    }
-
-    /**
-     * Just for test mocking
-     *
-     * @param core the core
-     */
-    public static void set(Core core) {
-        SingletonHolder.INSTANCE = core;
+    @Override
+    protected Locker getLocker(BranchSession branchSession) {
+        return new FileLocker(branchSession);
     }
 }

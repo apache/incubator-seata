@@ -71,7 +71,7 @@ public class DefaultCoordinatorTest {
 
     private static final String applicationData = "{\"data\":\"test\"}";
 
-    private static Core core = new DefaultCore();
+    private static DefaultCore core;
 
     @BeforeAll
     public static void beforeClass() throws Exception {
@@ -79,6 +79,8 @@ public class DefaultCoordinatorTest {
         SessionHolder.init(null);
         serverMessageSender = new MockServerMessageSender();
         defaultCoordinator = new DefaultCoordinator(serverMessageSender);
+        core = new DefaultCore();
+        core.setMessageSender(serverMessageSender);
 //        defaultCoordinator.init();
     }
 
@@ -88,7 +90,7 @@ public class DefaultCoordinatorTest {
         BranchStatus result = null;
 
         try {
-            result = defaultCoordinator.branchCommit(BranchType.AT, xid, branchId, resourceId, applicationData);
+            result = core.branchCommit(BranchType.AT, xid, branchId, resourceId, applicationData);
         } catch (TransactionException e) {
             Assertions.fail(e.getMessage());
         }
@@ -105,7 +107,7 @@ public class DefaultCoordinatorTest {
     public void branchRollback(String xid, Long branchId) {
         BranchStatus result = null;
         try {
-            result = defaultCoordinator.branchRollback(BranchType.AT, xid, branchId, resourceId, applicationData);
+            result = core.branchRollback(BranchType.AT, xid, branchId, resourceId, applicationData);
         } catch (TransactionException e) {
             Assertions.fail(e.getMessage());
         }

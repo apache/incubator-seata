@@ -34,9 +34,9 @@ import java.util.stream.Stream;
  * @author zhimo.xiao @gmail.com
  * @since 2019 /1/23
  */
-public class MemoryLockManagerImplTest {
+public class FileLockManagerImplTest {
 
-    private LockManager lockManager = new MemoryLockManagerForTest();
+    private LockManager lockManager = new FileLockManagerForTest();
 
     private static final long transactionId = UUIDGenerator.generateUUID();
 

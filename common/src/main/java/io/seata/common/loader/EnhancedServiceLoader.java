@@ -150,19 +150,7 @@ public class EnhancedServiceLoader {
      * @return list list
      */
     public static <S> List<S> loadAll(Class<S> service) {
-        List<S> allInstances = new ArrayList<>();
-        List<Class> allClazzs = getAllExtensionClass(service);
-        if (CollectionUtils.isEmpty(allClazzs)) {
-            return allInstances;
-        }
-        try {
-            for (Class clazz : allClazzs) {
-                allInstances.add(initInstance(service, clazz, null, null));
-            }
-        } catch (Throwable t) {
-            throw new EnhancedServiceNotFoundException(t);
-        }
-        return allInstances;
+        return loadAll(service, null, null);
     }
 
     /**

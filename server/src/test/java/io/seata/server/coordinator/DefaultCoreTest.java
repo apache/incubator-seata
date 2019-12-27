@@ -22,7 +22,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.model.ResourceManagerInbound;
+import io.seata.core.rpc.ServerMessageSender;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHelper;
@@ -44,7 +44,7 @@ import org.junit.jupiter.params.provider.MethodSource;
  */
 public class DefaultCoreTest {
 
-    private static Core core = new DefaultCore();
+    private static DefaultCore core = new DefaultCore();
 
     private static final String applicationId = "demo-child-app";
 
@@ -167,8 +167,8 @@ public class DefaultCoreTest {
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.setResourceManagerInbound(
-            new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseOne_Done));
+        core.mockCore(BranchType.AT,
+            new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Committed);
     }
@@ -187,8 +187,8 @@ public class DefaultCoreTest {
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.setResourceManagerInbound(
-            new MockResourceManagerInbound(BranchStatus.PhaseTwo_CommitFailed_Unretryable, BranchStatus.PhaseOne_Done));
+        core.mockCore(BranchType.AT,
+                new MockCore(BranchStatus.PhaseTwo_CommitFailed_Unretryable, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Begin);
     }
@@ -207,8 +207,8 @@ public class DefaultCoreTest {
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.setResourceManagerInbound(
-            new MockResourceManagerInbound(BranchStatus.PhaseOne_Timeout, BranchStatus.PhaseOne_Done));
+        core.mockCore(BranchType.AT,
+                new MockCore(BranchStatus.PhaseOne_Timeout, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.CommitRetrying);
     }
@@ -240,8 +240,8 @@ public class DefaultCoreTest {
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.setResourceManagerInbound(
-            new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_Rollbacked));
+        core.mockCore(BranchType.AT,
+                new MockCore(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_Rollbacked));
         core.doGlobalRollback(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Rollbacked);
     }
@@ -260,7 +260,7 @@ public class DefaultCoreTest {
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed,
+        core.mockCore(BranchType.AT, new MockCore(BranchStatus.PhaseTwo_Committed,
             BranchStatus.PhaseTwo_RollbackFailed_Unretryable));
         core.doGlobalRollback(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.RollbackFailed);
@@ -280,7 +280,7 @@ public class DefaultCoreTest {
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed,
+        core.mockCore(BranchType.AT, new MockCore(BranchStatus.PhaseTwo_Committed,
             BranchStatus.PhaseTwo_RollbackFailed_Retryable));
         core.doGlobalRollback(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.RollbackRetrying);
@@ -333,7 +333,7 @@ public class DefaultCoreTest {
         }
     }
 
-    private static class MockResourceManagerInbound implements ResourceManagerInbound {
+    private static class MockCore extends AbstractCore {
 
         private BranchStatus commitStatus;
         private BranchStatus rollbackStatus;
@@ -344,7 +344,8 @@ public class DefaultCoreTest {
          * @param commitStatus   the commit status
          * @param rollbackStatus the rollback status
          */
-        public MockResourceManagerInbound(BranchStatus commitStatus, BranchStatus rollbackStatus) {
+        public MockCore(BranchStatus commitStatus, BranchStatus rollbackStatus) {
+            super(null);
             this.commitStatus = commitStatus;
             this.rollbackStatus = rollbackStatus;
         }
@@ -359,6 +360,11 @@ public class DefaultCoreTest {
         public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
                                            String applicationData) throws TransactionException {
             return rollbackStatus;
+        }
+
+        @Override
+        public BranchType getBranchType() {
+            return BranchType.AT;
         }
     }
 

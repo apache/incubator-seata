@@ -114,6 +114,18 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
     }
 
     /**
+     * Is saga type transaction
+     *
+     * @return is saga
+     */
+    public boolean isSaga() {
+        if (branchSessions.size() > 0) {
+            return BranchType.SAGA.equals(branchSessions.get(0).getBranchType());
+        }
+        return false;
+    }
+
+    /**
      * Is timeout boolean.
      *
      * @return the boolean
@@ -260,8 +272,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      * @return the sorted branches
      */
     public ArrayList<BranchSession> getSortedBranches() {
-        ArrayList<BranchSession> sorted = new ArrayList<>(branchSessions);
-        return sorted;
+        return new ArrayList<>(branchSessions);
     }
 
     /**

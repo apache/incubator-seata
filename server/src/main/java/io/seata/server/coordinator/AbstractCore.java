@@ -1,6 +1,20 @@
+/*
+ *  Copyright 1999-2019 Seata.io Group.
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package io.seata.server.coordinator;
 
-import io.seata.core.event.EventBus;
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
@@ -13,7 +27,6 @@ import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.ServerMessageSender;
-import io.seata.server.event.EventBusManager;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.LockerManagerFactory;
 import io.seata.server.session.BranchSession;
@@ -26,18 +39,24 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-import static io.seata.core.exception.TransactionExceptionCode.*;
+import static io.seata.core.exception.TransactionExceptionCode.BranchTransactionNotExist;
+import static io.seata.core.exception.TransactionExceptionCode.FailedToAddBranch;
+import static io.seata.core.exception.TransactionExceptionCode.GlobalTransactionNotActive;
+import static io.seata.core.exception.TransactionExceptionCode.GlobalTransactionStatusInvalid;
+import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
+import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchCommitRequest;
+import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchRollbackRequest;
 
 /**
- * Created by txg on 2019-12-24.
+ * The type abstract core.
+ *
+ * @author ph3636
  */
-public abstract class AbstractCore implements Core1 {
+public abstract class AbstractCore implements Core {
 
     protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractCore.class);
 
     protected LockManager lockManager = LockerManagerFactory.getLockManager();
-
-    protected EventBus eventBus = EventBusManager.get();
 
     protected ServerMessageSender messageSender;
 
@@ -195,8 +214,8 @@ public abstract class AbstractCore implements Core1 {
     }
 
     @Override
-    public void doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
-
+    public boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
+        return true;
     }
 
     @Override
@@ -210,8 +229,8 @@ public abstract class AbstractCore implements Core1 {
     }
 
     @Override
-    public void doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
-
+    public boolean doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
+        return true;
     }
 
     @Override
