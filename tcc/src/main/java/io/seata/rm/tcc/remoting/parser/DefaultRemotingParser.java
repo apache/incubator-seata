@@ -50,7 +50,7 @@ public class DefaultRemotingParser {
     protected static Map<String, RemotingDesc> remotingServiceMap = new ConcurrentHashMap<>();
 
     private static class SingletonHolder {
-        private static DefaultRemotingParser INSTANCE = new DefaultRemotingParser();
+        private static final DefaultRemotingParser INSTANCE = new DefaultRemotingParser();
     }
 
     /**
