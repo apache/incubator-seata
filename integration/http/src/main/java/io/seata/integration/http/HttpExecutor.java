@@ -16,6 +16,7 @@
 package io.seata.integration.http;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Http executer.
@@ -26,6 +27,6 @@ public interface HttpExecutor {
 
     <T, K> K executePost(String host, String path, T paramObject, Class<K> returnType) throws IOException;
 
-    <T, K> K executeGet(String host, String path, T paramObject, Class<K> returnType) throws IOException;
+    <T, K> K executeGet(String host, String path, Map<String,String> paramObject, Class<K> returnType) throws IOException;
 
 }

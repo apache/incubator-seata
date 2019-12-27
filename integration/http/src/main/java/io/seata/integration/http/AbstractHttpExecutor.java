@@ -18,6 +18,7 @@ package io.seata.integration.http;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Maps;
 import io.seata.core.context.RootContext;
 import org.apache.http.HttpResponse;
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * The abstract http executor.
@@ -90,13 +92,14 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
     }
 
     @Override
-    public <T, K> K executeGet(String host, String path, T paramObject, Class<K> returnType) throws IOException {
+    public <T, K> K executeGet(String host, String path, Map<String, String> paramObject, Class<K> returnType) throws IOException {
 
         Args.notNull(returnType, "returnType");
         Args.notNull(host, "host");
         Args.notNull(path, "path");
 
         CloseableHttpClient httpClient = initHttpClientInstance(paramObject);
+
         HttpGet httpGet = new HttpGet(initGetUrl(host, path, paramObject));
         Map<String, String> headers = Maps.newHashMap();
 
@@ -133,7 +136,7 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
     protected abstract <T> void buildGetHeaders(Map<String, String> headers, T paramObject);
 
-    protected abstract <T> String initGetUrl(String host, String path, T paramObject);
+    protected abstract <T> String initGetUrl(String host, String path, Map<String, String> paramObject);
 
 
     protected abstract <T> void buildPostHeaders(Map<String, String> headers, T t);
@@ -142,4 +145,21 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
     protected abstract <K> K convertResult(HttpResponse response, Class<K> clazz);
 
+
+    public static Map<String, String> convertParamOfBean(Object sourceParam) {
+        Map<String, Object> targetObjectParam =
+                JSON.parseObject(JSON.toJSONString(sourceParam, SerializerFeature.WriteNullStringAsEmpty, SerializerFeature.WriteMapNullValue), Map.class);
+        Map<String, String> TrimStringParam = convert(targetObjectParam);
+        return TrimStringParam;
+    }
+
+    public static <T> Map<String, String> convertParamOfJsonString(String jsonstr, Class<T> returnType) {
+        T paramBean =
+                JSON.parseObject(jsonstr, returnType);
+        return convertParamOfBean(paramBean);
+    }
+
+    public static Map<String, String> convert(Map<String, Object> param) {
+        return param.keySet().stream().filter(key -> param.get(key) != null && param.get(key) != null).collect(Collectors.toMap(key -> key, key -> param.get(key).toString()));
+    }
 }

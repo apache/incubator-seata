@@ -42,12 +42,15 @@ class HttpTransactionFilterTest {
     private static final String getPath = "/index";
     private static final String postPath = "/testPost";
     private static final String XID = "127.0.0.1:8081:87654321";
+    private static final int PARAM_TYPE_MAP = 1;
+    private static final int PARAM_TYPE_BEAN = 2;
+    private static final int PARAM_TYPE_JSON = 3;
 
     @Test
     void testGetProviderXID() {
         RootContext.bind(XID);
         providerStart();
-        consumerGetStart();
+        consumerGetStart(PARAM_TYPE_MAP);
         RootContext.unbind();
     }
 
@@ -55,7 +58,7 @@ class HttpTransactionFilterTest {
     void testPostProviderXID() {
         RootContext.bind(XID);
         providerStart();
-        consumerPostStart();
+        consumerPostStart(PARAM_TYPE_MAP);
         RootContext.unbind();
     }
 
@@ -85,7 +88,7 @@ class HttpTransactionFilterTest {
 
     }
 
-    private void consumerPostStart() {
+    private void consumerPostStart(int param_type) {
         DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
         String str = "{\n" +
                 "    \"name\":\"zhangsan\",\n" +
@@ -103,7 +106,17 @@ class HttpTransactionFilterTest {
 
         //The body parameter of post supports the above types (str,person,map,json)
         try {
-            HttpResponse response = httpExecuter.excutePost(host, postPath, map, HttpResponse.class);
+            HttpResponse response;
+
+            if (param_type == PARAM_TYPE_MAP) {
+                response = httpExecuter.executePost(host, postPath, map, HttpResponse.class);
+            } else if (param_type == PARAM_TYPE_BEAN) {
+                response = httpExecuter.executePost(host, postPath, person, HttpResponse.class);
+            } else {
+                response = httpExecuter.executePost(host, postPath, str, HttpResponse.class);
+            }
+
+
             String content = readStreamAsStr(response.getEntity().getContent());
             System.out.println("return content =" + content);
             Assertions.assertTrue(content.contains("zhangsan") && content.contains("15"));
@@ -112,12 +125,26 @@ class HttpTransactionFilterTest {
         }
     }
 
-    private void consumerGetStart() {
+    private void consumerGetStart(int param_type) {
         DefaultHttpExecutor httpExecuter = DefaultHttpExecutor.getInstance();
         Map<String, String> params = Maps.newHashMap();
         params.put("name", "zhangsan");
+
+        String str = "{\n" +
+                "    \"name\":\"zhangsan\",\n" +
+                "    \"age\":15\n" +
+                "}";
+        Person person = JSON.parseObject(str, Person.class);
         try {
-            HttpResponse response = httpExecuter.excuteGet(host, getPath, params, HttpResponse.class);
+            //support all type of parameter types
+            HttpResponse response;
+            if (param_type == PARAM_TYPE_MAP) {
+                response = httpExecuter.executeGet(host, getPath, params, HttpResponse.class);
+            } else if (param_type == PARAM_TYPE_BEAN) {
+                response = httpExecuter.executeGet(host, getPath, DefaultHttpExecutor.convertParamOfBean(person), HttpResponse.class);
+            } else {
+                response = httpExecuter.executeGet(host, getPath, DefaultHttpExecutor.convertParamOfJsonString(str, Person.class), HttpResponse.class);
+            }
             String content = readStreamAsStr(response.getEntity().getContent());
             Assertions.assertEquals(content, "hello world!");
         } catch (IOException e) {

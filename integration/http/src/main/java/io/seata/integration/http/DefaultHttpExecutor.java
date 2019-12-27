@@ -15,6 +15,7 @@
  */
 package io.seata.integration.http;
 
+import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
@@ -51,54 +52,51 @@ public class DefaultHttpExecutor extends AbstractHttpExecutor {
 
     }
 
+
     @Override
-    public <T> String initGetUrl(String host, String path, T paramObject) {
+    public <T> String initGetUrl(String host, String path, Map<String, String> querys) {
 
-        if (paramObject != null && paramObject instanceof Map) {
-            Map<String, String> querys = (Map<String, String>) paramObject;
-            if (querys.isEmpty()) {
-                return host + path;
+        if (querys.isEmpty()) {
+            return host + path;
+        }
+        StringBuilder sbUrl = new StringBuilder();
+        sbUrl.append(host);
+        if (!StringUtils.isBlank(path)) {
+            sbUrl.append(path);
+        }
+
+        StringBuilder sbQuery = new StringBuilder();
+        Iterator queryKeys = querys.entrySet().iterator();
+
+        while (queryKeys.hasNext()) {
+            Map.Entry<String, String> query = (Map.Entry) queryKeys.next();
+            if (0 < sbQuery.length()) {
+                sbQuery.append("&");
             }
-            StringBuilder sbUrl = new StringBuilder();
-            sbUrl.append(host);
-            if (!StringUtils.isBlank(path)) {
-                sbUrl.append(path);
+
+            if (StringUtils.isBlank(query.getKey()) && !StringUtils.isBlank(query.getValue())) {
+                sbQuery.append(query.getValue());
             }
 
-            StringBuilder sbQuery = new StringBuilder();
-            Iterator queryKeys = querys.entrySet().iterator();
-
-            while (queryKeys.hasNext()) {
-                Map.Entry<String, String> query = (Map.Entry) queryKeys.next();
-                if (0 < sbQuery.length()) {
-                    sbQuery.append("&");
-                }
-
-                if (StringUtils.isBlank(query.getKey()) && !StringUtils.isBlank(query.getValue())) {
-                    sbQuery.append(query.getValue());
-                }
-
-                if (!StringUtils.isBlank(query.getKey())) {
-                    sbQuery.append(query.getKey());
-                    if (!StringUtils.isBlank(query.getValue())) {
-                        sbQuery.append("=");
-                        try {
-                            sbQuery.append(URLEncoder.encode(query.getValue(), "UTF-8"));
-                        } catch (UnsupportedEncodingException e) {
-                            throw new RuntimeException(e.getMessage());
-                        }
+            if (!StringUtils.isBlank(query.getKey())) {
+                sbQuery.append(query.getKey());
+                if (!StringUtils.isBlank(query.getValue())) {
+                    sbQuery.append("=");
+                    try {
+                        sbQuery.append(URLEncoder.encode(query.getValue(), "UTF-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        throw new RuntimeException(e.getMessage());
                     }
                 }
             }
-
-            if (sbQuery.length() > 0) {
-                sbUrl.append("?").append(sbQuery);
-            }
-
-            return sbUrl.toString();
         }
 
-        return host + path;
+        if (sbQuery.length() > 0) {
+            sbUrl.append("?").append(sbQuery);
+        }
+
+        return sbUrl.toString();
+
     }
 
     @Override
@@ -119,5 +117,41 @@ public class DefaultHttpExecutor extends AbstractHttpExecutor {
             return (K) response;
         }
         return null;
+    }
+
+    public static void main(String[] args) {
+        String str = "{\n" +
+                "    \"name\":\"zhangsan\",\n" +
+                "    \"age\":15\n" +
+                "}";
+        Map<String, String> map = convertParamOfJsonString(str, Person.class);
+        System.out.println(map.toString());
+        Person person = JSON.parseObject(str, Person.class);
+        map = convertParamOfBean(person);
+        System.out.println(map.toString());
+
+
+    }
+
+    public static class Person {
+        private String name;
+        private int age;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            this.age = age;
+        }
+
     }
 }
