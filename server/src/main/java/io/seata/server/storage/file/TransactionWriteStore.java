@@ -21,7 +21,7 @@ import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.store.SessionStorable;
-import io.seata.server.store.TransactionStoreManager;
+import io.seata.server.store.TransactionStoreManager.LogOperation;
 
 /**
  * The type Transaction write store.
@@ -30,7 +30,7 @@ import io.seata.server.store.TransactionStoreManager;
  */
 public class TransactionWriteStore implements SessionStorable {
     private SessionStorable sessionRequest;
-    private TransactionStoreManager.LogOperation operate;
+    private LogOperation operate;
 
     /**
      * Instantiates a new Transaction write store.
@@ -38,7 +38,7 @@ public class TransactionWriteStore implements SessionStorable {
      * @param sessionRequest the session request
      * @param operate        the operate
      */
-    public TransactionWriteStore(SessionStorable sessionRequest, TransactionStoreManager.LogOperation operate) {
+    public TransactionWriteStore(SessionStorable sessionRequest, LogOperation operate) {
         this.sessionRequest = sessionRequest;
         this.operate = operate;
     }
@@ -71,7 +71,7 @@ public class TransactionWriteStore implements SessionStorable {
      *
      * @return the operate
      */
-    public TransactionStoreManager.LogOperation getOperate() {
+    public LogOperation getOperate() {
         return operate;
     }
 
@@ -80,7 +80,7 @@ public class TransactionWriteStore implements SessionStorable {
      *
      * @param operate the operate
      */
-    public void setOperate(TransactionStoreManager.LogOperation operate) {
+    public void setOperate(LogOperation operate) {
         this.operate = operate;
     }
 
@@ -102,13 +102,13 @@ public class TransactionWriteStore implements SessionStorable {
         byte[] bySessionRequest = new byte[src.length - 1];
         byteBuffer.get(bySessionRequest);
         byte byOpCode = byteBuffer.get();
-        this.operate = TransactionStoreManager.LogOperation.getLogOperationByCode(byOpCode);
+        this.operate = LogOperation.getLogOperationByCode(byOpCode);
         SessionStorable tmpSessionStorable = getSessionInstanceByOperation(this.operate);
         tmpSessionStorable.decode(bySessionRequest);
         this.sessionRequest = tmpSessionStorable;
     }
 
-    private SessionStorable getSessionInstanceByOperation(TransactionStoreManager.LogOperation logOperation) {
+    private SessionStorable getSessionInstanceByOperation(LogOperation logOperation) {
         SessionStorable sessionStorable = null;
         switch (logOperation) {
             case GLOBAL_ADD:

@@ -16,7 +16,10 @@
 package io.seata.server.coordinator;
 
 import io.seata.core.exception.TransactionException;
-import io.seata.core.model.*;
+import io.seata.core.model.GlobalStatus;
+import io.seata.core.model.ResourceManagerInbound;
+import io.seata.core.model.ResourceManagerOutbound;
+import io.seata.core.model.TransactionManager;
 import io.seata.server.session.GlobalSession;
 
 /**
@@ -31,6 +34,7 @@ public interface Core extends TransactionManager, ResourceManagerOutbound, Resou
      *
      * @param globalSession the global session
      * @param retrying      the retrying
+     * @return is global commit.
      * @throws TransactionException the transaction exception
      */
     boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException;
@@ -40,13 +44,10 @@ public interface Core extends TransactionManager, ResourceManagerOutbound, Resou
      *
      * @param globalSession the global session
      * @param retrying      the retrying
-     * @return whether succeed
+     * @return is global rollback.
      * @throws TransactionException the transaction exception
      */
     boolean doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException;
 
     void doGlobalReport(GlobalSession globalSession, String xid, GlobalStatus globalStatus) throws TransactionException;
-
-    BranchType getBranchType();
 }
-

@@ -15,7 +15,7 @@
  */
 package io.seata.server.coordinator;
 
-import io.seata.common.exception.FrameworkException;
+import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.event.EventBus;
@@ -50,7 +50,7 @@ public class DefaultCore implements Core {
 
     private static final EventBus eventBus = EventBusManager.get();
 
-    private static volatile Map<BranchType, Core> coreMap = new ConcurrentHashMap<>();
+    private static volatile Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
 
     private static final DefaultCore instance = new DefaultCore();
 
@@ -67,22 +67,29 @@ public class DefaultCore implements Core {
         this.messageSender = messageSender;
     }
 
-    public Core getCore(BranchType branchType) {
+    /**
+     * get core
+     *
+     * @param branchType the branchType
+     * @return the core
+     */
+    public AbstractCore getCore(BranchType branchType) {
         if (coreMap == null) {
             synchronized (DefaultCore.class) {
                 if (coreMap == null) {
-                    List<Core> allCore = EnhancedServiceLoader.loadAll(Core.class, new Class[] {ServerMessageSender.class}, new Object[] {messageSender});
+                    List<AbstractCore> allCore = EnhancedServiceLoader.loadAll(AbstractCore.class,
+                            new Class[] {ServerMessageSender.class}, new Object[] {messageSender});
                     if (CollectionUtils.isNotEmpty(allCore)) {
-                        for (Core rm : allCore) {
-                            coreMap.put(rm.getBranchType(), rm);
+                        for (AbstractCore core : allCore) {
+                            coreMap.put(core.getBranchType(), core);
                         }
                     }
                 }
             }
         }
-        Core rm = coreMap.get(branchType);
+        AbstractCore rm = coreMap.get(branchType);
         if (rm == null) {
-            throw new FrameworkException("No Core for BranchType:" + branchType.name());
+            throw new NotSupportYetException("unsupported type:" + branchType.name());
         }
         return rm;
     }
@@ -93,13 +100,8 @@ public class DefaultCore implements Core {
      * @param branchType the branchType
      * @param core the core
      */
-    public void mockCore(BranchType branchType, Core core) {
+    public void mockCore(BranchType branchType, AbstractCore core) {
         coreMap.put(branchType, core);
-    }
-
-    @Override
-    public BranchType getBranchType() {
-        throw new FrameworkException("DefaultCore isn't a real Core");
     }
 
     @Override

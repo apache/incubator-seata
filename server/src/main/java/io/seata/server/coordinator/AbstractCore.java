@@ -64,6 +64,8 @@ public abstract class AbstractCore implements Core {
         this.messageSender = messageSender;
     }
 
+    public abstract BranchType getBranchType();
+
     @Override
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {

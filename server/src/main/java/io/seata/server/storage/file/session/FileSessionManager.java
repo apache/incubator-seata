@@ -120,7 +120,7 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
 
     @Override
     public GlobalSession findGlobalSession(String xid, boolean withBranchSessions) {
-        //withBranchSessions without process in memory
+        // withBranchSessions without process in memory
         return sessionMap.get(xid);
     }
 
