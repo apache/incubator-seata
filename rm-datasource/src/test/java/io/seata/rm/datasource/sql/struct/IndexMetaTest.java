@@ -31,7 +31,7 @@ public class IndexMetaTest {
         Assertions.assertNotNull(indexMeta.toString());
         Assertions.assertEquals(indexMeta, indexMeta);
         Assertions.assertEquals(indexMeta.hashCode(), indexMeta.hashCode());
-        Assertions.assertNotEquals(indexMeta, new String());
+        Assertions.assertNotEquals(indexMeta, "");
 
         IndexMeta other = new IndexMeta();
         other.setValues(Lists.newArrayList(new ColumnMeta()));

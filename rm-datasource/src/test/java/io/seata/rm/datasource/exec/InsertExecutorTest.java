@@ -58,13 +58,9 @@ public class InsertExecutorTest {
     private static final String USER_STATUS_COLUMN = "user_status";
     private static final Integer PK_VALUE = 100;
 
-    private ConnectionProxy connectionProxy;
-
     private StatementProxy statementProxy;
 
     private SQLInsertRecognizer sqlInsertRecognizer;
-
-    private StatementCallback statementCallback;
 
     private TableMeta tableMeta;
 
@@ -72,13 +68,13 @@ public class InsertExecutorTest {
 
     @BeforeEach
     public void init() {
-        connectionProxy = mock(ConnectionProxy.class);
+        ConnectionProxy connectionProxy = mock(ConnectionProxy.class);
         when(connectionProxy.getDbType()).thenReturn(JdbcConstants.MYSQL);
 
         statementProxy = mock(PreparedStatementProxy.class);
         when(statementProxy.getConnectionProxy()).thenReturn(connectionProxy);
 
-        statementCallback = mock(StatementCallback.class);
+        StatementCallback statementCallback = mock(StatementCallback.class);
         sqlInsertRecognizer = mock(SQLInsertRecognizer.class);
         tableMeta = mock(TableMeta.class);
         insertExecutor = Mockito.spy(new InsertExecutor(statementProxy, statementCallback, sqlInsertRecognizer));

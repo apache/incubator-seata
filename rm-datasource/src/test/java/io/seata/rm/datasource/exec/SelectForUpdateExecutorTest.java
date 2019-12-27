@@ -91,18 +91,16 @@ public class SelectForUpdateExecutorTest {
 
     @Test
     public void testDoExecute() throws Throwable {
-        Assertions.assertThrows(RuntimeException.class, () -> {
-            selectForUpdateExecutor.doExecute(null);
-        });
+        Assertions.assertThrows(RuntimeException.class, () -> selectForUpdateExecutor.doExecute((Object) null));
         RootContext.bind("xid");
         Assertions.assertDoesNotThrow(() -> {
-            selectForUpdateExecutor.doExecute(null);
+            selectForUpdateExecutor.doExecute((Object) null);
         });
         RootContext.unbind();
 
         RootContext.bindGlobalLockFlag();
         Assertions.assertDoesNotThrow(() -> {
-            selectForUpdateExecutor.doExecute(null);
+            selectForUpdateExecutor.doExecute((Object) null);
         });
         RootContext.unbindGlobalLockFlag();
 
@@ -115,9 +113,7 @@ public class SelectForUpdateExecutorTest {
         selectForUpdateExecutor = new SelectForUpdateExecutor(statementProxy, (statement, args) -> null, recognizer);
 
         RootContext.bind("xid");
-        Assertions.assertThrows(LockWaitTimeoutException.class, () -> {
-            selectForUpdateExecutor.doExecute(null);
-        });
+        Assertions.assertThrows(LockWaitTimeoutException.class, () -> selectForUpdateExecutor.doExecute((Object) null));
         RootContext.unbind();
     }
 }
