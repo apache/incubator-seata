@@ -52,13 +52,13 @@ public abstract class AbstractLockManager implements LockManager {
         }
         String lockKey = branchSession.getLockKey();
         if (StringUtils.isNullOrEmpty(lockKey)) {
-            //no lock
+            // no lock
             return true;
         }
-        //get locks of branch
+        // get locks of branch
         List<RowLock> locks = collectRowLocks(branchSession);
         if (CollectionUtils.isEmpty(locks)) {
-            //no lock
+            // no lock
             return true;
         }
         return getLocker(branchSession).acquireLock(locks);
@@ -172,7 +172,7 @@ public abstract class AbstractLockManager implements LockManager {
                 return locks;
             }
             String[] pks = mergedPKs.split(",");
-            if (pks == null || pks.length == 0) {
+            if (pks.length == 0) {
                 return locks;
             }
             for (String pk : pks) {

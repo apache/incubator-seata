@@ -26,8 +26,6 @@ import io.seata.common.util.CollectionUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
-import io.seata.core.lock.Locker;
-import io.seata.core.store.StoreMode;
 import io.seata.core.store.db.DataSourceGenerator;
 import io.seata.server.lock.AbstractLockManager;
 import io.seata.server.session.BranchSession;
@@ -49,8 +47,7 @@ public class DataBaseLockManager extends AbstractLockManager implements Initiali
         String datasourceType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, datasourceType);
         DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
-        locker = EnhancedServiceLoader.load(Locker.class, StoreMode.DB.name(), new Class[] {DataSource.class},
-                new Object[] {logStoreDataSource});
+        locker = new DataBaseLocker(logStoreDataSource);
     }
 
     @Override

@@ -23,7 +23,6 @@ import java.util.concurrent.ConcurrentMap;
 
 import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.FrameworkException;
-import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.AbstractLocker;
@@ -35,7 +34,6 @@ import io.seata.server.session.BranchSession;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "file")
 public class FileLocker extends AbstractLocker {
 
     private static final int BUCKET_PER_TABLE = 128;

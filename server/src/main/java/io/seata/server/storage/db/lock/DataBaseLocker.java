@@ -21,7 +21,6 @@ import java.util.List;
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
@@ -33,7 +32,6 @@ import io.seata.core.store.StoreMode;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "db")
 public class DataBaseLocker extends AbstractLocker {
 
     private LockStore lockStore;

@@ -17,11 +17,9 @@ package io.seata.server.storage.file.lock;
 
 import java.util.ArrayList;
 
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.loader.LoadLevel;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
-import io.seata.core.store.StoreMode;
 import io.seata.server.lock.AbstractLockManager;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
@@ -36,8 +34,7 @@ public class FileLockManager extends AbstractLockManager {
 
     @Override
     protected Locker getLocker(BranchSession branchSession) {
-        locker = EnhancedServiceLoader.load(Locker.class, StoreMode.FILE.name(),
-                new Class[] {BranchSession.class}, new Object[] {branchSession});
+        locker = new FileLocker(branchSession);
         return locker;
     }
 
