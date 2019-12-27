@@ -133,7 +133,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
 
     private ServerMessageSender messageSender;
 
-    private DefaultCore core = DefaultCore.getInstance();
+    private DefaultCore core;
 
     private EventBus eventBus = EventBusManager.get();
 
@@ -144,7 +144,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
      */
     public DefaultCoordinator(ServerMessageSender messageSender) {
         this.messageSender = messageSender;
-        core.setMessageSender(messageSender);
+        this.core = new DefaultCore(messageSender);
     }
 
     @Override

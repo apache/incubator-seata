@@ -44,7 +44,8 @@ import org.junit.jupiter.params.provider.MethodSource;
  */
 public class DefaultCoreTest {
 
-    private static DefaultCore core = new DefaultCore();
+    private static DefaultCore core;
+    private static ServerMessageSender serverMessageSender;
 
     private static final String applicationId = "demo-child-app";
 
@@ -74,6 +75,8 @@ public class DefaultCoreTest {
     @BeforeAll
     public static void initSessionManager() throws Exception {
         SessionHolder.init(null);
+        serverMessageSender = new DefaultCoordinatorTest.MockServerMessageSender();
+        core = new DefaultCore(serverMessageSender);
     }
 
     /**

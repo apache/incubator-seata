@@ -79,8 +79,7 @@ public class DefaultCoordinatorTest {
         SessionHolder.init(null);
         serverMessageSender = new MockServerMessageSender();
         defaultCoordinator = new DefaultCoordinator(serverMessageSender);
-        core = new DefaultCore();
-        core.setMessageSender(serverMessageSender);
+        core = new DefaultCore(serverMessageSender);
 //        defaultCoordinator.init();
     }
 
@@ -163,7 +162,7 @@ public class DefaultCoordinatorTest {
     }
 
 
-    private static class MockServerMessageSender implements ServerMessageSender {
+    public static class MockServerMessageSender implements ServerMessageSender {
 
         @Override
         public void sendResponse(RpcMessage request, Channel channel, Object msg) {

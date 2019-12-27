@@ -46,25 +46,24 @@ public class DefaultCore implements Core {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCore.class);
 
-    private ServerMessageSender messageSender;
-
     private EventBus eventBus = EventBusManager.get();
 
     private static volatile Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
 
-    private static DefaultCore instance = new DefaultCore();
-
-    public static DefaultCore getInstance() {
-        return instance;
-    }
-
     /**
-     * set the message sender
+     * get the Default core.
      *
      * @param messageSender the message sender
+     * @return the Default core.
      */
-    public void setMessageSender(ServerMessageSender messageSender) {
-        this.messageSender = messageSender;
+    public DefaultCore(ServerMessageSender messageSender) {
+        List<AbstractCore> allCore = EnhancedServiceLoader.loadAll(AbstractCore.class,
+                new Class[] {ServerMessageSender.class}, new Object[] {messageSender});
+        if (CollectionUtils.isNotEmpty(allCore)) {
+            for (AbstractCore core : allCore) {
+                coreMap.put(core.getBranchType(), core);
+            }
+        }
     }
 
     /**
@@ -74,19 +73,6 @@ public class DefaultCore implements Core {
      * @return the core
      */
     public AbstractCore getCore(BranchType branchType) {
-        if (coreMap == null) {
-            synchronized (DefaultCore.class) {
-                if (coreMap == null) {
-                    List<AbstractCore> allCore = EnhancedServiceLoader.loadAll(AbstractCore.class,
-                            new Class[] {ServerMessageSender.class}, new Object[] {messageSender});
-                    if (CollectionUtils.isNotEmpty(allCore)) {
-                        for (AbstractCore core : allCore) {
-                            coreMap.put(core.getBranchType(), core);
-                        }
-                    }
-                }
-            }
-        }
         AbstractCore rm = coreMap.get(branchType);
         if (rm == null) {
             throw new NotSupportYetException("unsupported type:" + branchType.name());
