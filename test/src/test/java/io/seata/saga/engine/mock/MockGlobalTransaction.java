@@ -19,6 +19,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.saga.engine.sequence.SpringJvmUUIDSeqGenerator;
 import io.seata.tm.api.GlobalTransaction;
+import io.seata.tm.api.GlobalTransactionRole;
 
 /**
  *
@@ -76,6 +77,11 @@ public class MockGlobalTransaction implements GlobalTransaction {
     @Override
     public String getXid() {
         return xid;
+    }
+
+    @Override
+    public GlobalTransactionRole getRole() {
+        return null;
     }
 
     @Override

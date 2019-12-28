@@ -149,13 +149,6 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void rollback() throws TransactionException {
-        if (role == GlobalTransactionRole.Participant) {
-            // Participant has no responsibility of rollback
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Ignore Rollback(): just involved in global transaction [{}]", xid);
-            }
-            return;
-        }
         if (xid == null) {
             throw new IllegalStateException();
         }
@@ -198,6 +191,11 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     @Override
     public String getXid() {
         return xid;
+    }
+
+    @Override
+    public GlobalTransactionRole getRole() {
+        return role;
     }
 
     @Override

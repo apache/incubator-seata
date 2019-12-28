@@ -18,6 +18,7 @@ package io.seata.tm.api;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
@@ -86,6 +87,10 @@ public class TransactionalTemplate {
         if (txInfo != null && txInfo.rollbackOn(ex)) {
             try {
                 rollbackTransaction(tx, ex);
+                //throw to Launcher
+                if (tx.getRole() == GlobalTransactionRole.Participant) {
+                    throw new TransactionException(TransactionExceptionCode.ParticipantReportRollback);
+                }
             } catch (TransactionException txe) {
                 // Failed to rollback
                 throw new TransactionalExecutor.ExecutionException(tx, txe,
@@ -111,7 +116,11 @@ public class TransactionalTemplate {
 
     private void rollbackTransaction(GlobalTransaction tx, Throwable ex) throws TransactionException, TransactionalExecutor.ExecutionException {
         triggerBeforeRollback();
-        tx.rollback();
+        //branch has reported rollback
+        if (!(ex instanceof TransactionException
+                && ((TransactionException) ex).getCode() == TransactionExceptionCode.ParticipantReportRollback)) {
+            tx.rollback();
+        }
         triggerAfterRollback();
         // 3.1 Successfully rolled back
         throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);

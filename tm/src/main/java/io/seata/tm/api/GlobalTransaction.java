@@ -86,6 +86,13 @@ public interface GlobalTransaction {
     String getXid();
 
     /**
+     * Get role
+     *
+     * @return GlobalTransactionRole
+     */
+    GlobalTransactionRole getRole();
+
+    /**
      * report the global transaction status.
      *
      * @param globalStatus global status.
