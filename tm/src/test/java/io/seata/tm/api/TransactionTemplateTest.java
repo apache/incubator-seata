@@ -15,19 +15,20 @@
  */
 package io.seata.tm.api;
 
+import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
-import io.seata.tm.api.transaction.NoRollbackRule;
-import io.seata.tm.api.transaction.RollbackRule;
-import io.seata.tm.api.transaction.TransactionHook;
-import io.seata.tm.api.transaction.TransactionHookManager;
-import io.seata.tm.api.transaction.TransactionInfo;
+import io.seata.tm.api.transaction.*;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -117,6 +118,27 @@ public class TransactionTemplateTest {
         rollbackRules.add(new NoRollbackRule(NullPointerException.class));
         TransactionHook transactionHook = testRollBackRules(rollbackRules, new NullPointerException());
         verifyRollBack(transactionHook);
+    }
+
+    @Test
+    public void testTransactionTemplate_rollbackTransaction() throws Throwable {
+        Throwable transactionException = new TransactionException(TransactionExceptionCode.ParticipantReportRollback);
+        TransactionalTemplate template = new TransactionalTemplate();
+        Method method = TransactionalTemplate.class.getDeclaredMethod("rollbackTransaction",GlobalTransaction.class,Throwable.class);
+        GlobalTransaction globalTransaction = new DefaultGlobalTransaction();
+        method.setAccessible(true);
+        try {
+            method.invoke(template,globalTransaction,transactionException);
+        }catch (InvocationTargetException e){
+            Assertions.assertEquals(e.getTargetException().getClass(),TransactionalExecutor.ExecutionException.class);
+        }
+
+        Throwable myRuntimeException = new MyRuntimeException("others");
+        try {
+            method.invoke(template,globalTransaction,myRuntimeException);
+        }catch (InvocationTargetException e){
+            Assertions.assertEquals(e.getTargetException().getClass(),IllegalStateException.class);
+        }
     }
 
     private TransactionHook testRollBackRules(Set<RollbackRule> rollbackRules, Throwable throwable) throws Throwable {

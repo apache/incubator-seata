@@ -82,19 +82,19 @@ public class TransactionalTemplate {
         }
     }
 
-    private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable ex) throws TransactionalExecutor.ExecutionException {
+    private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable ex) throws TransactionalExecutor.ExecutionException, TransactionException {
         //roll back
         if (txInfo != null && txInfo.rollbackOn(ex)) {
             try {
                 rollbackTransaction(tx, ex);
-                //throw to Launcher
-                if (tx.getRole() == GlobalTransactionRole.Participant) {
-                    throw new TransactionException(TransactionExceptionCode.ParticipantReportRollback);
-                }
             } catch (TransactionException txe) {
                 // Failed to rollback
                 throw new TransactionalExecutor.ExecutionException(tx, txe,
                         TransactionalExecutor.Code.RollbackFailure, ex);
+            }
+            //throw to Launcher
+            if (tx.getRole() == GlobalTransactionRole.Participant) {
+                throw new TransactionException(TransactionExceptionCode.ParticipantReportRollback);
             }
         } else {
             // not roll back on this exception, so commit
