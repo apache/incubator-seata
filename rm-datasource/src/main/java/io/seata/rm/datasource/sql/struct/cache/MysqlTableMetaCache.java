@@ -15,10 +15,15 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
-import com.alibaba.druid.util.JdbcConstants;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
@@ -28,15 +33,6 @@ import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.sql.DataSource;
-
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 /**
  * The type Table meta cache.
@@ -71,15 +67,15 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
     }
 
     @Override
-    protected String getCacheKey(DataSourceProxy dataSourceProxy, String tableName) {
-        StringBuilder cacheKey = new StringBuilder(dataSourceProxy.getResourceId());
+    protected String getCacheKey(Connection connection, String tableName, String resourceId) {
+        StringBuilder cacheKey = new StringBuilder(resourceId);
         cacheKey.append(".");
         //remove single quote and separate it to catalogName and tableName
         String[] tableNameWithCatalog = tableName.replace("`", "").split("\\.");
         String defaultTableName = tableNameWithCatalog.length > 1 ? tableNameWithCatalog[1] : tableNameWithCatalog[0];
 
         DatabaseMetaData databaseMetaData = null;
-        try (Connection connection = dataSourceProxy.getPlainConnection()) {
+        try {
             databaseMetaData = connection.getMetaData();
         } catch (SQLException e) {
             LOGGER.error("Could not get connection, use default cache key", e.getMessage(), e);
@@ -102,19 +98,17 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
     }
 
     @Override
-    protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
-        Connection conn = null;
+    protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            conn = dataSource.getConnection();
-            stmt = conn.createStatement();
+            stmt = connection.createStatement();
             StringBuilder builder = new StringBuilder("SELECT * FROM ");
             builder.append(keywordChecker.checkAndReplace(tableName));
             builder.append(" LIMIT 1");
             rs = stmt.executeQuery(builder.toString());
             ResultSetMetaData rsmd = rs.getMetaData();
-            DatabaseMetaData dbmd = conn.getMetaData();
+            DatabaseMetaData dbmd = connection.getMetaData();
 
             return resultSetMetaToSchema(rsmd, dbmd);
         } catch (Exception e) {
@@ -129,9 +123,6 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
             }
             if (stmt != null) {
                 stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
             }
         }
     }
