@@ -15,12 +15,15 @@
  */
 package io.seata.tm.api;
 
-import io.seata.core.exception.TransactionException;
-import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
-import io.seata.tm.api.transaction.*;
+import io.seata.tm.api.transaction.MyRuntimeException;
+import io.seata.tm.api.transaction.TransactionHook;
+import io.seata.tm.api.transaction.TransactionHookManager;
+import io.seata.tm.api.transaction.TransactionInfo;
+import io.seata.tm.api.transaction.NoRollbackRule;
+import io.seata.tm.api.transaction.RollbackRule;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,9 +36,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  * @author guoyao
@@ -122,10 +123,11 @@ public class TransactionTemplateTest {
 
     @Test
     public void testTransactionTemplate_rollbackTransaction() throws Throwable {
-        Throwable transactionException = new TransactionException(TransactionExceptionCode.ParticipantReportRollback);
+        GlobalTransaction globalTransaction = new DefaultGlobalTransaction();
+        Throwable transactionException = new TransactionalExecutor.ExecutionException(globalTransaction, null,
+                TransactionalExecutor.Code.RollbackDone);
         TransactionalTemplate template = new TransactionalTemplate();
         Method method = TransactionalTemplate.class.getDeclaredMethod("rollbackTransaction",GlobalTransaction.class,Throwable.class);
-        GlobalTransaction globalTransaction = new DefaultGlobalTransaction();
         method.setAccessible(true);
         try {
             method.invoke(template,globalTransaction,transactionException);

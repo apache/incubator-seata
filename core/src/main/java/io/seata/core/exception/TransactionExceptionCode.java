@@ -118,12 +118,7 @@ public enum TransactionExceptionCode {
     /**
      * Failed to store exception code
      */
-    FailedStore,
-
-    /**
-     * Participant has reported rollback code
-     */
-    ParticipantReportRollback
+    FailedStore
     ;
 
     private static final Map<Integer, TransactionExceptionCode> MAP = new HashMap<>(values().length * 2);
