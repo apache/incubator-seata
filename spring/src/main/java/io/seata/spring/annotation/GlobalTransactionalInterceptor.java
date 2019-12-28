@@ -20,6 +20,7 @@ import java.lang.reflect.Method;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import io.seata.common.exception.RollbackDoneException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeEvent;
@@ -143,7 +144,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
             TransactionalExecutor.Code code = e.getCode();
             switch (code) {
                 case RollbackDone:
-                    throw e.getOriginalException();
+                    throw new RollbackDoneException("Rollback done, TransactionalExecutor.Code:" + code);
                 case BeginFailure:
                     failureHandler.onBeginFailure(e.getTransaction(), e.getCause());
                     throw e.getCause();

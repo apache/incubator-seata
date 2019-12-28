@@ -16,6 +16,7 @@
 package io.seata.tm.api;
 
 
+import io.seata.common.exception.RollbackDoneException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.exception.TransactionException;
 import io.seata.tm.api.transaction.TransactionHook;
@@ -117,8 +118,7 @@ public class TransactionalTemplate {
     private void rollbackTransaction(GlobalTransaction tx, Throwable ex) throws TransactionException, TransactionalExecutor.ExecutionException {
         triggerBeforeRollback();
         //branch has reported rollback
-        if (!(ex instanceof TransactionalExecutor.ExecutionException
-                && ((TransactionalExecutor.ExecutionException) ex).getCode() == TransactionalExecutor.Code.RollbackDone)) {
+        if (!(ex instanceof RollbackDoneException)) {
             tx.rollback();
         }
         triggerAfterRollback();

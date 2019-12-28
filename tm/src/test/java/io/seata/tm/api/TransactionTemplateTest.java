@@ -15,6 +15,7 @@
  */
 package io.seata.tm.api;
 
+import io.seata.common.exception.RollbackDoneException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
@@ -124,13 +125,12 @@ public class TransactionTemplateTest {
     @Test
     public void testTransactionTemplate_rollbackTransaction() throws Throwable {
         GlobalTransaction globalTransaction = new DefaultGlobalTransaction();
-        Throwable transactionException = new TransactionalExecutor.ExecutionException(globalTransaction, null,
-                TransactionalExecutor.Code.RollbackDone);
         TransactionalTemplate template = new TransactionalTemplate();
         Method method = TransactionalTemplate.class.getDeclaredMethod("rollbackTransaction",GlobalTransaction.class,Throwable.class);
         method.setAccessible(true);
+        Throwable rollbackDoneException = new RollbackDoneException();
         try {
-            method.invoke(template,globalTransaction,transactionException);
+            method.invoke(template,globalTransaction,rollbackDoneException);
         }catch (InvocationTargetException e){
             Assertions.assertEquals(e.getTargetException().getClass(),TransactionalExecutor.ExecutionException.class);
         }
