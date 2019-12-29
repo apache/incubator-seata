@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db;
+package io.seata.server.storage.db.store;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -23,13 +23,9 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
-
 import javax.sql.DataSource;
-
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
-import io.seata.common.executor.Initialize;
-import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -47,8 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "db")
-public class LogStoreDataBaseDAO implements LogStore, Initialize {
+public class LogStoreDataBaseDAO implements LogStore {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LogStoreDataBaseDAO.class);
 
@@ -87,21 +82,11 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     /**
      * Instantiates a new Log store data base dao.
-     */
-    public LogStoreDataBaseDAO() {
-    }
-
-    /**
-     * Instantiates a new Log store data base dao.
      *
      * @param logStoreDataSource the log store data source
      */
     public LogStoreDataBaseDAO(DataSource logStoreDataSource) {
         this.logStoreDataSource = logStoreDataSource;
-    }
-
-    @Override
-    public void init() {
         globalTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_GLOBAL_TABLE,
             ConfigurationKeys.STORE_DB_GLOBAL_DEFAULT_TABLE);
         brachTable = CONFIG.getConfig(ConfigurationKeys.STORE_DB_BRANCH_TABLE,

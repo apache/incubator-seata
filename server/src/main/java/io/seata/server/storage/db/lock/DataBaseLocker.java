@@ -15,17 +15,16 @@
  */
 package io.seata.server.storage.db.lock;
 
-import javax.sql.DataSource;
-import java.util.List;
-
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
-import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.common.util.CollectionUtils;
 import io.seata.core.lock.AbstractLocker;
 import io.seata.core.lock.RowLock;
 import io.seata.core.store.LockStore;
-import io.seata.core.store.StoreMode;
+import io.seata.server.storage.db.store.LockStoreDataBaseDAO;
+
+import javax.sql.DataSource;
+import java.util.List;
 
 /**
  * The type Data base locker.
@@ -48,8 +47,7 @@ public class DataBaseLocker extends AbstractLocker {
      * @param logStoreDataSource the log store data source
      */
     public DataBaseLocker(DataSource logStoreDataSource) {
-        lockStore = EnhancedServiceLoader.load(LockStore.class, StoreMode.DB.name(), new Class[] {DataSource.class},
-            new Object[] {logStoreDataSource});
+        lockStore = new LockStoreDataBaseDAO(logStoreDataSource);
     }
 
     @Override

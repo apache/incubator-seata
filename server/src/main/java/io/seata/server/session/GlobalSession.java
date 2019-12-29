@@ -601,24 +601,6 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
         globalSessionLock.unlock();
     }
 
-    public void lockAndExcute(LockRunnable excuteRunnable) throws TransactionException {
-        this.lock();
-        try {
-            excuteRunnable.run();
-        } finally {
-            this.unlock();
-        }
-    }
-
-    public <T> T lockAndExcute(LockCallable<T> lockCallable) throws TransactionException {
-        this.lock();
-        try {
-            return lockCallable.call();
-        } finally {
-            this.unlock();
-        }
-    }
-
     private static class GlobalSessionLock {
 
         private Lock globalSessionLock = new ReentrantLock();

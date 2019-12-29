@@ -21,7 +21,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.db.LogStoreDataBaseDAO;
+import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;

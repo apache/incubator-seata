@@ -127,6 +127,12 @@ public class WriteStoreMultithreadTest {
                     }
 
                     @Override
+                    public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
+                            throws TransactionException {
+                        return null;
+                    }
+
+                    @Override
                     public void onBegin(GlobalSession globalSession) throws TransactionException {
 
                     }

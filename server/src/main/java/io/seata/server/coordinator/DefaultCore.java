@@ -146,7 +146,8 @@ public class DefaultCore implements Core {
         }
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         // just lock changeStatus
-        boolean shouldCommit = globalSession.lockAndExcute(() -> {
+
+        boolean shouldCommit = SessionHolder.lockAndExecute(globalSession, () -> {
             // the lock should release after branch commit
             globalSession
                     .closeAndClean(); // Highlight: Firstly, close the session, then no more branch can be registered.
@@ -252,7 +253,7 @@ public class DefaultCore implements Core {
         }
         globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
         // just lock changeStatus
-        boolean shouldRollBack = globalSession.lockAndExcute(() -> {
+        boolean shouldRollBack = SessionHolder.lockAndExecute(globalSession, () -> {
             globalSession.close(); // Highlight: Firstly, close the session, then no more branch can be registered.
             if (globalSession.getStatus() == GlobalStatus.Begin) {
                 globalSession.changeStatus(GlobalStatus.Rollbacking);

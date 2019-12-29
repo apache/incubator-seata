@@ -270,6 +270,18 @@ public class SessionHolder {
         return getRootSessionManager().findGlobalSession(xid, withBranchSessions);
     }
 
+    /**
+     * lock and execute
+     *
+     * @param globalSession the global session
+     * @param lockCallable the lock Callable
+     * @return the value
+     */
+    public static <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
+            throws TransactionException{
+        return getRootSessionManager().lockAndExecute(globalSession, lockCallable);
+    }
+
     public static void destroy() {
         ROOT_SESSION_MANAGER.destroy();
         ASYNC_COMMITTING_SESSION_MANAGER.destroy();

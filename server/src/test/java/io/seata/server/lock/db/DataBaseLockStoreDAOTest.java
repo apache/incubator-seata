@@ -13,10 +13,11 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db;
+package io.seata.server.lock.db;
 
 import io.seata.common.util.IOUtil;
 import io.seata.core.store.LockDO;
+import io.seata.server.storage.db.store.LockStoreDataBaseDAO;
 import org.apache.commons.dbcp.BasicDataSource;
 
 import org.h2.store.fs.FileUtils;

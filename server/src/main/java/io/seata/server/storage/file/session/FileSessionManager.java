@@ -146,6 +146,17 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
         return found;
     }
 
+    @Override
+    public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
+            throws TransactionException {
+        globalSession.lock();
+        try {
+            return lockCallable.call();
+        } finally {
+            globalSession.unlock();
+        }
+    }
+
     private void restoreSessions() {
         Map<Long, BranchSession> unhandledBranchBuffer = new HashMap<>();
 

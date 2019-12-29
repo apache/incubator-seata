@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import javax.sql.DataSource;
@@ -39,7 +38,6 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
 import io.seata.core.store.LogStore;
-import io.seata.core.store.StoreMode;
 import io.seata.core.store.db.DataSourceGenerator;
 import io.seata.server.UUIDGenerator;
 import io.seata.server.session.BranchSession;
@@ -69,11 +67,6 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     protected static final int DEFAULT_LOG_QUERY_LIMIT = 100;
 
     /**
-     * is inited
-     */
-    protected AtomicBoolean inited = new AtomicBoolean(false);
-
-    /**
      * The Log store.
      */
     protected LogStore logStore;
@@ -90,18 +83,13 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
     }
 
     @Override
-    public synchronized void init() {
-        if (inited.get()) {
-            return;
-        }
+    public void init() {
         logQueryLimit = CONFIG.getInt(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
         String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         //init dataSource
         DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, datasourceType);
         DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
-        logStore = EnhancedServiceLoader.load(LogStore.class, StoreMode.DB.name(), new Class[] {DataSource.class},
-            new Object[] {logStoreDataSource});
-        inited.set(true);
+        logStore = new LogStoreDataBaseDAO(logStoreDataSource);
     }
 
     @Override

@@ -24,7 +24,7 @@ import java.util.stream.Stream;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.server.UUIDGenerator;
-import io.seata.server.lock.memory.FileLockManagerForTest;
+import io.seata.server.lock.file.FileLockManagerForTest;
 import io.seata.server.session.BranchSession;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;

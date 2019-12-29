@@ -13,12 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db;
+package io.seata.server.store.db;
 
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.core.store.BranchTransactionDO;
 import io.seata.core.store.GlobalTransactionDO;
+import io.seata.server.storage.db.store.LogStoreDataBaseDAO;
 import org.apache.commons.dbcp.BasicDataSource;
 
 import org.h2.store.fs.FileUtils;

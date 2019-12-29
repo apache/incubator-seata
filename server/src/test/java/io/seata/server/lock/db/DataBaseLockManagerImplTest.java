@@ -18,7 +18,7 @@ package io.seata.server.lock.db;
 import io.seata.common.util.IOUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.lock.Locker;
-import io.seata.core.store.db.LockStoreDataBaseDAO;
+import io.seata.server.storage.db.store.LockStoreDataBaseDAO;
 import io.seata.server.storage.file.lock.FileLockManager;
 import io.seata.server.lock.LockManager;
 import io.seata.server.storage.db.lock.DataBaseLocker;

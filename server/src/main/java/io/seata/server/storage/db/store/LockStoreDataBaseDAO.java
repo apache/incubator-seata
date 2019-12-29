@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.core.store.db;
+package io.seata.server.storage.db.store;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -29,8 +29,6 @@ import java.util.stream.Collectors;
 
 import io.seata.common.exception.DataAccessException;
 import io.seata.common.exception.StoreException;
-import io.seata.common.executor.Initialize;
-import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.LambdaUtils;
@@ -49,8 +47,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "db")
-public class LockStoreDataBaseDAO implements LockStore, Initialize {
+public class LockStoreDataBaseDAO implements LockStore {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LockStoreDataBaseDAO.class);
 
@@ -81,10 +78,6 @@ public class LockStoreDataBaseDAO implements LockStore, Initialize {
      */
     public LockStoreDataBaseDAO(DataSource logStoreDataSource) {
         this.logStoreDataSource = logStoreDataSource;
-    }
-
-    @Override
-    public void init() {
         lockTable = CONFIG.getConfig(ConfigurationKeys.LOCK_DB_TABLE, ConfigurationKeys.LOCK_DB_DEFAULT_TABLE);
         dbType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_TYPE);
         if (StringUtils.isBlank(dbType)) {

@@ -190,6 +190,12 @@ public class DataBaseSessionManager extends AbstractSessionManager
     }
 
     @Override
+    public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
+            throws TransactionException{
+        return lockCallable.call();
+    }
+
+    @Override
     public void reload() {
         long maxSessionId = transactionStoreManager.getCurrentMaxSessionId();
         if (maxSessionId > UUIDGenerator.getCurrentUUID()) {

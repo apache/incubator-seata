@@ -70,7 +70,7 @@ public abstract class AbstractCore implements Core {
     public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
                                String applicationData, String lockKeys) throws TransactionException {
         GlobalSession globalSession = assertGlobalSessionNotNull(xid, false);
-        return globalSession.lockAndExcute(() -> {
+        return SessionHolder.lockAndExecute(globalSession, () -> {
             if (!globalSession.isActive()) {
                 throw new GlobalTransactionException(GlobalTransactionNotActive, String
                         .format("Could not register branch into global session xid = %s status = %s",
