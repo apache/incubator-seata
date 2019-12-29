@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <groupId>io.seata</groupId>
+        <artifactId>seata-compressor</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>seata-compressor-7z</artifactId>
+    <packaging>jar</packaging>
+    <name>seata-compressor-7z ${project.version}</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>seata-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--&lt;!&ndash; https://mvnrepository.com/artifact/gradle.plugin.eu.emundo/7z-gradle-plugin &ndash;&gt;-->
+        <!--<dependency>-->
+            <!--<groupId>gradle.plugin.eu.emundo</groupId>-->
+            <!--<artifactId>7z-gradle-plugin</artifactId>-->
+            <!--<version>1.0.5</version>-->
+        <!--</dependency>-->
+    </dependencies>
+
+
+</project>
