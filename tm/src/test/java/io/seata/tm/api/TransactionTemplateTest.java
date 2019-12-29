@@ -15,11 +15,11 @@
  */
 package io.seata.tm.api;
 
-import io.seata.common.exception.RollbackDoneException;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
-import io.seata.tm.api.transaction.MyRuntimeException;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
@@ -37,7 +37,11 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 
 /**
  * @author guoyao
@@ -124,23 +128,57 @@ public class TransactionTemplateTest {
 
     @Test
     public void testTransactionTemplate_rollbackTransaction() throws Throwable {
-        GlobalTransaction globalTransaction = new DefaultGlobalTransaction();
+        GlobalTransaction launcherTransaction = Mockito.mock(GlobalTransaction.class);
+        doNothing().when(launcherTransaction).rollback();
+        when(launcherTransaction.getRole()).thenReturn(GlobalTransactionRole.Launcher);
+
+        GlobalTransaction participantTransaction = Mockito.mock(GlobalTransaction.class);
+        doNothing().when(participantTransaction).rollback();
+        when(participantTransaction.getRole()).thenReturn(GlobalTransactionRole.Participant);
+
         TransactionalTemplate template = new TransactionalTemplate();
-        Method method = TransactionalTemplate.class.getDeclaredMethod("rollbackTransaction",GlobalTransaction.class,Throwable.class);
-        method.setAccessible(true);
-        Throwable rollbackDoneException = new RollbackDoneException();
+        Method rollbackTransaction = TransactionalTemplate.class.getDeclaredMethod("rollbackTransaction", GlobalTransaction.class, Throwable.class);
+        rollbackTransaction.setAccessible(true);
+        Method completeTransactionAfterThrowing = TransactionalTemplate.class.getDeclaredMethod("completeTransactionAfterThrowing", TransactionInfo.class, GlobalTransaction.class, Throwable.class);
+        completeTransactionAfterThrowing.setAccessible(true);
+
+        RuntimeException runtimeException = new RuntimeException("original");
+        Throwable rollbackDoneException = new TransactionException(TransactionExceptionCode.ParticipantRollbackDone, runtimeException);
+        Throwable rollbackFailException = new TransactionException("Failed to report global rollback", runtimeException);
+
+        //Participant throw rollbackDoneException
         try {
-            method.invoke(template,globalTransaction,rollbackDoneException);
-        }catch (InvocationTargetException e){
-            Assertions.assertEquals(e.getTargetException().getClass(),TransactionalExecutor.ExecutionException.class);
+            rollbackTransaction.invoke(template, participantTransaction, runtimeException);
+        }catch (InvocationTargetException e) {
+            Throwable originalException = ((TransactionalExecutor.ExecutionException) e.getTargetException()).getOriginalException();
+            Assertions.assertEquals(originalException.getMessage(), rollbackDoneException.getMessage());
         }
 
-        Throwable myRuntimeException = new MyRuntimeException("others");
+        //Participant throw rollbackFailException
         try {
-            method.invoke(template,globalTransaction,myRuntimeException);
-        }catch (InvocationTargetException e){
-            Assertions.assertEquals(e.getTargetException().getClass(),IllegalStateException.class);
+            doThrow(rollbackFailException).when(participantTransaction).rollback();
+            completeTransactionAfterThrowing.invoke(template, new TransactionInfo(), participantTransaction, runtimeException);
+        }catch (InvocationTargetException e) {
+            Throwable originalException = e.getTargetException().getCause().getCause();
+            Assertions.assertEquals(originalException.getMessage(), rollbackFailException.getMessage());
         }
+
+        //Launcher receive Participant threw rollbackDoneException
+        try {
+            rollbackTransaction.invoke(template, launcherTransaction, rollbackDoneException);
+        }catch (InvocationTargetException e) {
+            Throwable originalException = ((TransactionalExecutor.ExecutionException) e.getTargetException()).getOriginalException();
+            Assertions.assertEquals(originalException.getMessage(), runtimeException.getMessage());
+        }
+
+        //Launcher receive Participant threw rollbackFailException
+        try {
+            rollbackTransaction.invoke(template, launcherTransaction, rollbackFailException);
+        }catch (InvocationTargetException e) {
+            Throwable originalException = ((TransactionalExecutor.ExecutionException) e.getTargetException()).getOriginalException();
+            Assertions.assertEquals(originalException.getMessage(), runtimeException.getMessage());
+        }
+
     }
 
     private TransactionHook testRollBackRules(Set<RollbackRule> rollbackRules, Throwable throwable) throws Throwable {
@@ -178,5 +216,4 @@ public class TransactionTemplateTest {
         verify(transactionHook).afterRollback();
         verify(transactionHook).afterCompletion();
     }
-
 }

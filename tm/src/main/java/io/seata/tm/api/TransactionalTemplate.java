@@ -16,9 +16,9 @@
 package io.seata.tm.api;
 
 
-import io.seata.common.exception.RollbackDoneException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
@@ -82,20 +82,20 @@ public class TransactionalTemplate {
         }
     }
 
-    private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable ex) throws TransactionalExecutor.ExecutionException {
+    private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable ex) throws TransactionalExecutor.ExecutionException, TransactionException {
         //roll back
-        if (txInfo != null && txInfo.rollbackOn(ex)) {
+        if (txInfo != null && (txInfo.rollbackOn(ex) || ex instanceof TransactionException)) {
             try {
                 rollbackTransaction(tx, ex);
             } catch (TransactionException txe) {
                 // Failed to rollback
-                throw new TransactionalExecutor.ExecutionException(tx, txe,
-                        TransactionalExecutor.Code.RollbackFailure, ex);
-            }
-            //throw to Launcher
-            if (tx.getRole() == GlobalTransactionRole.Participant) {
-                throw new TransactionalExecutor.ExecutionException(tx, null,
-                        TransactionalExecutor.Code.RollbackDone);
+                if (tx.getRole() == GlobalTransactionRole.Launcher) {
+                    throw new TransactionalExecutor.ExecutionException(tx, txe,
+                            TransactionalExecutor.Code.RollbackFailure, ex);
+                } else if (tx.getRole() == GlobalTransactionRole.Participant) {
+                    throw new TransactionalExecutor.ExecutionException(tx, new TransactionException(TransactionExceptionCode.ParticipantRollbackFailure,txe),
+                            TransactionalExecutor.Code.RollbackFailure, ex);
+                }
             }
         } else {
             // not roll back on this exception, so commit
@@ -117,13 +117,28 @@ public class TransactionalTemplate {
 
     private void rollbackTransaction(GlobalTransaction tx, Throwable ex) throws TransactionException, TransactionalExecutor.ExecutionException {
         triggerBeforeRollback();
-        //branch has reported rollback
-        if (!(ex instanceof RollbackDoneException)) {
+        //branch has reported rollback done
+        if (!(ex instanceof TransactionException
+                && ((TransactionException) ex).getCode() == TransactionExceptionCode.ParticipantRollbackDone)) {
             tx.rollback();
         }
         triggerAfterRollback();
         // 3.1 Successfully rolled back
-        throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
+        if (tx.getRole() == GlobalTransactionRole.Launcher) {
+            if (ex instanceof TransactionException) {
+                throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex.getCause());
+            } else {
+                throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
+            }
+        } else if (tx.getRole() == GlobalTransactionRole.Participant) {
+            if (ex instanceof TransactionException) {
+                throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone,
+                        new TransactionException(TransactionExceptionCode.ParticipantRollbackDone, ex.getCause()));
+            } else {
+                throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone,
+                        new TransactionException(TransactionExceptionCode.ParticipantRollbackDone, ex));
+            }
+        }
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
