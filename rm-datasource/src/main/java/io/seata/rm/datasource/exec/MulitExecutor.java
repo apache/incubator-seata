@@ -90,7 +90,7 @@ public class MulitExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         AbstractDMLBaseExecutor<T, S> executor = null;
         for (int i = 0; i < sqlRecognizers.size(); i++) {
-            sqlRecognizer = sqlRecognizers.get(i);
+            SQLRecognizer sqlRecognizer = sqlRecognizers.get(i);
             switch (sqlRecognizer.getSQLType()) {
                 case UPDATE:
                     executor = new UpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
@@ -125,12 +125,12 @@ public class MulitExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
         buildUndo(deleteBeforeImagesMap, deleteAfterImagesMap, SQLType.DELETE);
     }
 
-    private void buildUndo(Map<String, TableRecords> deleteBeforeImagesMap, Map<String, TableRecords> deleteAfterImagesMap, SQLType sqlType) {
+    private void buildUndo(Map<String, TableRecords> beforeImagesMap, Map<String, TableRecords> afterImagesMap, SQLType sqlType) {
         TableRecords beforeImage;
         TableRecords afterImage;
-        for (String table : deleteAfterImagesMap.keySet()) {
-            beforeImage = deleteBeforeImagesMap.get(table);
-            afterImage = deleteAfterImagesMap.get(table);
+        for (String table : beforeImagesMap.keySet()) {
+            beforeImage = beforeImagesMap.get(table);
+            afterImage = afterImagesMap.get(table);
             ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
             TableRecords lockKeyRecords = sqlType == SQLType.DELETE ? beforeImage : afterImage;
             String lockKeys = buildLockKey(lockKeyRecords);
