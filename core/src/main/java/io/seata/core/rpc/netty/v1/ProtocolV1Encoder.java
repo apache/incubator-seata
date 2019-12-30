@@ -20,6 +20,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToByteEncoder;
 import io.seata.core.codec.Codec;
 import io.seata.core.codec.CodecFactory;
+import io.seata.core.compressor.Compressor;
+import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
 import org.slf4j.Logger;
@@ -32,7 +34,7 @@ import java.util.Map;
  * 0     1     2     3     4     5     6     7     8     9    10     11    12    13    14    15    16
  * +-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+
  * |   magic   |Proto|     Full length       |    Head   | Msg |Seria|Compr|     RequestId         |
- * |   code    |colVer|    （head+body)      |   Length  |Type |lizer|ess  |                       |
+ * |   code    |colVer|    (head+body)      |   Length  |Type |lizer|ess  |                       |
  * +-----------+-----------+-----------+-----------+-----------+-----------+-----------+-----------+
  * |                                                                                               |
  * |                                   Head Map [Optional]                                         |
@@ -91,6 +93,8 @@ public class ProtocolV1Encoder extends MessageToByteEncoder {
                     // heartbeat has no body
                     Codec codec = CodecFactory.getCodec(rpcMessage.getCodec());
                     bodyBytes = codec.encode(rpcMessage.getBody());
+                    Compressor compressor = CompressorFactory.getCompressor(rpcMessage.getCompressor());
+                    bodyBytes = compressor.compress(bodyBytes);
                     fullLength += bodyBytes.length;
                 }
 

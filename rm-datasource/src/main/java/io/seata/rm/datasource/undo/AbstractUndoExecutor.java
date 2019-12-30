@@ -15,11 +15,14 @@
  */
 package io.seata.rm.datasource.undo;
 
+import com.alibaba.druid.util.JdbcUtils;
 import com.alibaba.fastjson.JSON;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.Result;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.DataCompareUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -130,7 +133,6 @@ public abstract class AbstractUndoExecutor {
             }
 
         } catch (Exception ex) {
-            ex.printStackTrace();
             if (ex instanceof SQLException) {
                 throw (SQLException) ex;
             } else {
@@ -168,9 +170,12 @@ public abstract class AbstractUndoExecutor {
                 } else {
                     undoPST.setObject(undoIndex, null);
                 }
+            } else if (undoValue.getType() == JDBCType.OTHER.getVendorTypeNumber()) {
+                undoPST.setObject(undoIndex, undoValue.getValue());
             } else {
                 undoPST.setObject(undoIndex, undoValue.getValue(), undoValue.getType());
             }
+
         }
         // PK is at last one.
         // INSERT INTO a (x, y, z, pk) VALUES (?, ?, ?, ?)
@@ -263,13 +268,14 @@ public abstract class AbstractUndoExecutor {
         if (pkValues.length == 0) {
             return TableRecords.empty(tableMeta);
         }
-        StringBuffer replace = new StringBuffer();
+        StringBuilder replace = new StringBuilder();
         for (int i = 0; i < pkValues.length; i++) {
             replace.append("?,");
         }
         // build check sql
-        String checkSQL = String.format(CHECK_SQL_TEMPLATE, sqlUndoLog.getTableName(), pkName,
-            replace.substring(0, replace.length() - 1));
+        String dbType = getDbType(conn);
+        String checkSQL = String.format(CHECK_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), dbType),
+                tableMeta.getEscapePkName(dbType), replace.substring(0, replace.length() - 1));
 
         PreparedStatement statement = null;
         ResultSet checkSet = null;
@@ -282,18 +288,7 @@ public abstract class AbstractUndoExecutor {
             checkSet = statement.executeQuery();
             currentRecords = TableRecords.buildRecords(tableMeta, checkSet);
         } finally {
-            if (checkSet != null) {
-                try {
-                    checkSet.close();
-                } catch (Exception e) {
-                }
-            }
-            if (statement != null) {
-                try {
-                    statement.close();
-                } catch (Exception e) {
-                }
-            }
+            IOUtil.close(checkSet, statement);
         }
         return currentRecords;
     }
@@ -320,4 +315,15 @@ public abstract class AbstractUndoExecutor {
         }
         return pkValues;
     }
+
+    /**
+     * Get db type
+     * @param conn the connection
+     * @return the db type
+     * @throws SQLException
+     */
+    protected String getDbType(Connection conn) throws SQLException {
+        return JdbcUtils.getDbType(conn.getMetaData().getURL(), null);
+    }
+
 }

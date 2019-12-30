@@ -23,11 +23,9 @@ import java.time.Duration;
 /**
  * The type Abstract configuration.
  *
- * @param <T> the type parameter
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /2/1
+ * @author slievrly
  */
-public abstract class AbstractConfiguration<T> implements Configuration<T> {
+public abstract class AbstractConfiguration implements Configuration {
 
     /**
      * The constant DEFAULT_CONFIG_TIMEOUT.

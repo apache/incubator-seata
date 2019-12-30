@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 
 /**
   * @author l81893521
-  * @date 2019/8/9
   */
 public class NoRollbackRuleTest {
 
@@ -32,5 +31,9 @@ public class NoRollbackRuleTest {
         RollbackRule rollbackRuleByName = new NoRollbackRule(Exception.class.getName());
         RollbackRule otherRollbackRuleByName = new NoRollbackRule(Exception.class.getName());
         Assertions.assertEquals(rollbackRuleByName, otherRollbackRuleByName);
+        NoRollbackRule otherRollbackRuleByName3 = new NoRollbackRule(Exception.class.getName());
+        Assertions.assertEquals(otherRollbackRuleByName3.toString(),"NoRollbackRule with pattern [" + Exception.class.getName() + "]");
+
+
     }
 }

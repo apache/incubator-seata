@@ -25,6 +25,7 @@ import java.util.Objects;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.util.CollectionUtils;
+import io.seata.rm.datasource.ColumnUtils;
 
 /**
  * The type Table meta.
@@ -34,7 +35,13 @@ import io.seata.common.util.CollectionUtils;
 public class TableMeta {
     private String tableName;
 
+    /**
+     * key: column name
+     */
     private Map<String, ColumnMeta> allColumns = new LinkedHashMap<String, ColumnMeta>();
+    /**
+     * key: index name
+     */
     private Map<String, IndexMeta> allIndexes = new LinkedHashMap<String, IndexMeta>();
 
     /**
@@ -62,15 +69,7 @@ public class TableMeta {
      * @return the column meta
      */
     public ColumnMeta getColumnMeta(String colName) {
-        ColumnMeta col = allColumns.get(colName);
-        if (col == null) {
-            if (colName.charAt(0) == '`') {
-                col = allColumns.get(colName.substring(1, colName.length() - 1));
-            } else {
-                col = allColumns.get("`" + colName + "`");
-            }
-        }
-        return col;
+        return allColumns.get(colName);
     }
 
     /**
@@ -124,7 +123,10 @@ public class TableMeta {
         }
 
         if (pk.size() > 1) {
-            throw new NotSupportYetException("Multi PK");
+            throw new NotSupportYetException(String.format("%s contains multi PK, but current not support.", tableName));
+        }
+        if (pk.size() < 1) {
+            throw new NotSupportYetException(String.format("%s needs to contain the primary key.", tableName));
         }
 
         return pk;
@@ -154,6 +156,15 @@ public class TableMeta {
     }
 
     /**
+     * Gets add escape pk name.
+     * @param dbType
+     * @return
+     */
+    public String getEscapePkName(String dbType) {
+        return ColumnUtils.addEscape(getPkName(), dbType);
+    }
+
+    /**
      * Contains pk boolean.
      *
      * @param cols the cols
@@ -174,81 +185,6 @@ public class TableMeta {
         } else {
             return CollectionUtils.toUpperList(cols).containsAll(CollectionUtils.toUpperList(pk));
         }
-    }
-
-    /**
-     * Gets create table sql.
-     *
-     * @return the create table sql
-     */
-    public String getCreateTableSQL() {
-        StringBuilder sb = new StringBuilder("CREATE TABLE");
-        sb.append(String.format(" `%s` ", getTableName()));
-        sb.append("(");
-
-        boolean flag = true;
-        Map<String, ColumnMeta> allColumns = getAllColumns();
-        for (Entry<String, ColumnMeta> entry : allColumns.entrySet()) {
-            if (flag) {
-                flag = false;
-            } else {
-                sb.append(",");
-            }
-
-            ColumnMeta col = entry.getValue();
-            sb.append(String.format(" `%s` ", col.getColumnName()));
-            sb.append(col.getDataTypeName());
-            if (col.getColumnSize() > 0) {
-                sb.append(String.format("(%d)", col.getColumnSize()));
-            }
-
-            if (col.getColumnDef() != null && col.getColumnDef().length() > 0) {
-                sb.append(String.format(" default '%s'", col.getColumnDef()));
-            }
-
-            if (col.getIsNullAble() != null && col.getIsNullAble().length() > 0) {
-                sb.append(" ");
-                sb.append(col.getIsNullAble());
-            }
-        }
-
-        Map<String, IndexMeta> allIndexes = getAllIndexes();
-        for (Entry<String, IndexMeta> entry : allIndexes.entrySet()) {
-            sb.append(", ");
-
-            IndexMeta index = entry.getValue();
-            switch (index.getIndextype()) {
-                case FullText:
-                    break;
-                case Normal:
-                    sb.append(String.format("KEY `%s`", index.getIndexName()));
-                    break;
-                case PRIMARY:
-                    sb.append("PRIMARY KEY");
-                    break;
-                case Unique:
-                    sb.append(String.format("UNIQUE KEY `%s`", index.getIndexName()));
-                    break;
-                default:
-                    break;
-            }
-
-            sb.append(" (");
-            boolean f = true;
-            for (ColumnMeta c : index.getValues()) {
-                if (f) {
-                    f = false;
-                } else {
-                    sb.append(",");
-                }
-
-                sb.append(String.format("`%s`", c.getColumnName()));
-            }
-            sb.append(")");
-        }
-        sb.append(")");
-
-        return sb.toString();
     }
 
     @Override

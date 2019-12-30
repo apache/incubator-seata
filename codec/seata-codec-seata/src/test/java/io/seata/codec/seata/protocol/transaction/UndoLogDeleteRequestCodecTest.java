@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The type Undo Log Delete request codec test.
  *
  * @author guoyao
- * @data 2019 0704
  */
 public class UndoLogDeleteRequestCodecTest {
 

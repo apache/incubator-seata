@@ -24,8 +24,7 @@ import java.lang.annotation.Target;
 /**
  * The interface Load level.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/10
+ * @author slievrly
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

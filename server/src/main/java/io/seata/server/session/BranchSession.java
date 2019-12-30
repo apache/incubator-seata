@@ -15,6 +15,7 @@
  */
 package io.seata.server.session;
 
+import io.seata.server.lock.memory.MemoryLocker;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Set;
@@ -65,7 +66,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
 
     private String applicationData;
 
-    private ConcurrentMap<ConcurrentMap<String, Long>, Set<String>> lockHolder
+    private ConcurrentMap<MemoryLocker.BucketLockMap, Set<String>> lockHolder
         = new ConcurrentHashMap<>();
 
     /**
@@ -263,7 +264,7 @@ public class BranchSession implements Lockable, Comparable<BranchSession>, Sessi
      *
      * @return the lock holder
      */
-    public ConcurrentMap<ConcurrentMap<String, Long>, Set<String>> getLockHolder() {
+    public ConcurrentMap<MemoryLocker.BucketLockMap, Set<String>> getLockHolder() {
         return lockHolder;
     }
 

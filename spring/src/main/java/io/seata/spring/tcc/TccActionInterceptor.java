@@ -16,8 +16,8 @@
 package io.seata.spring.tcc;
 
 import io.seata.common.Constants;
-import io.seata.common.executor.Callback;
 import io.seata.core.context.RootContext;
+import io.seata.core.model.BranchType;
 import io.seata.rm.tcc.api.TwoPhaseBusinessAction;
 import io.seata.rm.tcc.interceptor.ActionInterceptorHandler;
 import io.seata.rm.tcc.remoting.RemotingDesc;
@@ -40,7 +40,7 @@ public class TccActionInterceptor implements MethodInterceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TccActionInterceptor.class);
 
-    private static final String DUBBO_PROXY_NAME_PREFIX="com.alibaba.dubbo.common.bytecode.proxy";
+    private static final String DUBBO_PROXY_NAME_PREFIX = "com.alibaba.dubbo.common.bytecode.proxy";
 
 
     private ActionInterceptorHandler actionInterceptorHandler = new ActionInterceptorHandler();
@@ -67,7 +67,7 @@ public class TccActionInterceptor implements MethodInterceptor {
 
     @Override
     public Object invoke(final MethodInvocation invocation) throws Throwable {
-        if(!RootContext.inGlobalTransaction()){
+        if (!RootContext.inGlobalTransaction()) {
             //not in transaction
             return invocation.proceed();
         }
@@ -79,20 +79,17 @@ public class TccActionInterceptor implements MethodInterceptor {
             String xid = RootContext.getXID();
             //clear the context
             RootContext.unbind();
+            RootContext.bindInterceptorType(xid, BranchType.TCC);
             try {
                 Object[] methodArgs = invocation.getArguments();
                 //Handler the TCC Aspect
                 Map<String, Object> ret = actionInterceptorHandler.proceed(method, methodArgs, xid, businessAction,
-                        new Callback<Object>() {
-                            @Override
-                            public Object execute() throws Throwable {
-                                return invocation.proceed();
-                            }
-                        });
+                        invocation::proceed);
                 //return the final result
                 return ret.get(Constants.TCC_METHOD_RESULT);
             } finally {
                 //recovery the context
+                RootContext.unbindInterceptorType();
                 RootContext.bind(xid);
             }
         }

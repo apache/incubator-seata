@@ -170,12 +170,11 @@ public class DefaultRemotingParser {
         Method[] methods = interfaceClass.getMethods();
         if (isService(bean, beanName)) {
             try {
-                //service bean， registry resource
+                //service bean, registry resource
                 Object targetBean = remotingBeanDesc.getTargetBean();
                 for (Method m : methods) {
                     TwoPhaseBusinessAction twoPhaseBusinessAction = m.getAnnotation(TwoPhaseBusinessAction.class);
                     if (twoPhaseBusinessAction != null) {
-                        //
                         TCCResource tccResource = new TCCResource();
                         tccResource.setActionName(twoPhaseBusinessAction.name());
                         tccResource.setTargetBean(targetBean);
@@ -193,11 +192,11 @@ public class DefaultRemotingParser {
                     }
                 }
             } catch (Throwable t) {
-                throw new FrameworkException(t, "parser remting service error");
+                throw new FrameworkException(t, "parser remoting service error");
             }
         }
         if (isReference(bean, beanName)) {
-            //reference bean， TCC proxy
+            //reference bean, TCC proxy
             remotingBeanDesc.setReference(true);
         }
         return remotingBeanDesc;

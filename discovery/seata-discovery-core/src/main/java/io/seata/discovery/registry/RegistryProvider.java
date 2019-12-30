@@ -18,7 +18,6 @@ package io.seata.discovery.registry;
 /**
  * the interface registry provider
  * @author xingfudeshi@gmail.com
- * @date 2019/04/12
  */
 public interface RegistryProvider {
     /**

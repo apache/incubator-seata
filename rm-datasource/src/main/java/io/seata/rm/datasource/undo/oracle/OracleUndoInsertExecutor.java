@@ -15,15 +15,12 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
 import java.sql.PreparedStatement;
@@ -33,34 +30,32 @@ import java.util.List;
 
 /**
  * The type oralce undo insert executor.
+ *
  * @author ccg
- * @date 2019/3/25
  */
 public class OracleUndoInsertExecutor extends AbstractUndoExecutor {
 
+    /**
+     * DELETE FROM a WHERE pk = ?
+     */
+    private static final String DELETE_SQL_TEMPLATE = "DELETE FROM %s WHERE %s = ?";
+
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
         TableRecords afterImage = sqlUndoLog.getAfterImage();
         List<Row> afterImageRows = afterImage.getRows();
         if (afterImageRows == null || afterImageRows.size() == 0) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG");
         }
         Row row = afterImageRows.get(0);
-        StringBuilder mainSQL = new StringBuilder("DELETE FROM ").append(keywordChecker.checkAndReplace(sqlUndoLog.getTableName()));
-        StringBuilder where = new StringBuilder(" WHERE ");
-        // For a row, there's only one primary key now
-        for (Field field : row.getFields()) {
-            if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(keywordChecker.checkAndReplace(field.getName())).append(" = ?");
-            }
-
-        }
-        return mainSQL.append(where).toString();
+        Field pkField = row.primaryKeys().get(0);
+        return String.format(DELETE_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), ColumnUtils.Escape.STANDARD),
+            ColumnUtils.addEscape(pkField.getName(), ColumnUtils.Escape.STANDARD));
     }
 
     @Override
-    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue) throws SQLException {
+    protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue)
+        throws SQLException {
         undoPST.setObject(1, pkValue.getValue(), pkValue.getType());
     }
 

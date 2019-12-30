@@ -15,52 +15,45 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The type oracle undo update executor.
+ *
  * @author ccg
- * @date 2019/3/25
  */
 public class OracleUndoUpdateExecutor extends AbstractUndoExecutor {
 
+    /**
+     * UPDATE a SET x = ?, y = ?, z = ? WHERE pk = ?
+     */
+    private static final String UPDATE_SQL_TEMPLATE = "UPDATE %s SET %s WHERE %s = ?";
+
     @Override
     protected String buildUndoSQL() {
-        KeywordChecker keywordChecker= KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
         if (beforeImageRows == null || beforeImageRows.size() == 0) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG"); // TODO
         }
-        Row row = beforeImageRows.get(0);
-        StringBuilder mainSQL = new StringBuilder("UPDATE ").append(keywordChecker.checkAndReplace(sqlUndoLog.getTableName())).append(" SET ");
-        StringBuilder where = new StringBuilder(" WHERE ");
-        boolean first = true;
-        for (Field field : row.getFields()) {
-            if (field.getKeyType() == KeyType.PrimaryKey) {
-                where.append(keywordChecker.checkAndReplace(field.getName())).append(" = ?");
-            } else {
-                if (first) {
-                    first = false;
-                } else {
-                    mainSQL.append(", ");
-                }
-                mainSQL.append(keywordChecker.checkAndReplace(field.getName())).append(" = ?");
-            }
 
-        }
-        return mainSQL.append(where).toString();
+        Row row = beforeImageRows.get(0);
+        Field pkField = row.primaryKeys().get(0);
+        List<Field> nonPkFields = row.nonPrimaryKeys();
+        String updateColumns = nonPkFields.stream()
+            .map(field -> ColumnUtils.addEscape(field.getName(), ColumnUtils.Escape.STANDARD) + " = ?")
+            .collect(Collectors.joining(", "));
+        return String.format(UPDATE_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), ColumnUtils.Escape.STANDARD),
+            updateColumns, ColumnUtils.addEscape(pkField.getName(), ColumnUtils.Escape.STANDARD));
     }
 
     /**

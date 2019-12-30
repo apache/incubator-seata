@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * @author jimin.jm@alibaba-inc.com
+ * @author slievrly
  */
 @Spi(scope = Scope.SINGLETON)
 @Activation(key = {MotanConstants.NODE_TYPE_SERVICE, MotanConstants.NODE_TYPE_REFERER}, sequence = 100)
@@ -39,7 +39,7 @@ public class MotanTransactionFilter implements Filter {
     @Override
     public Response filter(final Caller<?> caller, final Request request) {
         String currentXid = RootContext.getXID();
-        String requestXid = request.getAttachments().get(RootContext.KEY_XID);
+        String requestXid = getRpcXid(request);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RootContext [" + currentXid + "] xid in Request [" + requestXid + "]");
         }
@@ -72,4 +72,18 @@ public class MotanTransactionFilter implements Filter {
             }
         }
     }
+
+    /**
+     * get rpc xid
+     * @param request
+     * @return
+     */
+    private String getRpcXid(Request request) {
+        String rpcXid = request.getAttachments().get(RootContext.KEY_XID);
+        if (rpcXid == null) {
+            rpcXid = request.getAttachments().get(RootContext.KEY_XID.toLowerCase());
+        }
+        return rpcXid;
+    }
+
 }

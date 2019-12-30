@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
  * ensure the shutdownHook is singleton
  *
  * @author 563868273@qq.com
- * @date 2019/3/29
  */
 public class ShutdownHook extends Thread {
 
@@ -91,7 +90,7 @@ public class ShutdownHook extends Thread {
         Runtime.getRuntime().removeShutdownHook(SHUTDOWN_HOOK);
     }
 
-    private class DisposablePriorityWrapper implements Comparable<DisposablePriorityWrapper>, Disposable {
+    private static class DisposablePriorityWrapper implements Comparable<DisposablePriorityWrapper>, Disposable {
 
         private Disposable disposable;
 
@@ -114,10 +113,10 @@ public class ShutdownHook extends Thread {
 
         @Override
         public boolean equals(Object other) {
-            if(this == other){
+            if (this == other) {
                 return true;
             }
-            if(!(other instanceof DisposablePriorityWrapper)){
+            if (!(other instanceof DisposablePriorityWrapper)) {
                 return false;
             }
             DisposablePriorityWrapper dpw = (DisposablePriorityWrapper)other;

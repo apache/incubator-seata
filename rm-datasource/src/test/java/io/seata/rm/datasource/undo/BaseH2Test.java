@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
+import io.seata.common.util.IOUtil;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -61,12 +62,7 @@ public abstract class BaseH2Test {
 
     @AfterAll
     public static void stop() {
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-            }
-        }
+        IOUtil.close(connection);
         if (dataSource != null) {
             try {
                 dataSource.close();
@@ -91,12 +87,7 @@ public abstract class BaseH2Test {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (s != null) {
-                try {
-                    s.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(s);
         }
     }
 
@@ -108,24 +99,14 @@ public abstract class BaseH2Test {
             set = s.executeQuery(sql);
             return TableRecords.buildRecords(tableMeta, set);
         } finally {
-            if (set != null) {
-                try {
-                    set.close();
-                } catch (Exception e) {
-                }
-            }
-            if (s != null) {
-                try {
-                    s.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(set, s);
         }
     }
 
     protected static TableMeta mockTableMeta() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
         Mockito.when(tableMeta.getPkName()).thenReturn("ID");
+        Mockito.when(tableMeta.getEscapePkName("h2")).thenReturn("`ID`");
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
         ColumnMeta meta0 = Mockito.mock(ColumnMeta.class);
         Mockito.when(meta0.getDataType()).thenReturn(Types.INTEGER);

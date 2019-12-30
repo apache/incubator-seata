@@ -25,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author guoyao
- * @date 2019/4/18
  */
 public class RollbackRuleTest {
 
@@ -77,5 +76,20 @@ public class RollbackRuleTest {
     public void ctorArgExceptionStringNameVersionWithNull() {
         Assertions.assertThrows(IllegalArgumentException.class, () -> new RollbackRule((String) null));
     }
+    @Test
+    public void toStringTest(){
+        RollbackRule otherRollbackRuleByName = new RollbackRule(Exception.class.getName());
+        Assertions.assertEquals(otherRollbackRuleByName.toString(),"RollbackRule with pattern [" + Exception.class.getName() + "]");
+    }
 
+    @Test
+    public void equalsTest(){
+        RollbackRule otherRollbackRuleByName = new RollbackRule(Exception.class.getName());
+        RollbackRule otherRollbackRuleByName2 = new NoRollbackRule(Exception.class.getName());
+
+        Assertions.assertFalse(otherRollbackRuleByName.equals(""));
+        Assertions.assertTrue(otherRollbackRuleByName.equals(otherRollbackRuleByName));
+        Assertions.assertTrue(otherRollbackRuleByName.equals(otherRollbackRuleByName2));
+
+    }
 }

@@ -29,15 +29,14 @@ import java.net.InetSocketAddress;
 /**
  * The type Netty key poolable factory.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /11/19
+ * @author slievrly
  */
 public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoolKey, Channel> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyPoolableFactory.class);
-    
+
     private final AbstractRpcRemotingClient rpcRemotingClient;
-    
+
     private final RpcClientBootstrap clientBootstrap;
 
     /**
@@ -45,8 +44,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
      *
      * @param rpcRemotingClient the rpc remoting client
      */
-    public NettyPoolableFactory(AbstractRpcRemotingClient rpcRemotingClient,
-                                RpcClientBootstrap clientBootstrap) {
+    public NettyPoolableFactory(AbstractRpcRemotingClient rpcRemotingClient, RpcClientBootstrap clientBootstrap) {
         this.rpcRemotingClient = rpcRemotingClient;
         this.clientBootstrap = clientBootstrap;
     }
@@ -54,7 +52,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
     @Override
     public Channel makeObject(NettyPoolKey key) {
         InetSocketAddress address = NetUtil.toInetSocketAddress(key.getAddress());
-            if (LOGGER.isInfoEnabled()) {
+        if (LOGGER.isInfoEnabled()) {
             LOGGER.info("NettyPool create channel to " + key);
         }
         Channel tmpChannel = clientBootstrap.getNewChannel(address);
@@ -62,8 +60,7 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
         Object response;
         Channel channelToServer = null;
         if (null == key.getMessage()) {
-            throw new FrameworkException(
-                "register msg is null, role:" + key.getTransactionRole().name());
+            throw new FrameworkException("register msg is null, role:" + key.getTransactionRole().name());
         }
         try {
             response = rpcRemotingClient.sendAsyncRequestWithResponse(tmpChannel, key.getMessage());
@@ -71,35 +68,37 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
                 rpcRemotingClient.onRegisterMsgFail(key.getAddress(), tmpChannel, response, key.getMessage());
             } else {
                 channelToServer = tmpChannel;
-                rpcRemotingClient.onRegisterMsgSuccess(key.getAddress(), tmpChannel, response,
-                    key.getMessage());
+                rpcRemotingClient.onRegisterMsgSuccess(key.getAddress(), tmpChannel, response, key.getMessage());
             }
         } catch (Exception exx) {
-            if (tmpChannel != null) { tmpChannel.close(); }
+            if (tmpChannel != null) {
+                tmpChannel.close();
+            }
             throw new FrameworkException(
                 "register error,role:" + key.getTransactionRole().name() + ",err:" + exx.getMessage());
         }
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(
-                "register success, cost " + (System.currentTimeMillis() - start) + " ms, version:"
-                    + getVersion(response, key.getTransactionRole()) + ",role:" + key.getTransactionRole().name()
-                    + ",channel:" + channelToServer);
+            LOGGER.info("register success, cost " + (System.currentTimeMillis() - start) + " ms, version:" + getVersion(
+                response, key.getTransactionRole()) + ",role:" + key.getTransactionRole().name() + ",channel:"
+                + channelToServer);
         }
         return channelToServer;
     }
 
     private boolean isResponseSuccess(Object response, NettyPoolKey.TransactionRole transactionRole) {
-        if (null == response) { return false; }
+        if (null == response) {
+            return false;
+        }
         if (transactionRole.equals(NettyPoolKey.TransactionRole.TMROLE)) {
             if (!(response instanceof RegisterTMResponse)) {
                 return false;
             }
-            return ((RegisterTMResponse) response).isIdentified();
+            return ((RegisterTMResponse)response).isIdentified();
         } else if (transactionRole.equals(NettyPoolKey.TransactionRole.RMROLE)) {
             if (!(response instanceof RegisterRMResponse)) {
                 return false;
             }
-            return ((RegisterRMResponse) response).isIdentified();
+            return ((RegisterRMResponse)response).isIdentified();
         }
         return false;
     }
@@ -114,7 +113,6 @@ public class NettyPoolableFactory implements KeyedPoolableObjectFactory<NettyPoo
 
     @Override
     public void destroyObject(NettyPoolKey key, Channel channel) throws Exception {
-
         if (null != channel) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("will destroy channel:" + channel);

@@ -18,8 +18,7 @@ package io.seata.config;
 /**
  * The type Configuration keys.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /02/26
+ * @author slievrly
  */
 public final class ConfigurationKeys {
     /**
@@ -30,6 +29,10 @@ public final class ConfigurationKeys {
      * The constant FILE_ROOT_CONFIG.
      */
     public static final String FILE_ROOT_CONFIG = "config";
+    /**
+     * The constant SEATA_FILE_ROOT_CONFIG
+     */
+    public static final String SEATA_FILE_ROOT_CONFIG = "seata";
     /**
      * The constant FILE_CONFIG_SPLIT_CHAR.
      */

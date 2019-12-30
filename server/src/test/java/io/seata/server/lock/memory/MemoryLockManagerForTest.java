@@ -21,7 +21,6 @@ import io.seata.server.session.BranchSession;
 
 /**
  * @author zhangsen
- * @data 2019-05-16
  */
 public class MemoryLockManagerForTest extends DefaultLockManager {
 
