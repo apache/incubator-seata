@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.compressor.zip;
+package io.seata.compressor.sevenz;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -24,19 +24,19 @@ import org.junit.jupiter.api.Test;
  *
  * @author ph3636
  */
-public class ZipUtilTest {
+public class SevenZUtilTest {
 
     @Test
     public void test_compress() {
         Assertions.assertThrows(NullPointerException.class, () -> {
-            ZUtil.compress(null);
+            SevenZUtil.compress(null);
         });
     }
 
     @Test
     public void test_decompress() {
         Assertions.assertThrows(NullPointerException.class, () -> {
-            ZUtil.decompress(null);
+            SevenZUtil.decompress(null);
         });
     }
 }

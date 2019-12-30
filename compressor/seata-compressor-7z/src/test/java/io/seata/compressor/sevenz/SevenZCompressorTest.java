@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.compressor.zip;
+package io.seata.compressor.sevenz;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -23,11 +23,11 @@ import org.junit.jupiter.api.Test;
  *
  * @author ph3636
  */
-public class ZipCompressorTest {
+public class SevenZCompressorTest {
 
     @Test
     public void testCompressAndDecompress() {
-        ZCompressor compressor = new ZCompressor();
+        SevenZCompressor compressor = new SevenZCompressor();
         byte[] bytes = "aa".getBytes();
         bytes = compressor.compress(bytes);
         bytes = compressor.decompress(bytes);

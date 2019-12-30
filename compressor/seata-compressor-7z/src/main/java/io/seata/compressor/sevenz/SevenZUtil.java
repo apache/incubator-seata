@@ -16,13 +16,13 @@
 package io.seata.compressor.sevenz;
 
 import io.seata.common.util.IOUtil;
+import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
+import org.apache.commons.compress.archivers.sevenz.SevenZFile;
+import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
+import org.apache.commons.compress.utils.SeekableInMemoryByteChannel;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 /**
  * the 7Z Util
@@ -37,22 +37,23 @@ public class SevenZUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        ByteArrayOutputStream out = null;
-        ZipOutputStream zip = null;
+        SevenZOutputFile z7z = null;
+        SeekableInMemoryByteChannel channel = null;
         try {
-            out = new ByteArrayOutputStream();
-            zip = new ZipOutputStream(out);
-            ZipEntry entry = new ZipEntry("zip");
+            channel = new SeekableInMemoryByteChannel();
+            z7z = new SevenZOutputFile(channel);
+            SevenZArchiveEntry entry = new SevenZArchiveEntry();
+            entry.setName("sevenZip");
             entry.setSize(bytes.length);
-            zip.putNextEntry(entry);
-            zip.write(bytes);
-            zip.closeEntry();
-            zip.close();
-            return out.toByteArray();
+            z7z.putArchiveEntry(entry);
+            z7z.write(bytes);
+            z7z.closeArchiveEntry();
+            z7z.close();
+            return channel.array();
         } catch (IOException e) {
-            throw new RuntimeException("zip compress error", e);
+            throw new RuntimeException("seven zip compress error", e);
         } finally {
-            IOUtil.close(out);
+            IOUtil.close(channel);
         }
     }
 
@@ -61,23 +62,24 @@ public class SevenZUtil {
             throw new NullPointerException("bytes is null");
         }
         ByteArrayOutputStream out = null;
-        ZipInputStream zip = null;
+        SeekableInMemoryByteChannel channel = null;
         try {
             out = new ByteArrayOutputStream();
-            zip = new ZipInputStream(new ByteArrayInputStream(bytes));
+            channel = new SeekableInMemoryByteChannel(bytes);
+            SevenZFile sevenZFile = new SevenZFile(channel);
             byte[] buffer = new byte[BUFFER_SIZE];
-            while (zip.getNextEntry() != null) {
+            while (sevenZFile.getNextEntry() != null) {
                 int n;
-                while ((n = zip.read(buffer)) > -1) {
+                while ((n = sevenZFile.read(buffer)) > -1) {
                     out.write(buffer, 0, n);
                 }
             }
-            zip.close();
+            sevenZFile.close();
             return out.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("zip decompress error", e);
+            throw new RuntimeException("seven zip decompress error", e);
         } finally {
-            IOUtil.close(out);
+            IOUtil.close(out, channel);
         }
     }
 }
