@@ -132,7 +132,7 @@ public class MulitExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
             beforeImage = deleteBeforeImagesMap.get(table);
             afterImage = deleteAfterImagesMap.get(table);
             ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
-            TableRecords lockKeyRecords = sqlRecognizer.getSQLType() == SQLType.DELETE ? beforeImage : afterImage;
+            TableRecords lockKeyRecords = sqlType == SQLType.DELETE ? beforeImage : afterImage;
             String lockKeys = buildLockKey(lockKeyRecords);
             connectionProxy.appendLockKey(lockKeys);
             SQLUndoLog sqlUndoLog = new SQLUndoLog();
