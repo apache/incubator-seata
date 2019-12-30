@@ -44,14 +44,16 @@ public class TransactionalTemplate {
      * @throws TransactionalExecutor.ExecutionException the execution exception
      */
     public Object execute(TransactionalExecutor business) throws Throwable {
-        // 1. get or create a transaction
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
-
-        // 1.1 get transactionInfo
+        // 1 get transactionInfo
         TransactionInfo txInfo = business.getTransactionInfo();
         if (txInfo == null) {
             throw new ShouldNeverHappenException("transactionInfo does not exist");
         }
+
+        // 1.1 get or create a transaction
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
+
+
         try {
 
             // 2. begin transaction

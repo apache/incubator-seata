@@ -84,7 +84,7 @@ public class DefaultSagaTransactionalTemplate
 
     @Override
     public GlobalTransaction beginTransaction(TransactionInfo txInfo) throws TransactionalExecutor.ExecutionException {
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         try {
             triggerBeforeBegin();
             tx.begin(txInfo.getTimeOut(), txInfo.getName());

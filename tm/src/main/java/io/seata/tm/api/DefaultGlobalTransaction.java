@@ -47,6 +47,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     private GlobalTransactionRole role;
 
+    private String previousXid;
+
+    private GlobalTransactionRole previousRole;
+
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
         ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, 1);
 
@@ -74,6 +78,23 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         this.role = role;
     }
 
+    /**
+     * Instantiates a new Default global transaction with specific param
+     *
+     * @param xid    the xid
+     * @param status the status
+     * @param role   the role
+     */
+    DefaultGlobalTransaction(String xid, GlobalStatus status, GlobalTransactionRole role, String previousXid,
+                             GlobalTransactionRole previousRole) {
+        this.transactionManager = TransactionManagerHolder.get();
+        this.xid = xid;
+        this.status = status;
+        this.role = role;
+        this.previousRole = previousRole;
+        this.previousXid = previousXid;
+    }
+
     @Override
     public void begin() throws TransactionException {
         begin(DEFAULT_GLOBAL_TX_TIMEOUT);
@@ -86,25 +107,30 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void begin(int timeout, String name) throws TransactionException {
-        if (role != GlobalTransactionRole.Launcher) {
-            check();
+        if (role == GlobalTransactionRole.Participant) {
+            assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Ignore Begin(): just involved in global transaction [{}]", xid);
             }
             return;
         }
-        if (xid != null) {
-            throw new IllegalStateException();
+        assertXIDNull();
+        if (hasExternalTransaction()) {
+            // Suspend the external transaction, resume it on commit or rollback
+            if (previousXid != null) {
+                RootContext.unbind();
+            }
+            RootContext.unbindXIDRole();
         }
-        if (RootContext.getXID() != null) {
-            throw new IllegalStateException();
+        if (needApplyForXID()) {
+            xid = transactionManager.begin(null, null, name, timeout);
+            status = GlobalStatus.Begin;
+            RootContext.bind(xid);
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Begin new global transaction [{}]", xid);
+            }
         }
-        xid = transactionManager.begin(null, null, name, timeout);
-        status = GlobalStatus.Begin;
-        RootContext.bind(xid);
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Begin new global transaction [{}]", xid);
-        }
+        RootContext.bindXIDRole(role.getName());
 
     }
 
@@ -117,20 +143,21 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
             return;
         }
-        if (xid == null) {
-            throw new IllegalStateException();
-        }
+        checkTransactionState();
         int retry = COMMIT_RETRY_COUNT;
         try {
-            while (retry > 0) {
-                try {
-                    status = transactionManager.commit(xid);
-                    break;
-                } catch (Throwable ex) {
-                    LOGGER.error("Failed to report global commit [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
-                    retry--;
-                    if (retry == 0) {
-                        throw new TransactionException("Failed to report global commit", ex);
+            //Only launcher can commit the global transaction
+            if (role == GlobalTransactionRole.Launcher) {
+                while (retry > 0) {
+                    try {
+                        status = transactionManager.commit(xid);
+                        break;
+                    } catch (Throwable ex) {
+                        LOGGER.error("Failed to report global commit [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
+                        retry--;
+                        if (retry == 0) {
+                            throw new TransactionException("Failed to report global commit", ex);
+                        }
                     }
                 }
             }
@@ -139,6 +166,14 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 if (xid.equals(RootContext.getXID())) {
                     RootContext.unbind();
                 }
+            }
+            RootContext.unbindXIDRole();
+            if (hasExternalTransaction()) {
+                // Resume the external Transaction
+                if (previousXid != null) {
+                    RootContext.bind(previousXid);
+                }
+                RootContext.bindXIDRole(previousRole.getName());
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -156,21 +191,22 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
             return;
         }
-        if (xid == null) {
-            throw new IllegalStateException();
-        }
+        checkTransactionState();
 
         int retry = ROLLBACK_RETRY_COUNT;
         try {
-            while (retry > 0) {
-                try {
-                    status = transactionManager.rollback(xid);
-                    break;
-                } catch (Throwable ex) {
-                    LOGGER.error("Failed to report global rollback [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
-                    retry--;
-                    if (retry == 0) {
-                        throw new TransactionException("Failed to report global rollback", ex);
+            //Only launcher can rollback the global transaction
+            if (role == GlobalTransactionRole.Launcher) {
+                while (retry > 0) {
+                    try {
+                        status = transactionManager.rollback(xid);
+                        break;
+                    } catch (Throwable ex) {
+                        LOGGER.error("Failed to report global rollback [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
+                        retry--;
+                        if (retry == 0) {
+                            throw new TransactionException("Failed to report global rollback", ex);
+                        }
                     }
                 }
             }
@@ -179,6 +215,14 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 if (xid.equals(RootContext.getXID())) {
                     RootContext.unbind();
                 }
+            }
+            RootContext.unbindXIDRole();
+            if (hasExternalTransaction()) {
+                // Resume the external Transaction
+                if (previousXid != null) {
+                    RootContext.bind(previousXid);
+                }
+                RootContext.bindXIDRole(previousRole.getName());
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -221,10 +265,43 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
     }
 
-    private void check() {
+    private void assertXIDNotNull() {
         if (xid == null) {
             throw new ShouldNeverHappenException();
         }
 
+    }
+
+    private void assertXIDNull() {
+        if (xid != null) {
+            throw new IllegalStateException();
+        }
+    }
+
+    private void checkTransactionState() {
+        if (xid == null) {
+            //XID can be null only if the tx role is Excluded
+            if (role != GlobalTransactionRole.Excluded) {
+                throw new IllegalStateException();
+            }
+        }
+    }
+
+    private boolean hasExternalTransaction() {
+        if (previousXid != null || previousRole != null) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean needApplyForXID() {
+        if (xid == null && role == GlobalTransactionRole.Launcher) {
+            return true;
+        } else
+            if (role == GlobalTransactionRole.Excluded) {
+                return false;
+            } else {
+                throw new ShouldNeverHappenException();
+            }
     }
 }

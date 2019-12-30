@@ -26,11 +26,42 @@ public enum GlobalTransactionRole {
      * The Launcher.
      */
     // The one begins the current global transaction.
-    Launcher,
+    Launcher("Launcher"),
 
     /**
      * The Participant.
      */
     // The one just joins into a existing global transaction.
-    Participant
+    Participant("Participant"),
+
+    /**
+     * The Excluded
+     */
+    // The one does not join into the existing global transaction.
+    Excluded("Excluded");
+
+    GlobalTransactionRole(String name) {
+        this.name = name;
+    }
+
+    private String name;
+
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+
+    public static GlobalTransactionRole get(String name) {
+        for (GlobalTransactionRole roleEnum : GlobalTransactionRole.values()) {
+            if (roleEnum.getName().equals(name)) {
+                return roleEnum;
+            }
+        }
+        throw new IllegalArgumentException("Unknown GlobalTransactionRole[" + name + "]");
+    }
 }

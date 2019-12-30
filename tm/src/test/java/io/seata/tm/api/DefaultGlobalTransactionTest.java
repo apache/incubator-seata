@@ -22,6 +22,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.transaction.MyRuntimeException;
+import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -68,7 +69,10 @@ class DefaultGlobalTransactionTest {
     @Test
     public void commitRetryExceptionTest() throws TransactionException {
         RootContext.unbind();
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        RootContext.unbindXIDRole();
+        TransactionInfo txInfo = new TransactionInfo();
+        txInfo.setPropagation(Propagation.REQUIRED);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         tx.begin();
         Assertions.assertThrows(TransactionException.class, () -> {
             tx.commit();});
@@ -77,7 +81,10 @@ class DefaultGlobalTransactionTest {
     @Test
     public void commitNoXIDExceptionTest() throws TransactionException {
         RootContext.unbind();
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        RootContext.unbindXIDRole();
+        TransactionInfo txInfo = new TransactionInfo();
+        txInfo.setPropagation(Propagation.REQUIRED);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         Assertions.assertThrows(IllegalStateException.class, () -> tx.commit());
     }
 
@@ -85,7 +92,10 @@ class DefaultGlobalTransactionTest {
     @Test
     public void rollBackRetryExceptionTest() throws TransactionException {
         RootContext.unbind();
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        RootContext.unbindXIDRole();
+        TransactionInfo txInfo = new TransactionInfo();
+        txInfo.setPropagation(Propagation.REQUIRED);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         tx.begin();
         Assertions.assertThrows(TransactionException.class, () -> tx.rollback());
     }
@@ -93,7 +103,10 @@ class DefaultGlobalTransactionTest {
     @Test
     public void rollBackNoXIDExceptionTest() throws TransactionException {
         RootContext.unbind();
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        RootContext.unbindXIDRole();
+        TransactionInfo txInfo = new TransactionInfo();
+        txInfo.setPropagation(Propagation.REQUIRED);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         tx.begin();
         Assertions.assertThrows(TransactionException.class, () -> tx.rollback());
     }

@@ -24,6 +24,7 @@ import com.weibo.api.motan.rpc.Caller;
 import com.weibo.api.motan.rpc.Request;
 import com.weibo.api.motan.rpc.Response;
 import io.seata.core.context.RootContext;
+import io.seata.tm.api.GlobalTransactionRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,34 +40,48 @@ public class MotanTransactionFilter implements Filter {
     @Override
     public Response filter(final Caller<?> caller, final Request request) {
         String currentXid = RootContext.getXID();
+        String currentXidRole = RootContext.getXIDRole();
         String requestXid = getRpcXid(request);
+        String requestXidRole = request.getAttachments().get(RootContext.KEY_XID);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("xid in RootContext [" + currentXid + "] xid in Request [" + requestXid + "]");
         }
         boolean bind = false;
         if (currentXid != null) {
-            request.getAttachments().put(RootContext.KEY_XID, currentXid);
-        } else if (null != requestXid) {
-            RootContext.bind(requestXid);
-            bind = true;
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("bind [" + requestXid + "] to RootContext");
+            if (currentXid != null) {
+                request.getAttachments().put(RootContext.KEY_XID, currentXid);
+                request.getAttachments().put(RootContext.KEY_XID_ROLE, GlobalTransactionRole.Participant.getName());
+            } else {
+                request.getAttachments().put(RootContext.KEY_XID_ROLE, currentXidRole);
             }
-
-        }
+        } else
+            if (null != requestXidRole) {
+                RootContext.bindXIDRole(requestXidRole);
+                bind = true;
+                if (null != requestXid) {
+                    RootContext.bind(requestXid);
+                }
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("bind [" + requestXid + "] to RootContext");
+                }
+            }
         try {
             return caller.call(request);
         } finally {
             if (bind) {
-                String unbindXid = RootContext.unbind();
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("unbind [" + unbindXid + "] from RootContext");
-                }
-                if (!requestXid.equalsIgnoreCase(unbindXid)) {
-                    LOGGER.warn("xid has changed, during RPC from " + requestXid + " to " + unbindXid);
-                    if (unbindXid != null) {
-                        RootContext.bind(unbindXid);
-                        LOGGER.warn("bind [" + unbindXid + "] back to RootContext");
+                String unbindXidRole = RootContext.unbindXIDRole();
+                if (null != requestXid) {
+                    String unbindXid = RootContext.unbind();
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("unbind [" + unbindXid + "] from RootContext");
+                    }
+                    if (!requestXid.equalsIgnoreCase(unbindXid)) {
+                        LOGGER.warn("xid has changed, during RPC from " + requestXid + " to " + unbindXid);
+                        if (unbindXid != null) {
+                            RootContext.bind(unbindXid);
+                            RootContext.bindXIDRole(unbindXidRole);
+                            LOGGER.warn("bind [" + unbindXid + "] back to RootContext");
+                        }
                     }
                 }
             }

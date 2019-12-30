@@ -20,6 +20,7 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
+import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -64,7 +65,9 @@ class GlobalTransactionContextTest {
 
     @Test
     void reloadTest() throws TransactionException {
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        TransactionInfo txInfo = new TransactionInfo();
+        txInfo.setPropagation(Propagation.REQUIRED);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         tx = GlobalTransactionContext.reload(DEFAULT_XID);
         GlobalTransaction finalTx = tx;
         Assertions.assertThrows(IllegalStateException.class, () -> finalTx.begin());

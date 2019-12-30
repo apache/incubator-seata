@@ -23,6 +23,7 @@ import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
 import io.seata.tm.TransactionManagerHolder;
 import io.seata.tm.api.transaction.MyRuntimeException;
+import io.seata.tm.api.transaction.TransactionInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -75,7 +76,9 @@ class DefaultFailureHandlerImplTest {
     @Test
     void onBeginFailure() {
         RootContext.bind(DEFAULT_XID);
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        TransactionInfo txInfo = new TransactionInfo();
+        txInfo.setPropagation(Propagation.REQUIRED);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         FailureHandler failureHandler = new DefaultFailureHandlerImpl();
         failureHandler.onBeginFailure(tx, new MyRuntimeException("").getCause());
     }
@@ -84,7 +87,9 @@ class DefaultFailureHandlerImplTest {
     void onCommitFailure() throws Exception{
 
         RootContext.bind(DEFAULT_XID);
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        TransactionInfo txInfo = new TransactionInfo();
+        txInfo.setPropagation(Propagation.REQUIRED);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         FailureHandler failureHandler = new DefaultFailureHandlerImpl();
         failureHandler.onCommitFailure(tx, new MyRuntimeException("").getCause());
 
@@ -110,7 +115,9 @@ class DefaultFailureHandlerImplTest {
 
 
         RootContext.bind(DEFAULT_XID);
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        TransactionInfo txInfo = new TransactionInfo();
+        txInfo.setPropagation(Propagation.REQUIRED);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         FailureHandler failureHandler = new DefaultFailureHandlerImpl();
         failureHandler.onRollbackFailure(tx, new MyRuntimeException("").getCause());
 

@@ -41,6 +41,8 @@ public class RootContext {
 
     public static final String KEY_GLOBAL_LOCK_FLAG = "TX_LOCK";
 
+    public static final String KEY_XID_ROLE = "TX_XID_ROLE";
+
     private static ContextCore CONTEXT_HOLDER = ContextCoreLoader.load();
 
     /**
@@ -60,6 +62,42 @@ public class RootContext {
         }
 
         return null;
+    }
+
+    /**
+     * Gets xid propagation type
+     *
+     * @return the xidPropagationType
+     */
+    public static String getXIDRole() {
+        return CONTEXT_HOLDER.get(KEY_XID_ROLE);
+    }
+
+    /**
+     * Unbind xid propagation type.
+     *
+     * @return the string
+     */
+    public static String unbindXIDRole() {
+        String xidRole = CONTEXT_HOLDER.remove(KEY_XID_ROLE);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("unbind xid role {} ", xidRole);
+        }
+        return xidRole;
+    }
+
+    /**
+     * Bind xid propagation type.
+     *
+     * @param xidRole
+     */
+    public static void bindXIDRole(String xidRole) {
+        if (StringUtils.isNotBlank(xidRole)) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("bind xid role {}", xidRole);
+            }
+            CONTEXT_HOLDER.put(KEY_XID_ROLE, xidRole);
+        }
     }
 
     /**

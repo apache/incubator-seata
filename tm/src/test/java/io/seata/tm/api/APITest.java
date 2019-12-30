@@ -76,6 +76,7 @@ public class APITest {
     @AfterEach
     public void cleanRootContext() {
         RootContext.unbind();
+        RootContext.unbindXIDRole();
     }
 
     /**
@@ -86,7 +87,9 @@ public class APITest {
     @Test
     public void testCurrent() throws Exception {
         RootContext.bind(DEFAULT_XID);
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        TransactionInfo txInfo = new TransactionInfo();
+        txInfo.setPropagation(Propagation.REQUIRED);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         Assertions.assertEquals(tx.getXid(), DEFAULT_XID);
         Assertions.assertEquals(tx.getStatus(), GlobalStatus.Begin);
 
@@ -99,7 +102,9 @@ public class APITest {
      */
     @Test
     public void testNewTx() throws Exception {
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        TransactionInfo txInfo = new TransactionInfo();
+        txInfo.setPropagation(Propagation.REQUIRED);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         Assertions.assertEquals(tx.getStatus(), GlobalStatus.UnKnown);
         Assertions.assertNull(tx.getXid());
     }
@@ -111,7 +116,9 @@ public class APITest {
      */
     @Test
     public void testBegin() throws Exception {
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        TransactionInfo txInfo = new TransactionInfo();
+        txInfo.setPropagation(Propagation.REQUIRED);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         tx.begin();
         Assertions.assertEquals(tx.getStatus(), GlobalStatus.Begin);
         Assertions.assertNotNull(tx.getXid());
@@ -201,13 +208,17 @@ public class APITest {
     @Test
     public void testGlobalReport() throws Exception {
         RootContext.bind(DEFAULT_XID);
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
+        TransactionInfo txInfo = new TransactionInfo();
+        txInfo.setPropagation(Propagation.REQUIRED);
+        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         tx.globalReport(tx.getStatus());
 
         Assertions.assertThrows(IllegalStateException.class, () ->  tx.globalReport(null));
         Assertions.assertThrows(IllegalStateException.class, () -> {
             RootContext.unbind();
-            GlobalTransaction tx2 = GlobalTransactionContext.getCurrentOrCreate();
+            TransactionInfo txInfo2 = new TransactionInfo();
+            txInfo2.setPropagation(Propagation.REQUIRED);
+            GlobalTransaction tx2 = GlobalTransactionContext.getCurrentOrCreate(txInfo2);
             tx2.globalReport(tx2.getStatus());
         });
 
