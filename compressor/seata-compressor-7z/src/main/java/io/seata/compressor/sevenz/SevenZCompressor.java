@@ -23,7 +23,7 @@ import io.seata.core.compressor.Compressor;
  *
  * @author ph3636
  */
-@LoadLevel(name = "7Z")
+@LoadLevel(name = "SEVENZ")
 public class SevenZCompressor implements Compressor {
 
     @Override

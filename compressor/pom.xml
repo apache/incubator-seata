@@ -17,6 +17,7 @@
         <module>seata-compressor-gzip</module>
         <module>seata-compressor-zip</module>
         <module>seata-compressor-7z</module>
+        <module>seata-compressor-bzip2</module>
     </modules>
 
 

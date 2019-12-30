@@ -33,7 +33,17 @@ public enum CompressorType {
     /**
      * The zip.
      */
-    ZIP((byte) 2);
+    ZIP((byte) 2),
+
+    /**
+     * The sevenz.
+     */
+    SEVENZ((byte) 3),
+
+    /**
+     * The bzip2.
+     */
+    BZIP2((byte) 4);
 
     private final byte code;
 
