@@ -15,6 +15,7 @@
  */
 package io.seata.spring.annotation;
 
+import io.seata.tm.api.Propagation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,7 @@ public class BusinessImpl implements Business {
     private static final Logger LOGGER = LoggerFactory.getLogger(BusinessImpl.class);
 
     @Override
-    @GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz")
+    @GlobalTransactional(timeoutMills = 300000, name = "busi-doBiz" ,propagation = Propagation.REQUIRED)
     public String doBiz(String msg) {
         LOGGER.info("Business doBiz");
         return "hello " + msg;
