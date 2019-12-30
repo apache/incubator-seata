@@ -33,6 +33,17 @@ import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * The type MulitSql executor.
+ *  ex.
+ *  <pre>
+ *  jdbcTemplate.update("update account_tbl set money = money - ? where user_id = ?;delete from account_tbl where user_id = ?;update account_tbl set money = money - ? where user_id = ?", new Object[] {money, userId,"U10000",money,"U1000"});
+ *  </pre>
+ * @author wangwei.ying
+ *
+ * @param <T> the type parameter
+ * @param <S> the type parameter
+ */
 public class MulitExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
 
