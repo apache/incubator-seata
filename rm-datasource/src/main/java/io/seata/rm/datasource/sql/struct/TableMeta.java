@@ -15,6 +15,9 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
+import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.util.CollectionUtils;
+import io.seata.rm.datasource.ColumnUtils;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -22,10 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.util.CollectionUtils;
-import io.seata.rm.datasource.ColumnUtils;
 
 /**
  * The type Table meta.
@@ -157,6 +156,7 @@ public class TableMeta {
 
     /**
      * Gets add escape pk name.
+     *
      * @param dbType
      * @return
      */

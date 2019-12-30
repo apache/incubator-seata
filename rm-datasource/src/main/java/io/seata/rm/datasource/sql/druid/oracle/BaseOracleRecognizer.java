@@ -15,18 +15,16 @@
  */
 package io.seata.rm.datasource.sql.druid.oracle;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
-
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.sql.druid.BaseRecognizer;
 import io.seata.rm.datasource.sql.struct.Null;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author will
@@ -43,8 +41,8 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
     }
 
     public OracleOutputVisitor createOutputVisitor(final ParametersHolder parametersHolder,
-                                                   final ArrayList<List<Object>> paramAppenderList,
-                                                   final StringBuilder sb) {
+        final ArrayList<List<Object>> paramAppenderList,
+        final StringBuilder sb) {
         OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
             @Override
@@ -66,7 +64,8 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
         return visitor;
     }
 
-    public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {
+    public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder,
+        final ArrayList<List<Object>> paramAppenderList) {
         if (Objects.isNull(where)) {
             return StringUtils.EMPTY;
         }

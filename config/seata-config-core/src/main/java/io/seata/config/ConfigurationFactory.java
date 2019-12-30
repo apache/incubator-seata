@@ -99,8 +99,8 @@ public final class ConfigurationFactory {
             configTypeName = CURRENT_FILE_INSTANCE.getConfig(
                     ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
                 + ConfigurationKeys.FILE_ROOT_TYPE);
-            //没有则默认为file
-            if(StringUtils.isEmpty(configTypeName)) {
+            //no has  ,so  defalut file
+            if (StringUtils.isEmpty(configTypeName)) {
                 configTypeName = ConfigType.File.name();
             }
             configType = ConfigType.getType(configTypeName);

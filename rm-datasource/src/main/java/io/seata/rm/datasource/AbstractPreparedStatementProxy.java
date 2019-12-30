@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource;
 
+import io.seata.rm.datasource.sql.struct.Null;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -36,8 +37,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
-import io.seata.rm.datasource.sql.struct.Null;
 
 /**
  * The type Abstract prepared statement proxy.
@@ -65,11 +64,11 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
      *
      * @param connectionProxy the connection proxy
      * @param targetStatement the target statement
-     * @param targetSQL       the target sql
+     * @param targetSQL the target sql
      * @throws SQLException the sql exception
      */
     public AbstractPreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement,
-                                          String targetSQL) throws SQLException {
+        String targetSQL) throws SQLException {
         super(connectionProxy, targetStatement, targetSQL);
         initParameterHolder();
     }
@@ -101,7 +100,7 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
      * Sets param by index.
      *
      * @param index the index
-     * @param x     the x
+     * @param x the x
      */
     protected void setParamByIndex(int index, Object x) {
         parameters[--index].add(x);

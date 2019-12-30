@@ -16,10 +16,8 @@
 package io.seata.rm.datasource.undo;
 
 import com.alibaba.druid.util.JdbcConstants;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -40,7 +38,7 @@ public class UndoExecutorFactory {
     /**
      * Gets undo executor.
      *
-     * @param dbType     the db type
+     * @param dbType the db type
      * @param sqlUndoLog the sql undo log
      * @return the undo executor
      */

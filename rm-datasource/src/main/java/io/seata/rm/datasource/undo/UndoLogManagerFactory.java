@@ -19,7 +19,6 @@ import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import io.seata.rm.datasource.undo.oracle.OracleUndoLogManager;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,7 +34,8 @@ public final class UndoLogManagerFactory {
         UNDO_LOG_MANAGER_MAP.put(JdbcConstants.ORACLE, new OracleUndoLogManager());
     }
 
-    private UndoLogManagerFactory() {}
+    private UndoLogManagerFactory() {
+    }
 
     public static UndoLogManager getUndoLogManager(String dbType) {
         UndoLogManager undoLogManager = UNDO_LOG_MANAGER_MAP.get(dbType);

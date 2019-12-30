@@ -24,7 +24,6 @@ import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,7 +59,7 @@ public class MySQLUndoUpdateExecutor extends AbstractUndoExecutor {
             .map(field -> keywordChecker.checkAndReplace(field.getName()) + " = ?")
             .collect(Collectors.joining(", "));
         return String.format(UPDATE_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
-                             updateColumns, keywordChecker.checkAndReplace(pkField.getName()));
+            updateColumns, keywordChecker.checkAndReplace(pkField.getName()));
     }
 
     /**

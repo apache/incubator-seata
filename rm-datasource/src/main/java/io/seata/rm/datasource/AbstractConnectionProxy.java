@@ -21,7 +21,6 @@ import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
-
 import java.sql.Array;
 import java.sql.Blob;
 import java.sql.CallableStatement;
@@ -61,7 +60,7 @@ public abstract class AbstractConnectionProxy implements Connection {
     /**
      * Instantiates a new Abstract connection proxy.
      *
-     * @param dataSourceProxy  the data source proxy
+     * @param dataSourceProxy the data source proxy
      * @param targetConnection the target connection
      */
     public AbstractConnectionProxy(DataSourceProxy dataSourceProxy, Connection targetConnection) {
@@ -112,8 +111,8 @@ public abstract class AbstractConnectionProxy implements Connection {
             if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
                 String tableName = ColumnUtils.delEscape(sqlRecognizer.getTableName(), dbType);
                 TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(getDataSourceProxy()).getTableMeta(getTargetConnection(),
-                    tableName,getDataSourceProxy().getResourceId());
-                targetPreparedStatement = getTargetConnection().prepareStatement(sql, new String[]{tableMeta.getPkName()});
+                    tableName, getDataSourceProxy().getResourceId());
+                targetPreparedStatement = getTargetConnection().prepareStatement(sql, new String[] {tableMeta.getPkName()});
             }
         }
         if (targetPreparedStatement == null) {
@@ -205,9 +204,9 @@ public abstract class AbstractConnectionProxy implements Connection {
 
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency)
-            throws SQLException {
+        throws SQLException {
         PreparedStatement preparedStatement = targetConnection.prepareStatement(sql, resultSetType,
-                resultSetConcurrency);
+            resultSetConcurrency);
         return new PreparedStatementProxy(this, preparedStatement, sql);
     }
 
@@ -263,23 +262,23 @@ public abstract class AbstractConnectionProxy implements Connection {
 
     @Override
     public Statement createStatement(int resultSetType, int resultSetConcurrency, int resultSetHoldability)
-            throws SQLException {
+        throws SQLException {
         Statement statement = targetConnection.createStatement(resultSetType, resultSetConcurrency,
-                resultSetHoldability);
+            resultSetHoldability);
         return new StatementProxy<Statement>(this, statement);
     }
 
     @Override
     public PreparedStatement prepareStatement(String sql, int resultSetType, int resultSetConcurrency,
-                                              int resultSetHoldability) throws SQLException {
+        int resultSetHoldability) throws SQLException {
         PreparedStatement preparedStatement = targetConnection.prepareStatement(sql, resultSetType,
-                resultSetConcurrency, resultSetHoldability);
+            resultSetConcurrency, resultSetHoldability);
         return new PreparedStatementProxy(this, preparedStatement, sql);
     }
 
     @Override
     public CallableStatement prepareCall(String sql, int resultSetType, int resultSetConcurrency,
-                                         int resultSetHoldability) throws SQLException {
+        int resultSetHoldability) throws SQLException {
         RootContext.assertNotInGlobalTransaction();
         return targetConnection.prepareCall(sql, resultSetType, resultSetConcurrency, resultSetHoldability);
     }

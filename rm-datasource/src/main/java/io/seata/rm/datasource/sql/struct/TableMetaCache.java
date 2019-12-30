@@ -24,12 +24,11 @@ import java.sql.Connection;
  */
 public interface TableMetaCache {
 
-
     /**
      * Gets table meta.
      *
      * @param connection
-     * @param tableName       the table name
+     * @param tableName the table name
      * @param resourceId
      * @return the table meta
      */

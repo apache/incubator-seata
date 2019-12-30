@@ -21,8 +21,6 @@ import io.seata.rm.datasource.undo.UndoExecutorHolder;
 
 /**
  * The Type MySQLUndoExecutorHolder
- *
- * @author: Zhibei Hao
  */
 public class MySQLUndoExecutorHolder implements UndoExecutorHolder {
     private static final String MYSQL = "mysql";

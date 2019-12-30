@@ -21,8 +21,6 @@ import io.seata.rm.datasource.undo.UndoExecutorHolder;
 
 /**
  * The Type OracleUndoExecutorHolder
- *
- * @author: Zhibei Hao
  */
 public class OracleUndoExecutorHolder implements UndoExecutorHolder {
     private static final String ORACLE = "oracle";

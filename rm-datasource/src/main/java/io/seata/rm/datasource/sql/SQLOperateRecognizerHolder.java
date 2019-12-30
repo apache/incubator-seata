@@ -19,8 +19,6 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 
 /**
  * The interface SQLOperateRecognizerHolder
- *
- * @author: Zhibei Hao
  */
 public interface SQLOperateRecognizerHolder {
 

@@ -29,17 +29,17 @@ import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialClob;
-import java.sql.JDBCType;
 import java.sql.Connection;
+import java.sql.JDBCType;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialClob;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Abstract undo executor.
@@ -65,7 +65,7 @@ public abstract class AbstractUndoExecutor {
      * Switch of undo data validation
      */
     public static final boolean IS_UNDO_DATA_VALIDATION_ENABLE = ConfigurationFactory.getInstance()
-            .getBoolean(ConfigurationKeys.TRANSACTION_UNDO_DATA_VALIDATION, true);
+        .getBoolean(ConfigurationKeys.TRANSACTION_UNDO_DATA_VALIDATION, true);
 
     /**
      * The Sql undo log.
@@ -146,9 +146,9 @@ public abstract class AbstractUndoExecutor {
     /**
      * Undo prepare.
      *
-     * @param undoPST    the undo pst
+     * @param undoPST the undo pst
      * @param undoValues the undo values
-     * @param pkValue    the pk value
+     * @param pkValue the pk value
      * @throws SQLException the sql exception
      */
     protected void undoPrepare(PreparedStatement undoPST, ArrayList<Field> undoValues, Field pkValue)
@@ -275,7 +275,7 @@ public abstract class AbstractUndoExecutor {
         // build check sql
         String dbType = getDbType(conn);
         String checkSQL = String.format(CHECK_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), dbType),
-                tableMeta.getEscapePkName(dbType), replace.substring(0, replace.length() - 1));
+            tableMeta.getEscapePkName(dbType), replace.substring(0, replace.length() - 1));
 
         PreparedStatement statement = null;
         ResultSet checkSet = null;
@@ -318,6 +318,7 @@ public abstract class AbstractUndoExecutor {
 
     /**
      * Get db type
+     *
      * @param conn the connection
      * @return the db type
      * @throws SQLException

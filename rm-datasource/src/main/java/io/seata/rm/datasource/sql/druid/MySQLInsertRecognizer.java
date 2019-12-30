@@ -15,9 +15,6 @@
  */
 package io.seata.rm.datasource.sql.druid;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
@@ -29,12 +26,13 @@ import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.ast.statement.MySqlInsertStatement;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
-
 import io.seata.rm.datasource.sql.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.struct.Null;
 import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The type My sql insert recognizer.
@@ -49,11 +47,11 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
      * Instantiates a new My sql insert recognizer.
      *
      * @param originalSQL the original sql
-     * @param ast         the ast
+     * @param ast the ast
      */
     public MySQLInsertRecognizer(String originalSQL, SQLStatement ast) {
         super(originalSQL);
-        this.ast = (MySqlInsertStatement)ast;
+        this.ast = (MySqlInsertStatement) ast;
     }
 
     @Override
@@ -91,7 +89,7 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
         List<String> list = new ArrayList<>(columnSQLExprs.size());
         for (SQLExpr expr : columnSQLExprs) {
             if (expr instanceof SQLIdentifierExpr) {
-                list.add(((SQLIdentifierExpr)expr).getName());
+                list.add(((SQLIdentifierExpr) expr).getName());
             } else {
                 throw new SQLParsingException("Unknown SQLExpr: " + expr.getClass() + " " + expr);
             }
@@ -111,9 +109,9 @@ public class MySQLInsertRecognizer extends BaseMySQLRecognizer implements SQLIns
                 if (expr instanceof SQLNullExpr) {
                     row.add(Null.get());
                 } else if (expr instanceof SQLValuableExpr) {
-                    row.add(((SQLValuableExpr)expr).getValue());
+                    row.add(((SQLValuableExpr) expr).getValue());
                 } else if (expr instanceof SQLVariantRefExpr) {
-                    row.add(((SQLVariantRefExpr)expr).getName());
+                    row.add(((SQLVariantRefExpr) expr).getName());
                 } else if (expr instanceof SQLMethodInvokeExpr) {
                     row.add(new SqlMethodExpr());
                 } else {

@@ -51,25 +51,25 @@ public class ColumnMeta {
     @Override
     public String toString() {
         return "ColumnMeta{" +
-                "tableCat='" + tableCat + '\'' +
-                ", tableSchemaName='" + tableSchemaName + '\'' +
-                ", tableName='" + tableName + '\'' +
-                ", columnName='" + columnName + '\'' +
-                ", dataType=" + dataType +
-                ", dataTypeName='" + dataTypeName + '\'' +
-                ", columnSize=" + columnSize +
-                ", decimalDigits=" + decimalDigits +
-                ", numPrecRadix=" + numPrecRadix +
-                ", nullAble=" + nullAble +
-                ", remarks='" + remarks + '\'' +
-                ", columnDef='" + columnDef + '\'' +
-                ", sqlDataType=" + sqlDataType +
-                ", sqlDatetimeSub=" + sqlDatetimeSub +
-                ", charOctetLength=" + charOctetLength +
-                ", ordinalPosition=" + ordinalPosition +
-                ", isNullAble='" + isNullAble + '\'' +
-                ", isAutoincrement='" + isAutoincrement + '\'' +
-                '}';
+            "tableCat='" + tableCat + '\'' +
+            ", tableSchemaName='" + tableSchemaName + '\'' +
+            ", tableName='" + tableName + '\'' +
+            ", columnName='" + columnName + '\'' +
+            ", dataType=" + dataType +
+            ", dataTypeName='" + dataTypeName + '\'' +
+            ", columnSize=" + columnSize +
+            ", decimalDigits=" + decimalDigits +
+            ", numPrecRadix=" + numPrecRadix +
+            ", nullAble=" + nullAble +
+            ", remarks='" + remarks + '\'' +
+            ", columnDef='" + columnDef + '\'' +
+            ", sqlDataType=" + sqlDataType +
+            ", sqlDatetimeSub=" + sqlDatetimeSub +
+            ", charOctetLength=" + charOctetLength +
+            ", ordinalPosition=" + ordinalPosition +
+            ", isNullAble='" + isNullAble + '\'' +
+            ", isAutoincrement='" + isAutoincrement + '\'' +
+            '}';
     }
 
     /**
@@ -110,6 +110,7 @@ public class ColumnMeta {
 
     /**
      * Gets table schema name
+     *
      * @return
      */
     protected String getTableSchemaName() {
@@ -125,9 +126,9 @@ public class ColumnMeta {
         this.tableName = tableName;
     }
 
-
     /**
      * Gets table name
+     *
      * @return
      */
     protected String getTableName() {

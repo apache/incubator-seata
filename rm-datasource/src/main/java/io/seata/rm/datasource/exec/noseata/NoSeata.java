@@ -16,12 +16,11 @@
 package io.seata.rm.datasource.exec.noseata;
 
 import io.seata.rm.datasource.sql.struct.TableRecords;
-
 import java.sql.SQLException;
 
 public interface NoSeata {
-    public TableRecords beforeImage() throws SQLException ;
+    public TableRecords beforeImage() throws SQLException;
 
-    public TableRecords afterImage(TableRecords beforeImage) throws SQLException ;
+    public TableRecords afterImage(TableRecords beforeImage) throws SQLException;
 
 }

@@ -15,46 +15,32 @@
  */
 package io.seata.rm.datasource.exec.noseata;
 
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.exec.AbstractDMLBaseExecutor;
 import io.seata.rm.datasource.exec.DeleteExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
-import io.seata.rm.datasource.sql.SQLDeleteRecognizer;
 import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import io.seata.rm.datasource.undo.KeywordChecker;
-import io.seata.rm.datasource.undo.KeywordCheckerFactory;
-import org.apache.commons.lang.StringUtils;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * The type Delete executor.
  *
- * @author sharajava
- *
  * @param <T> the type parameter
  * @param <S> the type parameter
+ * @author sharajava
  */
-public class DeleteExecutorNoSeata<T, S extends Statement> extends DeleteExecutor<T, S> implements NoSeata{
+public class DeleteExecutorNoSeata<T, S extends Statement> extends DeleteExecutor<T, S> implements NoSeata {
 
     /**
      * Instantiates a new Delete executor.
      *
-     * @param statementProxy    the statement proxy
+     * @param statementProxy the statement proxy
      * @param statementCallback the statement callback
-     * @param sqlRecognizer     the sql recognizer
+     * @param sqlRecognizer the sql recognizer
      */
     public DeleteExecutorNoSeata(StatementProxy statementProxy, StatementCallback statementCallback,
-                                 SQLRecognizer sqlRecognizer) {
+        SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 

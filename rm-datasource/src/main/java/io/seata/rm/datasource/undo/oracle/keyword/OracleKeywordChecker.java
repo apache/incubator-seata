@@ -17,7 +17,6 @@ package io.seata.rm.datasource.undo.oracle.keyword;
 
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.undo.KeywordChecker;
-
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -507,8 +506,7 @@ public class OracleKeywordChecker implements KeywordChecker {
     }
 
     @Override
-    public String getDbType()
-    {
+    public String getDbType() {
         return JdbcConstants.ORACLE;
     }
 }

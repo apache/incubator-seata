@@ -15,13 +15,12 @@
  */
 package io.seata.rm.datasource;
 
+import io.seata.rm.datasource.exec.ExecuteTemplate;
+import io.seata.rm.datasource.exec.StatementCallback;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-
-import io.seata.rm.datasource.exec.ExecuteTemplate;
-import io.seata.rm.datasource.exec.StatementCallback;
 
 /**
  * The type Prepared statement proxy.
@@ -41,11 +40,11 @@ public class PreparedStatementProxy extends AbstractPreparedStatementProxy
      *
      * @param connectionProxy the connection proxy
      * @param targetStatement the target statement
-     * @param targetSQL       the target sql
+     * @param targetSQL the target sql
      * @throws SQLException the sql exception
      */
     public PreparedStatementProxy(AbstractConnectionProxy connectionProxy, PreparedStatement targetStatement,
-                                  String targetSQL) throws SQLException {
+        String targetSQL) throws SQLException {
         super(connectionProxy, targetStatement, targetSQL);
     }
 

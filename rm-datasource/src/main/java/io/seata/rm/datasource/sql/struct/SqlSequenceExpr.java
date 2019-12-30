@@ -16,8 +16,8 @@
 package io.seata.rm.datasource.sql.struct;
 
 /**
- * TODO
- * sql sequence expression
+ * TODO sql sequence expression
+ *
  * @author jsbxyyx
  */
 public class SqlSequenceExpr {
@@ -25,7 +25,8 @@ public class SqlSequenceExpr {
     private String sequence;
     private String function;
 
-    public SqlSequenceExpr() {}
+    public SqlSequenceExpr() {
+    }
 
     public SqlSequenceExpr(String sequence, String function) {
         this.sequence = sequence;

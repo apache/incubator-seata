@@ -17,8 +17,6 @@ package io.seata.rm.datasource.undo.parser;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import java.io.IOException;
-
 import io.protostuff.Input;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.Output;
@@ -33,7 +31,6 @@ import io.protostuff.runtime.RuntimeSchema;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
-
 import java.io.IOException;
 
 /**
@@ -45,7 +42,7 @@ import java.io.IOException;
 public class ProtostuffUndoLogParser implements UndoLogParser {
 
     public static final String NAME = "protostuff";
-    
+
     private final static DefaultIdStrategy ID_STRATEGY = ((DefaultIdStrategy) RuntimeEnv.ID_STRATEGY);
 
     static {
@@ -89,11 +86,10 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
         return fooParsed;
     }
 
-
     @Override
     public String writeValueAsString(BranchUndoLog branchUndoLog) {
         try {
-            String context =  JSON.toJSONString(branchUndoLog, SerializerFeature.WriteDateUseDateFormat);
+            String context = JSON.toJSONString(branchUndoLog, SerializerFeature.WriteDateUseDateFormat);
             return context;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -102,7 +98,7 @@ public class ProtostuffUndoLogParser implements UndoLogParser {
 
     /**
      * Delegate for java.sql.Timestamp
-     * 
+     *
      * @author zhangsen
      */
     public static class TimestampDelegate implements Delegate<java.sql.Timestamp> {

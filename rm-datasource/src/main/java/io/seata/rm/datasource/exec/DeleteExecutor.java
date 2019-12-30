@@ -15,12 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
-
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLDeleteRecognizer;
 import io.seata.rm.datasource.sql.SQLRecognizer;
@@ -28,27 +22,31 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
 import org.apache.commons.lang.StringUtils;
 
 /**
  * The type Delete executor.
  *
- * @author sharajava
- *
  * @param <T> the type parameter
  * @param <S> the type parameter
+ * @author sharajava
  */
 public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
     /**
      * Instantiates a new Delete executor.
      *
-     * @param statementProxy    the statement proxy
+     * @param statementProxy the statement proxy
      * @param statementCallback the statement callback
-     * @param sqlRecognizer     the sql recognizer
+     * @param sqlRecognizer the sql recognizer
      */
     public DeleteExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
-                          SQLRecognizer sqlRecognizer) {
+        SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
@@ -61,7 +59,8 @@ public class DeleteExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         return buildTableRecords(tmeta, selectSQL, paramAppenderList);
     }
 
-    private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta, ArrayList<List<Object>> paramAppenderList) {
+    private String buildBeforeImageSQL(SQLDeleteRecognizer visitor, TableMeta tableMeta,
+        ArrayList<List<Object>> paramAppenderList) {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(getDbType());
         String whereCondition = buildWhereCondition(visitor, paramAppenderList);
         StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());

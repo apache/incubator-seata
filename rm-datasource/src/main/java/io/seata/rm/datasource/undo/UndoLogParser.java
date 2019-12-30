@@ -25,14 +25,14 @@ public interface UndoLogParser {
 
     /**
      * Get the name of parser;
-     * 
+     *
      * @return the name of parser
      */
     String getName();
 
     /**
      * Get default context of this parser
-     * 
+     *
      * @return the default content if undo log is empty
      */
     byte[] getDefaultContent();

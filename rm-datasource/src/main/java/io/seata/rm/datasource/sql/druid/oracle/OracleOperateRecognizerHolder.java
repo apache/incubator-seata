@@ -17,14 +17,11 @@ package io.seata.rm.datasource.sql.druid.oracle;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
-
 import io.seata.rm.datasource.sql.SQLOperateRecognizerHolder;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 
 /**
  * The Type OracleOperateRecognizerHolder
- *
- * @author: Zhibei Hao
  */
 public class OracleOperateRecognizerHolder implements SQLOperateRecognizerHolder {
     private static final String ORACLE = "oracle";

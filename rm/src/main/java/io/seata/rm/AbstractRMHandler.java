@@ -73,6 +73,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
 
     /**
      * delete undo log
+     *
      * @param request the request
      */
     @Override
@@ -81,7 +82,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
     /**
      * Do branch commit.
      *
-     * @param request  the request
+     * @param request the request
      * @param response the response
      * @throws TransactionException the transaction exception
      */
@@ -108,7 +109,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
     /**
      * Do branch rollback.
      *
-     * @param request  the request
+     * @param request the request
      * @param response the response
      * @throws TransactionException the transaction exception
      */
@@ -143,7 +144,7 @@ public abstract class AbstractRMHandler extends AbstractExceptionHandler
         if (!(request instanceof AbstractTransactionRequestToRM)) {
             throw new IllegalArgumentException();
         }
-        AbstractTransactionRequestToRM transactionRequest = (AbstractTransactionRequestToRM)request;
+        AbstractTransactionRequestToRM transactionRequest = (AbstractTransactionRequestToRM) request;
         transactionRequest.setRMInboundMessageHandler(this);
 
         return transactionRequest.handle(context);

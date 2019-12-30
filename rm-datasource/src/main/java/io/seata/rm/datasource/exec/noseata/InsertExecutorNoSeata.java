@@ -15,26 +15,13 @@
  */
 package io.seata.rm.datasource.exec.noseata;
 
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.exec.InsertExecutor;
 import io.seata.rm.datasource.exec.StatementCallback;
-import io.seata.rm.datasource.sql.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.rm.datasource.sql.struct.Null;
-import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * The type Insert executor.
@@ -42,27 +29,27 @@ import java.util.Map;
  * @param <T> the type parameter
  * @param <S> the type parameter
  * @author yuanguoyao
- * @date 2019-03-21 21:30:02
  */
-public class InsertExecutorNoSeata<T, S extends Statement> extends InsertExecutor<T, S> implements NoSeata{
+public class InsertExecutorNoSeata<T, S extends Statement> extends InsertExecutor<T, S> implements NoSeata {
 
     private StatementProxy statementProxy;
+
     /**
      * Instantiates a new Insert executor.
      *
-     * @param statementProxy    the statement proxy
+     * @param statementProxy the statement proxy
      * @param statementCallback the statement callback
-     * @param sqlRecognizer     the sql recognizer
+     * @param sqlRecognizer the sql recognizer
      */
     public InsertExecutorNoSeata(StatementProxy statementProxy, StatementCallback statementCallback,
-                          SQLRecognizer sqlRecognizer) {
+        SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
         this.statementProxy = statementProxy;
     }
 
     @Override
     public TableRecords beforeImage() throws SQLException {
-      return super.beforeImage();
+        return super.beforeImage();
     }
 
     @Override

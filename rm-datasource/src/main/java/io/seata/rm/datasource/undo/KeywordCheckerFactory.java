@@ -28,7 +28,7 @@ import java.util.Map;
  */
 public class KeywordCheckerFactory {
 
-    private static volatile Map<String,KeywordChecker> keywordCheckerMap;
+    private static volatile Map<String, KeywordChecker> keywordCheckerMap;
 
     /**
      * get keyword checker

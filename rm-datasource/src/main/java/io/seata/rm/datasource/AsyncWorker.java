@@ -26,9 +26,6 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.ResourceManagerInbound;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.undo.UndoLogManagerFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -42,6 +39,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static io.seata.core.constants.ConfigurationKeys.CLIENT_ASYNC_COMMIT_BUFFER_LIMIT;
 
@@ -63,14 +62,14 @@ public class AsyncWorker implements ResourceManagerInbound {
         /**
          * Instantiates a new Phase 2 context.
          *
-         * @param branchType      the branchType
-         * @param xid             the xid
-         * @param branchId        the branch id
-         * @param resourceId      the resource id
+         * @param branchType the branchType
+         * @param xid the xid
+         * @param branchId the branch id
+         * @param resourceId the resource id
          * @param applicationData the application data
          */
         public Phase2Context(BranchType branchType, String xid, long branchId, String resourceId,
-                             String applicationData) {
+            String applicationData) {
             this.xid = xid;
             this.branchId = branchId;
             this.resourceId = resourceId;
@@ -111,7 +110,7 @@ public class AsyncWorker implements ResourceManagerInbound {
 
     @Override
     public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
-                                     String applicationData) throws TransactionException {
+        String applicationData) throws TransactionException {
         if (!ASYNC_COMMIT_BUFFER.offer(new Phase2Context(branchType, xid, branchId, resourceId, applicationData))) {
             LOGGER.warn("Async commit buffer is FULL. Rejected branch [" + branchId + "/" + xid
                 + "] will be handled by housekeeping later.");
@@ -162,7 +161,7 @@ public class AsyncWorker implements ResourceManagerInbound {
             DataSourceProxy dataSourceProxy;
             try {
                 try {
-                    DataSourceManager resourceManager = (DataSourceManager)DefaultResourceManager.get()
+                    DataSourceManager resourceManager = (DataSourceManager) DefaultResourceManager.get()
                         .getResourceManager(BranchType.AT);
                     dataSourceProxy = resourceManager.get(entry.getKey());
                     if (dataSourceProxy == null) {
@@ -217,7 +216,7 @@ public class AsyncWorker implements ResourceManagerInbound {
 
     @Override
     public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
-                                       String applicationData) throws TransactionException {
+        String applicationData) throws TransactionException {
         throw new NotSupportYetException();
 
     }

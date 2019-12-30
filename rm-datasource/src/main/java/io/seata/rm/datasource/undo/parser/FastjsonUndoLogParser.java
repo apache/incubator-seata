@@ -17,7 +17,6 @@ package io.seata.rm.datasource.undo.parser;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.seata.common.Constants;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
@@ -59,12 +58,11 @@ public class FastjsonUndoLogParser implements UndoLogParser {
     @Override
     public String writeValueAsString(BranchUndoLog branchUndoLog) {
         try {
-            String context =  JSON.toJSONString(branchUndoLog, SerializerFeature.WriteDateUseDateFormat);
+            String context = JSON.toJSONString(branchUndoLog, SerializerFeature.WriteDateUseDateFormat);
             return context;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
-
 
 }

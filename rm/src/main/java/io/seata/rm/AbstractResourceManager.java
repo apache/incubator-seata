@@ -46,16 +46,18 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
     /**
      * registry branch record
+     *
      * @param branchType the branch type
      * @param resourceId the resource id
-     * @param clientId   the client id
-     * @param xid        the xid
-     * @param lockKeys   the lock keys
+     * @param clientId the client id
+     * @param xid the xid
+     * @param lockKeys the lock keys
      * @return
      * @throws TransactionException
      */
     @Override
-    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid, String applicationData, String lockKeys) throws TransactionException {
+    public Long branchRegister(BranchType branchType, String resourceId, String clientId, String xid,
+        String applicationData, String lockKeys) throws TransactionException {
         try {
             BranchRegisterRequest request = new BranchRegisterRequest();
             request.setXid(xid);
@@ -78,15 +80,17 @@ public abstract class AbstractResourceManager implements ResourceManager {
 
     /**
      * report branch status
-     * @param branchType      the branch type
-     * @param xid             the xid
-     * @param branchId        the branch id
-     * @param status          the status
+     *
+     * @param branchType the branch type
+     * @param xid the xid
+     * @param branchId the branch id
+     * @param status the status
      * @param applicationData the application data
      * @throws TransactionException
      */
     @Override
-    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status, String applicationData) throws TransactionException {
+    public void branchReport(BranchType branchType, String xid, long branchId, BranchStatus status,
+        String applicationData) throws TransactionException {
         try {
             BranchReportRequest request = new BranchReportRequest();
             request.setXid(xid);
@@ -106,7 +110,8 @@ public abstract class AbstractResourceManager implements ResourceManager {
     }
 
     @Override
-    public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys) throws TransactionException {
+    public boolean lockQuery(BranchType branchType, String resourceId, String xid,
+        String lockKeys) throws TransactionException {
         return false;
     }
 

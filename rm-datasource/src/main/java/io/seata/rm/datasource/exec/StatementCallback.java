@@ -21,10 +21,9 @@ import java.sql.Statement;
 /**
  * The interface Statement callback.
  *
- * @author sharajava
- *
  * @param <T> the type parameter
  * @param <S> the type parameter
+ * @author sharajava
  */
 public interface StatementCallback<T, S extends Statement> {
 
@@ -32,7 +31,7 @@ public interface StatementCallback<T, S extends Statement> {
      * Execute t.
      *
      * @param statement the statement
-     * @param args      the args
+     * @param args the args
      * @return the t
      * @throws SQLException the sql exception
      */

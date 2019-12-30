@@ -20,13 +20,12 @@ import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.concurrent.Callable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Abstract dml base executor.
@@ -42,12 +41,12 @@ public abstract class AbstractDMLBaseExecutor<T, S extends Statement> extends Ba
     /**
      * Instantiates a new Abstract dml base executor.
      *
-     * @param statementProxy    the statement proxy
+     * @param statementProxy the statement proxy
      * @param statementCallback the statement callback
-     * @param sqlRecognizer     the sql recognizer
+     * @param sqlRecognizer the sql recognizer
      */
     public AbstractDMLBaseExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
-                                   SQLRecognizer sqlRecognizer) {
+        SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 

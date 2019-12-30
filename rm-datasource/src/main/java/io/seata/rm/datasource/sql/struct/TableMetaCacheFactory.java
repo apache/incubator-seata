@@ -26,7 +26,8 @@ import io.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache;
  */
 public class TableMetaCacheFactory {
 
-    private TableMetaCacheFactory() {}
+    private TableMetaCacheFactory() {
+    }
 
     public static TableMetaCache getTableMetaCache(DataSourceProxy dataSourceProxy) {
         return getTableMetaCache(dataSourceProxy.getDbType());
@@ -35,7 +36,7 @@ public class TableMetaCacheFactory {
     public static TableMetaCache getTableMetaCache(String dbType) {
         if (dbType.equals(JdbcConstants.MYSQL)) {
             return MysqlTableMetaCache.getInstance();
-        } else  if (dbType.equals(JdbcConstants.ORACLE)) {
+        } else if (dbType.equals(JdbcConstants.ORACLE)) {
             return OracleTableMetaCache.getInstance();
         } else {
             throw new NotSupportYetException("not support dbType[" + dbType + "]");

@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.sql;
 
 import io.seata.common.loader.EnhancedServiceLoader;
-
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +23,6 @@ import java.util.Map;
 
 /**
  * The SQLOperateRecognizerHolderFactory
- *
- * @author: Zhibei Hao
  */
 public class SQLOperateRecognizerHolderFactory {
 

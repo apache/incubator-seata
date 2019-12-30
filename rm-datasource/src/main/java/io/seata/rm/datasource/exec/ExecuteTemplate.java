@@ -15,29 +15,26 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Arrays;
-
 import co.faao.plugin.starter.dubbo.util.ThreadLocalTools;
 import co.faao.plugin.starter.seata.util.ElasticsearchUtil;
 import co.faao.plugin.starter.seata.util.SeataXidWorker;
-import io.seata.config.ConfigurationFactory;
-import io.seata.rm.datasource.exec.noseata.NoSeata;
-import io.seata.rm.datasource.exec.noseata.DeleteExecutorNoSeata;
-import io.seata.rm.datasource.exec.noseata.InsertExecutorNoSeata;
-import io.seata.rm.datasource.exec.noseata.UpdateExecutorNoSeata;
-
 import io.seata.core.constants.Seata;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.exec.noseata.DeleteExecutorNoSeata;
+import io.seata.rm.datasource.exec.noseata.InsertExecutorNoSeata;
+import io.seata.rm.datasource.exec.noseata.NoSeata;
+import io.seata.rm.datasource.exec.noseata.UpdateExecutorNoSeata;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
 import org.apache.commons.lang.time.DateFormatUtils;
 
 /**
@@ -50,51 +47,51 @@ public class ExecuteTemplate {
     /**
      * Execute t.
      *
-     * @param <T>               the type parameter
-     * @param <S>               the type parameter
-     * @param statementProxy    the statement proxy
+     * @param <T> the type parameter
+     * @param <S> the type parameter
+     * @param statementProxy the statement proxy
      * @param statementCallback the statement callback
-     * @param args              the args
+     * @param args the args
      * @return the t
      * @throws SQLException the sql exception
      */
     public static <T, S extends Statement> T execute(StatementProxy<S> statementProxy,
-                                                     StatementCallback<T, S> statementCallback,
-                                                     Object... args) throws SQLException {
+        StatementCallback<T, S> statementCallback,
+        Object... args) throws SQLException {
         return execute(null, statementProxy, statementCallback, args);
     }
 
     /**
      * Execute t.
      *
-     * @param <T>               the type parameter
-     * @param <S>               the type parameter
-     * @param sqlRecognizer     the sql recognizer
-     * @param statementProxy    the statement proxy
+     * @param <T> the type parameter
+     * @param <S> the type parameter
+     * @param sqlRecognizer the sql recognizer
+     * @param statementProxy the statement proxy
      * @param statementCallback the statement callback
-     * @param args              the args
+     * @param args the args
      * @return the t
      * @throws SQLException the sql exception
      */
     public static <T, S extends Statement> T execute(SQLRecognizer sqlRecognizer,
-                                                     StatementProxy<S> statementProxy,
-                                                     StatementCallback<T, S> statementCallback,
-                                                     Object... args) throws SQLException {
-        if(!ElasticsearchUtil.isStarted) {//在启动过程中执行的sql,直接执行。类似flyway执行
+        StatementProxy<S> statementProxy,
+        StatementCallback<T, S> statementCallback,
+        Object... args) throws SQLException {
+        if (!ElasticsearchUtil.isStarted) {//在启动过程中执行的sql,直接执行。类似flyway执行
             // Just work as original statement
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
 
-       //如果配置是seata.enabled=false则关闭分布式事务
-        if (!Seata.EWELL_SEATA_STATE_IS_ON||(!RootContext.inGlobalTransaction() && !RootContext.requireGlobalLock())) {
+        //如果配置是seata.enabled=false则关闭分布式事务
+        if (!Seata.EWELL_SEATA_STATE_IS_ON || (!RootContext.inGlobalTransaction() && !RootContext.requireGlobalLock())) {
             if (sqlRecognizer == null) {
                 try {
                     sqlRecognizer = SQLVisitorFactory.get(statementProxy.getTargetSQL(), statementProxy.getConnectionProxy().getDbType());
                 } catch (Throwable t) {
 
                 }
-             }
-            if (sqlRecognizer != null&&"true".equals(System.getProperty("dataTrace"))) {
+            }
+            if (sqlRecognizer != null && "true".equals(System.getProperty("dataTrace"))) {
                 NoSeata executor = null;
                 switch (sqlRecognizer.getSQLType()) {
                     case INSERT:
@@ -110,7 +107,7 @@ public class ExecuteTemplate {
                         executor = null;
                         break;
                 }
-                if(executor!=null) {
+                if (executor != null) {
                     //保存数据前后镜像
                     TableRecords beforeImage = null;
                     try {
@@ -129,10 +126,10 @@ public class ExecuteTemplate {
                         branchUndoLog.setXid(xid);
                         branchUndoLog.setSqlUndoLogs(new ArrayList<SQLUndoLog>(Arrays.asList(sQLUndoLog)));
                         branchUndoLog.setUserName(ThreadLocalTools.stringThreadLocal.get());
-                        branchUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(),"yyyy-MM-dd HH:mm:ss"));
+                        branchUndoLog.setExecuteDate(DateFormatUtils.format(new java.util.Date(), "yyyy-MM-dd HH:mm:ss"));
                         ElasticsearchUtil.addData(branchUndoLog);
 
-                        if(statementProxy.getConnection().getAutoCommit()) {// 如果不是事务直接提交
+                        if (statementProxy.getConnection().getAutoCommit()) {// 如果不是事务直接提交
                             ElasticsearchUtil.commitData();
                         }
                     } catch (Throwable e) {
@@ -151,8 +148,8 @@ public class ExecuteTemplate {
 
         if (sqlRecognizer == null) {
             sqlRecognizer = SQLVisitorFactory.get(
-                    statementProxy.getTargetSQL(),
-                    statementProxy.getConnectionProxy().getDbType());
+                statementProxy.getTargetSQL(),
+                statementProxy.getConnectionProxy().getDbType());
         }
         Executor<T> executor = null;
         if (sqlRecognizer == null) {
@@ -184,12 +181,13 @@ public class ExecuteTemplate {
                 // Turn other exception into SQLException
                 ex = new SQLException(ex);
             }
-            throw (SQLException)ex;
+            throw (SQLException) ex;
         }
         return rs;
     }
 
-    protected static SQLUndoLog buildUndoItem(SQLRecognizer sqlRecognizer,TableRecords beforeImage, TableRecords afterImage) {
+    protected static SQLUndoLog buildUndoItem(SQLRecognizer sqlRecognizer, TableRecords beforeImage,
+        TableRecords afterImage) {
         SQLType sqlType = sqlRecognizer.getSQLType();
         String tableName = sqlRecognizer.getTableName();
         SQLUndoLog sqlUndoLog = new SQLUndoLog();

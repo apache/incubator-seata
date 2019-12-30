@@ -110,7 +110,7 @@ public abstract class AbstractRpcRemotingClient extends AbstractRpcRemoting
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                if(Seata.EWELL_SEATA_STATE_IS_ON) {
+                if (Seata.EWELL_SEATA_STATE_IS_ON) {
                     clientChannelManager.reconnect(getTransactionServiceGroup());
                 }
             }

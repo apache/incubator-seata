@@ -17,7 +17,6 @@ package io.seata.rm.datasource.undo.mysql.keyword;
 
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.undo.KeywordChecker;
-
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -1100,7 +1099,6 @@ public class MySQLKeywordChecker implements KeywordChecker {
         }
     }
 
-
     @Override
     public boolean check(String fieldOrTableName) {
         if (keywordSet.contains(fieldOrTableName)) {
@@ -1119,8 +1117,7 @@ public class MySQLKeywordChecker implements KeywordChecker {
     }
 
     @Override
-    public String getDbType()
-    {
+    public String getDbType() {
         return JdbcConstants.MYSQL;
     }
 

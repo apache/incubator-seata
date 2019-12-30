@@ -15,20 +15,19 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.Savepoint;
-import java.sql.Statement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLSelectRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
+import java.sql.Savepoint;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,12 +44,12 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
     /**
      * Instantiates a new Select for update executor.
      *
-     * @param statementProxy    the statement proxy
+     * @param statementProxy the statement proxy
      * @param statementCallback the statement callback
-     * @param sqlRecognizer     the sql recognizer
+     * @param sqlRecognizer the sql recognizer
      */
     public SelectForUpdateExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
-                                   SQLRecognizer sqlRecognizer) {
+        SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
@@ -134,7 +133,7 @@ public class SelectForUpdateExecutor<T, S extends Statement> extends BaseTransac
     }
 
     private String buildSelectSQL(ArrayList<List<Object>> paramAppenderList) {
-        SQLSelectRecognizer recognizer = (SQLSelectRecognizer)sqlRecognizer;
+        SQLSelectRecognizer recognizer = (SQLSelectRecognizer) sqlRecognizer;
         StringBuilder selectSQLAppender = new StringBuilder("SELECT ");
         selectSQLAppender.append(getColumnNameInSQL(getTableMeta().getPkName()));
         selectSQLAppender.append(" FROM ").append(getFromTableInSQL());

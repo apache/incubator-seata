@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.loader.EnhancedServiceLoader;
-
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +23,6 @@ import java.util.Map;
 
 /**
  * The Type UndoExecutorHolderFactory
- *
- * @author: Zhibei Hao
  */
 public class UndoExecutorHolderFactory {
     private static volatile Map<String, UndoExecutorHolder> executorHolderMap;

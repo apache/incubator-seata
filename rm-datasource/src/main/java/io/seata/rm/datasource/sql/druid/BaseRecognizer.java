@@ -21,7 +21,6 @@ import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
 import com.alibaba.druid.sql.ast.expr.SQLExistsExpr;
 import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
 import com.alibaba.druid.sql.visitor.SQLASTVisitor;
-
 import io.seata.rm.datasource.sql.SQLRecognizer;
 
 /**

@@ -24,15 +24,14 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.parser.FastjsonUndoLogParser;
-
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Arrays;
 
 /**
  * The type Data compare utils.
@@ -48,16 +47,17 @@ public class DataCompareUtils {
      * @param f1 the f1
      * @return the Result<Boolean>
      */
-    public static Result<Boolean> isFieldEquals(Field f0, Field f1) {
-        if (f0 == null) {
+    public static Result<Boolean> isFieldEquals(Field f0, Field f1)
+        {
+        if (f0 == null){
             return Result.build(f1 == null);
-        } else {
-            if (f1 == null) {
+        } else{
+            if (f1 == null)  {
                 return Result.build(false);
             } else {
                 if (StringUtils.equalsIgnoreCase(f0.getName(), f1.getName())
                     && f0.getType() == f1.getType()) {
-                    if (f0.getValue() == null) {
+                    if (f0.getValue() == null)  {
                         return Result.build(f1.getValue() == null);
                     } else {
                         if (f1.getValue() == null) {
@@ -103,7 +103,7 @@ public class DataCompareUtils {
      * Is image equals.
      *
      * @param beforeImage the before image
-     * @param afterImage  the after image
+     * @param afterImage the after image
      * @return Result<Boolean>
      */
     public static Result<Boolean> isRecordsEquals(TableRecords beforeImage, TableRecords afterImage) {
@@ -126,13 +126,12 @@ public class DataCompareUtils {
         }
     }
 
-
     /**
      * Is rows equals.
      *
      * @param tableMetaData the table meta data
-     * @param oldRows       the old rows
-     * @param newRows       the new rows
+     * @param oldRows the old rows
+     * @param newRows the new rows
      * @return the Result<Boolean>
      */
     public static Result<Boolean> isRowsEquals(TableMeta tableMetaData, List<Row> oldRows, List<Row> newRows) {
@@ -179,7 +178,7 @@ public class DataCompareUtils {
             for (int j = 0; j < row.getFields().size(); j++) {
                 Field field = row.getFields().get(j);
                 if (field.getName().equalsIgnoreCase(primaryKey)) {
-                    if(field.getType() == -3) {//byte[[]
+                    if (field.getType() == -3) {//byte[[]
                         rowKey = Arrays.toString((byte[]) field.getValue());
                     } else {
                         rowKey = String.valueOf(field.getValue());

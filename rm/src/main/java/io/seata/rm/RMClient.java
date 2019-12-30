@@ -28,7 +28,7 @@ public class RMClient {
     /**
      * Init.
      *
-     * @param applicationId           the application id
+     * @param applicationId the application id
      * @param transactionServiceGroup the transaction service group
      */
     public static void init(String applicationId, String transactionServiceGroup) {

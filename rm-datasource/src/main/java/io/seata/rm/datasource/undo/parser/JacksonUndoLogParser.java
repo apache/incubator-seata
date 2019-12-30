@@ -21,13 +21,13 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
 import com.fasterxml.jackson.core.type.WritableTypeId;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.deser.std.JsonNodeDeserializer;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -40,22 +40,18 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
-
-import java.util.Arrays;
-
-import org.apache.commons.lang.time.DateFormatUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
-
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialClob;
 import javax.sql.rowset.serial.SerialException;
+import org.apache.commons.lang.time.DateFormatUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * The type Json based undo log parser.
@@ -173,23 +169,26 @@ public class JacksonUndoLogParser implements UndoLogParser {
 //            objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
             objectMapper.getSerializerProvider().setNullValueSerializer(new JsonSerializer<Object>() {
                 @Override
-                public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
-                     jgen.writeObject("");// 输出孔字符串
+                public void serialize(Object value, JsonGenerator jgen,
+                    SerializerProvider provider) throws IOException, JsonProcessingException {
+                    jgen.writeObject("");// 输出孔字符串
                 }
             });
             objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
             SimpleModule simpleModule = new SimpleModule();
             simpleModule.addSerializer(Number.class, ToStringSerializer.instance);
             simpleModule.addSerializer(Date.class, ToStringSerializer.instance);
-            simpleModule.addSerializer(TableRecords.EmptyTableRecords.class,new JsonSerializer<Object>() {
+            simpleModule.addSerializer(TableRecords.EmptyTableRecords.class, new JsonSerializer<Object>() {
                 @Override
-                public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
+                public void serialize(Object value, JsonGenerator jgen,
+                    SerializerProvider provider) throws IOException, JsonProcessingException {
                     jgen.writeObject(null);// 直接输出为空字符串
                 }
             });
-            simpleModule.addSerializer(TableMeta.class,new JsonSerializer<Object>() {
+            simpleModule.addSerializer(TableMeta.class, new JsonSerializer<Object>() {
                 @Override
-                public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
+                public void serialize(Object value, JsonGenerator jgen,
+                    SerializerProvider provider) throws IOException, JsonProcessingException {
                     jgen.writeObject("");// 直接输出为空字符串
                 }
             });
@@ -213,13 +212,13 @@ public class JacksonUndoLogParser implements UndoLogParser {
     }
 
     /**
-     * if necessary
-     * extend {@link ArraySerializerBase}
+     * if necessary extend {@link ArraySerializerBase}
      */
     private static class OracleTimestampSerializer extends JsonSerializer<oracle.sql.TIMESTAMP> {
 
         @Override
-        public void serializeWithType(oracle.sql.TIMESTAMP timestamp, JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSerializer) throws IOException {
+        public void serializeWithType(oracle.sql.TIMESTAMP timestamp, JsonGenerator gen, SerializerProvider serializers,
+            TypeSerializer typeSerializer) throws IOException {
             WritableTypeId typeId = typeSerializer.writeTypePrefix(gen, typeSerializer.typeId(timestamp, JsonToken.VALUE_EMBEDDED_OBJECT));
             serialize(timestamp, gen, serializers);
             gen.writeTypeSuffix(typeId);
@@ -237,32 +236,30 @@ public class JacksonUndoLogParser implements UndoLogParser {
     }
 
     /**
-     * if necessary
-     * extend {@link JsonNodeDeserializer}
+     * if necessary extend {@link JsonNodeDeserializer}
      */
     private static class OracleTimestampDeserializer extends JsonDeserializer<oracle.sql.TIMESTAMP> {
 
         @Override
         public oracle.sql.TIMESTAMP deserialize(JsonParser p, DeserializationContext ctxt) {
-                try {
-                    oracle.sql.TIMESTAMP timestamp = new oracle.sql.TIMESTAMP(p.getBinaryValue());
-                    return timestamp;
-                } catch (IOException e) {
-                    LOGGER.error("deserialize oracle.sql.Timestamp error : {}", e.getMessage(), e);
-                }
+            try {
+                oracle.sql.TIMESTAMP timestamp = new oracle.sql.TIMESTAMP(p.getBinaryValue());
+                return timestamp;
+            } catch (IOException e) {
+                LOGGER.error("deserialize oracle.sql.Timestamp error : {}", e.getMessage(), e);
+            }
             return null;
         }
     }
 
     /**
-     * if necessary
-     * extend {@link ArraySerializerBase}
+     * if necessary extend {@link ArraySerializerBase}
      */
     private static class TimestampSerializer extends JsonSerializer<Timestamp> {
 
         @Override
         public void serializeWithType(Timestamp timestamp, JsonGenerator gen, SerializerProvider serializers,
-                                      TypeSerializer typeSerializer) throws IOException {
+            TypeSerializer typeSerializer) throws IOException {
             WritableTypeId typeId = typeSerializer.writeTypePrefix(gen,
                 typeSerializer.typeId(timestamp, JsonToken.START_ARRAY));
             serialize(timestamp, gen, serializers);
@@ -282,8 +279,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
     }
 
     /**
-     * if necessary
-     * extend {@link JsonNodeDeserializer}
+     * if necessary extend {@link JsonNodeDeserializer}
      */
     private static class TimestampDeserializer extends JsonDeserializer<Timestamp> {
 
@@ -312,7 +308,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
 
         @Override
         public void serializeWithType(SerialBlob blob, JsonGenerator gen, SerializerProvider serializers,
-                                      TypeSerializer typeSer) throws IOException {
+            TypeSerializer typeSer) throws IOException {
             WritableTypeId typeIdDef = typeSer.writeTypePrefix(gen,
                 typeSer.typeId(blob, JsonToken.VALUE_EMBEDDED_OBJECT));
             serialize(blob, gen, serializers);
@@ -322,7 +318,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
         @Override
         public void serialize(SerialBlob blob, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             try {
-                gen.writeBinary(blob.getBytes(1, (int)blob.length()));
+                gen.writeBinary(blob.getBytes(1, (int) blob.length()));
             } catch (SerialException e) {
                 LOGGER.error("serialize java.sql.Blob error : {}", e.getMessage(), e);
             }
@@ -352,7 +348,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
 
         @Override
         public void serializeWithType(SerialClob clob, JsonGenerator gen, SerializerProvider serializers,
-                                      TypeSerializer typeSer) throws IOException {
+            TypeSerializer typeSer) throws IOException {
             WritableTypeId typeIdDef = typeSer.writeTypePrefix(gen,
                 typeSer.typeId(clob, JsonToken.VALUE_EMBEDDED_OBJECT));
             serialize(clob, gen, serializers);
@@ -362,7 +358,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
         @Override
         public void serialize(SerialClob clob, JsonGenerator gen, SerializerProvider serializers) throws IOException {
             try {
-                gen.writeString(clob.getCharacterStream(), (int)clob.length());
+                gen.writeString(clob.getCharacterStream(), (int) clob.length());
             } catch (SerialException e) {
                 LOGGER.error("serialize java.sql.Blob error : {}", e.getMessage(), e);
             }
@@ -383,15 +379,14 @@ public class JacksonUndoLogParser implements UndoLogParser {
         }
     }
 
-
     /**
-     * if necessary
-     * extend {@link ArraySerializerBase}
+     * if necessary extend {@link ArraySerializerBase}
      */
     private static class OracleTimestampToStringSerializer extends JsonSerializer<oracle.sql.TIMESTAMP> {
 
         @Override
-        public void serializeWithType(oracle.sql.TIMESTAMP timestamp, JsonGenerator gen, SerializerProvider serializers, TypeSerializer typeSerializer) throws IOException {
+        public void serializeWithType(oracle.sql.TIMESTAMP timestamp, JsonGenerator gen, SerializerProvider serializers,
+            TypeSerializer typeSerializer) throws IOException {
             WritableTypeId typeId = typeSerializer.writeTypePrefix(gen, typeSerializer.typeId(timestamp, JsonToken.VALUE_STRING));
             serialize(timestamp, gen, serializers);
             gen.writeTypeSuffix(typeId);
@@ -400,11 +395,11 @@ public class JacksonUndoLogParser implements UndoLogParser {
         @Override
         public void serialize(oracle.sql.TIMESTAMP timestamp, JsonGenerator gen, SerializerProvider serializers) {
             try {
-               if(timestamp!=null&&timestamp.dateValue()!=null) {
-                   gen.writeString(DateFormatUtils.format(timestamp.dateValue(), "yyyy-MM-dd HH:mm:ss"));
-               } else {
-                   gen.writeString("");
-               }
+                if (timestamp != null && timestamp.dateValue() != null) {
+                    gen.writeString(DateFormatUtils.format(timestamp.dateValue(), "yyyy-MM-dd HH:mm:ss"));
+                } else {
+                    gen.writeString("");
+                }
             } catch (Exception e) {
                 LOGGER.error("OracleTimestampToStringSerializer oralce.sql.Timestamp error : {}", e.getMessage(), e);
             }

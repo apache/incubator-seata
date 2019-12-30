@@ -15,14 +15,13 @@
  */
 package io.seata.rm.datasource;
 
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.rm.datasource.undo.SQLUndoLog;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.undo.SQLUndoLog;
 
 /**
  * The type Connection context.
@@ -156,7 +155,6 @@ public class ConnectionContext {
     void setBranchId(Long branchId) {
         this.branchId = branchId;
     }
-
 
     /**
      * Reset.

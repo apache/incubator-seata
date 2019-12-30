@@ -15,14 +15,6 @@
  */
 package io.seata.rm.datasource.exec;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
@@ -37,6 +29,13 @@ import io.seata.rm.datasource.sql.struct.Null;
 import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
 import io.seata.rm.datasource.sql.struct.SqlSequenceExpr;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,12 +56,12 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     /**
      * Instantiates a new Insert executor.
      *
-     * @param statementProxy    the statement proxy
+     * @param statementProxy the statement proxy
      * @param statementCallback the statement callback
-     * @param sqlRecognizer     the sql recognizer
+     * @param sqlRecognizer the sql recognizer
      */
     public InsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
-                          SQLRecognizer sqlRecognizer) {
+        SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
 
@@ -75,7 +74,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected TableRecords afterImage(TableRecords beforeImage) throws SQLException {
         //Pk column exists or PK is just auto generated
         List<Object> pkValues = containsPK() ? getPkValuesByColumn() :
-                (containsColumns() ? getPkValuesByAuto() : getPkValuesByColumn());
+            (containsColumns() ? getPkValuesByAuto() : getPkValuesByColumn());
 
         TableRecords afterImage = buildTableRecords(pkValues);
 
@@ -221,6 +220,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     /**
      * get pk index
+     *
      * @return -1 not found pk index
      */
     protected int getPkIndex() {
@@ -250,6 +250,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     /**
      * check pk values
+     *
      * @param pkValues
      * @return true support false not support
      */
@@ -281,6 +282,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     /**
      * default auto increment
+     *
      * @return the primary key value
      * @throws SQLException the SQL exception
      */
@@ -324,6 +326,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
 
     /**
      * oracle auto increment sequence
+     *
      * @return the primary key value
      * @throws SQLException the SQL exception
      */

@@ -24,9 +24,8 @@ import java.sql.Statement;
 /**
  * The type Abstract statement proxy.
  *
- * @author sharajava
- *
  * @param <T> the type parameter
+ * @author sharajava
  */
 public abstract class AbstractStatementProxy<T extends Statement> implements Statement {
 
@@ -50,7 +49,7 @@ public abstract class AbstractStatementProxy<T extends Statement> implements Sta
      *
      * @param connectionProxy the connection proxy
      * @param targetStatement the target statement
-     * @param targetSQL       the target sql
+     * @param targetSQL the target sql
      * @throws SQLException the sql exception
      */
     public AbstractStatementProxy(AbstractConnectionProxy connectionProxy, T targetStatement, String targetSQL)

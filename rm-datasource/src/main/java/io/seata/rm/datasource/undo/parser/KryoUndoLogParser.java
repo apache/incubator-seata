@@ -26,15 +26,15 @@ import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.BranchUndoLog;
 import io.seata.rm.datasource.undo.UndoLogParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * kryo serializer
+ *
  * @author jsbxyyx
  */
 @LoadLevel(name = KryoUndoLogParser.NAME)
@@ -79,7 +79,6 @@ public class KryoUndoLogParser implements UndoLogParser {
         }
     }
 
-
     @Override
     public String writeValueAsString(BranchUndoLog branchUndoLog) {
         try {
@@ -89,7 +88,8 @@ public class KryoUndoLogParser implements UndoLogParser {
 //            objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);
             objectMapper.getSerializerProvider().setNullValueSerializer(new JsonSerializer<Object>() {
                 @Override
-                public void serialize(Object value, JsonGenerator jgen, SerializerProvider provider) throws IOException, JsonProcessingException {
+                public void serialize(Object value, JsonGenerator jgen,
+                    SerializerProvider provider) throws IOException, JsonProcessingException {
                     jgen.writeObject("");// 输出孔字符串
                 }
             });

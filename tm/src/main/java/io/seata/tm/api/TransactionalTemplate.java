@@ -48,7 +48,7 @@ public class TransactionalTemplate {
      * @throws TransactionalExecutor.ExecutionException the execution exception
      */
     public Object execute(TransactionalExecutor business) throws Throwable {
-        if(!Seata.EWELL_SEATA_STATE_IS_ON) {//分布式事务关闭
+        if (!Seata.EWELL_SEATA_STATE_IS_ON) {
             return business.execute();
         }
         // 1. get or create a transaction
@@ -76,16 +76,15 @@ public class TransactionalTemplate {
                 completeTransactionAfterThrowing(txInfo, tx, ex);
                 throw ex;
             }
-            //业务code判断来回滚
+            //code   add ccg ewell
             if (rs != null && rs instanceof MessageCoreResult) {
                 MessageCoreResult msr = (MessageCoreResult) rs;
                 if (msr.getStatus().equals(0)) {
-                    //回滚但不抛出异常
                     try {
-                      completeTransactionAfterThrowing(txInfo, tx, new Exception(msr.getMessage()));
+                        completeTransactionAfterThrowing(txInfo, tx, new Exception(msr.getMessage()));
                     } catch (TransactionalExecutor.ExecutionException e) {
                         TransactionalExecutor.Code code = e.getCode();
-                        if(!code.toString().equals(RollbackDone.toString())) {
+                        if (!code.toString().equals(RollbackDone.toString())) {
                             throw new TransactionalExecutor.ExecutionException(tx, e, TransactionalExecutor.Code.RollbackFailure,e);
                         }
                     }

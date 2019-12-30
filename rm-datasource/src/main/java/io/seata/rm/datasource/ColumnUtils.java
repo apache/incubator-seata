@@ -18,12 +18,12 @@ package io.seata.rm.datasource;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
-
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * column utils
+ *
  * @author jsbxyyx
  */
 public final class ColumnUtils {
@@ -35,9 +35,9 @@ public final class ColumnUtils {
         /** standard escape */
         STANDARD('"'),
         /** mysql series escape */
-        MYSQL('`')
-        ;
+        MYSQL('`');
         public final char value;
+
         Escape(char value) {
             this.value = value;
         }
@@ -45,6 +45,7 @@ public final class ColumnUtils {
 
     /**
      * del escape by db type
+     *
      * @param cols the cols
      * @param dbType the db type
      * @return
@@ -63,6 +64,7 @@ public final class ColumnUtils {
 
     /**
      * del escape
+     *
      * @param cols the cols
      * @param escape the escape
      * @return delete the column list element left and right escape.
@@ -82,6 +84,7 @@ public final class ColumnUtils {
 
     /**
      * del escape by db type
+     *
      * @param colName the column name
      * @param dbType the db type
      * @return
@@ -96,6 +99,7 @@ public final class ColumnUtils {
 
     /**
      * del escape by escape
+     *
      * @param colName the column name
      * @param escape the escape
      * @return
@@ -112,6 +116,7 @@ public final class ColumnUtils {
 
     /**
      * add escape by db type
+     *
      * @param cols the column name list
      * @param dbType the db type
      * @return
@@ -131,6 +136,7 @@ public final class ColumnUtils {
 
     /**
      * add escape by db type
+     *
      * @param colName the column name
      * @param dbType the db type
      * @return the colName left and right add escape
@@ -144,6 +150,7 @@ public final class ColumnUtils {
 
     /**
      * add escape
+     *
      * @param colName the column name
      * @param escape the escape
      * @return
