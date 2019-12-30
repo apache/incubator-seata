@@ -104,7 +104,7 @@ public class TccActionInterceptor implements MethodInterceptor {
      */
     protected Method getActionInterfaceMethod(MethodInvocation invocation) {
         try {
-            Class<?> interfaceType = null;
+            Class<?> interfaceType;
             if (remotingDesc == null) {
                 interfaceType = getProxyInterface(invocation.getThis());
             } else {
@@ -117,9 +117,8 @@ public class TccActionInterceptor implements MethodInterceptor {
             if (interfaceType == null) {
                 return invocation.getMethod();
             }
-            Method method = interfaceType.getMethod(invocation.getMethod().getName(),
+            return interfaceType.getMethod(invocation.getMethod().getName(),
                 invocation.getMethod().getParameterTypes());
-            return method;
         } catch (Exception e) {
             LOGGER.warn("get Method from interface failed", e);
             return invocation.getMethod();

@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.seata.common.util.CollectionUtils;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.support.AopUtils;
@@ -32,6 +33,10 @@ import org.springframework.aop.target.EmptyTargetSource;
  * @author zhangsen
  */
 public class SpringProxyUtils {
+
+    private SpringProxyUtils() {
+
+    }
 
     /**
      * Find target class class.
@@ -60,7 +65,7 @@ public class SpringProxyUtils {
             AdvisedSupport advised = getAdvisedSupport(proxy);
             return getInterfacesByAdvised(advised);
         } else {
-            return null;
+            return new Class<?>[]{};
         }
     }
 
@@ -150,7 +155,7 @@ public class SpringProxyUtils {
      * @return
      * @throws Exception
      */
-    protected static Class getTargetClass(Object proxy) throws Exception {
+    protected static Class<?> getTargetClass(Object proxy) throws Exception {
         if (proxy == null) {
             throw new java.lang.IllegalArgumentException("proxy can not be null");
         }
@@ -160,11 +165,11 @@ public class SpringProxyUtils {
         }
         AdvisedSupport advisedSupport = getAdvisedSupport(proxy);
         Object target = advisedSupport.getTargetSource().getTarget();
-        /**
+        /*
          * the Proxy of sofa:reference has no target
          */
         if (target == null) {
-            if (advisedSupport.getProxiedInterfaces() != null && advisedSupport.getProxiedInterfaces().length > 0) {
+            if (CollectionUtils.isNotEmpty(advisedSupport.getProxiedInterfaces())) {
                 return advisedSupport.getProxiedInterfaces()[0];
             } else {
                 return proxy.getClass();
