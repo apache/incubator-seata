@@ -15,17 +15,21 @@
  */
 package io.seata.rm.datasource.exec;
 
+import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.sql.SQLRecognizer;
+import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.undo.SQLUndoLog;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -37,6 +41,7 @@ public class MulitExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
 
     private List<TableRecords> updateAfterImages = new ArrayList<>();
     private List<TableRecords> deleteAfterImages = new ArrayList<>();
+    private Map<SQLRecognizer, TableRecords> tableRecordsMap = new HashMap<>(4);
 
     /**
      * Instantiates a new Abstract dml base executor.
@@ -63,11 +68,15 @@ public class MulitExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
             switch (recognizer.getSQLType()) {
                 case UPDATE:
                     executor = new UpdateExecutor<T, S>(statementProxy, statementCallback, recognizer);
-                    updateBeforeImages.add(executor.beforeImage());
+                    TableRecords updateRecords = executor.beforeImage();
+                    updateBeforeImages.add(updateRecords);
+                    tableRecordsMap.put(recognizer, updateRecords);
                     break;
                 case DELETE:
                     executor = new DeleteExecutor<T, S>(statementProxy, statementCallback, recognizer);
-                    deleteBeforeImages.add(executor.beforeImage());
+                    TableRecords deleteRecords = executor.beforeImage();
+                    deleteBeforeImages.add(deleteRecords);
+                    tableRecordsMap.put(recognizer, deleteRecords);
                     break;
                 default:
                     break;
@@ -85,11 +94,11 @@ public class MulitExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
             switch (sqlRecognizer.getSQLType()) {
                 case UPDATE:
                     executor = new UpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                    updateAfterImages.add(executor.afterImage(updateBeforeImages.get(i)));
+                    updateAfterImages.add(executor.afterImage(tableRecordsMap.get(sqlRecognizer)));
                     break;
                 case DELETE:
                     executor = new DeleteExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                    deleteAfterImages.add(executor.afterImage(deleteBeforeImages.get(i)));
+                    deleteAfterImages.add(executor.afterImage(tableRecordsMap.get(sqlRecognizer)));
                     break;
                 default:
                     break;
@@ -110,13 +119,30 @@ public class MulitExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
         deleteBeforeImages = new ArrayList<>(deleteBeforeImagesMap.values());
         updateAfterImages = new ArrayList<>(updateAfterImagesMap.values());
         deleteAfterImages = new ArrayList<>(deleteAfterImagesMap.values());
-        for (String table : updateAfterImagesMap.keySet()) {
-            super.prepareUndoLog(updateBeforeImagesMap.get(table),updateAfterImagesMap.get(table));
-        }
+        //update
+        buildUndo(updateBeforeImagesMap, updateAfterImagesMap, SQLType.UPDATE);
+        //delete
+        buildUndo(deleteBeforeImagesMap, deleteAfterImagesMap, SQLType.DELETE);
+    }
+
+    private void buildUndo(Map<String, TableRecords> deleteBeforeImagesMap, Map<String, TableRecords> deleteAfterImagesMap, SQLType sqlType) {
+        TableRecords beforeImage;
+        TableRecords afterImage;
         for (String table : deleteAfterImagesMap.keySet()) {
-            super.prepareUndoLog(deleteBeforeImagesMap.get(table),deleteAfterImagesMap.get(table));
+            beforeImage = deleteBeforeImagesMap.get(table);
+            afterImage = deleteAfterImagesMap.get(table);
+            ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+            String lockKeys = buildLockKey(beforeImage);
+            connectionProxy.appendLockKey(lockKeys);
+            SQLUndoLog sqlUndoLog = new SQLUndoLog();
+            sqlUndoLog.setSqlType(sqlType);
+            sqlUndoLog.setTableName(table);
+            sqlUndoLog.setBeforeImage(beforeImage);
+            sqlUndoLog.setAfterImage(afterImage);
+            connectionProxy.appendUndoLog(sqlUndoLog);
         }
     }
+
 
     private Map<String, TableRecords> getTableMap(List<TableRecords> updateBeforeImages) {
         //merge tables
