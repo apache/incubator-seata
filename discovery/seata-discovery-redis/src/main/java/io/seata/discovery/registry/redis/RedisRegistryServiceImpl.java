@@ -47,7 +47,6 @@ import redis.clients.jedis.Protocol;
  * The type Redis registry service.
  *
  * @author kl @kailing.pub
- * @date 2019 /2/27
  */
 public class RedisRegistryServiceImpl implements RegistryService<RedisListener> {
 

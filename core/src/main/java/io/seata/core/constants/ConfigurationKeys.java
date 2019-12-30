@@ -18,7 +18,7 @@ package io.seata.core.constants;
 /**
  * The type Configuration keys.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class ConfigurationKeys {
 
@@ -304,6 +304,11 @@ public class ConfigurationKeys {
     public static final String TRANSACTION_UNDO_LOG_TABLE = CLIENT_UNDO_PREFIX + "log.table";
 
     /**
+     * The constant TRANSACTION_UNDO_LOG_EXCEPTION_RATE
+     */
+    public static final String TRANSACTION_LOG_EXCEPTION_RATE = CLIENT_PREFIX + "log.exceptionRate";
+
+    /**
      * The constant TRANSACTION_UNDO_LOG_DEFAULT_TABLE.
      */
     public static final String TRANSACTION_UNDO_LOG_DEFAULT_TABLE = "undo_log";
@@ -411,6 +416,10 @@ public class ConfigurationKeys {
      */
     public static final String SHUNDOWN_WAIT = SHUTDOWN_PREFIX + "wait";
 
+    /**
+     * The constant ENABLE_CLIENT_BATCH_SEND_REQUEST
+     */
+    public static final String ENABLE_CLIENT_BATCH_SEND_REQUEST = TRANSPORT_PREFIX + "enable-client-batch-send-request";
 
     /**
      * The constant DISABLE_GLOBAL_TRANSACTION.

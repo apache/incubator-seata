@@ -23,7 +23,6 @@ import io.seata.rm.datasource.DataSourceProxy;
 
 /**
  * @author will
- * @date 2019/9/18
  */
 public class MockConnectionProxy extends ConnectionProxy {
     /**

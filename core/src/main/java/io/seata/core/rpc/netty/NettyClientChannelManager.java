@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 /**
  * Netty client pool manager.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author zhaojun
  */
 class NettyClientChannelManager {

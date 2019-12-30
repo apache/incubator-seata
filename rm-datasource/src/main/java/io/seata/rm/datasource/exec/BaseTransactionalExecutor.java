@@ -15,6 +15,14 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.StringJoiner;
+
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
@@ -30,14 +38,6 @@ import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
-
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
 
 /**
  * The type Base transactional executor.
@@ -189,7 +189,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         tableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
-                .getTableMeta(connectionProxy.getDataSourceProxy(), tableName);
+                .getTableMeta(connectionProxy.getTargetConnection(), tableName,connectionProxy.getDataSourceProxy().getResourceId());
         return tableMeta;
     }
 
@@ -346,7 +346,8 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected TableRecords buildTableRecords(List<Object> pkValues) throws SQLException {
         TableRecords afterImage;
         String pk = getTableMeta().getPkName();
-        StringJoiner pkValuesJoiner = new StringJoiner(" , ", "SELECT * FROM " + getTableMeta().getTableName() + " WHERE " + pk + " in (", ")");
+        StringJoiner pkValuesJoiner = new StringJoiner(" , ",
+            "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (", ")");
         for (Object pkValue : pkValues) {
             pkValuesJoiner.add("?");
         }

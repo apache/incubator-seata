@@ -28,8 +28,7 @@ import java.util.regex.Pattern;
 /**
  * The type Net util.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/10
+ * @author slievrly
  */
 public class NetUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(NetUtil.class);

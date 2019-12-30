@@ -42,7 +42,6 @@ import static org.mockito.Mockito.when;
  * batch insert executor test
  *
  * @author zjinlei
- * @date 2019/07/16
  */
 public class BatchInsertExecutorTest {
 

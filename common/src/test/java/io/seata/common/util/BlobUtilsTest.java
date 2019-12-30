@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  *
  * @author Otis.z
  * @author Geng Zhang
- * @date 2019 /2/26
  */
 public class BlobUtilsTest {
 
