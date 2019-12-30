@@ -30,6 +30,8 @@ import io.seata.rm.datasource.sql.druid.oracle.OracleUpdateRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
+
 /**
  * The type Sql visitor factory test.
  */
@@ -100,5 +102,92 @@ public class SQLVisitorFactoryTest {
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
             SQLVisitorFactory.get("select * from t", JdbcConstants.DB2);
         });
+
+
+        //TEST FOR MULIT-SQL
+
+        List<SQLRecognizer> sqlRecognizers = null;
+        //test for mysql insert
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.getMulti("insert into t(id) values (1);insert into t(id) values (2)", JdbcConstants.MYSQL);
+        });
+        //test for mysql insert and update
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.getMulti("insert into t(id) values (1);update t set a = t;", JdbcConstants.MYSQL);
+        });
+        //test for mysql insert and deleted
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.getMulti("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.MYSQL);
+        });
+        //test for mysql delete
+        sql = "delete from t where id =1 ; delete from t where id = 2";
+        sqlRecognizers = SQLVisitorFactory.getMulti(sql, JdbcConstants.MYSQL);
+        for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
+            Assertions.assertTrue(sqlRecognizer instanceof MySQLDeleteRecognizer);
+        }
+        //test for mysql update
+        sql = "update t set a = a;update t set a = c;";
+        sqlRecognizers = SQLVisitorFactory.getMulti(sql, JdbcConstants.MYSQL);
+        for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
+            Assertions.assertTrue(sqlRecognizer instanceof MySQLUpdateRecognizer);
+        }
+        //test for mysql update and deleted
+        sql = "update t set a = a where id =1;update t set a = c where id = 1;delete from t where id =1 ";
+        sqlRecognizers = SQLVisitorFactory.getMulti(sql, JdbcConstants.MYSQL);
+        Assertions.assertTrue(sqlRecognizers.get(0) instanceof MySQLUpdateRecognizer);
+        Assertions.assertTrue(sqlRecognizers.get(1) instanceof MySQLUpdateRecognizer);
+        Assertions.assertTrue(sqlRecognizers.get(2) instanceof MySQLDeleteRecognizer);
+        //test for mysql select
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.getMulti("select * from d where id = 1; select * from t where id = 2", JdbcConstants.MYSQL);
+        });
+
+        //test for mysql select for update
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.getMulti("select * from t for update; select * from t where id = 2", JdbcConstants.MYSQL);
+        });
+
+        //test for oracle insert
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.getMulti("insert into t(id) values (1);insert into t(id) values (2)", JdbcConstants.ORACLE);
+        });
+
+        //test for oracle delete and deleted
+        sql = "delete from t where id =1 ; delete from t where id = 2";
+        sqlRecognizers = SQLVisitorFactory.getMulti(sql, JdbcConstants.ORACLE);
+        for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
+            Assertions.assertTrue(sqlRecognizer instanceof OracleDeleteRecognizer);
+        }
+
+        //test for oracle update
+        sql = "update t set a = b where id =1 ;update t set a = c where id = 1;";
+        sqlRecognizers = SQLVisitorFactory.getMulti(sql, JdbcConstants.ORACLE);
+        for (SQLRecognizer sqlRecognizer : sqlRecognizers) {
+            Assertions.assertTrue(sqlRecognizer instanceof OracleUpdateRecognizer);
+        }
+
+        //test for oracle select
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.getMulti("select * from b ; select * from t where id = 2", JdbcConstants.ORACLE);
+        });
+
+        //test for oracle select for update
+        //test for mysql select for update
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.getMulti("select * from t for update; select * from t where id = 2", JdbcConstants.ORACLE);
+        });
+
+        //test for oracle insert and update
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.getMulti("insert into t(id) values (1);update t set a = t;", JdbcConstants.ORACLE);
+        });
+        //test for oracle insert and deleted
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
+            SQLVisitorFactory.getMulti("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.ORACLE);
+        });
+
+
+
+
     }
 }

@@ -42,10 +42,9 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
 /**
  * The type Base transactional executor.
  *
- * @author sharajava
- *
  * @param <T> the type parameter
  * @param <S> the type parameter
+ * @author sharajava
  */
 public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor {
 
@@ -64,6 +63,11 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected SQLRecognizer sqlRecognizer;
 
+    /**
+     * The Sql recognizer.
+     */
+    protected List<SQLRecognizer> sqlRecognizers;
+
     private TableMeta tableMeta;
 
     /**
@@ -78,6 +82,20 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         this.statementProxy = statementProxy;
         this.statementCallback = statementCallback;
         this.sqlRecognizer = sqlRecognizer;
+    }
+
+    /**
+     * Instantiates a new Base transactional executor.
+     *
+     * @param statementProxy    the statement proxy
+     * @param statementCallback the statement callback
+     * @param sqlRecognizer     the multi sql recognizer
+     */
+    public BaseTransactionalExecutor(StatementProxy<S> statementProxy, StatementCallback<T, S> statementCallback,
+                                     List<SQLRecognizer> sqlRecognizers) {
+        this.statementProxy = statementProxy;
+        this.statementCallback = statementCallback;
+        this.sqlRecognizers = sqlRecognizers;
     }
 
     @Override
@@ -189,12 +207,13 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         tableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
-                .getTableMeta(connectionProxy.getTargetConnection(), tableName,connectionProxy.getDataSourceProxy().getResourceId());
+                .getTableMeta(connectionProxy.getTargetConnection(), tableName, connectionProxy.getDataSourceProxy().getResourceId());
         return tableMeta;
     }
 
     /**
      * the columns contains table meta pk
+     *
      * @param columns the column name list
      * @return true: contains pk false: not contains pk
      */
@@ -208,6 +227,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     /**
      * compare column name and primary key name
+     *
      * @param columnName the primary key column name
      * @return true: equal false: not equal
      */
@@ -347,7 +367,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         TableRecords afterImage;
         String pk = getTableMeta().getPkName();
         StringJoiner pkValuesJoiner = new StringJoiner(" , ",
-            "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (", ")");
+                "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (", ")");
         for (Object pkValue : pkValues) {
             pkValuesJoiner.add("?");
         }
@@ -376,6 +396,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
 
     /**
      * get db type
+     *
      * @return
      */
     protected String getDbType() {

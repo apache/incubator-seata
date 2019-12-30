@@ -22,6 +22,7 @@ import io.seata.rm.datasource.sql.SQLVisitorFactory;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 /**
  * The type Execute template.
@@ -59,7 +60,7 @@ public class ExecuteTemplate {
      * @return the t
      * @throws SQLException the sql exception
      */
-    public static <T, S extends Statement> T execute(SQLRecognizer sqlRecognizer,
+    public static <T, S extends Statement> T execute(List<SQLRecognizer> sqlRecognizers,
                                                      StatementProxy<S> statementProxy,
                                                      StatementCallback<T, S> statementCallback,
                                                      Object... args) throws SQLException {
@@ -69,31 +70,36 @@ public class ExecuteTemplate {
             return statementCallback.execute(statementProxy.getTargetStatement(), args);
         }
 
-        if (sqlRecognizer == null) {
-            sqlRecognizer = SQLVisitorFactory.get(
+        if (sqlRecognizers == null) {
+            sqlRecognizers = SQLVisitorFactory.getMulti(
                     statementProxy.getTargetSQL(),
                     statementProxy.getConnectionProxy().getDbType());
         }
         Executor<T> executor = null;
-        if (sqlRecognizer == null) {
+        if (sqlRecognizers == null || sqlRecognizers.size() == 0) {
             executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
         } else {
-            switch (sqlRecognizer.getSQLType()) {
-                case INSERT:
-                    executor = new InsertExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case UPDATE:
-                    executor = new UpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case DELETE:
-                    executor = new DeleteExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                case SELECT_FOR_UPDATE:
-                    executor = new SelectForUpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
-                    break;
-                default:
-                    executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
-                    break;
+            if (sqlRecognizers.size() == 1) {
+                SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
+                switch (sqlRecognizer.getSQLType()) {
+                    case INSERT:
+                        executor = new InsertExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                        break;
+                    case UPDATE:
+                        executor = new UpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                        break;
+                    case DELETE:
+                        executor = new DeleteExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                        break;
+                    case SELECT_FOR_UPDATE:
+                        executor = new SelectForUpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                        break;
+                    default:
+                        executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
+                        break;
+                }
+            } else {
+                executor = new MulitExecutor<T, S>(statementProxy, statementCallback, sqlRecognizers);
             }
         }
         T rs = null;
@@ -104,7 +110,7 @@ public class ExecuteTemplate {
                 // Turn other exception into SQLException
                 ex = new SQLException(ex);
             }
-            throw (SQLException)ex;
+            throw (SQLException) ex;
         }
         return rs;
     }

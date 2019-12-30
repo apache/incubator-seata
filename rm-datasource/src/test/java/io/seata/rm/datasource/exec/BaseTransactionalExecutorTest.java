@@ -18,6 +18,7 @@ package io.seata.rm.datasource.exec;
 import io.seata.rm.GlobalLockTemplate;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
+import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -45,7 +46,7 @@ public class BaseTransactionalExecutorTest {
         StatementProxy statementProxy = new StatementProxy<>(connectionProxy, null);
 
         BaseTransactionalExecutor<Object, Statement> baseTransactionalExecutor
-                = new BaseTransactionalExecutor<Object, Statement>(statementProxy, null, null) {
+                = new BaseTransactionalExecutor<Object, Statement>(statementProxy, null, (SQLRecognizer) null) {
             @Override
             protected Object doExecute(Object... args) {
                 return null;
