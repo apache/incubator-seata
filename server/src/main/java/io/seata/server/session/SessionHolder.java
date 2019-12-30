@@ -278,7 +278,7 @@ public class SessionHolder {
      * @return the value
      */
     public static <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
-            throws TransactionException{
+            throws TransactionException {
         return getRootSessionManager().lockAndExecute(globalSession, lockCallable);
     }
 

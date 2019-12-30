@@ -191,7 +191,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public <T> T lockAndExecute(GlobalSession globalSession, GlobalSession.LockCallable<T> lockCallable)
-            throws TransactionException{
+            throws TransactionException {
         return lockCallable.call();
     }
 
