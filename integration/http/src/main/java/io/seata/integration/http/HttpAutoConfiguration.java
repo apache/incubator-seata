@@ -37,7 +37,7 @@ import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import java.util.List;
 
 /**
- * auto bean add for spring context if in springboot env.
+ * Auto bean add for spring context if in springboot env.
  *
  * @author wangxb
  */

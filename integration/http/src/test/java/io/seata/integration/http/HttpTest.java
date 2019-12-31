@@ -1,25 +1,9 @@
-/*
- *  Copyright 1999-2019 Seata.io Group.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- */
-package io.seata.integration.motan;
+package io.seata.integration.http;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Maps;
 import io.seata.core.context.RootContext;
-import io.seata.integration.http.DefaultHttpExecutor;
 import org.apache.http.HttpResponse;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -33,6 +17,9 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.Map;
 
+import static io.seata.integration.http.AbstractHttpExecutor.convertParamOfBean;
+import static io.seata.integration.http.AbstractHttpExecutor.convertParamOfJsonString;
+
 /**
  * @author wangxb
  */
@@ -44,7 +31,6 @@ class HttpTransactionFilterTest {
     private static final String XID = "127.0.0.1:8081:87654321";
     private static final int PARAM_TYPE_MAP = 1;
     private static final int PARAM_TYPE_BEAN = 2;
-    private static final int PARAM_TYPE_JSON = 3;
 
     @Test
     void testGetProviderXID() {
@@ -141,9 +127,9 @@ class HttpTransactionFilterTest {
             if (param_type == PARAM_TYPE_MAP) {
                 response = httpExecuter.executeGet(host, getPath, params, HttpResponse.class);
             } else if (param_type == PARAM_TYPE_BEAN) {
-                response = httpExecuter.executeGet(host, getPath, DefaultHttpExecutor.convertParamOfBean(person), HttpResponse.class);
+                response = httpExecuter.executeGet(host, getPath, convertParamOfBean(person), HttpResponse.class);
             } else {
-                response = httpExecuter.executeGet(host, getPath, DefaultHttpExecutor.convertParamOfJsonString(str, Person.class), HttpResponse.class);
+                response = httpExecuter.executeGet(host, getPath, convertParamOfJsonString(str, Person.class), HttpResponse.class);
             }
             String content = readStreamAsStr(response.getEntity().getContent());
             Assertions.assertEquals(content, "hello world!");
@@ -169,4 +155,20 @@ class HttpTransactionFilterTest {
         return new String(bos.toByteArray(), "UTF-8");
     }
 
+    @Test
+    void convertParamOfJsonStringTest() {
+
+        String targetParam = "{name=zhangsan, age=15}";
+        String str = "{\n" +
+                "    \"name\":\"zhangsan\",\n" +
+                "    \"age\":15\n" +
+                "}";
+        Map<String, String> map = convertParamOfJsonString(str, Person.class);
+        Assertions.assertEquals(map.toString(), targetParam);
+        Person person = JSON.parseObject(str, Person.class);
+        map = convertParamOfBean(person);
+        Assertions.assertEquals(map.toString(), targetParam);
+
+
+    }
 }

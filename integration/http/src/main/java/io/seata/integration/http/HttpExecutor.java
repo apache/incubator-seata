@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.Map;
 
 /**
- * Http executer.
+ * Http executor.
  *
  * @author wangxb
  */
@@ -27,6 +27,12 @@ public interface HttpExecutor {
 
     <T, K> K executePost(String host, String path, T paramObject, Class<K> returnType) throws IOException;
 
-    <T, K> K executeGet(String host, String path, Map<String,String> paramObject, Class<K> returnType) throws IOException;
+
+    /**
+     * get method only support param type of Map<String,String>
+     *
+     * @return K
+     */
+    <K> K executeGet(String host, String path, Map<String, String> paramObject, Class<K> returnType) throws IOException;
 
 }

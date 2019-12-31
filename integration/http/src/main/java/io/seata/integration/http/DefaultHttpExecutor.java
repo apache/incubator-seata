@@ -15,7 +15,6 @@
  */
 package io.seata.integration.http;
 
-import com.alibaba.fastjson.JSON;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.entity.StringEntity;
@@ -27,7 +26,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * The default http executer.
+ * Default http executor.
  *
  * @author wangxb
  */
@@ -119,39 +118,4 @@ public class DefaultHttpExecutor extends AbstractHttpExecutor {
         return null;
     }
 
-    public static void main(String[] args) {
-        String str = "{\n" +
-                "    \"name\":\"zhangsan\",\n" +
-                "    \"age\":15\n" +
-                "}";
-        Map<String, String> map = convertParamOfJsonString(str, Person.class);
-        System.out.println(map.toString());
-        Person person = JSON.parseObject(str, Person.class);
-        map = convertParamOfBean(person);
-        System.out.println(map.toString());
-
-
-    }
-
-    public static class Person {
-        private String name;
-        private int age;
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public int getAge() {
-            return age;
-        }
-
-        public void setAge(int age) {
-            this.age = age;
-        }
-
-    }
 }

@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * The abstract http executor.
+ * Abstract http executor.
  *
  * @author wangxb
  */
@@ -92,7 +92,7 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
     }
 
     @Override
-    public <T, K> K executeGet(String host, String path, Map<String, String> paramObject, Class<K> returnType) throws IOException {
+    public <K> K executeGet(String host, String path, Map<String, String> paramObject, Class<K> returnType) throws IOException {
 
         Args.notNull(returnType, "returnType");
         Args.notNull(host, "host");
