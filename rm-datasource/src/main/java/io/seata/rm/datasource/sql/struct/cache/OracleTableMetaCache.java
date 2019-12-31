@@ -100,7 +100,7 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
         TableMeta tm = new TableMeta();
         tm.setTableName(tableName);
         String[] schemaTable = tableName.split("\\.");
-        String schemaName = schemaTable.length > 1 ? schemaTable[0] : dbmd.getUserName();
+        String schemaName = schemaTable.length > 1 ? schemaTable[0].toUpperCase() : dbmd.getUserName();
         tableName = schemaTable.length > 1 ? schemaTable[1] : tableName;
         if (tableName.contains("\"")) {
             tableName = tableName.replace("\"", "");
