@@ -53,7 +53,7 @@ public class DefaultHttpExecutor extends AbstractHttpExecutor {
 
 
     @Override
-    public <T> String initGetUrl(String host, String path, Map<String, String> querys) {
+    public String initGetUrl(String host, String path, Map<String, String> querys) {
 
         if (querys.isEmpty()) {
             return host + path;

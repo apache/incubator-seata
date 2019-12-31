@@ -136,7 +136,7 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
 
     protected abstract <T> void buildGetHeaders(Map<String, String> headers, T paramObject);
 
-    protected abstract <T> String initGetUrl(String host, String path, Map<String, String> paramObject);
+    protected abstract String initGetUrl(String host, String path, Map<String, String> paramObject);
 
 
     protected abstract <T> void buildPostHeaders(Map<String, String> headers, T t);
