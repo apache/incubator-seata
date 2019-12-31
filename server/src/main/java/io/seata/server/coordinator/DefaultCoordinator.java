@@ -15,14 +15,6 @@
  */
 package io.seata.server.coordinator;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Collection;
-import java.util.Map;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
 import io.netty.channel.Channel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
@@ -36,7 +28,6 @@ import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.model.ResourceManagerInbound;
 import io.seata.core.protocol.AbstractMessage;
 import io.seata.core.protocol.AbstractResultMessage;
 import io.seata.core.protocol.transaction.AbstractTransactionRequestToTC;
@@ -76,6 +67,14 @@ import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.Map;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchCommitRequest;
 import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchRollbackRequest;
 
@@ -83,7 +82,7 @@ import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranc
  * The type Default coordinator.
  */
 public class DefaultCoordinator extends AbstractTCInboundHandler
-    implements TransactionMessageHandler, ResourceManagerInbound, Disposable {
+    implements TransactionMessageHandler, TransactionCoordinatorOutbound, Disposable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCoordinator.class);
 
@@ -159,7 +158,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
      */
     public DefaultCoordinator(ServerMessageSender messageSender) {
         this.messageSender = messageSender;
-        core.setResourceManagerInbound(this);
+        core.setTransactionCoordinatorOutbound(this);
     }
 
     @Override
@@ -221,8 +220,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     }
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
-                                     String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(GlobalSession globalSession, BranchType branchType, String xid, long branchId,
+                                     String resourceId, String applicationData) throws TransactionException {
         try {
             BranchCommitRequest request = new BranchCommitRequest();
             request.setXid(xid);
@@ -230,11 +229,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             request.setResourceId(resourceId);
             request.setApplicationData(applicationData);
             request.setBranchType(branchType);
-
-            GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-            if (globalSession == null) {
-                return BranchStatus.PhaseTwo_Committed;
-            }
 
             if (BranchType.SAGA.equals(branchType)) {
 
@@ -251,13 +245,13 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                         + ", cannot find channel by resourceId[" + sagaResourceId + "]");
                     return BranchStatus.PhaseTwo_CommitFailed_Retryable;
                 }
-                BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(sagaChannel,
+                BranchCommitResponse response = (BranchCommitResponse) messageSender.sendSyncRequest(sagaChannel,
                     request);
                 return response.getBranchStatus();
             } else {
                 BranchSession branchSession = globalSession.getBranch(branchId);
                 if (null != branchSession) {
-                    BranchCommitResponse response = (BranchCommitResponse)messageSender.sendSyncRequest(resourceId,
+                    BranchCommitResponse response = (BranchCommitResponse) messageSender.sendSyncRequest(resourceId,
                         branchSession.getClientId(), request);
                     return response.getBranchStatus();
                 } else {
@@ -271,8 +265,8 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     }
 
     @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
-                                       String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(GlobalSession globalSession, BranchType branchType, String xid, long branchId,
+                                       String resourceId, String applicationData) throws TransactionException {
         try {
             BranchRollbackRequest request = new BranchRollbackRequest();
             request.setXid(xid);
@@ -280,11 +274,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             request.setResourceId(resourceId);
             request.setApplicationData(applicationData);
             request.setBranchType(branchType);
-
-            GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-            if (globalSession == null) {
-                return BranchStatus.PhaseTwo_Rollbacked;
-            }
 
             if (BranchType.SAGA.equals(branchType)) {
 
@@ -302,14 +291,14 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                         + ", cannot find channel by resourceId[" + sagaResourceId + "]");
                     return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
                 }
-                BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSyncRequest(sagaChannel,
+                BranchRollbackResponse response = (BranchRollbackResponse) messageSender.sendSyncRequest(sagaChannel,
                     request);
                 return response.getBranchStatus();
             } else {
 
                 BranchSession branchSession = globalSession.getBranch(branchId);
 
-                BranchRollbackResponse response = (BranchRollbackResponse)messageSender.sendSyncRequest(resourceId,
+                BranchRollbackResponse response = (BranchRollbackResponse) messageSender.sendSyncRequest(resourceId,
                     branchSession.getClientId(), request);
                 return response.getBranchStatus();
             }
@@ -538,7 +527,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         if (!(request instanceof AbstractTransactionRequestToTC)) {
             throw new IllegalArgumentException();
         }
-        AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC)request;
+        AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC) request;
         transactionRequest.setTCInboundHandler(this);
 
         return transactionRequest.handle(context);
@@ -569,7 +558,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         }
         // 2. second close netty flow
         if (messageSender instanceof RpcServer) {
-            ((RpcServer)messageSender).destroy();
+            ((RpcServer) messageSender).destroy();
         }
         // 3. last destroy SessionHolder
         SessionHolder.destroy();

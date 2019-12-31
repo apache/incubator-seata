@@ -15,8 +15,6 @@
  */
 package io.seata.server.coordinator;
 
-import java.util.ArrayList;
-
 import io.seata.core.event.EventBus;
 import io.seata.core.event.GlobalTransactionEvent;
 import io.seata.core.exception.BranchTransactionException;
@@ -26,7 +24,6 @@ import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.model.ResourceManagerInbound;
 import io.seata.server.event.EventBusManager;
 import io.seata.server.lock.LockManager;
 import io.seata.server.lock.LockerFactory;
@@ -36,6 +33,8 @@ import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
 
 import static io.seata.core.exception.TransactionExceptionCode.BranchTransactionNotExist;
 import static io.seata.core.exception.TransactionExceptionCode.FailedToAddBranch;
@@ -54,13 +53,13 @@ public class DefaultCore implements Core {
 
     private LockManager lockManager = LockerFactory.getLockManager();
 
-    private ResourceManagerInbound resourceManagerInbound;
+    private TransactionCoordinatorOutbound transactionCoordinatorOutbound;
 
     private EventBus eventBus = EventBusManager.get();
 
     @Override
-    public void setResourceManagerInbound(ResourceManagerInbound resourceManagerInbound) {
-        this.resourceManagerInbound = resourceManagerInbound;
+    public void setTransactionCoordinatorOutbound(TransactionCoordinatorOutbound transactionCoordinatorOutbound) {
+        this.transactionCoordinatorOutbound = transactionCoordinatorOutbound;
     }
 
     @Override
@@ -195,8 +194,8 @@ public class DefaultCore implements Core {
             try {
                 String sagaResourceId = globalSession.getApplicationId() + "#" + globalSession
                     .getTransactionServiceGroup();
-                BranchStatus branchStatus = resourceManagerInbound.branchCommit(BranchType.SAGA, globalSession.getXid(),
-                    -1, sagaResourceId, null);
+                BranchStatus branchStatus = transactionCoordinatorOutbound.branchCommit(globalSession, BranchType.SAGA,
+                    globalSession.getXid(), -1, sagaResourceId, null);
 
                 switch (branchStatus) {
                     case PhaseTwo_Committed:
@@ -255,7 +254,7 @@ public class DefaultCore implements Core {
                     continue;
                 }
                 try {
-                    BranchStatus branchStatus = resourceManagerInbound.branchCommit(branchSession.getBranchType(),
+                    BranchStatus branchStatus = transactionCoordinatorOutbound.branchCommit(globalSession, branchSession.getBranchType(),
                         branchSession.getXid(), branchSession.getBranchId(), branchSession.getResourceId(),
                         branchSession.getApplicationData());
 
@@ -374,13 +373,13 @@ public class DefaultCore implements Core {
             try {
                 String sagaResourceId = globalSession.getApplicationId() + "#" + globalSession
                     .getTransactionServiceGroup();
-                BranchStatus branchStatus = resourceManagerInbound.branchRollback(BranchType.SAGA,
+                BranchStatus branchStatus = transactionCoordinatorOutbound.branchRollback(globalSession, BranchType.SAGA,
                     globalSession.getXid(), -1, sagaResourceId, null);
 
                 switch (branchStatus) {
                     case PhaseTwo_Rollbacked:
                         removeAllBranches(globalSession);
-                        LOGGER.info("Successfully rollbacked SAGA global[{}]",globalSession.getXid());
+                        LOGGER.info("Successfully rollbacked SAGA global[{}]", globalSession.getXid());
                         break;
                     case PhaseTwo_RollbackFailed_Unretryable:
                         SessionHelper.endRollbackFailed(globalSession);
@@ -408,7 +407,7 @@ public class DefaultCore implements Core {
                     continue;
                 }
                 try {
-                    BranchStatus branchStatus = resourceManagerInbound.branchRollback(branchSession.getBranchType(),
+                    BranchStatus branchStatus = transactionCoordinatorOutbound.branchRollback(globalSession, branchSession.getBranchType(),
                         branchSession.getXid(), branchSession.getBranchId(), branchSession.getResourceId(),
                         branchSession.getApplicationData());
 
@@ -518,7 +517,7 @@ public class DefaultCore implements Core {
                 SessionHelper.endCommitted(globalSession);
                 LOGGER.info("Global[{}] committed", globalSession.getXid());
             } else if (GlobalStatus.Rollbacked.equals(globalStatus)
-                    || GlobalStatus.Finished.equals(globalStatus)) {
+                || GlobalStatus.Finished.equals(globalStatus)) {
                 removeAllBranches(globalSession);
                 SessionHelper.endRollbacked(globalSession);
                 LOGGER.info("Global[{}] rollbacked", globalSession.getXid());
@@ -527,8 +526,8 @@ public class DefaultCore implements Core {
                 LOGGER.info("Global[{}] reporting is successfully done. status[{}]", globalSession.getXid(), globalSession.getStatus());
 
                 if (GlobalStatus.RollbackRetrying.equals(globalStatus)
-                        || GlobalStatus.TimeoutRollbackRetrying.equals(globalStatus)
-                        || GlobalStatus.UnKnown.equals(globalStatus)) {
+                    || GlobalStatus.TimeoutRollbackRetrying.equals(globalStatus)
+                    || GlobalStatus.UnKnown.equals(globalStatus)) {
                     queueToRetryRollback(globalSession);
                     LOGGER.info("Global[{}] will retry rollback", globalSession.getXid());
                 } else if (GlobalStatus.CommitRetrying.equals(globalStatus)) {

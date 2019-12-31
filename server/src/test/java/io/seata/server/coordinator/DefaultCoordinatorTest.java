@@ -86,16 +86,15 @@ public class DefaultCoordinatorTest {
     @MethodSource("xidAndBranchIdProviderForCommit")
     public void branchCommit(String xid, Long branchId) throws TransactionException {
         BranchStatus result = null;
-
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         try {
-            result = defaultCoordinator.branchCommit(BranchType.AT, xid, branchId, resourceId, applicationData);
+            result = defaultCoordinator.branchCommit(globalSession, BranchType.AT, xid, branchId, resourceId, applicationData);
         } catch (TransactionException e) {
             Assertions.fail(e.getMessage());
         }
         Assertions.assertEquals(result, BranchStatus.PhaseTwo_Committed);
 
         //clear
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
         globalSession.end();
     }
@@ -104,8 +103,9 @@ public class DefaultCoordinatorTest {
     @MethodSource("xidAndBranchIdProviderForRollback")
     public void branchRollback(String xid, Long branchId) {
         BranchStatus result = null;
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         try {
-            result = defaultCoordinator.branchRollback(BranchType.AT, xid, branchId, resourceId, applicationData);
+            result = defaultCoordinator.branchRollback(globalSession, BranchType.AT, xid, branchId, resourceId, applicationData);
         } catch (TransactionException e) {
             Assertions.fail(e.getMessage());
         }

@@ -16,7 +16,6 @@
 package io.seata.server.coordinator;
 
 import io.seata.core.exception.TransactionException;
-import io.seata.core.model.ResourceManagerInbound;
 import io.seata.core.model.ResourceManagerOutbound;
 import io.seata.core.model.TransactionManager;
 import io.seata.server.session.GlobalSession;
@@ -31,9 +30,9 @@ public interface Core extends TransactionManager, ResourceManagerOutbound {
     /**
      * Sets resource manager inbound.
      *
-     * @param resourceManagerInbound the resource manager inbound
+     * @param transactionCoordinatorOutbound the transaction coordinator outbound
      */
-    void setResourceManagerInbound(ResourceManagerInbound resourceManagerInbound);
+    void setTransactionCoordinatorOutbound(TransactionCoordinatorOutbound transactionCoordinatorOutbound);
 
     /**
      * Do global commit.

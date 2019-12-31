@@ -167,7 +167,7 @@ public class DefaultCoreTest {
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.setResourceManagerInbound(
+        core.setTransactionCoordinatorOutbound(
             new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Committed);
@@ -187,7 +187,7 @@ public class DefaultCoreTest {
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.setResourceManagerInbound(
+        core.setTransactionCoordinatorOutbound(
             new MockResourceManagerInbound(BranchStatus.PhaseTwo_CommitFailed_Unretryable, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Begin);
@@ -207,7 +207,7 @@ public class DefaultCoreTest {
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.setResourceManagerInbound(
+        core.setTransactionCoordinatorOutbound(
             new MockResourceManagerInbound(BranchStatus.PhaseOne_Timeout, BranchStatus.PhaseOne_Done));
         core.doGlobalCommit(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.CommitRetrying);
@@ -240,7 +240,7 @@ public class DefaultCoreTest {
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.setResourceManagerInbound(
+        core.setTransactionCoordinatorOutbound(
             new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed, BranchStatus.PhaseTwo_Rollbacked));
         core.doGlobalRollback(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.Rollbacked);
@@ -260,7 +260,7 @@ public class DefaultCoreTest {
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed,
+        core.setTransactionCoordinatorOutbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed,
             BranchStatus.PhaseTwo_RollbackFailed_Unretryable));
         core.doGlobalRollback(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.RollbackFailed);
@@ -280,7 +280,7 @@ public class DefaultCoreTest {
             applicationData, "t1:1", clientId);
         globalSession.addBranch(branchSession);
         globalSession.changeBranchStatus(branchSession, BranchStatus.PhaseOne_Done);
-        core.setResourceManagerInbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed,
+        core.setTransactionCoordinatorOutbound(new MockResourceManagerInbound(BranchStatus.PhaseTwo_Committed,
             BranchStatus.PhaseTwo_RollbackFailed_Retryable));
         core.doGlobalRollback(globalSession, false);
         Assertions.assertEquals(globalSession.getStatus(), GlobalStatus.RollbackRetrying);
@@ -333,7 +333,7 @@ public class DefaultCoreTest {
         }
     }
 
-    private static class MockResourceManagerInbound implements ResourceManagerInbound {
+    private static class MockResourceManagerInbound implements TransactionCoordinatorOutbound {
 
         private BranchStatus commitStatus;
         private BranchStatus rollbackStatus;
@@ -350,13 +350,13 @@ public class DefaultCoreTest {
         }
 
         @Override
-        public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
+        public BranchStatus branchCommit(GlobalSession globalSession, BranchType branchType, String xid, long branchId, String resourceId,
                                          String applicationData) throws TransactionException {
             return commitStatus;
         }
 
         @Override
-        public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
+        public BranchStatus branchRollback(GlobalSession globalSession, BranchType branchType, String xid, long branchId, String resourceId,
                                            String applicationData) throws TransactionException {
             return rollbackStatus;
         }
