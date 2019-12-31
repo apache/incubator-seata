@@ -135,10 +135,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 }
             }
         } finally {
-            if (RootContext.getXID() != null) {
-                if (xid.equals(RootContext.getXID())) {
-                    RootContext.unbind();
-                }
+            if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+                RootContext.unbind();
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -175,10 +173,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
                 }
             }
         } finally {
-            if (RootContext.getXID() != null) {
-                if (xid.equals(RootContext.getXID())) {
-                    RootContext.unbind();
-                }
+            if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+                RootContext.unbind();
             }
         }
         if (LOGGER.isInfoEnabled()) {
@@ -214,10 +210,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             LOGGER.info("[{}] report status: {}", xid, status);
         }
 
-        if (RootContext.getXID() != null) {
-            if (xid.equals(RootContext.getXID())) {
-                RootContext.unbind();
-            }
+        if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
+            RootContext.unbind();
         }
     }
 

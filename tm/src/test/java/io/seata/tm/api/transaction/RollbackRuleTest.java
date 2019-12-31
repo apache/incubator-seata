@@ -79,7 +79,7 @@ public class RollbackRuleTest {
     @Test
     public void toStringTest(){
         RollbackRule otherRollbackRuleByName = new RollbackRule(Exception.class.getName());
-        Assertions.assertEquals(otherRollbackRuleByName.toString(),"RollbackRule with pattern [" + Exception.class.getName() + "]");
+        Assertions.assertEquals(otherRollbackRuleByName.toString(), String.format("RollbackRule with pattern [%s]", Exception.class.getName()));
     }
 
     @Test
@@ -87,9 +87,9 @@ public class RollbackRuleTest {
         RollbackRule otherRollbackRuleByName = new RollbackRule(Exception.class.getName());
         RollbackRule otherRollbackRuleByName2 = new NoRollbackRule(Exception.class.getName());
 
-        Assertions.assertFalse(otherRollbackRuleByName.equals(""));
-        Assertions.assertTrue(otherRollbackRuleByName.equals(otherRollbackRuleByName));
-        Assertions.assertTrue(otherRollbackRuleByName.equals(otherRollbackRuleByName2));
+        Assertions.assertNotEquals("", otherRollbackRuleByName);
+        Assertions.assertEquals(otherRollbackRuleByName, otherRollbackRuleByName);
+        Assertions.assertEquals(otherRollbackRuleByName, otherRollbackRuleByName2);
 
     }
 }
