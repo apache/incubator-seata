@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * @author : wangxb
- * @Description: mock springmvc controller,one should be start real service
+ * @Description: Mock springmvc controller,one should be start real server
  */
 @Controller
 public class IndexController {
