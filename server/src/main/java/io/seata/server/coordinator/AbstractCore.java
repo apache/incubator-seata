@@ -140,67 +140,50 @@ public abstract class AbstractCore implements Core {
     }
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
-                                     String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
         try {
             BranchCommitRequest request = new BranchCommitRequest();
-            request.setXid(xid);
-            request.setBranchId(branchId);
-            request.setResourceId(resourceId);
-            request.setApplicationData(applicationData);
-            request.setBranchType(branchType);
-
-            GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-            if (globalSession == null) {
-                return BranchStatus.PhaseTwo_Committed;
-            }
-            return branchCommitSend(request, branchId, resourceId, globalSession);
+            request.setXid(branchSession.getXid());
+            request.setBranchId(branchSession.getBranchId());
+            request.setResourceId(branchSession.getResourceId());
+            request.setApplicationData(branchSession.getApplicationData());
+            request.setBranchType(branchSession.getBranchType());
+            return branchCommitSend(request, globalSession, branchSession);
         } catch (IOException | TimeoutException e) {
             throw new BranchTransactionException(FailedToSendBranchCommitRequest,
-                    String.format("Send branch commit failed, xid = %s branchId = %s", xid, branchId), e);
+                    String.format("Send branch commit failed, xid = %s branchId = %s", branchSession.getXid(),
+                            branchSession.getBranchId()), e);
         }
     }
 
-    protected BranchStatus branchCommitSend(BranchCommitRequest request, long branchId, String resourceId,
-                                         GlobalSession globalSession) throws IOException, TimeoutException {
-        BranchSession branchSession = globalSession.getBranch(branchId);
-        if (null != branchSession) {
-            BranchCommitResponse response = (BranchCommitResponse) messageSender.sendSyncRequest(resourceId,
-                    branchSession.getClientId(), request);
-            return response.getBranchStatus();
-        } else {
-            return BranchStatus.PhaseTwo_Committed;
-        }
+    protected BranchStatus branchCommitSend(BranchCommitRequest request, GlobalSession globalSession,
+                                            BranchSession branchSession) throws IOException, TimeoutException {
+        BranchCommitResponse response = (BranchCommitResponse) messageSender.sendSyncRequest(
+                branchSession.getResourceId(), branchSession.getClientId(), request);
+        return response.getBranchStatus();
     }
 
     @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
-                                       String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
         try {
             BranchRollbackRequest request = new BranchRollbackRequest();
-            request.setXid(xid);
-            request.setBranchId(branchId);
-            request.setResourceId(resourceId);
-            request.setApplicationData(applicationData);
-            request.setBranchType(branchType);
-
-            GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
-            if (globalSession == null) {
-                return BranchStatus.PhaseTwo_Rollbacked;
-            }
-            return branchRollbackSend(request, branchId, resourceId, globalSession);
+            request.setXid(branchSession.getXid());
+            request.setBranchId(branchSession.getBranchId());
+            request.setResourceId(branchSession.getResourceId());
+            request.setApplicationData(branchSession.getApplicationData());
+            request.setBranchType(branchSession.getBranchType());
+            return branchRollbackSend(request, globalSession, branchSession);
         } catch (IOException | TimeoutException e) {
             throw new BranchTransactionException(FailedToSendBranchRollbackRequest,
-                    String.format("Send branch rollback failed, xid = %s branchId = %s", xid, branchId), e);
+                    String.format("Send branch rollback failed, xid = %s branchId = %s",
+                            branchSession.getXid(), branchSession.getBranchId()), e);
         }
     }
 
-    protected BranchStatus branchRollbackSend(BranchRollbackRequest request, long branchId, String resourceId,
-                                            GlobalSession globalSession) throws IOException, TimeoutException {
-        BranchSession branchSession = globalSession.getBranch(branchId);
-
-        BranchRollbackResponse response = (BranchRollbackResponse) messageSender.sendSyncRequest(resourceId,
-                branchSession.getClientId(), request);
+    protected BranchStatus branchRollbackSend(BranchRollbackRequest request, GlobalSession globalSession,
+                                              BranchSession branchSession) throws IOException, TimeoutException {
+        BranchRollbackResponse response = (BranchRollbackResponse) messageSender.sendSyncRequest(
+                branchSession.getResourceId(), branchSession.getClientId(), request);
         return response.getBranchStatus();
     }
 

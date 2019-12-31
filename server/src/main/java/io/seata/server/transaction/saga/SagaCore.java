@@ -60,15 +60,14 @@ public class SagaCore extends AbstractCore {
     }
 
     @Override
-    public BranchStatus branchCommitSend(BranchCommitRequest request, long branchId, String resourceId,
-                                         GlobalSession globalSession) throws IOException, TimeoutException {
+    public BranchStatus branchCommitSend(BranchCommitRequest request, GlobalSession globalSession,
+                                         BranchSession branchSession) throws IOException, TimeoutException {
         Map<String, Channel> channels = ChannelManager.getRmChannels();
         if (channels == null || channels.size() == 0) {
             LOGGER.error("Failed to commit SAGA global[" + globalSession.getXid() + ", RM channels is empty.");
             return BranchStatus.PhaseTwo_CommitFailed_Retryable;
         }
-        String sagaResourceId = globalSession.getApplicationId() + "#" + globalSession
-                .getTransactionServiceGroup();
+        String sagaResourceId = getSagaResourceId(globalSession);
         Channel sagaChannel = channels.get(sagaResourceId);
         if (sagaChannel == null) {
             LOGGER.error("Failed to commit SAGA global[" + globalSession.getXid()
@@ -80,14 +79,14 @@ public class SagaCore extends AbstractCore {
     }
 
     @Override
-    public BranchStatus branchRollbackSend(BranchRollbackRequest request, long branchId, String resourceId,
-                                              GlobalSession globalSession) throws IOException, TimeoutException {
+    public BranchStatus branchRollbackSend(BranchRollbackRequest request, GlobalSession globalSession,
+                                           BranchSession branchSession) throws IOException, TimeoutException {
         Map<String, Channel> channels = ChannelManager.getRmChannels();
         if (channels == null || channels.size() == 0) {
             LOGGER.error("Failed to rollback SAGA global[" + globalSession.getXid() + ", RM channels is empty.");
             return BranchStatus.PhaseTwo_RollbackFailed_Retryable;
         }
-        String sagaResourceId = globalSession.getApplicationId() + "#" + globalSession .getTransactionServiceGroup();
+        String sagaResourceId = getSagaResourceId(globalSession);
         Channel sagaChannel = channels.get(sagaResourceId);
         if (sagaChannel == null) {
             LOGGER.error("Failed to rollback SAGA global[" + globalSession.getXid()
@@ -101,10 +100,8 @@ public class SagaCore extends AbstractCore {
     @Override
     public boolean doGlobalCommit(GlobalSession globalSession, boolean retrying) throws TransactionException {
         try {
-            String sagaResourceId = globalSession.getApplicationId() + "#" + globalSession
-                    .getTransactionServiceGroup();
-            BranchStatus branchStatus = branchCommit(BranchType.SAGA, globalSession.getXid(),
-                    -1, sagaResourceId, null);
+            BranchStatus branchStatus = branchCommit(globalSession, SessionHelper.newBranch(BranchType.SAGA,
+                    globalSession.getXid(), -1, getSagaResourceId(globalSession), null));
 
             switch (branchStatus) {
                 case PhaseTwo_Committed:
@@ -161,9 +158,8 @@ public class SagaCore extends AbstractCore {
     @Override
     public boolean doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException {
         try {
-            String sagaResourceId = globalSession.getApplicationId() + "#" + globalSession.getTransactionServiceGroup();
-            BranchStatus branchStatus = branchRollback(BranchType.SAGA,
-                    globalSession.getXid(), -1, sagaResourceId, null);
+            BranchStatus branchStatus = branchRollback(globalSession, SessionHelper.newBranch(BranchType.SAGA,
+                    globalSession.getXid(), -1, getSagaResourceId(globalSession), null));
 
             switch (branchStatus) {
                 case PhaseTwo_Rollbacked:
@@ -229,5 +225,15 @@ public class SagaCore extends AbstractCore {
         for (BranchSession branchSession : branchSessions) {
             globalSession.removeBranch(branchSession);
         }
+    }
+
+    /**
+     * get saga ResourceId
+     *
+     * @param globalSession the globalSession
+     * @return sagaResourceId
+     */
+    private String getSagaResourceId(GlobalSession globalSession) {
+        return globalSession.getApplicationId() + "#" + globalSession.getTransactionServiceGroup();
     }
 }

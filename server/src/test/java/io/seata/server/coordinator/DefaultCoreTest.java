@@ -354,14 +354,12 @@ public class DefaultCoreTest {
         }
 
         @Override
-        public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
-                                         String applicationData) throws TransactionException {
+        public BranchStatus branchCommit(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
             return commitStatus;
         }
 
         @Override
-        public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
-                                           String applicationData) throws TransactionException {
+        public BranchStatus branchRollback(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
             return rollbackStatus;
         }
 

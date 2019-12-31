@@ -48,7 +48,7 @@ public class DefaultCore implements Core {
 
     private EventBus eventBus = EventBusManager.get();
 
-    private static volatile Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
+    private static Map<BranchType, AbstractCore> coreMap = new ConcurrentHashMap<>();
 
     /**
      * get the Default core.
@@ -110,15 +110,13 @@ public class DefaultCore implements Core {
     }
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
-                                     String applicationData) throws TransactionException {
-        return getCore(branchType).branchCommit(branchType, xid, branchId, resourceId, applicationData);
+    public BranchStatus branchCommit(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        return getCore(branchSession.getBranchType()).branchCommit(globalSession, branchSession);
     }
 
     @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
-                                       String applicationData) throws TransactionException {
-        return getCore(branchType).branchRollback(branchType, xid, branchId, resourceId, applicationData);
+    public BranchStatus branchRollback(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        return getCore(branchSession.getBranchType()).branchRollback(globalSession, branchSession);
     }
 
     @Override
@@ -186,9 +184,7 @@ public class DefaultCore implements Core {
                     continue;
                 }
                 try {
-                    BranchStatus branchStatus = getCore(branchSession.getBranchType()).branchCommit(branchSession.getBranchType(),
-                            branchSession.getXid(), branchSession.getBranchId(), branchSession.getResourceId(),
-                            branchSession.getApplicationData());
+                    BranchStatus branchStatus = getCore(branchSession.getBranchType()).branchCommit(globalSession, branchSession);
 
                     switch (branchStatus) {
                         case PhaseTwo_Committed:
@@ -286,10 +282,7 @@ public class DefaultCore implements Core {
                     continue;
                 }
                 try {
-                    BranchStatus branchStatus = branchRollback(branchSession.getBranchType(),
-                            branchSession.getXid(), branchSession.getBranchId(), branchSession.getResourceId(),
-                            branchSession.getApplicationData());
-
+                    BranchStatus branchStatus = branchRollback(globalSession, branchSession);
                     switch (branchStatus) {
                         case PhaseTwo_Rollbacked:
                             globalSession.removeBranch(branchSession);

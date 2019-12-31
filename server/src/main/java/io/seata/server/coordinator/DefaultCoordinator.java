@@ -158,14 +158,12 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     protected void doGlobalCommit(GlobalCommitRequest request, GlobalCommitResponse response, RpcContext rpcContext)
         throws TransactionException {
         response.setGlobalStatus(core.commit(request.getXid()));
-
     }
 
     @Override
     protected void doGlobalRollback(GlobalRollbackRequest request, GlobalRollbackResponse response,
                                     RpcContext rpcContext) throws TransactionException {
         response.setGlobalStatus(core.rollback(request.getXid()));
-
     }
 
     @Override
@@ -178,7 +176,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
     protected void doGlobalReport(GlobalReportRequest request, GlobalReportResponse response, RpcContext rpcContext)
         throws TransactionException {
         response.setGlobalStatus(core.globalReport(request.getXid(), request.getGlobalStatus()));
-
     }
 
     @Override
@@ -187,7 +184,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         response.setBranchId(
             core.branchRegister(request.getBranchType(), request.getResourceId(), rpcContext.getClientId(),
                 request.getXid(), request.getApplicationData(), request.getLockKey()));
-
     }
 
     @Override
@@ -195,7 +191,6 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         throws TransactionException {
         core.branchReport(request.getBranchType(), request.getXid(), request.getBranchId(), request.getStatus(),
             request.getApplicationData());
-
     }
 
     @Override

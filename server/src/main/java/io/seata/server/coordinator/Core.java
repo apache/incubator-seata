@@ -16,10 +16,11 @@
 package io.seata.server.coordinator;
 
 import io.seata.core.exception.TransactionException;
+import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
-import io.seata.core.model.ResourceManagerInbound;
 import io.seata.core.model.ResourceManagerOutbound;
 import io.seata.core.model.TransactionManager;
+import io.seata.server.session.BranchSession;
 import io.seata.server.session.GlobalSession;
 
 /**
@@ -27,7 +28,7 @@ import io.seata.server.session.GlobalSession;
  *
  * @author sharajava
  */
-public interface Core extends TransactionManager, ResourceManagerOutbound, ResourceManagerInbound {
+public interface Core extends TransactionManager, ResourceManagerOutbound {
 
     /**
      * Do global commit.
@@ -49,5 +50,35 @@ public interface Core extends TransactionManager, ResourceManagerOutbound, Resou
      */
     boolean doGlobalRollback(GlobalSession globalSession, boolean retrying) throws TransactionException;
 
-    void doGlobalReport(GlobalSession globalSession, String xid, GlobalStatus globalStatus) throws TransactionException;
+    /**
+     * Do global report.
+     *
+     * @param globalSession the global session
+     * @param xid           Transaction id.
+     * @param param         the global status
+     * @throws TransactionException the transaction exception
+     */
+    void doGlobalReport(GlobalSession globalSession, String xid, GlobalStatus param) throws TransactionException;
+
+    /**
+     * Commit a branch transaction.
+     *
+     * @param globalSession the global session
+     * @param branchSession the branch session
+     * @return Status of the branch after committing.
+     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
+     *                              out.
+     */
+    BranchStatus branchCommit(GlobalSession globalSession, BranchSession branchSession) throws TransactionException;
+
+    /**
+     * Rollback a branch transaction.
+     *
+     * @param globalSession the global session
+     * @param branchSession the branch session
+     * @return Status of the branch after rollbacking.
+     * @throws TransactionException Any exception that fails this will be wrapped with TransactionException and thrown
+     *                              out.
+     */
+    BranchStatus branchRollback(GlobalSession globalSession, BranchSession branchSession) throws TransactionException;
 }
