@@ -127,6 +127,8 @@ public class StarterConstants {
     public static String NORMALIZED_KEY_GROUPLIST = "grouplist";
     public static String SPECIAL_KEY_DATASOURCE_AUTOPROXY = "datasource.autoproxy";
     public static String NORMALIZED_KEY_DATASOURCE_AUTOPROXY = "datasourceAutoproxy";
+    public static String SPECIAL_KEY_DATASOURCE_USE_JDK_PROXY = "datasource.useJdkProxy";
+    public static String NORMALIZED_KEY_DATASOURCE_USE_JDK_PROXY = "datasourceUseJdkProxy";
     public static String SPECIAL_KEY_UNDO = "client.undo.";
     public static String NORMALIZED_KEY_UNDO = "client.undo.";
     public static String SPECIAL_KEY_CLIENT = "client.";

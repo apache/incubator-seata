@@ -30,6 +30,10 @@ public class SpringProperties {
      * auto proxy the DataSource bean
      */
     private boolean datasourceAutoproxy = true;
+    /**
+     * whether use JDK proxy instead of Cglib proxy
+     */
+    private boolean datasourceUseJdkProxy = false;
 
     public boolean isDatasourceAutoproxy() {
         return datasourceAutoproxy;
@@ -37,6 +41,15 @@ public class SpringProperties {
 
     public SpringProperties setDatasourceAutoproxy(boolean datasourceAutoproxy) {
         this.datasourceAutoproxy = datasourceAutoproxy;
+        return this;
+    }
+
+    public boolean isDatasourceUseJdkProxy() {
+        return datasourceUseJdkProxy;
+    }
+
+    public SpringProperties setDatasourceUseJdkProxy(boolean datasourceUseJdkProxy) {
+        this.datasourceUseJdkProxy = datasourceUseJdkProxy;
         return this;
     }
 }

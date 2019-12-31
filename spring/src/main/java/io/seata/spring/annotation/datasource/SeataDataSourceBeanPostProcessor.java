@@ -16,28 +16,31 @@
 package io.seata.spring.annotation.datasource;
 
 import javax.sql.DataSource;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.config.ConfigurationFactory;
 import io.seata.rm.datasource.DataSourceProxy;
+import io.seata.spring.util.SpringProxyUtils;
 import net.sf.cglib.proxy.Enhancer;
-import net.sf.cglib.proxy.MethodProxy;
+import net.sf.cglib.proxy.MethodInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
-import org.springframework.core.PriorityOrdered;
 
 import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_AUTOPROXY;
+import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_USE_JDK_PROXY;
 
 /**
  * @author xingfudeshi@gmail.com
  * @date 2019/12/26
  * The type seata data source bean post processor
  */
-public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor, PriorityOrdered {
+public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataDataSourceBeanPostProcessor.class);
 
     @Override
@@ -46,25 +49,7 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor, Prio
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Auto proxy of [{}]", beanName);
             }
-            DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
-            return Enhancer.create(bean.getClass(), new net.sf.cglib.proxy.MethodInterceptor() {
-                @Override
-                public Object intercept(Object proxy, Method method, Object[] args, MethodProxy methodProxy) throws Throwable {
-                    Method m = BeanUtils.findDeclaredMethod(DataSourceProxy.class, method.getName(), method.getParameterTypes());
-                    if (null != m) {
-                        return m.invoke(dataSourceProxy, args);
-                    } else {
-                        boolean oldAccessible = method.isAccessible();
-                        try {
-                            method.setAccessible(true);
-                            return method.invoke(bean, args);
-                        } finally {
-                            //recover the original accessible for security reason
-                            method.setAccessible(oldAccessible);
-                        }
-                    }
-                }
-            });
+            return proxyDataSource(bean);
         }
         return bean;
     }
@@ -78,8 +63,46 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor, Prio
         return bean;
     }
 
-    @Override
-    public int getOrder() {
-        return HIGHEST_PRECEDENCE;
+    /**
+     * proxy data source
+     *
+     * @param originBean
+     * @return proxied datasource
+     */
+    private Object proxyDataSource(Object originBean) {
+        DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) originBean);
+        if (ConfigurationFactory.getInstance().getBoolean(DATASOURCE_USE_JDK_PROXY, false)) {
+            return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), SpringProxyUtils.getAllInterfaces(originBean), (proxy, method, args) -> handleMethodProxy(dataSourceProxy, method, args, originBean));
+        } else {
+            return Enhancer.create(originBean.getClass(), (MethodInterceptor) (proxy, method, args, methodProxy) -> handleMethodProxy(dataSourceProxy, method, args, originBean));
+        }
+
+    }
+
+    /**
+     * handle method proxy
+     *
+     * @param dataSourceProxy
+     * @param method
+     * @param args
+     * @param originBean
+     * @return proxied datasource
+     * @throws InvocationTargetException
+     * @throws IllegalAccessException
+     */
+    private Object handleMethodProxy(DataSourceProxy dataSourceProxy, Method method, Object[] args, Object originBean) throws InvocationTargetException, IllegalAccessException {
+        Method m = BeanUtils.findDeclaredMethod(DataSourceProxy.class, method.getName(), method.getParameterTypes());
+        if (null != m) {
+            return m.invoke(dataSourceProxy, args);
+        } else {
+            boolean oldAccessible = method.isAccessible();
+            try {
+                method.setAccessible(true);
+                return method.invoke(originBean, args);
+            } finally {
+                //recover the original accessible for security reason
+                method.setAccessible(oldAccessible);
+            }
+        }
     }
 }

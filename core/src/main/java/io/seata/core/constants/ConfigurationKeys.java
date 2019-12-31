@@ -330,6 +330,11 @@ public class ConfigurationKeys {
      */
     public static final String DATASOURCE_AUTOPROXY = CLIENT_PREFIX + SUPPORT_PREFIX + SPRING_PREFIX + DATASOURCE_PREFIX
         + "autoproxy";
+    /**
+     * The constant DATASOURCE_USE_JDK_PROXY
+     */
+    public static final String DATASOURCE_USE_JDK_PROXY = CLIENT_PREFIX + SUPPORT_PREFIX + SPRING_PREFIX + DATASOURCE_PREFIX
+        + "useJdkProxy";
 
     /**
      * The constant MAX_COMMIT_RETRY_TIMEOUT.

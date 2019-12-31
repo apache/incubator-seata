@@ -17,6 +17,7 @@ seata:
     support:
       spring:
         datasource-autoproxy: true
+        datasource-use-jdk-proxy: false
     undo:
       undo-data-validation: true
       undo-log-serialization: jackson

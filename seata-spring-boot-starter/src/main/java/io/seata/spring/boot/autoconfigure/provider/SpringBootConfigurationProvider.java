@@ -36,6 +36,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_CONFIG_APOLLO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_CONFIG_ZK;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_DATASOURCE_AUTOPROXY;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_DATASOURCE_USE_JDK_PROXY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_GROUPLIST;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_REGISTRY_ZK;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_UNDO;
@@ -47,6 +48,7 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CL
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CONFIG_APOLLO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CONFIG_ZK;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_DATASOURCE_AUTOPROXY;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_DATASOURCE_USE_JDK_PROXY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_REGISTRY_ZK;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_UNDO;
@@ -130,6 +132,9 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         }
         if (rawDataId.endsWith(SPECIAL_KEY_DATASOURCE_AUTOPROXY)) {
             return StarterConstants.SPRING_PREFIX + "." + NORMALIZED_KEY_DATASOURCE_AUTOPROXY;
+        }
+        if (rawDataId.endsWith(SPECIAL_KEY_DATASOURCE_USE_JDK_PROXY)) {
+            return StarterConstants.SPRING_PREFIX + "." + NORMALIZED_KEY_DATASOURCE_USE_JDK_PROXY;
         }
         if (rawDataId.startsWith(SPECIAL_KEY_UNDO)) {
             String suffix = StringUtils.removeStart(rawDataId, NORMALIZED_KEY_UNDO);
