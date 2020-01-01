@@ -43,7 +43,6 @@ import static io.seata.core.exception.TransactionExceptionCode.BranchTransaction
 import static io.seata.core.exception.TransactionExceptionCode.FailedToAddBranch;
 import static io.seata.core.exception.TransactionExceptionCode.GlobalTransactionNotActive;
 import static io.seata.core.exception.TransactionExceptionCode.GlobalTransactionStatusInvalid;
-import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
 import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchCommitRequest;
 import static io.seata.core.exception.TransactionExceptionCode.FailedToSendBranchRollbackRequest;
 
