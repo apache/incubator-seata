@@ -64,9 +64,15 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
         "CARDINALITY"
     );
 
+    private static List<String> pkMetaColumnLabels = Arrays.asList(
+        "PK_NAME"
+    );
+
     private Object[][] columnsMetasReturnValue;
 
     private Object[][] indexMetasReturnValue;
+
+    private Object[][] pkMetasReturnValue;
 
     /**
      * Instantiate a new MockDatabaseMetaData
@@ -75,6 +81,7 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
         this.connection = connection;
         this.columnsMetasReturnValue = connection.getDriver().getMockColumnsMetasReturnValue();
         this.indexMetasReturnValue = connection.getDriver().getMockIndexMetasReturnValue();
+        this.pkMetasReturnValue = connection.getDriver().getMockPkMetasReturnValue();
     }
 
     @Override
@@ -732,7 +739,7 @@ public class MockDatabaseMetaData implements DatabaseMetaData {
 
     @Override
     public ResultSet getPrimaryKeys(String catalog, String schema, String table) throws SQLException {
-        return null;
+        return new MockResultSet(this.connection.createStatement()).mockResultSet(pkMetaColumnLabels, pkMetasReturnValue);
     }
 
     @Override
