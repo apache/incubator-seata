@@ -76,19 +76,15 @@ public abstract class AbstractCore implements Core {
                         .format("Could not register branch into global session xid = %s status = %s",
                                 globalSession.getXid(), globalSession.getStatus()));
             }
-            branchRegisterCheck(globalSession);
+            globalSessionStatusCheck(globalSession);
             globalSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
             BranchSession branchSession = SessionHelper.newBranchByGlobal(globalSession, branchType, resourceId,
                     applicationData, lockKeys, clientId);
-            if (!branchSession.lock()) {
-                throw new BranchTransactionException(LockKeyConflict, String
-                        .format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
-                                branchSession.getBranchId()));
-            }
+            branchSessionLock(globalSession, branchSession);
             try {
                 globalSession.addBranch(branchSession);
             } catch (RuntimeException ex) {
-                branchSession.unlock();
+                branchSessionUnlock(branchSession);
                 throw new BranchTransactionException(FailedToAddBranch, String
                         .format("Failed to store branch xid = %s branchId = %s", globalSession.getXid(),
                                 branchSession.getBranchId()), ex);
@@ -99,12 +95,20 @@ public abstract class AbstractCore implements Core {
         });
     }
 
-    protected void branchRegisterCheck(GlobalSession globalSession) throws GlobalTransactionException {
+    protected void globalSessionStatusCheck(GlobalSession globalSession) throws GlobalTransactionException {
         if (globalSession.getStatus() != GlobalStatus.Begin) {
             throw new GlobalTransactionException(GlobalTransactionStatusInvalid, String
                     .format("Could not register branch into global session xid = %s status = %s while expecting %s",
                             globalSession.getXid(), globalSession.getStatus(), GlobalStatus.Begin));
         }
+    }
+
+    protected void branchSessionLock(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+
+    }
+
+    protected void branchSessionUnlock(BranchSession branchSession) throws TransactionException {
+
     }
 
     private GlobalSession assertGlobalSessionNotNull(String xid, boolean withBranchSessions)

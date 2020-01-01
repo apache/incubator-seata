@@ -55,7 +55,7 @@ public class SagaCore extends AbstractCore {
     }
 
     @Override
-    public void branchRegisterCheck(GlobalSession globalSession) throws GlobalTransactionException {
+    public void globalSessionStatusCheck(GlobalSession globalSession) throws GlobalTransactionException {
         // SAGA type accept forward(retry) operation, forward operation will register remaining branches
     }
 

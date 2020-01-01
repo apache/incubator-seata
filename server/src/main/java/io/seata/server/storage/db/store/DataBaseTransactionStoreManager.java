@@ -15,18 +15,8 @@
  */
 package io.seata.server.storage.db.store;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.sql.DataSource;
-
 import io.seata.common.exception.StoreException;
-import io.seata.common.executor.Initialize;
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.Configuration;
@@ -47,14 +37,20 @@ import io.seata.server.store.AbstractTransactionStoreManager;
 import io.seata.server.store.SessionStorable;
 import io.seata.server.store.TransactionStoreManager;
 
+import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 /**
  * The type Database transaction store manager.
  *
  * @author zhangsen
  */
-@LoadLevel(name = "db")
 public class DataBaseTransactionStoreManager extends AbstractTransactionStoreManager
-    implements TransactionStoreManager, Initialize {
+    implements TransactionStoreManager {
 
     /**
      * The constant CONFIG.
@@ -80,10 +76,6 @@ public class DataBaseTransactionStoreManager extends AbstractTransactionStoreMan
      * Instantiates a new Database transaction store manager.
      */
     public DataBaseTransactionStoreManager() {
-    }
-
-    @Override
-    public void init() {
         logQueryLimit = CONFIG.getInt(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
         String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         //init dataSource

@@ -15,10 +15,15 @@
  */
 package io.seata.server.transaction.at;
 
+import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchType;
 import io.seata.core.rpc.ServerMessageSender;
 import io.seata.server.coordinator.AbstractCore;
+import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
+
+import static io.seata.core.exception.TransactionExceptionCode.LockKeyConflict;
 
 /**
  * The type at core.
@@ -34,6 +39,20 @@ public class ATCore extends AbstractCore {
     @Override
     public BranchType getBranchType() {
         return BranchType.AT;
+    }
+
+    @Override
+    protected void branchSessionLock(GlobalSession globalSession, BranchSession branchSession) throws TransactionException {
+        if (!branchSession.lock()) {
+            throw new BranchTransactionException(LockKeyConflict, String
+                    .format("Global lock acquire failed xid = %s branchId = %s", globalSession.getXid(),
+                            branchSession.getBranchId()));
+        }
+    }
+
+    @Override
+    protected void branchSessionUnlock(BranchSession branchSession) throws TransactionException {
+        branchSession.unlock();
     }
 
     @Override

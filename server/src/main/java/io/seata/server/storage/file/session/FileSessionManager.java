@@ -15,6 +15,26 @@
  */
 package io.seata.server.storage.file.session;
 
+import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.loader.LoadLevel;
+import io.seata.common.util.StringUtils;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.model.GlobalStatus;
+import io.seata.server.UUIDGenerator;
+import io.seata.server.session.AbstractSessionManager;
+import io.seata.server.session.BranchSession;
+import io.seata.server.session.GlobalSession;
+import io.seata.server.session.Reloadable;
+import io.seata.server.session.SessionCondition;
+import io.seata.server.storage.file.ReloadableStore;
+import io.seata.server.storage.file.TransactionWriteStore;
+import io.seata.server.storage.file.store.FileTransactionStoreManager;
+import io.seata.server.store.AbstractTransactionStoreManager;
+import io.seata.server.store.SessionStorable;
+import io.seata.server.store.TransactionStoreManager;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,28 +44,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.common.loader.LoadLevel;
-import io.seata.common.util.StringUtils;
-import io.seata.config.ConfigurationFactory;
-import io.seata.core.constants.ConfigurationKeys;
-import io.seata.core.exception.TransactionException;
-import io.seata.core.model.GlobalStatus;
-import io.seata.core.store.StoreMode;
-import io.seata.server.UUIDGenerator;
-import io.seata.server.session.AbstractSessionManager;
-import io.seata.server.session.BranchSession;
-import io.seata.server.session.GlobalSession;
-import io.seata.server.session.Reloadable;
-import io.seata.server.session.SessionCondition;
-import io.seata.server.session.SessionManager;
-import io.seata.server.storage.file.ReloadableStore;
-import io.seata.server.store.AbstractTransactionStoreManager;
-import io.seata.server.store.SessionStorable;
-import io.seata.server.store.TransactionStoreManager;
-import io.seata.server.storage.file.TransactionWriteStore;
 
 /**
  * The type File based session manager.
@@ -72,9 +70,8 @@ public class FileSessionManager extends AbstractSessionManager implements Reload
     public FileSessionManager(String name, String sessionStoreFilePath) throws IOException {
         super(name);
         if (StringUtils.isNotBlank(sessionStoreFilePath)) {
-            transactionStoreManager = EnhancedServiceLoader.load(TransactionStoreManager.class, StoreMode.FILE.name(),
-                    new Class[] {String.class, SessionManager.class},
-                    new Object[] {sessionStoreFilePath + File.separator + name, this});
+            transactionStoreManager = new FileTransactionStoreManager(
+                    sessionStoreFilePath + File.separator + name, this);
         } else {
             transactionStoreManager = new AbstractTransactionStoreManager() {
                 @Override

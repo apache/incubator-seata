@@ -120,7 +120,7 @@ public class GlobalSession implements SessionLifecycle, SessionStorable {
      */
     public boolean isSaga() {
         if (branchSessions.size() > 0) {
-            return BranchType.SAGA.equals(branchSessions.get(0).getBranchType());
+            return BranchType.SAGA == branchSessions.get(0).getBranchType();
         }
         return false;
     }

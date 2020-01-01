@@ -34,7 +34,6 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.StoreException;
-import io.seata.common.loader.LoadLevel;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.server.session.BranchSession;
@@ -56,7 +55,6 @@ import org.slf4j.LoggerFactory;
  *
  * @author slievrly
  */
-@LoadLevel(name = "file")
 public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     implements TransactionStoreManager, ReloadableStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileTransactionStoreManager.class);

@@ -54,7 +54,6 @@ public class DefaultCore implements Core {
      * get the Default core.
      *
      * @param messageSender the message sender
-     * @return the Default core.
      */
     public DefaultCore(ServerMessageSender messageSender) {
         List<AbstractCore> allCore = EnhancedServiceLoader.loadAll(AbstractCore.class,
@@ -147,8 +146,8 @@ public class DefaultCore implements Core {
 
         boolean shouldCommit = SessionHolder.lockAndExecute(globalSession, () -> {
             // the lock should release after branch commit
-            globalSession
-                    .closeAndClean(); // Highlight: Firstly, close the session, then no more branch can be registered.
+            // Highlight: Firstly, close the session, then no more branch can be registered.
+            globalSession.closeAndClean();
             if (globalSession.getStatus() == GlobalStatus.Begin) {
                 globalSession.changeStatus(GlobalStatus.Committing);
                 return true;

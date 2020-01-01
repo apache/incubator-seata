@@ -87,7 +87,6 @@ public class FileLockManagerImplTest {
         branchSession.setLockKey(lockKey);
         branchSession.setBranchType(BranchType.AT);
         branchSession.setApplicationData("{\"data\":\"test\"}");
-        branchSession.setBranchType(BranchType.AT);
         return Stream.of(branchSession);
     }
 
