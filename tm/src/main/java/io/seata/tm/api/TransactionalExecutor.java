@@ -72,7 +72,17 @@ public interface TransactionalExecutor {
          * Report failure code.
          */
         //
-        ReportFailure
+        ReportFailure,
+
+        /**
+         * Participant rollback done
+         */
+        ParticipantRollbackDone,
+
+        /**
+         * Participant rollback failure
+         */
+        ParticipantRollbackFailure
     }
 
     /**

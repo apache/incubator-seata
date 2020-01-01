@@ -89,13 +89,8 @@ public class TransactionalTemplate {
                 rollbackTransaction(tx, ex);
             } catch (TransactionException txe) {
                 // Failed to rollback
-                if (tx.getRole() == GlobalTransactionRole.Launcher) {
-                    throw new TransactionalExecutor.ExecutionException(tx, txe,
-                            TransactionalExecutor.Code.RollbackFailure, ex);
-                } else if (tx.getRole() == GlobalTransactionRole.Participant) {
-                    throw new TransactionalExecutor.ExecutionException(tx, new TransactionException(TransactionExceptionCode.ParticipantRollbackFailure,txe),
-                            TransactionalExecutor.Code.RollbackFailure, ex);
-                }
+                throw new TransactionalExecutor.ExecutionException(tx, txe,
+                        getRollbackFailureCode(tx.getRole()), ex);
             }
         } else {
             // not roll back on this exception, so commit
@@ -119,26 +114,12 @@ public class TransactionalTemplate {
         triggerBeforeRollback();
         //branch has reported rollback done
         if (!(ex instanceof TransactionException
-                && ((TransactionException) ex).getCode() == TransactionExceptionCode.ParticipantRollbackDone)) {
+                && ((TransactionException) ex).getCode() == TransactionExceptionCode.ParticipantReportedRollback)) {
             tx.rollback();
         }
         triggerAfterRollback();
         // 3.1 Successfully rolled back
-        if (tx.getRole() == GlobalTransactionRole.Launcher) {
-            if (ex instanceof TransactionException) {
-                throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex.getCause());
-            } else {
-                throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone, ex);
-            }
-        } else if (tx.getRole() == GlobalTransactionRole.Participant) {
-            if (ex instanceof TransactionException) {
-                throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone,
-                        new TransactionException(TransactionExceptionCode.ParticipantRollbackDone, ex.getCause()));
-            } else {
-                throw new TransactionalExecutor.ExecutionException(tx, TransactionalExecutor.Code.RollbackDone,
-                        new TransactionException(TransactionExceptionCode.ParticipantRollbackDone, ex));
-            }
-        }
+        throw new TransactionalExecutor.ExecutionException(tx, getRollbackDoneCode(tx.getRole()), getOriginalException(ex));
     }
 
     private void beginTransaction(TransactionInfo txInfo, GlobalTransaction tx) throws TransactionalExecutor.ExecutionException {
@@ -229,6 +210,30 @@ public class TransactionalTemplate {
 
     private List<TransactionHook> getCurrentHooks() {
         return TransactionHookManager.getHooks();
+    }
+
+    private Throwable getOriginalException(Throwable ex) {
+        if (ex instanceof TransactionException) {
+            return ex.getCause();
+        } else {
+            return ex;
+        }
+    }
+
+    private TransactionalExecutor.Code getRollbackDoneCode(GlobalTransactionRole role) {
+        if (role == GlobalTransactionRole.Launcher) {
+            return TransactionalExecutor.Code.RollbackDone;
+        } else {
+            return TransactionalExecutor.Code.ParticipantRollbackDone;
+        }
+    }
+
+    private TransactionalExecutor.Code getRollbackFailureCode(GlobalTransactionRole role) {
+        if (role == GlobalTransactionRole.Launcher) {
+            return TransactionalExecutor.Code.RollbackFailure;
+        } else {
+            return TransactionalExecutor.Code.ParticipantRollbackFailure;
+        }
     }
 
 }

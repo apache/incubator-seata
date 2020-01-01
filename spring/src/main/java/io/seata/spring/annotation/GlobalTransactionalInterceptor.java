@@ -15,17 +15,14 @@
  */
 package io.seata.spring.annotation;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeEvent;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
+import io.seata.core.exception.TransactionException;
+import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.rm.GlobalLockTemplate;
 import io.seata.tm.api.DefaultFailureHandlerImpl;
 import io.seata.tm.api.FailureHandler;
@@ -41,6 +38,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * The type Global transactional interceptor.
@@ -153,9 +155,12 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 case RollbackFailure:
                     failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
                     throw e.getCause();
+                case ParticipantRollbackDone:
+                    throw new TransactionException(TransactionExceptionCode.ParticipantReportedRollback,e.getOriginalException());
+                case ParticipantRollbackFailure:
+                    throw e.getCause();
                 default:
                     throw new ShouldNeverHappenException("Unknown TransactionalExecutor.Code: " + code);
-
             }
         }
     }

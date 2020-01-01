@@ -143,42 +143,64 @@ public class TransactionTemplateTest {
         completeTransactionAfterThrowing.setAccessible(true);
 
         RuntimeException runtimeException = new RuntimeException("original");
-        Throwable rollbackDoneException = new TransactionException(TransactionExceptionCode.ParticipantRollbackDone, runtimeException);
+        Throwable rollbackDoneException = new TransactionException(TransactionExceptionCode.ParticipantReportedRollback, runtimeException);
         Throwable rollbackFailException = new TransactionException("Failed to report global rollback", runtimeException);
 
-        //Participant throw rollbackDoneException
+        //When Participant RuntimeException occurred, rollback and throw original Exception
         try {
             rollbackTransaction.invoke(template, participantTransaction, runtimeException);
         }catch (InvocationTargetException e) {
-            Throwable originalException = ((TransactionalExecutor.ExecutionException) e.getTargetException()).getOriginalException();
-            Assertions.assertEquals(originalException.getMessage(), rollbackDoneException.getMessage());
+            TransactionalExecutor.ExecutionException executionException = ((TransactionalExecutor.ExecutionException) e.getTargetException());
+            Assertions.assertEquals(executionException.getCode(), TransactionalExecutor.Code.ParticipantRollbackDone);
+            Assertions.assertEquals(executionException.getOriginalException().getMessage(), runtimeException.getMessage());
         }
 
-        //Participant throw rollbackFailException
+        //When Participant received rollbackDoneException, rollback and throw original Exception
+        try {
+            rollbackTransaction.invoke(template, participantTransaction, rollbackDoneException);
+        }catch (InvocationTargetException e) {
+            TransactionalExecutor.ExecutionException executionException = ((TransactionalExecutor.ExecutionException) e.getTargetException());
+            Assertions.assertEquals(executionException.getCode(), TransactionalExecutor.Code.ParticipantRollbackDone);
+            Assertions.assertEquals(executionException.getOriginalException().getMessage(), runtimeException.getMessage());
+        }
+
+        //When Launcher RuntimeException occurred, rollback and throw original Exception
+        try {
+            rollbackTransaction.invoke(template, launcherTransaction, runtimeException);
+        }catch (InvocationTargetException e) {
+            TransactionalExecutor.ExecutionException executionException = ((TransactionalExecutor.ExecutionException) e.getTargetException());
+            Assertions.assertEquals(executionException.getCode(), TransactionalExecutor.Code.RollbackDone);
+            Assertions.assertEquals(executionException.getOriginalException().getMessage(), runtimeException.getMessage());
+        }
+
+        //When Launcher received rollbackDoneException ,rollback and throw original Exception
+        try {
+            rollbackTransaction.invoke(template, launcherTransaction, rollbackDoneException);
+        }catch (InvocationTargetException e) {
+            TransactionalExecutor.ExecutionException executionException = ((TransactionalExecutor.ExecutionException) e.getTargetException());
+            Assertions.assertEquals(executionException.getCode(), TransactionalExecutor.Code.RollbackDone);
+            Assertions.assertEquals(executionException.getOriginalException().getMessage(), runtimeException.getMessage());
+        }
+
+        //When Launcher RuntimeException occurred, rollbackFailure and throw cause
+        try {
+            doThrow(rollbackFailException).when(launcherTransaction).rollback();
+            completeTransactionAfterThrowing.invoke(template, new TransactionInfo(), launcherTransaction, runtimeException);
+        }catch (InvocationTargetException e) {
+            TransactionalExecutor.ExecutionException executionException = ((TransactionalExecutor.ExecutionException) e.getTargetException());
+            Assertions.assertEquals(executionException.getCode(), TransactionalExecutor.Code.RollbackFailure);
+            Assertions.assertEquals(executionException.getCause(),rollbackFailException);
+        }
+
+        //When Participant RuntimeException occurred, rollbackFailure and throw cause
         try {
             doThrow(rollbackFailException).when(participantTransaction).rollback();
             completeTransactionAfterThrowing.invoke(template, new TransactionInfo(), participantTransaction, runtimeException);
         }catch (InvocationTargetException e) {
-            Throwable originalException = e.getTargetException().getCause().getCause();
-            Assertions.assertEquals(originalException.getMessage(), rollbackFailException.getMessage());
+            TransactionalExecutor.ExecutionException executionException = ((TransactionalExecutor.ExecutionException) e.getTargetException());
+            Assertions.assertEquals(executionException.getCode(), TransactionalExecutor.Code.ParticipantRollbackFailure);
+            Assertions.assertEquals(executionException.getCause(),rollbackFailException);
         }
-
-        //Launcher receive Participant threw rollbackDoneException
-        try {
-            rollbackTransaction.invoke(template, launcherTransaction, rollbackDoneException);
-        }catch (InvocationTargetException e) {
-            Throwable originalException = ((TransactionalExecutor.ExecutionException) e.getTargetException()).getOriginalException();
-            Assertions.assertEquals(originalException.getMessage(), runtimeException.getMessage());
-        }
-
-        //Launcher receive Participant threw rollbackFailException
-        try {
-            rollbackTransaction.invoke(template, launcherTransaction, rollbackFailException);
-        }catch (InvocationTargetException e) {
-            Throwable originalException = ((TransactionalExecutor.ExecutionException) e.getTargetException()).getOriginalException();
-            Assertions.assertEquals(originalException.getMessage(), runtimeException.getMessage());
-        }
-
     }
 
     private TransactionHook testRollBackRules(Set<RollbackRule> rollbackRules, Throwable throwable) throws Throwable {
