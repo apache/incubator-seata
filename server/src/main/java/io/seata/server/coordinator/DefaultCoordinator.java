@@ -96,9 +96,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
         1000L);
 
     /**
-     * The constant ASYN_COMMITTING_RETRY_PERIOD.
+     * The constant ASYNC_COMMITTING_RETRY_PERIOD.
      */
-    protected static final long ASYN_COMMITTING_RETRY_PERIOD = CONFIG.getLong(
+    protected static final long ASYNC_COMMITTING_RETRY_PERIOD = CONFIG.getLong(
         ConfigurationKeys.ASYN_COMMITING_RETRY_PERIOD, 1000L);
 
     /**
@@ -113,15 +113,15 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     protected static final long TIMEOUT_RETRY_PERIOD = CONFIG.getLong(ConfigurationKeys.TIMEOUT_RETRY_PERIOD, 1000L);
 
     /**
-     * The Transaction undolog delete period.
+     * The Transaction undo log delete period.
      */
-    protected static final long UNDOLOG_DELETE_PERIOD = CONFIG.getLong(
+    protected static final long UNDO_LOG_DELETE_PERIOD = CONFIG.getLong(
         ConfigurationKeys.TRANSACTION_UNDO_LOG_DELETE_PERIOD, 24 * 60 * 60 * 1000);
 
     /**
-     * The Transaction undolog delay delete period
+     * The Transaction undo log delay delete period
      */
-    protected static final long UNDOLOG_DELAY_DELETE_PERIOD = 3 * 60 * 1000;
+    protected static final long UNDO_LOG_DELAY_DELETE_PERIOD = 3 * 60 * 1000;
 
     private static final int ALWAYS_RETRY_BOUNDARY = 0;
 
@@ -514,7 +514,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception async committing ... ", e);
             }
-        }, 0, ASYN_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
+        }, 0, ASYNC_COMMITTING_RETRY_PERIOD, TimeUnit.MILLISECONDS);
 
         timeoutCheck.scheduleAtFixedRate(() -> {
             try {
@@ -530,7 +530,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
             } catch (Exception e) {
                 LOGGER.info("Exception undoLog deleting ... ", e);
             }
-        }, UNDOLOG_DELAY_DELETE_PERIOD, UNDOLOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
+        }, UNDO_LOG_DELAY_DELETE_PERIOD, UNDO_LOG_DELETE_PERIOD, TimeUnit.MILLISECONDS);
     }
 
     @Override
