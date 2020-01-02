@@ -22,6 +22,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.google.common.collect.Maps;
 import io.seata.core.context.RootContext;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -46,8 +47,6 @@ import java.util.stream.Collectors;
 public abstract class AbstractHttpExecutor implements HttpExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractHttpExecutor.class);
-    private static final int SUCCESS_CODE = 200;
-
 
     @Override
     public <T, K> K executePost(String host, String path, T paramObject, Class<K> returnType) throws IOException {
@@ -125,7 +124,9 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
             headers.keySet().forEach(key -> httpUriRequest.addHeader(key, headers.get(key)));
         }
         response = httpClient.execute(httpUriRequest);
-        if (response.getStatusLine().getStatusCode() != SUCCESS_CODE) {
+        int statusCode = response.getStatusLine().getStatusCode();
+        /** 2xx is success. */
+        if (statusCode >= HttpStatus.SC_OK && statusCode <= HttpStatus.SC_MULTI_STATUS) {
             throw new RuntimeException("Failed to invoke the http method "
                     + httpUriRequest.getURI() + " in the service "
                     + ". return status by: " + response.getStatusLine().getStatusCode());
