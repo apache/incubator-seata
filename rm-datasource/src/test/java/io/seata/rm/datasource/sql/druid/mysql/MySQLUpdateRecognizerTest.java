@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.sql.druid;
+package io.seata.rm.datasource.sql.druid.mysql;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +32,7 @@ import io.seata.rm.datasource.ParametersHolder;
 
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLType;
-import io.seata.rm.datasource.sql.druid.mysql.MySQLUpdateRecognizer;
+import io.seata.rm.datasource.sql.druid.AbstractMySQLRecognizerTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

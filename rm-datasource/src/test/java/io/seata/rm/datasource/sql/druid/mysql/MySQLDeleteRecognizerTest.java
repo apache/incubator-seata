@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.sql.druid;
+package io.seata.rm.datasource.sql.druid.mysql;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,7 +29,8 @@ import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.ParametersHolder;
 
 import io.seata.rm.datasource.sql.SQLType;
-import io.seata.rm.datasource.sql.druid.mysql.MySQLDeleteRecognizer;
+import io.seata.rm.datasource.sql.druid.AbstractMySQLRecognizerTest;
+import io.seata.rm.datasource.sql.druid.BaseRecognizer.VMarker;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -42,7 +43,7 @@ public class MySQLDeleteRecognizerTest extends AbstractMySQLRecognizerTest {
 
     @Test
     public void testVMarker() {
-        Assertions.assertEquals("?", new BaseRecognizer.VMarker().toString());
+        Assertions.assertEquals("?", new VMarker().toString());
     }
 
     /**
