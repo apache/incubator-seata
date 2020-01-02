@@ -115,9 +115,7 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 * Mailing list: 
   * dev-seata@googlegroups.com , for dev/user discussion. [subscribe](mailto:dev-seata+subscribe@googlegroups.com), [unsubscribe](mailto:dev-seata+unsubscribe@googlegroups.com), [archive](https://groups.google.com/forum/#!forum/dev-seata)
   
-**Dingtalk**
-
-<img src="https://upload-images.jianshu.io/upload_images/4420767-4e95b186a1a1bfba.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240"  height="300" width="300">
+<img src="https://img.alicdn.com/tfs/TB1CR2orKT2gK0jSZFvXXXnFXXa-1798-588.jpg"  height="200" width="630">
 
 
 ## Seata ecosystem
@@ -126,8 +124,8 @@ Contributors are welcomed to join the FEATS project. Please check [CONTRIBUTING]
 * [Seata Samples](https://github.com/seata/seata-samples) - Samples for Seata
 * [Seata Docker](https://github.com/seata/seata-docker) - Seata integration with docker
 * [Seata K8s](https://github.com/seata/seata-k8s) - Seata integration with k8s
-* [Awesome Seata](https://github.com/seata/awesome-seata) - Description of Seata related projects 
-* [Seata Website](https://github.com/seata/seata.github.io) - Seata official website （***In the process of design***）
+* [Awesome Seata](https://github.com/seata/awesome-seata) - Seata's slides and videa address in meetup
+* [Seata Website](https://github.com/seata/seata.github.io) - Seata official website
 
 ## Contributors
 
