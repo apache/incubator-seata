@@ -18,11 +18,11 @@ package io.seata.rm.datasource;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
-import io.seata.rm.datasource.sql.druid.MySQLDeleteRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLInsertRecognizer;
-import io.seata.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
+import io.seata.rm.datasource.sql.druid.mysql.MySQLDeleteRecognizer;
+import io.seata.rm.datasource.sql.druid.mysql.MySQLInsertRecognizer;
+import io.seata.rm.datasource.sql.druid.mysql.MySQLSelectForUpdateRecognizer;
 
-import io.seata.rm.datasource.sql.druid.MySQLUpdateRecognizer;
+import io.seata.rm.datasource.sql.druid.mysql.MySQLUpdateRecognizer;
 import io.seata.rm.datasource.sql.druid.oracle.OracleDeleteRecognizer;
 import io.seata.rm.datasource.sql.druid.oracle.OracleInsertRecognizer;
 import io.seata.rm.datasource.sql.druid.oracle.OracleSelectForUpdateRecognizer;

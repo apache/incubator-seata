@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.sql.druid;
+package io.seata.rm.datasource.sql.druid.mysql;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
@@ -26,7 +26,7 @@ import io.seata.rm.datasource.sql.SQLRecognizer;
  *
  * @author: Zhibei Hao
  */
-public class MySqlOperateRecognizerHolder implements SQLOperateRecognizerHolder {
+public class MySQLOperateRecognizerHolder implements SQLOperateRecognizerHolder {
     private static final String MYSQL = "mysql";
 
     @Override

@@ -13,13 +13,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.sql.druid;
+package io.seata.rm.datasource.sql.druid.mysql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
 import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.ParametersHolder;
+import io.seata.rm.datasource.sql.druid.BaseRecognizer;
 import io.seata.rm.datasource.sql.struct.Null;
 
 import java.util.ArrayList;

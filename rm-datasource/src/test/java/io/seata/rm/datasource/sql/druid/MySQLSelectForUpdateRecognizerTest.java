@@ -29,6 +29,7 @@ import io.seata.rm.datasource.ParametersHolder;
 
 import io.seata.rm.datasource.sql.SQLParsingException;
 import io.seata.rm.datasource.sql.SQLType;
+import io.seata.rm.datasource.sql.druid.mysql.MySQLSelectForUpdateRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
