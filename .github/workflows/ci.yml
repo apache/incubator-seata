@@ -23,7 +23,7 @@ jobs:
           java-version: ${{ matrix.java }}
       - name: 'Install & Test'
         run: |
-          ./mvnw clean install
+          ./mvnw clean install -DskipTests=false 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v1
           with:
