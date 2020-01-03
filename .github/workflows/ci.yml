@@ -23,4 +23,4 @@ jobs:
           java-version: ${{ matrix.java }}
       - name: 'Install & Test'
         run: |
-          ./mvnw clean install -DskipTests=false -P image -B
+          ./mvnw clean install -DskipTests=false
