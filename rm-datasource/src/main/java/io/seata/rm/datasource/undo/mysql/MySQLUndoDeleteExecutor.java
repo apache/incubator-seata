@@ -15,10 +15,6 @@
  */
 package io.seata.rm.datasource.undo.mysql;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.sql.struct.Field;
@@ -28,6 +24,10 @@ import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * The type My sql undo delete executor.
@@ -78,8 +78,7 @@ public class MySQLUndoDeleteExecutor extends AbstractUndoExecutor {
         String insertValues = fields.stream().map(field -> "?")
             .collect(Collectors.joining(", "));
 
-        return String.format(INSERT_SQL_TEMPLATE, keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
-                             insertColumns, insertValues);
+        return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), insertColumns, insertValues);
     }
 
     @Override

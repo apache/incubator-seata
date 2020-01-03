@@ -67,8 +67,7 @@ public class OracleUndoDeleteExecutor extends AbstractUndoExecutor {
         String insertValues = fields.stream().map(field -> "?")
             .collect(Collectors.joining(", "));
 
-        return String.format(INSERT_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), ColumnUtils.Escape.STANDARD),
-            insertColumns, insertValues);
+        return String.format(INSERT_SQL_TEMPLATE, sqlUndoLog.getTableName(), insertColumns, insertValues);
     }
 
     @Override

@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.undo.oracle;
 
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableRecords;
@@ -50,10 +49,9 @@ public class OracleUndoUpdateExecutor extends AbstractUndoExecutor {
         Field pkField = row.primaryKeys().get(0);
         List<Field> nonPkFields = row.nonPrimaryKeys();
         String updateColumns = nonPkFields.stream()
-            .map(field -> ColumnUtils.addEscape(field.getName(), ColumnUtils.Escape.STANDARD) + " = ?")
+            .map(field -> field.getName() + " = ?")
             .collect(Collectors.joining(", "));
-        return String.format(UPDATE_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), ColumnUtils.Escape.STANDARD),
-            updateColumns, ColumnUtils.addEscape(pkField.getName(), ColumnUtils.Escape.STANDARD));
+        return String.format(UPDATE_SQL_TEMPLATE, sqlUndoLog.getTableName(), updateColumns, pkField.getName());
     }
 
     /**

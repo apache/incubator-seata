@@ -18,6 +18,8 @@ package io.seata.rm.datasource;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -155,12 +157,43 @@ public final class ColumnUtils {
         if (colName.charAt(0) == escape.value && colName.charAt(colName.length() - 1) == escape.value) {
             return colName;
         }
-        return String.format("%s%s%s", escape.value, colName, escape.value);
+
+        KeywordChecker keywordChecker = null;
+        if (escape == Escape.STANDARD) {
+            keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
+        } else if (escape == Escape.MYSQL) {
+            keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
+        }
+        if (keywordChecker != null) {
+            boolean check = keywordChecker.check(colName);
+            if (!check) {
+                boolean uppercase = isUppercase(colName);
+                if (uppercase) {
+                    return colName;
+                }
+            }
+        }
+
+        StringBuilder result = new StringBuilder(2 + colName.length());
+        return result.append(escape.value).append(colName).append(escape.value).toString();
     }
 
     private static boolean isMysqlSeries(String dbType) {
         return StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MYSQL) ||
             StringUtils.equalsIgnoreCase(dbType, JdbcConstants.H2) ||
             StringUtils.equalsIgnoreCase(dbType, JdbcConstants.MARIADB);
+    }
+
+    private static boolean isUppercase(String colName) {
+        if (colName == null) {
+            return false;
+        }
+        char[] chars = colName.toCharArray();
+        for (char ch : chars) {
+            if (ch >= 'a' && ch <= 'z') {
+                return false;
+            }
+        }
+        return true;
     }
 }

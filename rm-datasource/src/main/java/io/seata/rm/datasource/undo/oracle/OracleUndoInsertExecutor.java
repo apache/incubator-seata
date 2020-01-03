@@ -49,8 +49,8 @@ public class OracleUndoInsertExecutor extends AbstractUndoExecutor {
         }
         Row row = afterImageRows.get(0);
         Field pkField = row.primaryKeys().get(0);
-        return String.format(DELETE_SQL_TEMPLATE, ColumnUtils.addEscape(sqlUndoLog.getTableName(), ColumnUtils.Escape.STANDARD),
-            ColumnUtils.addEscape(pkField.getName(), ColumnUtils.Escape.STANDARD));
+        return String.format(DELETE_SQL_TEMPLATE, sqlUndoLog.getTableName(),
+                ColumnUtils.addEscape(pkField.getName(), ColumnUtils.Escape.STANDARD));
     }
 
     @Override
