@@ -1,0 +1,30 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - name: Set up JDK 8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 8
+
+      - name: Deploy to Maven Center
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: ./mvnw clean install -DskipTests=true deploy
+
+      - name: Deploy to Docker Registry
+        uses: elgohr/Publish-Docker-Github-Action@master
+        with:
+          name: seataio/seata-server
+          registry: hub.docker.com
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          snapshot: true
