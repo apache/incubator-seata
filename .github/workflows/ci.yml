@@ -23,4 +23,4 @@ jobs:
           java-version: ${{ matrix.java }}
       - name: 'Install & Test'
         run: |
-          ./mvnw clean install -DskipTests=false -P image -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
+          ./mvnw clean install -DskipTests=false -P image -B 
