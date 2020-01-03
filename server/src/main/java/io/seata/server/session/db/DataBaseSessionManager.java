@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
  * The Data base session manager.
  *
  * @author zhangsen
- * @data 2019 /4/4
  */
 @LoadLevel(name = "db")
 public class DataBaseSessionManager extends AbstractSessionManager
@@ -173,7 +172,7 @@ public class DataBaseSessionManager extends AbstractSessionManager
             return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.CommitRetrying}));
         } else if (SessionHolder.RETRY_ROLLBACKING_SESSION_MANAGER_NAME.equalsIgnoreCase(taskName)) {
             return findGlobalSessions(new SessionCondition(new GlobalStatus[] {GlobalStatus.RollbackRetrying,
-                GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
+                GlobalStatus.Rollbacking, GlobalStatus.TimeoutRollbacking, GlobalStatus.TimeoutRollbackRetrying}));
         } else {
             //all data
             return findGlobalSessions(new SessionCondition(new GlobalStatus[] {

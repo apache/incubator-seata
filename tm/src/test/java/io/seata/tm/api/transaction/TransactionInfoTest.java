@@ -26,7 +26,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author guoyao
- * @date 2019/4/17
  */
 public class TransactionInfoTest {
 

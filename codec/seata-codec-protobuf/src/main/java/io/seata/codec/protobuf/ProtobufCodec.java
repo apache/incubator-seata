@@ -29,7 +29,6 @@ import io.seata.core.codec.Codec;
  * The type Protobuf codec.
  *
  * @author leizhiyuan
- * @date 2019 /5/6
  */
 @LoadLevel(name = "PROTOBUF", order = 0)
 public class ProtobufCodec implements Codec {

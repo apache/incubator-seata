@@ -30,7 +30,6 @@ import io.seata.rm.datasource.sql.struct.Null;
 
 /**
  * @author will
- * @date 2019/9/26
  */
 public abstract class BaseOracleRecognizer extends BaseRecognizer {
 

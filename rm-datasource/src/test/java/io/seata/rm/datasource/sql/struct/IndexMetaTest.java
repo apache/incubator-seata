@@ -21,7 +21,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author will
- * @date 2019/9/28
  */
 public class IndexMetaTest {
 
@@ -29,7 +28,6 @@ public class IndexMetaTest {
     public void testIndexMeta() {
         IndexMeta indexMeta = new IndexMeta();
         indexMeta.setValues(Lists.newArrayList());
-        Assertions.assertNotNull(indexMeta.getIndexvalue());
         Assertions.assertNotNull(indexMeta.toString());
         Assertions.assertEquals(indexMeta, indexMeta);
         Assertions.assertEquals(indexMeta.hashCode(), indexMeta.hashCode());

@@ -23,7 +23,7 @@ import io.seata.core.protocol.MessageType;
 /**
  * The type Branch report request.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class BranchReportRequest extends AbstractTransactionRequestToTC {
 

@@ -15,9 +15,8 @@
  */
 package io.seata.config.apollo;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -26,15 +25,18 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import com.ctrip.framework.apollo.Config;
-import com.ctrip.framework.apollo.ConfigChangeListener;
 import com.ctrip.framework.apollo.ConfigService;
-import com.ctrip.framework.apollo.model.ConfigChangeEvent;
-import com.google.common.collect.Lists;
+import com.ctrip.framework.apollo.enums.PropertyChangeType;
+import com.ctrip.framework.apollo.model.ConfigChange;
+import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
+import io.seata.config.ConfigurationChangeType;
 import io.seata.config.ConfigurationFactory;
 
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
@@ -44,9 +46,8 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
  * The type Apollo configuration.
  *
  * @author: kl @kailing.pub
- * @date: 2019 /2/27
  */
-public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListener> {
+public class ApolloConfiguration extends AbstractConfiguration {
 
     private static final String REGISTRY_TYPE = "apollo";
     private static final String APP_ID = "app.id";
@@ -55,7 +56,8 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
     private static volatile Config config;
     private ExecutorService configOperateExecutor;
     private static final int CORE_CONFIG_OPERATE_THREAD = 1;
-    private static final ConcurrentMap<String, ConfigChangeListener> LISTENER_SERVICE_MAP = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Set<ConfigurationChangeListener>> LISTENER_SERVICE_MAP
+        = new ConcurrentHashMap<>();
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
     private static volatile ApolloConfiguration instance;
 
@@ -66,17 +68,18 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
                 if (null == config) {
                     config = ConfigService.getAppConfig();
                     configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD,
-                        MAX_CONFIG_OPERATE_THREAD,
-                        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
+                        MAX_CONFIG_OPERATE_THREAD, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
+                        new LinkedBlockingQueue<>(),
                         new NamedThreadFactory("apolloConfigOperate", MAX_CONFIG_OPERATE_THREAD));
-                    config.addChangeListener(new ConfigChangeListener() {
-                        @Override
-                        public void onChange(ConfigChangeEvent changeEvent) {
-                            for (Map.Entry<String, ConfigChangeListener> entry : LISTENER_SERVICE_MAP.entrySet()) {
-                                if (changeEvent.isChanged(entry.getKey())) {
-                                    entry.getValue().onChange(changeEvent);
-                                }
+                    config.addChangeListener((changeEvent) -> {
+                        for (String key : changeEvent.changedKeys()) {
+                            if (!LISTENER_SERVICE_MAP.containsKey(key)) {
+                                continue;
                             }
+                            ConfigChange change = changeEvent.getChange(key);
+                            ConfigurationChangeEvent event = new ConfigurationChangeEvent(key, change.getNamespace(),
+                                change.getOldValue(), change.getNewValue(), getChangeType(change.getChangeType()));
+                            LISTENER_SERVICE_MAP.get(key).forEach(listener -> listener.onProcessEvent(event));
                         }
                     });
                 }
@@ -134,18 +137,25 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
     }
 
     @Override
-    public void addConfigListener(String dataId, ConfigChangeListener listener) {
-        LISTENER_SERVICE_MAP.put(dataId, listener);
+    public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (null == dataId || null == listener) {
+            return;
+        }
+        LISTENER_SERVICE_MAP.putIfAbsent(dataId, new ConcurrentSet<>());
+        LISTENER_SERVICE_MAP.get(dataId).add(listener);
     }
 
     @Override
-    public void removeConfigListener(String dataId, ConfigChangeListener listener) {
-        LISTENER_SERVICE_MAP.remove(dataId, listener);
+    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (!LISTENER_SERVICE_MAP.containsKey(dataId) || listener == null) {
+            return;
+        }
+        LISTENER_SERVICE_MAP.get(dataId).remove(listener);
     }
 
     @Override
-    public List<ConfigChangeListener> getConfigListeners(String dataId) {
-        return Lists.newArrayList(LISTENER_SERVICE_MAP.values());
+    public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
+        return LISTENER_SERVICE_MAP.get(dataId);
     }
 
     private void readyApolloConfig() {
@@ -164,12 +174,21 @@ public class ApolloConfiguration extends AbstractConfiguration<ConfigChangeListe
     }
 
     private static String getApolloMetaFileKey() {
-        return FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-            + APOLLO_META;
+        return FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR + APOLLO_META;
     }
 
     private static String getApolloAppIdFileKey() {
-        return FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-            + APP_ID;
+        return FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR + APP_ID;
+    }
+
+    private ConfigurationChangeType getChangeType(PropertyChangeType changeType) {
+        switch (changeType) {
+            case ADDED:
+                return ConfigurationChangeType.ADD;
+            case DELETED:
+                return ConfigurationChangeType.DELETE;
+            default:
+                return ConfigurationChangeType.MODIFY;
+        }
     }
 }

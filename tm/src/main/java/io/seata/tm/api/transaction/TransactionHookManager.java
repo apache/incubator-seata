@@ -21,9 +21,12 @@ import java.util.List;
 
 /**
  * @author guoyao
- * @date 2019/3/4
  */
 public final class TransactionHookManager {
+
+    private TransactionHookManager() {
+
+    }
 
     private static final ThreadLocal<List<TransactionHook>> LOCAL_HOOKS = new ThreadLocal<>();
 

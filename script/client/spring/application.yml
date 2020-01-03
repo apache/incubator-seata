@@ -5,7 +5,7 @@ seata:
   client:
     rm-async-commit-buffer-limit: 1000
     rm-report-retry-count: 5
-    rm-table-meta-check-enable: true
+    rm-table-meta-check-enable: false
     rm-report-success-enable: true
     rm:
       lock:
@@ -21,6 +21,9 @@ seata:
       undo-data-validation: true
       undo-log-serialization: jackson
       undo-log-table: undo_log
+    client:
+      log:
+        exceptionRate: 100
   service:
     vgroup-mapping: default
     grouplist: 127.0.0.1:8091
@@ -42,6 +45,7 @@ seata:
     heartbeat: true
     serialization: seata
     compressor: none
+    enable-client-batch-send-request: true
   config:
     type: file
     file:
