@@ -189,7 +189,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         }
         ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
         tableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
-                .getTableMeta(connectionProxy.getTargetConnection(), tableName,connectionProxy.getDataSourceProxy().getResourceId());
+                .getTableMeta(connectionProxy.getTargetConnection(), tableName, connectionProxy.getDataSourceProxy().getResourceId());
         return tableMeta;
     }
 
@@ -345,7 +345,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected TableRecords buildTableRecords(List<Object> pkValues) throws SQLException {
         TableRecords afterImage;
-        String pk = getTableMeta().getPkName();
+        String pk = getTableMeta().getEscapePkName(getDbType());
         StringJoiner pkValuesJoiner = new StringJoiner(" , ",
             "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (", ")");
         for (Object pkValue : pkValues) {
