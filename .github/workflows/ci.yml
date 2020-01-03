@@ -24,4 +24,3 @@ jobs:
       - name: 'Install & Test'
         run: |
           ./mvnw clean install -DskipTests=false -P image -B -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn;
-          CODECOV_TOKEN="d185f78f-b73e-41fe-9439-f207e8073885" bash <(curl -s https://codecov.io/bash)
