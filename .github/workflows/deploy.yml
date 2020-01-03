@@ -1,0 +1,6 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - develop
