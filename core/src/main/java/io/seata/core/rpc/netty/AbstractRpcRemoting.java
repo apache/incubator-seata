@@ -38,8 +38,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.SocketAddress;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.BlockingQueue;
@@ -55,8 +53,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * The type Abstract rpc remoting.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/12
+ * @author slievrly
  */
 public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implements Disposable {
 
@@ -71,7 +68,9 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
      */
     protected final ThreadPoolExecutor messageExecutor;
 
-    /** Id generator of this remoting */
+    /**
+     * Id generator of this remoting
+     */
     protected final PositiveAtomicCounter idGenerator = new PositiveAtomicCounter();
 
     /**
@@ -133,19 +132,16 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         timerExecutor.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
-                List<MessageFuture> timeoutMessageFutures = new ArrayList<MessageFuture>(futures.size());
-                for (MessageFuture future : futures.values()) {
-                    if (future.isTimeout()) {
-                        timeoutMessageFutures.add(future);
+                for (Map.Entry<Integer, MessageFuture> entry : futures.entrySet()) {
+                    if (entry.getValue().isTimeout()) {
+                        futures.remove(entry.getKey());
+                        entry.getValue().setResultMessage(null);
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("timeout clear future: {}", entry.getValue().getRequestMessage().getBody());
+                        }
                     }
                 }
-                for (MessageFuture messageFuture : timeoutMessageFutures) {
-                    futures.remove(messageFuture.getRequestMessage().getId());
-                    messageFuture.setResultMessage(null);
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("timeout clear future : " + messageFuture.getRequestMessage().getBody());
-                    }
-                }
+
                 nowMills = System.currentTimeMillis();
             }
         }, TIMEOUT_CHECK_INTERNAL, TIMEOUT_CHECK_INTERNAL, TimeUnit.MILLISECONDS);
@@ -233,45 +229,44 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         futures.put(rpcMessage.getId(), messageFuture);
 
         if (address != null) {
-            ConcurrentHashMap<String, BlockingQueue<RpcMessage>> map = basketMap;
-            BlockingQueue<RpcMessage> basket = map.get(address);
-            if (basket == null) {
-                map.putIfAbsent(address, new LinkedBlockingQueue<>());
-                basket = map.get(address);
-            }
-            basket.offer(rpcMessage);
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("offer message: " + rpcMessage.getBody());
-            }
-            if (!isSending) {
-                synchronized (mergeLock) {
-                    mergeLock.notifyAll();
+            /*
+            The batch send.
+            Object From big to small: RpcMessage -> MergedWarpMessage -> AbstractMessage
+            @see AbstractRpcRemotingClient.MergedSendRunnable
+            */
+            if (NettyClientConfig.isEnableClientBatchSendRequest()) {
+                ConcurrentHashMap<String, BlockingQueue<RpcMessage>> map = basketMap;
+                BlockingQueue<RpcMessage> basket = map.get(address);
+                if (basket == null) {
+                    map.putIfAbsent(address, new LinkedBlockingQueue<>());
+                    basket = map.get(address);
+                }
+                basket.offer(rpcMessage);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("offer message: {}", rpcMessage.getBody());
+                }
+                if (!isSending) {
+                    synchronized (mergeLock) {
+                        mergeLock.notifyAll();
+                    }
+                }
+            } else {
+                // the single send.
+                sendSingleRequest(channel, msg, rpcMessage);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("send this msg[{}] by single send.", msg);
                 }
             }
         } else {
-            ChannelFuture future;
-            channelWriteableCheck(channel, msg);
-            future = channel.writeAndFlush(rpcMessage);
-            future.addListener(new ChannelFutureListener() {
-                @Override
-                public void operationComplete(ChannelFuture future) {
-                    if (!future.isSuccess()) {
-                        MessageFuture messageFuture = futures.remove(rpcMessage.getId());
-                        if (messageFuture != null) {
-                            messageFuture.setResultMessage(future.cause());
-                        }
-                        destroyChannel(future.channel());
-                    }
-                }
-            });
+            sendSingleRequest(channel, msg, rpcMessage);
         }
         if (timeout > 0) {
             try {
                 return messageFuture.get(timeout, TimeUnit.MILLISECONDS);
             } catch (Exception exx) {
-                LOGGER.error("wait response error:" + exx.getMessage() + ",ip:" + address + ",request:" + msg);
+                LOGGER.error("wait response error:{},ip:{},request:{}", exx.getMessage(), address, msg);
                 if (exx instanceof TimeoutException) {
-                    throw (TimeoutException)exx;
+                    throw (TimeoutException) exx;
                 } else {
                     throw new RuntimeException(exx);
                 }
@@ -279,6 +274,24 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
         } else {
             return null;
         }
+    }
+
+    private void sendSingleRequest(Channel channel, Object msg, RpcMessage rpcMessage) {
+        ChannelFuture future;
+        channelWritableCheck(channel, msg);
+        future = channel.writeAndFlush(rpcMessage);
+        future.addListener(new ChannelFutureListener() {
+            @Override
+            public void operationComplete(ChannelFuture future) {
+                if (!future.isSuccess()) {
+                    MessageFuture messageFuture = futures.remove(rpcMessage.getId());
+                    if (messageFuture != null) {
+                        messageFuture.setResultMessage(future.cause());
+                    }
+                    destroyChannel(future.channel());
+                }
+            }
+        });
     }
 
     /**
@@ -290,16 +303,16 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     protected void sendRequest(Channel channel, Object msg) {
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setMessageType(msg instanceof HeartbeatMessage ?
-                ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
-                : ProtocolConstants.MSGTYPE_RESQUEST);
+            ProtocolConstants.MSGTYPE_HEARTBEAT_REQUEST
+            : ProtocolConstants.MSGTYPE_RESQUEST);
         rpcMessage.setCodec(ProtocolConstants.CONFIGURED_CODEC);
         rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
         rpcMessage.setBody(msg);
         rpcMessage.setId(getNextMessageId());
         if (msg instanceof MergeMessage) {
-            mergeMsgMap.put(rpcMessage.getId(), (MergeMessage)msg);
+            mergeMsgMap.put(rpcMessage.getId(), (MergeMessage) msg);
         }
-        channelWriteableCheck(channel, msg);
+        channelWritableCheck(channel, msg);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("write message:" + rpcMessage.getBody() + ", channel:" + channel + ",active?"
                 + channel.isActive() + ",writable?" + channel.isWritable() + ",isopen?" + channel.isOpen());
@@ -310,27 +323,27 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     /**
      * Send response.
      *
-     * @param request  the msg id
+     * @param request the msg id
      * @param channel the channel
      * @param msg     the msg
      */
     protected void sendResponse(RpcMessage request, Channel channel, Object msg) {
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setMessageType(msg instanceof HeartbeatMessage ?
-                ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE :
-                ProtocolConstants.MSGTYPE_RESPONSE);
+            ProtocolConstants.MSGTYPE_HEARTBEAT_RESPONSE :
+            ProtocolConstants.MSGTYPE_RESPONSE);
         rpcMessage.setCodec(request.getCodec()); // same with request
         rpcMessage.setCompressor(request.getCompressor());
         rpcMessage.setBody(msg);
         rpcMessage.setId(request.getId());
-        channelWriteableCheck(channel, msg);
+        channelWritableCheck(channel, msg);
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("send response:" + rpcMessage.getBody() + ",channel:" + channel);
         }
         channel.writeAndFlush(rpcMessage);
     }
 
-    private void channelWriteableCheck(Channel channel, Object msg) {
+    private void channelWritableCheck(Channel channel, Object msg) {
         int tryTimes = 0;
         synchronized (lock) {
             while (!channel.isWritable()) {
@@ -357,9 +370,9 @@ public abstract class AbstractRpcRemoting extends ChannelDuplexHandler implement
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
         if (msg instanceof RpcMessage) {
-            final RpcMessage rpcMessage = (RpcMessage)msg;
+            final RpcMessage rpcMessage = (RpcMessage) msg;
             if (rpcMessage.getMessageType() == ProtocolConstants.MSGTYPE_RESQUEST
-                    || rpcMessage.getMessageType() == ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY) {
+                || rpcMessage.getMessageType() == ProtocolConstants.MSGTYPE_RESQUEST_ONEWAY) {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug(String.format("%s msgId:%s, body:%s", this, rpcMessage.getId(), rpcMessage.getBody()));
                 }

@@ -30,7 +30,6 @@ import java.util.Date;
 
 /**
  * @author jsbxyyx
- * @date 2019/09/07
  */
 public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
@@ -64,7 +63,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
             deletePST.setInt(2, limitRows);
             int deleteRows = deletePST.executeUpdate();
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("batch delete undo log size " + deleteRows);
+                LOGGER.debug("batch delete undo log size {}", deleteRows);
             }
             return deleteRows;
         } catch (Exception e) {

@@ -17,26 +17,38 @@ package io.seata.rm.datasource.mock;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import com.alibaba.druid.mock.MockStatementBase;
 import com.alibaba.druid.mock.handler.MockExecuteHandler;
 
 /**
   * @author will
-  * @date 2019/8/16
   */
 public class MockExecuteHandlerImpl implements MockExecuteHandler {
 
     /**
      * the mock value of return value
      */
-    private Object[][] mockReturnValue = null;
+    private Object[][] mockReturnValue;
+
+    /**
+     * the mock column labels of return value
+     */
+    private List<String> mockReturnValueColumnLabels;
+
+    /**
+     * the mock column meta
+     */
+    private Object[][] mockColumnsMetasReturnValue;
 
     /**
      * Instantiate MockExecuteHandlerImpl
      * @param mockReturnValue
      */
-    public MockExecuteHandlerImpl(Object[][] mockReturnValue) {
+    public MockExecuteHandlerImpl(List<String> mockReturnValueColumnLabels, Object[][] mockReturnValue, Object[][] mockColumnsMetasReturnValue) {
+        this.mockReturnValueColumnLabels = mockReturnValueColumnLabels;
         this.mockReturnValue = mockReturnValue;
+        this.mockColumnsMetasReturnValue = mockColumnsMetasReturnValue;
     }
 
     @Override
@@ -44,8 +56,9 @@ public class MockExecuteHandlerImpl implements MockExecuteHandler {
         MockResultSet resultSet = new MockResultSet(statement);
 
         //mock the return value
-        resultSet.mockResultSet(mockReturnValue);
-
+        resultSet.mockResultSet(mockReturnValueColumnLabels, mockReturnValue);
+        //mock the rs meta data
+        resultSet.mockResultSetMetaData(mockColumnsMetasReturnValue);
         return resultSet;
     }
 }

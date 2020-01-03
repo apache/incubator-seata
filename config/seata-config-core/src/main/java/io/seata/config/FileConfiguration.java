@@ -16,9 +16,10 @@
 package io.seata.config;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -28,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
+import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigFuture.ConfigOperation;
 import org.apache.commons.lang.ObjectUtils;
@@ -37,40 +39,47 @@ import org.slf4j.LoggerFactory;
 /**
  * The type FileConfiguration.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/10
+ * @author slievrly
  */
-public class FileConfiguration extends AbstractConfiguration<ConfigChangeListener> {
+public class FileConfiguration extends AbstractConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileConfiguration.class);
 
-    private final Config fileConfig;
+    private Config fileConfig;
 
     private ExecutorService configOperateExecutor;
 
-    private ExecutorService configChangeExecutor;
-
     private static final int CORE_CONFIG_OPERATE_THREAD = 1;
-
-    private static final int CORE_CONFIG_CHANGE_THREAD = 1;
 
     private static final int MAX_CONFIG_OPERATE_THREAD = 2;
 
     private static final long LISTENER_CONFIG_INTERNAL = 1 * 1000;
 
     private static final String REGISTRY_TYPE = "file";
-    
+
     private static final String SYS_FILE_RESOURCE_PREFIX = "file:";
 
-    private final ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap = new ConcurrentHashMap<>(8);
+    private final ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(
+        8);
 
-    private final ConcurrentMap<String, String> listenedConfigMap = new ConcurrentHashMap<>(8);
+    private final Map<String, String> listenedConfigMap = new HashMap<>(8);
+
+    private final String targetFilePath;
+
+    private volatile long targetFileLastModified;
+
+    private final String name;
+
+    private final boolean allowDynamicRefresh;
 
     /**
-     * Instantiates a new File configuration.
+     * Note that:this constructor is only used to create proxy with CGLIB
+     * see io.seata.spring.boot.autoconfigure.provider.SpringBootConfigurationProvider#provide
      */
     public FileConfiguration() {
-        this(null);
+        this.name = null;
+        this.targetFilePath = null;
+        this.allowDynamicRefresh = false;
     }
 
     /**
@@ -79,22 +88,54 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
      * @param name the name
      */
     public FileConfiguration(String name) {
+        this(name, true);
+    }
+
+    /**
+     * Instantiates a new File configuration.
+     *
+     * @param name                the name
+     * @param allowDynamicRefresh the allow dynamic refresh
+     */
+    public FileConfiguration(String name, boolean allowDynamicRefresh) {
+        LOGGER.info("The file name of the operation is {}", name);
         if (null == name) {
-            fileConfig = ConfigFactory.load();
-        }
-        else if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
-            Config appConfig = ConfigFactory.parseFileAnySyntax(new File(name.substring(SYS_FILE_RESOURCE_PREFIX.length())));
-            fileConfig = ConfigFactory.load(appConfig);
+            throw new IllegalArgumentException("name can't be null");
+        } else if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
+            File targetFile = new File(name.substring(SYS_FILE_RESOURCE_PREFIX.length()));
+            if (targetFile.exists()) {
+                targetFilePath = targetFile.getPath();
+                Config appConfig = ConfigFactory.parseFileAnySyntax(targetFile);
+                fileConfig = ConfigFactory.load(appConfig);
+            } else {
+                targetFilePath = null;
+            }
         } else {
-            fileConfig = ConfigFactory.load(name);
+            URL resource = this.getClass().getClassLoader().getResource(name);
+            if (null != resource) {
+                targetFilePath = resource.getPath();
+                fileConfig = ConfigFactory.load(name);
+
+            } else {
+                targetFilePath = null;
+            }
         }
+        /**
+         * For seata-server side the conf file should always exists.
+         * For application(or client) side,conf file may not exists when using seata-spring-boot-starter
+         */
+        if (null == targetFilePath) {
+            fileConfig = ConfigFactory.load();
+            this.allowDynamicRefresh = false;
+        } else {
+            targetFileLastModified = new File(targetFilePath).lastModified();
+            this.allowDynamicRefresh = allowDynamicRefresh;
+        }
+
+        this.name = name;
         configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD, MAX_CONFIG_OPERATE_THREAD,
-            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
+            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
             new NamedThreadFactory("configOperate", MAX_CONFIG_OPERATE_THREAD));
-        configChangeExecutor = new ThreadPoolExecutor(CORE_CONFIG_CHANGE_THREAD, CORE_CONFIG_CHANGE_THREAD,
-            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(),
-            new NamedThreadFactory("configChange", CORE_CONFIG_CHANGE_THREAD));
-        configChangeExecutor.submit(new ConfigChangeRunnable());
     }
 
     @Override
@@ -130,40 +171,35 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
     }
 
     @Override
-    public void addConfigListener(String dataId, ConfigChangeListener listener) {
-        configListenersMap.putIfAbsent(dataId, new ArrayList<ConfigChangeListener>());
-        configListenersMap.get(dataId).add(listener);
-        listenedConfigMap.putIfAbsent(dataId, getConfig(dataId));
-        if (null != listener.getExecutor()) {
-            ConfigChangeRunnable configChangeTask = new ConfigChangeRunnable(dataId, listener);
-            listener.getExecutor().submit(configChangeTask);
-        }
-    }
-
-    @Override
-    public void removeConfigListener(String dataId, ConfigChangeListener listener) {
-        List<ConfigChangeListener> configChangeListeners = getConfigListeners(dataId);
-        if (configChangeListeners == null) {
+    public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (null == dataId || null == listener) {
             return;
         }
-        List<ConfigChangeListener> newChangeListenerList = new ArrayList<>();
-        for (ConfigChangeListener changeListener : configChangeListeners) {
-            if (!changeListener.equals(listener)) {
-                newChangeListenerList.add(changeListener);
-            }
-        }
-        configListenersMap.put(dataId, newChangeListenerList);
-        if (newChangeListenerList.isEmpty()) {
-            listenedConfigMap.remove(dataId);
-        }
-        if (null != listener.getExecutor()) {
-            listener.getExecutor().shutdownNow();
-        }
-
+        configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
+        configListenersMap.get(dataId).add(listener);
+        listenedConfigMap.put(dataId, getConfig(dataId));
+        FileListener fileListener = new FileListener(dataId, listener);
+        fileListener.onProcessEvent(new ConfigurationChangeEvent());
     }
 
     @Override
-    public List<ConfigChangeListener> getConfigListeners(String dataId) {
+    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
+        Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
+        if (dataId == null || configChangeListeners == null) {
+            return;
+        }
+        if (configListenersMap.containsKey(dataId)) {
+            configListenersMap.get(dataId).remove(listener);
+            if (configListenersMap.get(dataId).isEmpty()) {
+                configListenersMap.remove(dataId);
+                listenedConfigMap.remove(dataId);
+            }
+        }
+        listener.onShutDown();
+    }
+
+    @Override
+    public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
         return configListenersMap.get(dataId);
     }
 
@@ -196,6 +232,22 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
                     return;
                 }
                 try {
+                    if (allowDynamicRefresh) {
+                        long tempLastModified = new File(targetFilePath).lastModified();
+                        if (tempLastModified > targetFileLastModified) {
+                            Config tempConfig;
+                            if (name.startsWith(SYS_FILE_RESOURCE_PREFIX)) {
+                                Config appConfig = ConfigFactory.parseFileAnySyntax(new File(targetFilePath));
+                                tempConfig = ConfigFactory.load(appConfig);
+                            } else {
+                                tempConfig = ConfigFactory.load(name);
+                            }
+                            if (null != tempConfig) {
+                                fileConfig = tempConfig;
+                                targetFileLastModified = tempLastModified;
+                            }
+                        }
+                    }
                     if (configFuture.getOperation() == ConfigOperation.GET) {
                         String result = fileConfig.getString(configFuture.getDataId());
                         configFuture.setResult(result);
@@ -229,79 +281,49 @@ public class FileConfiguration extends AbstractConfiguration<ConfigChangeListene
     }
 
     /**
-     * The type Config change runnable.
+     * The type FileListener.
      */
-    class ConfigChangeRunnable implements Runnable {
+    class FileListener implements ConfigurationChangeListener {
 
-        private String dataId;
-        private ConfigChangeListener listener;
-
-        /**
-         * Instantiates a new Config change runnable.
-         */
-        public ConfigChangeRunnable() {
-        }
+        private final String dataId;
+        private final ConfigurationChangeListener listener;
+        private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
+            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+            new NamedThreadFactory("fileListener", MAX_LISTENER_THREAD));
 
         /**
-         * Instantiates a new Config change runnable.
+         * Instantiates a new FileListener.
          *
          * @param dataId   the data id
          * @param listener the listener
          */
-        public ConfigChangeRunnable(String dataId, ConfigChangeListener listener) {
-
-            if (null == listener.getExecutor()) {
-                throw new IllegalArgumentException("getExecutor is null.");
-            }
+        public FileListener(String dataId, ConfigurationChangeListener listener) {
             this.dataId = dataId;
             this.listener = listener;
         }
 
         @Override
-        public void run() {
+        public void onChangeEvent(ConfigurationChangeEvent event) {
             while (true) {
                 try {
-                    Map<String, List<ConfigChangeListener>> configListenerMap;
-                    if (null != dataId && null != listener) {
-                        configListenerMap = new ConcurrentHashMap<>(8);
-                        configListenerMap.put(dataId, new ArrayList<>());
-                        configListenerMap.get(dataId).add(listener);
-                    } else {
-                        configListenerMap = configListenersMap;
-                    }
-                    for (Map.Entry<String, List<ConfigChangeListener>> entry : configListenerMap.entrySet()) {
-                        String configId = entry.getKey();
-                        String currentConfig = getConfig(configId);
-                        if (ObjectUtils.notEqual(currentConfig, listenedConfigMap.get(configId))) {
-                            listenedConfigMap.put(configId, currentConfig);
-                            notifyAllListener(configId, configListenerMap.get(configId));
-
-                        }
+                    String currentConfig = getConfig(dataId);
+                    String oldConfig = listenedConfigMap.get(dataId);
+                    if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
+                        listenedConfigMap.put(dataId, currentConfig);
+                        event.setDataId(dataId).setNewValue(currentConfig).setOldValue(oldConfig);
+                        listener.onChangeEvent(event);
                     }
                     Thread.sleep(LISTENER_CONFIG_INTERNAL);
                 } catch (Exception exx) {
-                    LOGGER.error(exx.getMessage());
+                    LOGGER.error("fileListener execute error:{}", exx.getMessage(), exx);
                 }
-
             }
         }
 
-        private void notifyAllListener(String dataId, List<ConfigChangeListener> configChangeListeners) {
-            List<ConfigChangeListener> needNotifyListeners = new ArrayList<>();
-            if (null != dataId && null != listener) {
-                needNotifyListeners.addAll(configChangeListeners);
-            } else {
-                for (ConfigChangeListener configChangeListener : configChangeListeners) {
-                    if (null == configChangeListener.getExecutor()) {
-                        needNotifyListeners.add(configChangeListener);
-                    }
-                }
-            }
-            for (ConfigChangeListener configChangeListener : needNotifyListeners) {
-                configChangeListener.receiveConfigInfo(listenedConfigMap.get(dataId));
-            }
+        @Override
+        public ExecutorService getExecutorService() {
+            return executor;
         }
-
     }
 
 }

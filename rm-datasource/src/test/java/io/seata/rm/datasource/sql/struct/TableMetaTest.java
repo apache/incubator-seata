@@ -16,14 +16,12 @@
 package io.seata.rm.datasource.sql.struct;
 
 import com.google.common.collect.Lists;
-import com.sun.org.apache.xpath.internal.operations.String;
 import io.seata.common.exception.NotSupportYetException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
  * @author will
- * @date 2019/9/28
  */
 public class TableMetaTest {
 
@@ -52,8 +50,8 @@ public class TableMetaTest {
     public void testGetColumnMeta() {
         TableMeta tableMeta = new TableMeta();
         tableMeta.getAllColumns().put("id", new ColumnMeta());
-        tableMeta.getAllColumns().put("`name`", new ColumnMeta());
-        Assertions.assertNotNull(tableMeta.getColumnMeta("`id`"));
+        tableMeta.getAllColumns().put("name", new ColumnMeta());
+        Assertions.assertNull(tableMeta.getColumnMeta("`id`"));
         Assertions.assertNotNull(tableMeta.getColumnMeta("name"));
     }
 
@@ -116,8 +114,11 @@ public class TableMetaTest {
     public void testContainsPK() {
         TableMeta tableMeta = new TableMeta();
         Assertions.assertFalse(tableMeta.containsPK(null));
-        Assertions.assertFalse(tableMeta.containsPK(Lists.newArrayList("id")));
-
+        Throwable exception = Assertions.assertThrows(NotSupportYetException.class, () -> {
+            tableMeta.containsPK(Lists.newArrayList("id"));
+        });
+        Assertions.assertEquals(tableMeta.getTableName() + " needs to contain the primary key.",
+            exception.getMessage());
         IndexMeta primary = new IndexMeta();
         primary.setIndextype(IndexType.PRIMARY);
         ColumnMeta columnMeta = new ColumnMeta();
@@ -127,60 +128,4 @@ public class TableMetaTest {
         Assertions.assertTrue(tableMeta.containsPK(Lists.newArrayList("id")));
         Assertions.assertTrue(tableMeta.containsPK(Lists.newArrayList("ID")));
     }
-
-    @Test
-    public void testGetCreateTableSQL() {
-        TableMeta tableMeta = new TableMeta();
-        ColumnMeta id = new ColumnMeta();
-        id.setColumnName("id");
-        id.setColumnSize(1);
-        id.setColumnDef("columnDef");
-        id.setIsNullAble("isNullAble");
-        ColumnMeta name = new ColumnMeta();
-        name.setColumnName("name");
-        ColumnMeta description = new ColumnMeta();
-        name.setColumnName("description");
-        ColumnMeta englishName = new ColumnMeta();
-        name.setColumnName("englishName");
-        ColumnMeta chineseName = new ColumnMeta();
-        name.setColumnName("chineseName");
-        ColumnMeta userCode = new ColumnMeta();
-        userCode.setColumnName("userCode");
-        tableMeta.getAllColumns().put("id", id);
-        tableMeta.getAllColumns().put("name", name);
-        tableMeta.getAllColumns().put("description", description);
-        tableMeta.getAllColumns().put("englishName", englishName);
-        tableMeta.getAllColumns().put("chineseName", chineseName);
-        tableMeta.getAllColumns().put("userCode", userCode);
-
-        IndexMeta primary = new IndexMeta();
-        primary.setIndextype(IndexType.PRIMARY);
-        primary.setValues(Lists.newArrayList(id));
-        IndexMeta fullText = new IndexMeta();
-        fullText.setIndextype(IndexType.FullText);
-        fullText.setValues(Lists.newArrayList(description));
-        IndexMeta normal = new IndexMeta();
-        normal.setIndextype(IndexType.Normal);
-        normal.setValues(Lists.newArrayList(englishName, chineseName));
-        IndexMeta unique = new IndexMeta();
-        unique.setIndextype(IndexType.Unique);
-        unique.setValues(Lists.newArrayList(userCode));
-        tableMeta.getAllIndexes().put("primary", primary);
-        tableMeta.getAllIndexes().put("fullText", fullText);
-        tableMeta.getAllIndexes().put("normal", normal);
-        tableMeta.getAllIndexes().put("unique", unique);
-        Assertions.assertNotNull(tableMeta.getCreateTableSQL());
-
-        tableMeta.getAllColumns().get("id").setColumnDef(null);
-        tableMeta.getAllColumns().get("id").setIsNullAble(null);
-        Assertions.assertNotNull(tableMeta.getCreateTableSQL());
-
-        IndexMeta nullIndex = new IndexMeta();
-        nullIndex.setIndextype(null);
-        tableMeta.getAllIndexes().put("nullIndex", nullIndex);
-        Assertions.assertThrows(NullPointerException.class, () -> {
-           tableMeta.getCreateTableSQL();
-        });
-    }
-
 }

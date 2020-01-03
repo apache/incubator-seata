@@ -68,12 +68,12 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         List<String> updateColumns = recognizer.getUpdateColumns();
         StringBuilder prefix = new StringBuilder("SELECT ");
         if (!tableMeta.containsPK(updateColumns)) {
-            prefix.append(getColumnNameInSQL(tableMeta.getPkName()) + ", ");
+            prefix.append(getColumnNameInSQL(tableMeta.getEscapePkName(getDbType()))).append(", ");
         }
-        StringBuilder suffix = new StringBuilder(" FROM " + getFromTableInSQL());
+        StringBuilder suffix = new StringBuilder(" FROM ").append(getFromTableInSQL());
         String whereCondition = buildWhereCondition(recognizer, paramAppenderList);
         if (StringUtils.isNotBlank(whereCondition)) {
-            suffix.append(" WHERE " + whereCondition);
+            suffix.append(" WHERE ").append(whereCondition);
         }
         suffix.append(" FOR UPDATE");
         StringJoiner selectSQLJoin = new StringJoiner(", ", prefix.toString(), suffix.toString());
@@ -118,9 +118,9 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         SQLUpdateRecognizer recognizer = (SQLUpdateRecognizer)sqlRecognizer;
         List<String> updateColumns = recognizer.getUpdateColumns();
         StringBuilder prefix = new StringBuilder("SELECT ");
-        if (!tableMeta.containsPK(updateColumns)) {
+        if (!containsPK(updateColumns)) {
             // PK should be included.
-            prefix.append(getColumnNameInSQL(tableMeta.getPkName()) + ", ");
+            prefix.append(getColumnNameInSQL(tableMeta.getEscapePkName(getDbType()))).append(", ");
         }
         String suffix = " FROM " + getFromTableInSQL() + " WHERE " + buildWhereConditionByPKs(beforeImage.pkRows());
         StringJoiner selectSQLJoiner = new StringJoiner(", ", prefix.toString(), suffix);

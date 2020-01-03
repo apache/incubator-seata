@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~  Copyright 1999-2019 Seata.io Group.
+  ~
+  ~  Licensed under the Apache License, Version 2.0 (the "License");
+  ~  you may not use this file except in compliance with the License.
+  ~  You may obtain a copy of the License at
+  ~
+  ~       http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~  Unless required by applicable law or agreed to in writing, software
+  ~  distributed under the License is distributed on an "AS IS" BASIS,
+  ~  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~  See the License for the specific language governing permissions and
+  ~  limitations under the License.
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	   xsi:schemaLocation="
+	   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+	<bean id="dataSource" class="org.h2.jdbcx.JdbcConnectionPool" destroy-method="dispose">
+		<constructor-arg>
+			<bean class="org.h2.jdbcx.JdbcDataSource">
+				<property name="URL" value="jdbc:h2:mem:seata_saga" />
+				<property name="user" value="sa" />
+				<property name="password" value="sa" />
+			</bean>
+		</constructor-arg>
+	</bean>
+
+	<!-- 初始化数据表结构 -->
+	<jdbc:initialize-database data-source="dataSource">
+		<jdbc:script location="classpath:saga/sql/h2_init.sql" />
+	</jdbc:initialize-database>
+
+	<bean id="stateMachineEngine" class="io.seata.saga.engine.impl.ProcessCtrlStateMachineEngine">
+		<property name="stateMachineConfig" ref="dbStateMachineConfig"></property>
+	</bean>
+	<bean id="dbStateMachineConfig" class="io.seata.saga.engine.config.DbStateMachineConfig">
+		<property name="dataSource" ref="dataSource"></property>
+		<property name="resources" value="saga/statelang/*.json"></property>
+		<property name="enableAsync" value="true"></property>
+		<property name="threadPoolExecutor" ref="threadExecutor"></property>
+		<property name="applicationId" value="test_saga"></property>
+		<property name="txServiceGroup" value="my_test_tx_group"></property>
+	</bean>
+	<bean id="threadExecutor"
+		  class="org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean">
+		<property name="threadNamePrefix" value="SAGA_ASYNC_EXE_" />
+		<property name="corePoolSize" value="1" />
+		<property name="maxPoolSize" value="20" />
+	</bean>
+
+	<bean class="io.seata.saga.rm.StateMachineEngineHolder">
+		<property name="stateMachineEngine" ref="stateMachineEngine"/>
+	</bean>
+
+
+	<bean id="demoService" class="io.seata.saga.engine.mock.DemoService"/>
+</beans>

@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
@@ -35,7 +36,6 @@ import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Null;
 import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
 import io.seata.rm.datasource.sql.struct.SqlSequenceExpr;
-import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
  * @param <T> the type parameter
  * @param <S> the type parameter
  * @author yuanguoyao
- * @date 2019-03-21 21:30:02
  */
 public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
@@ -90,8 +89,10 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected boolean containsPK() {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();
-        TableMeta tmeta = getTableMeta();
-        return tmeta.containsPK(insertColumns);
+        if (CollectionUtils.isEmpty(insertColumns)) {
+            return false;
+        }
+        return containsPK(insertColumns);
     }
 
     protected boolean containsColumns() {
@@ -104,6 +105,9 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         // insert values including PK
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         final int pkIndex = getPkIndex();
+        if (pkIndex == -1) {
+            throw new ShouldNeverHappenException("pkIndex is " + pkIndex);
+        }
         List<Object> pkValues = null;
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
@@ -126,6 +130,11 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                     pkValues = new ArrayList<>(rowSize);
                     for (int i = 0; i < rowSize; i++) {
                         List<Object> row = insertRows.get(i);
+                        // oracle insert sql statement specify RETURN_GENERATED_KEYS will append :rowid on sql end
+                        // insert parameter count will than the actual +1
+                        if (row.isEmpty()) {
+                            continue;
+                        }
                         Object pkValue = row.get(pkIndex);
                         int currentRowPlaceholderNum = -1;
                         for (Object r : row) {
@@ -216,13 +225,12 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      */
     protected int getPkIndex() {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        String pkName = getTableMeta().getPkName();
         List<String> insertColumns = recognizer.getInsertColumns();
-        if (insertColumns != null && !insertColumns.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(insertColumns)) {
             final int insertColumnsSize = insertColumns.size();
             int pkIndex = -1;
             for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
-                if (insertColumns.get(paramIdx).equalsIgnoreCase(pkName)) {
+                if (equalsPK(insertColumns.get(paramIdx))) {
                     pkIndex = paramIdx;
                     break;
                 }
@@ -233,7 +241,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         Map<String, ColumnMeta> allColumns = getTableMeta().getAllColumns();
         for (Map.Entry<String, ColumnMeta> entry : allColumns.entrySet()) {
             pkIndex++;
-            if (entry.getValue().getColumnName().equalsIgnoreCase(pkName)) {
+            if (equalsPK(entry.getValue().getColumnName())) {
                 break;
             }
         }
@@ -305,6 +313,11 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);
             pkValues.add(v);
+        }
+        try {
+            genKeys.beforeFirst();
+        } catch (SQLException e) {
+            LOGGER.warn("Fail to reset ResultSet cursor. can not get primary key value");
         }
         return pkValues;
     }

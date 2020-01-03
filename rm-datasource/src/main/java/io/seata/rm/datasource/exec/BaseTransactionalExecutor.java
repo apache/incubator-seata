@@ -23,10 +23,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
@@ -35,8 +35,7 @@ import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.WhereRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
-import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 
@@ -113,9 +112,9 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @throws SQLException the sql exception
      */
     protected String buildWhereConditionByPKs(List<Field> pkRows) throws SQLException {
-        StringJoiner whereConditionAppender = new StringJoiner(" OR ");
+        StringJoiner whereConditionAppender = new StringJoiner(",", getColumnNameInSQL(pkRows.get(0).getName()) + " in (", ")");
         for (Field field : pkRows) {
-            whereConditionAppender.add(getColumnNameInSQL(field.getName()) + " = ?");
+            whereConditionAppender.add("?");
         }
         return whereConditionAppender.toString();
 
@@ -188,12 +187,33 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (tableMeta != null) {
             return tableMeta;
         }
-        if (JdbcConstants.ORACLE.equalsIgnoreCase(statementProxy.getConnectionProxy().getDbType())) {
-            tableMeta = TableMetaCacheOracle.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
-        } else {
-            tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
-        }
+        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+        tableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
+                .getTableMeta(connectionProxy.getTargetConnection(), tableName,connectionProxy.getDataSourceProxy().getResourceId());
         return tableMeta;
+    }
+
+    /**
+     * the columns contains table meta pk
+     * @param columns the column name list
+     * @return true: contains pk false: not contains pk
+     */
+    protected boolean containsPK(List<String> columns) {
+        if (columns == null || columns.isEmpty()) {
+            return false;
+        }
+        List<String> newColumns = ColumnUtils.delEscape(columns, getDbType());
+        return getTableMeta().containsPK(newColumns);
+    }
+
+    /**
+     * compare column name and primary key name
+     * @param columnName the primary key column name
+     * @return true: equal false: not equal
+     */
+    protected boolean equalsPK(String columnName) {
+        String newColumnName = ColumnUtils.delEscape(columnName, getDbType());
+        return StringUtils.equalsIgnoreCase(getTableMeta().getPkName(), newColumnName);
     }
 
     /**
@@ -228,14 +248,16 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (rowsIncludingPK.size() == 0) {
             return null;
         }
+
         StringBuilder sb = new StringBuilder();
         sb.append(rowsIncludingPK.getTableMeta().getTableName());
         sb.append(":");
         int filedSequence = 0;
-        for (Field field : rowsIncludingPK.pkRows()) {
+        List<Field> pkRows = rowsIncludingPK.pkRows();
+        for (Field field : pkRows) {
             sb.append(field.getValue());
             filedSequence++;
-            if (filedSequence < rowsIncludingPK.pkRows().size()) {
+            if (filedSequence < pkRows.size()) {
                 sb.append(",");
             }
         }
@@ -324,9 +346,10 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected TableRecords buildTableRecords(List<Object> pkValues) throws SQLException {
         TableRecords afterImage;
         String pk = getTableMeta().getPkName();
-        StringJoiner pkValuesJoiner = new StringJoiner(" OR ", "SELECT * FROM " + getTableMeta().getTableName() + " WHERE ", "");
+        StringJoiner pkValuesJoiner = new StringJoiner(" , ",
+            "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (", ")");
         for (Object pkValue : pkValues) {
-            pkValuesJoiner.add(pk + "=?");
+            pkValuesJoiner.add("?");
         }
         PreparedStatement ps = null;
         ResultSet rs = null;

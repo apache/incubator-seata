@@ -15,14 +15,13 @@
  */
 package io.seata.rm.datasource;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import javax.sql.DataSource;
 
-import com.alibaba.druid.util.JdbcConstants;
 import com.alibaba.druid.util.JdbcUtils;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
@@ -30,10 +29,7 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
-import io.seata.rm.datasource.sql.struct.TableMetaCacheOracle;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 
 /**
  * The type Data source proxy.
@@ -41,8 +37,6 @@ import org.slf4j.LoggerFactory;
  * @author sharajava
  */
 public class DataSourceProxy extends AbstractDataSourceProxy implements Resource {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(DataSourceProxy.class);
 
     private String resourceGroupId;
 
@@ -55,14 +49,16 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     /**
      * Enable the table meta checker
      */
-    private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, true);
+    private static boolean ENABLE_TABLE_META_CHECKER_ENABLE = ConfigurationFactory.getInstance().getBoolean(
+        ConfigurationKeys.CLIENT_TABLE_META_CHECK_ENABLE, false);
 
     /**
      * Table meta checker interval
      */
     private static final long TABLE_META_CHECKER_INTERVAL = 60000L;
 
-    private final ScheduledExecutorService tableMetaExcutor = new ScheduledThreadPoolExecutor(1, new NamedThreadFactory("tableMetaChecker", 1, true));
+    private final ScheduledExecutorService tableMetaExcutor = new ScheduledThreadPoolExecutor(1,
+        new NamedThreadFactory("tableMetaChecker", 1, true));
 
     /**
      * Instantiates a new Data source proxy.
@@ -93,14 +89,12 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             throw new IllegalStateException("can not init dataSource", e);
         }
         DefaultResourceManager.get().registerResource(this);
-        if(ENABLE_TABLE_META_CHECKER_ENABLE){
+        if (ENABLE_TABLE_META_CHECKER_ENABLE) {
             tableMetaExcutor.scheduleAtFixedRate(() -> {
-                if (DataSourceProxy.this.getDbType().equalsIgnoreCase(JdbcConstants.MYSQL)) {
-                    TableMetaCache.refresh(DataSourceProxy.this);
-                } else if (DataSourceProxy.this.getDbType().equalsIgnoreCase(JdbcConstants.ORACLE)) {
-                    TableMetaCacheOracle.refresh(DataSourceProxy.this);
-                } else {
-                    LOGGER.error("refresh table meta failed, {} does not support.", DataSourceProxy.this.getDbType());
+                try (Connection connection = dataSource.getConnection()) {
+                    TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
+                        .refresh(connection, DataSourceProxy.this.getResourceId());
+                } catch (Exception e) {
                 }
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }

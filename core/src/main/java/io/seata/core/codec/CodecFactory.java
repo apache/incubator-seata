@@ -24,7 +24,6 @@ import io.seata.common.loader.EnhancedServiceLoader;
  * The type Codec factory.
  *
  * @author zhangsen
- * @date 2019 /5/6
  */
 public class CodecFactory {
 
@@ -39,13 +38,13 @@ public class CodecFactory {
      * @param codec the code
      * @return the codec
      */
-    public static synchronized Codec getCodec(byte codec) {
+    public static Codec getCodec(byte codec) {
         CodecType codecType = CodecType.getByCode(codec);
         if (CODEC_MAP.get(codecType) != null) {
             return CODEC_MAP.get(codecType);
         }
         Codec codecImpl = EnhancedServiceLoader.load(Codec.class, codecType.name());
-        CODEC_MAP.put(codecType, codecImpl);
+        CODEC_MAP.putIfAbsent(codecType, codecImpl);
         return codecImpl;
     }
 

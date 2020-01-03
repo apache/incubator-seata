@@ -38,8 +38,7 @@ import io.seata.server.store.file.FileTransactionStoreManager;
 /**
  * The type Write store test.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/13
+ * @author slievrly
  * write  cost:87281,read cost:158922   65535*5  1000 per open  init 1024 write cost:86454,read
  * cost:160541   65535*5  2000 per open  init 1024 write cost:82953,read cost:157736   65535*5  2000 per open  init
  * 65535*5*9 write cost:115079,read cost:163664   65535*5  2000 per open  init 65535*5*9  schedule flush 10||2s
@@ -74,6 +73,11 @@ public class WriteStoreTest {
 
                 @Override
                 public GlobalSession findGlobalSession(String xid)  {
+                    return null;
+                }
+
+                @Override
+                public GlobalSession findGlobalSession(String xid, boolean withBranchSessions) {
                     return null;
                 }
 

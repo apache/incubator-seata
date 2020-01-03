@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 
 /**
  * @author Otis.z
- * @date 2019/2/26
  */
 public class NamedThreadFactoryTest {
 
@@ -40,5 +39,14 @@ public class NamedThreadFactoryTest {
             });
         assertThat(testNameThread.getName()).startsWith("testNameThread");
         assertThat(testNameThread.isDaemon()).isTrue();
+    }
+
+    @Test
+    public void testConstructorWithPrefixAndDaemons() {
+        NamedThreadFactory factory = new NamedThreadFactory("prefix", true);
+        Thread thread = factory.newThread(() -> {});
+
+        assertThat(thread.getName()).startsWith("prefix");
+        assertThat(thread.isDaemon()).isTrue();
     }
 }

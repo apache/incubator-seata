@@ -44,9 +44,8 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Rpc remoting server.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  * @author xingfudeshi@gmail.com
- * @date 2018 /9/12
  */
 public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting implements RemotingServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractRpcRemotingServer.class);
@@ -186,7 +185,7 @@ public abstract class AbstractRpcRemotingServer extends AbstractRpcRemoting impl
     @Override
     public void destroyChannel(String serverAddress, Channel channel) {
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("will destroy channel:" + channel + ",address:" + serverAddress);
+            LOGGER.info("will destroy channel:{},address:{}", channel, serverAddress);
         }
         channel.disconnect();
         channel.close();

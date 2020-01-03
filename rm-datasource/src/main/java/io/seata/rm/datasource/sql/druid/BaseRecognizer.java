@@ -15,14 +15,14 @@
  */
 package io.seata.rm.datasource.sql.druid;
 
-import com.alibaba.druid.sql.ast.expr.SQLVariantRefExpr;
-import com.alibaba.druid.sql.dialect.mysql.visitor.MySqlOutputVisitor;
-import com.alibaba.druid.sql.dialect.oracle.visitor.OracleOutputVisitor;
-import io.seata.rm.datasource.ParametersHolder;
-import io.seata.rm.datasource.sql.SQLRecognizer;
+import com.alibaba.druid.sql.ast.SQLExpr;
+import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
+import com.alibaba.druid.sql.ast.expr.SQLBinaryOpExpr;
+import com.alibaba.druid.sql.ast.expr.SQLExistsExpr;
+import com.alibaba.druid.sql.ast.expr.SQLInListExpr;
+import com.alibaba.druid.sql.visitor.SQLASTVisitor;
 
-import java.util.ArrayList;
-import java.util.List;
+import io.seata.rm.datasource.sql.SQLRecognizer;
 
 /**
  * The type Base recognizer.
@@ -57,50 +57,22 @@ public abstract class BaseRecognizer implements SQLRecognizer {
 
     }
 
+    public void executeVisit(SQLExpr where, SQLASTVisitor visitor) {
+        if (where instanceof SQLBinaryOpExpr) {
+            visitor.visit((SQLBinaryOpExpr) where);
+        } else if (where instanceof SQLInListExpr) {
+            visitor.visit((SQLInListExpr) where);
+        } else if (where instanceof SQLBetweenExpr) {
+            visitor.visit((SQLBetweenExpr) where);
+        } else if (where instanceof SQLExistsExpr) {
+            visitor.visit((SQLExistsExpr) where);
+        } else {
+            throw new IllegalArgumentException("unexpected WHERE expr: " + where.getClass().getSimpleName());
+        }
+    }
+
     @Override
     public String getOriginalSQL() {
         return originalSQL;
-    }
-
-    public MySqlOutputVisitor createMySqlOutputVisitor(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList, final StringBuilder sb) {
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
-
-            @Override
-            public boolean visit(SQLVariantRefExpr x) {
-                if ("?".equals(x.getName())) {
-                    ArrayList<Object> oneParamValues = parametersHolder.getParameters()[x.getIndex()];
-                    if (paramAppenderList.size() == 0) {
-                        oneParamValues.stream().forEach(t -> paramAppenderList.add(new ArrayList<>()));
-                    }
-                    for (int i = 0; i < oneParamValues.size(); i++) {
-                        paramAppenderList.get(i).add(oneParamValues.get(i));
-                    }
-
-                }
-                return super.visit(x);
-            }
-        };
-        return visitor;
-    }
-
-    public OracleOutputVisitor createOracleOutputVisitor(final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList, final StringBuilder sb) {
-        OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
-
-            @Override
-            public boolean visit(SQLVariantRefExpr x) {
-                if ("?".equals(x.getName())) {
-                    ArrayList<Object> oneParamValues = parametersHolder.getParameters()[x.getIndex()];
-                    if (paramAppenderList.size() == 0) {
-                        oneParamValues.stream().forEach(t -> paramAppenderList.add(new ArrayList<>()));
-                    }
-                    for (int i = 0; i < oneParamValues.size(); i++) {
-                        paramAppenderList.get(i).add(oneParamValues.get(i));
-                    }
-
-                }
-                return super.visit(x);
-            }
-        };
-        return visitor;
     }
 }
