@@ -6,19 +6,15 @@ on:
       - develop
     tags:
       - 'v*'
-
-strategy:
-  matrix:
-    java: [8, 11]
-    os: [macos-latest, windows-latest, ubuntu-18.04]
-
 jobs:
   build:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 180
     strategy:
       fail-fast: true
-
+      matrix:
+        java: [8, 11]
+        os: [macos-latest, windows-latest, ubuntu-18.04]
     steps:
       - uses: actions/checkout@v1
       - name: Set up JDK ${{ matrix.java }}
