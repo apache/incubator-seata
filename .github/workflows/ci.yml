@@ -28,3 +28,4 @@ jobs:
         uses: codecov/codecov-action@v1
         with:
           token: d185f78f-b73e-41fe-9439-f207e8073885
+          yml: ./codecov.yml
