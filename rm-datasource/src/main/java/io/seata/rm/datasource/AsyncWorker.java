@@ -131,7 +131,7 @@ public class AsyncWorker implements ResourceManagerInbound {
                 LOGGER.info("Failed at async committing ... {}", e.getMessage());
 
             }
-        }, 10, 1000, TimeUnit.MILLISECONDS);
+        }, 10, 1000 * 1, TimeUnit.MILLISECONDS);
     }
 
     private void doBranchCommits() {
