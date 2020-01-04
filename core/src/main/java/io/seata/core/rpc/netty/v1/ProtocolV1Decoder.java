@@ -137,8 +137,8 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 frame.readBytes(bs);
                 Compressor compressor = CompressorFactory.getCompressor(compressorType);
                 bs = compressor.decompress(bs);
-                Serializer codec = SerializerFactory.getSerializer(codecType);
-                rpcMessage.setBody(codec.deserialize(bs));
+                Serializer serializer = SerializerFactory.getSerializer(codecType);
+                rpcMessage.setBody(serializer.deserialize(bs));
             }
         }
 
