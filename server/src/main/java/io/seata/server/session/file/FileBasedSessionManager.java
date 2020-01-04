@@ -15,6 +15,7 @@
  */
 package io.seata.server.session.file;
 
+import io.seata.common.loader.Scope;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -45,7 +46,7 @@ import io.seata.server.store.TransactionWriteStore;
  *
  * @author slievrly
  */
-@LoadLevel(name = "file")
+@LoadLevel(name = "file",scope = Scope.PROTOTYPE)
 public class FileBasedSessionManager extends DefaultSessionManager implements Reloadable {
 
     private static final int READ_SIZE = ConfigurationFactory.getInstance().getInt(
@@ -60,7 +61,8 @@ public class FileBasedSessionManager extends DefaultSessionManager implements Re
      */
     public FileBasedSessionManager(String name, String sessionStoreFilePath) throws IOException {
         super(name);
-        transactionStoreManager = EnhancedServiceLoader.load(TransactionStoreManager.class, StoreMode.FILE.name(),
+        transactionStoreManager =
+                EnhancedServiceLoader.getServiceLoader(TransactionStoreManager.class).load(StoreMode.FILE.getName(),
             new Class[] {String.class, SessionManager.class},
             new Object[] {sessionStoreFilePath + File.separator + name, this});
     }

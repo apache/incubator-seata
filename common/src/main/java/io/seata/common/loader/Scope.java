@@ -13,24 +13,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.loadbalance;
-
-import io.seata.common.loader.EnhancedServiceLoader;
+package io.seata.common.loader;
 
 /**
- * The type Load balance factory.
+ * the scope of the extension
  *
- * @author slievrly
+ * @author haozhibei
  */
-public class LoadBalanceFactory {
+public enum Scope {
+    /**
+     * The extension will be loaded in singleton mode
+     */
+    SINGLETON,
 
     /**
-     * Gets instance.
-     *
-     * @return the instance
+     * The extension will be loaded in multi instance mode
      */
-    public static LoadBalance getInstance() {
-        LoadBalance loadBalance = EnhancedServiceLoader.getServiceLoader(LoadBalance.class).load();
-        return loadBalance;
-    }
+    PROTOTYPE
+
 }

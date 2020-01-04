@@ -41,7 +41,7 @@ public class KeywordCheckerFactory {
             synchronized (KeywordCheckerFactory.class) {
                 if (keywordCheckerMap == null) {
                     Map<String, KeywordChecker> initializedMap = new HashMap<>();
-                    List<KeywordChecker> checkerList = EnhancedServiceLoader.loadAll(KeywordChecker.class);
+                    List<KeywordChecker> checkerList = EnhancedServiceLoader.getServiceLoader(KeywordChecker.class).loadAll();
                     for (KeywordChecker checker : checkerList) {
                         initializedMap.put(checker.getDbType(), checker);
                     }

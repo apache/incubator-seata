@@ -44,6 +44,6 @@ public class CustomConfigurationProvider implements ConfigurationProvider {
                 .anyMatch(ct -> ct.name().equalsIgnoreCase(name))) {
             throw new IllegalArgumentException(String.format("custom config type name %s is not allowed", name));
         }
-        return EnhancedServiceLoader.load(ConfigurationProvider.class, name).provide();
+        return EnhancedServiceLoader.getServiceLoader(ConfigurationProvider.class).load(name).provide();
     }
 }

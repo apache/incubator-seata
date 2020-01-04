@@ -15,6 +15,7 @@
  */
 package io.seata.server.store.file;
 
+import io.seata.common.loader.Scope;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -56,7 +57,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author slievrly
  */
-@LoadLevel(name = "file")
+@LoadLevel(name = "file",scope = Scope.PROTOTYPE)
 public class FileTransactionStoreManager extends AbstractTransactionStoreManager
     implements TransactionStoreManager, ReloadableStore {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileTransactionStoreManager.class);

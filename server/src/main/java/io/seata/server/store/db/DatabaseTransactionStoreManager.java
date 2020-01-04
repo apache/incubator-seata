@@ -15,6 +15,7 @@
  */
 package io.seata.server.store.db;
 
+import io.seata.common.loader.Scope;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -54,7 +55,7 @@ import io.seata.server.store.TransactionStoreManager;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "db")
+@LoadLevel(name = "db",scope = Scope.PROTOTYPE)
 public class DatabaseTransactionStoreManager extends AbstractTransactionStoreManager
     implements TransactionStoreManager, Initialize {
 
@@ -97,9 +98,10 @@ public class DatabaseTransactionStoreManager extends AbstractTransactionStoreMan
         logQueryLimit = CONFIG.getInt(ConfigurationKeys.STORE_DB_LOG_QUERY_LIMIT, DEFAULT_LOG_QUERY_LIMIT);
         String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
         //init dataSource
-        DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class, datasourceType);
+        DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.getServiceLoader(DataSourceGenerator.class).load(datasourceType);
         DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
-        logStore = EnhancedServiceLoader.load(LogStore.class, StoreMode.DB.name(), new Class[] {DataSource.class},
+        logStore = EnhancedServiceLoader.getServiceLoader(LogStore.class).load(StoreMode.DB.getName(),
+                new Class[] {DataSource.class},
             new Object[] {logStoreDataSource});
         inited.set(true);
     }

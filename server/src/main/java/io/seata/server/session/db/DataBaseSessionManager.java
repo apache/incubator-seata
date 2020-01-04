@@ -15,6 +15,7 @@
  */
 package io.seata.server.session.db;
 
+import io.seata.common.loader.Scope;
 import java.util.Collection;
 import java.util.List;
 
@@ -46,7 +47,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "db")
+@LoadLevel(name = "db",scope = Scope.PROTOTYPE)
 public class DataBaseSessionManager extends AbstractSessionManager
     implements SessionManager, SessionLifecycleListener, Initialize, Reloadable {
 
@@ -79,7 +80,8 @@ public class DataBaseSessionManager extends AbstractSessionManager
 
     @Override
     public void init() {
-        transactionStoreManager = EnhancedServiceLoader.load(TransactionStoreManager.class, StoreMode.DB.name());
+        transactionStoreManager =
+                EnhancedServiceLoader.getServiceLoader(TransactionStoreManager.class).load(StoreMode.DB.getName());
     }
 
     @Override

@@ -43,7 +43,7 @@ public class CodecFactory {
         if (CODEC_MAP.get(codecType) != null) {
             return CODEC_MAP.get(codecType);
         }
-        Codec codecImpl = EnhancedServiceLoader.load(Codec.class, codecType.name());
+        Codec codecImpl = EnhancedServiceLoader.getServiceLoader(Codec.class).load(codecType.name());
         CODEC_MAP.putIfAbsent(codecType, codecImpl);
         return codecImpl;
     }

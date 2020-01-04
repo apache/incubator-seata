@@ -15,6 +15,7 @@
  */
 package io.seata.server.session;
 
+import io.seata.common.loader.Scope;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -31,7 +32,7 @@ import io.seata.server.store.SessionStorable;
  *
  * @author sharajava
  */
-@LoadLevel(name = "default")
+@LoadLevel(name = "default",scope = Scope.PROTOTYPE)
 public class DefaultSessionManager extends AbstractSessionManager {
 
     /**

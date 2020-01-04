@@ -59,7 +59,7 @@ public final class ConfigurationFactory {
             false) : new FileConfiguration(seataConfigName + "-" + envValue + REGISTRY_CONF_SUFFIX, false);
         Configuration extConfiguration = null;
         try {
-            extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+            extConfiguration = EnhancedServiceLoader.getServiceLoader(ExtConfigurationProvider.class).load().provide(configuration);
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("load extConfiguration:{}",
                     extConfiguration == null ? null : extConfiguration.getClass().getSimpleName());
@@ -109,7 +109,7 @@ public final class ConfigurationFactory {
             Configuration configuration = new FileConfiguration(name);
             Configuration extConfiguration = null;
             try {
-                extConfiguration = EnhancedServiceLoader.load(ExtConfigurationProvider.class).provide(configuration);
+                extConfiguration = EnhancedServiceLoader.getServiceLoader(ExtConfigurationProvider.class).load().provide(configuration);
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("load extConfiguration:{}",
                         extConfiguration == null ? null : extConfiguration.getClass().getSimpleName());
@@ -120,7 +120,7 @@ public final class ConfigurationFactory {
 
             return null == extConfiguration ? configuration : extConfiguration;
         } else {
-            return EnhancedServiceLoader.load(ConfigurationProvider.class, Objects.requireNonNull(configType).name())
+            return EnhancedServiceLoader.getServiceLoader(ConfigurationProvider.class).load(Objects.requireNonNull(configType).name())
                 .provide();
         }
     }

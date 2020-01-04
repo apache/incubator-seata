@@ -42,7 +42,7 @@ public class UndoExecutorHolderFactory {
             synchronized (UndoExecutorHolderFactory.class) {
                 if (executorHolderMap == null) {
                     Map<String, UndoExecutorHolder> initializedMap = new HashMap<>();
-                    List<UndoExecutorHolder> holderList = EnhancedServiceLoader.loadAll(UndoExecutorHolder.class);
+                    List<UndoExecutorHolder> holderList = EnhancedServiceLoader.getServiceLoader(UndoExecutorHolder.class).loadAll();
                     for (UndoExecutorHolder holder : holderList) {
                         initializedMap.put(holder.getDbType().toLowerCase(), holder);
                     }

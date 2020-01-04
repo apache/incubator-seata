@@ -13,24 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.discovery.loadbalance;
-
-import io.seata.common.loader.EnhancedServiceLoader;
+package io.seata.common.loader;
 
 /**
- * The type Load balance factory.
+ * The type LatinHello
  *
- * @author slievrly
+ * @author: haozhibei
  */
-public class LoadBalanceFactory {
-
-    /**
-     * Gets instance.
-     *
-     * @return the instance
-     */
-    public static LoadBalance getInstance() {
-        LoadBalance loadBalance = EnhancedServiceLoader.getServiceLoader(LoadBalance.class).load();
-        return loadBalance;
+@LoadLevel(name = "LatinHello",order = 3,scope = Scope.PROTOTYPE)
+public class LatinHello implements Hello {
+    @Override
+    public String say() {
+        return "Olá.";
     }
 }

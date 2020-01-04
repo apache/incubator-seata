@@ -15,6 +15,7 @@
  */
 package io.seata.server.lock.memory;
 
+import io.seata.common.loader.Scope;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +36,7 @@ import io.seata.server.session.BranchSession;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "file")
+@LoadLevel(name = "file",scope = Scope.PROTOTYPE)
 public class MemoryLocker extends AbstractLocker {
 
     private static final int BUCKET_PER_TABLE = 128;

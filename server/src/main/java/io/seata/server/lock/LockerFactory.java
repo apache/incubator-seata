@@ -71,7 +71,7 @@ public class LockerFactory {
      */
     public static final LockManager getLockManager() {
         if (lockManager == null) {
-            if (StringUtils.equalsIgnoreCase(StoreMode.DB.name(), CONFIG.getConfig(ConfigurationKeys.STORE_MODE))) {
+            if (StringUtils.equalsIgnoreCase(StoreMode.DB.getName(), CONFIG.getConfig(ConfigurationKeys.STORE_MODE))) {
                 lockManager = new DataBaseLockManager();
             } else {
                 lockManager = new DefaultLockManager();
@@ -88,24 +88,23 @@ public class LockerFactory {
      */
     public static final Locker get(BranchSession branchSession) {
         String storeMode = CONFIG.getConfig(ConfigurationKeys.STORE_MODE);
-        if (StringUtils.equalsIgnoreCase(StoreMode.DB.name(), storeMode)) {
+        if (StringUtils.equalsIgnoreCase(StoreMode.DB.getName(), storeMode)) {
             if (lockerMap.get(storeMode) != null) {
                 return lockerMap.get(storeMode);
             }
             //init dataSource
             String datasourceType = CONFIG.getConfig(ConfigurationKeys.STORE_DB_DATASOURCE_TYPE);
-            DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.load(DataSourceGenerator.class,
-                datasourceType);
+            DataSourceGenerator dataSourceGenerator = EnhancedServiceLoader.getServiceLoader(DataSourceGenerator.class).load(datasourceType);
             DataSource logStoreDataSource = dataSourceGenerator.generateDataSource();
-            locker = EnhancedServiceLoader.load(Locker.class, storeMode, new Class[] {DataSource.class},
+            locker = EnhancedServiceLoader.getServiceLoader(Locker.class).load(storeMode, new Class[] {DataSource.class},
                 new Object[] {logStoreDataSource});
             lockerMap.putIfAbsent(storeMode, locker);
-        } else if (StringUtils.equalsIgnoreCase(StoreMode.FILE.name(), storeMode)) {
-            locker = EnhancedServiceLoader.load(Locker.class, storeMode,
+        } else if (StringUtils.equalsIgnoreCase(StoreMode.FILE.getName(), storeMode)) {
+            locker = EnhancedServiceLoader.getServiceLoader(Locker.class).load(storeMode,
                 new Class[] {BranchSession.class}, new Object[] {branchSession});
         } else {
             //other locker
-            locker = EnhancedServiceLoader.load(Locker.class, storeMode);
+            locker = EnhancedServiceLoader.getServiceLoader(Locker.class).load(storeMode);
         }
         return locker;
     }

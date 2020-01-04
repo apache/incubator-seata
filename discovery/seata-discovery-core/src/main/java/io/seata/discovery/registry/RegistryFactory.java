@@ -51,7 +51,7 @@ public class RegistryFactory {
         if (RegistryType.File == registryType) {
             return FileRegistryServiceImpl.getInstance();
         } else {
-            return EnhancedServiceLoader.load(RegistryProvider.class, Objects.requireNonNull(registryType).name()).provide();
+            return EnhancedServiceLoader.getServiceLoader(RegistryProvider.class).load(Objects.requireNonNull(registryType).name()).provide();
         }
     }
 }

@@ -48,6 +48,6 @@ public class CustomRegistryProvider implements RegistryProvider {
 
     @Override
     public RegistryService provide() {
-        return EnhancedServiceLoader.load(RegistryProvider.class, customName).provide();
+        return EnhancedServiceLoader.getServiceLoader(RegistryProvider.class).load(customName).provide();
     }
 }

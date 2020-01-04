@@ -28,7 +28,7 @@ public class ContextCoreLoader {
         private static ContextCore instance;
 
         static {
-            ContextCore contextCore = EnhancedServiceLoader.load(ContextCore.class);
+            ContextCore contextCore = EnhancedServiceLoader.getServiceLoader(ContextCore.class).load();
             if (contextCore == null) {
                 // Default
                 contextCore = new ThreadLocalContextCore();
