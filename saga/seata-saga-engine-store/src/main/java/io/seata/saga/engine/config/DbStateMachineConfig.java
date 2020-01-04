@@ -21,14 +21,15 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
+
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
 import io.seata.saga.engine.store.db.DbAndReportTcStateLogStore;
 import io.seata.saga.engine.store.db.DbStateLangStore;
 import io.seata.saga.tm.DefaultSagaTransactionalTemplate;
 import io.seata.saga.tm.SagaTransactionalTemplate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.DisposableBean;
 
 /**
  * DbStateMachineConfig
@@ -50,19 +51,9 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private SagaTransactionalTemplate sagaTransactionalTemplate;
 
     public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
-        Connection con = null;
-        try {
-            con = dataSource.getConnection();
+        try (Connection con = dataSource.getConnection()) {
             DatabaseMetaData metaData = con.getMetaData();
             return metaData.getDatabaseProductName();
-        } finally {
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    LOGGER.error("Get dbType from failed: {}", e.getMessage(), e);
-                }
-            }
         }
     }
 
