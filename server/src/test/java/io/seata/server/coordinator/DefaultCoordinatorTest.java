@@ -71,7 +71,7 @@ public class DefaultCoordinatorTest {
 
     private static final String applicationData = "{\"data\":\"test\"}";
 
-    private static Core core = new DefaultCore();
+    private static DefaultCore core;
 
     @BeforeAll
     public static void beforeClass() throws Exception {
@@ -79,6 +79,7 @@ public class DefaultCoordinatorTest {
         SessionHolder.init(null);
         serverMessageSender = new MockServerMessageSender();
         defaultCoordinator = new DefaultCoordinator(serverMessageSender);
+        core = new DefaultCore(serverMessageSender);
 //        defaultCoordinator.init();
     }
 
@@ -86,16 +87,16 @@ public class DefaultCoordinatorTest {
     @MethodSource("xidAndBranchIdProviderForCommit")
     public void branchCommit(String xid, Long branchId) throws TransactionException {
         BranchStatus result = null;
-
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         try {
-            result = defaultCoordinator.branchCommit(BranchType.AT, xid, branchId, resourceId, applicationData);
+            result = core.branchCommit(globalSession, globalSession.getBranch(branchId));
         } catch (TransactionException e) {
             Assertions.fail(e.getMessage());
         }
         Assertions.assertEquals(result, BranchStatus.PhaseTwo_Committed);
 
         //clear
-        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        globalSession = SessionHolder.findGlobalSession(xid);
         Assertions.assertNotNull(globalSession);
         globalSession.end();
     }
@@ -104,8 +105,9 @@ public class DefaultCoordinatorTest {
     @MethodSource("xidAndBranchIdProviderForRollback")
     public void branchRollback(String xid, Long branchId) {
         BranchStatus result = null;
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
         try {
-            result = defaultCoordinator.branchRollback(BranchType.AT, xid, branchId, resourceId, applicationData);
+            result = core.branchRollback(globalSession, globalSession.getBranch(branchId));
         } catch (TransactionException e) {
             Assertions.fail(e.getMessage());
         }
@@ -161,7 +163,7 @@ public class DefaultCoordinatorTest {
     }
 
 
-    private static class MockServerMessageSender implements ServerMessageSender {
+    public static class MockServerMessageSender implements ServerMessageSender {
 
         @Override
         public void sendResponse(RpcMessage request, Channel channel, Object msg) {
