@@ -34,18 +34,12 @@ public class GzipUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        ByteArrayOutputStream out = null;
-        GZIPOutputStream gzip = null;
-        try {
-            out = new ByteArrayOutputStream();
-            gzip = new GZIPOutputStream(out);
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+            GZIPOutputStream gzip = new GZIPOutputStream(out)) {
             gzip.write(bytes);
-            gzip.close();
             return out.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("gzip compress error", e);
-        } finally {
-            IOUtil.close(out);
         }
 
     }
@@ -54,22 +48,16 @@ public class GzipUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        ByteArrayOutputStream out = null;
-        GZIPInputStream gunzip = null;
-        try {
-            out = new ByteArrayOutputStream();
-            gunzip = new GZIPInputStream(new ByteArrayInputStream(bytes));
+        try (GZIPInputStream gunzip = new GZIPInputStream(new ByteArrayInputStream(bytes));
+            ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             byte[] buffer = new byte[BUFFER_SIZE];
             int n;
             while ((n = gunzip.read(buffer)) > -1) {
                 out.write(buffer, 0, n);
             }
-            gunzip.close();
             return out.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("gzip decompress error", e);
-        } finally {
-            IOUtil.close(out);
         }
     }
 

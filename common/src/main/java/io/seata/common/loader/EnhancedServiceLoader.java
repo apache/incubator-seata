@@ -301,9 +301,8 @@ public class EnhancedServiceLoader {
         if (urls != null) {
             while (urls.hasMoreElements()) {
                 java.net.URL url = urls.nextElement();
-                BufferedReader reader = null;
-                try {
-                    reader = new BufferedReader(new InputStreamReader(url.openStream(), Constants.DEFAULT_CHARSET));
+                try (BufferedReader reader =
+                    new BufferedReader(new InputStreamReader(url.openStream(), Constants.DEFAULT_CHARSET))) {
                     String line = null;
                     while ((line = reader.readLine()) != null) {
                         final int ci = line.indexOf('#');
@@ -321,8 +320,6 @@ public class EnhancedServiceLoader {
                     }
                 } catch (Throwable e) {
                     LOGGER.warn(e.getMessage());
-                } finally {
-                    IOUtil.close(reader);
                 }
             }
         }

@@ -50,19 +50,9 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private SagaTransactionalTemplate sagaTransactionalTemplate;
 
     public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
-        Connection con = null;
-        try {
-            con = dataSource.getConnection();
+        try (Connection con = dataSource.getConnection()) {
             DatabaseMetaData metaData = con.getMetaData();
             return metaData.getDatabaseProductName();
-        } finally {
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    LOGGER.error("Get dbType from failed: {}", e.getMessage(), e);
-                }
-            }
         }
     }
 
