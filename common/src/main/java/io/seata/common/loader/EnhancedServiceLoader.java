@@ -29,15 +29,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import io.seata.common.Constants;
-import io.seata.common.executor.Initialize;
-import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.IOUtil;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.seata.common.Constants;
+import io.seata.common.executor.Initialize;
+import io.seata.common.util.CollectionUtils;
 
 /**
  * The type Enhanced service loader.

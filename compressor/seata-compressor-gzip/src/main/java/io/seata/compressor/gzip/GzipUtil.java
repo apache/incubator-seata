@@ -15,8 +15,6 @@
  */
 package io.seata.compressor.gzip;
 
-import io.seata.common.util.IOUtil;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
