@@ -1,4 +1,5 @@
 name: CI
+
 on:
   pull_request:
     branches:
@@ -7,13 +8,13 @@ on:
       - 'v*'
 jobs:
   build:
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 180
     strategy:
       fail-fast: true
       matrix:
         java: [8, 11]
-        os: [ubuntu-18.04]
-    runs-on: ${{ matrix.os }}
+        os: [macos-latest, windows-latest, ubuntu-18.04]
     steps:
       - uses: actions/checkout@v1
       - name: Set up JDK ${{ matrix.java }}

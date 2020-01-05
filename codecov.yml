@@ -17,6 +17,7 @@ ignore:
  - ".mvn/.*"
  - ".style/.*"
  - "*.md"
+ - "integration-test/.*"
 comment:
   layout: "reach,diff,flags,tree"
   behavior: default
