@@ -23,20 +23,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.SQLInsertRecognizer;
-import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.rm.datasource.sql.struct.Null;
-import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
-import io.seata.rm.datasource.sql.struct.SqlSequenceExpr;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+
+import io.seata.sqlparser.SQLInsertRecognizer;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.SqlMethodExpr;
+import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.util.JdbcConstants;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

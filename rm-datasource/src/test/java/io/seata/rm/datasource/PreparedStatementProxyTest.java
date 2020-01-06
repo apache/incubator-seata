@@ -43,7 +43,7 @@ import io.seata.rm.datasource.mock.MockBlob;
 import io.seata.rm.datasource.mock.MockClob;
 import io.seata.rm.datasource.mock.MockConnection;
 import io.seata.rm.datasource.mock.MockDriver;
-import io.seata.rm.datasource.sql.struct.Null;
+import io.seata.sqlparser.struct.Null;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

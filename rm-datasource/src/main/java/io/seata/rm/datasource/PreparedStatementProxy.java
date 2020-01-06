@@ -21,6 +21,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 
 import io.seata.rm.datasource.exec.ExecuteTemplate;
+import io.seata.rm.datasource.exec.StatementCallback;
+import io.seata.sqlparser.ParametersHolder;
 
 /**
  * The type Prepared statement proxy.
