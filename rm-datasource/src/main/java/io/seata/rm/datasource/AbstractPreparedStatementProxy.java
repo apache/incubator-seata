@@ -14,6 +14,7 @@
  *  limitations under the License.
  */
 package io.seata.rm.datasource;
+import io.seata.sqlparser.struct.Null;
 
 import java.io.InputStream;
 import java.io.Reader;
@@ -36,8 +37,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
-import io.seata.rm.datasource.sql.struct.Null;
 
 /**
  * The type Abstract prepared statement proxy.

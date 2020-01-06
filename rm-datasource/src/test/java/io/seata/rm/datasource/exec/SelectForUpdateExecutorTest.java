@@ -32,7 +32,7 @@ import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.mock.MockConnectionProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.mock.MockLockConflictConnectionProxy;
-import io.seata.rm.datasource.sql.druid.MySQLSelectForUpdateRecognizer;
+import io.seata.sqlparser.druid.MySQLSelectForUpdateRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

@@ -17,12 +17,6 @@ package io.seata.rm.datasource.undo.mysql.keyword;
 
 import java.sql.Types;
 
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.rm.datasource.sql.SQLType;
-import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.KeyType;
-import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
@@ -31,6 +25,12 @@ import io.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
 
 import io.seata.rm.datasource.undo.UndoExecutorTest;
+import io.seata.sqlparser.SQLType;
+import io.seata.rm.datasource.sql.struct.Field;
+import io.seata.rm.datasource.sql.struct.KeyType;
+import io.seata.rm.datasource.sql.struct.Row;
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

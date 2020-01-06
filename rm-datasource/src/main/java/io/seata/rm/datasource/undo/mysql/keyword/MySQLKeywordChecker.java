@@ -15,8 +15,8 @@
  */
 package io.seata.rm.datasource.undo.mysql.keyword;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.util.Arrays;
 import java.util.Set;

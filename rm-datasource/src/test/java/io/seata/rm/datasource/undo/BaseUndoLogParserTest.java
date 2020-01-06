@@ -16,7 +16,7 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.rm.datasource.DataCompareUtils;
-import io.seata.rm.datasource.sql.SQLType;
+import io.seata.sqlparser.SQLType;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

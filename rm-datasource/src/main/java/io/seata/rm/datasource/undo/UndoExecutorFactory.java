@@ -15,10 +15,9 @@
  */
 package io.seata.rm.datasource.undo;
 
-import com.alibaba.druid.util.JdbcConstants;
-
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.util.HashSet;
 import java.util.Set;

@@ -15,17 +15,17 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.rm.datasource.undo.AbstractUndoLogManager;
-import io.seata.rm.datasource.undo.UndoLogParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayInputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
+
+import io.seata.rm.datasource.undo.AbstractUndoLogManager;
+import io.seata.rm.datasource.undo.UndoLogParser;
+import io.seata.sqlparser.util.JdbcConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author jsbxyyx

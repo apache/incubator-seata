@@ -18,7 +18,7 @@ package io.seata.rm.datasource.exec;
 import io.seata.rm.datasource.ConnectionContext;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.PreparedStatementProxy;
-import io.seata.rm.datasource.sql.SQLInsertRecognizer;
+import io.seata.sqlparser.SQLInsertRecognizer;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.junit.jupiter.api.Assertions;
