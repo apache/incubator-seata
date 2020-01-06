@@ -112,7 +112,7 @@
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
 
         <!-- for test -->
-        <junit-jupiter.version>5.4.2</junit-jupiter.version>
+        <junit-jupiter.version>5.5.2</junit-jupiter.version>
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <junit-platform-launcher.version>1.4.2</junit-platform-launcher.version>
