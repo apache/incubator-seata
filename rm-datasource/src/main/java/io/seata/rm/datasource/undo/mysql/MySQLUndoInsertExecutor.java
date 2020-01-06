@@ -57,8 +57,7 @@ public class MySQLUndoInsertExecutor extends AbstractUndoExecutor {
         }
         Row row = afterImageRows.get(0);
         Field pkField = row.primaryKeys().get(0);
-        return String.format(DELETE_SQL_TEMPLATE,
-                             keywordChecker.checkAndReplace(sqlUndoLog.getTableName()),
+        return String.format(DELETE_SQL_TEMPLATE, sqlUndoLog.getTableName(),
                              keywordChecker.checkAndReplace(pkField.getName()));
     }
 

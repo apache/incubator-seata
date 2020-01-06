@@ -139,9 +139,9 @@ public final class ColumnUtils {
      */
     public static String addEscape(String colName, String dbType) {
         if (isMysqlSeries(dbType)) {
-            return addEscape(colName, ColumnUtils.Escape.MYSQL);
+            return addEscape(colName, dbType, ColumnUtils.Escape.MYSQL);
         }
-        return addEscape(colName, ColumnUtils.Escape.STANDARD);
+        return addEscape(colName, dbType, ColumnUtils.Escape.STANDARD);
     }
 
     /**
@@ -150,7 +150,7 @@ public final class ColumnUtils {
      * @param escape the escape
      * @return
      */
-    public static String addEscape(String colName, Escape escape) {
+    private static String addEscape(String colName, String dbType, Escape escape) {
         if (colName == null || colName.isEmpty()) {
             return colName;
         }
@@ -158,12 +158,7 @@ public final class ColumnUtils {
             return colName;
         }
 
-        KeywordChecker keywordChecker = null;
-        if (escape == Escape.STANDARD) {
-            keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.ORACLE);
-        } else if (escape == Escape.MYSQL) {
-            keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-        }
+        KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(dbType);
         if (keywordChecker != null) {
             boolean check = keywordChecker.check(colName);
             if (!check) {

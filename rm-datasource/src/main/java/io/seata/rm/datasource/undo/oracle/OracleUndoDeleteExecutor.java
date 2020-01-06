@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
+import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
@@ -62,7 +63,7 @@ public class OracleUndoDeleteExecutor extends AbstractUndoExecutor {
         fields.add(pkField);
 
         String insertColumns = fields.stream()
-            .map(field -> ColumnUtils.addEscape(field.getName(), ColumnUtils.Escape.STANDARD))
+            .map(field -> ColumnUtils.addEscape(field.getName(), JdbcConstants.ORACLE))
             .collect(Collectors.joining(", "));
         String insertValues = fields.stream().map(field -> "?")
             .collect(Collectors.joining(", "));

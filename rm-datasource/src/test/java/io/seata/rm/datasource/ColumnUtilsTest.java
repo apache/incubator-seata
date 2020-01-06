@@ -62,32 +62,6 @@ public class ColumnUtilsTest {
     }
 
     @Test
-    public void test_addEscape_byEscape() throws Exception {
-        String col = "`id`";
-        String newCol = ColumnUtils.addEscape(col, ColumnUtils.Escape.MYSQL);
-        Assertions.assertEquals(col, newCol);
-
-        String col_s = "\"id\"";
-        String newCol_s = ColumnUtils.addEscape(col_s, ColumnUtils.Escape.STANDARD);
-        Assertions.assertEquals(col_s, newCol_s);
-
-        String col2 = "id";
-        String newCol2 = ColumnUtils.addEscape(col2, ColumnUtils.Escape.MYSQL);
-        Assertions.assertEquals("`" + col2 + "`", newCol2);
-
-        String col2_s = "id";
-        String newCol2_s = ColumnUtils.addEscape(col2_s, ColumnUtils.Escape.STANDARD);
-        Assertions.assertEquals("\"" + col2_s + "\"", newCol2_s);
-
-        String col3 = "";
-        String newCol3 = ColumnUtils.addEscape(col3, ColumnUtils.Escape.MYSQL);
-        Assertions.assertEquals(col3, newCol3);
-
-        Assertions.assertNull(ColumnUtils.addEscape(null, ColumnUtils.Escape.MYSQL));
-
-    }
-
-    @Test
     public void test_addEscape_byDbType() throws Exception {
         List<String> cols1 = new ArrayList<>();
         cols1.add("id");
