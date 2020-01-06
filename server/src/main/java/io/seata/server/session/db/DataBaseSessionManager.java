@@ -15,7 +15,6 @@
  */
 package io.seata.server.session.db;
 
-import io.seata.common.loader.Scope;
 import java.util.Collection;
 import java.util.List;
 
@@ -47,7 +46,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "db",scope = Scope.PROTOTYPE)
+@LoadLevel(name = "db")
 public class DataBaseSessionManager extends AbstractSessionManager
     implements SessionManager, SessionLifecycleListener, Initialize, Reloadable {
 

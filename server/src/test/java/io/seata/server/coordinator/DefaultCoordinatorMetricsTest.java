@@ -67,7 +67,7 @@ public class DefaultCoordinatorMetricsTest {
             coordinator.doGlobalCommit(commitRequest, new GlobalCommitResponse(), new RpcContext());
 
             //we need sleep for a short while because default canBeCommittedAsync() is true
-            Thread.sleep(200);
+            Thread.sleep(1000);
 
             measurements.clear();
             MetricsManager.get().getRegistry().measure().forEach(

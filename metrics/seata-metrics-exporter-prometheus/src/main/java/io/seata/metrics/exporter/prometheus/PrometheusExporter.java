@@ -35,7 +35,7 @@ import io.seata.metrics.registry.Registry;
  *
  * @author zhengyangyong
  */
-@LoadLevel(name = "Prometheus", order = 1)
+@LoadLevel(name = "prometheus", order = 1)
 public class PrometheusExporter extends Collector implements Collector.Describable, Exporter {
     private static final String METRICS_EXPORTER_PROMETHEUS_PORT = "exporter-prometheus-port";
 

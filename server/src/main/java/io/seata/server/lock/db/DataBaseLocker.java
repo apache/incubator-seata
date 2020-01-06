@@ -15,7 +15,6 @@
  */
 package io.seata.server.lock.db;
 
-import io.seata.common.loader.Scope;
 import javax.sql.DataSource;
 import java.util.List;
 
@@ -34,7 +33,7 @@ import io.seata.core.store.StoreMode;
  *
  * @author zhangsen
  */
-@LoadLevel(name = "db",scope = Scope.PROTOTYPE)
+@LoadLevel(name = "db")
 public class DataBaseLocker extends AbstractLocker {
 
     private LockStore lockStore;

@@ -252,7 +252,7 @@ public class EnhancedServiceLoader<S> {
     private S getExtension(ExtensionURL url, ClassLoader loader, Class[] argTypes,
                            Object[] args) {
         if (url == null) {
-            throw new EnhancedServiceNotFoundException("service provider not found");
+            throw new EnhancedServiceNotFoundException("not found service provider for : " + type.getName());
         }
         if (Scope.SINGLETON.equals(url.getScope())) {
             Holder<Object> holder = extensionInstances.get(url);
