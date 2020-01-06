@@ -133,7 +133,7 @@ public class StringUtils {
         }
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            int i = -1;
+            int i;
             while ((i = is.read()) != -1) {
                 baos.write(i);
             }
@@ -155,7 +155,7 @@ public class StringUtils {
         }
         try {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            int i = -1;
+            int i;
             while ((i = is.read()) != -1) {
                 baos.write(i);
             }
