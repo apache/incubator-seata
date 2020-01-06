@@ -25,6 +25,6 @@ public interface Initialize {
     /**
      * init method
      */
-    public void init();
+    void init();
 
 }

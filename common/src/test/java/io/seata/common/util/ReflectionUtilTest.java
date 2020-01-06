@@ -47,7 +47,7 @@ public class ReflectionUtilTest {
                 ReflectionUtil.invokeMethod("foo", "length"));
 
         Assertions.assertThrows(NoSuchMethodException.class,
-                () -> ReflectionUtil.invokeMethod(new String(), "size"));
+                () -> ReflectionUtil.invokeMethod("", "size"));
     }
 
     @Test
@@ -59,7 +59,7 @@ public class ReflectionUtilTest {
                 .invokeMethod("foo", "length", null, null));
 
         Assertions.assertThrows(NoSuchMethodException.class, () -> ReflectionUtil
-                .invokeMethod(new String(), "size", null, null));
+                .invokeMethod("", "size", null, null));
     }
 
     @Test

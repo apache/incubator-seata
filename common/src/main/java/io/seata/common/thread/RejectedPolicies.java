@@ -17,7 +17,6 @@ package io.seata.common.thread;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.RejectedExecutionHandler;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Policies for RejectedExecutionHandler
@@ -32,21 +31,18 @@ public final class RejectedPolicies {
      * @return rejected execution handler
      */
     public static RejectedExecutionHandler runsOldestTaskPolicy() {
-        return new RejectedExecutionHandler() {
-            @Override
-            public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                if (executor.isShutdown()) {
-                    return;
-                }
-                BlockingQueue<Runnable> workQueue = executor.getQueue();
-                Runnable firstWork = workQueue.poll();
-                boolean newTaskAdd = workQueue.offer(r);
-                if (firstWork != null) {
-                    firstWork.run();
-                }
-                if (!newTaskAdd) {
-                    executor.execute(r);
-                }
+        return (r, executor) -> {
+            if (executor.isShutdown()) {
+                return;
+            }
+            BlockingQueue<Runnable> workQueue = executor.getQueue();
+            Runnable firstWork = workQueue.poll();
+            boolean newTaskAdd = workQueue.offer(r);
+            if (firstWork != null) {
+                firstWork.run();
+            }
+            if (!newTaskAdd) {
+                executor.execute(r);
             }
         };
     }

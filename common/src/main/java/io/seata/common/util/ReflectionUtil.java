@@ -187,7 +187,7 @@ public class ReflectionUtil {
         if (clazz.isInterface()) {
             return Collections.singleton(clazz);
         }
-        Set<Class<?>> interfaces = new LinkedHashSet<Class<?>>();
+        Set<Class<?>> interfaces = new LinkedHashSet<>();
         while (clazz != null) {
             Class<?>[] ifcs = clazz.getInterfaces();
             for (Class<?> ifc : ifcs) {

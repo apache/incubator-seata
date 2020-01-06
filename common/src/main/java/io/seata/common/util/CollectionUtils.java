@@ -177,7 +177,7 @@ public class CollectionUtils {
             if (null != element) {
                 destList.add(element.toUpperCase());
             } else {
-                destList.add(element);
+                destList.add(null);
             }
         }
         return destList;
