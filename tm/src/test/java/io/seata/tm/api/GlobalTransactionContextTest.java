@@ -70,7 +70,7 @@ class GlobalTransactionContextTest {
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         tx = GlobalTransactionContext.reload(DEFAULT_XID);
         GlobalTransaction finalTx = tx;
-        Assertions.assertThrows(IllegalStateException.class, () -> finalTx.begin());
+        Assertions.assertThrows(IllegalStateException.class, finalTx::begin);
 
     }
 }

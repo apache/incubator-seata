@@ -74,8 +74,7 @@ class DefaultGlobalTransactionTest {
         txInfo.setPropagation(Propagation.REQUIRED);
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         tx.begin();
-        Assertions.assertThrows(TransactionException.class, () -> {
-            tx.commit();});
+        Assertions.assertThrows(TransactionException.class, tx::commit);
     }
 
     @Test
@@ -85,7 +84,7 @@ class DefaultGlobalTransactionTest {
         TransactionInfo txInfo = new TransactionInfo();
         txInfo.setPropagation(Propagation.REQUIRED);
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
-        Assertions.assertThrows(IllegalStateException.class, () -> tx.commit());
+        Assertions.assertThrows(IllegalStateException.class, tx::commit);
     }
 
 
@@ -97,7 +96,7 @@ class DefaultGlobalTransactionTest {
         txInfo.setPropagation(Propagation.REQUIRED);
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         tx.begin();
-        Assertions.assertThrows(TransactionException.class, () -> tx.rollback());
+        Assertions.assertThrows(TransactionException.class, tx::rollback);
     }
 
     @Test
@@ -108,7 +107,7 @@ class DefaultGlobalTransactionTest {
         txInfo.setPropagation(Propagation.REQUIRED);
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate(txInfo);
         tx.begin();
-        Assertions.assertThrows(TransactionException.class, () -> tx.rollback());
+        Assertions.assertThrows(TransactionException.class, tx::rollback);
     }
 
 }

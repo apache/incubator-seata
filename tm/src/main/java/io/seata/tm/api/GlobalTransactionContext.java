@@ -36,8 +36,7 @@ public class GlobalTransactionContext {
      * @return
      */
     private static GlobalTransaction createNew() {
-        GlobalTransaction tx = new DefaultGlobalTransaction();
-        return tx;
+        return new DefaultGlobalTransaction();
     }
 
     /**
@@ -103,13 +102,12 @@ public class GlobalTransactionContext {
      * @throws TransactionException the transaction exception
      */
     public static GlobalTransaction reload(String xid) throws TransactionException {
-        GlobalTransaction tx = new DefaultGlobalTransaction(xid, GlobalStatus.UnKnown, GlobalTransactionRole.Launcher) {
+        return new DefaultGlobalTransaction(xid, GlobalStatus.UnKnown, GlobalTransactionRole.Launcher) {
             @Override
             public void begin(int timeout, String name) throws TransactionException {
                 throw new IllegalStateException("Never BEGIN on a RELOADED GlobalTransaction. ");
             }
         };
-        return tx;
     }
 
     /**
