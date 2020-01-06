@@ -40,6 +40,8 @@ public class GzipUtil {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream();
              GZIPOutputStream gzip = new GZIPOutputStream(out)) {
             gzip.write(bytes);
+            gzip.flush();
+            gzip.finish();
             return out.toByteArray();
         } catch (IOException e) {
             throw new RuntimeException("gzip compress error", e);
