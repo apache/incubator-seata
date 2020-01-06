@@ -422,8 +422,8 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
                 if (ExecutionStatus.SU.equals(stateInstance.getStatus())) {
                     branchStatus = BranchStatus.PhaseTwo_Committed;
-                } else if ((ExecutionStatus.FA.equals(stateInstance.getStatus()) || ExecutionStatus.UN.equals(
-                        stateInstance.getStatus()))) {
+                } else if (ExecutionStatus.FA.equals(stateInstance.getStatus()) || ExecutionStatus.UN.equals(
+                        stateInstance.getStatus())) {
                     branchStatus = BranchStatus.PhaseOne_Failed;
                 } else {
                     branchStatus = BranchStatus.Unknown;
