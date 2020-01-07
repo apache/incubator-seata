@@ -15,14 +15,15 @@
  */
 package io.seata.rm.datasource.sql.druid.postgresql;
 
+import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.druid.postgresql.PostgresqlDeleteRecognizer;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 
-import io.seata.rm.datasource.ParametersHolder;
-import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

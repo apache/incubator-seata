@@ -13,16 +13,16 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.sql.druid.postgresql;
+package io.seata.sqlparser.druid.postgresql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLExprTableSource;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGDeleteStatement;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
-import io.seata.rm.datasource.ParametersHolder;
-import io.seata.rm.datasource.sql.SQLDeleteRecognizer;
-import io.seata.rm.datasource.sql.SQLType;
+import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLDeleteRecognizer;
+import io.seata.sqlparser.SQLType;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,7 +71,7 @@ public class PostgresqlDeleteRecognizer extends BasePostgresqlRecognizer impleme
 
     @Override
     public String getWhereCondition(final ParametersHolder parametersHolder,
-                                    final ArrayList<List<Object>> paramAppenderList) {
+        final ArrayList<List<Object>> paramAppenderList) {
         SQLExpr where = ast.getWhere();
         return super.getWhereCondition(where, parametersHolder, paramAppenderList);
     }

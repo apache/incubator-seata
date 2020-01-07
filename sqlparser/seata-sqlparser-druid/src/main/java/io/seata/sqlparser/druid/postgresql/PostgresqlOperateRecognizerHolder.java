@@ -13,17 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.sql.druid.postgresql;
+package io.seata.sqlparser.druid.postgresql;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectQueryBlock;
-
-import io.seata.rm.datasource.sql.SQLOperateRecognizerHolder;
-import io.seata.rm.datasource.sql.SQLRecognizer;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 
 /**
  * The type PostgresqlOperateRecognizerHolder
+ *
  * @author will.zjw
  */
 public class PostgresqlOperateRecognizerHolder implements SQLOperateRecognizerHolder {
@@ -47,7 +47,7 @@ public class PostgresqlOperateRecognizerHolder implements SQLOperateRecognizerHo
 
     @Override
     public SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast) {
-        PGSelectQueryBlock selectQueryBlock = (PGSelectQueryBlock)((SQLSelectStatement)ast).getSelect().getFirstQueryBlock();
+        PGSelectQueryBlock selectQueryBlock = (PGSelectQueryBlock) ((SQLSelectStatement) ast).getSelect().getFirstQueryBlock();
         if (selectQueryBlock.getForClause() != null && selectQueryBlock.getForClause().getOption().equals(PGSelectQueryBlock.ForClause.Option.UPDATE)) {
             return new PostgresqlSelectForUpdateRecognizer(sql, ast);
         }

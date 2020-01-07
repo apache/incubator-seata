@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.rm.datasource.sql.druid.postgresql;
+package io.seata.sqlparser.druid.postgresql;
 
 import com.alibaba.druid.sql.ast.SQLExpr;
 import com.alibaba.druid.sql.ast.SQLStatement;
@@ -23,10 +23,10 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectQueryBlock;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLTableSource;
 import com.alibaba.druid.sql.dialect.postgresql.visitor.PGOutputVisitor;
-import io.seata.rm.datasource.ParametersHolder;
-import io.seata.rm.datasource.sql.SQLParsingException;
-import io.seata.rm.datasource.sql.SQLSelectRecognizer;
-import io.seata.rm.datasource.sql.SQLType;
+import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLParsingException;
+import io.seata.sqlparser.SQLSelectRecognizer;
+import io.seata.sqlparser.SQLType;
 import java.util.ArrayList;
 import java.util.List;
 
