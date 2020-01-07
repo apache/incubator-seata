@@ -33,7 +33,6 @@ import org.springframework.beans.factory.config.BeanPostProcessor;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/12/26
  * The type seata data source bean post processor
  */
 public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
