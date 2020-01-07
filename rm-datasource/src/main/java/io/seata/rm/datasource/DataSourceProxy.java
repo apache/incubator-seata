@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource;
 
-import com.alibaba.druid.util.JdbcUtils;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
@@ -24,13 +23,12 @@ import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.util.JdbcUtils;
-
-import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 
 /**
  * The type Data source proxy.
@@ -74,7 +72,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
      * Instantiates a new Data source proxy.
      *
      * @param targetDataSource the target data source
-     * @param resourceGroupId  the resource group id
+     * @param resourceGroupId the resource group id
      */
     public DataSourceProxy(DataSource targetDataSource, String resourceGroupId) {
         super(targetDataSource);
