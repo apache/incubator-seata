@@ -102,7 +102,7 @@ public class ConfigFuture {
             LOGGER.error("config operation timeout,cost:{} ms,op:{},dataId:{}", System.currentTimeMillis() - start, operation.name(), dataId);
             return getFailResult();
         } catch (InterruptedException exx) {
-            LOGGER.error("config operate interrupted,error:{}", exx.getMessage());
+            LOGGER.error("config operate interrupted,error:{}", exx.getMessage(), exx);
             return getFailResult();
         }
         if (operation == ConfigOperation.GET) {
