@@ -27,7 +27,7 @@
     <artifactId>seata-integration-test</artifactId>
     <packaging>pom</packaging>
     <modules>
-        <module>test-mysql</module>
+        <module>test-api</module>
     </modules>
     <properties>
         <maven.deploy.skip>true</maven.deploy.skip>

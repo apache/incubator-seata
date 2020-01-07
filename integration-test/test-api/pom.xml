@@ -24,8 +24,36 @@
         <version>${revision}</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
-    <artifactId>test-mysql</artifactId>
-
+    <properties>
+        <mysql-connector.version>5.1.31</mysql-connector.version>
+    </properties>
+    <artifactId>test-api</artifactId>
+    <dependencies>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-rm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-tm</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-rm-datasource</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>druid</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>
