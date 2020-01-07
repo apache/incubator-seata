@@ -19,8 +19,9 @@ import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleArgumentExpr;
-import io.seata.rm.datasource.ParametersHolder;
-import io.seata.rm.datasource.sql.SQLType;
+import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.druid.oracle.OracleDeleteRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

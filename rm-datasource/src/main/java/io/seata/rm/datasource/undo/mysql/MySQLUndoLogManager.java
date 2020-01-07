@@ -15,19 +15,19 @@
  */
 package io.seata.rm.datasource.undo.mysql;
 
-import com.alibaba.druid.util.JdbcConstants;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Date;
+
 import io.seata.common.util.BlobUtils;
 import io.seata.common.util.IOUtil;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogParser;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.Date;
 
 /**
  * @author jsbxyyx
