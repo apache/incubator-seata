@@ -22,11 +22,12 @@ import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
+
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.sql.DataSource;
+import java.sql.Statement;
 
 /**
  * The type Table meta cache.
@@ -54,31 +55,6 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
             }
         }
         return tableMetaCache;
-    }
-
-    @Override
-    protected TableMeta fetchSchema(DataSource dataSource, String tableName) throws SQLException {
-        Connection conn = null;
-        java.sql.Statement stmt = null;
-        try {
-            conn = dataSource.getConnection();
-            stmt = conn.createStatement();
-            DatabaseMetaData dbmd = conn.getMetaData();
-            return resultSetMetaToSchema(dbmd, tableName);
-        } catch (Exception e) {
-            if (e instanceof SQLException) {
-                throw e;
-            }
-            throw new SQLException("Failed to fetch schema of " + tableName, e);
-
-        } finally {
-            if (stmt != null) {
-                stmt.close();
-            }
-            if (conn != null) {
-                conn.close();
-            }
-        }
     }
 
     private TableMeta resultSetMetaToSchema(DatabaseMetaData dbmd, String tableName) throws SQLException {
@@ -176,4 +152,42 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
         return tm;
     }
 
+    @Override
+    protected String getCacheKey(Connection connection, String tableName, String resourceId) {
+        StringBuilder cacheKey = new StringBuilder(resourceId);
+        cacheKey.append(".");
+
+        //separate it to schemaName and tableName
+        String[] tableNameWithSchema = tableName.split("\\.");
+        String defaultTableName = tableNameWithSchema.length > 1 ? tableNameWithSchema[1] : tableNameWithSchema[0];
+
+        //postgres does not implement supportsMixedCaseIdentifiers in DatabaseMetadata
+        if (defaultTableName.contains("\"")) {
+            cacheKey.append(defaultTableName.replace("\"", ""));
+        } else {
+            //postgres default store in lower case
+            cacheKey.append(defaultTableName.toLowerCase());
+        }
+
+        return cacheKey.toString();
+    }
+
+    @Override
+    protected TableMeta fetchSchema(Connection connection, String tableName) throws SQLException {
+        Statement stmt = null;
+        try {
+            stmt = connection.createStatement();
+            DatabaseMetaData dbmd = connection.getMetaData();
+            return resultSetMetaToSchema(dbmd, tableName);
+        } catch (Exception e) {
+            if (e instanceof SQLException) {
+                throw e;
+            }
+            throw new SQLException("Failed to fetch schema of " + tableName, e);
+        } finally {
+            if (stmt != null) {
+                stmt.close();
+            }
+        }
+    }
 }
