@@ -418,7 +418,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         if (!(request instanceof AbstractTransactionRequestToTC)) {
             throw new IllegalArgumentException();
         }
-        AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC)request;
+        AbstractTransactionRequestToTC transactionRequest = (AbstractTransactionRequestToTC) request;
         transactionRequest.setTCInboundHandler(this);
 
         return transactionRequest.handle(context);
@@ -449,7 +449,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler implements Tran
         }
         // 2. second close netty flow
         if (messageSender instanceof RpcServer) {
-            ((RpcServer)messageSender).destroy();
+            ((RpcServer) messageSender).destroy();
         }
         // 3. last destroy SessionHolder
         SessionHolder.destroy();
