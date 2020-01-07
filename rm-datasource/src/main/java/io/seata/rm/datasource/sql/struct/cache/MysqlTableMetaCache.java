@@ -188,9 +188,9 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
                     if ("PRIMARY".equalsIgnoreCase(indexName)) {
                         index.setIndextype(IndexType.PRIMARY);
                     } else if (!index.isNonUnique()) {
-                        index.setIndextype(IndexType.Unique);
+                        index.setIndextype(IndexType.UNIQUE);
                     } else {
-                        index.setIndextype(IndexType.Normal);
+                        index.setIndextype(IndexType.NORMAL);
                     }
                     tm.getAllIndexes().put(indexName, index);
 
