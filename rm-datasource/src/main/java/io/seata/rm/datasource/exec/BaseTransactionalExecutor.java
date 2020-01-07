@@ -28,16 +28,17 @@ import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
-import io.seata.rm.datasource.ParametersHolder;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.SQLType;
-import io.seata.rm.datasource.sql.WhereRecognizer;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+
+import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.WhereRecognizer;
 
 /**
  * The type Base transactional executor.

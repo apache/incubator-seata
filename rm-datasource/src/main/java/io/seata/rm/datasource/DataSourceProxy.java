@@ -23,6 +23,7 @@ import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
 import io.seata.rm.DefaultResourceManager;
 import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
+import io.seata.rm.datasource.util.JdbcUtils;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -84,7 +85,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
         this.resourceGroupId = resourceGroupId;
         try (Connection connection = dataSource.getConnection()) {
             jdbcUrl = connection.getMetaData().getURL();
-            dbType = JdbcUtils.getDbType(jdbcUrl, null);
+            dbType = JdbcUtils.getDbType(jdbcUrl);
         } catch (SQLException e) {
             throw new IllegalStateException("can not init dataSource", e);
         }

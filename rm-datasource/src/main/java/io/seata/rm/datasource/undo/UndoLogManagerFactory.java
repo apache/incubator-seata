@@ -19,7 +19,6 @@ import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import io.seata.rm.datasource.undo.oracle.OracleUndoLogManager;
-import io.seata.rm.datasource.undo.postgresql.PostgresqlUndoLogManager;
 
 import java.util.HashMap;
 import java.util.Map;
