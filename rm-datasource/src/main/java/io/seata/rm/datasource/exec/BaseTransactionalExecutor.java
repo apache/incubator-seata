@@ -318,34 +318,25 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @throws SQLException
      */
     protected TableRecords buildTableRecords(List<Object> pkValues) throws SQLException {
-        TableRecords afterImage;
         String pk = getTableMeta().getPkName();
         StringJoiner pkValuesJoiner = new StringJoiner(" , ",
-            "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (", ")");
+                "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (", ")");
         for (Object pkValue : pkValues) {
             pkValuesJoiner.add("?");
         }
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-        try {
-            ps = statementProxy.getConnection().prepareStatement(pkValuesJoiner.toString());
 
-            for (int i = 1; i <= pkValues.size(); i++) {
+        ResultSet rs = null;
+        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(pkValuesJoiner.toString())) {
+            for (int i = 1, s = pkValues.size(); i <= s; i++) {
                 ps.setObject(i, pkValues.get(i - 1));
             }
-
             rs = ps.executeQuery();
-            afterImage = TableRecords.buildRecords(getTableMeta(), rs);
-
+            return TableRecords.buildRecords(getTableMeta(), rs);
         } finally {
             if (rs != null) {
                 rs.close();
             }
-            if (ps != null) {
-                ps.close();
-            }
         }
-        return afterImage;
     }
 
     /**
