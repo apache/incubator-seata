@@ -16,7 +16,6 @@
 package io.seata.spring.boot.autoconfigure;
 
 import io.seata.spring.annotation.GlobalTransactionScanner;
-import io.seata.spring.annotation.datasource.EnableAutoDataSourceProxy;
 import io.seata.spring.annotation.datasource.SeataDataSourceBeanPostProcessor;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
 import io.seata.spring.boot.autoconfigure.util.SpringUtils;
@@ -39,7 +38,6 @@ import static io.seata.spring.annotation.datasource.AutoDataSourceProxyRegistrar
 @ConditionalOnProperty(prefix = StarterConstants.SEATA_PREFIX, name = "enabled", havingValue = "true", matchIfMissing = true)
 @Configuration
 @EnableConfigurationProperties({SeataProperties.class})
-@EnableAutoDataSourceProxy
 public class SeataAutoConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataAutoConfiguration.class);
 
