@@ -21,7 +21,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.config.ConfigurationFactory;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.spring.util.SpringProxyUtils;
 import net.sf.cglib.proxy.Enhancer;
@@ -32,9 +31,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 
-import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_AUTOPROXY;
-import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_USE_JDK_PROXY;
-
 /**
  * @author xingfudeshi@gmail.com
  * @date 2019/12/26
@@ -42,10 +38,15 @@ import static io.seata.core.constants.ConfigurationKeys.DATASOURCE_USE_JDK_PROXY
  */
 public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
     private static final Logger LOGGER = LoggerFactory.getLogger(SeataDataSourceBeanPostProcessor.class);
+    private final boolean useJdkProxy;
+
+    public SeataDataSourceBeanPostProcessor(boolean useJdkProxy) {
+        this.useJdkProxy = useJdkProxy;
+    }
 
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
-        if (bean instanceof DataSource && !(bean instanceof DataSourceProxy) && ConfigurationFactory.getInstance().getBoolean(DATASOURCE_AUTOPROXY, false)) {
+        if (bean instanceof DataSource && !(bean instanceof DataSourceProxy)) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Auto proxy of [{}]", beanName);
             }
@@ -56,7 +57,7 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
 
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) {
-        if (bean instanceof DataSourceProxy && ConfigurationFactory.getInstance().getBoolean(DATASOURCE_AUTOPROXY, false)) {
+        if (bean instanceof DataSourceProxy) {
             throw new ShouldNeverHappenException("Auto proxy of DataSource can't be enabled as you've created a DataSourceProxy bean." +
                 "Please consider removing DataSourceProxy bean or disabling auto proxy of DataSource.");
         }
@@ -71,7 +72,7 @@ public class SeataDataSourceBeanPostProcessor implements BeanPostProcessor {
      */
     private Object proxyDataSource(Object originBean) {
         DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) originBean);
-        if (ConfigurationFactory.getInstance().getBoolean(DATASOURCE_USE_JDK_PROXY, false)) {
+        if (this.useJdkProxy) {
             return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), SpringProxyUtils.getAllInterfaces(originBean), (proxy, method, args) -> handleMethodProxy(dataSourceProxy, method, args, originBean));
         } else {
             return Enhancer.create(originBean.getClass(), (MethodInterceptor) (proxy, method, args, methodProxy) -> handleMethodProxy(dataSourceProxy, method, args, originBean));

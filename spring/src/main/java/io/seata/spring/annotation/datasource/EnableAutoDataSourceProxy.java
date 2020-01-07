@@ -25,12 +25,17 @@ import org.springframework.context.annotation.Import;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/12/26
  * This annotation will enable auto proxying of datasource bean.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Import(SeataDataSourceBeanPostProcessor.class)
+@Import(AutoDataSourceProxyRegistrar.class)
 @Documented
 public @interface EnableAutoDataSourceProxy {
+    /**
+     * Whether use JDK proxy instead of CGLIB proxy
+     *
+     * @return useJdkProxy
+     */
+    boolean useJdkProxy() default false;
 }

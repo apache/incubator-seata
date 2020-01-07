@@ -15,12 +15,13 @@
  */
 package io.seata.spring.boot.autoconfigure;
 
+import java.util.HashMap;
+
 import io.seata.spring.boot.autoconfigure.properties.file.ClientProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.LockProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.LogProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.ServiceProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.ShutdownProperties;
-import io.seata.spring.boot.autoconfigure.properties.file.SpringProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.SupportProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.ThreadFactoryProperties;
 import io.seata.spring.boot.autoconfigure.properties.file.TransportProperties;
@@ -42,8 +43,6 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisPrope
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistrySofaProperties;
 import io.seata.spring.boot.autoconfigure.properties.registry.RegistryZooKeeperProperties;
 
-import java.util.HashMap;
-
 /**
  * @author xingfudeshi@gmail.com
  */
@@ -61,7 +60,6 @@ public class StarterConstants {
     public static final String UNDO_PREFIX = CLIENT_PREFIX + ".undo";
     public static final String LOG_PREFIX = CLIENT_PREFIX + ".log";
     public static final String SUPPORT_PREFIX = CLIENT_PREFIX + ".support";
-    public static final String SPRING_PREFIX = SUPPORT_PREFIX + ".spring";
 
     public static final String REGISTRY_PREFIX = SEATA_PREFIX + ".registry";
     public static final String REGISTRY_NACOS_PREFIX = REGISTRY_PREFIX + ".nacos";
@@ -89,7 +87,6 @@ public class StarterConstants {
             put(LOCK_PREFIX, LockProperties.class);
             put(SERVICE_PREFIX, ServiceProperties.class);
             put(SHUTDOWN_PREFIX, ShutdownProperties.class);
-            put(SPRING_PREFIX, SpringProperties.class);
             put(SUPPORT_PREFIX, SupportProperties.class);
             put(THREAD_FACTORY_PREFIX, ThreadFactoryProperties.class);
             put(UNDO_PREFIX, UndoProperties.class);
