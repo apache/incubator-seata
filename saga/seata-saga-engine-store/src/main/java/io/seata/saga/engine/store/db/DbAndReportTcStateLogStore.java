@@ -28,6 +28,8 @@ import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.GlobalStatus;
+import io.seata.saga.engine.StateMachineConfig;
+import io.seata.saga.engine.config.DbStateMachineConfig;
 import io.seata.saga.engine.exception.EngineExecutionException;
 import io.seata.saga.engine.sequence.SeqGenerator;
 import io.seata.saga.engine.serializer.Serializer;
@@ -404,7 +406,13 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             executeUpdate(stateLogStoreSqls.getRecordStateFinishedSql(dbType), STATE_INSTANCE_TO_STATEMENT_FOR_UPDATE,
                     stateInstance);
 
-            branchReport(stateInstance, context);
+            StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
+                    DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
+            if (!(stateMachineConfig instanceof DbStateMachineConfig
+                    && ((DbStateMachineConfig)stateMachineConfig).isSkipBranchReportOnSuccess()
+                    && ExecutionStatus.SU.equals(stateInstance.getStatus()))) {
+                branchReport(stateInstance, context);
+            }
         }
     }
 

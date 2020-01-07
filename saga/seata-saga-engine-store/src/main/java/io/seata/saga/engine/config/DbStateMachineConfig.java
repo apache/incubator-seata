@@ -48,6 +48,7 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private String dbType;
     private int transOperationTimeout = DEFAULT_TRANS_OPER_TIMEOUT;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
+    private boolean skipBranchReportOnSuccess;
 
     public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
         Connection con = null;
@@ -164,5 +165,13 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     public void setTransOperationTimeout(int transOperationTimeout) {
         this.transOperationTimeout = transOperationTimeout;
+    }
+
+    public boolean isSkipBranchReportOnSuccess() {
+        return skipBranchReportOnSuccess;
+    }
+
+    public void setSkipBranchReportOnSuccess(boolean skipBranchReportOnSuccess) {
+        this.skipBranchReportOnSuccess = skipBranchReportOnSuccess;
     }
 }
