@@ -198,7 +198,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (expr instanceof SqlSequenceExpr) {
             SqlSequenceExpr sequenceExpr = (SqlSequenceExpr) expr;
             final String sql = "SELECT " + sequenceExpr.getSequence() + ".currval FROM DUAL";
-            LOGGER.warn("Fail to get auto-generated keys, use \'{}\' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
+            LOGGER.warn("Fail to get auto-generated keys, use '{}' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
             genKeys = statementProxy.getConnection().createStatement().executeQuery(sql);
         } else {
             throw new NotSupportYetException(String.format("not support expr [%s]", expr.getClass().getName()));
@@ -300,7 +300,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             // specify Statement.RETURN_GENERATED_KEYS to
             // Statement.executeUpdate() or Connection.prepareStatement().
             if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
-                LOGGER.warn("Fail to get auto-generated keys, use \'SELECT LAST_INSERT_ID()\' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
+                LOGGER.warn("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
                 genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
             } else {
                 throw e;
