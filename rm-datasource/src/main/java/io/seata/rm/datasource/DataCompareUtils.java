@@ -40,6 +40,10 @@ import java.util.Objects;
  */
 public class DataCompareUtils {
 
+    private DataCompareUtils() {
+
+    }
+
     /**
      * Is field equals.
      *
