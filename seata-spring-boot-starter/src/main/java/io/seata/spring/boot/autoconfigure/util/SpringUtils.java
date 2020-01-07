@@ -18,6 +18,7 @@ package io.seata.spring.boot.autoconfigure.util;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.env.Environment;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -33,6 +34,15 @@ public class SpringUtils implements ApplicationContextAware {
      */
     public static ApplicationContext getApplicationContext() {
         return applicationContext;
+    }
+
+    /**
+     * get Environment
+     *
+     * @return environment
+     */
+    public static Environment getEnvironment() {
+        return applicationContext.getEnvironment();
     }
 
     /**

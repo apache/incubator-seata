@@ -20,6 +20,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.env.Environment;
 
+@Deprecated
 public class SpringContextProvider implements ApplicationContextAware {
     private static ApplicationContext applicationContext;
     private static Environment environment;
