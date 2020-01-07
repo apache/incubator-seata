@@ -291,46 +291,23 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @throws SQLException the sql exception
      */
     protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
-        TableRecords tableRecords = null;
-        PreparedStatement ps = null;
-        Statement st = null;
         ResultSet rs = null;
-        try {
-            if (paramAppenderList.isEmpty()) {
-                st = statementProxy.getConnection().createStatement();
-                rs = st.executeQuery(selectSQL);
-            } else {
-                if (paramAppenderList.size() == 1) {
-                    ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                    List<Object> paramAppender = paramAppenderList.get(0);
-                    for (int i = 0; i < paramAppender.size(); i++) {
-                        ps.setObject(i + 1, paramAppender.get(i));
-                    }
-                } else {
-                    ps = statementProxy.getConnection().prepareStatement(selectSQL);
-                    List<Object> paramAppender = null;
-                    for (int i = 0; i < paramAppenderList.size(); i++) {
-                        paramAppender = paramAppenderList.get(i);
-                        for (int j = 0; j < paramAppender.size(); j++) {
-                            ps.setObject(i * paramAppender.size() + j + 1, paramAppender.get(j));
-                        }
+        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQL)) {
+            if (CollectionUtils.isNotEmpty(paramAppenderList)) {
+                for (int i = 0, ts = paramAppenderList.size(); i < ts; i++) {
+                    List<Object> paramAppender = paramAppenderList.get(i);
+                    for (int j = 0, ds = paramAppender.size(); j < ds; j++) {
+                        ps.setObject(i * ds + j + 1, paramAppender.get(j));
                     }
                 }
-                rs = ps.executeQuery();
             }
-            tableRecords = TableRecords.buildRecords(tableMeta, rs);
+            rs = ps.executeQuery();
+            return TableRecords.buildRecords(tableMeta, rs);
         } finally {
             if (rs != null) {
                 rs.close();
             }
-            if (st != null) {
-                st.close();
-            }
-            if (ps != null) {
-                ps.close();
-            }
         }
-        return tableRecords;
     }
 
     /**
