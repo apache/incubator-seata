@@ -99,13 +99,10 @@ public class ConfigFuture {
         } catch (ExecutionException e) {
             throw new ShouldNeverHappenException("Should not get results in a multi-threaded environment", e);
         } catch (TimeoutException e) {
-            LOGGER.error(
-                    "config operation timeout,cost:" + (System.currentTimeMillis() - start) + " ms,op:" + operation
-                            .name()
-                            + ",dataId:" + dataId);
+            LOGGER.error("config operation timeout,cost:{} ms,op:{},dataId:{}", System.currentTimeMillis() - start, operation.name(), dataId);
             return getFailResult();
         } catch (InterruptedException exx) {
-            LOGGER.error("config operate interrupted,error:" + exx.getMessage());
+            LOGGER.error("config operate interrupted,error:{}", exx.getMessage(), exx);
             return getFailResult();
         }
         if (operation == ConfigOperation.GET) {
