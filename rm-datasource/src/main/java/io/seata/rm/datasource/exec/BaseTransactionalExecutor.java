@@ -221,7 +221,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @throws SQLException the sql exception
      */
     protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
-        if (beforeImage.getRows().size() == 0 && afterImage.getRows().size() == 0) {
+        if (beforeImage.getRows().isEmpty() && afterImage.getRows().isEmpty()) {
             return;
         }
 
