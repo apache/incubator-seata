@@ -412,12 +412,23 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
 
         if (sagaTransactionalTemplate != null) {
 
+            BranchStatus branchStatus = null;
             //find out the original state instance, only the original state instance is registered on the server, and its status should
             // be reported.
             StateInstance originalStateInst = null;
             if (StringUtils.hasLength(stateInstance.getStateIdRetriedFor())) {
 
                 originalStateInst = findOutOriginalStateInstanceOfRetryState(stateInstance);
+
+                if (ExecutionStatus.SU.equals(stateInstance.getStatus())) {
+                    branchStatus = BranchStatus.PhaseTwo_Committed;
+                } else if (ExecutionStatus.FA.equals(stateInstance.getStatus()) || ExecutionStatus.UN.equals(
+                        stateInstance.getStatus())) {
+                    branchStatus = BranchStatus.PhaseOne_Failed;
+                } else {
+                    branchStatus = BranchStatus.Unknown;
+                }
+
             } else if (StringUtils.hasLength(stateInstance.getStateIdCompensatedFor())) {
 
                 originalStateInst = findOutOriginalStateInstanceOfCompensateState(stateInstance);
@@ -427,15 +438,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 originalStateInst = stateInstance;
             }
 
-            BranchStatus branchStatus = null;
-            try {
-                StateMachineInstance machineInstance = stateInstance.getStateMachineInstance();
-                GlobalTransaction globalTransaction = getGlobalTransaction(machineInstance, context);
-
-                if (globalTransaction == null) {
-                    throw new EngineExecutionException("Global transaction is not exists", FrameworkErrorCode.ObjectNotExists);
-                }
-
+            if (branchStatus == null) {
                 if (ExecutionStatus.SU.equals(originalStateInst.getStatus()) && originalStateInst.getCompensationStatus() == null) {
                     branchStatus = BranchStatus.PhaseTwo_Committed;
                 } else if (ExecutionStatus.SU.equals(originalStateInst.getCompensationStatus())) {
@@ -449,6 +452,15 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                     branchStatus = BranchStatus.PhaseOne_Failed;
                 } else {
                     branchStatus = BranchStatus.Unknown;
+                }
+            }
+
+            try {
+                StateMachineInstance machineInstance = stateInstance.getStateMachineInstance();
+                GlobalTransaction globalTransaction = getGlobalTransaction(machineInstance, context);
+
+                if (globalTransaction == null) {
+                    throw new EngineExecutionException("Global transaction is not exists", FrameworkErrorCode.ObjectNotExists);
                 }
 
                 sagaTransactionalTemplate.branchReport(globalTransaction.getXid(), Long.parseLong(originalStateInst.getId()), branchStatus,
