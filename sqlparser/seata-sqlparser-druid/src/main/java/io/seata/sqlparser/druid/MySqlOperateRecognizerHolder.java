@@ -17,8 +17,8 @@ package io.seata.sqlparser.druid;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The class MySqlOperateRecognizerHolder

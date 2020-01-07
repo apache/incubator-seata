@@ -27,6 +27,7 @@ import io.seata.core.rpc.netty.NettyPoolKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -196,11 +197,7 @@ public class ChannelManager {
         if (StringUtils.isNullOrEmpty(dbkey)) {
             return null;
         }
-        Set<String> set = new HashSet<String>();
-        for (String s : dbkey.split(Constants.DBKEYS_SPLIT_CHAR)) {
-            set.add(s);
-        }
-        return set;
+        return new HashSet<String>(Arrays.asList(dbkey.split(Constants.DBKEYS_SPLIT_CHAR)));
     }
 
     /**
@@ -231,7 +228,7 @@ public class ChannelManager {
             return null;
         }
         if (rpcContext.getChannel().isActive()) {
-            //recheck
+            // recheck
             return rpcContext.getChannel();
         }
         Integer clientPort = ChannelUtil.getClientPortFromChannel(channel);
@@ -454,7 +451,7 @@ public class ChannelManager {
         if (RM_CHANNELS.isEmpty()) {
             return null;
         }
-        Map<String,Channel> channels = new HashMap(RM_CHANNELS.size());
+        Map<String,Channel> channels = new HashMap<>(RM_CHANNELS.size());
         for (String resourceId : RM_CHANNELS.keySet()) {
             Channel channel = tryOtherApp(RM_CHANNELS.get(resourceId), null);
             if (channel == null) {

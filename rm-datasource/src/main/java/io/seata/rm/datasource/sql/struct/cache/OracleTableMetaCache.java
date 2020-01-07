@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
@@ -23,6 +22,7 @@ import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;

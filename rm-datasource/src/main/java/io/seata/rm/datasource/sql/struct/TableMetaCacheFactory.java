@@ -16,10 +16,6 @@
 package io.seata.rm.datasource.sql.struct;
 
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.sql.struct.cache.MysqlTableMetaCache;
-import io.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache;
-import io.seata.sqlparser.util.JdbcConstants;
 import io.seata.common.loader.EnhancedServiceLoader;
 import java.util.HashMap;
 import java.util.List;

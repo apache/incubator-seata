@@ -15,10 +15,10 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoExecutorHolder;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The Type OracleUndoExecutorHolder

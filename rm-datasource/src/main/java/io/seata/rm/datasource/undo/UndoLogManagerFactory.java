@@ -16,9 +16,6 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
-import io.seata.rm.datasource.undo.oracle.OracleUndoLogManager;
-import io.seata.sqlparser.util.JdbcConstants;
 import io.seata.common.loader.EnhancedServiceLoader;
 
 import java.util.HashMap;
