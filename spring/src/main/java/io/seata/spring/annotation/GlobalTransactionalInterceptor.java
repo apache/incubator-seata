@@ -152,7 +152,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
                     throw e.getCause();
                 default:
-                    throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code);
+                    throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
 
             }
         }
