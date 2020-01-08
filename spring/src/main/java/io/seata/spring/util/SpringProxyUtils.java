@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.seata.rm.tcc.remoting.parser.DubboUtil;
 import org.springframework.aop.TargetSource;
 import org.springframework.aop.framework.AdvisedSupport;
 import org.springframework.aop.support.AopUtils;
@@ -114,12 +115,8 @@ public class SpringProxyUtils {
             return false;
         }
         //check dubbo proxy ?
-        String proxyClassName = bean.getClass().getName();
-        if (proxyClassName.startsWith("com.alibaba.dubbo.common.bytecode.proxy") || proxyClassName.startsWith(
-            "org.apache.dubbo.common.bytecode.proxy")) {
-            return true;
-        }
-        return Proxy.class.isAssignableFrom(bean.getClass()) || AopUtils.isAopProxy(bean);
+        return DubboUtil.isDubboProxyName(bean.getClass().getName()) || (Proxy.class.isAssignableFrom(bean.getClass())
+                || AopUtils.isAopProxy(bean));
     }
 
     /**
