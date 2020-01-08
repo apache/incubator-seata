@@ -109,9 +109,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
      */
     @Override
     public void deleteUndoLog(String xid, long branchId, Connection conn) throws SQLException {
-        PreparedStatement deletePST = null;
-        try {
-            deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL);
+        try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_SQL)) {
             deletePST.setLong(1, branchId);
             deletePST.setString(2, xid);
             deletePST.executeUpdate();
@@ -119,9 +117,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
             }
-            throw (SQLException)e;
-        } finally {
-            IOUtil.close(deletePST);
+            throw (SQLException) e;
         }
     }
 
@@ -140,9 +136,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
         int xidSize = xids.size();
         int branchIdSize = branchIds.size();
         String batchDeleteSql = toBatchDeleteUndoLogSql(xidSize, branchIdSize);
-        PreparedStatement deletePST = null;
-        try {
-            deletePST = conn.prepareStatement(batchDeleteSql);
+        try (PreparedStatement deletePST = conn.prepareStatement(batchDeleteSql)) {
             int paramsIndex = 1;
             for (Long branchId : branchIds) {
                 deletePST.setLong(paramsIndex++, branchId);
@@ -158,11 +152,8 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             if (!(e instanceof SQLException)) {
                 e = new SQLException(e);
             }
-            throw (SQLException)e;
-        } finally {
-            IOUtil.close(deletePST);
+            throw (SQLException) e;
         }
-
     }
 
     protected static String toBatchDeleteUndoLogSql(int xidSize, int branchIdSize) {
@@ -210,11 +201,11 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     public void flushUndoLogs(ConnectionProxy cp) throws SQLException {
         ConnectionContext connectionContext = cp.getContext();
         String xid = connectionContext.getXid();
-        long branchID = connectionContext.getBranchId();
+        long branchId = connectionContext.getBranchId();
 
         BranchUndoLog branchUndoLog = new BranchUndoLog();
         branchUndoLog.setXid(xid);
-        branchUndoLog.setBranchId(branchID);
+        branchUndoLog.setBranchId(branchId);
         branchUndoLog.setSqlUndoLogs(connectionContext.getUndoItems());
 
         UndoLogParser parser = UndoLogParserFactory.getInstance();
@@ -224,7 +215,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
             LOGGER.debug("Flushing UNDO LOG: {}", new String(undoLogContent, Constants.DEFAULT_CHARSET));
         }
 
-        insertUndoLogWithNormal(xid, branchID, buildContext(parser.getName()), undoLogContent,
+        insertUndoLogWithNormal(xid, branchId, buildContext(parser.getName()), undoLogContent,
             cp.getTargetConnection());
     }
 
