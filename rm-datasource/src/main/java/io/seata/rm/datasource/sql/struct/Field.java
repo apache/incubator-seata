@@ -142,6 +142,6 @@ public class Field {
 
     @Override
     public String toString() {
-        return String.format("[%s,%s]", name, String.valueOf(value));
+        return String.format("[%s,%s]", name, value);
     }
 }

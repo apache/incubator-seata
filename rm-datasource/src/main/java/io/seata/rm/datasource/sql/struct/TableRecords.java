@@ -185,7 +185,7 @@ public class TableRecords {
                 Field field = new Field();
                 field.setName(col.getColumnName());
                 if (tmeta.getPkName().equalsIgnoreCase(field.getName())) {
-                    field.setKeyType(KeyType.PrimaryKey);
+                    field.setKeyType(KeyType.PRIMARY_KEY);
                 }
                 field.setType(col.getDataType());
                 // mysql will not run in this code
