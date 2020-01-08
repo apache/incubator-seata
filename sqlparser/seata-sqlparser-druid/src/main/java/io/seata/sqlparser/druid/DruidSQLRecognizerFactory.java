@@ -22,6 +22,7 @@ import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
 import io.seata.common.loader.LoadLevel;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
 
@@ -33,7 +34,7 @@ import java.util.List;
  * @author sharajava
  * @author ggndnn
  */
-@LoadLevel(name = "druid")
+@LoadLevel(name = ConfigurationKeys.SQL_PARSER_TYPE_DRUID)
 public class DruidSQLRecognizerFactory implements SQLRecognizerFactory {
     @Override
     public SQLRecognizer create(String sql, String dbType) {

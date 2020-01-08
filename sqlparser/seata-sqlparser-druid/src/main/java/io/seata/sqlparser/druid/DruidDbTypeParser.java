@@ -17,12 +17,13 @@ package io.seata.sqlparser.druid;
 
 import com.alibaba.druid.util.JdbcUtils;
 import io.seata.common.loader.LoadLevel;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.sqlparser.util.DbTypeParser;
 
 /**
  * @author ggndnn
  */
-@LoadLevel(name = "druid")
+@LoadLevel(name = ConfigurationKeys.SQL_PARSER_TYPE_DRUID)
 public class DruidDbTypeParser implements DbTypeParser {
     @Override
     public String parseFromJdbcUrl(String jdbcUrl) {

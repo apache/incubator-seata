@@ -430,4 +430,9 @@ public class ConfigurationKeys {
      * The constant SQL_PARSER_TYPE.
      */
     public static final String SQL_PARSER_TYPE = CLIENT_RM_PREFIX + "sqlparser.type";
+
+    /**
+     * The constant SQL_PARSER_TYPE_DRUID.
+     */
+    public static final String SQL_PARSER_TYPE_DRUID = "druid";
 }
