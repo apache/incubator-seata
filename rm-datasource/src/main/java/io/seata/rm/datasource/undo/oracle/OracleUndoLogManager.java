@@ -26,7 +26,6 @@ import io.seata.rm.datasource.undo.UndoLogParser;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.seata.common.util.IOUtil;
 
 /**
  * @author jsbxyyx
