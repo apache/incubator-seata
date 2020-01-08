@@ -86,9 +86,7 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
         public void run(Timeout timeout) throws Exception {
             if (!isStopped) {
                 if (++count > RETRY_MAX_TIMES) {
-                    LOGGER.error(
-                        "transaction[" + tx.getXid() + "] retry fetch status times exceed the limit [" + RETRY_MAX_TIMES
-                            + " times]");
+                    LOGGER.error("transaction [{}] retry fetch status times exceed the limit [{} times]", tx.getXid(), RETRY_MAX_TIMES);
                     return;
                 }
                 isStopped = shouldStop(tx, required);
@@ -100,7 +98,7 @@ public class DefaultFailureHandlerImpl implements FailureHandler {
     private boolean shouldStop(final GlobalTransaction tx, GlobalStatus required) {
         try {
             GlobalStatus status = tx.getStatus();
-            LOGGER.info("transaction[" + tx.getXid() + "] current status is [" + status + "]");
+            LOGGER.info("transaction [{}] current status is [{}]", tx.getXid(), status);
             if (status == required || status == GlobalStatus.Finished) {
                 return true;
             }
