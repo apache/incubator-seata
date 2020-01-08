@@ -39,8 +39,8 @@ public class ExceptionSerializer implements Serializer<Exception, byte[]> {
 
         byte[] result = null;
         if (o != null) {
-            try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
                 oos.writeObject(o);
                 oos.flush();
                 result = baos.toByteArray();
@@ -66,8 +66,8 @@ public class ExceptionSerializer implements Serializer<Exception, byte[]> {
 
         Object result = null;
         if (bytes != null) {
-            try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-                ObjectInputStream ois = new ObjectInputStream(bais)) {
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+            try (ObjectInputStream ois = new ObjectInputStream(bais)) {
                 result = ois.readObject();
             } catch (IOException e) {
                 LOGGER.error("deserialize failed:", e);
