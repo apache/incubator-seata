@@ -18,7 +18,6 @@ package io.seata.rm.datasource.undo;
 import io.seata.common.Constants;
 import io.seata.common.util.BlobUtils;
 import io.seata.common.util.CollectionUtils;
-import io.seata.common.util.IOUtil;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.core.constants.ConfigurationKeys;
