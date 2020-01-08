@@ -99,6 +99,6 @@ public class DeleteExecutorTest {
     @Test
     public void testAfterImage() throws SQLException {
         TableRecords tableRecords = deleteExecutor.beforeImage();
-        Assertions.assertTrue(deleteExecutor.afterImage(tableRecords).size() == 0);
+        Assertions.assertEquals(0, deleteExecutor.afterImage(tableRecords).size());
     }
 }

@@ -124,11 +124,7 @@ public class TableRecordsTest {
         Assertions.assertEquals(0, empty.size());
         Assertions.assertEquals(0, empty.getRows().size());
         Assertions.assertEquals(0, empty.pkRows().size());
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            empty.add(new Row());
-        });
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            empty.getTableMeta();
-        });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> empty.add(new Row()));
+        Assertions.assertThrows(UnsupportedOperationException.class, empty::getTableMeta);
     }
 }

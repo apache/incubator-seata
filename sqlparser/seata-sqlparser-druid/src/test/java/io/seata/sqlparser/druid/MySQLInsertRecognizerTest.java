@@ -153,7 +153,7 @@ public class MySQLInsertRecognizerTest extends AbstractMySQLRecognizerTest {
 
         MySQLInsertRecognizer recognizer = new MySQLInsertRecognizer(sql, asts.get(0));
         List<List<Object>> insertRows = recognizer.getInsertRows();
-        Assertions.assertTrue(insertRows.size() == 1);
+        Assertions.assertEquals(1, insertRows.size());
 
         //test for exception
         Assertions.assertThrows(SQLParsingException.class, () -> {

@@ -135,8 +135,7 @@ public class MockResultSet extends ResultSetBase {
 
     public Object getObjectInternal(int columnIndex) {
         Object[] row = rows.get(rowIndex);
-        Object obj = row[columnIndex - 1];
-        return obj;
+        return row[columnIndex - 1];
     }
 
     @Override

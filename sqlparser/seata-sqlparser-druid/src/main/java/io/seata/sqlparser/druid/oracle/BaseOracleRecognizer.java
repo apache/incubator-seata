@@ -45,25 +45,23 @@ public abstract class BaseOracleRecognizer extends BaseRecognizer {
     public OracleOutputVisitor createOutputVisitor(final ParametersHolder parametersHolder,
                                                    final ArrayList<List<Object>> paramAppenderList,
                                                    final StringBuilder sb) {
-        OracleOutputVisitor visitor = new OracleOutputVisitor(sb) {
 
+        return new OracleOutputVisitor(sb) {
             @Override
             public boolean visit(SQLVariantRefExpr x) {
                 if ("?".equals(x.getName())) {
                     ArrayList<Object> oneParamValues = parametersHolder.getParameters()[x.getIndex()];
-                    if (paramAppenderList.size() == 0) {
-                        oneParamValues.stream().forEach(t -> paramAppenderList.add(new ArrayList<>()));
+                    if (paramAppenderList.isEmpty()) {
+                        oneParamValues.forEach(t -> paramAppenderList.add(new ArrayList<>()));
                     }
                     for (int i = 0; i < oneParamValues.size(); i++) {
                         Object o = oneParamValues.get(i);
                         paramAppenderList.get(i).add(o instanceof Null ? null : o);
                     }
-
                 }
                 return super.visit(x);
             }
         };
-        return visitor;
     }
 
     public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder, final ArrayList<List<Object>> paramAppenderList) {

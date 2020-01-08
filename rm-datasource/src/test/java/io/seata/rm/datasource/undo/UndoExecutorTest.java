@@ -75,7 +75,7 @@ public class UndoExecutorTest {
         f.setName("name");
         f.setValue("x");
         f.setType(Types.VARCHAR);
-        f.setKeyType(KeyType.PrimaryKey);
+        f.setKeyType(KeyType.PRIMARY_KEY);
 
         String s = JSON.toJSONString(f, SerializerFeature.WriteDateUseDateFormat);
 
@@ -99,7 +99,7 @@ public class UndoExecutorTest {
         Row beforeRow = new Row();
 
         Field pkField = new Field();
-        pkField.setKeyType(KeyType.PrimaryKey);
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
         pkField.setName("id");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
@@ -124,7 +124,7 @@ public class UndoExecutorTest {
         Row afterRow = new Row();
 
         Field pkField1 = new Field();
-        pkField1.setKeyType(KeyType.PrimaryKey);
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
         pkField1.setName("id");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(213);
@@ -171,7 +171,7 @@ public class UndoExecutorTest {
         Row afterRow1 = new Row();
 
         Field pkField = new Field();
-        pkField.setKeyType(KeyType.PrimaryKey);
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
         pkField.setName("id");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
@@ -192,7 +192,7 @@ public class UndoExecutorTest {
         Row afterRow = new Row();
 
         Field pkField1 = new Field();
-        pkField1.setKeyType(KeyType.PrimaryKey);
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
         pkField1.setName("id");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);
@@ -240,7 +240,7 @@ public class UndoExecutorTest {
         Row afterRow1 = new Row();
 
         Field pkField = new Field();
-        pkField.setKeyType(KeyType.PrimaryKey);
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
         pkField.setName("id");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
@@ -261,7 +261,7 @@ public class UndoExecutorTest {
         Row afterRow = new Row();
 
         Field pkField1 = new Field();
-        pkField1.setKeyType(KeyType.PrimaryKey);
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
         pkField1.setName("id");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);

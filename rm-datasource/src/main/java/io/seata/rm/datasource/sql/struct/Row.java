@@ -70,7 +70,7 @@ public class Row {
     public List<Field> primaryKeys() {
         List<Field> pkFields = new ArrayList<>();
         for (Field field : fields) {
-            if (KeyType.PrimaryKey == field.getKeyType()) {
+            if (KeyType.PRIMARY_KEY == field.getKeyType()) {
                 pkFields.add(field);
             }
         }
@@ -88,7 +88,7 @@ public class Row {
     public List<Field> nonPrimaryKeys() {
         List<Field> nonPkFields = new ArrayList<>();
         for (Field field : fields) {
-            if (KeyType.PrimaryKey != field.getKeyType()) {
+            if (KeyType.PRIMARY_KEY != field.getKeyType()) {
                 nonPkFields.add(field);
             }
         }

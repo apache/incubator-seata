@@ -23,7 +23,7 @@ import io.seata.core.constants.ConfigurationKeys;
  */
 public class UndoLogConstants {
 
-    public final static String SERIALIZER_KEY = "serializer";
+    public static final String SERIALIZER_KEY = "serializer";
     
     public static final String DEFAULT_SERIALIZER = ConfigurationFactory.getInstance()
             .getConfig(ConfigurationKeys.TRANSACTION_UNDO_LOG_SERIALIZATION, "jackson");

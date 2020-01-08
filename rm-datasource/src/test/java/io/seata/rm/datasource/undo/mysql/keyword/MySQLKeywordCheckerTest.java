@@ -74,7 +74,7 @@ public class MySQLKeywordCheckerTest {
         Row beforeRow = new Row();
 
         Field pkField = new Field();
-        pkField.setKeyType(KeyType.PrimaryKey);
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
         pkField.setName("key");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
@@ -99,7 +99,7 @@ public class MySQLKeywordCheckerTest {
         Row afterRow = new Row();
 
         Field pkField1 = new Field();
-        pkField1.setKeyType(KeyType.PrimaryKey);
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
         pkField1.setName("key");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);
@@ -165,7 +165,7 @@ public class MySQLKeywordCheckerTest {
         Row afterRow1 = new Row();
 
         Field pkField = new Field();
-        pkField.setKeyType(KeyType.PrimaryKey);
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
         pkField.setName("key");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
@@ -186,7 +186,7 @@ public class MySQLKeywordCheckerTest {
         Row afterRow = new Row();
 
         Field pkField1 = new Field();
-        pkField1.setKeyType(KeyType.PrimaryKey);
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
         pkField1.setName("key");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);
@@ -252,7 +252,7 @@ public class MySQLKeywordCheckerTest {
         Row afterRow1 = new Row();
 
         Field pkField = new Field();
-        pkField.setKeyType(KeyType.PrimaryKey);
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
         pkField.setName("key");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
@@ -273,7 +273,7 @@ public class MySQLKeywordCheckerTest {
         Row afterRow = new Row();
 
         Field pkField1 = new Field();
-        pkField1.setKeyType(KeyType.PrimaryKey);
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
         pkField1.setName("key");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);

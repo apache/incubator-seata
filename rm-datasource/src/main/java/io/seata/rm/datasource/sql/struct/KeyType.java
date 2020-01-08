@@ -32,5 +32,5 @@ public enum KeyType {
      * The Primary key.
      */
     // Primary Key
-    PrimaryKey
+    PRIMARY_KEY
 }

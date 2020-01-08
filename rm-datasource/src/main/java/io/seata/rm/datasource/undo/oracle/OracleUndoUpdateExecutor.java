@@ -16,6 +16,7 @@
 package io.seata.rm.datasource.undo.oracle;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.Row;
@@ -42,7 +43,7 @@ public class OracleUndoUpdateExecutor extends AbstractUndoExecutor {
     protected String buildUndoSQL() {
         TableRecords beforeImage = sqlUndoLog.getBeforeImage();
         List<Row> beforeImageRows = beforeImage.getRows();
-        if (beforeImageRows == null || beforeImageRows.size() == 0) {
+        if (CollectionUtils.isEmpty(beforeImageRows)) {
             throw new ShouldNeverHappenException("Invalid UNDO LOG"); // TODO
         }
 

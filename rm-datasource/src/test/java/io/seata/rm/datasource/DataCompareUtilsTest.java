@@ -52,8 +52,8 @@ public class DataCompareUtilsTest {
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field0, field10).getResult());
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field4, field11).getResult());
 
-        Field field12 = new Field("information", JDBCType.BLOB.getVendorTypeNumber(), new String("hello world").getBytes());
-        Field field13 = new Field("information", JDBCType.BLOB.getVendorTypeNumber(), new String("hello world").getBytes());
+        Field field12 = new Field("information", JDBCType.BLOB.getVendorTypeNumber(), "hello world".getBytes());
+        Field field13 = new Field("information", JDBCType.BLOB.getVendorTypeNumber(), "hello world".getBytes());
         Assertions.assertTrue(DataCompareUtils.isFieldEquals(field12, field13).getResult());
     }
 

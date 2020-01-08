@@ -101,7 +101,7 @@ public class PreparedStatementProxyTest {
 
     @Test
     public void testExecute() throws SQLException {
-        Assertions.assertNotNull(preparedStatementProxy.execute());
+        preparedStatementProxy.execute();
     }
 
     @Test
@@ -243,9 +243,7 @@ public class PreparedStatementProxyTest {
         Assertions.assertEquals(1, preparedStatementProxy.getParamsByIndex(0).get(0));
         preparedStatementProxy.clearParameters();
 
-        Assertions.assertDoesNotThrow(() -> {
-            preparedStatementProxy.addBatch();
-        });
+        Assertions.assertDoesNotThrow(() -> preparedStatementProxy.addBatch());
 
         CharArrayReader charArrayReader = new CharArrayReader("x".toCharArray());
         preparedStatementProxy.setCharacterStream(1, charArrayReader, 1);

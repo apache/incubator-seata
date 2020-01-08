@@ -29,8 +29,6 @@ public class KeywordCheckerFactoryTest {
         KeywordCheckerFactory keywordCheckerFactory = new KeywordCheckerFactory();
         Assertions.assertNotNull(keywordCheckerFactory);
 
-        Assertions.assertThrows(NotSupportYetException.class, () -> {
-            KeywordCheckerFactory.getKeywordChecker("unknow");
-        });
+        Assertions.assertThrows(NotSupportYetException.class, () -> KeywordCheckerFactory.getKeywordChecker("unknow"));
     }
 }

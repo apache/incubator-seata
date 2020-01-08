@@ -44,25 +44,23 @@ public abstract class BaseMySQLRecognizer extends BaseRecognizer {
     public MySqlOutputVisitor createOutputVisitor(final ParametersHolder parametersHolder,
                                                   final ArrayList<List<Object>> paramAppenderList,
                                                   final StringBuilder sb) {
-        MySqlOutputVisitor visitor = new MySqlOutputVisitor(sb) {
+        return new MySqlOutputVisitor(sb) {
 
             @Override
             public boolean visit(SQLVariantRefExpr x) {
                 if ("?".equals(x.getName())) {
                     ArrayList<Object> oneParamValues = parametersHolder.getParameters()[x.getIndex()];
-                    if (paramAppenderList.size() == 0) {
-                        oneParamValues.stream().forEach(t -> paramAppenderList.add(new ArrayList<>()));
+                    if (paramAppenderList.isEmpty()) {
+                        oneParamValues.forEach(t -> paramAppenderList.add(new ArrayList<>()));
                     }
                     for (int i = 0; i < oneParamValues.size(); i++) {
                         Object o = oneParamValues.get(i);
                         paramAppenderList.get(i).add(o instanceof Null ? null : o);
                     }
-
                 }
                 return super.visit(x);
             }
         };
-        return visitor;
     }
 
     public String getWhereCondition(SQLExpr where, final ParametersHolder parametersHolder,

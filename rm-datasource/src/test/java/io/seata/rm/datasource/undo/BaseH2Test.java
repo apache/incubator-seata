@@ -122,7 +122,7 @@ public abstract class BaseH2Test {
     protected static Field addField(Row row, String name, int type, Object value) {
         Field field = new Field(name, type, value);
         if (name.equalsIgnoreCase("id")) {
-            field.setKeyType(KeyType.PrimaryKey);
+            field.setKeyType(KeyType.PRIMARY_KEY);
         }
         row.add(field);
         return field;
