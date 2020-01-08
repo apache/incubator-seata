@@ -85,11 +85,11 @@ public class StatementProxyTest {
         String sql = "select * from table_statment_proxy";
         Assertions.assertNotNull(statementProxy.executeQuery(sql));
         Assertions.assertDoesNotThrow(() -> statementProxy.executeUpdate(sql));
-        Assertions.assertDoesNotThrow(() -> statementProxy.executeUpdate(sql, 1));
+        Assertions.assertDoesNotThrow(() -> statementProxy.executeUpdate(sql, Statement.RETURN_GENERATED_KEYS));
         Assertions.assertDoesNotThrow(() -> statementProxy.executeUpdate(sql, new int[]{1}));
         Assertions.assertDoesNotThrow(() -> statementProxy.executeUpdate(sql, new String[]{"id"}));
         Assertions.assertDoesNotThrow(() -> statementProxy.execute(sql));
-        Assertions.assertDoesNotThrow(() -> statementProxy.execute(sql, 1));
+        Assertions.assertDoesNotThrow(() -> statementProxy.execute(sql, Statement.RETURN_GENERATED_KEYS));
         Assertions.assertDoesNotThrow(() -> statementProxy.execute(sql, new int[]{1}));
         Assertions.assertDoesNotThrow(() -> statementProxy.execute(sql, new String[]{"id"}));
         Assertions.assertDoesNotThrow(() -> statementProxy.executeBatch());
@@ -157,7 +157,7 @@ public class StatementProxyTest {
 
     @Test
     public void testMoreResults() throws SQLException {
-        Assertions.assertEquals(false, statementProxy.getMoreResults());
+        Assertions.assertFalse(statementProxy.getMoreResults());
     }
 
     @Test
@@ -191,7 +191,7 @@ public class StatementProxyTest {
 
     @Test
     public void testGetMoreResults() throws SQLException {
-        Assertions.assertEquals(false, statementProxy.getMoreResults(1));
+        Assertions.assertFalse(statementProxy.getMoreResults(1));
     }
 
     @Test
@@ -212,7 +212,7 @@ public class StatementProxyTest {
     @Test
     public void testPoolable() throws SQLException {
         statementProxy.setPoolable(true);
-        Assertions.assertEquals(true, statementProxy.isPoolable());
+        Assertions.assertTrue(statementProxy.isPoolable());
     }
 
     @Test
@@ -224,7 +224,7 @@ public class StatementProxyTest {
     @Test
     public void testWrap() throws SQLException {
         Assertions.assertDoesNotThrow(() -> statementProxy.unwrap(String.class));
-        Assertions.assertEquals(false, statementProxy.isWrapperFor(String.class));
+        Assertions.assertFalse(statementProxy.isWrapperFor(String.class));
     }
 
 }

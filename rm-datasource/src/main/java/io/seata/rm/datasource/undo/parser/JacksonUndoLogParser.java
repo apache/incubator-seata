@@ -123,8 +123,7 @@ public class JacksonUndoLogParser implements UndoLogParser {
     @Override
     public byte[] encode(BranchUndoLog branchUndoLog) {
         try {
-            byte[] bytes = MAPPER.writeValueAsBytes(branchUndoLog);
-            return bytes;
+            return MAPPER.writeValueAsBytes(branchUndoLog);
         } catch (JsonProcessingException e) {
             LOGGER.error("json encode exception, {}", e.getMessage(), e);
             throw new RuntimeException(e);
