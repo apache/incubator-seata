@@ -16,7 +16,6 @@
 package io.seata.rm.datasource.sql.struct.cache;
 
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
