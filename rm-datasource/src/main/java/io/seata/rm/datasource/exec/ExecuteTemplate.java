@@ -74,29 +74,29 @@ public class ExecuteTemplate {
                     statementProxy.getTargetSQL(),
                     statementProxy.getConnectionProxy().getDbType());
         }
-        Executor<T> executor = null;
+        Executor<T> executor;
         if (sqlRecognizer == null) {
-            executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
+            executor = new PlainExecutor<>(statementProxy, statementCallback);
         } else {
             switch (sqlRecognizer.getSQLType()) {
                 case INSERT:
-                    executor = new InsertExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                    executor = new InsertExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                     break;
                 case UPDATE:
-                    executor = new UpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                    executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                     break;
                 case DELETE:
-                    executor = new DeleteExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                    executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                     break;
                 case SELECT_FOR_UPDATE:
-                    executor = new SelectForUpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                    executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                     break;
                 default:
-                    executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
+                    executor = new PlainExecutor<>(statementProxy, statementCallback);
                     break;
             }
         }
-        T rs = null;
+        T rs;
         try {
             rs = executor.execute(args);
         } catch (Throwable ex) {

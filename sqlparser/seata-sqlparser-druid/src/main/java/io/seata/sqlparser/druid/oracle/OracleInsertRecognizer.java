@@ -85,7 +85,7 @@ public class OracleInsertRecognizer extends BaseOracleRecognizer implements SQLI
     @Override
     public List<String> getInsertColumns() {
         List<SQLExpr> columnSQLExprs = ast.getColumns();
-        if (columnSQLExprs.size() == 0) {
+        if (columnSQLExprs.isEmpty()) {
             // INSERT INTO ta VALUES (...), without fields clarified
             return null;
         }

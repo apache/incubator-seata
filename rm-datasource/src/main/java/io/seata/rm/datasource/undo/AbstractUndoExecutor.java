@@ -120,7 +120,7 @@ public abstract class AbstractUndoExecutor {
                 ArrayList<Field> undoValues = new ArrayList<>();
                 Field pkValue = null;
                 for (Field field : undoRow.getFields()) {
-                    if (field.getKeyType() == KeyType.PrimaryKey) {
+                    if (field.getKeyType() == KeyType.PRIMARY_KEY) {
                         pkValue = field;
                     } else {
                         undoValues.add(field);
