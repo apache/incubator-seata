@@ -26,9 +26,9 @@ import javax.sql.rowset.serial.SerialClob;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.seata.rm.datasource.DataCompareUtils;
-import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.undo.BaseUndoLogParserTest;
 import io.seata.rm.datasource.undo.UndoLogParser;
+import io.seata.rm.datasource.sql.struct.Field;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
