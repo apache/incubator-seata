@@ -16,13 +16,13 @@
 package io.seata.spring.annotation;
 
 import javax.sql.DataSource;
-import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.HashSet;
 import java.util.Set;
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
@@ -173,22 +173,17 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             LOGGER.info("Initializing Global Transaction Clients ... ");
         }
         if (StringUtils.isNullOrEmpty(applicationId) || StringUtils.isNullOrEmpty(txServiceGroup)) {
-            throw new IllegalArgumentException(
-                "applicationId: " + applicationId + ", txServiceGroup: " + txServiceGroup);
+            throw new IllegalArgumentException(String.format("applicationId: %s, txServiceGroup: %s", applicationId, txServiceGroup));
         }
         //init TM
         TMClient.init(applicationId, txServiceGroup);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(
-                "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
-                    + txServiceGroup + "]");
+            LOGGER.info("Transaction Manager Client is initialized. applicationId[{}] txServiceGroup[{}]", applicationId, txServiceGroup);
         }
         //init RM
         RMClient.init(applicationId, txServiceGroup);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(
-                "Resource Manager is initialized. applicationId[" + applicationId + "] txServiceGroup[" + txServiceGroup
-                    + "]");
+            LOGGER.info("Resource Manager is initialized. applicationId[{}] txServiceGroup[{}]", applicationId, txServiceGroup);
         }
 
         if (LOGGER.isInfoEnabled()) {
@@ -237,9 +232,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     }
                 }
 
-                LOGGER.info(
-                    "Bean[" + bean.getClass().getName() + "] with name [" + beanName + "] would use interceptor ["
-                        + interceptor.getClass().getName() + "]");
+                LOGGER.info("Bean[{}] with name [{}] would use interceptor [{}]", bean.getClass().getName(), beanName, interceptor.getClass().getName());
                 if (!AopUtils.isAopProxy(bean)) {
                     bean = super.wrapIfNecessary(bean, beanName, cacheKey);
                 } else {
@@ -258,8 +251,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     private boolean existsAnnotation(Class<?>[] classes) {
-        if (classes != null && classes.length > 0) {
-            for (Class clazz : classes) {
+        if (CollectionUtils.isNotEmpty(classes)) {
+            for (Class<?> clazz : classes) {
                 if (clazz == null) {
                     continue;
                 }
@@ -311,8 +304,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     @Override
     public Object postProcessBeforeInitialization(Object bean, String beanName) {
         if (bean instanceof DataSourceProxy && ConfigurationFactory.getInstance().getBoolean(DATASOURCE_AUTOPROXY, false)) {
-            throw new ShouldNeverHappenException("Auto proxy of DataSource can't be enabled as you've created a DataSourceProxy bean." +
-                "Please consider removing DataSourceProxy bean or disabling auto proxy of DataSource.");
+            throw new ShouldNeverHappenException("Auto proxy of DataSource can't be enabled as you've created a DataSourceProxy bean. Please consider removing DataSourceProxy bean or disabling auto proxy of DataSource.");
         }
         return super.postProcessBeforeInitialization(bean, beanName);
     }
@@ -325,21 +317,18 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             }
             DataSourceProxy dataSourceProxy = DataSourceProxyHolder.get().putDataSource((DataSource) bean);
             Class<?>[] interfaces = SpringProxyUtils.getAllInterfaces(bean);
-            return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), interfaces, new InvocationHandler() {
-                @Override
-                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                    Method m = BeanUtils.findDeclaredMethod(DataSourceProxy.class, method.getName(), method.getParameterTypes());
-                    if (null != m) {
-                        return m.invoke(dataSourceProxy, args);
-                    } else {
-                        boolean oldAccessible = method.isAccessible();
-                        try {
-                            method.setAccessible(true);
-                            return method.invoke(bean, args);
-                        } finally {
-                            //recover the original accessible for security reason
-                            method.setAccessible(oldAccessible);
-                        }
+            return Proxy.newProxyInstance(Thread.currentThread().getContextClassLoader(), interfaces, (proxy, method, args) -> {
+                Method m = BeanUtils.findDeclaredMethod(DataSourceProxy.class, method.getName(), method.getParameterTypes());
+                if (null != m) {
+                    return m.invoke(dataSourceProxy, args);
+                } else {
+                    boolean oldAccessible = method.isAccessible();
+                    try {
+                        method.setAccessible(true);
+                        return method.invoke(bean, args);
+                    } finally {
+                        //recover the original accessible for security reason
+                        method.setAccessible(oldAccessible);
                     }
                 }
             });

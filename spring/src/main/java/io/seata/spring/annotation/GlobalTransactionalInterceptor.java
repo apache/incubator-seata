@@ -90,12 +90,10 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
         return globalLockTemplate.execute(() -> {
             try {
                 return methodInvocation.proceed();
+            } catch (Exception e) {
+                throw e;
             } catch (Throwable e) {
-                if (e instanceof Exception) {
-                    throw (Exception)e;
-                } else {
-                    throw new RuntimeException(e);
-                }
+                throw new RuntimeException(e);
             }
         });
     }
@@ -154,7 +152,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                     failureHandler.onRollbackFailure(e.getTransaction(), e.getCause());
                     throw e.getCause();
                 default:
-                    throw new ShouldNeverHappenException("Unknown TransactionalExecutor.Code: " + code);
+                    throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
 
             }
         }
