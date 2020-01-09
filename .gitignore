@@ -35,7 +35,7 @@ dependency-reduced-pom.xml
 /server/sessionStore/
 /server/db_store/
 /sessionStore/
-/test/sessionStore/
+/integration-test/*/sessionStore/*
 /distribution/sessionStore/
 /file_store/
 

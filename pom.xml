@@ -40,7 +40,6 @@
         <module>server</module>
         <module>spring</module>
         <module>tcc</module>
-        <module>test</module>
         <module>tm</module>
         <module>metrics</module>
         <module>codec</module>
@@ -473,6 +472,7 @@
                             <failOnViolation>false</failOnViolation>
                             <excludes>**/generated/**/*</excludes>
                             <excludes>io/seata/integration/grpc/interceptor/</excludes>
+                            <excludes>**/sessionStore/**/*</excludes>
                         </configuration>
                         <goals>
                             <goal>check</goal>

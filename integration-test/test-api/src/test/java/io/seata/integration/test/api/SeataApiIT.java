@@ -15,8 +15,8 @@
  */
 package io.seata.integration.test.api;
 
+import java.io.IOException;
 import java.sql.SQLException;
-import java.util.concurrent.TimeUnit;
 
 import io.seata.core.exception.TransactionException;
 import io.seata.integration.test.api.service.impl.AccountServiceImpl;
@@ -46,8 +46,7 @@ public class SeataApiIT {
      * @throws TransactionException the transaction exception
      */
     @Test
-    public void testSeataApi() throws SQLException, TransactionException, InterruptedException {
-
+    public void testSeataApi() throws SQLException, TransactionException, IOException {
         String userId = "U100001";
         String commodityCode = "C00321";
         int commodityCount = 100;
@@ -96,7 +95,6 @@ public class SeataApiIT {
             tx.rollback();
             throw exx;
         }
-        TimeUnit.SECONDS.sleep(10);
-        Assertions.assertEquals("","");
+        Assertions.assertEquals("", "");
     }
 }

@@ -26,6 +26,15 @@
     <modelVersion>4.0.0</modelVersion>
     <properties>
         <mysql-connector.version>5.1.31</mysql-connector.version>
+        <docker-maven-plugin.version>0.30.0</docker-maven-plugin.version>
+        <jib-maven-plugin.version>1.2.0</jib-maven-plugin.version>
+        <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+        <maven-failsafe-plugin.version>2.21.0</maven-failsafe-plugin.version>
+        <image.name>${project.artifactId}:${project.version}</image.name>
+        <java-image.name>openjdk:8</java-image.name>
+        <seata-server.port>8091</seata-server.port>
+        <mysql.port>3306</mysql.port>
+        <main-class>io.seata.server.Server</main-class>
     </properties>
     <artifactId>test-api</artifactId>
     <dependencies>
@@ -33,16 +42,25 @@
             <groupId>io.seata</groupId>
             <artifactId>seata-rm</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-tm</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
             <artifactId>seata-rm-datasource</artifactId>
             <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-sqlparser-druid</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -54,6 +72,131 @@
             <artifactId>mysql-connector-java</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-server</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.dubbo</groupId>
+                <artifactId>dubbo-maven-address-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>local-address</goal>
+                        </goals>
+                        <configuration>
+                            <localAddress>seata-local-address</localAddress>
+                        </configuration>
+                        <phase>initialize</phase>
+                    </execution>
+                </executions>
+            </plugin>
 
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib-maven-plugin.version}</version>
+                <configuration>
+                    <from>
+                        <image>${java-image.name}</image>
+                    </from>
+                    <to>
+                        <image>${image.name}</image>
+                    </to>
+                    <container>
+                        <mainClass>${main-class}</mainClass>
+                        <jvmFlags>
+                            <jvmFlag>-Dp=${seata-server.port}</jvmFlag>
+                        </jvmFlags>
+                    </container>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>dockerBuild</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${docker-maven-plugin.version}</version>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>mysql:latest</name>
+                            <run>
+                                <ports>
+                                    <port>${mysql.port}:${mysql.port}</port>
+                                </ports>
+                                <wait>
+                                    <tcp>
+                                        <host>${seata-local-address}</host>
+                                        <ports>
+                                            <port>${mysql.port}</port>
+                                        </ports>
+                                    </tcp>
+                                </wait>
+                            </run>
+                        </image>
+                        <image>
+                            <name>${image.name}</name>
+                            <run>
+                                <ports>
+                                    <port>${seata-server.port}:${seata-server.port}</port>
+                                </ports>
+                                <wait>
+                                    <log>Seata service started</log>
+                                </wait>
+                            </run>
+                        </image>
+                    </images>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>start</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>stop</id>
+                        <phase>post-integration-test</phase>
+                        <goals>
+                            <goal>stop</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven-failsafe-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                        </goals>
+                        <configuration>
+                            <systemPropertyVariables>
+                                <java.net.preferIPv4Stack>true</java.net.preferIPv4Stack>
+                            </systemPropertyVariables>
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

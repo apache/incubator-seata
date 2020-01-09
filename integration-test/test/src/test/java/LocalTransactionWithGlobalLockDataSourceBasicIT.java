@@ -39,7 +39,7 @@ import java.util.Date;
  * @author services
  */
 @Disabled
-public class LocalTransactionWithGlobalLockDataSourceBasicTest {
+public class LocalTransactionWithGlobalLockDataSourceBasicIT {
 
     private static ClassPathXmlApplicationContext context;
     private static JdbcTemplate jdbcTemplate;
@@ -244,7 +244,7 @@ public class LocalTransactionWithGlobalLockDataSourceBasicTest {
 
     private abstract static class AbstractLockConflictExecuteTemplate {
         public void execute() {
-            synchronized (LocalTransactionWithGlobalLockDataSourceBasicTest.class) {
+            synchronized (LocalTransactionWithGlobalLockDataSourceBasicIT.class) {
                 DefaultResourceManager.mockResourceManager(BranchType.AT, new MockDataSourceManager() {
                     @Override
                     public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)

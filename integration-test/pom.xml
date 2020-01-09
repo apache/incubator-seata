@@ -27,6 +27,8 @@
     <artifactId>seata-integration-test</artifactId>
     <packaging>pom</packaging>
     <modules>
+        <module>seata-maven-address-plugin</module>
+        <module>test</module>
         <module>test-api</module>
     </modules>
     <properties>
@@ -42,7 +44,6 @@
                         <id>integration-tests</id>
                         <goals>
                             <goal>integration-test</goal>
-                            <goal>verify</goal>
                         </goals>
                     </execution>
                 </executions>

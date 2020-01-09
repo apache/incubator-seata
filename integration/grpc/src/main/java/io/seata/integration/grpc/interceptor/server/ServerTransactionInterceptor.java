@@ -27,10 +27,10 @@ import io.seata.integration.grpc.interceptor.GrpcHeaderKey;
 public class ServerTransactionInterceptor implements ServerInterceptor {
 
     @Override
-    public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
-        ServerCall<ReqT, RespT> serverCall,
+    public <REQT, RESPT> ServerCall.Listener<REQT> interceptCall(
+        ServerCall<REQT, RESPT> serverCall,
         Metadata metadata,
-        ServerCallHandler<ReqT, RespT> serverCallHandler) {
+        ServerCallHandler<REQT, RESPT> serverCallHandler) {
         String xid = getRpcXid(metadata);
         return new ServerListenerProxy<>(xid, serverCallHandler.startCall(serverCall, metadata));
     }

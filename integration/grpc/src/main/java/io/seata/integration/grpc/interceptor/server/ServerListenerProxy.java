@@ -24,12 +24,12 @@ import java.util.Objects;
 /**
  * @author eddyxu1213@126.com
  */
-public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
+public class ServerListenerProxy<REQT> extends ServerCall.Listener<REQT> {
 
-    private ServerCall.Listener<ReqT> target;
+    private ServerCall.Listener<REQT> target;
     private String xid;
 
-    public ServerListenerProxy(String xid, ServerCall.Listener<ReqT> target) {
+    public ServerListenerProxy(String xid, ServerCall.Listener<REQT> target) {
         super();
         Objects.requireNonNull(target);
         this.target = target;
@@ -37,7 +37,7 @@ public class ServerListenerProxy<ReqT> extends ServerCall.Listener<ReqT> {
     }
 
     @Override
-    public void onMessage(ReqT message) {
+    public void onMessage(REQT message) {
         target.onMessage(message);
     }
 

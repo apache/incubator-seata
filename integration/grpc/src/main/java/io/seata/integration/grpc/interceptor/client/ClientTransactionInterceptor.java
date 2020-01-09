@@ -33,20 +33,20 @@ import io.seata.integration.grpc.interceptor.GrpcHeaderKey;
 public class ClientTransactionInterceptor implements ClientInterceptor {
 
     @Override
-    public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(
-        MethodDescriptor<ReqT, RespT> method,
+    public <REQT, RESPT> ClientCall<REQT, RESPT> interceptCall(
+        MethodDescriptor<REQT, RESPT> method,
         CallOptions callOptions,
         Channel next) {
 
         String xid = RootContext.getXID();
-        return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(next.newCall(method, callOptions)) {
+        return new ForwardingClientCall.SimpleForwardingClientCall<REQT, RESPT>(next.newCall(method, callOptions)) {
 
             @Override
-            public void start(Listener<RespT> responseListener, Metadata headers) {
+            public void start(Listener<RESPT> responseListener, Metadata headers) {
                 if (StringUtils.isNotBlank(xid)) {
                     headers.put(GrpcHeaderKey.HEADER_KEY, xid);
                 }
-                super.start(new ForwardingClientCallListener.SimpleForwardingClientCallListener<RespT>(responseListener) {
+                super.start(new ForwardingClientCallListener.SimpleForwardingClientCallListener<RESPT>(responseListener) {
                     @Override
                     public void onHeaders(Metadata headers) {
                         super.onHeaders(headers);

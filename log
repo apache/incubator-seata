@@ -1,0 +1,45 @@
+2020/01/08 12:54:26 available remote server 47.75.179.6:1234
+2020/01/08 12:54:26 starting local socks5 server at 127.0.0.1:1234 ...
+2020/01/08 12:54:29 error connecting to shadowsocks server: write tcp 192.168.0.106:56452->47.75.179.6:1234: write: broken pipe
+2020/01/08 12:54:29 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection reset by peer
+2020/01/08 12:54:33 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 12:54:58 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 12:54:58 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection reset by peer
+2020/01/08 14:27:27 socks handshake: EOF
+2020/01/08 14:28:35 error getting request: read tcp 127.0.0.1:1234->127.0.0.1:63076: read: connection reset by peer
+2020/01/08 14:35:38 socks handshake: EOF
+2020/01/08 14:36:08 socks handshake: EOF
+2020/01/08 15:10:37 socks handshake: EOF
+2020/01/08 17:46:58 error getting request: read tcp 127.0.0.1:1234->127.0.0.1:56533: read: connection reset by peer
+2020/01/08 18:00:15 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:00:18 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection reset by peer
+2020/01/08 18:00:18 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:00:25 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:00:25 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:00:27 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:00:28 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection reset by peer
+2020/01/08 18:00:28 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:00:33 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection reset by peer
+2020/01/08 18:00:43 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:00:45 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection reset by peer
+2020/01/08 18:00:56 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:00:56 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection reset by peer
+2020/01/08 18:00:57 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:00:59 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:00:59 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:01:00 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection reset by peer
+2020/01/08 18:01:00 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:01:01 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:01:08 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:01:08 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:01:29 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/08 18:01:30 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: connection refused
+2020/01/09 10:31:17 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: network is unreachable
+2020/01/09 10:31:17 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: network is unreachable
+2020/01/09 10:31:17 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: network is unreachable
+2020/01/09 10:31:17 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: network is unreachable
+2020/01/09 10:31:17 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: network is unreachable
+2020/01/09 10:31:17 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: network is unreachable
+2020/01/09 10:31:17 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: network is unreachable
+2020/01/09 10:31:17 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: network is unreachable
+2020/01/09 10:31:17 error connecting to shadowsocks server: dial tcp 47.75.179.6:1234: connect: network is unreachable
