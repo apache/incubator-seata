@@ -406,10 +406,11 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
             executeUpdate(stateLogStoreSqls.getRecordStateFinishedSql(dbType), STATE_INSTANCE_TO_STATEMENT_FOR_UPDATE,
                     stateInstance);
 
+            //A switch to skip branch report on branch success, in order to optimize performance
             StateMachineConfig stateMachineConfig = (StateMachineConfig) context.getVariable(
                     DomainConstants.VAR_NAME_STATEMACHINE_CONFIG);
             if (!(stateMachineConfig instanceof DbStateMachineConfig
-                    && ((DbStateMachineConfig)stateMachineConfig).isSkipBranchReportOnSuccess()
+                    && !((DbStateMachineConfig)stateMachineConfig).isRmReportSuccessEnable()
                     && ExecutionStatus.SU.equals(stateInstance.getStatus()))) {
                 branchReport(stateInstance, context);
             }
