@@ -93,8 +93,8 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
             tableMetaExcutor.scheduleAtFixedRate(() -> {
                 try (Connection connection = dataSource.getConnection()) {
                     TableMetaCacheFactory.getTableMetaCache(DataSourceProxy.this.getDbType())
-                        .refresh(connection, DataSourceProxy.this.getResourceId());
-                } catch (Exception e) {
+                            .refresh(connection, DataSourceProxy.this.getResourceId());
+                } catch (Exception ignore) {
                 }
             }, 0, TABLE_META_CHECKER_INTERVAL, TimeUnit.MILLISECONDS);
         }
@@ -139,7 +139,7 @@ public class DataSourceProxy extends AbstractDataSourceProxy implements Resource
     @Override
     public String getResourceId() {
         if (jdbcUrl.contains("?")) {
-            return jdbcUrl.substring(0, jdbcUrl.indexOf("?"));
+            return jdbcUrl.substring(0, jdbcUrl.indexOf('?'));
         } else {
             return jdbcUrl;
         }
