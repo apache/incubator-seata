@@ -31,7 +31,7 @@ public class TableMetaTest {
         Assertions.assertEquals(tableMeta, tableMeta);
         Assertions.assertEquals(tableMeta, new TableMeta());
         Assertions.assertEquals(tableMeta.hashCode(), tableMeta.hashCode());
-        Assertions.assertNotEquals(tableMeta, new String());
+        Assertions.assertNotEquals(tableMeta, "");
 
         TableMeta other = new TableMeta();
         other.setTableName("");
@@ -114,9 +114,7 @@ public class TableMetaTest {
     public void testContainsPK() {
         TableMeta tableMeta = new TableMeta();
         Assertions.assertFalse(tableMeta.containsPK(null));
-        Throwable exception = Assertions.assertThrows(NotSupportYetException.class, () -> {
-            tableMeta.containsPK(Lists.newArrayList("id"));
-        });
+        Throwable exception = Assertions.assertThrows(NotSupportYetException.class, () -> tableMeta.containsPK(Lists.newArrayList("id")));
         Assertions.assertEquals(tableMeta.getTableName() + " needs to contain the primary key.",
             exception.getMessage());
         IndexMeta primary = new IndexMeta();
