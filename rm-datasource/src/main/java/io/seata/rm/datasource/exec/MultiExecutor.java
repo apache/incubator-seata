@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
  */
 public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
-    private Map<String, List<SQLRecognizer>> multiSqlGroup;
+    private Map<String, List<SQLRecognizer>> multiSqlGroup = new HashMap<>(4);
     private Map<SQLRecognizer, TableRecords> beforeImagesMap = new HashMap<>(4);
     private Map<SQLRecognizer, TableRecords> afterImagesMap = new HashMap<>(4);
 
@@ -117,5 +117,17 @@ public class MultiExecutor<T, S extends Statement> extends AbstractDMLBaseExecut
             afterImage = afterImagesMap.get(recognizer);
             super.prepareUndoLog(beforeImage, afterImage);
         }
+    }
+
+    public Map<String, List<SQLRecognizer>> getMultiSqlGroup() {
+        return multiSqlGroup;
+    }
+
+    public Map<SQLRecognizer, TableRecords> getBeforeImagesMap() {
+        return beforeImagesMap;
+    }
+
+    public Map<SQLRecognizer, TableRecords> getAfterImagesMap() {
+        return afterImagesMap;
     }
 }

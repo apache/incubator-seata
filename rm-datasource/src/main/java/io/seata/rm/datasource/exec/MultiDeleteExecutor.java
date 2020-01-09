@@ -59,7 +59,7 @@ public class MultiDeleteExecutor<T, S extends Statement> extends AbstractDMLBase
             SQLDeleteRecognizer visitor = (SQLDeleteRecognizer) recognizer;
             String whereConditionStr = buildWhereCondition(visitor, paramAppenderList);
             if (whereCondition.length() > 0) {
-                whereCondition.append(" or ");
+                whereCondition.append(" OR ");
             }
             if (StringUtils.isNotBlank(whereConditionStr)) {
                 whereCondition.append(whereConditionStr);

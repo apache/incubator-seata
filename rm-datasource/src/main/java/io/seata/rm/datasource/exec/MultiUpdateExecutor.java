@@ -65,7 +65,7 @@ public class MultiUpdateExecutor<T, S extends Statement> extends AbstractDMLBase
             updateColumnsSet.addAll(updateColumns);
             String whereConditionStr = buildWhereCondition(sqlUpdateRecognizer, paramAppenderList);
             if (whereCondition.length() > 0) {
-                whereCondition.append("or");
+                whereCondition.append(" OR ");
             }
             if (StringUtils.isNotBlank(whereConditionStr)) {
                 whereCondition.append(whereConditionStr);
