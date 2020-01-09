@@ -104,7 +104,7 @@ public class SQLVisitorFactoryTest {
         });
 
 
-        //TEST FOR MULIT-SQL
+        //TEST FOR Multi-SQL
 
         List<SQLRecognizer> sqlRecognizers = null;
         //test for mysql insert
