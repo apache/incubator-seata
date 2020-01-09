@@ -16,11 +16,10 @@
 package io.seata.rm.datasource.undo.postgresql.keyword;
 
 import io.seata.rm.datasource.undo.KeywordChecker;
+import io.seata.sqlparser.util.JdbcConstants;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import com.alibaba.druid.util.JdbcConstants;
 
 /**
  * The type postgresql keyword checker.

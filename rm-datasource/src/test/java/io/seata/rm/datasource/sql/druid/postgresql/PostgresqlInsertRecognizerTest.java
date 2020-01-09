@@ -15,14 +15,15 @@
  */
 package io.seata.rm.datasource.sql.druid.postgresql;
 
+import io.seata.sqlparser.SQLParsingException;
+import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.druid.postgresql.PostgresqlInsertRecognizer;
 import java.util.List;
 
 import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.expr.SQLBetweenExpr;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
-import io.seata.rm.datasource.sql.SQLParsingException;
-import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -15,19 +15,20 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.cache.MysqlTableMetaCache;
 import io.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache;
 import io.seata.rm.datasource.sql.struct.cache.PostgresqlTableMetaCache;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * @author guoyao
  */
 public class TableMetaCacheFactory {
 
-    private TableMetaCacheFactory() {}
+    private TableMetaCacheFactory() {
+    }
 
     public static TableMetaCache getTableMetaCache(DataSourceProxy dataSourceProxy) {
         return getTableMetaCache(dataSourceProxy.getDbType());
