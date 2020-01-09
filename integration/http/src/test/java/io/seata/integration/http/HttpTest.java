@@ -43,7 +43,7 @@ class HttpTest {
     private static final String host = "http://127.0.0.1:8081";
     private static final String getPath = "/index";
     private static final String postPath = "/testPost";
-    private static final String XID = "127.0.0.1:8081:87654321";
+    public static final String XID = "127.0.0.1:8081:87654321";
     private static final int PARAM_TYPE_MAP = 1;
     private static final int PARAM_TYPE_BEAN = 2;
 
@@ -117,9 +117,7 @@ class HttpTest {
                 response = httpExecuter.executePost(host, postPath, str, HttpResponse.class);
             }
 
-
             String content = readStreamAsStr(response.getEntity().getContent());
-            System.out.println("return content =" + content);
             Assertions.assertTrue(content.contains("zhangsan") && content.contains("15"));
         } catch (IOException e) {
             e.printStackTrace();

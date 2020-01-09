@@ -15,8 +15,8 @@
  */
 package io.seata.integration.http;
 
-import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
+import org.junit.jupiter.api.Assertions;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -42,12 +42,8 @@ public class IndexController {
     @ResponseBody
     @PostMapping("/testPost")
     public String testPost(@RequestBody Person person) {
-
-        String xid = RootContext.getXID();
-        if (StringUtils.isNotBlank(xid)) {
-            System.out.println("In global transaction, global transactionXid =" + xid);
-        }
-
+        /* verify xid propagate by test case */
+        Assertions.assertEquals(HttpTest.XID,RootContext.getXID());
         return person.toString();
     }
 
