@@ -99,7 +99,7 @@ public class ExecuteTemplate {
                         break;
                 }
             } else {
-                executor = new MulitExecutor<T, S>(statementProxy, statementCallback, sqlRecognizers);
+                executor = new MultiExecutor<T, S>(statementProxy, statementCallback, sqlRecognizers);
             }
         }
         T rs = null;

@@ -69,7 +69,10 @@ public class SQLVisitorFactory {
      */
     public static List<SQLRecognizer> getMulti(String sql, String dbType) {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
-        if ((asts == null || asts.size() != 1) && asts.stream().anyMatch(statement -> (statement instanceof SQLInsertStatement) || (statement instanceof SQLSelectStatement))) {
+        if (asts == null || asts.size() == 0) {
+            throw new UnsupportedOperationException("Unsupported SQL: " + sql);
+        }
+        if (asts.size() > 1 && asts.stream().anyMatch(statement -> (statement instanceof SQLInsertStatement) || (statement instanceof SQLSelectStatement))) {
             throw new UnsupportedOperationException("Unsupported INSERT OR SELECT MULTI SQL: " + sql);
         }
         final List<SQLRecognizer> recognizers = new ArrayList<>();
