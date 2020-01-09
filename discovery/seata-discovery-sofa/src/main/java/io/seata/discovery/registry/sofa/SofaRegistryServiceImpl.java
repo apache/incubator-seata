@@ -47,7 +47,6 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
  * The type SOFARegistry registry service.
  *
  * @author leizhiyuan
- * @date 2019 /4/15
  */
 public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataObserver> {
 
@@ -158,8 +157,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
-        Configuration config = ConfigurationFactory.getInstance();
-        String clusterName = config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
+        String clusterName = getServiceGroup(key);
         if (null == clusterName) {
             return null;
         }

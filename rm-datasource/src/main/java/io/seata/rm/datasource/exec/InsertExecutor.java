@@ -23,20 +23,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.CollectionUtils;
 import io.seata.common.util.StringUtils;
+
 import io.seata.rm.datasource.PreparedStatementProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.SQLInsertRecognizer;
-import io.seata.rm.datasource.sql.SQLRecognizer;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
-import io.seata.rm.datasource.sql.struct.Null;
-import io.seata.rm.datasource.sql.struct.SqlMethodExpr;
-import io.seata.rm.datasource.sql.struct.SqlSequenceExpr;
-import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+
+import io.seata.sqlparser.SQLInsertRecognizer;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.struct.Null;
+import io.seata.sqlparser.struct.SqlMethodExpr;
+import io.seata.sqlparser.struct.SqlSequenceExpr;
+import io.seata.sqlparser.util.JdbcConstants;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,7 +49,6 @@ import org.slf4j.LoggerFactory;
  * @param <T> the type parameter
  * @param <S> the type parameter
  * @author yuanguoyao
- * @date 2019-03-21 21:30:02
  */
 public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecutor<T, S> {
 
@@ -62,7 +64,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      * @param statementCallback the statement callback
      * @param sqlRecognizer     the sql recognizer
      */
-    public InsertExecutor(StatementProxy statementProxy, StatementCallback statementCallback,
+    public InsertExecutor(StatementProxy<S> statementProxy, StatementCallback<T,S> statementCallback,
                           SQLRecognizer sqlRecognizer) {
         super(statementProxy, statementCallback, sqlRecognizer);
     }
@@ -90,8 +92,10 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
     protected boolean containsPK() {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         List<String> insertColumns = recognizer.getInsertColumns();
-        TableMeta tmeta = getTableMeta();
-        return tmeta.containsPK(insertColumns);
+        if (CollectionUtils.isEmpty(insertColumns)) {
+            return false;
+        }
+        return containsPK(insertColumns);
     }
 
     protected boolean containsColumns() {
@@ -104,6 +108,9 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         // insert values including PK
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
         final int pkIndex = getPkIndex();
+        if (pkIndex == -1) {
+            throw new ShouldNeverHappenException(String.format("pkIndex is %d", pkIndex));
+        }
         List<Object> pkValues = null;
         if (statementProxy instanceof PreparedStatementProxy) {
             PreparedStatementProxy preparedStatementProxy = (PreparedStatementProxy) statementProxy;
@@ -118,14 +125,18 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                     if (PLACEHOLDER.equals(pkValue)) {
                         pkValues = parameters[pkIndex];
                     } else {
-                        int finalPkIndex = pkIndex;
-                        pkValues = insertRows.stream().map(insertRow -> insertRow.get(finalPkIndex)).collect(Collectors.toList());
+                        pkValues = insertRows.stream().map(insertRow -> insertRow.get(pkIndex)).collect(Collectors.toList());
                     }
                 } else {
                     int totalPlaceholderNum = -1;
                     pkValues = new ArrayList<>(rowSize);
                     for (int i = 0; i < rowSize; i++) {
                         List<Object> row = insertRows.get(i);
+                        // oracle insert sql statement specify RETURN_GENERATED_KEYS will append :rowid on sql end
+                        // insert parameter count will than the actual +1
+                        if (row.isEmpty()) {
+                            continue;
+                        }
                         Object pkValue = row.get(pkIndex);
                         int currentRowPlaceholderNum = -1;
                         for (Object r : row) {
@@ -140,9 +151,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
                                 idx = totalPlaceholderNum - currentRowPlaceholderNum + pkIndex;
                             }
                             ArrayList<Object> parameter = parameters[idx];
-                            for (Object obj : parameter) {
-                                pkValues.add(obj);
-                            }
+                            pkValues.addAll(parameter);
                         } else {
                             pkValues.add(pkValue);
                         }
@@ -161,9 +170,9 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         }
         boolean b = this.checkPkValues(pkValues);
         if (!b) {
-            throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+            throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
         }
-        if (pkValues.size() > 0 && pkValues.get(0) instanceof SqlSequenceExpr) {
+        if (!pkValues.isEmpty() && pkValues.get(0) instanceof SqlSequenceExpr) {
             pkValues = getPkValuesBySequence(pkValues.get(0));
         }
         // pk auto generated while single insert primary key is expression
@@ -171,7 +180,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             pkValues = getPkValuesByAuto();
         }
         // pk auto generated while column exists and value is null
-        else if (pkValues.size() > 0 && pkValues.get(0) instanceof Null) {
+        else if (!pkValues.isEmpty() && pkValues.get(0) instanceof Null) {
             pkValues = getPkValuesByAuto();
         }
         return pkValues;
@@ -185,11 +194,11 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         } catch (NotSupportYetException | SQLException ignore) {
         }
 
-        ResultSet genKeys = null;
+        ResultSet genKeys;
         if (expr instanceof SqlSequenceExpr) {
             SqlSequenceExpr sequenceExpr = (SqlSequenceExpr) expr;
             final String sql = "SELECT " + sequenceExpr.getSequence() + ".currval FROM DUAL";
-            LOGGER.warn("Fail to get auto-generated keys, use \'{}\' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
+            LOGGER.warn("Fail to get auto-generated keys, use '{}' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.", sql);
             genKeys = statementProxy.getConnection().createStatement().executeQuery(sql);
         } else {
             throw new NotSupportYetException(String.format("not support expr [%s]", expr.getClass().getName()));
@@ -216,13 +225,12 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
      */
     protected int getPkIndex() {
         SQLInsertRecognizer recognizer = (SQLInsertRecognizer) sqlRecognizer;
-        String pkName = getTableMeta().getPkName();
         List<String> insertColumns = recognizer.getInsertColumns();
-        if (insertColumns != null && !insertColumns.isEmpty()) {
+        if (CollectionUtils.isNotEmpty(insertColumns)) {
             final int insertColumnsSize = insertColumns.size();
             int pkIndex = -1;
             for (int paramIdx = 0; paramIdx < insertColumnsSize; paramIdx++) {
-                if (insertColumns.get(paramIdx).equalsIgnoreCase(pkName)) {
+                if (equalsPK(insertColumns.get(paramIdx))) {
                     pkIndex = paramIdx;
                     break;
                 }
@@ -233,7 +241,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         Map<String, ColumnMeta> allColumns = getTableMeta().getAllColumns();
         for (Map.Entry<String, ColumnMeta> entry : allColumns.entrySet()) {
             pkIndex++;
-            if (entry.getValue().getColumnName().equalsIgnoreCase(pkName)) {
+            if (equalsPK(entry.getValue().getColumnName())) {
                 break;
             }
         }
@@ -265,10 +273,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (pkParameterHasExpr) {
             return false;
         }
-        if (pkParameterHasNull && pkParameterHasNotNull) {
-            return false;
-        }
-        return true;
+        return !pkParameterHasNull || !pkParameterHasNotNull;
     }
 
     /**
@@ -287,7 +292,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             throw new ShouldNeverHappenException();
         }
 
-        ResultSet genKeys = null;
+        ResultSet genKeys;
         try {
             genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
         } catch (SQLException e) {
@@ -295,7 +300,7 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             // specify Statement.RETURN_GENERATED_KEYS to
             // Statement.executeUpdate() or Connection.prepareStatement().
             if (ERR_SQL_STATE.equalsIgnoreCase(e.getSQLState())) {
-                LOGGER.warn("Fail to get auto-generated keys, use \'SELECT LAST_INSERT_ID()\' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
+                LOGGER.warn("Fail to get auto-generated keys, use 'SELECT LAST_INSERT_ID()' instead. Be cautious, statement could be polluted. Recommend you set the statement to return generated keys.");
                 genKeys = statementProxy.getTargetStatement().executeQuery("SELECT LAST_INSERT_ID()");
             } else {
                 throw e;
@@ -324,19 +329,14 @@ public class InsertExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
         if (pkMetaMap.size() != 1) {
             throw new NotSupportYetException();
         }
-        ResultSet genKeys = null;
-        try {
-            genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
-        } catch (SQLException e) {
-            throw e;
-        }
+        ResultSet genKeys = statementProxy.getTargetStatement().getGeneratedKeys();
         List<Object> pkValues = new ArrayList<>();
         while (genKeys.next()) {
             Object v = genKeys.getObject(1);
             pkValues.add(v);
         }
         if (pkValues.isEmpty()) {
-            throw new NotSupportYetException("not support sql [" + sqlRecognizer.getOriginalSQL() + "]");
+            throw new NotSupportYetException(String.format("not support sql [%s]", sqlRecognizer.getOriginalSQL()));
         }
         return pkValues;
     }

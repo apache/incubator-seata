@@ -15,6 +15,16 @@
  */
 package io.seata.config.etcd3;
 
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import io.etcd.jetcd.ByteSequence;
 import io.etcd.jetcd.Client;
 import io.etcd.jetcd.KeyValue;
@@ -28,66 +38,56 @@ import io.etcd.jetcd.op.CmpTarget;
 import io.etcd.jetcd.op.Op;
 import io.etcd.jetcd.options.PutOption;
 import io.etcd.jetcd.watch.WatchResponse;
+import io.netty.util.internal.ConcurrentSet;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.util.CollectionUtils;
 import io.seata.config.AbstractConfiguration;
-import io.seata.config.ConfigChangeListener;
 import io.seata.config.ConfigFuture;
 import io.seata.config.Configuration;
+import io.seata.config.ConfigurationChangeEvent;
+import io.seata.config.ConfigurationChangeListener;
 import io.seata.config.ConfigurationFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 import static io.netty.util.CharsetUtil.UTF_8;
 import static io.seata.config.ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR;
 import static io.seata.config.ConfigurationKeys.FILE_ROOT_CONFIG;
 
 /**
- * @author xingfudeshi@gmail.com
- * @date 2019/05/10
+ * The type Etcd configuration.
+ *
+ * @author xingfudeshi @gmail.com
  */
-public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListener> {
+public class EtcdConfiguration extends AbstractConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(EtcdConfiguration.class);
     private static volatile EtcdConfiguration instance;
     private static volatile Client client;
 
-    private static final Configuration FILE_CONFIG = ConfigurationFactory.getInstance();
+    private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static final String SERVER_ADDR_KEY = "serverAddr";
     private static final String CONFIG_TYPE = "etcd3";
-    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE + FILE_CONFIG_SPLIT_CHAR;
+    private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + CONFIG_TYPE
+        + FILE_CONFIG_SPLIT_CHAR;
     private static final int THREAD_POOL_NUM = 1;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private ExecutorService etcdConfigExecutor;
-    private ExecutorService etcdNotifierExecutor;
-    private ConcurrentMap<String, List<ConfigChangeListener>> configListenersMap;
-    private ConcurrentHashMap<String, List<ConfigChangeNotifier>> configChangeNotifiersMap;
+    private ConcurrentMap<String, Set<ConfigurationChangeListener>> configListenersMap = new ConcurrentHashMap<>(
+        MAP_INITIAL_CAPACITY);
 
     private static final long VERSION_NOT_EXIST = 0;
 
     private EtcdConfiguration() {
-        etcdConfigExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("etcd-config-executor", THREAD_POOL_NUM));
-        etcdNotifierExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM,
-            Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("etcd-config-notifier-executor", THREAD_POOL_NUM));
-        configListenersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-        configChangeNotifiersMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        etcdConfigExecutor = new ThreadPoolExecutor(THREAD_POOL_NUM, THREAD_POOL_NUM, Integer.MAX_VALUE,
+            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+            new NamedThreadFactory("etcd-config-executor", THREAD_POOL_NUM));
     }
 
     /**
      * get instance
      *
-     * @return
+     * @return instance
      */
     public static EtcdConfiguration getInstance() {
         if (null == instance) {
@@ -100,7 +100,6 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         return instance;
     }
 
-
     @Override
     public String getTypeName() {
         return CONFIG_TYPE;
@@ -112,21 +111,26 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         if ((value = getConfigFromSysPro(dataId)) != null) {
             return value;
         }
-        ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET, timeoutMills);
-        etcdConfigExecutor.execute(() -> complete(getClient().getKVClient().get(ByteSequence.from(dataId, UTF_8)), configFuture));
-        return (String) configFuture.get();
+        ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
+            timeoutMills);
+        etcdConfigExecutor.execute(
+            () -> complete(getClient().getKVClient().get(ByteSequence.from(dataId, UTF_8)), configFuture));
+        return (String)configFuture.get();
     }
 
     @Override
     public boolean putConfig(String dataId, String content, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUT, timeoutMills);
-        etcdConfigExecutor.execute(() -> complete(getClient().getKVClient().put(ByteSequence.from(dataId, UTF_8), ByteSequence.from(content, UTF_8)), configFuture));
-        return (Boolean) configFuture.get();
+        etcdConfigExecutor.execute(() -> complete(
+            getClient().getKVClient().put(ByteSequence.from(dataId, UTF_8), ByteSequence.from(content, UTF_8)),
+            configFuture));
+        return (Boolean)configFuture.get();
     }
 
     @Override
     public boolean putConfigIfAbsent(String dataId, String content, long timeoutMills) {
-        ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUTIFABSENT, timeoutMills);
+        ConfigFuture configFuture = new ConfigFuture(dataId, content, ConfigFuture.ConfigOperation.PUTIFABSENT,
+            timeoutMills);
         etcdConfigExecutor.execute(() -> {
             //use etcd transaction to ensure the atomic operation
             complete(client.getKVClient().txn()
@@ -136,7 +140,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
                 .Then(Op.put(ByteSequence.from(dataId, UTF_8), ByteSequence.from(content, UTF_8), PutOption.DEFAULT))
                 .commit(), configFuture);
         });
-        return (Boolean) configFuture.get();
+        return (Boolean)configFuture.get();
     }
 
     @Override
@@ -145,53 +149,38 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         etcdConfigExecutor.execute(() -> {
             complete(getClient().getKVClient().delete(ByteSequence.from(dataId, UTF_8)), configFuture);
         });
-        return (Boolean) configFuture.get();
+        return (Boolean)configFuture.get();
     }
 
     @Override
-    public void addConfigListener(String dataId, ConfigChangeListener listener) {
-        configListenersMap.putIfAbsent(dataId, new ArrayList<>());
-        configChangeNotifiersMap.putIfAbsent(dataId, new ArrayList<>());
-        ConfigChangeNotifier configChangeNotifier = new ConfigChangeNotifier(dataId, listener);
-        configChangeNotifiersMap.get(dataId).add(configChangeNotifier);
-        if (null != listener.getExecutor()) {
-            listener.getExecutor().submit(configChangeNotifier);
-        } else {
-            etcdNotifierExecutor.submit(configChangeNotifier);
-        }
-    }
-
-    @Override
-    public void removeConfigListener(String dataId, ConfigChangeListener listener) {
-        List<ConfigChangeListener> configChangeListeners = getConfigListeners(dataId);
-        if (configChangeListeners == null) {
+    public void addConfigListener(String dataId, ConfigurationChangeListener listener) {
+        if (null == dataId || null == listener) {
             return;
         }
-        List<ConfigChangeListener> newChangeListenerList = new ArrayList<>();
-        for (ConfigChangeListener changeListener : configChangeListeners) {
-            if (!changeListener.equals(listener)) {
-                newChangeListenerList.add(changeListener);
-            }
-        }
-        configListenersMap.put(dataId, newChangeListenerList);
-        if (null != listener.getExecutor()) {
-            listener.getExecutor().shutdownNow();
-        }
-        //remove and stop the configChangeNotifier
-        List<ConfigChangeNotifier> configChangeNotifiers = configChangeNotifiersMap.get(dataId);
-        List<ConfigChangeNotifier> newConfigChangeNotifiers = new ArrayList<>();
-        for (ConfigChangeNotifier configChangeNotifier : configChangeNotifiers) {
-            if (!listener.equals(configChangeNotifier.getListener())) {
-                newConfigChangeNotifiers.add(configChangeNotifier);
-            } else {
-                configChangeNotifier.stop();
-            }
-        }
-        configChangeNotifiersMap.put(dataId, newConfigChangeNotifiers);
+        configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
+        EtcdListener etcdListener = new EtcdListener(dataId, listener);
+        configListenersMap.get(dataId).add(etcdListener);
+        etcdListener.onProcessEvent(new ConfigurationChangeEvent());
     }
 
     @Override
-    public List getConfigListeners(String dataId) {
+    public void removeConfigListener(String dataId, ConfigurationChangeListener listener) {
+        Set<ConfigurationChangeListener> configChangeListeners = getConfigListeners(dataId);
+        if (configChangeListeners == null || listener == null) {
+            return;
+        }
+        for (ConfigurationChangeListener entry : configChangeListeners) {
+            ConfigurationChangeListener target = ((EtcdListener)entry).getTargetListener();
+            if (listener.equals(target)) {
+                entry.onShutDown();
+                configChangeListeners.remove(entry);
+                break;
+            }
+        }
+    }
+
+    @Override
+    public Set<ConfigurationChangeListener> getConfigListeners(String dataId) {
         return configListenersMap.get(dataId);
     }
 
@@ -204,7 +193,8 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         if (null == client) {
             synchronized (EtcdConfiguration.class) {
                 if (null == client) {
-                    client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY)).build();
+                    client = Client.builder().endpoints(FILE_CONFIG.getConfig(FILE_CONFIG_KEY_PREFIX + SERVER_ADDR_KEY))
+                        .build();
                 }
             }
         }
@@ -222,7 +212,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         try {
             T response = completableFuture.get();
             if (response instanceof GetResponse) {
-                List<KeyValue> keyValues = ((GetResponse) response).getKvs();
+                List<KeyValue> keyValues = ((GetResponse)response).getKvs();
                 if (CollectionUtils.isNotEmpty(keyValues)) {
                     ByteSequence value = keyValues.get(0).getValue();
                     if (null != value) {
@@ -232,7 +222,7 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
             } else if (response instanceof PutResponse) {
                 configFuture.setResult(Boolean.TRUE);
             } else if (response instanceof TxnResponse) {
-                boolean result = ((TxnResponse) response).isSucceeded();
+                boolean result = ((TxnResponse)response).isSucceeded();
                 //create key if file does not exist)
                 if (result) {
                     configFuture.setResult(Boolean.TRUE);
@@ -243,19 +233,28 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
                 throw new ShouldNeverHappenException("unsupported response type");
             }
         } catch (Exception e) {
-            LOGGER.error("error occurred while completing the future{}", e.getMessage());
+            LOGGER.error("error occurred while completing the future{}", e.getMessage(),e);
         }
     }
 
     /**
      * the type config change notifier
      */
-    private class ConfigChangeNotifier implements Runnable {
+    private class EtcdListener implements ConfigurationChangeListener {
         private final String dataId;
-        private final ConfigChangeListener listener;
+        private final ConfigurationChangeListener listener;
         private Watch.Watcher watcher;
+        private final ExecutorService executor = new ThreadPoolExecutor(CORE_LISTENER_THREAD, MAX_LISTENER_THREAD, 0L,
+            TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(),
+            new NamedThreadFactory("etcdListener", MAX_LISTENER_THREAD));
 
-        ConfigChangeNotifier(String dataId, ConfigChangeListener listener) {
+        /**
+         * Instantiates a new Etcd listener.
+         *
+         * @param dataId   the data id
+         * @param listener the listener
+         */
+        public EtcdListener(String dataId, ConfigurationChangeListener listener) {
             this.dataId = dataId;
             this.listener = listener;
         }
@@ -263,19 +262,35 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
         /**
          * get the listener
          *
-         * @return ConfigChangeListener
+         * @return ConfigurationChangeListener target listener
          */
-        ConfigChangeListener getListener() {
+        public ConfigurationChangeListener getTargetListener() {
             return this.listener;
         }
 
         @Override
-        public void run() {
+        public void onShutDown() {
+            this.watcher.close();
+            getExecutorService().shutdownNow();
+        }
+
+        @Override
+        public void onChangeEvent(ConfigurationChangeEvent event) {
             Watch watchClient = getClient().getWatchClient();
             watcher = watchClient.watch(ByteSequence.from(dataId, UTF_8), new Watch.Listener() {
+
                 @Override
-                public void onNext(WatchResponse response) {
-                    notifyListeners();
+                public void onNext(WatchResponse watchResponse) {
+                    try {
+                        GetResponse getResponse = getClient().getKVClient().get(ByteSequence.from(dataId, UTF_8)).get();
+                        List<KeyValue> keyValues = getResponse.getKvs();
+                        if (CollectionUtils.isNotEmpty(keyValues)) {
+                            event.setDataId(dataId).setNewValue(keyValues.get(0).getValue().toString(UTF_8));
+                            listener.onChangeEvent(event);
+                        }
+                    } catch (Exception e) {
+                        LOGGER.error("error occurred while getting value{}", e.getMessage(), e);
+                    }
                 }
 
                 @Override
@@ -290,29 +305,9 @@ public class EtcdConfiguration extends AbstractConfiguration<ConfigChangeListene
             });
         }
 
-        /**
-         * notify listeners
-         */
-        private void notifyListeners() {
-            try {
-                GetResponse getResponse = getClient().getKVClient().get(ByteSequence.from(dataId, UTF_8)).get();
-                List<KeyValue> keyValues = getResponse.getKvs();
-                if (CollectionUtils.isNotEmpty(keyValues)) {
-                    for (ConfigChangeListener listener : configListenersMap.get(this.dataId)) {
-                        listener.receiveConfigInfo(keyValues.get(0).getValue().toString(UTF_8));
-                    }
-                }
-            } catch (Exception e) {
-                LOGGER.error("error occurred while getting value{}", e.getMessage());
-            }
-        }
-
-
-        /**
-         * stop the notifier
-         */
-        private void stop() {
-            this.watcher.close();
+        @Override
+        public ExecutorService getExecutorService() {
+            return executor;
         }
     }
 }

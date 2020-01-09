@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
  * The type Log store data base dao.
  *
  * @author zhangsen
- * @date 2019 /4/2
  */
 @LoadLevel(name = "db")
 public class LogStoreDataBaseDAO implements LogStore, Initialize {
@@ -261,12 +260,13 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setString(1, globalTransactionDO.getXid());
-            return ps.executeUpdate() > 0;
+            ps.executeUpdate();
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
             IOUtil.close(ps, conn);
         }
+        return true;
     }
 
     @Override
@@ -339,11 +339,10 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             ps.setLong(3, branchTransactionDO.getBranchId());
             ps.setString(4, branchTransactionDO.getResourceGroupId());
             ps.setString(5, branchTransactionDO.getResourceId());
-            ps.setString(6, branchTransactionDO.getLockKey());
-            ps.setString(7, branchTransactionDO.getBranchType());
-            ps.setInt(8, branchTransactionDO.getStatus());
-            ps.setString(9, branchTransactionDO.getClientId());
-            ps.setString(10, branchTransactionDO.getApplicationData());
+            ps.setString(6, branchTransactionDO.getBranchType());
+            ps.setInt(7, branchTransactionDO.getStatus());
+            ps.setString(8, branchTransactionDO.getClientId());
+            ps.setString(9, branchTransactionDO.getApplicationData());
             return ps.executeUpdate() > 0;
         } catch (SQLException e) {
             throw new StoreException(e);
@@ -448,7 +447,6 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         branchTransactionDO.setStatus(rs.getInt(ServerTableColumnsName.BRANCH_TABLE_STATUS));
         branchTransactionDO.setApplicationData(rs.getString(ServerTableColumnsName.BRANCH_TABLE_APPLICATION_DATA));
         branchTransactionDO.setClientId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_CLIENT_ID));
-        branchTransactionDO.setLockKey(rs.getString(ServerTableColumnsName.BRANCH_TABLE_LOCK_KEY));
         branchTransactionDO.setXid(rs.getString(ServerTableColumnsName.BRANCH_TABLE_XID));
         branchTransactionDO.setResourceId(rs.getString(ServerTableColumnsName.BRANCH_TABLE_RESOURCE_ID));
         branchTransactionDO.setBranchId(rs.getLong(ServerTableColumnsName.BRANCH_TABLE_BRANCH_ID));
@@ -482,7 +480,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         try (Connection conn = logStoreDataSource.getConnection()) {
             DatabaseMetaData dbmd = conn.getMetaData();
             String schema = getSchema(conn);
-            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[] {"TABLE"});
+            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[]{"TABLE"});
             while (tableRs.next()) {
                 String table = tableRs.getString("TABLE_NAME");
                 if (StringUtils.equalsIgnoreCase(table, tableName)) {

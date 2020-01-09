@@ -15,17 +15,16 @@
  */
 package io.seata.rm.datasource.undo;
 
-import com.alibaba.druid.util.JdbcConstants;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import io.seata.rm.datasource.undo.oracle.OracleUndoLogManager;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  * @author jsbxyyx
- * @date 2019/09/07
  */
 public final class UndoLogManagerFactory {
 

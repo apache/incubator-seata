@@ -42,7 +42,6 @@ import java.util.stream.Collectors;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/4/1
  */
 public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener> {
 
@@ -243,17 +242,6 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
             .setQueryParams(new QueryParams(watchTimeout, index))
             .setPassing(true)
             .build());
-    }
-
-    /**
-     * get service group
-     *
-     * @param key
-     * @return clusterNameKey
-     */
-    private String getServiceGroup(String key) {
-        String clusterNameKey = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
-        return ConfigurationFactory.getInstance().getConfig(clusterNameKey);
     }
 
     /**
