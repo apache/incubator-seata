@@ -43,10 +43,11 @@
         <module>test</module>
         <module>tm</module>
         <module>metrics</module>
-        <module>codec</module>
+        <module>serializer</module>
         <module>seata-spring-boot-starter</module>
         <module>compressor</module>
         <module>saga</module>
+        <module>sqlparser</module>
     </modules>
     <packaging>pom</packaging>
 

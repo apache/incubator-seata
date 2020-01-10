@@ -15,18 +15,18 @@
  */
 package io.seata.rm.datasource.undo.mysql;
 
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.common.util.BlobUtils;
-import io.seata.core.constants.ClientTableColumnsName;
-import io.seata.rm.datasource.undo.AbstractUndoLogManager;
-import io.seata.rm.datasource.undo.UndoLogParser;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
+
+import io.seata.common.util.BlobUtils;
+import io.seata.core.constants.ClientTableColumnsName;
+import io.seata.rm.datasource.undo.AbstractUndoLogManager;
+import io.seata.rm.datasource.undo.UndoLogParser;
+import io.seata.sqlparser.util.JdbcConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author jsbxyyx
@@ -56,9 +56,7 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {
-        PreparedStatement deletePST = null;
-        try {
-            deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL);
+        try (PreparedStatement deletePST = conn.prepareStatement(DELETE_UNDO_LOG_BY_CREATE_SQL)) {
             deletePST.setDate(1, new java.sql.Date(logCreated.getTime()));
             deletePST.setInt(2, limitRows);
             int deleteRows = deletePST.executeUpdate();
@@ -71,31 +69,25 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
                 e = new SQLException(e);
             }
             throw (SQLException) e;
-        } finally {
-            if (deletePST != null) {
-                deletePST.close();
-            }
         }
     }
 
     @Override
-    protected void insertUndoLogWithNormal(String xid, long branchID, String rollbackCtx,
+    protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx,
                                                 byte[] undoLogContent, Connection conn) throws SQLException {
-        insertUndoLog(xid, branchID, rollbackCtx, undoLogContent, State.Normal, conn);
+        insertUndoLog(xid, branchId, rollbackCtx, undoLogContent, State.Normal, conn);
     }
 
     @Override
-    protected void insertUndoLogWithGlobalFinished(String xid, long branchID, UndoLogParser parser, Connection conn) throws SQLException {
-        insertUndoLog(xid, branchID, buildContext(parser.getName()),
+    protected void insertUndoLogWithGlobalFinished(String xid, long branchId, UndoLogParser parser, Connection conn) throws SQLException {
+        insertUndoLog(xid, branchId, buildContext(parser.getName()),
                 parser.getDefaultContent(), State.GlobalFinished, conn);
     }
 
-    private void insertUndoLog(String xid, long branchID, String rollbackCtx,
+    private void insertUndoLog(String xid, long branchId, String rollbackCtx,
                                       byte[] undoLogContent, State state, Connection conn) throws SQLException {
-        PreparedStatement pst = null;
-        try {
-            pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL);
-            pst.setLong(1, branchID);
+        try (PreparedStatement pst = conn.prepareStatement(INSERT_UNDO_LOG_SQL)) {
+            pst.setLong(1, branchId);
             pst.setString(2, xid);
             pst.setString(3, rollbackCtx);
             pst.setBlob(4, BlobUtils.bytes2Blob(undoLogContent));
@@ -106,10 +98,6 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
                 e = new SQLException(e);
             }
             throw (SQLException) e;
-        } finally {
-            if (pst != null) {
-                pst.close();
-            }
         }
     }
 
