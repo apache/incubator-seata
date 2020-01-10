@@ -53,19 +53,9 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private boolean                   rmReportSuccessEnable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, true);
 
     public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
-        Connection con = null;
-        try {
-            con = dataSource.getConnection();
+        try (Connection con = dataSource.getConnection()) {
             DatabaseMetaData metaData = con.getMetaData();
             return metaData.getDatabaseProductName();
-        } finally {
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    LOGGER.error("Get dbType from failed: {}", e.getMessage(), e);
-                }
-            }
         }
     }
 
