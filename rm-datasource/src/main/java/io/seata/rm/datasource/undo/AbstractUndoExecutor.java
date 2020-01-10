@@ -15,7 +15,6 @@
  */
 package io.seata.rm.datasource.undo;
 
-import com.alibaba.druid.util.JdbcUtils;
 import com.alibaba.fastjson.JSON;
 import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
@@ -29,6 +28,7 @@ import io.seata.rm.datasource.sql.struct.KeyType;
 import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.rm.datasource.util.JdbcUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.sql.rowset.serial.SerialBlob;
@@ -120,7 +120,7 @@ public abstract class AbstractUndoExecutor {
                 ArrayList<Field> undoValues = new ArrayList<>();
                 Field pkValue = null;
                 for (Field field : undoRow.getFields()) {
-                    if (field.getKeyType() == KeyType.PrimaryKey) {
+                    if (field.getKeyType() == KeyType.PRIMARY_KEY) {
                         pkValue = field;
                     } else {
                         undoValues.add(field);
@@ -322,7 +322,7 @@ public abstract class AbstractUndoExecutor {
      * @throws SQLException
      */
     protected String getDbType(Connection conn) throws SQLException {
-        return JdbcUtils.getDbType(conn.getMetaData().getURL(), null);
+        return JdbcUtils.getDbType(conn.getMetaData().getURL());
     }
 
 }

@@ -30,7 +30,7 @@ import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.DefaultPromise;
 import io.seata.common.thread.NamedThreadFactory;
 import io.seata.common.thread.PositiveAtomicCounter;
-import io.seata.core.codec.CodecType;
+import io.seata.core.serializer.SerializerType;
 import io.seata.core.model.BranchType;
 import io.seata.core.protocol.ProtocolConstants;
 import io.seata.core.protocol.RpcMessage;
@@ -118,7 +118,7 @@ public class ProtocolV1Client {
 
         RpcMessage rpcMessage = new RpcMessage();
         rpcMessage.setId(msgId);
-        rpcMessage.setCodec(CodecType.SEATA.getCode());
+        rpcMessage.setCodec(SerializerType.SEATA.getCode());
         rpcMessage.setCompressor(ProtocolConstants.CONFIGURED_COMPRESSOR);
         rpcMessage.setHeadMap(head);
         rpcMessage.setBody(body);

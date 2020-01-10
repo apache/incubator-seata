@@ -260,12 +260,13 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
             conn.setAutoCommit(true);
             ps = conn.prepareStatement(sql);
             ps.setString(1, globalTransactionDO.getXid());
-            return ps.executeUpdate() > 0;
+            ps.executeUpdate();
         } catch (SQLException e) {
             throw new StoreException(e);
         } finally {
             IOUtil.close(ps, conn);
         }
+        return true;
     }
 
     @Override
@@ -479,7 +480,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         try (Connection conn = logStoreDataSource.getConnection()) {
             DatabaseMetaData dbmd = conn.getMetaData();
             String schema = getSchema(conn);
-            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[] {"TABLE"});
+            ResultSet tableRs = dbmd.getTables(null, schema, null, new String[]{"TABLE"});
             while (tableRs.next()) {
                 String table = tableRs.getString("TABLE_NAME");
                 if (StringUtils.equalsIgnoreCase(table, tableName)) {
