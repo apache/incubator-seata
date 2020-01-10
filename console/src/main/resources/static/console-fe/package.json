@@ -23,7 +23,7 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jameslcj/seata.git"
+    "url": "git+https://github.com/seata/seata.git"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
