@@ -45,7 +45,7 @@ public class DruidSQLRecognizerFactory implements SQLRecognizerFactory {
         if (asts.size() > 1 && asts.stream().anyMatch(statement -> (statement instanceof SQLInsertStatement) || (statement instanceof SQLSelectStatement))) {
             throw new UnsupportedOperationException("Unsupported INSERT OR SELECT MULTI SQL: " + sql);
         }
-        List<SQLRecognizer> recognizers = new ArrayList<>();
+        List<SQLRecognizer> recognizers = null;
         SQLRecognizer recognizer = null;
         for (SQLStatement ast : asts) {
             SQLOperateRecognizerHolder recognizerHolder =
@@ -60,6 +60,9 @@ public class DruidSQLRecognizerFactory implements SQLRecognizerFactory {
                 recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
             }
             if (recognizer != null) {
+                if (recognizers == null) {
+                    recognizers = new ArrayList<>();
+                }
                 recognizers.add(recognizer);
             }
         }

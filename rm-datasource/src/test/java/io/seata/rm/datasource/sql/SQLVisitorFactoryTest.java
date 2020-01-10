@@ -47,17 +47,17 @@ public class SQLVisitorFactoryTest {
         //test for mysql insert
         String sql = "insert into t(id) values (1)";
         List<SQLRecognizer> recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertTrue(recognizer instanceof MySQLInsertRecognizer);
+        Assertions.assertTrue(recognizer.get(0) instanceof MySQLInsertRecognizer);
 
         //test for mysql delete
         sql = "delete from t";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertTrue(recognizer instanceof MySQLDeleteRecognizer);
+        Assertions.assertTrue(recognizer.get(0) instanceof MySQLDeleteRecognizer);
 
         //test for mysql update
         sql = "update t set a = a";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertTrue(recognizer instanceof MySQLUpdateRecognizer);
+        Assertions.assertTrue(recognizer.get(0) instanceof MySQLUpdateRecognizer);
 
         //test for mysql select
         sql = "select * from t";
@@ -67,22 +67,22 @@ public class SQLVisitorFactoryTest {
         //test for mysql select for update
         sql = "select * from t for update";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
-        Assertions.assertTrue(recognizer instanceof MySQLSelectForUpdateRecognizer);
+        Assertions.assertTrue(recognizer.get(0) instanceof MySQLSelectForUpdateRecognizer);
 
         //test for oracle insert
         sql = "insert into t(id) values (1)";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
-        Assertions.assertTrue(recognizer instanceof OracleInsertRecognizer);
+        Assertions.assertTrue(recognizer.get(0) instanceof OracleInsertRecognizer);
 
         //test for oracle delete
         sql = "delete from t";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
-        Assertions.assertTrue(recognizer instanceof OracleDeleteRecognizer);
+        Assertions.assertTrue(recognizer.get(0) instanceof OracleDeleteRecognizer);
 
         //test for oracle update
         sql = "update t set a = a";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
-        Assertions.assertTrue(recognizer instanceof OracleUpdateRecognizer);
+        Assertions.assertTrue(recognizer.get(0) instanceof OracleUpdateRecognizer);
 
         //test for oracle select
         sql = "select * from t";
@@ -92,7 +92,7 @@ public class SQLVisitorFactoryTest {
         //test for oracle select for update
         sql = "select * from t for update";
         recognizer = SQLVisitorFactory.get(sql, JdbcConstants.ORACLE);
-        Assertions.assertTrue(recognizer instanceof OracleSelectForUpdateRecognizer);
+        Assertions.assertTrue(recognizer.get(0) instanceof OracleSelectForUpdateRecognizer);
 
         //test for do not support db
         Assertions.assertThrows(UnsupportedOperationException.class, () -> {
