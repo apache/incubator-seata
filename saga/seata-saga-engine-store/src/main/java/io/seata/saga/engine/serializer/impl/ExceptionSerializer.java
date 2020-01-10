@@ -21,10 +21,10 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
+import io.seata.saga.engine.serializer.Serializer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import io.seata.saga.engine.serializer.Serializer;
 
 /**
  * Exception serializer
