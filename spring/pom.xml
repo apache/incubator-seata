@@ -50,7 +50,7 @@
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-codec-all</artifactId>
+            <artifactId>seata-serializer-all</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

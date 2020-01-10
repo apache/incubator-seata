@@ -164,22 +164,17 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
             LOGGER.info("Initializing Global Transaction Clients ... ");
         }
         if (StringUtils.isNullOrEmpty(applicationId) || StringUtils.isNullOrEmpty(txServiceGroup)) {
-            throw new IllegalArgumentException(
-                "applicationId: " + applicationId + ", txServiceGroup: " + txServiceGroup);
+            throw new IllegalArgumentException(String.format("applicationId: %s, txServiceGroup: %s", applicationId, txServiceGroup));
         }
         //init TM
         TMClient.init(applicationId, txServiceGroup);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(
-                "Transaction Manager Client is initialized. applicationId[" + applicationId + "] txServiceGroup["
-                    + txServiceGroup + "]");
+            LOGGER.info("Transaction Manager Client is initialized. applicationId[{}] txServiceGroup[{}]", applicationId, txServiceGroup);
         }
         //init RM
         RMClient.init(applicationId, txServiceGroup);
         if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(
-                "Resource Manager is initialized. applicationId[" + applicationId + "] txServiceGroup[" + txServiceGroup
-                    + "]");
+            LOGGER.info("Resource Manager is initialized. applicationId[{}] txServiceGroup[{}]", applicationId, txServiceGroup);
         }
 
         if (LOGGER.isInfoEnabled()) {
@@ -228,9 +223,7 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
                     }
                 }
 
-                LOGGER.info(
-                    "Bean[" + bean.getClass().getName() + "] with name [" + beanName + "] would use interceptor ["
-                        + interceptor.getClass().getName() + "]");
+                LOGGER.info("Bean[{}] with name [{}] would use interceptor [{}]", bean.getClass().getName(), beanName, interceptor.getClass().getName());
                 if (!AopUtils.isAopProxy(bean)) {
                     bean = super.wrapIfNecessary(bean, beanName, cacheKey);
                 } else {
@@ -249,8 +242,8 @@ public class GlobalTransactionScanner extends AbstractAutoProxyCreator
     }
 
     private boolean existsAnnotation(Class<?>[] classes) {
-        if (classes != null && classes.length > 0) {
-            for (Class clazz : classes) {
+        if (CollectionUtils.isNotEmpty(classes)) {
+            for (Class<?> clazz : classes) {
                 if (clazz == null) {
                     continue;
                 }

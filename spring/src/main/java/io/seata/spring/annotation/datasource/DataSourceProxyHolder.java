@@ -37,7 +37,7 @@ public class DataSourceProxyHolder {
      * the type holder
      */
     private static class Holder {
-        private static DataSourceProxyHolder INSTANCE;
+        private static final DataSourceProxyHolder INSTANCE;
 
         static {
             INSTANCE = new DataSourceProxyHolder();
