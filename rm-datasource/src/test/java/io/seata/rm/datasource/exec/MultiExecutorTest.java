@@ -27,12 +27,11 @@ import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.StatementProxy;
 import io.seata.rm.datasource.mock.MockDriver;
 import io.seata.rm.datasource.mock.MockExecuteHandlerImpl;
-import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.SQLVisitorFactory;
-import io.seata.rm.datasource.sql.druid.MySQLDeleteRecognizer;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -93,7 +92,7 @@ public class MultiExecutorTest {
     public void testBeforeImageAndAfterImages() throws SQLException {
         //same table and same type
         String sql = "update table_update_executor_test set name = 'WILL' where id = 1;update table_update_executor_test set name = 'WILL2' where id = 2";
-        List<SQLRecognizer> multi = SQLVisitorFactory.getMulti(sql, JdbcConstants.MYSQL);
+        List<SQLRecognizer> multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
         }, multi);
@@ -111,7 +110,7 @@ public class MultiExecutorTest {
         items.clear();
         //same table and multi type
         sql = "update table_update_executor_test set name = 'WILL' where id = 1;delete from table_update_executor_test where id = 2;";
-        multi = SQLVisitorFactory.getMulti(sql, JdbcConstants.MYSQL);
+        multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
         }, multi);
@@ -134,7 +133,7 @@ public class MultiExecutorTest {
         // multi table and multi type
         sql = "update table_update_executor_test set name = 'WILL' where id = 1;" +
                 "update table_update_executor_test_1 set name = 'WILL' where id = 2;delete from table_update_executor_test2 where id = 2;delete from table_update_executor_test2 where id = 3";
-        multi = SQLVisitorFactory.getMulti(sql, JdbcConstants.MYSQL);
+        multi = SQLVisitorFactory.get(sql, JdbcConstants.MYSQL);
         executor = new MultiExecutor(statementProxy, (statement, args) -> {
             return null;
         }, multi);

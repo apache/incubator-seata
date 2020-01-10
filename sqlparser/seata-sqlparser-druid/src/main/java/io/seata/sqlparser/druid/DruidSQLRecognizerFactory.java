@@ -25,6 +25,7 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -36,24 +37,32 @@ import java.util.List;
 @LoadLevel(name = "druid")
 public class DruidSQLRecognizerFactory implements SQLRecognizerFactory {
     @Override
-    public SQLRecognizer create(String sql, String dbType) {
+    public List<SQLRecognizer> create(String sql, String dbType) {
         List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
-        if (asts == null || asts.size() != 1) {
+        if (asts == null || asts.size() == 0) {
             throw new UnsupportedOperationException("Unsupported SQL: " + sql);
         }
-        SQLRecognizer recognizer = null;
-        SQLStatement ast = asts.get(0);
-        SQLOperateRecognizerHolder recognizerHolder =
-                SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
-        if (ast instanceof SQLInsertStatement) {
-            recognizer = recognizerHolder.getInsertRecognizer(sql, ast);
-        } else if (ast instanceof SQLUpdateStatement) {
-            recognizer = recognizerHolder.getUpdateRecognizer(sql, ast);
-        } else if (ast instanceof SQLDeleteStatement) {
-            recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
-        } else if (ast instanceof SQLSelectStatement) {
-            recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
+        if (asts.size() > 1 && asts.stream().anyMatch(statement -> (statement instanceof SQLInsertStatement) || (statement instanceof SQLSelectStatement))) {
+            throw new UnsupportedOperationException("Unsupported INSERT OR SELECT MULTI SQL: " + sql);
         }
-        return recognizer;
+        List<SQLRecognizer> recognizers = new ArrayList<>();
+        SQLRecognizer recognizer = null;
+        for (SQLStatement ast : asts) {
+            SQLOperateRecognizerHolder recognizerHolder =
+                    SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
+            if (ast instanceof SQLInsertStatement) {
+                recognizer = recognizerHolder.getInsertRecognizer(sql, ast);
+            } else if (ast instanceof SQLUpdateStatement) {
+                recognizer = recognizerHolder.getUpdateRecognizer(sql, ast);
+            } else if (ast instanceof SQLDeleteStatement) {
+                recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
+            } else if (ast instanceof SQLSelectStatement) {
+                recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
+            }
+            if (recognizer != null) {
+                recognizers.add(recognizer);
+            }
+        }
+        return recognizers;
     }
 }

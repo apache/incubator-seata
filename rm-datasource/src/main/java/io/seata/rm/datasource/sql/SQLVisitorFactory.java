@@ -21,6 +21,8 @@ import io.seata.core.constants.ConfigurationKeys;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
 
+import java.util.List;
+
 /**
  * @author ggndnn
  */
@@ -42,43 +44,9 @@ public class SQLVisitorFactory {
      * @param dbType the db type
      * @return the sql recognizer
      */
-    public static SQLRecognizer get(String sql, String dbType) {
+    public static List<SQLRecognizer> get(String sql, String dbType) {
         return SQL_RECOGNIZER_FACTORY.create(sql, dbType);
     }
 
-    /**
-     * Get  multi sql recognizer. not support multi insert or select sql
-     *
-     * @param sql    the sql
-     * @param dbType the db type
-     * @return the sql recognizer
-     */
-    public static List<SQLRecognizer> getMulti(String sql, String dbType) {
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
-        if (asts == null || asts.size() == 0) {
-            throw new UnsupportedOperationException("Unsupported SQL: " + sql);
-        }
-        if (asts.size() > 1 && asts.stream().anyMatch(statement -> (statement instanceof SQLInsertStatement) || (statement instanceof SQLSelectStatement))) {
-            throw new UnsupportedOperationException("Unsupported INSERT OR SELECT MULTI SQL: " + sql);
-        }
-        final List<SQLRecognizer> recognizers = new ArrayList<>();
-        SQLRecognizer recognizer = null;
-        for (SQLStatement ast : asts) {
-            SQLOperateRecognizerHolder recognizerHolder =
-                    SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
-            if (ast instanceof SQLInsertStatement) {
-                recognizer = recognizerHolder.getInsertRecognizer(sql, ast);
-            } else if (ast instanceof SQLUpdateStatement) {
-                recognizer = recognizerHolder.getUpdateRecognizer(sql, ast);
-            } else if (ast instanceof SQLDeleteStatement) {
-                recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
-            } else if (ast instanceof SQLSelectStatement) {
-                recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
-            }
-            if (recognizer != null) {
-                recognizers.add(recognizer);
-            }
-        }
-        return recognizers;
-    }
+
 }

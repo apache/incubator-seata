@@ -71,35 +71,35 @@ public class ExecuteTemplate {
         }
 
         if (sqlRecognizers == null) {
-            sqlRecognizers = SQLVisitorFactory.getMulti(
+            sqlRecognizers = SQLVisitorFactory.get(
                     statementProxy.getTargetSQL(),
                     statementProxy.getConnectionProxy().getDbType());
         }
-        Executor<T> executor = null;
+        Executor<T> executor;
         if (sqlRecognizers == null || sqlRecognizers.size() == 0) {
-            executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
+            executor = new PlainExecutor<>(statementProxy, statementCallback);
         } else {
             if (sqlRecognizers.size() == 1) {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                 switch (sqlRecognizer.getSQLType()) {
                     case INSERT:
-                        executor = new InsertExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                        executor = new InsertExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                         break;
                     case UPDATE:
-                        executor = new UpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                        executor = new UpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                         break;
                     case DELETE:
-                        executor = new DeleteExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                        executor = new DeleteExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                         break;
                     case SELECT_FOR_UPDATE:
-                        executor = new SelectForUpdateExecutor<T, S>(statementProxy, statementCallback, sqlRecognizer);
+                        executor = new SelectForUpdateExecutor<>(statementProxy, statementCallback, sqlRecognizer);
                         break;
                     default:
-                        executor = new PlainExecutor<T, S>(statementProxy, statementCallback);
+                        executor = new PlainExecutor<>(statementProxy, statementCallback);
                         break;
                 }
             } else {
-                executor = new MultiExecutor<T, S>(statementProxy, statementCallback, sqlRecognizers);
+                executor = new MultiExecutor<>(statementProxy, statementCallback, sqlRecognizers);
             }
         }
         T rs;
