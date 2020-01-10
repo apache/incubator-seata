@@ -17,6 +17,7 @@ package io.seata.saga.tm;
 
 import java.util.List;
 
+import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -84,6 +85,7 @@ public class DefaultSagaTransactionalTemplate
 
     @Override
     public GlobalTransaction beginTransaction(TransactionInfo txInfo) throws TransactionalExecutor.ExecutionException {
+        RootContext.unbind();
         GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
         try {
             triggerBeforeBegin();
