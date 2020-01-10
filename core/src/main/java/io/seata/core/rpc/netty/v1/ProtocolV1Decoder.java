@@ -18,8 +18,8 @@ package io.seata.core.rpc.netty.v1;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
-import io.seata.core.codec.Codec;
-import io.seata.core.codec.CodecFactory;
+import io.seata.core.serializer.Serializer;
+import io.seata.core.serializer.SerializerFactory;
 import io.seata.core.compressor.Compressor;
 import io.seata.core.compressor.CompressorFactory;
 import io.seata.core.protocol.HeartbeatMessage;
@@ -137,8 +137,8 @@ public class ProtocolV1Decoder extends LengthFieldBasedFrameDecoder {
                 frame.readBytes(bs);
                 Compressor compressor = CompressorFactory.getCompressor(compressorType);
                 bs = compressor.decompress(bs);
-                Codec codec = CodecFactory.getCodec(codecType);
-                rpcMessage.setBody(codec.decode(bs));
+                Serializer serializer = SerializerFactory.getSerializer(codecType);
+                rpcMessage.setBody(serializer.deserialize(bs));
             }
         }
 
