@@ -13,18 +13,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-if [[ $# != 1 ]]; then
-  echo "USAGE: $0 consulAddr"
+while getopts ":h:p:" opt
+do
+  case $opt in
+  h)
+    host=$OPTARG
+  ;;
+  p)
+    port=$OPTARG
+  ;;
+  ?)
+  echo "\033[31m USAGE OPTION: $0 [-h host] [-p port] \033[0m"
   exit 1
+  ;;
+  esac
+done
+
+if [[ -z ${host} ]]; then
+    host=localhost
 fi
-consulAddr=$1
+if [[ -z ${port} ]]; then
+    port=8500
+fi
+
+consulAddr=$host:$port
 contentType="content-type:application/json;charset=UTF-8"
 echo "Set consulAddr=$consulAddr"
 
 failCount=0
 tempLog=$(mktemp -t consul-config.log)
 function addConfig() {
-  curl -X PUT -H ${1} -d ${2} "http://$3/v1/kv/$4" >${tempLog} 2>/dev/null
+  curl -X PUT -H ${1} -d ${2} "http://$3/v1/kv/$4" >"${tempLog}" 2>/dev/null
   if [[ -z $(cat ${tempLog}) ]]; then
     echo "\033[31m Please check the cluster status. \033[0m"
     exit 1

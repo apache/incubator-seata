@@ -18,27 +18,37 @@
 # This script need to rely on zk.
 
 
-for line in $(cat zk-params.txt); do
-	key=${line%%=*}
-	value=${line#*=}
-	case ${key} in
-	zkAddr)
-		zkAddr=${value}
-		;;
-	zkHome)
-		zkHome=${value}
-		;;
-	*)
-		echo "Invalid parameter，please refer to zk-params.txt"
-		exit 1
-		;;
-	esac
+while getopts ":h:p:z:" opt
+do
+  case $opt in
+  h)
+    host=$OPTARG
+  ;;
+  p)
+    port=$OPTARG
+  ;;
+  z)
+    zkHome=$OPTARG
+  ;;
+  ?)
+  echo "\033[31m USAGE OPTION: $0 [-h host] [-p port] [-z zkHome] \033[0m"
+  exit 1
+  ;;
+  esac
 done
 
-if [[ -z ${zkAddr} || -z ${zkHome} ]]; then
-	echo " \033[31m Incomplete parameters, please fill in the complete parameters: zkAddr:$zkAddr, zkHome:$zkHome \033[0m"
-	exit 1
+if [[ -z ${host} ]]; then
+    host=localhost
 fi
+if [[ -z ${port} ]]; then
+    port=2181
+fi
+if [[ -z ${zkHome} ]]; then
+    echo "\033[31m zk home is empty, please usage option: [-z zkHome] \033[0m"
+    exit 1
+fi
+
+zkAddr=$host:$port
 
 root="/seata"
 tempLog=$(mktemp -t zk-config.log)
