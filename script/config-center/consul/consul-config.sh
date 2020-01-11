@@ -43,12 +43,12 @@ echo "Set consulAddr=$consulAddr"
 failCount=0
 tempLog=$(mktemp -u)
 function addConfig() {
-  curl -X PUT -H ${1} -d ${2} "http://$3/v1/kv/$4" >"${tempLog}" 2>/dev/null
-  if [[ -z $(cat ${tempLog}) ]]; then
+  curl -X PUT -H "${1}" -d "${2}" "http://$3/v1/kv/$4" >"${tempLog}" 2>/dev/null
+  if [[ -z $(cat "${tempLog}") ]]; then
     echo "\033[31m Please check the cluster status. \033[0m"
     exit 1
   fi
-  if [[ $(cat ${tempLog}) =~ "true" ]]; then
+  if [[ $(cat "${tempLog}") =~ "true" ]]; then
     echo "Set $4=$2\033[32m successfully \033[0m"
   else
     echo "Set $4=$2\033[31m failure \033[0m"
@@ -61,7 +61,7 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
   (( count++ ))
   key=${line%%=*}
   value=${line#*=}
-  addConfig ${contentType} ${value} ${consulAddr} ${key}
+  addConfig "${contentType}" "${value}" "${consulAddr}" "${key}"
 done
 
 echo "========================================================================="

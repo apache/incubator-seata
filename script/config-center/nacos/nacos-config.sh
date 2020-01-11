@@ -43,12 +43,12 @@ contentType="content-type:application/json;charset=UTF-8"
 failCount=0
 tempLog=$(mktemp -u)
 function addConfig() {
-  curl -X POST -H ${1} "http://$2/nacos/v1/cs/configs?dataId=$3&group=SEATA_GROUP&content=$4" >"${tempLog}" 2>/dev/null
-  if [[ -z $(cat ${tempLog}) ]]; then
+  curl -X POST -H "${1}" "http://$2/nacos/v1/cs/configs?dataId=$3&group=SEATA_GROUP&content=$4" >"${tempLog}" 2>/dev/null
+  if [[ -z $(cat "${tempLog}") ]]; then
     echo "\033[31m Please check the cluster status. \033[0m"
     exit 1
   fi
-  if [[ $(cat ${tempLog}) =~ "true" ]]; then
+  if [[ $(cat "${tempLog}") =~ "true" ]]; then
     echo "Set $3=$4\033[32m successfully \033[0m"
   else
     echo "Set $3=$4\033[31m failure \033[0m"
@@ -61,7 +61,7 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
   (( count++ ))
 	key=${line%%=*}
   value=${line#*=}
-	addConfig ${contentType} ${nacosAddr} ${key} ${value}
+	addConfig "${contentType}" "${nacosAddr}" "${key}" "${value}"
 done
 
 echo "========================================================================="

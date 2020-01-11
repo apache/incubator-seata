@@ -58,37 +58,37 @@ echo "ZK home is $zkHome"
 echo "ZK config root node is $root"
 
 function check_node() {
-	$2/bin/zkCli.sh -server $1 ls ${root} >/dev/null 2>"${tempLog}"
+	"$2"/bin/zkCli.sh -server "$1" ls ${root} >/dev/null 2>"${tempLog}"
 }
 
 function create_node() {
-	$2/bin/zkCli.sh -server $1 create ${root} "" >/dev/null
+	"$2"/bin/zkCli.sh -server "$1" create ${root} "" >/dev/null
 }
 
 function create_subNode() {
-	$2/bin/zkCli.sh -server $1 create "${root}/$3" "$4" >/dev/null
+	"$2"/bin/zkCli.sh -server "$1" create "${root}/$3" "$4" >/dev/null
 }
 
 function delete_node() {
-	$2/bin/zkCli.sh -server $1 rmr ${root} "" >/dev/null
+	"$2"/bin/zkCli.sh -server $1 rmr ${root} "" >/dev/null
 }
 
-check_node ${zkAddr} ${zkHome}
+check_node "${zkAddr}" "${zkHome}"
 
-if [[ $(cat ${tempLog}) =~ "No such file or directory" ]]; then
+if [[ $(cat "${tempLog}") =~ "No such file or directory" ]]; then
 	echo "\033[31m ZK home is error, please enter correct zk home! \033[0m"
 	exit 1
-elif [[ $(cat ${tempLog}) =~ "Exception" ]]; then
+elif [[ $(cat "${tempLog}") =~ "Exception" ]]; then
 	echo "\033[31m Exception error, please check zk cluster status or if the zk address is entered correctly! \033[0m"
 	exit 1
-elif [[ $(cat ${tempLog}) =~ "Node does not exist" ]]; then
-	create_node ${zkAddr} ${zkHome}
+elif [[ $(cat "${tempLog}") =~ "Node does not exist" ]]; then
+	create_node "${zkAddr}" "${zkHome}"
 else
 	read -p "${root} node already exists, now delete ${root} node in zk, y/n: " result
 	if [[ ${result} == "y" ]]; then
 		echo "Delete ${root} node..."
-		delete_node ${zkAddr} ${zkHome}
-		create_node ${zkAddr} ${zkHome}
+		delete_node "${zkAddr}" "${zkHome}"
+		create_node "${zkAddr}" "${zkHome}"
 	else
 		exit 0
 	fi
@@ -98,5 +98,5 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 	key=${line%%=*}
 	value=${line#*=}
 	echo "Set" "${key}" "=" "${value}"
-	create_subNode ${zkAddr} ${zkHome} ${key} ${value}
+	create_subNode "${zkAddr}" "${zkHome}" "${key}" "${value}"
 done

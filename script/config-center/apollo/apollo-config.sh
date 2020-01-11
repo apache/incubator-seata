@@ -105,8 +105,8 @@ echo "token is ${token}"
 failCount=0
 tempLog=$(mktemp -u)
 function addConfig() {
-	curl -X POST -H ${1} -H ${2} -d ${3} "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/items" >"${tempLog}" 2>/dev/null
-	log=$(cat ${tempLog})
+	curl -X POST -H "${1}" -H "${2}" -d "${3}" "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/items" >"${tempLog}" 2>/dev/null
+	log=$(cat "${tempLog}")
 	if [[ ${log} =~ ":401" || ${log} =~ ":403"
 	    || ${log} =~ ":404" || ${log} =~ ":405"
 	      || ${log} =~ ":500" || ! ${log} =~ "{" ]]; then
@@ -118,8 +118,8 @@ function addConfig() {
 }
 
 function publishConfig() {
-	curl -X POST -H ${1} -H ${2} -d ${3} "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/releases" >"${tempLog}" 2>/dev/null
-	log=$(cat ${tempLog})
+	curl -X POST -H "${1}" -H "${2}" -d "${3}" "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/releases" >"${tempLog}" 2>/dev/null
+	log=$(cat "${tempLog}")
 	if [[ ${log} =~ ":401" || ${log} =~ ":403"
 	    || ${log} =~ ":404" || ${log} =~ ":405"
 	      || ${log} =~ ":500" || ! ${log} =~ "{" ]]; then
@@ -136,7 +136,7 @@ for line in $(cat $(dirname "$PWD")/config.txt); do
 	key=${line%%=*}
 	value=${line#*=}
 	body="{\"key\":\"${key}\",\"value\":\"${value}\",\"comment\":\"\",\"dataChangeCreatedBy\":\"${dataChangeCreatedBy}\"}"
-	addConfig ${contentType} ${authorization} ${body} ${portalAddr} ${env} ${appId} ${clusterName} ${namespaceName} ${key} ${value}
+	addConfig ${contentType} "${authorization}" "${body}" "${portalAddr}" "${env}" "${appId}" "${clusterName}" "${namespaceName}" "${key}" "${value}"
 done
 
 echo "========================================================================="
@@ -146,7 +146,7 @@ echo "========================================================================="
 if [[ $failCount -eq 0 ]]; then
   read -p "Publish now, y/n: " result
   if [[ ${result} == "y" ]]; then
-    publishConfig ${contentType} ${authorization} ${publishBody} ${portalAddr} ${env} ${appId} ${clusterName} ${namespaceName}
+    publishConfig "${contentType}" "${authorization}" "${publishBody}" "${portalAddr}" "${env}" "${appId}" "${clusterName}" "${namespaceName}"
   else
     echo "Remember to publish later..."
   fi
