@@ -40,9 +40,7 @@ public class SQLVisitorFactoryTest {
     public void testSqlRecognizing() {
 
         //test for ast was null
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("", JdbcConstants.MYSQL);
-        });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> SQLVisitorFactory.get("", JdbcConstants.MYSQL));
 
         //test for mysql insert
         String sql = "insert into t(id) values (1)";
@@ -95,9 +93,7 @@ public class SQLVisitorFactoryTest {
         Assertions.assertTrue(recognizer instanceof OracleSelectForUpdateRecognizer);
 
         //test for do not support db
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("select * from t", JdbcConstants.DB2);
-        });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.DB2));
     }
 
     @Test
