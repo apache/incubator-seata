@@ -41,7 +41,7 @@ echo "set nacosAddr=$nacosAddr"
 contentType="content-type:application/json;charset=UTF-8"
 
 failCount=0
-tempLog=$(mktemp -t nacos-config.log)
+tempLog=$(mktemp -u)
 function addConfig() {
   curl -X POST -H ${1} "http://$2/nacos/v1/cs/configs?dataId=$3&group=SEATA_GROUP&content=$4" >"${tempLog}" 2>/dev/null
   if [[ -z $(cat ${tempLog}) ]]; then

@@ -103,9 +103,9 @@ echo "releasedBy is ${releasedBy}"
 echo "token is ${token}"
 
 failCount=0
-tempLog=$(mktemp -t apollo-config.log)
+tempLog=$(mktemp -u)
 function addConfig() {
-	curl -X POST -H ${1} -H ${2} -d ${3} "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/items" >${tempLog} 2>/dev/null
+	curl -X POST -H ${1} -H ${2} -d ${3} "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/items" >"${tempLog}" 2>/dev/null
 	log=$(cat ${tempLog})
 	if [[ ${log} =~ ":401" || ${log} =~ ":403"
 	    || ${log} =~ ":404" || ${log} =~ ":405"
@@ -118,7 +118,7 @@ function addConfig() {
 }
 
 function publishConfig() {
-	curl -X POST -H ${1} -H ${2} -d ${3} "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/releases" >${tempLog} 2>/dev/null
+	curl -X POST -H ${1} -H ${2} -d ${3} "http://${4}/openapi/v1/envs/${5}/apps/${6}/clusters/${7}/namespaces/${8}/releases" >"${tempLog}" 2>/dev/null
 	log=$(cat ${tempLog})
 	if [[ ${log} =~ ":401" || ${log} =~ ":403"
 	    || ${log} =~ ":404" || ${log} =~ ":405"

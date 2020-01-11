@@ -51,14 +51,14 @@ fi
 zkAddr=$host:$port
 
 root="/seata"
-tempLog=$(mktemp -t zk-config.log)
+tempLog=$(mktemp -u)
 
 echo "ZK address is $zkAddr"
 echo "ZK home is $zkHome"
 echo "ZK config root node is $root"
 
 function check_node() {
-	$2/bin/zkCli.sh -server $1 ls ${root} >/dev/null 2>${tempLog}
+	$2/bin/zkCli.sh -server $1 ls ${root} >/dev/null 2>"${tempLog}"
 }
 
 function create_node() {

@@ -43,7 +43,7 @@ contentType="content-type:application/json;charset=UTF-8"
 echo "Set etcd3Addr=$etcd3Addr"
 
 failCount=0
-tempLog=$(mktemp -t etcd-config.log)
+tempLog=$(mktemp -u)
 function addConfig() {
   keyBase64=$(printf "%s""$2" | base64)
 	valueBase64=$(printf "%s""$3" | base64)
