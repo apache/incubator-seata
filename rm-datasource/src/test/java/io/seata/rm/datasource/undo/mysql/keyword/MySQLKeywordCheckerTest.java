@@ -17,12 +17,6 @@ package io.seata.rm.datasource.undo.mysql.keyword;
 
 import java.sql.Types;
 
-import com.alibaba.druid.util.JdbcConstants;
-import io.seata.rm.datasource.sql.SQLType;
-import io.seata.rm.datasource.sql.struct.Field;
-import io.seata.rm.datasource.sql.struct.KeyType;
-import io.seata.rm.datasource.sql.struct.Row;
-import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 import io.seata.rm.datasource.undo.SQLUndoLog;
@@ -31,6 +25,12 @@ import io.seata.rm.datasource.undo.mysql.MySQLUndoInsertExecutor;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoUpdateExecutor;
 
 import io.seata.rm.datasource.undo.UndoExecutorTest;
+import io.seata.sqlparser.SQLType;
+import io.seata.rm.datasource.sql.struct.Field;
+import io.seata.rm.datasource.sql.struct.KeyType;
+import io.seata.rm.datasource.sql.struct.Row;
+import io.seata.rm.datasource.sql.struct.TableRecords;
+import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Test;
  * The type My sql keyword checker test.
  *
  * @author Wu
- * @date 2019 /3/5 The type MySQL keyword checker test.
  */
 public class MySQLKeywordCheckerTest {
 
@@ -49,7 +48,6 @@ public class MySQLKeywordCheckerTest {
     public void testCheck() {
         KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
         Assertions.assertTrue(keywordChecker.check("desc"));
-
     }
 
     /**
@@ -76,7 +74,7 @@ public class MySQLKeywordCheckerTest {
         Row beforeRow = new Row();
 
         Field pkField = new Field();
-        pkField.setKeyType(KeyType.PrimaryKey);
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
         pkField.setName("key");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
@@ -101,7 +99,7 @@ public class MySQLKeywordCheckerTest {
         Row afterRow = new Row();
 
         Field pkField1 = new Field();
-        pkField1.setKeyType(KeyType.PrimaryKey);
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
         pkField1.setName("key");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);
@@ -167,7 +165,7 @@ public class MySQLKeywordCheckerTest {
         Row afterRow1 = new Row();
 
         Field pkField = new Field();
-        pkField.setKeyType(KeyType.PrimaryKey);
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
         pkField.setName("key");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
@@ -188,7 +186,7 @@ public class MySQLKeywordCheckerTest {
         Row afterRow = new Row();
 
         Field pkField1 = new Field();
-        pkField1.setKeyType(KeyType.PrimaryKey);
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
         pkField1.setName("key");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);
@@ -254,7 +252,7 @@ public class MySQLKeywordCheckerTest {
         Row afterRow1 = new Row();
 
         Field pkField = new Field();
-        pkField.setKeyType(KeyType.PrimaryKey);
+        pkField.setKeyType(KeyType.PRIMARY_KEY);
         pkField.setName("key");
         pkField.setType(Types.INTEGER);
         pkField.setValue(213);
@@ -275,7 +273,7 @@ public class MySQLKeywordCheckerTest {
         Row afterRow = new Row();
 
         Field pkField1 = new Field();
-        pkField1.setKeyType(KeyType.PrimaryKey);
+        pkField1.setKeyType(KeyType.PRIMARY_KEY);
         pkField1.setName("key");
         pkField1.setType(Types.INTEGER);
         pkField1.setValue(214);

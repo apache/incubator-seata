@@ -34,6 +34,7 @@
         <module>integration/dubbo-alibaba</module>
         <module>integration/sofa-rpc</module>
         <module>integration/motan</module>
+        <module>integration/grpc</module>
         <module>rm</module>
         <module>rm-datasource</module>
         <module>server</module>
@@ -42,7 +43,11 @@
         <module>test</module>
         <module>tm</module>
         <module>metrics</module>
-        <module>codec</module>
+        <module>serializer</module>
+        <module>seata-spring-boot-starter</module>
+        <module>compressor</module>
+        <module>saga</module>
+        <module>sqlparser</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -85,7 +90,7 @@
 
     <properties>
         <!-- seata version -->
-        <revision>0.7.0-SNAPSHOT</revision>
+        <revision>1.1.0-SNAPSHOT</revision>
 
         <!-- Compiler settings properties -->
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -102,6 +107,7 @@
         <maven-pmd-plugin.version>3.8</maven-pmd-plugin.version>
         <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
         <maven-source-plugin.version>2.2.1</maven-source-plugin.version>
+        <protobuf-maven-plugin.version>0.5.0</protobuf-maven-plugin.version>
         <license-maven-plugin.version>3.0</license-maven-plugin.version>
         <maven-checkstyle-plugin.version>3.0.0</maven-checkstyle-plugin.version>
         <!-- for test -->
@@ -109,6 +115,10 @@
         <mockito.version>2.23.4</mockito.version>
         <assertj-core.version>3.12.2</assertj-core.version>
         <junit-platform-launcher.version>1.4.2</junit-platform-launcher.version>
+      
+        <!-- for docker image-->
+        <image.publish.skip>true</image.publish.skip>
+        <image.tags>latest</image.tags>
     </properties>
 
     <!--test-->
@@ -227,7 +237,10 @@
                     <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
                 </repository>
             </distributionManagement>
-
+            <properties>
+                <image.publish.skip>false</image.publish.skip>
+                <image.tags>${project.version},latest</image.tags>
+            </properties>
         </profile>
         <profile>
             <id>licenseCheck</id>
@@ -264,6 +277,13 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>image</id>
+            <properties>
+                <image.publish.skip>false</image.publish.skip>
+                <image.tags>latest</image.tags>
+            </properties>
+        </profile>
     </profiles>
 
     <build>
@@ -276,6 +296,24 @@
         </extensions>
         <plugins>
             <!-- Source -->
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>${protobuf-maven-plugin.version}</version>
+                <configuration>
+                    <protoSourceRoot>${project.basedir}/src/main/resources/protobuf/io/seata/protocol/transcation/</protoSourceRoot>
+                    <protocArtifact>
+                        com.google.protobuf:protoc:3.3.0:exe:${os.detected.classifier}
+                    </protocArtifact>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -425,12 +463,13 @@
                         <id>validate</id>
                         <phase>validate</phase>
                         <configuration>
-                            <configLocation>${user.dir}/style/feats_checkstyle.xml</configLocation>
+                            <configLocation>${user.dir}/style/seata_checkstyle.xml</configLocation>
                             <encoding>UTF-8</encoding>
                             <consoleOutput>true</consoleOutput>
-                            <failsOnError>false</failsOnError>
+                            <failsOnError>true</failsOnError>
                             <failOnViolation>false</failOnViolation>
-                            <excludes>**/generated/**</excludes>
+                            <excludes>**/generated/**/*</excludes>
+                            <excludes>io/seata/integration/grpc/interceptor/</excludes>
                         </configuration>
                         <goals>
                             <goal>check</goal>

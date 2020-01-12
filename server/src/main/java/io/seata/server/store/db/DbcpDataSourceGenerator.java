@@ -25,7 +25,6 @@ import javax.sql.DataSource;
  * The type Dbcp data source generator.
  *
  * @author zhangsen
- * @data 2019 /4/24
  */
 @LoadLevel(name = "dbcp")
 public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {
@@ -33,7 +32,7 @@ public class DbcpDataSourceGenerator extends AbstractDataSourceGenerator {
     @Override
     public DataSource generateDataSource() {
         BasicDataSource ds = new BasicDataSource();
-        ds.setDriverClassName(getDriverName(getDBType()));
+        ds.setDriverClassName(getDriverClassName());
         ds.setUrl(getUrl());
         ds.setUsername(getUser());
         ds.setPassword(getPassword());

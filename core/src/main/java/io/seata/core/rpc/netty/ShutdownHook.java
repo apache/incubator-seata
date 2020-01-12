@@ -15,6 +15,7 @@
  */
 package io.seata.core.rpc.netty;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,7 +29,6 @@ import org.slf4j.LoggerFactory;
  * ensure the shutdownHook is singleton
  *
  * @author 563868273@qq.com
- * @date 2019/3/29
  */
 public class ShutdownHook extends Thread {
 
@@ -90,7 +90,7 @@ public class ShutdownHook extends Thread {
         Runtime.getRuntime().removeShutdownHook(SHUTDOWN_HOOK);
     }
 
-    private class DisposablePriorityWrapper implements Comparable<DisposablePriorityWrapper>, Disposable {
+    private static class DisposablePriorityWrapper implements Comparable<DisposablePriorityWrapper>, Disposable {
 
         private Disposable disposable;
 
@@ -104,6 +104,23 @@ public class ShutdownHook extends Thread {
         @Override
         public int compareTo(DisposablePriorityWrapper disposablePriorityWrapper) {
             return priority - disposablePriorityWrapper.priority;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.priority);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (!(other instanceof DisposablePriorityWrapper)) {
+                return false;
+            }
+            DisposablePriorityWrapper dpw = (DisposablePriorityWrapper)other;
+            return this.priority == dpw.priority && this.disposable.equals(dpw.disposable);
         }
 
         @Override

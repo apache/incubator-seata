@@ -20,8 +20,7 @@ import io.seata.core.model.GlobalStatus;
 /**
  * The type Session condition.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /12/13
+ * @author slievrly
  */
 public class SessionCondition {
     private Long transactionId;

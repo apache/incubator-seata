@@ -17,16 +17,20 @@ package io.seata.tm;
 
 import java.util.concurrent.TimeoutException;
 
+import io.seata.core.exception.TmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
 import io.seata.core.model.GlobalStatus;
 import io.seata.core.model.TransactionManager;
+import io.seata.core.protocol.ResultCode;
 import io.seata.core.protocol.transaction.AbstractTransactionRequest;
 import io.seata.core.protocol.transaction.AbstractTransactionResponse;
 import io.seata.core.protocol.transaction.GlobalBeginRequest;
 import io.seata.core.protocol.transaction.GlobalBeginResponse;
 import io.seata.core.protocol.transaction.GlobalCommitRequest;
 import io.seata.core.protocol.transaction.GlobalCommitResponse;
+import io.seata.core.protocol.transaction.GlobalReportRequest;
+import io.seata.core.protocol.transaction.GlobalReportResponse;
 import io.seata.core.protocol.transaction.GlobalRollbackRequest;
 import io.seata.core.protocol.transaction.GlobalRollbackResponse;
 import io.seata.core.protocol.transaction.GlobalStatusRequest;
@@ -47,6 +51,9 @@ public class DefaultTransactionManager implements TransactionManager {
         request.setTransactionName(name);
         request.setTimeout(timeout);
         GlobalBeginResponse response = (GlobalBeginResponse)syncCall(request);
+        if (response.getResultCode() == ResultCode.Failed) {
+            throw new TmTransactionException(TransactionExceptionCode.BeginFailed, response.getMsg());
+        }
         return response.getXid();
     }
 
@@ -74,11 +81,20 @@ public class DefaultTransactionManager implements TransactionManager {
         return response.getGlobalStatus();
     }
 
+    @Override
+    public GlobalStatus globalReport(String xid, GlobalStatus globalStatus) throws TransactionException {
+        GlobalReportRequest globalReport = new GlobalReportRequest();
+        globalReport.setXid(xid);
+        globalReport.setGlobalStatus(globalStatus);
+        GlobalReportResponse response = (GlobalReportResponse) syncCall(globalReport);
+        return response.getGlobalStatus();
+    }
+
     private AbstractTransactionResponse syncCall(AbstractTransactionRequest request) throws TransactionException {
         try {
             return (AbstractTransactionResponse)TmRpcClient.getInstance().sendMsgWithResponse(request);
         } catch (TimeoutException toe) {
-            throw new TransactionException(TransactionExceptionCode.IO, toe);
+            throw new TmTransactionException(TransactionExceptionCode.IO, "RPC timeout", toe);
         }
     }
 }

@@ -16,6 +16,7 @@
 package io.seata.server.session.db;
 
 import io.seata.common.XID;
+import io.seata.common.util.IOUtil;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -43,7 +44,6 @@ import java.util.Collection;
  * The type Data base session manager test.
  *
  * @author zhangsen
- * @data 2019 /4/28
  */
 public class DataBaseSessionManagerTest {
 
@@ -76,6 +76,8 @@ public class DataBaseSessionManagerTest {
         sessionManager = tempSessionManager;
 
         prepareTable(dataSource);
+
+        logStoreDataBaseDAO.initTransactionNameSize();
     }
 
     private static void prepareTable(BasicDataSource dataSource) {
@@ -87,7 +89,7 @@ public class DataBaseSessionManagerTest {
                 s.execute("drop table global_table");
             } catch (Exception e) {
             }
-            s.execute("CREATE TABLE global_table ( xid varchar(96),  transaction_id long , STATUS int,  application_id varchar(32), transaction_service_group varchar(32) ,transaction_name varchar(32) ,timeout int,  begin_time long, application_data varchar(500), gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
+            s.execute("CREATE TABLE global_table ( xid varchar(96),  transaction_id long , STATUS int,  application_id varchar(32), transaction_service_group varchar(32) ,transaction_name varchar(128) ,timeout int,  begin_time long, application_data varchar(500), gmt_create TIMESTAMP(6) ,gmt_modified TIMESTAMP(6) ) ");
             System.out.println("create table global_table success.");
 
             try {
@@ -100,13 +102,7 @@ public class DataBaseSessionManagerTest {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (conn != null) {
-                try {
-                    conn.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+            IOUtil.close(conn);
         }
     }
 
@@ -559,6 +555,44 @@ public class DataBaseSessionManagerTest {
         }
     }
 
+    @Test
+    public void test_transactionNameGreaterDbSize() throws Exception {
+
+        int transactionNameColumnSize = logStoreDataBaseDAO.getTransactionNameColumnSize();
+        StringBuilder sb = new StringBuilder("test");
+        for (int i = 4; i < transactionNameColumnSize; i++) {
+            sb.append("0");
+        }
+        final String finalTxName = sb.toString();
+        sb.append("1321465454545436");
+
+        GlobalSession session = GlobalSession.createGlobalSession("test",
+                "test", sb.toString(), 100);
+        String xid = XID.generateXID(session.getTransactionId());
+        session.setXid(xid);
+        session.setTransactionId(146757978);
+        session.setBeginTime(System.currentTimeMillis());
+        session.setApplicationData("abc=878s");
+        session.setStatus(GlobalStatus.Begin);
+
+        sessionManager.addGlobalSession(session);
+
+        GlobalSession globalSession_db = sessionManager.findGlobalSession(session.getXid());
+        Assertions.assertNotNull(globalSession_db);
+
+        Assertions.assertEquals(globalSession_db.getTransactionName(), finalTxName);
+
+        String delSql = "delete from global_table where xid= '"+xid+"'";
+        Connection conn = null;
+        try{
+            conn = dataSource.getConnection();
+            conn.createStatement().execute(delSql);
+        }finally {
+            if(conn != null){
+                conn.close();
+            }
+        }
+    }
 
 
 

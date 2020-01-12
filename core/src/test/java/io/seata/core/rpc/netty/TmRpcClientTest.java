@@ -16,8 +16,8 @@
 package io.seata.core.rpc.netty;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.bootstrap.ChannelFactory;
 import io.netty.channel.Channel;
+import io.netty.channel.ChannelFactory;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.apache.commons.pool.impl.GenericKeyedObjectPool;
@@ -33,14 +33,13 @@ import java.util.concurrent.TimeUnit;
 /**
  * The type Tm rpc client test.
  *
- * @author jimin.jm @alibaba-inc.com xiajun.0706@163.com
- * @date 2019 /01/25
+ * @author slievrly xiajun.0706@163.com
  */
 public class TmRpcClientTest {
 
     private static final ThreadPoolExecutor
         workingThreads = new ThreadPoolExecutor(100, 500, 500, TimeUnit.SECONDS,
-        new LinkedBlockingQueue(20000), new ThreadPoolExecutor.CallerRunsPolicy());
+        new LinkedBlockingQueue<>(20000), new ThreadPoolExecutor.CallerRunsPolicy());
 
     /**
      * Test get instance.

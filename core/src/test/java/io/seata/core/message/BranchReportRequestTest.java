@@ -15,10 +15,7 @@
  */
 package io.seata.core.message;
 
-import java.nio.ByteBuffer;
-
 import io.seata.core.model.BranchStatus;
-import io.seata.core.model.BranchType;
 import io.seata.core.protocol.transaction.BranchReportRequest;
 
 import org.junit.jupiter.api.Assertions;

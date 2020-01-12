@@ -40,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/04/26
  */
 @Disabled
 public class EtcdRegistryServiceImplTest {
@@ -165,7 +164,7 @@ public class EtcdRegistryServiceImplTest {
     /**
      * etcd listener
      */
-    private class EtcdListener implements Watch.Listener {
+    private static class EtcdListener implements Watch.Listener {
         private boolean notified = false;
 
         @Override

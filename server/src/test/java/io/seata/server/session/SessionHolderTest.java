@@ -31,7 +31,6 @@ import static io.seata.server.session.SessionHolder.ROOT_SESSION_MANAGER_NAME;
  * The type Session holder test.
  *
  * @author Wu
- * @date 2019 /3/6 The type Session holder test.
  */
 public class SessionHolderTest {
     private String pathname;
@@ -51,9 +50,13 @@ public class SessionHolderTest {
         }
         final String mode = StoreMode.FILE.toString();
         SessionHolder.init(mode);
-        final File actual = new File(pathname);
-        Assertions.assertTrue(actual.exists());
-        Assertions.assertTrue(actual.isFile());
+        try {
+            final File actual = new File(pathname);
+            Assertions.assertTrue(actual.exists());
+            Assertions.assertTrue(actual.isFile());
+        } finally {
+            SessionHolder.destroy();
+        }
     }
 
     @AfterEach

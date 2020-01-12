@@ -17,12 +17,11 @@ package io.seata.core.protocol.transaction;
 
 import io.seata.core.protocol.MessageType;
 import io.seata.core.rpc.RpcContext;
-import java.nio.ByteBuffer;
 
 /**
  * The type Global begin request.
  *
- * @author jimin.jm @alibaba-inc.com
+ * @author slievrly
  */
 public class GlobalBeginRequest extends AbstractTransactionRequestToTC {
 

@@ -26,8 +26,7 @@ import org.slf4j.LoggerFactory;
 /**
  * The type Rpc client handler.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /9/12
+ * @author slievrly
  */
 public class RpcClientHandler extends ChannelDuplexHandler {
     private static final Logger LOGGER = LoggerFactory.getLogger(RpcClientHandler.class);
@@ -49,7 +48,7 @@ public class RpcClientHandler extends ChannelDuplexHandler {
         final String request = (String)msg;
         try {
             ctx.writeAndFlush(request, ctx.voidPromise());
-            LOGGER.info("client:" + msg);
+            LOGGER.info("client:{}", msg);
 
         } catch (Exception e) {
             LOGGER.error("when try flush error", e);

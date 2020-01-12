@@ -14,9 +14,8 @@
  *  limitations under the License.
  */
 package io.seata.rm.datasource;
+import io.seata.sqlparser.struct.Null;
 
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.core.context.RootContext;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -38,8 +37,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-
-import io.seata.rm.datasource.sql.struct.Null;
 
 /**
  * The type Abstract prepared statement proxy.
@@ -248,9 +245,6 @@ public abstract class AbstractPreparedStatementProxy extends StatementProxy<Prep
 
     @Override
     public void addBatch() throws SQLException {
-        if (RootContext.inGlobalTransaction()) {
-            throw new NotSupportYetException();
-        }
         targetStatement.addBatch();
     }
 

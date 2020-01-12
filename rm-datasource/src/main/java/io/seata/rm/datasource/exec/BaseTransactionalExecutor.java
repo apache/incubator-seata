@@ -15,20 +15,30 @@
  */
 package io.seata.rm.datasource.exec;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
+import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
+import io.seata.rm.datasource.ColumnUtils;
 import io.seata.rm.datasource.ConnectionProxy;
 import io.seata.rm.datasource.StatementProxy;
-import io.seata.rm.datasource.sql.SQLRecognizer;
-import io.seata.rm.datasource.sql.SQLType;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.rm.datasource.sql.struct.TableMetaCacheFactory;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import io.seata.rm.datasource.undo.SQLUndoLog;
+
+import io.seata.sqlparser.ParametersHolder;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.WhereRecognizer;
 
 /**
  * The type Base transactional executor.
@@ -38,7 +48,7 @@ import io.seata.rm.datasource.undo.SQLUndoLog;
  * @param <T> the type parameter
  * @param <S> the type parameter
  */
-public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor {
+public abstract class BaseTransactionalExecutor<T, S extends Statement> implements Executor<T> {
 
     /**
      * The Statement proxy.
@@ -72,17 +82,13 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     }
 
     @Override
-    public Object execute(Object... args) throws Throwable {
+    public T execute(Object... args) throws Throwable {
         if (RootContext.inGlobalTransaction()) {
             String xid = RootContext.getXID();
             statementProxy.getConnectionProxy().bind(xid);
         }
 
-        if (RootContext.requireGlobalLock()) {
-            statementProxy.getConnectionProxy().setGlobalLockRequire(true);
-        } else {
-            statementProxy.getConnectionProxy().setGlobalLockRequire(false);
-        }
+        statementProxy.getConnectionProxy().setGlobalLockRequire(RootContext.requireGlobalLock());
         return doExecute(args);
     }
 
@@ -93,7 +99,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @return the object
      * @throws Throwable the throwable
      */
-    protected abstract Object doExecute(Object... args) throws Throwable;
+    protected abstract T doExecute(Object... args) throws Throwable;
 
     /**
      * Build where condition by p ks string.
@@ -103,15 +109,38 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @throws SQLException the sql exception
      */
     protected String buildWhereConditionByPKs(List<Field> pkRows) throws SQLException {
-        StringBuffer whereConditionAppender = new StringBuffer();
-        for (int i = 0; i < pkRows.size(); i++) {
-            Field field = pkRows.get(i);
-            whereConditionAppender.append(getColumnNameInSQL(field.getName()) + " = ?");
-            if (i < (pkRows.size() - 1)) {
-                whereConditionAppender.append(" OR ");
-            }
+        StringJoiner whereConditionAppender = new StringJoiner(",", getColumnNameInSQL(pkRows.get(0).getName()) + " in (", ")");
+        for (Field field : pkRows) {
+            whereConditionAppender.add("?");
         }
         return whereConditionAppender.toString();
+
+    }
+
+    /**
+     * build buildWhereCondition
+     *
+     * @param recognizer        the recognizer
+     * @param paramAppenderList the param paramAppender list
+     * @return the string
+     */
+    protected String buildWhereCondition(WhereRecognizer recognizer, ArrayList<List<Object>> paramAppenderList) {
+        String whereCondition = null;
+        if (statementProxy instanceof ParametersHolder) {
+            whereCondition = recognizer.getWhereCondition((ParametersHolder) statementProxy, paramAppenderList);
+        } else {
+            whereCondition = recognizer.getWhereCondition();
+        }
+        //process batch operation
+        if (StringUtils.isNotBlank(whereCondition) && CollectionUtils.isNotEmpty(paramAppenderList) && paramAppenderList.size() > 1) {
+            StringBuilder whereConditionSb = new StringBuilder();
+            whereConditionSb.append(" ( ").append(whereCondition).append(" ) ");
+            for (int i = 1; i < paramAppenderList.size(); i++) {
+                whereConditionSb.append(" or ( ").append(whereCondition).append(" ) ");
+            }
+            whereCondition = whereConditionSb.toString();
+        }
+        return whereCondition;
     }
 
     /**
@@ -122,11 +151,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      */
     protected String getColumnNameInSQL(String columnName) {
         String tableAlias = sqlRecognizer.getTableAlias();
-        if (tableAlias == null) {
-            return columnName;
-        } else {
-            return tableAlias + "." + columnName;
-        }
+        return tableAlias == null ? columnName : tableAlias + "." + columnName;
     }
 
     /**
@@ -137,11 +162,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
     protected String getFromTableInSQL() {
         String tableName = sqlRecognizer.getTableName();
         String tableAlias = sqlRecognizer.getTableAlias();
-        if (tableAlias == null) {
-            return tableName;
-        } else {
-            return tableName + " " + tableAlias;
-        }
+        return tableAlias == null ? tableName : tableName + " " + tableAlias;
     }
 
     /**
@@ -163,8 +184,33 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (tableMeta != null) {
             return tableMeta;
         }
-        tableMeta = TableMetaCache.getTableMeta(statementProxy.getConnectionProxy().getDataSourceProxy(), tableName);
+        ConnectionProxy connectionProxy = statementProxy.getConnectionProxy();
+        tableMeta = TableMetaCacheFactory.getTableMetaCache(connectionProxy.getDbType())
+                .getTableMeta(connectionProxy.getTargetConnection(), tableName,connectionProxy.getDataSourceProxy().getResourceId());
         return tableMeta;
+    }
+
+    /**
+     * the columns contains table meta pk
+     * @param columns the column name list
+     * @return true: contains pk false: not contains pk
+     */
+    protected boolean containsPK(List<String> columns) {
+        if (columns == null || columns.isEmpty()) {
+            return false;
+        }
+        List<String> newColumns = ColumnUtils.delEscape(columns, getDbType());
+        return getTableMeta().containsPK(newColumns);
+    }
+
+    /**
+     * compare column name and primary key name
+     * @param columnName the primary key column name
+     * @return true: equal false: not equal
+     */
+    protected boolean equalsPK(String columnName) {
+        String newColumnName = ColumnUtils.delEscape(columnName, getDbType());
+        return StringUtils.equalsIgnoreCase(getTableMeta().getPkName(), newColumnName);
     }
 
     /**
@@ -175,7 +221,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
      * @throws SQLException the sql exception
      */
     protected void prepareUndoLog(TableRecords beforeImage, TableRecords afterImage) throws SQLException {
-        if (beforeImage.getRows().size() == 0 && afterImage.getRows().size() == 0) {
+        if (beforeImage.getRows().isEmpty() && afterImage.getRows().isEmpty()) {
             return;
         }
 
@@ -199,14 +245,16 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         if (rowsIncludingPK.size() == 0) {
             return null;
         }
+
         StringBuilder sb = new StringBuilder();
         sb.append(rowsIncludingPK.getTableMeta().getTableName());
         sb.append(":");
         int filedSequence = 0;
-        for (Field field : rowsIncludingPK.pkRows()) {
+        List<Field> pkRows = rowsIncludingPK.pkRows();
+        for (Field field : pkRows) {
             sb.append(field.getValue());
             filedSequence++;
-            if (filedSequence < rowsIncludingPK.pkRows().size()) {
+            if (filedSequence < pkRows.size()) {
                 sb.append(",");
             }
         }
@@ -230,6 +278,73 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
         sqlUndoLog.setBeforeImage(beforeImage);
         sqlUndoLog.setAfterImage(afterImage);
         return sqlUndoLog;
+    }
+
+
+    /**
+     * build a BeforeImage
+     *
+     * @param tableMeta         the tableMeta
+     * @param selectSQL         the selectSQL
+     * @param paramAppenderList the paramAppender list
+     * @return a tableRecords
+     * @throws SQLException the sql exception
+     */
+    protected TableRecords buildTableRecords(TableMeta tableMeta, String selectSQL, ArrayList<List<Object>> paramAppenderList) throws SQLException {
+        ResultSet rs = null;
+        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(selectSQL)) {
+            if (CollectionUtils.isNotEmpty(paramAppenderList)) {
+                for (int i = 0, ts = paramAppenderList.size(); i < ts; i++) {
+                    List<Object> paramAppender = paramAppenderList.get(i);
+                    for (int j = 0, ds = paramAppender.size(); j < ds; j++) {
+                        ps.setObject(i * ds + j + 1, paramAppender.get(j));
+                    }
+                }
+            }
+            rs = ps.executeQuery();
+            return TableRecords.buildRecords(tableMeta, rs);
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+        }
+    }
+
+    /**
+     * build TableRecords
+     *
+     * @param pkValues the pkValues
+     * @return return TableRecords;
+     * @throws SQLException
+     */
+    protected TableRecords buildTableRecords(List<Object> pkValues) throws SQLException {
+        String pk = getTableMeta().getPkName();
+        StringJoiner pkValuesJoiner = new StringJoiner(" , ",
+                "SELECT * FROM " + getFromTableInSQL() + " WHERE " + pk + " in (", ")");
+        for (Object pkValue : pkValues) {
+            pkValuesJoiner.add("?");
+        }
+
+        ResultSet rs = null;
+        try (PreparedStatement ps = statementProxy.getConnection().prepareStatement(pkValuesJoiner.toString())) {
+            for (int i = 1, s = pkValues.size(); i <= s; i++) {
+                ps.setObject(i, pkValues.get(i - 1));
+            }
+            rs = ps.executeQuery();
+            return TableRecords.buildRecords(getTableMeta(), rs);
+        } finally {
+            if (rs != null) {
+                rs.close();
+            }
+        }
+    }
+
+    /**
+     * get db type
+     * @return
+     */
+    protected String getDbType() {
+        return statementProxy.getConnectionProxy().getDbType();
     }
 
 }

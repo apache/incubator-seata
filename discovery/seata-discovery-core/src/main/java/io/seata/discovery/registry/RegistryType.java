@@ -20,8 +20,7 @@ import io.seata.common.exception.NotSupportYetException;
 /**
  * The enum Registry type.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2019 /02/26
+ * @author slievrly
  */
 public enum RegistryType {
     /**
@@ -55,7 +54,11 @@ public enum RegistryType {
     /**
      * Sofa registry type
      */
-    Sofa;
+    Sofa,
+    /**
+     * Sofa registry type
+     */
+    Custom;
 
     /**
      * Gets type.
@@ -80,6 +83,8 @@ public enum RegistryType {
             return Etcd3;
         } else if (Sofa.name().equalsIgnoreCase(name)) {
             return Sofa;
+        } else if (Custom.name().equalsIgnoreCase(name)) {
+            return Custom;
         } else {
             throw new NotSupportYetException("unsupported type:" + name);
         }

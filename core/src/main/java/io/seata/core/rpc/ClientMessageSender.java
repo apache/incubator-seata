@@ -15,13 +15,14 @@
  */
 package io.seata.core.rpc;
 
+import io.seata.core.protocol.RpcMessage;
+
 import java.util.concurrent.TimeoutException;
 
 /**
  * The interface Client message sender.
  *
- * @author jimin.jm @alibaba-inc.com
- * @date 2018 /10/10
+ * @author slievrly
  */
 public interface ClientMessageSender {
     /**
@@ -57,9 +58,9 @@ public interface ClientMessageSender {
     /**
      * Send response.
      *
-     * @param msgId         the msg id
+     * @param request       the msg id
      * @param serverAddress the server address
      * @param msg           the msg
      */
-    void sendResponse(long msgId, String serverAddress, Object msg);
+    void sendResponse(RpcMessage request, String serverAddress, Object msg);
 }

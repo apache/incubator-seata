@@ -1,0 +1,100 @@
+seata:
+  enabled: true
+  application-id: test
+  tx-service-group: my_test_tx_group
+  client:
+    rm-async-commit-buffer-limit: 1000
+    rm-report-retry-count: 5
+    rm-table-meta-check-enable: false
+    rm-report-success-enable: true
+    rm:
+      lock:
+        lock-retry-interval: 10
+        lock-retry-times: 30
+        lock-retry-policy-branch-rollback-on-conflict: true
+    tm-commit-retry-count: 5
+    tm-rollback-retry-count: 5
+    support:
+      spring:
+        datasource-autoproxy: true
+    undo:
+      undo-data-validation: true
+      undo-log-serialization: jackson
+      undo-log-table: undo_log
+    client:
+      log:
+        exceptionRate: 100
+  service:
+    vgroup-mapping: default
+    grouplist: 127.0.0.1:8091
+    enable-degrade: false
+    disable-global-transaction: false
+  transport:
+    shutdown:
+      wait: 3
+    thread-factory:
+      boss-thread-prefix: NettyBoss
+      worker-thread-prefix: NettyServerNIOWorker
+      server-executor-thread-prefix: NettyServerBizHandler
+      share-boss-worker: false
+      client-selector-thread-prefix: NettyClientSelector
+      client-selector-thread-size: 1
+      client-worker-thread-prefix: NettyClientWorkerThread
+    type: TCP
+    server: NIO
+    heartbeat: true
+    serialization: seata
+    compressor: none
+    enable-client-batch-send-request: true
+  config:
+    type: file
+    file:
+      name: file.conf
+    consul:
+      server-addr: 127.0.0.1:8500
+    apollo:
+      apollo-meta: http://192.168.1.204:8801
+      app-id: seata-server
+    etcd3:
+      server-addr: http://localhost:2379
+    nacos:
+      namespace:
+      serverAddr: localhost
+    zk:
+      server-addr: 127.0.0.1:2181
+      session-timeout: 6000
+      connect-timeout: 2000
+  registry:
+    type: file
+    file:
+      name: file.conf
+    consul:
+      cluster: default
+      server-addr: 127.0.0.1:8500
+    etcd3:
+      cluster: default
+      serverAddr: http://localhost:2379
+    eureka:
+      application: default
+      weight: 1
+      service-url: http://localhost:8761/eureka
+    nacos:
+      cluster: default
+      server-addr: localhost
+      namespace:
+    redis:
+      server-addr: localhost:6379
+      db: 0
+    sofa:
+      server-addr: 127.0.0.1:9603
+      application: default
+      region: DEFAULT_ZONE
+      datacenter: DefaultDataCenter
+      cluster: default
+      group: SEATA_GROUP
+      addressWaitTime: 3000
+    zk:
+      cluster: default
+      server-addr: 127.0.0.1:2181
+      session-timeout: 6000
+      connect-timeout: 2000

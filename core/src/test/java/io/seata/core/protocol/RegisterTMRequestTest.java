@@ -15,12 +15,6 @@
  */
 package io.seata.core.protocol;
 
-import io.seata.core.codec.CodecFactory;
-import io.seata.core.codec.CodecType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import io.netty.buffer.ByteBuf;
 import static io.netty.buffer.Unpooled.buffer;
 
@@ -30,7 +24,6 @@ import static io.netty.buffer.Unpooled.buffer;
  * @author kaitithoma
  * @author Danaykap
  * 
- * @date 2019/05/13
  *
  */
 

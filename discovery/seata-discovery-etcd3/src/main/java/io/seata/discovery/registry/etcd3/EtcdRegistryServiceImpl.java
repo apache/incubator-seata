@@ -40,6 +40,8 @@ import org.slf4j.LoggerFactory;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Collections;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -55,7 +57,6 @@ import static io.netty.util.CharsetUtil.UTF_8;
 
 /**
  * @author xingfudeshi@gmail.com
- * @date 2019/04/18
  */
 public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EtcdRegistryServiceImpl.class);
@@ -70,8 +71,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     private static final String FILE_CONFIG_KEY_PREFIX = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR;
     private static final int MAP_INITIAL_CAPACITY = 8;
     private static final int THREAD_POOL_SIZE = 2;
-    private final static ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE,
-        Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("registry-etcd3", THREAD_POOL_SIZE));
+    private ExecutorService executorService;
     /**
      * TTL for lease
      */
@@ -86,9 +86,9 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     private final static long LIFE_KEEP_CRITICAL = 6;
     private static volatile EtcdRegistryServiceImpl instance;
     private static volatile Client client;
-    private static ConcurrentMap<String, List<InetSocketAddress>> clusterAddressMap = null;
-    private static ConcurrentMap<String, Set<Watch.Listener>> listenerMap = null;
-    private static ConcurrentMap<String, EtcdWatcher> watcherMap = null;
+    private ConcurrentMap<String, Pair<Long /*revision*/, List<InetSocketAddress>>> clusterAddressMap;
+    private ConcurrentMap<String, Set<Watch.Listener>> listenerMap;
+    private ConcurrentMap<String, EtcdWatcher> watcherMap;
     private static long leaseId = 0;
     private EtcdLifeKeeper lifeKeeper = null;
     private Future<Boolean> lifeKeeperFuture = null;
@@ -99,6 +99,10 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
 
 
     private EtcdRegistryServiceImpl() {
+        clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        watcherMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
+        executorService = new ThreadPoolExecutor(THREAD_POOL_SIZE, THREAD_POOL_SIZE, Integer.MAX_VALUE, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<>(), new NamedThreadFactory("registry-etcd3", THREAD_POOL_SIZE));
     }
 
     /**
@@ -110,9 +114,6 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         if (null == instance) {
             synchronized (EtcdRegistryServiceImpl.class) {
                 if (null == instance) {
-                    clusterAddressMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    listenerMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
-                    watcherMap = new ConcurrentHashMap<>(MAP_INITIAL_CAPACITY);
                     instance = new EtcdRegistryServiceImpl();
                 }
             }
@@ -134,7 +135,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      */
     private void doRegister(InetSocketAddress address) throws Exception {
         PutOption putOption = PutOption.newBuilder().withLeaseId(getLeaseId()).build();
-        getClient().getKVClient().put(buildRegestryKey(address), buildRegistryValue(address), putOption).get();
+        getClient().getKVClient().put(buildRegistryKey(address), buildRegistryValue(address), putOption).get();
     }
 
 
@@ -151,15 +152,15 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      * @throws Exception
      */
     private void doUnregister(InetSocketAddress address) throws Exception {
-        getClient().getKVClient().delete(buildRegestryKey(address)).get();
+        getClient().getKVClient().delete(buildRegistryKey(address)).get();
     }
 
     @Override
     public void subscribe(String cluster, Watch.Listener listener) throws Exception {
         listenerMap.putIfAbsent(cluster, new HashSet<>());
         listenerMap.get(cluster).add(listener);
-        EtcdWatcher watcher = watcherMap.computeIfAbsent(cluster, w -> new EtcdWatcher(listener));
-        EXECUTOR_SERVICE.submit(watcher);
+        EtcdWatcher watcher = watcherMap.computeIfAbsent(cluster, w -> new EtcdWatcher(cluster, listener));
+        executorService.submit(watcher);
     }
 
     @Override
@@ -212,7 +213,8 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             });
 
         }
-        return clusterAddressMap.get(cluster);
+        Pair<Long, List<InetSocketAddress>> pair = clusterAddressMap.get(cluster);
+        return Objects.isNull(pair) ? Collections.emptyList() : pair.getValue();
     }
 
     @Override
@@ -237,14 +239,14 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             return;
         }
         //1.get all available registries
-        GetOption getOption = GetOption.newBuilder().withPrefix(buildRegestryKeyPrefix()).build();
-        GetResponse getResponse = getClient().getKVClient().get(buildRegestryKeyPrefix(), getOption).get();
+        GetOption getOption = GetOption.newBuilder().withPrefix(buildRegistryKeyPrefix()).build();
+        GetResponse getResponse = getClient().getKVClient().get(buildRegistryKeyPrefix(), getOption).get();
         //2.add to list
         List<InetSocketAddress> instanceList = getResponse.getKvs().stream().map(keyValue -> {
             String[] instanceInfo = keyValue.getValue().toString(UTF_8).split(":");
             return new InetSocketAddress(instanceInfo[0], Integer.parseInt(instanceInfo[1]));
         }).collect(Collectors.toList());
-        clusterAddressMap.put(cluster, instanceList);
+        clusterAddressMap.put(cluster, new Pair<>(getResponse.getHeader().getRevision(), instanceList));
     }
 
     /**
@@ -269,17 +271,6 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     }
 
     /**
-     * get service group
-     *
-     * @param key
-     * @return clusterNameKey
-     */
-    private String getServiceGroup(String key) {
-        String clusterNameKey = PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key;
-        return ConfigurationFactory.getInstance().getConfig(clusterNameKey);
-    }
-
-    /**
      * get cluster name
      *
      * @return
@@ -298,7 +289,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
             //create a new lease
             leaseId = getClient().getLeaseClient().grant(TTL).get().getID();
             lifeKeeper = new EtcdLifeKeeper(leaseId);
-            lifeKeeperFuture = EXECUTOR_SERVICE.submit(lifeKeeper);
+            lifeKeeperFuture = executorService.submit(lifeKeeper);
         }
         return leaseId;
     }
@@ -308,7 +299,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      *
      * @return registry key
      */
-    private ByteSequence buildRegestryKey(InetSocketAddress address) {
+    private ByteSequence buildRegistryKey(InetSocketAddress address) {
         return ByteSequence.from(REGISTRY_KEY_PREFIX + getClusterName() + "-" + NetUtil.toStringAddress(address), UTF_8);
     }
 
@@ -317,7 +308,7 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
      *
      * @return registry key prefix
      */
-    private ByteSequence buildRegestryKeyPrefix() {
+    private ByteSequence buildRegistryKeyPrefix() {
         return ByteSequence.from(REGISTRY_KEY_PREFIX + getClusterName(), UTF_8);
     }
 
@@ -390,16 +381,23 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
     private class EtcdWatcher implements Runnable {
         private final Watch.Listener listener;
         private Watch.Watcher watcher;
+        private String cluster;
 
-        public EtcdWatcher(Watch.Listener listener) {
+        public EtcdWatcher(String cluster, Watch.Listener listener) {
+            this.cluster = cluster;
             this.listener = listener;
         }
 
         @Override
         public void run() {
             Watch watchClient = getClient().getWatchClient();
-            WatchOption watchOption = WatchOption.newBuilder().withPrefix(buildRegestryKeyPrefix()).build();
-            this.watcher = watchClient.watch(buildRegestryKeyPrefix(), watchOption, this.listener);
+            WatchOption.Builder watchOptionBuilder = WatchOption.newBuilder().withPrefix(buildRegistryKeyPrefix());
+            Pair<Long /*revision*/, List<InetSocketAddress>> addressPair = clusterAddressMap.get(cluster);
+            if (Objects.nonNull(addressPair)) {
+                // Maybe addressPair isn't newest now, but it's ok
+                watchOptionBuilder.withRevision(addressPair.getKey());
+            }
+            this.watcher = watchClient.watch(buildRegistryKeyPrefix(), watchOptionBuilder.build(), this.listener);
         }
 
         /**
@@ -408,5 +406,40 @@ public class EtcdRegistryServiceImpl implements RegistryService<Watch.Listener> 
         public void stop() {
             this.watcher.close();
         }
+    }
+
+    private static class Pair<K,V> {
+
+        /**
+         * Key of this <code>Pair</code>.
+         */
+        private K key;
+
+        /**
+         * Value of this this <code>Pair</code>.
+         */
+        private V value;
+
+        /**
+         * Creates a new pair
+         * @param key The key for this pair
+         * @param value The value to use for this pair
+         */
+        public Pair(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        /**
+         * Gets the key for this pair.
+         * @return key for this pair
+         */
+        public K getKey() { return key; }
+
+        /**
+         * Gets the value for this pair.
+         * @return value for this pair
+         */
+        public V getValue() { return value; }
     }
 }

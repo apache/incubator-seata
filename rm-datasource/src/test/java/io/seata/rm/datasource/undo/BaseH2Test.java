@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
+import io.seata.common.util.IOUtil;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.Field;
 import io.seata.rm.datasource.sql.struct.KeyType;
@@ -22,6 +23,7 @@ import io.seata.rm.datasource.sql.struct.Row;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableRecords;
 import org.apache.commons.dbcp.BasicDataSource;
+import org.h2.store.fs.FileUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,18 +62,15 @@ public abstract class BaseH2Test {
 
     @AfterAll
     public static void stop() {
-        if (connection != null) {
-            try {
-                connection.close();
-            } catch (SQLException e) {
-            }
-        }
+        IOUtil.close(connection);
         if (dataSource != null) {
             try {
                 dataSource.close();
             } catch (SQLException e) {
             }
         }
+
+        FileUtils.deleteRecursive("db_store", true);
     }
 
     @BeforeEach
@@ -88,12 +87,7 @@ public abstract class BaseH2Test {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (s != null) {
-                try {
-                    s.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(s);
         }
     }
 
@@ -105,24 +99,14 @@ public abstract class BaseH2Test {
             set = s.executeQuery(sql);
             return TableRecords.buildRecords(tableMeta, set);
         } finally {
-            if (set != null) {
-                try {
-                    set.close();
-                } catch (Exception e) {
-                }
-            }
-            if (s != null) {
-                try {
-                    s.close();
-                } catch (SQLException e) {
-                }
-            }
+            IOUtil.close(set, s);
         }
     }
 
     protected static TableMeta mockTableMeta() {
         TableMeta tableMeta = Mockito.mock(TableMeta.class);
         Mockito.when(tableMeta.getPkName()).thenReturn("ID");
+        Mockito.when(tableMeta.getEscapePkName("h2")).thenReturn("`ID`");
         Mockito.when(tableMeta.getTableName()).thenReturn("table_name");
         ColumnMeta meta0 = Mockito.mock(ColumnMeta.class);
         Mockito.when(meta0.getDataType()).thenReturn(Types.INTEGER);
@@ -138,7 +122,7 @@ public abstract class BaseH2Test {
     protected static Field addField(Row row, String name, int type, Object value) {
         Field field = new Field(name, type, value);
         if (name.equalsIgnoreCase("id")) {
-            field.setKeyType(KeyType.PrimaryKey);
+            field.setKeyType(KeyType.PRIMARY_KEY);
         }
         row.add(field);
         return field;

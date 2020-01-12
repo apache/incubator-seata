@@ -19,7 +19,6 @@ package io.seata.rm.datasource.undo;
  * The interface Keyword checker.
  *
  * @author Wu
- * @date 2019 /3/5 The interface Keyword checker
  */
 public interface KeywordChecker {
     /**
@@ -37,4 +36,11 @@ public interface KeywordChecker {
      * @return string
      */
     String checkAndReplace(String fieldOrTableName);
+
+    /**
+     * get the SQL type of the current KeywordChecker
+     *
+     * @return the SQL type string
+     */
+    String getDbType();
 }

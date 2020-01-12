@@ -15,14 +15,22 @@
  */
 package io.seata.rm.datasource;
 
+import java.net.InetSocketAddress;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeoutException;
+
 import io.seata.common.exception.FrameworkException;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.executor.Initialize;
 import io.seata.common.util.NetUtil;
 import io.seata.core.context.RootContext;
+import io.seata.core.exception.RmTransactionException;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.exception.TransactionExceptionCode;
+import io.seata.core.logger.StackTraceLogger;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
 import io.seata.core.model.Resource;
@@ -36,15 +44,9 @@ import io.seata.core.rpc.netty.TmRpcClient;
 import io.seata.discovery.loadbalance.LoadBalanceFactory;
 import io.seata.discovery.registry.RegistryFactory;
 import io.seata.rm.AbstractResourceManager;
-import io.seata.rm.datasource.undo.UndoLogManager;
+import io.seata.rm.datasource.undo.UndoLogManagerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
 
 import static io.seata.common.exception.FrameworkErrorCode.NoAvailableService;
 
@@ -72,7 +74,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
 
     @Override
     public boolean lockQuery(BranchType branchType, String resourceId, String xid, String lockKeys)
-            throws TransactionException {
+        throws TransactionException {
         try {
             GlobalLockQueryRequest request = new GlobalLockQueryRequest();
             request.setXid(xid);
@@ -81,23 +83,23 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
 
             GlobalLockQueryResponse response = null;
             if (RootContext.inGlobalTransaction()) {
-                response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(request);
+                response = (GlobalLockQueryResponse)RmRpcClient.getInstance().sendMsgWithResponse(request);
             } else if (RootContext.requireGlobalLock()) {
-                response = (GlobalLockQueryResponse) RmRpcClient.getInstance().sendMsgWithResponse(loadBalance(),
-                        request, NettyClientConfig.getRpcRequestTimeout());
+                response = (GlobalLockQueryResponse)RmRpcClient.getInstance().sendMsgWithResponse(loadBalance(),
+                    request, NettyClientConfig.getRpcRequestTimeout());
             } else {
                 throw new RuntimeException("unknow situation!");
             }
 
             if (response.getResultCode() == ResultCode.Failed) {
                 throw new TransactionException(response.getTransactionExceptionCode(),
-                        "Response[" + response.getMsg() + "]");
+                    "Response[" + response.getMsg() + "]");
             }
             return response.isLockable();
         } catch (TimeoutException toe) {
-            throw new TransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
+            throw new RmTransactionException(TransactionExceptionCode.IO, "RPC Timeout", toe);
         } catch (RuntimeException rex) {
-            throw new TransactionException(TransactionExceptionCode.LockableCheckFailed, "Runtime", rex);
+            throw new RmTransactionException(TransactionExceptionCode.LockableCheckFailed, "Runtime", rex);
         }
 
     }
@@ -107,7 +109,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
         InetSocketAddress address = null;
         try {
             List<InetSocketAddress> inetSocketAddressList = RegistryFactory.getInstance().lookup(
-                    TmRpcClient.getInstance().getTransactionServiceGroup());
+                TmRpcClient.getInstance().getTransactionServiceGroup());
             address = LoadBalanceFactory.getInstance().select(inetSocketAddressList);
         } catch (Exception ignore) {
             LOGGER.error(ignore.getMessage());
@@ -142,7 +144,7 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
 
     @Override
     public void registerResource(Resource resource) {
-        DataSourceProxy dataSourceProxy = (DataSourceProxy) resource;
+        DataSourceProxy dataSourceProxy = (DataSourceProxy)resource;
         dataSourceCache.put(dataSourceProxy.getResourceId(), dataSourceProxy);
         super.registerResource(dataSourceProxy);
     }
@@ -159,26 +161,29 @@ public class DataSourceManager extends AbstractResourceManager implements Initia
      * @return the data source proxy
      */
     public DataSourceProxy get(String resourceId) {
-        return (DataSourceProxy) dataSourceCache.get(resourceId);
+        return (DataSourceProxy)dataSourceCache.get(resourceId);
     }
 
     @Override
-    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchCommit(BranchType branchType, String xid, long branchId, String resourceId,
+                                     String applicationData) throws TransactionException {
         return asyncWorker.branchCommit(branchType, xid, branchId, resourceId, applicationData);
     }
 
     @Override
-    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId, String applicationData) throws TransactionException {
+    public BranchStatus branchRollback(BranchType branchType, String xid, long branchId, String resourceId,
+                                       String applicationData) throws TransactionException {
         DataSourceProxy dataSourceProxy = get(resourceId);
         if (dataSourceProxy == null) {
             throw new ShouldNeverHappenException();
         }
         try {
-            UndoLogManager.undo(dataSourceProxy, xid, branchId);
+            UndoLogManagerFactory.getUndoLogManager(dataSourceProxy.getDbType()).undo(dataSourceProxy, xid, branchId);
         } catch (TransactionException te) {
-            if (LOGGER.isInfoEnabled()){
-                LOGGER.info("branchRollback failed reason [{}]", te.getMessage());
-            }
+            StackTraceLogger.info(LOGGER, te,
+                "[stacktrace]branchRollback failed. branchType:[{}], xid:[{}], branchId:[{}], resourceId:[{}], applicationData:[{}]. stacktrace:[{}]",
+                new Object[]{branchType, xid, branchId, resourceId, applicationData, te.getMessage()},
+                "branchRollback failed reason [{}]", new Object[]{te.getMessage()});
             if (te.getCode() == TransactionExceptionCode.BranchRollbackFailed_Unretriable) {
                 return BranchStatus.PhaseTwo_RollbackFailed_Unretryable;
             } else {

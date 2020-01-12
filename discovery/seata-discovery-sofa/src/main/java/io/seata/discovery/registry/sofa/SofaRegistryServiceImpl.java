@@ -29,7 +29,6 @@ import com.alipay.sofa.registry.client.api.RegistryClient;
 import com.alipay.sofa.registry.client.api.RegistryClientConfig;
 import com.alipay.sofa.registry.client.api.SubscriberDataObserver;
 import com.alipay.sofa.registry.client.api.model.RegistryType;
-import com.alipay.sofa.registry.client.api.model.UserData;
 import com.alipay.sofa.registry.client.api.registration.PublisherRegistration;
 import com.alipay.sofa.registry.client.api.registration.SubscriberRegistration;
 import com.alipay.sofa.registry.client.provider.DefaultRegistryClient;
@@ -48,7 +47,6 @@ import static io.seata.config.ConfigurationKeys.FILE_ROOT_REGISTRY;
  * The type SOFARegistry registry service.
  *
  * @author leizhiyuan
- * @date 2019 /4/15
  */
 public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataObserver> {
 
@@ -159,27 +157,22 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
 
     @Override
     public List<InetSocketAddress> lookup(String key) throws Exception {
-        Configuration config = ConfigurationFactory.getInstance();
-        String clusterName = config.getConfig(PREFIX_SERVICE_ROOT + CONFIG_SPLIT_CHAR + PREFIX_SERVICE_MAPPING + key);
+        String clusterName = getServiceGroup(key);
         if (null == clusterName) {
             return null;
         }
         if (!LISTENER_SERVICE_MAP.containsKey(clusterName)) {
             CountDownLatch respondRegistries = new CountDownLatch(1);
-            subscribe(clusterName, new SubscriberDataObserver() {
-                @Override
-                public void handleData(String dataId, UserData data) {
-                    Map<String, List<String>> instances = data.getZoneData();
-                    if (null == instances && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
-                        CLUSTER_ADDRESS_MAP.remove(clusterName);
-                    } else {
-                        List<InetSocketAddress> tranformData = flatData(instances);
-                        List<InetSocketAddress> newAddressList = new ArrayList<>();
-                        newAddressList.addAll(tranformData);
-                        CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
-                    }
-                    respondRegistries.countDown();
+            subscribe(clusterName, (dataId, data) -> {
+                Map<String, List<String>> instances = data.getZoneData();
+                if (null == instances && null != CLUSTER_ADDRESS_MAP.get(clusterName)) {
+                    CLUSTER_ADDRESS_MAP.remove(clusterName);
+                } else {
+                    List<InetSocketAddress> tranformData = flatData(instances);
+                    List<InetSocketAddress> newAddressList = new ArrayList<>(tranformData);
+                    CLUSTER_ADDRESS_MAP.put(clusterName, newAddressList);
                 }
+                respondRegistries.countDown();
             });
 
             //wait max for first lookup
@@ -191,7 +184,7 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     }
 
     private List<InetSocketAddress> flatData(Map<String, List<String>> instances) {
-        List<InetSocketAddress> result = new ArrayList<InetSocketAddress>();
+        List<InetSocketAddress> result = new ArrayList<>();
 
         for (Map.Entry<String, List<String>> entry : instances.entrySet()) {
             for (String str : entry.getValue()) {
