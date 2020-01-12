@@ -24,8 +24,8 @@ import java.util.stream.Stream;
 import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import io.seata.spring.boot.autoconfigure.StarterConstants;
-import io.seata.spring.boot.autoconfigure.util.SpringUtils;
 import io.seata.spring.boot.autoconfigure.util.StringFormatUtils;
+import io.seata.spring.context.ApplicationContextHolder;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
@@ -103,7 +103,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         String propertySuffix = getPropertySuffix(dataId);
         Class propertyClass = getPropertyClass(getPropertyPrefix(dataId));
         if (null != propertyClass) {
-            Object propertyObject = SpringUtils.getBean(propertyClass);
+            Object propertyObject = ApplicationContextHolder.getApplicationContext().getBean(propertyClass);
             Optional<Field> fieldOptional = Stream.of(propertyObject.getClass().getDeclaredFields()).filter(
                 f -> f.getName().equalsIgnoreCase(propertySuffix)).findAny();
             if (fieldOptional.isPresent()) {

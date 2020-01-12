@@ -20,6 +20,7 @@ import java.util.Set;
 import io.seata.common.util.StringUtils;
 import io.seata.config.AbstractConfiguration;
 import io.seata.config.ConfigurationChangeListener;
+import io.seata.spring.context.ApplicationContextHolder;
 
 public class SpringCloudConfiguration extends AbstractConfiguration {
 
@@ -49,10 +50,10 @@ public class SpringCloudConfiguration extends AbstractConfiguration {
 
     @Override
     public String getConfig(String dataId, String defaultValue, long timeoutMills) {
-        if (null == SpringContextProvider.getEnvironment()) {
+        if (null == ApplicationContextHolder.getApplicationContext() || null == ApplicationContextHolder.getApplicationContext().getEnvironment()) {
             return defaultValue;
         }
-        String conf = SpringContextProvider.getEnvironment().getProperty(PREFIX + dataId);
+        String conf = ApplicationContextHolder.getApplicationContext().getEnvironment().getProperty(PREFIX + dataId);
         return StringUtils.isNotBlank(conf) ? conf : defaultValue;
     }
 

@@ -17,7 +17,7 @@ package io.seata.spring.boot.autoconfigure;
 
 import io.seata.spring.annotation.GlobalTransactionScanner;
 import io.seata.spring.boot.autoconfigure.properties.SeataProperties;
-import io.seata.spring.boot.autoconfigure.util.SpringUtils;
+import io.seata.spring.context.ApplicationContextHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +28,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+
+import static io.seata.spring.context.ApplicationContextHolderRegistrar.BEAN_NAME_APPLICATION_CONTEXT_HOLDER_REGISTRAR;
 
 /**
  * @author xingfudeshi@gmail.com
@@ -41,13 +43,14 @@ public class SeataAutoConfiguration {
     @Autowired
     private SeataProperties seataProperties;
 
-    @Bean
-    public SpringUtils springUtils() {
-        return new SpringUtils();
+    @Bean(BEAN_NAME_APPLICATION_CONTEXT_HOLDER_REGISTRAR)
+    @ConditionalOnMissingBean(ApplicationContextHolder.class)
+    public ApplicationContextHolder applicationContextHolder() {
+        return new ApplicationContextHolder();
     }
 
     @Bean
-    @DependsOn({"springUtils"})
+    @DependsOn({BEAN_NAME_APPLICATION_CONTEXT_HOLDER_REGISTRAR})
     @ConditionalOnMissingBean(GlobalTransactionScanner.class)
     public GlobalTransactionScanner globalTransactionScanner() {
         if (LOGGER.isInfoEnabled()) {

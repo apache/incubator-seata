@@ -13,27 +13,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.config.springcloud;
+package io.seata.spring.context;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
-import org.springframework.core.env.Environment;
 
-public class SpringContextProvider implements ApplicationContextAware {
+/**
+ * @author xingfudeshi@gmail.com
+ * The type application context holder
+ */
+public class ApplicationContextHolder implements ApplicationContextAware {
     private static ApplicationContext applicationContext;
-    private static Environment environment;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        SpringContextProvider.applicationContext = applicationContext;
-        SpringContextProvider.environment = applicationContext.getEnvironment();
+        ApplicationContextHolder.applicationContext = applicationContext;
     }
 
-    public static Environment getEnvironment() {
-        return environment;
-    }
-
+    /**
+     * get application context
+     *
+     * @return applicationContext
+     */
     public static ApplicationContext getApplicationContext() {
         return applicationContext;
     }
