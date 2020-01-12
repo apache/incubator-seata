@@ -20,11 +20,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import io.seata.spring.context.ApplicationContextHolderRegistrar;
+import io.seata.spring.context.SeataSpringApplicationContextHolderRegistrar;
 import org.springframework.context.annotation.Import;
 
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Import({ApplicationContextHolderRegistrar.class})
+@Import({SeataSpringApplicationContextHolderRegistrar.class})
 public @interface EnableSeataSpringConfig {
 }

@@ -23,12 +23,12 @@ import org.springframework.context.ApplicationContextAware;
  * @author xingfudeshi@gmail.com
  * The type application context holder
  */
-public class ApplicationContextHolder implements ApplicationContextAware {
+public class SeataSpringApplicationContextHolder implements ApplicationContextAware {
     private static ApplicationContext applicationContext;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        ApplicationContextHolder.applicationContext = applicationContext;
+        SeataSpringApplicationContextHolder.applicationContext = applicationContext;
     }
 
     /**

@@ -25,7 +25,7 @@ import io.seata.config.Configuration;
 import io.seata.config.ExtConfigurationProvider;
 import io.seata.spring.boot.autoconfigure.StarterConstants;
 import io.seata.spring.boot.autoconfigure.util.StringFormatUtils;
-import io.seata.spring.context.ApplicationContextHolder;
+import io.seata.spring.context.SeataSpringApplicationContextHolder;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.MethodInterceptor;
@@ -38,8 +38,8 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_DATASOURCE_AUTOPROXY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_GROUPLIST;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_REGISTRY_ZK;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_UNDO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_TRANSPORT_THREAD_FACTORY;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_UNDO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.NORMALIZED_KEY_VGROUP_MAPPING;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.PROPERTY_MAP;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CLIENT;
@@ -49,8 +49,8 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_CO
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_DATASOURCE_AUTOPROXY;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_GROUPLIST;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_REGISTRY_ZK;
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_UNDO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_TRANSPORT_THREAD_FACTORY;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_UNDO;
 import static io.seata.spring.boot.autoconfigure.StarterConstants.SPECIAL_KEY_VGROUP_MAPPING;
 
 /**
@@ -103,7 +103,7 @@ public class SpringBootConfigurationProvider implements ExtConfigurationProvider
         String propertySuffix = getPropertySuffix(dataId);
         Class propertyClass = getPropertyClass(getPropertyPrefix(dataId));
         if (null != propertyClass) {
-            Object propertyObject = ApplicationContextHolder.getApplicationContext().getBean(propertyClass);
+            Object propertyObject = SeataSpringApplicationContextHolder.getApplicationContext().getBean(propertyClass);
             Optional<Field> fieldOptional = Stream.of(propertyObject.getClass().getDeclaredFields()).filter(
                 f -> f.getName().equalsIgnoreCase(propertySuffix)).findAny();
             if (fieldOptional.isPresent()) {
