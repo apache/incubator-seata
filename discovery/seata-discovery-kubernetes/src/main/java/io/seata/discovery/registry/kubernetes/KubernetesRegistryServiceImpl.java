@@ -43,7 +43,7 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
     private static final Logger LOGGER = LoggerFactory.getLogger(KubernetesRegistryServiceImpl.class);
 
 
-    private static final String DEFAULT_NAMESPACE= "any";
+    private static final String DEFAULT_NAMESPACE = "any";
 
     private static final String FILE_ROOT_REGISTRY = "registry";
     private static final String FILE_CONFIG_SPLIT_CHAR = ".";
@@ -63,7 +63,7 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
     }
 
 
-    static KubernetesRegistryServiceImpl getInstance(KubernetesClient client){
+    static KubernetesRegistryServiceImpl getInstance(KubernetesClient client) {
         if (null == instance) {
             synchronized (KubernetesRegistryServiceImpl.class) {
                 if (null == instance) {
@@ -79,14 +79,14 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
 
     @Override
     public void register(InetSocketAddress address) throws Exception {
-        if (!subscribeListener){
+        if (!subscribeListener) {
             refreshCluster();
         }
     }
 
     @Override
     public void unregister(InetSocketAddress address) throws Exception {
-        if (!subscribeListener){
+        if (!subscribeListener) {
             refreshCluster();
         }
     }
@@ -109,7 +109,7 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
         if (null == clusterName) {
             return null;
         }
-        if (!clusterAddressMap.containsKey(key)){
+        if (!clusterAddressMap.containsKey(key)) {
             refreshCluster();
         }
         return clusterAddressMap.get(clusterName);
@@ -119,7 +119,7 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
 
 
 
-    private void refreshCluster(){
+    private void refreshCluster() {
         final EndpointsList endpointsList =  Optional.ofNullable(getNamespace())
                 .map(namespace -> kubernetesClient.endpoints().inNamespace(namespace).list())
                 .orElseGet(() -> kubernetesClient.endpoints().list());
@@ -132,7 +132,7 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
         endpointsItems.forEach(endpoints -> {
             final List<EndpointSubset> subsets = endpoints.getSubsets();
             final String serviceName = endpoints.getMetadata().getName();
-            if (subsets != null && !subsets.isEmpty()){
+            if (subsets != null && !subsets.isEmpty()) {
                 List<InetSocketAddress> addressList = new ArrayList();
                 subsets.forEach(endpointSubset -> {
                     final List<EndpointAddress> addresses = endpointSubset.getAddresses();
@@ -155,7 +155,7 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
         EndpointPort endpointPort;
         if (ports.size() == 1) {
             endpointPort = ports.get(0);
-        }else{
+        } else {
             endpointPort = ports.stream().findAny().orElseThrow(IllegalStateException::new);
         }
         return endpointPort;
@@ -168,7 +168,7 @@ public class KubernetesRegistryServiceImpl  implements RegistryService<Kubernete
 
     private String getNamespace() {
         String namespace = FILE_CONFIG.getConfig(getKubernetesNamespaceFileKey());
-        if (DEFAULT_NAMESPACE.equals(namespace)){
+        if (DEFAULT_NAMESPACE.equals(namespace)) {
             return null;
         }
         return namespace;
