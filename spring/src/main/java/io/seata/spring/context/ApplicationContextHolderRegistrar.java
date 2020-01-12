@@ -26,13 +26,13 @@ import org.springframework.core.type.AnnotationMetadata;
  * The type application context registrar
  */
 public class ApplicationContextHolderRegistrar implements ImportBeanDefinitionRegistrar {
-    public static final String BEAN_NAME_APPLICATION_CONTEXT_HOLDER_REGISTRAR = "applicationContextHolderRegistrar";
+    public static final String BEAN_NAME_APPLICATION_CONTEXT_HOLDER = "applicationContextHolder";
 
     @Override
     public void registerBeanDefinitions(AnnotationMetadata importingClassMetadata, BeanDefinitionRegistry registry) {
-        if (!registry.containsBeanDefinition(BEAN_NAME_APPLICATION_CONTEXT_HOLDER_REGISTRAR)) {
+        if (!registry.containsBeanDefinition(BEAN_NAME_APPLICATION_CONTEXT_HOLDER)) {
             AbstractBeanDefinition beanDefinition = BeanDefinitionBuilder.genericBeanDefinition(ApplicationContextHolder.class).getBeanDefinition();
-            registry.registerBeanDefinition(BEAN_NAME_APPLICATION_CONTEXT_HOLDER_REGISTRAR, beanDefinition);
+            registry.registerBeanDefinition(BEAN_NAME_APPLICATION_CONTEXT_HOLDER, beanDefinition);
         }
     }
 }
