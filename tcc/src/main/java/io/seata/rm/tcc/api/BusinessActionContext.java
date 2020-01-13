@@ -145,6 +145,11 @@ public class BusinessActionContext implements Serializable {
 
     @Override
     public String toString() {
-        return "[xid:" + xid + ",branch_Id:" + branchId + ",action_name:" + actionName + ",action_context:" + actionContext + "]";
+        StringBuilder sb = new StringBuilder();
+        sb.append("[xid:").append(xid)
+                .append(",branch_Id:").append(branchId).append(",action_name:").append(actionName)
+                .append(",action_context:")
+                .append(actionContext).append("]");
+        return sb.toString();
     }
 }
