@@ -15,6 +15,11 @@
  */
 package io.seata.spring.annotation;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.config.ConfigurationChangeEvent;
@@ -38,11 +43,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.aop.support.AopUtils;
 import org.springframework.core.BridgeMethodResolver;
 import org.springframework.util.ClassUtils;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 /**
  * The type Global transactional interceptor.
@@ -156,7 +156,7 @@ public class GlobalTransactionalInterceptor implements ConfigurationChangeListen
                 case ParticipantRollbackDone:
                     throw new TransactionException(TransactionExceptionCode.ParticipantReportedRollback,e.getOriginalException());
                 case ParticipantRollbackFailure:
-                    throw e.getCause();
+                    throw new TransactionException(TransactionExceptionCode.ParticipantReportedRollback,e.getCause());
                 default:
                     throw new ShouldNeverHappenException(String.format("Unknown TransactionalExecutor.Code: %s", code));
             }
