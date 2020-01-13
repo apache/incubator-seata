@@ -13,18 +13,19 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.sqlparser.druid;
+package io.seata.sqlparser.druid.mysql;
 
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
 
 /**
  * The class MySqlOperateRecognizerHolder
  *
  * @author: Zhibei Hao
  */
-public class MySqlOperateRecognizerHolder implements SQLOperateRecognizerHolder {
+public class MySQLOperateRecognizerHolder implements SQLOperateRecognizerHolder {
     private static final String MYSQL = "mysql";
 
     @Override
