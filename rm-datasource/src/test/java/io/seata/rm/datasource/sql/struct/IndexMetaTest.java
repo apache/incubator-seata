@@ -31,7 +31,7 @@ public class IndexMetaTest {
         Assertions.assertNotNull(indexMeta.toString());
         Assertions.assertEquals(indexMeta, indexMeta);
         Assertions.assertEquals(indexMeta.hashCode(), indexMeta.hashCode());
-        Assertions.assertNotEquals(indexMeta, new String());
+        Assertions.assertNotEquals(indexMeta, "");
 
         IndexMeta other = new IndexMeta();
         other.setValues(Lists.newArrayList(new ColumnMeta()));
@@ -55,26 +55,26 @@ public class IndexMetaTest {
 
         other = new IndexMeta();
         indexMeta.setIndextype(IndexType.PRIMARY);
-        other.setIndextype(IndexType.Normal);
+        other.setIndextype(IndexType.NORMAL);
         Assertions.assertNotEquals(indexMeta, other);
 
         other = new IndexMeta();
         other.setAscOrDesc("");
         //prevent npe and make the unit test go equals ascOrDesc
-        other.setIndextype(IndexType.Normal);
-        indexMeta.setIndextype(IndexType.Normal);
+        other.setIndextype(IndexType.NORMAL);
+        indexMeta.setIndextype(IndexType.NORMAL);
         Assertions.assertNotEquals(indexMeta, other);
 
         other = new IndexMeta();
         other.setOrdinalPosition(1);
         //prevent npe and make the unit test go equals ordinal position
-        other.setIndextype(IndexType.Normal);
-        indexMeta.setIndextype(IndexType.Normal);
+        other.setIndextype(IndexType.NORMAL);
+        indexMeta.setIndextype(IndexType.NORMAL);
         Assertions.assertNotEquals(indexMeta, other);
 
         other = new IndexMeta();
-        other.setIndextype(IndexType.Normal);
-        indexMeta.setIndextype(IndexType.Normal);
+        other.setIndextype(IndexType.NORMAL);
+        indexMeta.setIndextype(IndexType.NORMAL);
         Assertions.assertEquals(indexMeta, other);
     }
 
