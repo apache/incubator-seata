@@ -15,7 +15,6 @@
  */
 package io.seata.core.rpc.netty;
 
-import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.ServerChannel;
 import io.netty.channel.epoll.Epoll;
 import io.netty.channel.epoll.EpollServerSocketChannel;
@@ -37,7 +36,6 @@ public class NettyServerConfig extends NettyBaseConfig {
     private int writeBufferLowWaterMark = 1048576;
     private static final int DEFAULT_LISTEN_PORT = 8091;
     private static final int RPC_REQUEST_TIMEOUT = 30 * 1000;
-    private boolean enableServerPooledByteBufAllocator = true;
     private int serverChannelMaxIdleTimeSeconds = 30;
     private static final String DEFAULT_BOSS_THREAD_PREFIX = "NettyBoss";
     private static final String EPOLL_WORKER_THREAD_PREFIX = "NettyServerEPollWorker";
@@ -55,22 +53,6 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public static final Class<? extends ServerChannel> SERVER_CHANNEL_CLAZZ = NettyBaseConfig.SERVER_CHANNEL_CLAZZ;
 
-    /**
-     * The constant DIRECT_BYTE_BUF_ALLOCATOR.
-     */
-    public static final PooledByteBufAllocator DIRECT_BYTE_BUF_ALLOCATOR =
-        new PooledByteBufAllocator(
-            true,
-            WORKER_THREAD_SIZE,
-            WORKER_THREAD_SIZE,
-            2048 * 64,
-            10,
-            512,
-            256,
-            64,
-            true,
-            0
-        );
 
     /**
      * Gets server selector threads.
@@ -225,24 +207,6 @@ public class NettyServerConfig extends NettyBaseConfig {
      */
     public int getChannelMaxReadIdleSeconds() {
         return MAX_READ_IDLE_SECONDS;
-    }
-
-    /**
-     * Is enable server pooled byte buf allocator boolean.
-     *
-     * @return the boolean
-     */
-    public boolean isEnableServerPooledByteBufAllocator() {
-        return enableServerPooledByteBufAllocator;
-    }
-
-    /**
-     * Sets enable server pooled byte buf allocator.
-     *
-     * @param enableServerPooledByteBufAllocator the enable server pooled byte buf allocator
-     */
-    public void setEnableServerPooledByteBufAllocator(boolean enableServerPooledByteBufAllocator) {
-        this.enableServerPooledByteBufAllocator = enableServerPooledByteBufAllocator;
     }
 
     /**
