@@ -58,7 +58,7 @@ public class PostgresqlUndoDeleteExecutor extends AbstractUndoExecutor {
         Field pkField = null;
         boolean first = true;
         for (Field field : row.getFields()) {
-            if (field.getKeyType() == KeyType.PrimaryKey) {
+            if (field.getKeyType() == KeyType.PRIMARY_KEY) {
                 pkField = field;
                 continue;
             } else {
