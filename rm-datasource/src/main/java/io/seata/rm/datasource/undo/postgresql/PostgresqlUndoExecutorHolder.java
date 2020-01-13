@@ -25,7 +25,7 @@ import io.seata.rm.datasource.undo.UndoExecutorHolder;
  * @author will
  */
 public class PostgresqlUndoExecutorHolder implements UndoExecutorHolder {
-    private static final String POSTGRE_SQL = "postgresql";
+    private static final String POSTGRESQL = "postgresql";
 
     @Override
     public AbstractUndoExecutor getInsertExecutor(SQLUndoLog sqlUndoLog) {
@@ -44,6 +44,6 @@ public class PostgresqlUndoExecutorHolder implements UndoExecutorHolder {
 
     @Override
     public String getDbType() {
-        return POSTGRE_SQL;
+        return POSTGRESQL;
     }
 }
