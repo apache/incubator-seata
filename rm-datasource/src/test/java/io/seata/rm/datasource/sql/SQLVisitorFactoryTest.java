@@ -103,12 +103,4 @@ public class SQLVisitorFactoryTest {
         Assertions.assertEquals(SQLType.UPDATE, recognizer.getSQLType());
         Assertions.assertEquals("t1", recognizer.getTableName());
     }
-
-    @Test
-    public void testSqlRecognizerLoading() {
-        SQLRecognizer recognizer = SQLVisitorFactory.get("update t1 set name = 'test' where id = '1'", JdbcConstants.MYSQL);
-        Assertions.assertNotNull(recognizer);
-        Assertions.assertEquals(SQLType.UPDATE, recognizer.getSQLType());
-        Assertions.assertEquals("t1", recognizer.getTableName());
-    }
 }
