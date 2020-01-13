@@ -31,6 +31,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * State machine tests with db log store
@@ -436,6 +437,51 @@ public class StateMachineDBTests extends AbstractServerTest {
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
         Assertions.assertNotNull(globalTransaction);
         Assertions.assertTrue(GlobalStatus.Finished.equals(globalTransaction.getStatus()));
+    }
+
+    @Test
+    public void testCompensationStateMachineAsyncConcurrently() throws Exception {
+
+        final CountDownLatch countDownLatch = new CountDownLatch(100);
+
+        final AsyncCallback asyncCallback = new AsyncCallback() {
+            @Override
+            public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
+
+                countDownLatch.countDown();
+
+                Assertions.assertTrue(ExecutionStatus.SU.equals(stateMachineInstance.getStatus()));
+            }
+
+            @Override
+            public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
+                countDownLatch.countDown();
+            }
+        };
+
+        long start = System.currentTimeMillis();
+
+        for(int i = 0; i < 10; i++){
+            Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    for(int j = 0; j < 10; j++){
+                        Map<String, Object> paramMap = new HashMap<>();
+                        paramMap.put("a", 1);
+
+                        String stateMachineName = "simpleChoiceTestStateMachine";
+
+                        stateMachineEngine.startAsync(stateMachineName, null, paramMap, asyncCallback);
+                    }
+                }
+            });
+            t.start();
+        }
+
+        countDownLatch.await();
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
     }
 
     @Test
