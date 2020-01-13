@@ -18,8 +18,8 @@ package io.seata.rm.datasource.undo;
 import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
 import io.seata.rm.datasource.undo.oracle.OracleUndoLogManager;
-import io.seata.rm.datasource.undo.postgresql.PostgresqlUndoLogManager;
 import io.seata.sqlparser.util.JdbcConstants;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,8 +36,7 @@ public final class UndoLogManagerFactory {
         UNDO_LOG_MANAGER_MAP.put(JdbcConstants.POSTGRESQL, new PostgresqlUndoLogManager());
     }
 
-    private UndoLogManagerFactory() {
-    }
+    private UndoLogManagerFactory() {}
 
     public static UndoLogManager getUndoLogManager(String dbType) {
         UndoLogManager undoLogManager = UNDO_LOG_MANAGER_MAP.get(dbType);

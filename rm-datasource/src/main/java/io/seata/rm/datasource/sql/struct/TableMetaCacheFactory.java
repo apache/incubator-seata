@@ -19,7 +19,6 @@ import io.seata.common.exception.NotSupportYetException;
 import io.seata.rm.datasource.DataSourceProxy;
 import io.seata.rm.datasource.sql.struct.cache.MysqlTableMetaCache;
 import io.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache;
-import io.seata.rm.datasource.sql.struct.cache.PostgresqlTableMetaCache;
 import io.seata.sqlparser.util.JdbcConstants;
 
 /**
@@ -27,8 +26,7 @@ import io.seata.sqlparser.util.JdbcConstants;
  */
 public class TableMetaCacheFactory {
 
-    private TableMetaCacheFactory() {
-    }
+    private TableMetaCacheFactory() {}
 
     public static TableMetaCache getTableMetaCache(DataSourceProxy dataSourceProxy) {
         return getTableMetaCache(dataSourceProxy.getDbType());
@@ -37,7 +35,7 @@ public class TableMetaCacheFactory {
     public static TableMetaCache getTableMetaCache(String dbType) {
         if (dbType.equals(JdbcConstants.MYSQL)) {
             return MysqlTableMetaCache.getInstance();
-        } else if (dbType.equals(JdbcConstants.ORACLE)) {
+        } else  if (dbType.equals(JdbcConstants.ORACLE)) {
             return OracleTableMetaCache.getInstance();
         } else if (dbType.equals(JdbcConstants.POSTGRESQL)) {
             return PostgresqlTableMetaCache.getInstance();

@@ -40,9 +40,7 @@ public class SQLVisitorFactoryTest {
     public void testSqlRecognizing() {
 
         //test for ast was null
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("", JdbcConstants.MYSQL);
-        });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> SQLVisitorFactory.get("", JdbcConstants.MYSQL));
 
         //test for mysql insert
         String sql = "insert into t(id) values (1)";
@@ -95,9 +93,15 @@ public class SQLVisitorFactoryTest {
         Assertions.assertTrue(recognizer instanceof OracleSelectForUpdateRecognizer);
 
         //test for do not support db
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> {
-            SQLVisitorFactory.get("select * from t", JdbcConstants.DB2);
-        });
+        Assertions.assertThrows(UnsupportedOperationException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.DB2));
+    }
+
+    @Test
+    public void testSqlRecognizerLoading() {
+        SQLRecognizer recognizer = SQLVisitorFactory.get("update t1 set name = 'test' where id = '1'", JdbcConstants.MYSQL);
+        Assertions.assertNotNull(recognizer);
+        Assertions.assertEquals(SQLType.UPDATE, recognizer.getSQLType());
+        Assertions.assertEquals("t1", recognizer.getTableName());
     }
 
     @Test
