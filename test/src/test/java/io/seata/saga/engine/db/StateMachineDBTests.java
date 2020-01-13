@@ -443,7 +443,7 @@ public class StateMachineDBTests extends AbstractServerTest {
     }
 
     @Test
-    public void testCompensationStateMachineAsyncConcurrently() throws Exception {
+    public void simpleChoiceTestStateMachineAsyncConcurrently() throws Exception {
 
         final CountDownLatch countDownLatch = new CountDownLatch(100);
 
