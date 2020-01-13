@@ -27,8 +27,7 @@ import io.seata.sqlparser.util.JdbcConstants;
  */
 public class TableMetaCacheFactory {
 
-    private TableMetaCacheFactory() {
-    }
+    private TableMetaCacheFactory() {}
 
     public static TableMetaCache getTableMetaCache(DataSourceProxy dataSourceProxy) {
         return getTableMetaCache(dataSourceProxy.getDbType());

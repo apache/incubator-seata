@@ -15,14 +15,6 @@
  */
 package io.seata.rm.datasource.undo.oracle;
 
-import io.seata.common.util.BlobUtils;
-import io.seata.core.constants.ClientTableColumnsName;
-import io.seata.rm.datasource.undo.AbstractUndoLogManager;
-import io.seata.rm.datasource.undo.UndoLogParser;
-import io.seata.sqlparser.util.JdbcConstants;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayInputStream;
 import java.sql.Blob;
 import java.sql.Connection;
@@ -30,6 +22,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
+
+import io.seata.common.util.BlobUtils;
+import io.seata.core.constants.ClientTableColumnsName;
+import io.seata.rm.datasource.undo.AbstractUndoLogManager;
+import io.seata.rm.datasource.undo.UndoLogParser;
+import io.seata.sqlparser.util.JdbcConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author jsbxyyx
@@ -72,7 +72,7 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
     @Override
     protected void insertUndoLogWithNormal(String xid, long branchId, String rollbackCtx,
                                            byte[] undoLogContent, Connection conn) throws SQLException {
-        insertUndoLog(xid, branchId, rollbackCtx, undoLogContent, State.Normal, conn);
+        insertUndoLog(xid, branchId,rollbackCtx, undoLogContent, State.Normal, conn);
     }
 
     @Override
