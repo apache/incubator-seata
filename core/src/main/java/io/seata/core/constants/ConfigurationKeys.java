@@ -106,7 +106,7 @@ public class ConfigurationKeys {
     /**
      * The constant CLIENT_REPORT_SUCCESS_ENABLE.
      */
-    public static final String CLIENT_REPORT_SUCCESS_ENABLE = CLIENT_PREFIX + "report.success.enable";
+    public static final String CLIENT_REPORT_SUCCESS_ENABLE = CLIENT_RM_PREFIX + "report.success.enable";
 
     /**
      * The constant CLIENT_REPORT_RETRY_COUNT.
