@@ -121,7 +121,7 @@
 
         <dependency>
             <groupId>${project.groupId}</groupId>
-            <artifactId>seata-codec-seata</artifactId>
+            <artifactId>seata-serializer-seata</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
