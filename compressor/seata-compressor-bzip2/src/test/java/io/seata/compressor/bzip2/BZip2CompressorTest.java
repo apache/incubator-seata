@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * the BZIP2 Compressor test
+ * the BZip2 Compressor test
  *
  * @author ph3636
  */

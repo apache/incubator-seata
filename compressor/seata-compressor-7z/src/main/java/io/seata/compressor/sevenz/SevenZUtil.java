@@ -15,7 +15,6 @@
  */
 package io.seata.compressor.sevenz;
 
-import io.seata.common.util.IOUtil;
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 import org.apache.commons.compress.archivers.sevenz.SevenZOutputFile;
@@ -25,7 +24,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
- * the 7Z Util
+ * the SevenZ Util
  *
  * @author ph3636
  */
@@ -37,11 +36,9 @@ public class SevenZUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        SevenZOutputFile z7z = null;
-        SeekableInMemoryByteChannel channel = null;
         try {
-            channel = new SeekableInMemoryByteChannel();
-            z7z = new SevenZOutputFile(channel);
+            SeekableInMemoryByteChannel channel = new SeekableInMemoryByteChannel();
+            SevenZOutputFile z7z = new SevenZOutputFile(channel);
             SevenZArchiveEntry entry = new SevenZArchiveEntry();
             entry.setName("sevenZip");
             entry.setSize(bytes.length);
@@ -51,9 +48,7 @@ public class SevenZUtil {
             z7z.close();
             return channel.array();
         } catch (IOException e) {
-            throw new RuntimeException("seven zip compress error", e);
-        } finally {
-            IOUtil.close(channel);
+            throw new RuntimeException("SevenZ compress error", e);
         }
     }
 
@@ -61,11 +56,9 @@ public class SevenZUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        ByteArrayOutputStream out = null;
-        SeekableInMemoryByteChannel channel = null;
         try {
-            out = new ByteArrayOutputStream();
-            channel = new SeekableInMemoryByteChannel(bytes);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            SeekableInMemoryByteChannel channel = new SeekableInMemoryByteChannel(bytes);
             SevenZFile sevenZFile = new SevenZFile(channel);
             byte[] buffer = new byte[BUFFER_SIZE];
             while (sevenZFile.getNextEntry() != null) {
@@ -77,9 +70,7 @@ public class SevenZUtil {
             sevenZFile.close();
             return out.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("seven zip decompress error", e);
-        } finally {
-            IOUtil.close(out, channel);
+            throw new RuntimeException("SevenZ decompress error", e);
         }
     }
 }

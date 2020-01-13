@@ -19,7 +19,7 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.core.compressor.Compressor;
 
 /**
- * the 7Z Compressor
+ * the SevenZ Compressor
  *
  * @author ph3636
  */

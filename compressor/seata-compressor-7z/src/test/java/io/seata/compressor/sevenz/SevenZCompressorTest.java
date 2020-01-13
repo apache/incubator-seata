@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 /**
- * the Zip Compressor test
+ * the SevenZ Compressor test
  *
  * @author ph3636
  */

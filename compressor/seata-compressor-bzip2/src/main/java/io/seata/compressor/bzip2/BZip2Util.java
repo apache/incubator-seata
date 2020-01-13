@@ -15,7 +15,6 @@
  */
 package io.seata.compressor.bzip2;
 
-import io.seata.common.util.IOUtil;
 import org.apache.tools.bzip2.CBZip2InputStream;
 import org.apache.tools.bzip2.CBZip2OutputStream;
 
@@ -24,7 +23,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
- * the BZIP2 Util
+ * the BZip2 Util
  *
  * @author ph3636
  */
@@ -36,19 +35,14 @@ public class BZip2Util {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        ByteArrayOutputStream bos = null;
-        CBZip2OutputStream bzip2;
         try {
-            bos = new ByteArrayOutputStream();
-            bzip2 = new CBZip2OutputStream(bos);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            CBZip2OutputStream bzip2 = new CBZip2OutputStream(bos);
             bzip2.write(bytes);
-            bzip2.flush();
             bzip2.close();
             return bos.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("bzip2 compress error", e);
-        } finally {
-            IOUtil.close(bos);
+            throw new RuntimeException("BZip2 compress error", e);
         }
     }
 
@@ -56,12 +50,10 @@ public class BZip2Util {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        ByteArrayOutputStream out = null;
-        ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
-        CBZip2InputStream bzip2;
         try {
-            out = new ByteArrayOutputStream();
-            bzip2 = new CBZip2InputStream(bis);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayInputStream bis = new ByteArrayInputStream(bytes);
+            CBZip2InputStream bzip2 = new CBZip2InputStream(bis);
             byte[] buffer = new byte[BUFFER_SIZE];
             int n;
             while ((n = bzip2.read(buffer)) > -1) {
@@ -70,9 +62,7 @@ public class BZip2Util {
             bzip2.close();
             return out.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("bzip2 decompress error", e);
-        } finally {
-            IOUtil.close(out, bis);
+            throw new RuntimeException("BZip2 decompress error", e);
         }
     }
 }

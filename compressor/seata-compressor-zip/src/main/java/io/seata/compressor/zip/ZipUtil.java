@@ -15,8 +15,6 @@
  */
 package io.seata.compressor.zip;
 
-import io.seata.common.util.IOUtil;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,11 +35,9 @@ public class ZipUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        ByteArrayOutputStream out = null;
-        ZipOutputStream zip = null;
         try {
-            out = new ByteArrayOutputStream();
-            zip = new ZipOutputStream(out);
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ZipOutputStream zip = new ZipOutputStream(out);
             ZipEntry entry = new ZipEntry("zip");
             entry.setSize(bytes.length);
             zip.putNextEntry(entry);
@@ -50,9 +46,7 @@ public class ZipUtil {
             zip.close();
             return out.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("zip compress error", e);
-        } finally {
-            IOUtil.close(out);
+            throw new RuntimeException("Zip compress error", e);
         }
     }
 
@@ -60,11 +54,9 @@ public class ZipUtil {
         if (bytes == null) {
             throw new NullPointerException("bytes is null");
         }
-        ByteArrayOutputStream out = null;
-        ZipInputStream zip = null;
         try {
-            out = new ByteArrayOutputStream();
-            zip = new ZipInputStream(new ByteArrayInputStream(bytes));
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ZipInputStream zip = new ZipInputStream(new ByteArrayInputStream(bytes));
             byte[] buffer = new byte[BUFFER_SIZE];
             while (zip.getNextEntry() != null) {
                 int n;
@@ -75,9 +67,7 @@ public class ZipUtil {
             zip.close();
             return out.toByteArray();
         } catch (IOException e) {
-            throw new RuntimeException("zip decompress error", e);
-        } finally {
-            IOUtil.close(out);
+            throw new RuntimeException("Zip decompress error", e);
         }
     }
 }

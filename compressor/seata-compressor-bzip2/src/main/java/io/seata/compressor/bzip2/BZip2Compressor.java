@@ -19,7 +19,7 @@ import io.seata.common.loader.LoadLevel;
 import io.seata.core.compressor.Compressor;
 
 /**
- * the BZIP2 Compressor
+ * the BZip2 Compressor
  *
  * @author ph3636
  */

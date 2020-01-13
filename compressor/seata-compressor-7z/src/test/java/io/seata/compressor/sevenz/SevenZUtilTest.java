@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 
 
 /**
- * the Zip Util test
+ * the SevenZ Util test
  *
  * @author ph3636
  */
