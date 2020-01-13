@@ -79,25 +79,17 @@ public class MySQLUndoLogManagerTest {
     @Test
     public void testDeleteUndoLogByLogCreated() throws SQLException {
         Assertions.assertEquals(0, undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, dataSource.getConnection()));
-        Assertions.assertThrows(SQLException.class, () -> {
-            undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy);
-        });
+        Assertions.assertThrows(SQLException.class, () -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
     }
 
     @Test
     public void testInsertUndoLog() throws SQLException {
-        Assertions.assertDoesNotThrow(() -> {
-            undoLogManager.insertUndoLogWithGlobalFinished("xid", 1L, new JacksonUndoLogParser(),
-                dataSource.getConnection());
-        });
+        Assertions.assertDoesNotThrow(() -> undoLogManager.insertUndoLogWithGlobalFinished("xid", 1L, new JacksonUndoLogParser(),
+            dataSource.getConnection()));
 
-        Assertions.assertDoesNotThrow(() -> {
-            undoLogManager.insertUndoLogWithNormal("xid", 1L, "", new byte[]{}, dataSource.getConnection());
-        });
+        Assertions.assertDoesNotThrow(() -> undoLogManager.insertUndoLogWithNormal("xid", 1L, "", new byte[]{}, dataSource.getConnection()));
 
-        Assertions.assertThrows(SQLException.class, () -> {
-            undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy);
-        });
+        Assertions.assertThrows(SQLException.class, () -> undoLogManager.deleteUndoLogByLogCreated(new Date(), 3000, connectionProxy));
 
     }
 
@@ -106,29 +98,21 @@ public class MySQLUndoLogManagerTest {
         MySQLUndoLogManager.setCurrentSerializer("jackson");
         Assertions.assertEquals("jackson", MySQLUndoLogManager.getCurrentSerializer());
         MySQLUndoLogManager.removeCurrentSerializer();
-        Assertions.assertEquals(null, MySQLUndoLogManager.getCurrentSerializer());
+        Assertions.assertNull(MySQLUndoLogManager.getCurrentSerializer());
     }
 
     @Test
     public void testDeleteUndoLog() {
-        Assertions.assertDoesNotThrow(() -> {
-            undoLogManager.deleteUndoLog("xid", 1L, dataSource.getConnection());
-        });
+        Assertions.assertDoesNotThrow(() -> undoLogManager.deleteUndoLog("xid", 1L, dataSource.getConnection()));
 
-        Assertions.assertThrows(SQLException.class, () -> {
-            undoLogManager.deleteUndoLog("xid", 1L, connectionProxy);
-        });
+        Assertions.assertThrows(SQLException.class, () -> undoLogManager.deleteUndoLog("xid", 1L, connectionProxy));
     }
 
     @Test
     public void testBatchDeleteUndoLog() {
-        Assertions.assertDoesNotThrow(() -> {
-            undoLogManager.batchDeleteUndoLog(Sets.newHashSet("xid"), Sets.newHashSet(1L), dataSource.getConnection());
-        });
+        Assertions.assertDoesNotThrow(() -> undoLogManager.batchDeleteUndoLog(Sets.newHashSet("xid"), Sets.newHashSet(1L), dataSource.getConnection()));
 
-        Assertions.assertThrows(SQLException.class, () -> {
-            undoLogManager.batchDeleteUndoLog(Sets.newHashSet("xid"), Sets.newHashSet(1L), connectionProxy);
-        });
+        Assertions.assertThrows(SQLException.class, () -> undoLogManager.batchDeleteUndoLog(Sets.newHashSet("xid"), Sets.newHashSet(1L), connectionProxy));
     }
 
     @Test
@@ -140,15 +124,11 @@ public class MySQLUndoLogManagerTest {
         method.invoke(context, 1L);
 
 
-        Assertions.assertDoesNotThrow(() -> {
-            undoLogManager.flushUndoLogs(connectionProxy);
-        });
+        Assertions.assertDoesNotThrow(() -> undoLogManager.flushUndoLogs(connectionProxy));
     }
 
     @Test
     public void testUndo() throws SQLException {
-        Assertions.assertDoesNotThrow(() -> {
-            undoLogManager.undo(dataSourceProxy, "xid", 1L);
-        });
+        Assertions.assertDoesNotThrow(() -> undoLogManager.undo(dataSourceProxy, "xid", 1L));
     }
 }

@@ -50,7 +50,7 @@ public class PostgresqlUndoInsertExecutor extends AbstractUndoExecutor {
         StringBuilder where = new StringBuilder(" WHERE ");
         // For a row, there's only one primary key now
         for (Field field : row.getFields()) {
-            if (field.getKeyType() == KeyType.PrimaryKey) {
+            if (field.getKeyType() == KeyType.PRIMARY_KEY) {
                 where.append(keywordChecker.checkAndReplace(field.getName())).append(" = ?");
             }
 
