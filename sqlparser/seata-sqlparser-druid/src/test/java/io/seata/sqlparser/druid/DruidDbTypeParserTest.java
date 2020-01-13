@@ -16,7 +16,7 @@
 package io.seata.sqlparser.druid;
 
 import io.seata.common.loader.EnhancedServiceLoader;
-import io.seata.core.constants.ConfigurationKeys;
+import io.seata.sqlparser.SqlParserType;
 import io.seata.sqlparser.util.DbTypeParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ public class DruidDbTypeParserTest {
     @Test
     public void testDruidDbTypeParser() {
         String jdbcUrl = "jdbc:mysql://127.0.0.1:3306/seata";
-        DbTypeParser dbTypeParser = EnhancedServiceLoader.load(DbTypeParser.class, ConfigurationKeys.SQL_PARSER_TYPE_DRUID);
+        DbTypeParser dbTypeParser = EnhancedServiceLoader.load(DbTypeParser.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
         Assertions.assertNotNull(dbTypeParser);
         String dbType = dbTypeParser.parseFromJdbcUrl(jdbcUrl);
         Assertions.assertEquals("mysql", dbType);
