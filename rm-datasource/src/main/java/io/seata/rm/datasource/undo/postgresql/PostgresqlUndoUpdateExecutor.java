@@ -45,7 +45,7 @@ public class PostgresqlUndoUpdateExecutor extends AbstractUndoExecutor {
         StringBuilder where = new StringBuilder(" WHERE ");
         boolean first = true;
         for (Field field : row.getFields()) {
-            if (field.getKeyType() == KeyType.PrimaryKey) {
+            if (field.getKeyType() == KeyType.PRIMARY_KEY) {
                 where.append(keywordChecker.checkAndReplace(field.getName())).append(" = ?");
             } else {
                 if (first) {
