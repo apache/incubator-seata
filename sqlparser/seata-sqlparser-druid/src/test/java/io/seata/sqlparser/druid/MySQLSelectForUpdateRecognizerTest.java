@@ -78,7 +78,7 @@ public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerT
             }
         }, paramAppenderList);
 
-        Assertions.assertEquals(Collections.singletonList(Arrays.asList("id1")), paramAppenderList);
+        Assertions.assertEquals(Collections.singletonList(Collections.singletonList("id1")), paramAppenderList);
         Assertions.assertEquals("id = ?", whereCondition);
     }
 
@@ -108,7 +108,7 @@ public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerT
             }
         }, paramAppenderList);
 
-        Assertions.assertEquals(Collections.singletonList(Arrays.asList("id1")), paramAppenderList);
+        Assertions.assertEquals(Collections.singletonList(Collections.singletonList("id1")), paramAppenderList);
         Assertions.assertEquals("id = ?", whereCondition);
     }
 
@@ -140,7 +140,7 @@ public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerT
             }
         }, paramAppenderList);
 
-        Assertions.assertEquals(Arrays.asList(Arrays.asList("id1", "id2")), paramAppenderList);
+        Assertions.assertEquals(Collections.singletonList(Arrays.asList("id1", "id2")), paramAppenderList);
         Assertions.assertEquals("id IN (?, ?)", whereCondition);
     }
 
@@ -172,7 +172,7 @@ public class MySQLSelectForUpdateRecognizerTest extends AbstractMySQLRecognizerT
             }
         }, paramAppenderList);
 
-        Assertions.assertEquals(Arrays.asList(Arrays.asList("id1", "id2")), paramAppenderList);
+        Assertions.assertEquals(Collections.singletonList(Arrays.asList("id1", "id2")), paramAppenderList);
         Assertions.assertEquals("id BETWEEN ? AND ?", whereCondition);
     }
 
