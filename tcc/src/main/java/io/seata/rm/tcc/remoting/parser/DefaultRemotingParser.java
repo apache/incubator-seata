@@ -42,15 +42,15 @@ public class DefaultRemotingParser {
     /**
      * all remoting bean parser
      */
-    protected static List<RemotingParser> allRemotingParsers = new ArrayList<RemotingParser>();
+    protected static List<RemotingParser> allRemotingParsers = new ArrayList<>();
 
     /**
      * all remoting beans beanName -> RemotingDesc
      */
-    protected static Map<String, RemotingDesc> remotingServiceMap = new ConcurrentHashMap<String, RemotingDesc>();
+    protected static Map<String, RemotingDesc> remotingServiceMap = new ConcurrentHashMap<>();
 
     private static class SingletonHolder {
-        private static DefaultRemotingParser INSTANCE = new DefaultRemotingParser();
+        private static final DefaultRemotingParser INSTANCE = new DefaultRemotingParser();
     }
 
     /**
@@ -136,7 +136,7 @@ public class DefaultRemotingParser {
      * @return service desc
      */
     public RemotingDesc getServiceDesc(Object bean, String beanName) {
-        List<RemotingDesc> ret = new ArrayList<RemotingDesc>();
+        List<RemotingDesc> ret = new ArrayList<>();
         for (RemotingParser remotingParser : allRemotingParsers) {
             RemotingDesc s = remotingParser.getServiceDesc(bean, beanName);
             if (s != null) {
@@ -146,7 +146,7 @@ public class DefaultRemotingParser {
         if (ret.size() == 1) {
             return ret.get(0);
         } else if (ret.size() > 1) {
-            throw new FrameworkException("More than one RemotingParser for bean:" + beanName);
+            throw new FrameworkException(String.format("More than one RemotingParser for bean: %s", beanName));
         } else {
             return null;
         }
