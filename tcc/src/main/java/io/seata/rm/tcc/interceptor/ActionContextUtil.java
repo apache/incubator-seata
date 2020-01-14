@@ -15,7 +15,6 @@
  */
 package io.seata.rm.tcc.interceptor;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,6 +33,10 @@ import io.seata.rm.tcc.api.BusinessActionContextParameter;
  */
 public class ActionContextUtil {
 
+    private ActionContextUtil() {
+
+    }
+
     /**
      * Extracting context data from parameters
      *
@@ -42,38 +45,37 @@ public class ActionContextUtil {
      */
     public static Map<String, Object> fetchContextFromObject(Object targetParam) {
         try {
-            Map<String, Object> context = new HashMap<String, Object>(8);
-            List<Field> fields = new ArrayList<Field>();
+            Map<String, Object> context = new HashMap<>(8);
+            List<Field> fields = new ArrayList<>();
             getAllField(targetParam.getClass(), fields);
             for (Field f : fields) {
                 String fieldName = f.getName();
-                Annotation annotation = f.getAnnotation(BusinessActionContextParameter.class);
+                BusinessActionContextParameter annotation = f.getAnnotation(BusinessActionContextParameter.class);
 
                 if (annotation != null) {
-                    BusinessActionContextParameter param = (BusinessActionContextParameter)annotation;
                     f.setAccessible(true);
                     Object paramObject = f.get(targetParam);
-                    int index = param.index();
+                    int index = annotation.index();
                     if (index >= 0) {
                         @SuppressWarnings("unchecked")
                         Object targetObject = ((List<Object>)paramObject).get(index);
-                        if (param.isParamInProperty()) {
+                        if (annotation.isParamInProperty()) {
                             context.putAll(fetchContextFromObject(targetObject));
                         } else {
-                            if (StringUtils.isBlank(param.paramName())) {
+                            if (StringUtils.isBlank(annotation.paramName())) {
                                 context.put(fieldName, paramObject);
                             } else {
-                                context.put(param.paramName(), paramObject);
+                                context.put(annotation.paramName(), paramObject);
                             }
                         }
                     } else {
-                        if (param.isParamInProperty()) {
+                        if (annotation.isParamInProperty()) {
                             context.putAll(fetchContextFromObject(paramObject));
                         } else {
-                            if (StringUtils.isBlank(param.paramName())) {
+                            if (StringUtils.isBlank(annotation.paramName())) {
                                 context.put(fieldName, paramObject);
                             } else {
-                                context.put(param.paramName(), paramObject);
+                                context.put(annotation.paramName(), paramObject);
                             }
                         }
                     }
@@ -96,9 +98,7 @@ public class ActionContextUtil {
             return;
         }
         Field[] field = interFace.getDeclaredFields();
-        if (field != null) {
-            fields.addAll(Arrays.asList(field));
-        }
+        fields.addAll(Arrays.asList(field));
         getAllField(interFace.getSuperclass(), fields);
     }
 

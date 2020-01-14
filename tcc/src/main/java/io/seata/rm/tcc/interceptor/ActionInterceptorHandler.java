@@ -55,7 +55,7 @@ public class ActionInterceptorHandler {
      */
     public Map<String, Object> proceed(Method method, Object[] arguments, String xid, TwoPhaseBusinessAction businessAction,
                                        Callback<Object> targetCallback) throws Throwable {
-        Map<String, Object> ret = new HashMap<String, Object>(4);
+        Map<String, Object> ret = new HashMap<>(4);
 
         //TCC name
         String actionName = businessAction.name();
@@ -109,7 +109,7 @@ public class ActionInterceptorHandler {
         actionContext.setActionContext(context);
 
         //init applicationData
-        Map<String, Object> applicationContext = new HashMap<String, Object>(4);
+        Map<String, Object> applicationContext = new HashMap<>(4);
         applicationContext.put(Constants.TCC_ACTION_CONTEXT, context);
         String applicationContextStr = JSON.toJSONString(applicationContext);
         try {
@@ -118,7 +118,7 @@ public class ActionInterceptorHandler {
                 applicationContextStr, null);
             return String.valueOf(branchId);
         } catch (Throwable t) {
-            String msg = "TCC branch Register error, xid:" + xid;
+            String msg = String.format("TCC branch Register error, xid: %s", xid);
             LOGGER.error(msg, t);
             throw new FrameworkException(t, msg);
         }
@@ -166,7 +166,7 @@ public class ActionInterceptorHandler {
      * @return map map
      */
     protected Map<String, Object> fetchActionRequestContext(Method method, Object[] arguments) {
-        Map<String, Object> context = new HashMap<String, Object>(8);
+        Map<String, Object> context = new HashMap<>(8);
 
         Annotation[][] parameterAnnotations = method.getParameterAnnotations();
         for (int i = 0; i < parameterAnnotations.length; i++) {
@@ -180,6 +180,7 @@ public class ActionInterceptorHandler {
                     int index = param.index();
                     //List, get by index
                     if (index >= 0) {
+                        @SuppressWarnings("unchecked")
                         Object targetParam = ((List<Object>)paramObject).get(index);
                         if (param.isParamInProperty()) {
                             context.putAll(ActionContextUtil.fetchContextFromObject(targetParam));
