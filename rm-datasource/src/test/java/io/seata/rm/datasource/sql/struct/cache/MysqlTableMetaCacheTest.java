@@ -106,7 +106,7 @@ public class MysqlTableMetaCacheTest {
         assertIndexMetaEquals(indexMetas[0], tableMeta.getAllIndexes().get("PRIMARY"));
         Assertions.assertEquals(IndexType.PRIMARY, tableMeta.getAllIndexes().get("PRIMARY").getIndextype());
         assertIndexMetaEquals(indexMetas[1], tableMeta.getAllIndexes().get("name1"));
-        Assertions.assertEquals(IndexType.Unique, tableMeta.getAllIndexes().get("name1").getIndextype());
+        Assertions.assertEquals(IndexType.UNIQUE, tableMeta.getAllIndexes().get("name1").getIndextype());
 
         indexMetas =
             new Object[][] {

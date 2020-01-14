@@ -22,6 +22,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 import io.seata.saga.engine.serializer.Serializer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,24 +39,14 @@ public class ExceptionSerializer implements Serializer<Exception, byte[]> {
 
         byte[] result = null;
         if (o != null) {
-            ObjectOutputStream oos = null;
-            try {
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                oos = new ObjectOutputStream(baos);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
                 oos.writeObject(o);
                 oos.flush();
                 result = baos.toByteArray();
             } catch (IOException e) {
                 LOGGER.error("serializer failed: {}", o.getClass(), e);
                 throw new RuntimeException("IO Create Error", e);
-            } finally {
-                if (oos != null) {
-                    try {
-                        oos.close();
-                    } catch (IOException e) {
-                        LOGGER.error(e.getMessage(), e);
-                    }
-                }
             }
         }
         return result;
@@ -75,10 +66,8 @@ public class ExceptionSerializer implements Serializer<Exception, byte[]> {
 
         Object result = null;
         if (bytes != null) {
-            ObjectInputStream ois = null;
-            try {
-                ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-                ois = new ObjectInputStream(bais);
+            ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+            try (ObjectInputStream ois = new ObjectInputStream(bais)) {
                 result = ois.readObject();
             } catch (IOException e) {
                 LOGGER.error("deserialize failed:", e);
@@ -86,14 +75,6 @@ public class ExceptionSerializer implements Serializer<Exception, byte[]> {
             } catch (ClassNotFoundException e) {
                 LOGGER.error("deserialize failed:", e);
                 throw new RuntimeException("Cannot find specified class", e);
-            } finally {
-                if (ois != null) {
-                    try {
-                        ois.close();
-                    } catch (IOException e) {
-                        LOGGER.error(e.getMessage(), e);
-                    }
-                }
             }
         }
         return result;

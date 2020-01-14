@@ -19,6 +19,7 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLRecognizerFactory;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.SqlParserType;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -26,7 +27,7 @@ import org.junit.jupiter.api.Test;
 public class DruidSQLRecognizerFactoryTest {
     @Test
     public void testSqlRecognizerCreation() {
-        SQLRecognizerFactory recognizerFactory = EnhancedServiceLoader.load(SQLRecognizerFactory.class, "druid");
+        SQLRecognizerFactory recognizerFactory = EnhancedServiceLoader.load(SQLRecognizerFactory.class, SqlParserType.SQL_PARSER_TYPE_DRUID);
         Assertions.assertNotNull(recognizerFactory);
         SQLRecognizer recognizer = recognizerFactory.create("delete from t1", JdbcConstants.MYSQL);
         Assertions.assertNotNull(recognizer);

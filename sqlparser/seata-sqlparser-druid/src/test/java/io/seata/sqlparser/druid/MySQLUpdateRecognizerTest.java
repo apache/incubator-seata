@@ -29,6 +29,7 @@ import com.alibaba.druid.sql.dialect.mysql.ast.expr.MySqlOrderingExpr;
 import io.seata.sqlparser.ParametersHolder;
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
 import io.seata.sqlparser.util.JdbcConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -110,7 +111,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
             }
         }, paramAppenderList);
 
-        Assertions.assertEquals(Collections.singletonList(Arrays.asList("id1")), paramAppenderList);
+        Assertions.assertEquals(Collections.singletonList(Collections.singletonList("id1")), paramAppenderList);
 
         Assertions.assertEquals("id = ?", whereCondition);
     }
@@ -147,7 +148,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
             }
         }, paramAppenderList);
 
-        Assertions.assertEquals(Arrays.asList(Arrays.asList("id1", "id2")), paramAppenderList);
+        Assertions.assertEquals(Collections.singletonList(Arrays.asList("id1", "id2")), paramAppenderList);
 
         Assertions.assertEquals("id IN (?, ?)", whereCondition);
     }
@@ -186,7 +187,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
             }
         }, paramAppenderList);
 
-        Assertions.assertEquals(Arrays.asList(Arrays.asList("id1", "id2", "name")), paramAppenderList);
+        Assertions.assertEquals(Collections.singletonList(Arrays.asList("id1", "id2", "name")), paramAppenderList);
 
         Assertions.assertEquals("id IN (?, ?)\nAND name1 = ?", whereCondition);
     }
@@ -223,7 +224,7 @@ public class MySQLUpdateRecognizerTest extends AbstractMySQLRecognizerTest {
             }
         }, paramAppenderList);
 
-        Assertions.assertEquals(Arrays.asList(Arrays.asList("id1", "id2")), paramAppenderList);
+        Assertions.assertEquals(Collections.singletonList(Arrays.asList("id1", "id2")), paramAppenderList);
         Assertions.assertEquals("id BETWEEN ? AND ?", whereCondition);
     }
 
