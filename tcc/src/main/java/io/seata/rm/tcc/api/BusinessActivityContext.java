@@ -31,7 +31,7 @@ public class BusinessActivityContext implements Serializable {
     /**  */
     private static final long serialVersionUID = 6539226288677737992L;
 
-    private Map<String, Object> context = new HashMap<String, Object>();
+    private Map<String, Object> context = new HashMap<>();
 
     /**
      * Instantiates a new Business activity context.
