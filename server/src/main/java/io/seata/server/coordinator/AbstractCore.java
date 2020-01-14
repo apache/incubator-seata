@@ -15,6 +15,9 @@
  */
 package io.seata.server.coordinator;
 
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
 import io.seata.core.exception.BranchTransactionException;
 import io.seata.core.exception.GlobalTransactionException;
 import io.seata.core.exception.TransactionException;
@@ -35,9 +38,6 @@ import io.seata.server.session.SessionHelper;
 import io.seata.server.session.SessionHolder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
 
 import static io.seata.core.exception.TransactionExceptionCode.BranchTransactionNotExist;
 import static io.seata.core.exception.TransactionExceptionCode.FailedToAddBranch;
