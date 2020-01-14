@@ -27,6 +27,10 @@ import io.seata.common.util.ReflectionUtil;
  */
 public class DubboUtil {
 
+    private DubboUtil() {
+
+    }
+
     private static final String ALIBABA_DUBBO_PROXY_NAME_PREFIX = "com.alibaba.dubbo.common.bytecode.proxy";
     private static final String APACHE_DUBBO_PROXY_NAME_PREFIX = "org.apache.dubbo.common.bytecode.proxy";
 
@@ -60,9 +64,8 @@ public class DubboUtil {
         Field failoverClusterInvokerField = invoker.getClass().getDeclaredField("invoker");
         failoverClusterInvokerField.setAccessible(true);
         Object failoverClusterInvoker = failoverClusterInvokerField.get(invoker);
-        Class failoverClusterInvokerInterfaceClass = (Class)ReflectionUtil.invokeMethod(failoverClusterInvoker,
+        return (Class<?>)ReflectionUtil.invokeMethod(failoverClusterInvoker,
             "getInterface");
-        return failoverClusterInvokerInterfaceClass;
     }
 
     public static boolean isDubboProxyName(String name) {
