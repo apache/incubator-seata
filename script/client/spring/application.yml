@@ -2,6 +2,8 @@ seata:
   enabled: true
   application-id: test
   tx-service-group: my_test_tx_group
+  enable-auto-data-source-proxy: true
+  use-jdk-proxy: false
   client:
     rm-async-commit-buffer-limit: 1000
     rm-report-retry-count: 5
