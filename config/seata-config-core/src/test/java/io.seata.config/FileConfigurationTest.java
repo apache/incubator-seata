@@ -43,8 +43,7 @@ class FileConfigurationTest {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         boolean value = fileConfig.getBoolean("service.disableGlobalTransaction");
         fileConfig.addConfigListener("service.disableGlobalTransaction", (event) -> {
-            Assertions.assertTrue(
-                Boolean.parseBoolean(event.getNewValue()) == !Boolean.parseBoolean(event.getOldValue()));
+            Assertions.assertEquals(Boolean.parseBoolean(event.getNewValue()), !Boolean.parseBoolean(event.getOldValue()));
             countDownLatch.countDown();
         });
         System.setProperty("service.disableGlobalTransaction", String.valueOf(!value));

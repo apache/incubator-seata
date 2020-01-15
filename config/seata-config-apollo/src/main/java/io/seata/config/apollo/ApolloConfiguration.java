@@ -111,12 +111,9 @@ public class ApolloConfiguration extends AbstractConfiguration {
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigFuture.ConfigOperation.GET,
             timeoutMills);
-        configOperateExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
-                String result = config.getProperty(dataId, defaultValue);
-                configFuture.setResult(result);
-            }
+        configOperateExecutor.submit(() -> {
+            String result = config.getProperty(dataId, defaultValue);
+            configFuture.setResult(result);
         });
         return (String)configFuture.get();
     }
@@ -174,11 +171,11 @@ public class ApolloConfiguration extends AbstractConfiguration {
     }
 
     private static String getApolloMetaFileKey() {
-        return FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR + APOLLO_META;
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APOLLO_META);
     }
 
     private static String getApolloAppIdFileKey() {
-        return FILE_ROOT_CONFIG + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR + APP_ID;
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APP_ID);
     }
 
     private ConfigurationChangeType getChangeType(PropertyChangeType changeType) {

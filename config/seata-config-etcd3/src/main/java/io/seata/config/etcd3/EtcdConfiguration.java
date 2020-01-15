@@ -146,9 +146,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
     @Override
     public boolean removeConfig(String dataId, long timeoutMills) {
         ConfigFuture configFuture = new ConfigFuture(dataId, null, ConfigFuture.ConfigOperation.REMOVE, timeoutMills);
-        etcdConfigExecutor.execute(() -> {
-            complete(getClient().getKVClient().delete(ByteSequence.from(dataId, UTF_8)), configFuture);
-        });
+        etcdConfigExecutor.execute(() -> complete(getClient().getKVClient().delete(ByteSequence.from(dataId, UTF_8)), configFuture));
         return (Boolean)configFuture.get();
     }
 
@@ -240,7 +238,7 @@ public class EtcdConfiguration extends AbstractConfiguration {
     /**
      * the type config change notifier
      */
-    private class EtcdListener implements ConfigurationChangeListener {
+    private static class EtcdListener implements ConfigurationChangeListener {
         private final String dataId;
         private final ConfigurationChangeListener listener;
         private Watch.Watcher watcher;

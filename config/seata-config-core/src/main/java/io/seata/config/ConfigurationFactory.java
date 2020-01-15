@@ -92,7 +92,7 @@ public final class ConfigurationFactory {
     }
 
     private static Configuration buildConfiguration() {
-        ConfigType configType = null;
+        ConfigType configType;
         String configTypeName = null;
         try {
             configTypeName = CURRENT_FILE_INSTANCE.getConfig(
@@ -103,8 +103,7 @@ public final class ConfigurationFactory {
             throw new NotSupportYetException("not support register type: " + configTypeName, e);
         }
         if (ConfigType.File == configType) {
-            String pathDataId = ConfigurationKeys.FILE_ROOT_CONFIG + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR
-                + FILE_TYPE + ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR + NAME_KEY;
+            String pathDataId = String.join(ConfigurationKeys.FILE_CONFIG_SPLIT_CHAR, ConfigurationKeys.FILE_ROOT_CONFIG, FILE_TYPE, NAME_KEY);
             String name = CURRENT_FILE_INSTANCE.getConfig(pathDataId);
             Configuration configuration = new FileConfiguration(name);
             Configuration extConfiguration = null;
