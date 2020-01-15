@@ -126,7 +126,7 @@ public abstract class AbstractHttpExecutor implements HttpExecutor {
         response = httpClient.execute(httpUriRequest);
         int statusCode = response.getStatusLine().getStatusCode();
         /** 2xx is success. */
-        if (statusCode >= HttpStatus.SC_OK && statusCode <= HttpStatus.SC_MULTI_STATUS) {
+        if (statusCode < HttpStatus.SC_OK || statusCode > HttpStatus.SC_MULTI_STATUS) {
             throw new RuntimeException("Failed to invoke the http method "
                     + httpUriRequest.getURI() + " in the service "
                     + ". return status by: " + response.getStatusLine().getStatusCode());
