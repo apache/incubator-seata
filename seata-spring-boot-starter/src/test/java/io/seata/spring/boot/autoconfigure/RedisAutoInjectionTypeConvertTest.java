@@ -8,6 +8,7 @@ import io.seata.spring.boot.autoconfigure.properties.registry.RegistryRedisPrope
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -20,6 +21,8 @@ import static org.mockito.Mockito.mock;
  * @Author zhangheng
  * @Date 2020/1/14 17:09
  **/
+@SpringBootApplication
+
 public class RedisAutoInjectionTypeConvertTest {
 
 
