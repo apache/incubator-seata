@@ -27,6 +27,7 @@ import com.alibaba.druid.util.JdbcConstants;
 
 import io.seata.sqlparser.SQLParsingException;
 import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
