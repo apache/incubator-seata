@@ -272,7 +272,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
     @Override
     public List<BranchTransactionDO> queryBranchTransactionDO(String xid) {
         List<BranchTransactionDO> rets = new ArrayList<>();
-        String sql = LogStoreSqls.getQureyBranchTransaction(brachTable, dbType);
+        String sql = LogStoreSqls.getQueryBranchTransaction(brachTable, dbType);
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -302,7 +302,7 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
         List<BranchTransactionDO> rets = new ArrayList<>(retsSize);
         StringJoiner sj = new StringJoiner(",");
         xids.stream().forEach(xid -> sj.add("?"));
-        String sql = LogStoreSqls.getQureyBranchTransaction(brachTable, dbType, sj.toString());
+        String sql = LogStoreSqls.getQueryBranchTransaction(brachTable, dbType, sj.toString());
         Connection conn = null;
         PreparedStatement ps = null;
         ResultSet rs = null;
@@ -393,8 +393,8 @@ public class LogStoreDataBaseDAO implements LogStore, Initialize {
 
     @Override
     public long getCurrentMaxSessionId(long high, long low) {
-        String transMaxSql = LogStoreSqls.getQureyGlobalMax(globalTable, dbType);
-        String branchMaxSql = LogStoreSqls.getQureyBranchMax(brachTable, dbType);
+        String transMaxSql = LogStoreSqls.getQueryGlobalMax(globalTable, dbType);
+        String branchMaxSql = LogStoreSqls.getQueryBranchMax(brachTable, dbType);
         long maxTransId = getCurrentMaxSessionId(transMaxSql, high, low);
         long maxBranchId = getCurrentMaxSessionId(branchMaxSql, high, low);
         return maxBranchId > maxTransId ? maxBranchId : maxTransId;

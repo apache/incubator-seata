@@ -106,7 +106,7 @@ public class ConfigurationKeys {
     /**
      * The constant CLIENT_REPORT_SUCCESS_ENABLE.
      */
-    public static final String CLIENT_REPORT_SUCCESS_ENABLE = CLIENT_PREFIX + "report.success.enable";
+    public static final String CLIENT_REPORT_SUCCESS_ENABLE = CLIENT_RM_PREFIX + "report.success.enable";
 
     /**
      * The constant CLIENT_REPORT_RETRY_COUNT.
@@ -312,24 +312,6 @@ public class ConfigurationKeys {
      * The constant TRANSACTION_UNDO_LOG_DEFAULT_TABLE.
      */
     public static final String TRANSACTION_UNDO_LOG_DEFAULT_TABLE = "undo_log";
-
-    /**
-     * The constant SUPPORT_PREFIX.
-     */
-    public static final String SUPPORT_PREFIX = "support.";
-    /**
-     * The constant SPRING_PREFIX.
-     */
-    public static final String SPRING_PREFIX = "spring.";
-    /**
-     * The constant DATASOURCE_PREFIX.
-     */
-    public static final String DATASOURCE_PREFIX = "datasource.";
-    /**
-     * The constant DATASOURCE_AUTOPROXY.
-     */
-    public static final String DATASOURCE_AUTOPROXY = CLIENT_PREFIX + SUPPORT_PREFIX + SPRING_PREFIX + DATASOURCE_PREFIX
-        + "autoproxy";
 
     /**
      * The constant MAX_COMMIT_RETRY_TIMEOUT.
