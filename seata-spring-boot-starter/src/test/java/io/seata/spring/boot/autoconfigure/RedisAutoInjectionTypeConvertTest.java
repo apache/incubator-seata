@@ -21,8 +21,6 @@ import static org.mockito.Mockito.mock;
  * @Author zhangheng
  * @Date 2020/1/14 17:09
  **/
-@SpringBootApplication
-
 public class RedisAutoInjectionTypeConvertTest {
 
 
