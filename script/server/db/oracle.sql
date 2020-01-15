@@ -31,12 +31,13 @@ CREATE TABLE branch_table
     status            NUMBER(3),
     client_id         VARCHAR2(64),
     application_data  VARCHAR2(2000),
-    gmt_create        TIMESTAMP(0),
-    gmt_modified      TIMESTAMP(0),
+    gmt_create        TIMESTAMP(6),
+    gmt_modified      TIMESTAMP(6),
     PRIMARY KEY (branch_id)
 );
 
 CREATE INDEX idx_xid ON branch_table (xid);
+CREATE INDEX idx_gmt_create ON branch_table (gmt_create);
 
 -- the table to store lock data
 CREATE TABLE lock_table

@@ -31,12 +31,13 @@ CREATE TABLE IF NOT EXISTS public.branch_table
     status            SMALLINT,
     client_id         VARCHAR(64),
     application_data  VARCHAR(2000),
-    gmt_create        TIMESTAMP(0),
-    gmt_modified      TIMESTAMP(0),
+    gmt_create        TIMESTAMP(6),
+    gmt_modified      TIMESTAMP(6),
     CONSTRAINT pk_branch_table PRIMARY KEY (branch_id)
 );
 
 CREATE INDEX idx_xid ON public.branch_table (xid);
+CREATE INDEX idx_gmt_create ON public.branch_table (gmt_create);
 
 -- the table to store lock data
 CREATE TABLE IF NOT EXISTS public.lock_table
