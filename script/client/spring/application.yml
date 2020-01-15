@@ -2,6 +2,8 @@ seata:
   enabled: true
   application-id: test
   tx-service-group: my_test_tx_group
+  enable-auto-data-source-proxy: true
+  use-jdk-proxy: false
   client:
     rm-async-commit-buffer-limit: 1000
     rm-report-retry-count: 5
@@ -14,9 +16,6 @@ seata:
         lock-retry-policy-branch-rollback-on-conflict: true
     tm-commit-retry-count: 5
     tm-rollback-retry-count: 5
-    support:
-      spring:
-        datasource-autoproxy: true
     undo:
       undo-data-validation: true
       undo-log-serialization: jackson
