@@ -62,4 +62,3 @@ metrics.enabled=false
 metrics.registry-type=compact
 metrics.exporter-list=prometheus
 metrics.exporter-prometheus-port=9898
-client.support.spring.datasource.autoproxy=false
