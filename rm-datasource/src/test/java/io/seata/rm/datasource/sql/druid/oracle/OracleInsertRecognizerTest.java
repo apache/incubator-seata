@@ -20,8 +20,9 @@ import com.alibaba.druid.sql.SQLUtils;
 import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
 import com.alibaba.druid.sql.dialect.oracle.ast.expr.OracleBinaryDoubleExpr;
-import io.seata.rm.datasource.sql.SQLParsingException;
-import io.seata.rm.datasource.sql.SQLType;
+import io.seata.sqlparser.SQLParsingException;
+import io.seata.sqlparser.SQLType;
+import io.seata.sqlparser.druid.oracle.OracleInsertRecognizer;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -98,7 +99,7 @@ public class OracleInsertRecognizerTest {
 
         OracleInsertRecognizer recognizer = new OracleInsertRecognizer(sql, asts.get(0));
         List<List<Object>> insertRows = recognizer.getInsertRows();
-        Assertions.assertTrue(insertRows.size() == 1);
+        Assertions.assertEquals(1, insertRows.size());
 
         //test for exception
         Assertions.assertThrows(SQLParsingException.class, () -> {

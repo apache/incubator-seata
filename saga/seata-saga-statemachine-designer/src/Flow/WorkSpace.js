@@ -61,7 +61,7 @@ class WorkSpaceBase extends React.Component {
         }
         else if (param.item.source.model.stateType == 'Catch') {
           const catchLinePropsTemplate = {
-            "Exceptions": [""]
+            "Exceptions": ["java.lang.Throwable"]
           };
           executeCommand(() => {
             update(param.item, {
