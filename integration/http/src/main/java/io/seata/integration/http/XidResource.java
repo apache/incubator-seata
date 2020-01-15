@@ -34,13 +34,13 @@ public class XidResource {
         if (xid != null) {
             String unbindXid = RootContext.unbind();
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("unbind[" + unbindXid + "] from RootContext");
+                LOGGER.debug("unbind[{}] from RootContext", unbindXid);
             }
             if (!rpcXid.equalsIgnoreCase(unbindXid)) {
-                LOGGER.warn("xid in change during RPC from " + rpcXid + " to " + unbindXid);
+                LOGGER.warn("xid in change during RPC from {} to {}", rpcXid, unbindXid);
                 if (unbindXid != null) {
                     RootContext.bind(unbindXid);
-                    LOGGER.warn("bind [" + unbindXid + "] back to RootContext");
+                    LOGGER.warn("bind [{}] back to RootContext", unbindXid);
                 }
             }
         }

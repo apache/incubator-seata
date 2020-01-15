@@ -41,12 +41,12 @@ public class TransactionPropagationIntercepter extends HandlerInterceptorAdapter
         String rpcXid = request.getHeader(RootContext.KEY_XID);
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("xid in RootContext[" + xid + "] xid in HttpContext[" + rpcXid + "]");
+            LOGGER.debug("xid in RootContext[{}] xid in HttpContext[{}]", xid, rpcXid);
         }
         if (rpcXid != null) {
             RootContext.bind(rpcXid);
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("bind[" + rpcXid + "] to RootContext");
+                LOGGER.debug("bind[{}] to RootContext", rpcXid);
             }
         }
 
