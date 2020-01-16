@@ -13,17 +13,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.file;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SUPPORT_PREFIX;
+package io.seata.sqlparser;
 
 /**
- * @author xingfudeshi@gmail.com
+ * @author ggndnn
  */
-@Component
-@ConfigurationProperties(prefix = SUPPORT_PREFIX)
-public class SupportProperties {
+public final class SqlParserType {
+    private SqlParserType() {
+    }
+
+    /**
+     * The constant SQL_PARSER_TYPE_DRUID.
+     */
+    public static final String SQL_PARSER_TYPE_DRUID = "druid";
 }
