@@ -328,7 +328,6 @@ public class ConfigurationKeys {
      */
     public static final String ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = SERVER_PREFIX + "rollback.retry.timeout.unlock.enable";
 
-
     /**
      * The constant TRANSPORT_TYPE
      */
