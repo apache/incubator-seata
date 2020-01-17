@@ -314,24 +314,6 @@ public class ConfigurationKeys {
     public static final String TRANSACTION_UNDO_LOG_DEFAULT_TABLE = "undo_log";
 
     /**
-     * The constant SUPPORT_PREFIX.
-     */
-    public static final String SUPPORT_PREFIX = "support.";
-    /**
-     * The constant SPRING_PREFIX.
-     */
-    public static final String SPRING_PREFIX = "spring.";
-    /**
-     * The constant DATASOURCE_PREFIX.
-     */
-    public static final String DATASOURCE_PREFIX = "datasource.";
-    /**
-     * The constant DATASOURCE_AUTOPROXY.
-     */
-    public static final String DATASOURCE_AUTOPROXY = CLIENT_PREFIX + SUPPORT_PREFIX + SPRING_PREFIX + DATASOURCE_PREFIX
-        + "autoproxy";
-
-    /**
      * The constant MAX_COMMIT_RETRY_TIMEOUT.
      */
     public static final String MAX_COMMIT_RETRY_TIMEOUT = SERVER_PREFIX + "max.commit.retry.timeout";
