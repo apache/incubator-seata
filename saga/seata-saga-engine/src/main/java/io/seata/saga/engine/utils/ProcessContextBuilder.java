@@ -113,4 +113,9 @@ public class ProcessContextBuilder {
         }
         return this;
     }
+
+    public ProcessContextBuilder withIsAsyncExecution(boolean isAsyncExecution) {
+        this.processContext.setVariable(DomainConstants.VAR_NAME_IS_ASYNC_EXECUTION, isAsyncExecution);
+        return this;
+    }
 }

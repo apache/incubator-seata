@@ -74,7 +74,7 @@ public class DomainConstants {
     public static final String VAR_NAME_IS_FOR_SUB_STATMACHINE_FORWARD = "_is_for_sub_statemachine_forward_";
     public static final String VAR_NAME_FIRST_COMPENSATION_STATE_STARTED = "_first_compensation_state_started";
     public static final String VAR_NAME_GLOBAL_TX = "_global_transaction_";
-    public static final String VAR_NAME_ROOT_CONTEXT_HOLDER = "_root_context_holder_";
+    public static final String VAR_NAME_IS_ASYNC_EXECUTION = "_is_async_execution_";
 
     public static final String OPERATION_NAME_START = "start";
     public static final String OPERATION_NAME_FORWARD = "forward";

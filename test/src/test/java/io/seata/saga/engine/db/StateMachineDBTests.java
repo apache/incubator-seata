@@ -29,8 +29,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * State machine tests with db log store
@@ -436,6 +440,60 @@ public class StateMachineDBTests extends AbstractServerTest {
         GlobalTransaction globalTransaction = getGlobalTransaction(inst);
         Assertions.assertNotNull(globalTransaction);
         Assertions.assertTrue(GlobalStatus.Finished.equals(globalTransaction.getStatus()));
+    }
+
+    @Test
+    public void simpleChoiceTestStateMachineAsyncConcurrently() throws Exception {
+
+        final CountDownLatch countDownLatch = new CountDownLatch(100);
+
+        final AsyncCallback asyncCallback = new AsyncCallback() {
+            @Override
+            public void onFinished(ProcessContext context, StateMachineInstance stateMachineInstance) {
+
+                countDownLatch.countDown();
+                Assertions.assertTrue(ExecutionStatus.SU.equals(stateMachineInstance.getStatus()));
+            }
+
+            @Override
+            public void onError(ProcessContext context, StateMachineInstance stateMachineInstance, Exception exp) {
+
+                countDownLatch.countDown();
+                Assertions.fail(exp);
+            }
+        };
+
+        long start = System.currentTimeMillis();
+        final List<Exception> exceptions = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            Thread t = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    for (int j = 0; j < 10; j++) {
+                        Map<String, Object> paramMap = new HashMap<>();
+                        paramMap.put("a", 1);
+
+                        String stateMachineName = "simpleChoiceTestStateMachine";
+
+                        try {
+                            stateMachineEngine.startAsync(stateMachineName, null, paramMap, asyncCallback);
+                        } catch (Exception e) {
+                            countDownLatch.countDown();
+                            exceptions.add(e);
+                        }
+                    }
+                }
+            });
+            t.start();
+        }
+
+        countDownLatch.await(5000, TimeUnit.MILLISECONDS);
+        if (exceptions.size() > 0) {
+            Assertions.fail(exceptions.get(0));
+        }
+
+        long cost = System.currentTimeMillis() - start;
+        System.out.println("====== cost :" + cost);
     }
 
     @Test

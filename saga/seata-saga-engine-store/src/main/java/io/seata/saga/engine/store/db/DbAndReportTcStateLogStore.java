@@ -121,7 +121,6 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 if (machineContext != null) {
                     machineContext.put(DomainConstants.VAR_NAME_GLOBAL_TX, globalTransaction);
                 }
-                context.setVariable(DomainConstants.VAR_NAME_ROOT_CONTEXT_HOLDER, RootContext.entries());
 
             } catch (ExecutionException e) {
 
@@ -132,6 +131,11 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                 throw new EngineExecutionException(e,
                         e.getCode() + ", TransName:" + transactionInfo.getName() + ", XID: " + xid + ", Reason: " + e
                                 .getMessage(), FrameworkErrorCode.TransactionManagerError);
+            }
+            finally {
+                if (Boolean.TRUE.equals(context.getVariable(DomainConstants.VAR_NAME_IS_ASYNC_EXECUTION))) {
+                    RootContext.unbind();
+                }
             }
         }
     }
@@ -198,11 +202,7 @@ public class DbAndReportTcStateLogStore extends AbstractStore implements StateLo
                                 .getMessage(), e);
             } finally {
                 // clear
-                Map<String, String> rootContextEntries = (Map<String, String>) context.getVariable(
-                        DomainConstants.VAR_NAME_ROOT_CONTEXT_HOLDER);
-                if (rootContextEntries != null) {
-                    rootContextEntries.clear();
-                }
+                RootContext.unbind();
                 sagaTransactionalTemplate.triggerAfterCompletion();
                 sagaTransactionalTemplate.cleanUp();
             }
