@@ -209,6 +209,16 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
+            <artifactId>seata-sqlparser-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
+            <artifactId>seata-sqlparser-druid</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.seata</groupId>
             <artifactId>seata-spring</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -224,12 +234,12 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
-            <artifactId>seata-codec-seata</artifactId>
+            <artifactId>seata-serializer-seata</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
-            <artifactId>seata-codec-protobuf</artifactId>
+            <artifactId>seata-serializer-protobuf</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -239,12 +249,12 @@
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
-            <artifactId>seata-codec-kryo</artifactId>
+            <artifactId>seata-serializer-kryo</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>io.seata</groupId>
-            <artifactId>seata-codec-hessian</artifactId>
+            <artifactId>seata-serializer-hessian</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -608,14 +618,16 @@
                                     <include>io.seata:seata-grpc</include>
                                     <include>io.seata:seata-rm</include>
                                     <include>io.seata:seata-rm-datasource</include>
+                                    <include>io.seata:seata-sqlparser-core</include>
+                                    <include>io.seata:seata-sqlparser-druid</include>
                                     <include>io.seata:seata-sofa-rpc</include>
                                     <include>io.seata:seata-spring</include>
                                     <include>io.seata:seata-tcc</include>
                                     <include>io.seata:seata-tm</include>
-                                    <include>io.seata:seata-codec-seata</include>
-                                    <include>io.seata:seata-codec-protobuf</include>
-                                    <include>io.seata:seata-codec-kryo</include>
-                                    <include>io.seata:seata-codec-hessian</include>
+                                    <include>io.seata:seata-serializer-seata</include>
+                                    <include>io.seata:seata-serializer-protobuf</include>
+                                    <include>io.seata:seata-serializer-kryo</include>
+                                    <include>io.seata:seata-serializer-hessian</include>
                                     <!-- saga -->
                                     <include>io.seata:seata-saga-processctrl</include>
                                     <include>io.seata:seata-saga-statelang</include>

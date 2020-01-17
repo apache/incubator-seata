@@ -15,20 +15,26 @@
  */
 package io.seata.rm.datasource.sql;
 
-import com.alibaba.druid.sql.SQLUtils;
-import com.alibaba.druid.sql.ast.SQLStatement;
-import com.alibaba.druid.sql.ast.statement.SQLDeleteStatement;
-import com.alibaba.druid.sql.ast.statement.SQLInsertStatement;
-import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
-import com.alibaba.druid.sql.ast.statement.SQLUpdateStatement;
-import java.util.List;
+import io.seata.common.loader.EnhancedServiceLoader;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
+import io.seata.sqlparser.SQLRecognizer;
+import io.seata.sqlparser.SQLRecognizerFactory;
+import io.seata.sqlparser.SqlParserType;
 
 /**
- * The type Sql visitor factory.
- *
- * @author sharajava
+ * @author ggndnn
  */
 public class SQLVisitorFactory {
+    /**
+     * SQLRecognizerFactory.
+     */
+    private final static SQLRecognizerFactory SQL_RECOGNIZER_FACTORY;
+
+    static {
+        String sqlparserType = ConfigurationFactory.getInstance().getConfig(ConfigurationKeys.SQL_PARSER_TYPE, SqlParserType.SQL_PARSER_TYPE_DRUID);
+        SQL_RECOGNIZER_FACTORY = EnhancedServiceLoader.load(SQLRecognizerFactory.class, sqlparserType);
+    }
 
     /**
      * Get sql recognizer.
@@ -38,23 +44,6 @@ public class SQLVisitorFactory {
      * @return the sql recognizer
      */
     public static SQLRecognizer get(String sql, String dbType) {
-        List<SQLStatement> asts = SQLUtils.parseStatements(sql, dbType);
-        if (asts == null || asts.size() != 1) {
-            throw new UnsupportedOperationException("Unsupported SQL: " + sql);
-        }
-        SQLRecognizer recognizer = null;
-        SQLStatement ast = asts.get(0);
-        SQLOperateRecognizerHolder recognizerHolder =
-            SQLOperateRecognizerHolderFactory.getSQLRecognizerHolder(dbType.toLowerCase());
-        if (ast instanceof SQLInsertStatement) {
-            recognizer = recognizerHolder.getInsertRecognizer(sql, ast);
-        } else if (ast instanceof SQLUpdateStatement) {
-            recognizer = recognizerHolder.getUpdateRecognizer(sql, ast);
-        } else if (ast instanceof SQLDeleteStatement) {
-            recognizer = recognizerHolder.getDeleteRecognizer(sql, ast);
-        } else if (ast instanceof SQLSelectStatement) {
-            recognizer = recognizerHolder.getSelectForUpdateRecognizer(sql, ast);
-        }
-        return recognizer;
+        return SQL_RECOGNIZER_FACTORY.create(sql, dbType);
     }
 }
