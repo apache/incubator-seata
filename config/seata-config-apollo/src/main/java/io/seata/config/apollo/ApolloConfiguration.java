@@ -181,7 +181,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
     }
 
     private static String getApolloNamespaceKey() {
-        return String.join(FILE_ROOT_CONFIG, FILE_CONFIG_SPLIT_CHAR, REGISTRY_TYPE, FILE_CONFIG_SPLIT_CHAR, NAMESPACE);
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, NAMESPACE);
     }
 
     private ConfigurationChangeType getChangeType(PropertyChangeType changeType) {
