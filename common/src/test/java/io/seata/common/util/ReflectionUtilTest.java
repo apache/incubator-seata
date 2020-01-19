@@ -23,6 +23,9 @@ import org.junit.jupiter.api.Test;
 
 public class ReflectionUtilTest {
 
+    //Prevent jvm from optimizing final
+    public static final String testValue = (null != null ? "hello" : "hello");
+
     @Test
     public void testGetClassByName() throws ClassNotFoundException {
         Assertions.assertEquals(String.class,
@@ -97,5 +100,12 @@ public class ReflectionUtilTest {
         Assertions.assertArrayEquals(new Object[]{
                         Serializable.class, Comparable.class, CharSequence.class},
                 ReflectionUtil.getInterfaces(String.class).toArray());
+    }
+
+    @Test
+    public void testModifyStaticFinalField() throws NoSuchFieldException, IllegalAccessException {
+        Assertions.assertEquals("hello", testValue);
+        ReflectionUtil.modifyStaticFinalField(ReflectionUtilTest.class, "testValue", "hello world");
+        Assertions.assertEquals("hello world", testValue);
     }
 }

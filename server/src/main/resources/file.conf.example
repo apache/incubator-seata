@@ -124,6 +124,7 @@ server {
   #unit ms,s,m,h,d represents milliseconds, seconds, minutes, hours, days, default permanent
   max.commit.retry.timeout = "-1"
   max.rollback.retry.timeout = "-1"
+  rollback.retry.timeout.unlock.enable = false
 }
 
 ## metrics settings

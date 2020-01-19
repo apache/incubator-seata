@@ -15,9 +15,20 @@
  */
 package io.seata.server.coordinator;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.time.Duration;
+import java.util.Collection;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
+
 import io.netty.channel.Channel;
 import io.seata.common.XID;
+import io.seata.common.util.DurationUtil;
 import io.seata.common.util.NetUtil;
+import io.seata.common.util.ReflectionUtil;
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
 import io.seata.core.model.BranchStatus;
 import io.seata.core.model.BranchType;
@@ -32,17 +43,11 @@ import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import java.io.IOException;
-import java.util.Collection;
-import java.util.concurrent.TimeoutException;
-import java.util.stream.Stream;
 
 /**
  * The type DefaultCoordinator test.
@@ -99,6 +104,7 @@ public class DefaultCoordinatorTest {
         Assertions.assertNotNull(globalSession);
         globalSession.end();
     }
+
     @Disabled
     @ParameterizedTest
     @MethodSource("xidAndBranchIdProviderForRollback")
@@ -129,6 +135,61 @@ public class DefaultCoordinatorTest {
 
     }
 
+    @Test
+    public void test_handleRetryRollbackingTimeOut() throws TransactionException, InterruptedException, NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        defaultCoordinator = new DefaultCoordinator(serverMessageSender);
+        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
+        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
+
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        Assertions.assertNotNull(globalSession);
+        Assertions.assertNotNull(globalSession.getBranchSessions());
+
+        Thread.sleep(100);
+        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", Duration.ofMillis(10));
+        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", false);
+        defaultCoordinator.timeoutCheck();
+        defaultCoordinator.handleRetryRollbacking();
+        int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
+        try {
+            Assertions.assertTrue(lockSize > 0);
+        } finally {
+            core.setResourceManagerInbound(defaultCoordinator);
+            core.doGlobalRollback(globalSession, true);
+            ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
+                ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100));
+        }
+    }
+
+    @Test
+    public void test_handleRetryRollbackingTimeOut_unlock() throws TransactionException, InterruptedException,
+        NoSuchFieldException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
+        defaultCoordinator = new DefaultCoordinator(serverMessageSender);
+        String xid = core.begin(applicationId, txServiceGroup, txName, 10);
+        Long branchId = core.branchRegister(BranchType.AT, "abcd", clientId, xid, applicationData, lockKeys_2);
+
+        GlobalSession globalSession = SessionHolder.findGlobalSession(xid);
+        Assertions.assertNotNull(globalSession);
+        Assertions.assertNotNull(globalSession.getBranchSessions());
+
+        Thread.sleep(100);
+        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT", Duration.ofMillis(10));
+        ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE", true);
+
+        defaultCoordinator.timeoutCheck();
+        defaultCoordinator.handleRetryRollbacking();
+
+        int lockSize = globalSession.getBranchSessions().get(0).getLockHolder().size();
+        try {
+            Assertions.assertTrue(lockSize == 0);
+        } finally {
+            core.setResourceManagerInbound(defaultCoordinator);
+            core.doGlobalRollback(globalSession, true);
+            ReflectionUtil.modifyStaticFinalField(defaultCoordinator.getClass(), "MAX_ROLLBACK_RETRY_TIMEOUT",
+                ConfigurationFactory.getInstance().getDuration(ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100));
+        }
+    }
+
     @AfterAll
     public static void afterClass() throws Exception {
 
@@ -148,7 +209,7 @@ public class DefaultCoordinatorTest {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
         Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
         return Stream.of(
-                Arguments.of(xid, branchId)
+            Arguments.of(xid, branchId)
         );
     }
 
@@ -156,7 +217,7 @@ public class DefaultCoordinatorTest {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
         Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_2);
         return Stream.of(
-                Arguments.of(xid, branchId)
+            Arguments.of(xid, branchId)
         );
     }
 
