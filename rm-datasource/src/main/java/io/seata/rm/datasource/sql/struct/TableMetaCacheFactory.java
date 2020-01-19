@@ -16,29 +16,41 @@
 package io.seata.rm.datasource.sql.struct;
 
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.rm.datasource.DataSourceProxy;
-import io.seata.rm.datasource.sql.struct.cache.MysqlTableMetaCache;
-import io.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.common.loader.EnhancedServiceLoader;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author guoyao
  */
 public class TableMetaCacheFactory {
 
-    private TableMetaCacheFactory() {}
+    private static volatile Map<String, TableMetaCache> tableMetaCacheMap;
 
-    public static TableMetaCache getTableMetaCache(DataSourceProxy dataSourceProxy) {
-        return getTableMetaCache(dataSourceProxy.getDbType());
-    }
-
+    /**
+     * get table meta cache
+     *
+     * @param dbType the db type
+     * @return table meta cache
+     */
     public static TableMetaCache getTableMetaCache(String dbType) {
-        if (dbType.equals(JdbcConstants.MYSQL)) {
-            return MysqlTableMetaCache.getInstance();
-        } else  if (dbType.equals(JdbcConstants.ORACLE)) {
-            return OracleTableMetaCache.getInstance();
-        } else {
-            throw new NotSupportYetException("not support dbType[" + dbType + "]");
+        dbType = dbType.toLowerCase();
+        if (tableMetaCacheMap == null) {
+            synchronized (TableMetaCacheFactory.class) {
+                if (tableMetaCacheMap == null) {
+                    Map<String, TableMetaCache> initializedMap = new HashMap<>();
+                    List<TableMetaCache> cacheList = EnhancedServiceLoader.loadAll(TableMetaCache.class);
+                    for (TableMetaCache cache : cacheList) {
+                        initializedMap.put(cache.getDbType().toLowerCase(), cache);
+                    }
+                    tableMetaCacheMap = initializedMap;
+                }
+            }
         }
+        if (tableMetaCacheMap.containsKey(dbType)) {
+            return tableMetaCacheMap.get(dbType);
+        }
+        throw new NotSupportYetException("not support dbType[" + dbType + "]");
     }
 }

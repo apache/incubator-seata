@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.StringJoiner;
 
 import io.seata.common.util.CollectionUtils;
+import io.seata.common.util.IOUtil;
 import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.rm.datasource.ColumnUtils;
@@ -304,9 +305,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             rs = ps.executeQuery();
             return TableRecords.buildRecords(tableMeta, rs);
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
+            IOUtil.close(rs);
         }
     }
 
@@ -333,9 +332,7 @@ public abstract class BaseTransactionalExecutor<T, S extends Statement> implemen
             rs = ps.executeQuery();
             return TableRecords.buildRecords(getTableMeta(), rs);
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
+            IOUtil.close(rs);
         }
     }
 
