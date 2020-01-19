@@ -15,7 +15,6 @@
  */
 package io.seata.tm.api;
 
-import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.context.RootContext;
@@ -48,10 +47,10 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     private GlobalTransactionRole role;
 
     private static final int COMMIT_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, 1);
+            ConfigurationKeys.CLIENT_TM_COMMIT_RETRY_COUNT, 1);
 
     private static final int ROLLBACK_RETRY_COUNT = ConfigurationFactory.getInstance().getInt(
-        ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, 1);
+            ConfigurationKeys.CLIENT_TM_ROLLBACK_RETRY_COUNT, 1);
 
     /**
      * Instantiates a new Default global transaction.
@@ -87,15 +86,13 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
     @Override
     public void begin(int timeout, String name) throws TransactionException {
         if (role != GlobalTransactionRole.Launcher) {
-            check();
+            assertXIDNotNull();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Ignore Begin(): just involved in global transaction [{}]", xid);
             }
             return;
         }
-        if (xid != null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNull();
         if (RootContext.getXID() != null) {
             throw new IllegalStateException();
         }
@@ -117,23 +114,21 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
             return;
         }
-        if (xid == null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNotNull();
         int retry = COMMIT_RETRY_COUNT;
         try {
-                while (retry > 0) {
-                    try {
-                        status = transactionManager.commit(xid);
-                        break;
-                    } catch (Throwable ex) {
-                        LOGGER.error("Failed to report global commit [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
-                        retry--;
-                        if (retry == 0) {
-                            throw new TransactionException("Failed to report global commit", ex);
-                        }
+            while (retry > 0) {
+                try {
+                    status = transactionManager.commit(xid);
+                    break;
+                } catch (Throwable ex) {
+                    LOGGER.error("Failed to report global commit [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
+                    retry--;
+                    if (retry == 0) {
+                        throw new TransactionException("Failed to report global commit", ex);
                     }
                 }
+            }
         } finally {
             if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
                 RootContext.unbind();
@@ -154,9 +149,7 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
             }
             return;
         }
-        if (xid == null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNotNull();
 
         int retry = ROLLBACK_RETRY_COUNT;
         try {
@@ -198,9 +191,8 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
 
     @Override
     public void globalReport(GlobalStatus globalStatus) throws TransactionException {
-        if (xid == null) {
-            throw new IllegalStateException();
-        }
+        assertXIDNotNull();
+
         if (globalStatus == null) {
             throw new IllegalStateException();
         }
@@ -215,10 +207,16 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
     }
 
-    private void check() {
+    private void assertXIDNotNull() {
         if (xid == null) {
-            throw new ShouldNeverHappenException();
+            throw new IllegalStateException();
         }
-
     }
+
+    private void assertXIDNull() {
+        if (xid != null) {
+            throw new IllegalStateException();
+        }
+    }
+
 }

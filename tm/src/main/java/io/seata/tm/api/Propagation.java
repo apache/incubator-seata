@@ -15,6 +15,11 @@
  */
 package io.seata.tm.api;
 
+/**
+ * Propagation level of global transactions.
+ *
+ * @author haozhibei
+ */
 public enum Propagation {
     /**
      * The REQUIRED.
@@ -29,7 +34,12 @@ public enum Propagation {
     /**
      * The NOT_SUPPORTED
      */
-    NOT_SUPPORTED("NOT_SUPPORTED");
+    NOT_SUPPORTED("NOT_SUPPORTED"),
+
+    /**
+     * The SUPPORTS
+     */
+    SUPPORTS("SUPPORTS");
 
 
     private String name;
@@ -42,13 +52,13 @@ public enum Propagation {
         return name;
     }
 
-    public static Propagation get(String name){
-      for (Propagation propagation : Propagation.class.getEnumConstants()) {
-                if (propagation.name.equals(name)) {
-                    return propagation;
-                }
+    public static Propagation get(String name) {
+        for (Propagation propagation : Propagation.class.getEnumConstants()) {
+            if (propagation.name.equals(name)) {
+                return propagation;
             }
-            throw new IllegalArgumentException("Unknown Propagation[" + name + "]");
+        }
+        throw new IllegalArgumentException("Unknown Propagation[" + name + "]");
     }
 }
 

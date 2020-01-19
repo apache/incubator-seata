@@ -17,6 +17,7 @@ package io.seata.tm.api;
 
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.common.util.StringUtils;
 import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.tm.api.transaction.TransactionHook;
@@ -52,13 +53,23 @@ public class TransactionalTemplate {
         Propagation propagation = txInfo.getPropagation();
         String previousXid = null;
         try {
-            if (propagation == Propagation.NOT_SUPPORTED) {
-                previousXid = RootContext.unbind();
-                return business.execute();
-            } else
-                if (propagation == Propagation.REQUIRES_NEW) {
+            switch (propagation) {
+                case NOT_SUPPORTED:
                     previousXid = RootContext.unbind();
-                }
+                    return business.execute();
+                case REQUIRES_NEW:
+                    previousXid = RootContext.unbind();
+                    break;
+                case SUPPORTS:
+                    if (StringUtils.isEmpty(RootContext.getXID())) {
+                        return business.execute();
+                    }
+                    break;
+                case REQUIRED:
+                    break;
+                default:
+                    throw new ShouldNeverHappenException("Not Supported Propagation:" + propagation);
+            }
 
             // 1.1 get or create a transaction
             GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
