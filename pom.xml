@@ -35,6 +35,7 @@
         <module>integration/sofa-rpc</module>
         <module>integration/motan</module>
         <module>integration/grpc</module>
+        <module>integration/http</module>
         <module>rm</module>
         <module>rm-datasource</module>
         <module>server</module>
