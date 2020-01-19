@@ -15,7 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
-import io.seata.common.exception.NotSupportYetException;
+import io.seata.common.loader.EnhancedServiceNotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -29,6 +29,6 @@ public class KeywordCheckerFactoryTest {
         KeywordCheckerFactory keywordCheckerFactory = new KeywordCheckerFactory();
         Assertions.assertNotNull(keywordCheckerFactory);
 
-        Assertions.assertThrows(NotSupportYetException.class, () -> KeywordCheckerFactory.getKeywordChecker("unknow"));
+        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> KeywordCheckerFactory.getKeywordChecker("unknow"));
     }
 }
