@@ -13,17 +13,26 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.spring.boot.autoconfigure.properties.file;
+package io.seata.integration.http;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
-
-import static io.seata.spring.boot.autoconfigure.StarterConstants.SUPPORT_PREFIX;
+import java.io.IOException;
+import java.util.Map;
 
 /**
- * @author xingfudeshi@gmail.com
+ * Http executor.
+ *
+ * @author wangxb
  */
-@Component
-@ConfigurationProperties(prefix = SUPPORT_PREFIX)
-public class SupportProperties {
+public interface HttpExecutor {
+
+    <T, K> K executePost(String host, String path, T paramObject, Class<K> returnType) throws IOException;
+
+
+    /**
+     * get method only support param type of Map<String,String>
+     *
+     * @return K
+     */
+    <K> K executeGet(String host, String path, Map<String, String> paramObject, Class<K> returnType) throws IOException;
+
 }
