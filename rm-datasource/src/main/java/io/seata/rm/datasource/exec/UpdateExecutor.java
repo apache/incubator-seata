@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+import io.seata.common.util.IOUtil;
 import io.seata.rm.datasource.StatementProxy;
 
 import io.seata.sqlparser.SQLRecognizer;
@@ -100,9 +101,7 @@ public class UpdateExecutor<T, S extends Statement> extends AbstractDMLBaseExecu
             rs = pst.executeQuery();
             return TableRecords.buildRecords(tmeta, rs);
         } finally {
-            if (rs != null) {
-                rs.close();
-            }
+            IOUtil.close(rs);
         }
     }
 

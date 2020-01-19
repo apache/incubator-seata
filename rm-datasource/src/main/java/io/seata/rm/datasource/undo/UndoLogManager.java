@@ -78,4 +78,11 @@ public interface UndoLogManager {
      * @throws SQLException the sql exception
      */
     int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException;
+
+    /**
+     * Get the SQL type of the current UndoLogManager
+     *
+     * @return the db type string
+     */
+    String getDbType();
 }

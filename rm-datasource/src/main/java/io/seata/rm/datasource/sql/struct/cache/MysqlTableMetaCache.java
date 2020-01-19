@@ -27,7 +27,6 @@ import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
 import io.seata.rm.datasource.undo.KeywordChecker;
 import io.seata.rm.datasource.undo.KeywordCheckerFactory;
 
@@ -46,27 +45,6 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
     private static final Logger LOGGER = LoggerFactory.getLogger(MysqlTableMetaCache.class);
 
     private static KeywordChecker keywordChecker = KeywordCheckerFactory.getKeywordChecker(JdbcConstants.MYSQL);
-
-    private static volatile TableMetaCache tableMetaCache = null;
-
-    private MysqlTableMetaCache() {
-    }
-
-    /**
-     * get instance of type MySQL keyword checker
-     *
-     * @return instance
-     */
-    public static TableMetaCache getInstance() {
-        if (tableMetaCache == null) {
-            synchronized (MysqlTableMetaCache.class) {
-                if (tableMetaCache == null) {
-                    tableMetaCache = new MysqlTableMetaCache();
-                }
-            }
-        }
-        return tableMetaCache;
-    }
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
@@ -203,4 +181,8 @@ public class MysqlTableMetaCache extends AbstractTableMetaCache {
         return tm;
     }
 
+    @Override
+    public String getDbType() {
+        return JdbcConstants.MYSQL;
+    }
 }

@@ -1,0 +1,2 @@
+io.seata.rm.datasource.sql.struct.cache.MysqlTableMetaCache
+io.seata.rm.datasource.sql.struct.cache.OracleTableMetaCache

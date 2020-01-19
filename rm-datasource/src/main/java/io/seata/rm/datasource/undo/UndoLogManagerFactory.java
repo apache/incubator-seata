@@ -16,33 +16,42 @@
 package io.seata.rm.datasource.undo;
 
 import io.seata.common.exception.NotSupportYetException;
-import io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager;
-import io.seata.rm.datasource.undo.oracle.OracleUndoLogManager;
-import io.seata.sqlparser.util.JdbcConstants;
+import io.seata.common.loader.EnhancedServiceLoader;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
  * @author jsbxyyx
  */
-public final class UndoLogManagerFactory {
+public class UndoLogManagerFactory {
 
-    private static final Map<String, UndoLogManager> UNDO_LOG_MANAGER_MAP = new HashMap<>();
+    private static volatile Map<String, UndoLogManager> undoLogManagerMap;
 
-    static {
-        UNDO_LOG_MANAGER_MAP.put(JdbcConstants.MYSQL, new MySQLUndoLogManager());
-        UNDO_LOG_MANAGER_MAP.put(JdbcConstants.ORACLE, new OracleUndoLogManager());
-    }
-
-    private UndoLogManagerFactory() {}
-
+    /**
+     * get undo log manager.
+     *
+     * @param dbType the db type
+     * @return undo log manager.
+     */
     public static UndoLogManager getUndoLogManager(String dbType) {
-        UndoLogManager undoLogManager = UNDO_LOG_MANAGER_MAP.get(dbType);
-        if (undoLogManager == null) {
-            throw new NotSupportYetException("not support dbType[" + dbType + "]");
+        if (undoLogManagerMap == null) {
+            synchronized (UndoLogManagerFactory.class) {
+                if (undoLogManagerMap == null) {
+                    Map<String, UndoLogManager> initializedMap = new HashMap<>();
+                    List<UndoLogManager> undoLogList = EnhancedServiceLoader.loadAll(UndoLogManager.class);
+                    for (UndoLogManager undoLog : undoLogList) {
+                        initializedMap.put(undoLog.getDbType(), undoLog);
+                    }
+                    undoLogManagerMap = initializedMap;
+                }
+            }
         }
-        return undoLogManager;
+        if (undoLogManagerMap.containsKey(dbType)) {
+            return undoLogManagerMap.get(dbType);
+        }
+        throw new NotSupportYetException("not support dbType[" + dbType + "]");
     }
 
 }

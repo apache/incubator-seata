@@ -15,12 +15,7 @@
  */
 package io.seata.rm.datasource.undo;
 
-import io.seata.common.exception.NotSupportYetException;
 import io.seata.common.exception.ShouldNeverHappenException;
-import io.seata.sqlparser.util.JdbcConstants;
-
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * The type Undo executor factory.
@@ -28,13 +23,6 @@ import java.util.Set;
  * @author sharajava
  */
 public class UndoExecutorFactory {
-
-    private static final Set<String> UNDO_LOG_SUPPORT_SET = new HashSet<>();
-
-    static {
-        UNDO_LOG_SUPPORT_SET.add(JdbcConstants.MYSQL);
-        UNDO_LOG_SUPPORT_SET.add(JdbcConstants.ORACLE);
-    }
 
     /**
      * Gets undo executor.
@@ -44,9 +32,6 @@ public class UndoExecutorFactory {
      * @return the undo executor
      */
     public static AbstractUndoExecutor getUndoExecutor(String dbType, SQLUndoLog sqlUndoLog) {
-        if (!UNDO_LOG_SUPPORT_SET.contains(dbType)) {
-            throw new NotSupportYetException(dbType);
-        }
         AbstractUndoExecutor result = null;
         UndoExecutorHolder holder = UndoExecutorHolderFactory.getUndoExecutorHolder(dbType.toLowerCase());
         switch (sqlUndoLog.getSqlType()) {

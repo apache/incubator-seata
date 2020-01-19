@@ -99,13 +99,6 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
     }
 
     /**
-     * get db type
-     *
-     * @return the db type
-     */
-    public abstract String getDbType();
-
-    /**
      * Delete undo log.
      *
      * @param xid      the xid
@@ -288,7 +281,7 @@ public abstract class AbstractUndoLogManager implements UndoLogManager {
                             Collections.reverse(sqlUndoLogs);
                         }
                         for (SQLUndoLog sqlUndoLog : sqlUndoLogs) {
-                            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy).getTableMeta(
+                            TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dataSourceProxy.getDbType()).getTableMeta(
                                 conn, sqlUndoLog.getTableName(),dataSourceProxy.getResourceId());
                             sqlUndoLog.setTableMeta(tableMeta);
                             AbstractUndoExecutor undoExecutor = UndoExecutorFactory.getUndoExecutor(
