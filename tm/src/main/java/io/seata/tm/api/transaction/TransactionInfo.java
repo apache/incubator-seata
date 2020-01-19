@@ -17,6 +17,7 @@ package io.seata.tm.api.transaction;
 
 import io.seata.common.util.CollectionUtils;
 
+import io.seata.tm.api.Propagation;
 import java.io.Serializable;
 import java.util.Set;
 
@@ -32,6 +33,8 @@ public final class TransactionInfo implements Serializable {
     private String name;
 
     private Set<RollbackRule> rollbackRules;
+
+    private Propagation propagation;
 
     public int getTimeOut() {
         return timeOut;
@@ -74,5 +77,13 @@ public final class TransactionInfo implements Serializable {
         }
 
         return !(winner instanceof NoRollbackRule);
+    }
+
+    public Propagation getPropagation(){
+        return this.propagation;
+    }
+
+    public void setPropagation(Propagation propagation){
+        this.propagation = propagation;
     }
 }

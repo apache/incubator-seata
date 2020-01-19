@@ -17,14 +17,14 @@ package io.seata.tm.api;
 
 
 import io.seata.common.exception.ShouldNeverHappenException;
+import io.seata.core.context.RootContext;
 import io.seata.core.exception.TransactionException;
 import io.seata.tm.api.transaction.TransactionHook;
 import io.seata.tm.api.transaction.TransactionHookManager;
 import io.seata.tm.api.transaction.TransactionInfo;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 /**
  * Template of executing business logic with a global transaction.
@@ -44,41 +44,58 @@ public class TransactionalTemplate {
      * @throws TransactionalExecutor.ExecutionException the execution exception
      */
     public Object execute(TransactionalExecutor business) throws Throwable {
-        // 1. get or create a transaction
-        GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
-
-        // 1.1 get transactionInfo
+        // 1 get transactionInfo
         TransactionInfo txInfo = business.getTransactionInfo();
         if (txInfo == null) {
             throw new ShouldNeverHappenException("transactionInfo does not exist");
         }
+        Propagation propagation = txInfo.getPropagation();
+        String previousXid = null;
         try {
+            if (propagation == Propagation.NOT_SUPPORTED) {
+                previousXid = RootContext.unbind();
+                return business.execute();
+            } else
+                if (propagation == Propagation.REQUIRES_NEW) {
+                    previousXid = RootContext.unbind();
+                }
 
-            // 2. begin transaction
-            beginTransaction(txInfo, tx);
+            // 1.1 get or create a transaction
+            GlobalTransaction tx = GlobalTransactionContext.getCurrentOrCreate();
 
-            Object rs = null;
             try {
 
-                // Do Your Business
-                rs = business.execute();
+                // 2. begin transaction
+                beginTransaction(txInfo, tx);
 
-            } catch (Throwable ex) {
+                Object rs = null;
+                try {
 
-                // 3.the needed business exception to rollback.
-                completeTransactionAfterThrowing(txInfo,tx,ex);
-                throw ex;
+                    // Do Your Business
+                    rs = business.execute();
+
+                } catch (Throwable ex) {
+
+                    // 3.the needed business exception to rollback.
+                    completeTransactionAfterThrowing(txInfo, tx, ex);
+                    throw ex;
+                }
+
+                // 4. everything is fine, commit.
+                commitTransaction(tx);
+
+                return rs;
+            } finally {
+                //5. clear
+                triggerAfterCompletion();
+                cleanUp();
             }
-
-            // 4. everything is fine, commit.
-            commitTransaction(tx);
-
-            return rs;
         } finally {
-            //5. clear
-            triggerAfterCompletion();
-            cleanUp();
+            if (previousXid != null) {
+                RootContext.bind(previousXid);
+            }
         }
+
     }
 
     private void completeTransactionAfterThrowing(TransactionInfo txInfo, GlobalTransaction tx, Throwable ex) throws TransactionalExecutor.ExecutionException {
@@ -105,7 +122,7 @@ public class TransactionalTemplate {
         } catch (TransactionException txe) {
             // 4.1 Failed to commit
             throw new TransactionalExecutor.ExecutionException(tx, txe,
-                TransactionalExecutor.Code.CommitFailure);
+                    TransactionalExecutor.Code.CommitFailure);
         }
     }
 
@@ -124,7 +141,7 @@ public class TransactionalTemplate {
             triggerAfterBegin();
         } catch (TransactionException txe) {
             throw new TransactionalExecutor.ExecutionException(tx, txe,
-                TransactionalExecutor.Code.BeginFailure);
+                    TransactionalExecutor.Code.BeginFailure);
 
         }
     }
@@ -134,7 +151,7 @@ public class TransactionalTemplate {
             try {
                 hook.beforeBegin();
             } catch (Exception e) {
-                LOGGER.error("Failed execute beforeBegin in hook {}",e.getMessage(),e);
+                LOGGER.error("Failed execute beforeBegin in hook {}", e.getMessage(), e);
             }
         }
     }
@@ -144,7 +161,7 @@ public class TransactionalTemplate {
             try {
                 hook.afterBegin();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterBegin in hook {}",e.getMessage(),e);
+                LOGGER.error("Failed execute afterBegin in hook {}", e.getMessage(), e);
             }
         }
     }
@@ -154,7 +171,7 @@ public class TransactionalTemplate {
             try {
                 hook.beforeRollback();
             } catch (Exception e) {
-                LOGGER.error("Failed execute beforeRollback in hook {}",e.getMessage(),e);
+                LOGGER.error("Failed execute beforeRollback in hook {}", e.getMessage(), e);
             }
         }
     }
@@ -164,7 +181,7 @@ public class TransactionalTemplate {
             try {
                 hook.afterRollback();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterRollback in hook {}",e.getMessage(),e);
+                LOGGER.error("Failed execute afterRollback in hook {}", e.getMessage(), e);
             }
         }
     }
@@ -174,7 +191,7 @@ public class TransactionalTemplate {
             try {
                 hook.beforeCommit();
             } catch (Exception e) {
-                LOGGER.error("Failed execute beforeCommit in hook {}",e.getMessage(),e);
+                LOGGER.error("Failed execute beforeCommit in hook {}", e.getMessage(), e);
             }
         }
     }
@@ -184,7 +201,7 @@ public class TransactionalTemplate {
             try {
                 hook.afterCommit();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterCommit in hook {}",e.getMessage(),e);
+                LOGGER.error("Failed execute afterCommit in hook {}", e.getMessage(), e);
             }
         }
     }
@@ -194,7 +211,7 @@ public class TransactionalTemplate {
             try {
                 hook.afterCompletion();
             } catch (Exception e) {
-                LOGGER.error("Failed execute afterCompletion in hook {}",e.getMessage(),e);
+                LOGGER.error("Failed execute afterCompletion in hook {}", e.getMessage(), e);
             }
         }
     }

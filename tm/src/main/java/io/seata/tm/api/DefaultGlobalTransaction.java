@@ -122,18 +122,18 @@ public class DefaultGlobalTransaction implements GlobalTransaction {
         }
         int retry = COMMIT_RETRY_COUNT;
         try {
-            while (retry > 0) {
-                try {
-                    status = transactionManager.commit(xid);
-                    break;
-                } catch (Throwable ex) {
-                    LOGGER.error("Failed to report global commit [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
-                    retry--;
-                    if (retry == 0) {
-                        throw new TransactionException("Failed to report global commit", ex);
+                while (retry > 0) {
+                    try {
+                        status = transactionManager.commit(xid);
+                        break;
+                    } catch (Throwable ex) {
+                        LOGGER.error("Failed to report global commit [{}],Retry Countdown: {}, reason: {}", this.getXid(), retry, ex.getMessage());
+                        retry--;
+                        if (retry == 0) {
+                            throw new TransactionException("Failed to report global commit", ex);
+                        }
                     }
                 }
-            }
         } finally {
             if (RootContext.getXID() != null && xid.equals(RootContext.getXID())) {
                 RootContext.unbind();
