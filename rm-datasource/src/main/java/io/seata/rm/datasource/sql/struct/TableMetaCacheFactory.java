@@ -35,13 +35,14 @@ public class TableMetaCacheFactory {
      * @return table meta cache
      */
     public static TableMetaCache getTableMetaCache(String dbType) {
+        dbType = dbType.toLowerCase();
         if (tableMetaCacheMap == null) {
             synchronized (TableMetaCacheFactory.class) {
                 if (tableMetaCacheMap == null) {
                     Map<String, TableMetaCache> initializedMap = new HashMap<>();
                     List<TableMetaCache> cacheList = EnhancedServiceLoader.loadAll(TableMetaCache.class);
                     for (TableMetaCache cache : cacheList) {
-                        initializedMap.put(cache.getDbType(), cache);
+                        initializedMap.put(cache.getDbType().toLowerCase(), cache);
                     }
                     tableMetaCacheMap = initializedMap;
                 }
