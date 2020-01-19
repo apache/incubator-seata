@@ -21,6 +21,8 @@ import java.sql.SQLException;
 
 import javax.sql.DataSource;
 
+import io.seata.config.ConfigurationFactory;
+import io.seata.core.constants.ConfigurationKeys;
 import io.seata.saga.engine.impl.DefaultStateMachineConfig;
 import io.seata.saga.engine.store.db.DbAndReportTcStateLogStore;
 import io.seata.saga.engine.store.db.DbStateLangStore;
@@ -48,21 +50,12 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
     private String dbType;
     private int transOperationTimeout = DEFAULT_TRANS_OPER_TIMEOUT;
     private SagaTransactionalTemplate sagaTransactionalTemplate;
+    private boolean                   rmReportSuccessEnable = ConfigurationFactory.getInstance().getBoolean(ConfigurationKeys.CLIENT_REPORT_SUCCESS_ENABLE, true);
 
     public static String getDbTypeFromDataSource(DataSource dataSource) throws SQLException {
-        Connection con = null;
-        try {
-            con = dataSource.getConnection();
+        try (Connection con = dataSource.getConnection()) {
             DatabaseMetaData metaData = con.getMetaData();
             return metaData.getDatabaseProductName();
-        } finally {
-            if (con != null) {
-                try {
-                    con.close();
-                } catch (SQLException e) {
-                    LOGGER.error("Get dbType from failed: {}", e.getMessage(), e);
-                }
-            }
         }
     }
 
@@ -164,5 +157,13 @@ public class DbStateMachineConfig extends DefaultStateMachineConfig implements D
 
     public void setTransOperationTimeout(int transOperationTimeout) {
         this.transOperationTimeout = transOperationTimeout;
+    }
+
+    public boolean isRmReportSuccessEnable() {
+        return rmReportSuccessEnable;
+    }
+
+    public void setRmReportSuccessEnable(boolean rmReportSuccessEnable) {
+        this.rmReportSuccessEnable = rmReportSuccessEnable;
     }
 }
