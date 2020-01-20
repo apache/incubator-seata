@@ -154,9 +154,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
             //1.refresh cluster
             refreshCluster(cluster);
             //2. subscribe
-            subscribe(cluster, services -> {
-                refreshCluster(cluster, services);
-            });
+            subscribe(cluster, services -> refreshCluster(cluster, services));
         }
         return clusterAddressMap.get(cluster);
     }
@@ -183,8 +181,7 @@ public class ConsulRegistryServiceImpl implements RegistryService<ConsulListener
      * @return
      */
     private String getClusterName() {
-        String clusterConfigName = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-            + REGISTRY_CLUSTER;
+        String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
         return FILE_CONFIG.getConfig(clusterConfigName, DEFAULT_CLUSTER_NAME);
     }
 

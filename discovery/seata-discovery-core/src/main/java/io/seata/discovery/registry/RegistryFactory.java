@@ -20,9 +20,6 @@ import io.seata.common.loader.EnhancedServiceLoader;
 import io.seata.config.ConfigurationFactory;
 import io.seata.config.ConfigurationKeys;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Objects;
 
 /**
@@ -31,7 +28,6 @@ import java.util.Objects;
  * @author slievrly
  */
 public class RegistryFactory {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RegistryFactory.class);
 
     /**
      * Gets instance.

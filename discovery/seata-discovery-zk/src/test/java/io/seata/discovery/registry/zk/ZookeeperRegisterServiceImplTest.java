@@ -69,7 +69,7 @@ public class ZookeeperRegisterServiceImplTest {
 
         Assertions.assertNull(service.lookup("xxx"));
         List<InetSocketAddress> lookup2 = service.doLookup("default");
-        Assertions.assertTrue(lookup2.size() == 1);
+        Assertions.assertEquals(1, lookup2.size());
 
         final List<String> data = new ArrayList<>();
         final CountDownLatch latch = new CountDownLatch(1);
@@ -90,7 +90,7 @@ public class ZookeeperRegisterServiceImplTest {
 
         service.unregister(new InetSocketAddress(NetUtil.getLocalAddress(), 33333));
         latch2.await(1000, TimeUnit.MILLISECONDS);
-        Assertions.assertTrue(data2.size() == 0);
+        Assertions.assertEquals(0, data2.size());
 
         service.unsubscribe("default", listener);
         service.unsubscribe("default", listener2);

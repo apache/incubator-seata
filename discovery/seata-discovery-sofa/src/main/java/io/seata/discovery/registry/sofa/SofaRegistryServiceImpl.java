@@ -265,44 +265,31 @@ public class SofaRegistryServiceImpl implements RegistryService<SubscriberDataOb
     }
 
     private static String getSofaClusterFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-            + FILE_CONFIG_SPLIT_CHAR
-            + PRO_CLUSTER_KEY;
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_CLUSTER_KEY);
     }
 
     private static String getSofaAddressWaitTimeFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-            + FILE_CONFIG_SPLIT_CHAR
-            + PRO_ADDRESS_WAIT_TIME_KEY;
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_ADDRESS_WAIT_TIME_KEY);
     }
 
     private static String getSofaAddrFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-            + FILE_CONFIG_SPLIT_CHAR
-            + PRO_SERVER_ADDR_KEY;
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_SERVER_ADDR_KEY);
     }
 
     private static String getSofaRegionFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-            + FILE_CONFIG_SPLIT_CHAR
-            + PRO_REGION_KEY;
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_REGION_KEY);
     }
 
     private static String getSofaDataCenterFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-            + FILE_CONFIG_SPLIT_CHAR
-            + PRO_DATACENTER_KEY;
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_DATACENTER_KEY);
     }
 
     private static String getSofaGroupFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE
-            + FILE_CONFIG_SPLIT_CHAR
-            + PRO_GROUP_KEY;
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_GROUP_KEY);
     }
 
     private String getApplicationFileKey() {
-        return FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-            + PRO_APPLICATION_KEY;
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, PRO_APPLICATION_KEY);
     }
 
     private String getApplicationName() {
