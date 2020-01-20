@@ -648,6 +648,8 @@ public class StateMachineDBTests extends AbstractServerTest {
         paramMap.put("barSleepTime", sleepTimeLong);
         paramMap.put("barThrowException", "true");
         doTestStateMachineTransTimeout(paramMap);
+
+        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
     }
 
     @Test
@@ -699,6 +701,8 @@ public class StateMachineDBTests extends AbstractServerTest {
         paramMap.put("barSleepTime", sleepTimeLong);
         paramMap.put("barThrowException", "true");
         doTestStateMachineTransTimeoutAsync(paramMap);
+
+        ((DefaultStateMachineConfig)stateMachineEngine.getStateMachineConfig()).setTransOperationTimeout(60000 * 30);
     }
 
     private void doTestStateMachineTransTimeout(Map<String, Object> paramMap) throws Exception {
