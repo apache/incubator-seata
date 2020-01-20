@@ -17,10 +17,10 @@ package io.seata.rm.datasource.sql;
 
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
-import io.seata.sqlparser.druid.MySQLDeleteRecognizer;
-import io.seata.sqlparser.druid.MySQLInsertRecognizer;
-import io.seata.sqlparser.druid.MySQLSelectForUpdateRecognizer;
-import io.seata.sqlparser.druid.MySQLUpdateRecognizer;
+import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
+import io.seata.sqlparser.druid.mysql.MySQLInsertRecognizer;
+import io.seata.sqlparser.druid.mysql.MySQLSelectForUpdateRecognizer;
+import io.seata.sqlparser.druid.mysql.MySQLUpdateRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleDeleteRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleInsertRecognizer;
 import io.seata.sqlparser.druid.oracle.OracleSelectForUpdateRecognizer;

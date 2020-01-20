@@ -114,7 +114,7 @@ public abstract class AbstractConnectionProxy implements Connection {
                 SQLRecognizer sqlRecognizer = sqlRecognizers.get(0);
                 if (sqlRecognizer != null && sqlRecognizer.getSQLType() == SQLType.INSERT) {
                     String tableName = ColumnUtils.delEscape(sqlRecognizer.getTableName(), dbType);
-                    TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(getDataSourceProxy()).getTableMeta(getTargetConnection(),
+                    TableMeta tableMeta = TableMetaCacheFactory.getTableMetaCache(dbType).getTableMeta(getTargetConnection(),
                             tableName, getDataSourceProxy().getResourceId());
                     targetPreparedStatement = getTargetConnection().prepareStatement(sql, new String[]{tableMeta.getPkName()});
                 }
