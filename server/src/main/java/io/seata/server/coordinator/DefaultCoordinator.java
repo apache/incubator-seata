@@ -131,6 +131,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
     private static final Duration MAX_ROLLBACK_RETRY_TIMEOUT = ConfigurationFactory.getInstance().getDuration(
         ConfigurationKeys.MAX_ROLLBACK_RETRY_TIMEOUT, DurationUtil.DEFAULT_DURATION, 100);
 
+    private static final boolean ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE = ConfigurationFactory.getInstance().getBoolean(
+        ConfigurationKeys.ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE, false);
+
     private ScheduledThreadPoolExecutor retryRollbacking = new ScheduledThreadPoolExecutor(1,
         new NamedThreadFactory("RetryRollbacking", 1));
 
@@ -389,6 +392,9 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                     continue;
                 }
                 if (isRetryTimeout(now, MAX_ROLLBACK_RETRY_TIMEOUT.toMillis(), rollbackingSession.getBeginTime())) {
+                    if (ROLLBACK_RETRY_TIMEOUT_UNLOCK_ENABLE) {
+                        rollbackingSession.clean();
+                    }
                     /**
                      * Prevent thread safety issues
                      */

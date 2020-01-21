@@ -19,6 +19,7 @@ import com.alibaba.druid.sql.ast.SQLStatement;
 import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The class MySqlOperateRecognizerHolder
@@ -26,7 +27,6 @@ import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
  * @author: Zhibei Hao
  */
 public class MySQLOperateRecognizerHolder implements SQLOperateRecognizerHolder {
-    private static final String MYSQL = "mysql";
 
     @Override
     public SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast) {
@@ -53,6 +53,6 @@ public class MySQLOperateRecognizerHolder implements SQLOperateRecognizerHolder 
 
     @Override
     public String getDbType() {
-        return MYSQL;
+        return JdbcConstants.MYSQL;
     }
 }
