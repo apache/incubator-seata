@@ -17,7 +17,6 @@ package io.seata.tm.api.transaction;
 
 import io.seata.common.util.CollectionUtils;
 
-import io.seata.tm.api.Propagation;
 import java.io.Serializable;
 import java.util.Set;
 

@@ -15,7 +15,7 @@
  */
 package io.seata.spring.annotation;
 
-import io.seata.tm.api.Propagation;
+import io.seata.tm.api.transaction.Propagation;
 import io.seata.tm.api.transaction.TransactionInfo;
 
 import java.lang.annotation.ElementType;

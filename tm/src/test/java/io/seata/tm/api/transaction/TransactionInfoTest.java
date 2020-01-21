@@ -16,7 +16,6 @@
 package io.seata.tm.api.transaction;
 
 import com.alibaba.fastjson.JSON;
-import io.seata.tm.api.Propagation;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -33,7 +32,7 @@ public class TransactionInfoTest {
     private static final String IO_EXCEPTION_SHORT_NAME = "IOException";
     private static final String NAME = "test";
     private static final int TIME_OUT = 30000;
-    private static final String PROPAGATION = Propagation.REQUIRED.getName();
+    private static final String PROPAGATION = Propagation.REQUIRED.name();
 
 
     /**
