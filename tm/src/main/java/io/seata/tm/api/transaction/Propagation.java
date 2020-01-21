@@ -13,7 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package io.seata.tm.api;
+package io.seata.tm.api.transaction;
 
 /**
  * Propagation level of global transactions.
@@ -52,13 +52,5 @@ public enum Propagation {
         return name;
     }
 
-    public static Propagation get(String name) {
-        for (Propagation propagation : Propagation.class.getEnumConstants()) {
-            if (propagation.name.equals(name)) {
-                return propagation;
-            }
-        }
-        throw new IllegalArgumentException("Unknown Propagation[" + name + "]");
-    }
 }
 

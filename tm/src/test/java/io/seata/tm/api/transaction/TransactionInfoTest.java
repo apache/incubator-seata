@@ -16,7 +16,6 @@
 package io.seata.tm.api.transaction;
 
 import com.alibaba.fastjson.JSON;
-import io.seata.tm.api.Propagation;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
