@@ -22,6 +22,7 @@ import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
 import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.sqlparser.util.JdbcConstants;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -189,5 +190,10 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
                 stmt.close();
             }
         }
+    }
+
+    @Override
+    public String getDbType() {
+        return JdbcConstants.POSTGRESQL;
     }
 }

@@ -20,6 +20,7 @@ import com.alibaba.druid.sql.ast.statement.SQLSelectStatement;
 import com.alibaba.druid.sql.dialect.postgresql.ast.stmt.PGSelectQueryBlock;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
+import io.seata.sqlparser.util.JdbcConstants;
 
 /**
  * The type PostgresqlOperateRecognizerHolder
@@ -27,8 +28,6 @@ import io.seata.sqlparser.druid.SQLOperateRecognizerHolder;
  * @author will.zjw
  */
 public class PostgresqlOperateRecognizerHolder implements SQLOperateRecognizerHolder {
-
-    private static final String POSTGRE_SQL = "postgresql";
 
     @Override
     public SQLRecognizer getDeleteRecognizer(String sql, SQLStatement ast) {
@@ -56,6 +55,6 @@ public class PostgresqlOperateRecognizerHolder implements SQLOperateRecognizerHo
 
     @Override
     public String getDbType() {
-        return POSTGRE_SQL;
+        return JdbcConstants.POSTGRESQL;
     }
 }
