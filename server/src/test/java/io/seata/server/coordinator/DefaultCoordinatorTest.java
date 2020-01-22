@@ -15,6 +15,7 @@
  */
 package io.seata.server.coordinator;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Collection;
@@ -27,6 +28,7 @@ import io.seata.common.XID;
 import io.seata.common.util.DurationUtil;
 import io.seata.common.util.NetUtil;
 import io.seata.common.util.ReflectionUtil;
+import io.seata.config.Configuration;
 import io.seata.config.ConfigurationFactory;
 import io.seata.core.constants.ConfigurationKeys;
 import io.seata.core.exception.TransactionException;
@@ -38,16 +40,21 @@ import io.seata.core.protocol.transaction.BranchCommitResponse;
 import io.seata.core.protocol.transaction.BranchRollbackRequest;
 import io.seata.core.protocol.transaction.BranchRollbackResponse;
 import io.seata.core.rpc.ServerMessageSender;
+import io.seata.core.store.StoreMode;
 import io.seata.server.session.GlobalSession;
 import io.seata.server.session.SessionHolder;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+
+import static io.seata.server.session.SessionHolder.DEFAULT_SESSION_STORE_FILE_DIR;
 
 /**
  * The type DefaultCoordinator test.
@@ -78,20 +85,31 @@ public class DefaultCoordinatorTest {
 
     private static Core core = new DefaultCore();
 
+    private static final Configuration CONFIG = ConfigurationFactory.getInstance();
+
+    private static String sessionStorePath = CONFIG.getConfig(ConfigurationKeys.STORE_FILE_DIR,
+        DEFAULT_SESSION_STORE_FILE_DIR);
+
     @BeforeAll
     public static void beforeClass() throws Exception {
         XID.setIpAddress(NetUtil.getLocalIp());
-        SessionHolder.init(null);
         serverMessageSender = new MockServerMessageSender();
         defaultCoordinator = new DefaultCoordinator(serverMessageSender);
     }
 
-    @ParameterizedTest
-    @MethodSource("xidAndBranchIdProviderForCommit")
-    public void branchCommit(String xid, Long branchId) throws TransactionException {
-        BranchStatus result = null;
+    @BeforeEach
+    public void tearUp() throws IOException {
+        deleteAndCreateDataFile();
+    }
 
+
+    @Test
+    public void branchCommit() throws TransactionException {
+        BranchStatus result = null;
+        String xid = null;
         try {
+            xid = core.begin(applicationId, txServiceGroup, txName, timeout);
+            Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
             result = defaultCoordinator.branchCommit(BranchType.AT, xid, branchId, resourceId, applicationData);
         } catch (TransactionException e) {
             Assertions.fail(e.getMessage());
@@ -204,13 +222,23 @@ public class DefaultCoordinatorTest {
         SessionHolder.destroy();
     }
 
-    static Stream<Arguments> xidAndBranchIdProviderForCommit() throws Exception {
-        String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
-        Long branchId = core.branchRegister(BranchType.AT, resourceId, clientId, xid, applicationData, lockKeys_1);
-        return Stream.of(
-            Arguments.of(xid, branchId)
-        );
+    @AfterEach
+    public void tearDown() {
+        deleteDataFile();
     }
+
+    private static void deleteDataFile() {
+        File directory = new File(sessionStorePath);
+        File[] files = directory.listFiles();
+        for (File file : files) {
+            file.delete();
+        }
+    }
+    private static void deleteAndCreateDataFile() throws IOException {
+        deleteDataFile();
+        SessionHolder.init(StoreMode.FILE.name());
+    }
+
 
     static Stream<Arguments> xidAndBranchIdProviderForRollback() throws Exception {
         String xid = core.begin(applicationId, txServiceGroup, txName, timeout);
