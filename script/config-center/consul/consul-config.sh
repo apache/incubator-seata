@@ -18,14 +18,14 @@ do
   case $opt in
   h)
     host=$OPTARG
-  ;;
+    ;;
   p)
     port=$OPTARG
-  ;;
+    ;;
   ?)
-  echo "\033[31m USAGE OPTION: $0 [-h host] [-p port] \033[0m"
-  exit 1
-  ;;
+    echo "\033[31m USAGE OPTION: $0 [-h host] [-p port] \033[0m"
+    exit 1
+    ;;
   esac
 done
 
