@@ -26,63 +26,64 @@ import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_PREFIX;
 @Component
 @ConfigurationProperties(prefix = CLIENT_PREFIX)
 public class ClientProperties {
-    private int rmAsyncCommitBufferLimit = 10000;
-    private int rmReportRetryCount = 5;
-    private int tmCommitRetryCount = 5;
-    private int tmRollbackRetryCount = 5;
-    private boolean rmTableMetaCheckEnable = false;
-    private boolean rmReportSuccessEnable = true;
+    private int asyncCommitBufferLimit = 10000;
+    private int reportRetryCount = 5;
+    private int commitRetryCount = 5;
+    private int rollbackRetryCount = 5;
+    private boolean tableMetaCheckEnable = false;
+    private boolean reportSuccessEnable = true;
 
-    public int getRmAsyncCommitBufferLimit() {
-        return rmAsyncCommitBufferLimit;
+    public int getAsyncCommitBufferLimit() {
+        return asyncCommitBufferLimit;
     }
 
-    public ClientProperties setRmAsyncCommitBufferLimit(int rmAsyncCommitBufferLimit) {
-        this.rmAsyncCommitBufferLimit = rmAsyncCommitBufferLimit;
+    public ClientProperties setAsyncCommitBufferLimit(int asyncCommitBufferLimit) {
+        this.asyncCommitBufferLimit = asyncCommitBufferLimit;
         return this;
     }
 
-    public int getRmReportRetryCount() {
-        return rmReportRetryCount;
+    public int getReportRetryCount() {
+        return reportRetryCount;
     }
 
-    public ClientProperties setRmReportRetryCount(int rmReportRetryCount) {
-        this.rmReportRetryCount = rmReportRetryCount;
+    public ClientProperties setReportRetryCount(int reportRetryCount) {
+        this.reportRetryCount = reportRetryCount;
         return this;
     }
 
-    public int getTmCommitRetryCount() {
-        return tmCommitRetryCount;
+    public int getCommitRetryCount() {
+        return commitRetryCount;
     }
 
-    public ClientProperties setTmCommitRetryCount(int tmCommitRetryCount) {
-        this.tmCommitRetryCount = tmCommitRetryCount;
+    public ClientProperties setCommitRetryCount(int commitRetryCount) {
+        this.commitRetryCount = commitRetryCount;
         return this;
     }
 
-    public int getTmRollbackRetryCount() {
-        return tmRollbackRetryCount;
+    public int getRollbackRetryCount() {
+        return rollbackRetryCount;
     }
 
-    public ClientProperties setTmRollbackRetryCount(int tmRollbackRetryCount) {
-        this.tmRollbackRetryCount = tmRollbackRetryCount;
+    public ClientProperties setRollbackRetryCount(int rollbackRetryCount) {
+        this.rollbackRetryCount = rollbackRetryCount;
         return this;
     }
 
-    public boolean isRmTableMetaCheckEnable() {
-        return rmTableMetaCheckEnable;
+    public boolean isTableMetaCheckEnable() {
+        return tableMetaCheckEnable;
     }
 
-    public ClientProperties setRmTableMetaCheckEnable(boolean rmTableMetaCheckEnable) {
-        this.rmTableMetaCheckEnable = rmTableMetaCheckEnable;
+    public ClientProperties setTableMetaCheckEnable(boolean tableMetaCheckEnable) {
+        this.tableMetaCheckEnable = tableMetaCheckEnable;
         return this;
     }
 
-    public boolean isRmReportSuccessEnable() {
-        return rmReportSuccessEnable;
+    public boolean isReportSuccessEnable() {
+        return reportSuccessEnable;
     }
 
-    public void setRmReportSuccessEnable(boolean rmReportSuccessEnable) {
-        this.rmReportSuccessEnable = rmReportSuccessEnable;
+    public ClientProperties setReportSuccessEnable(boolean reportSuccessEnable) {
+        this.reportSuccessEnable = reportSuccessEnable;
+        return this;
     }
 }
