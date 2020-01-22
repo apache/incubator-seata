@@ -146,7 +146,7 @@ public class FileConfiguration extends AbstractConfiguration {
         }
         ConfigFuture configFuture = new ConfigFuture(dataId, defaultValue, ConfigOperation.GET, timeoutMills);
         configOperateExecutor.submit(new ConfigOperateRunnable(configFuture));
-        return (String)configFuture.get();
+        return (String) configFuture.get();
     }
 
     @Override
@@ -177,7 +177,7 @@ public class FileConfiguration extends AbstractConfiguration {
         }
         configListenersMap.putIfAbsent(dataId, new ConcurrentSet<>());
         configListenersMap.get(dataId).add(listener);
-        listenedConfigMap.put(dataId, getConfig(dataId));
+        listenedConfigMap.put(dataId, ConfigurationFactory.getInstance().getConfig(dataId));
         FileListener fileListener = new FileListener(dataId, listener);
         fileListener.onProcessEvent(new ConfigurationChangeEvent());
     }
@@ -306,7 +306,7 @@ public class FileConfiguration extends AbstractConfiguration {
         public void onChangeEvent(ConfigurationChangeEvent event) {
             while (true) {
                 try {
-                    String currentConfig = getConfig(dataId);
+                    String currentConfig = ConfigurationFactory.getInstance().getConfig(dataId);
                     String oldConfig = listenedConfigMap.get(dataId);
                     if (ObjectUtils.notEqual(currentConfig, oldConfig)) {
                         listenedConfigMap.put(dataId, currentConfig);
