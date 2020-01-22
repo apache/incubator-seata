@@ -1,0 +1,2 @@
+io.seata.rm.datasource.undo.mysql.MySQLUndoLogManager
+io.seata.rm.datasource.undo.oracle.OracleUndoLogManager
