@@ -18,7 +18,6 @@ package io.seata.discovery.registry.redis;
 import java.lang.management.ManagementFactory;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -27,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.thread.NamedThreadFactory;
@@ -188,11 +188,9 @@ public class RedisRegistryServiceImpl implements RegistryService<RedisListener> 
                 instances = jedis.hgetAll(getRedisRegistryKey());
             }
             if (null != instances && !instances.isEmpty()) {
-                Set<InetSocketAddress> newAddressSet = new HashSet<>();
-                for (Map.Entry<String, String> instance : instances.entrySet()) {
-                    String serverAddr = instance.getKey();
-                    newAddressSet.add(NetUtil.toInetSocketAddress(serverAddr));
-                }
+                Set<InetSocketAddress> newAddressSet = instances.keySet().stream()
+                        .map(NetUtil::toInetSocketAddress)
+                        .collect(Collectors.toSet());
                 CLUSTER_ADDRESS_MAP.put(clusterName, newAddressSet);
             }
             subscribe(clusterName, msg -> {
