@@ -84,6 +84,9 @@ seata:
     redis:
       server-addr: localhost:6379
       db: 0
+      password:
+      cluster: default
+      timeout: 0
     sofa:
       server-addr: 127.0.0.1:9603
       application: default
