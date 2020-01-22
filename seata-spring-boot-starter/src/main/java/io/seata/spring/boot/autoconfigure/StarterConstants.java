@@ -120,19 +120,12 @@ public class StarterConstants {
     public static String SPECIAL_KEY_GROUPLIST = "grouplist";
     public static String NORMALIZED_KEY_GROUPLIST = "grouplist";
     public static String SPECIAL_KEY_UNDO = "client.undo.";
-    public static String NORMALIZED_KEY_UNDO = "client.undo.";
     public static String SPECIAL_KEY_CLIENT = "client.";
-    public static String NORMALIZED_KEY_CLIENT = "client.";
     public static String SPECIAL_KEY_CLIENT_LOCK = "client.rm.lock.";
-    public static String NORMALIZED_KEY_CLIENT_LOCK = "client.rm.lock.";
     public static String SPECIAL_KEY_TRANSPORT_THREAD_FACTORY = "transport.thread-factory.";
-    public static String NORMALIZED_KEY_TRANSPORT_THREAD_FACTORY = "transport.thread-factory.";
 
     public static String SPECIAL_KEY_REGISTRY_ZK = "registry.zk.";
-    public static String NORMALIZED_KEY_REGISTRY_ZK = "registry.zk.";
     public static String SPECIAL_KEY_CONFIG_ZK = "config.zk.";
-    public static String NORMALIZED_KEY_CONFIG_ZK = "config.zk.";
     public static String SPECIAL_KEY_CONFIG_APOLLO = "config.apollo.";
-    public static String NORMALIZED_KEY_CONFIG_APOLLO = "config.apollo.";
 
 }
