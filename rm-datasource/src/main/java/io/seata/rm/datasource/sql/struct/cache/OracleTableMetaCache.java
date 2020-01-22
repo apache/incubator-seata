@@ -15,18 +15,18 @@
  */
 package io.seata.rm.datasource.sql.struct.cache;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
 import io.seata.common.exception.ShouldNeverHappenException;
 import io.seata.common.util.StringUtils;
 import io.seata.rm.datasource.sql.struct.ColumnMeta;
 import io.seata.rm.datasource.sql.struct.IndexMeta;
 import io.seata.rm.datasource.sql.struct.IndexType;
 import io.seata.rm.datasource.sql.struct.TableMeta;
-import io.seata.rm.datasource.sql.struct.TableMetaCache;
+import io.seata.sqlparser.util.JdbcConstants;
+
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * The type Table meta cache.
@@ -34,27 +34,6 @@ import io.seata.rm.datasource.sql.struct.TableMetaCache;
  * @author ygy
  */
 public class OracleTableMetaCache extends AbstractTableMetaCache {
-
-    private static volatile TableMetaCache tableMetaCache = null;
-
-    private OracleTableMetaCache() {
-    }
-
-    /**
-     * get instance of type MySQL keyword checker
-     *
-     * @return instance
-     */
-    public static TableMetaCache getInstance() {
-        if (tableMetaCache == null) {
-            synchronized (OracleTableMetaCache.class) {
-                if (tableMetaCache == null) {
-                    tableMetaCache = new OracleTableMetaCache();
-                }
-            }
-        }
-        return tableMetaCache;
-    }
 
     @Override
     protected String getCacheKey(Connection connection, String tableName, String resourceId) {
@@ -174,4 +153,8 @@ public class OracleTableMetaCache extends AbstractTableMetaCache {
         return tm;
     }
 
+    @Override
+    public String getDbType() {
+        return JdbcConstants.ORACLE;
+    }
 }

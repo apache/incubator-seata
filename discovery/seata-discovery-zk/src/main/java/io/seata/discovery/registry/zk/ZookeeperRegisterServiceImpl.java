@@ -38,6 +38,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 import static io.seata.common.Constants.IP_PORT_SPLIT_CHAR;
 
@@ -153,12 +154,9 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
 
             List<IZkChildListener> subscribeList = LISTENER_SERVICE_MAP.get(cluster);
             if (null != subscribeList) {
-                List<IZkChildListener> newSubscribeList = new ArrayList<>();
-                for (IZkChildListener eventListener : subscribeList) {
-                    if (!eventListener.equals(listener)) {
-                        newSubscribeList.add(eventListener);
-                    }
-                }
+                List<IZkChildListener> newSubscribeList = subscribeList.stream()
+                        .filter(eventListener -> !eventListener.equals(listener))
+                        .collect(Collectors.toList());
                 LISTENER_SERVICE_MAP.put(cluster, newSubscribeList);
             }
         }
@@ -290,8 +288,7 @@ public class ZookeeperRegisterServiceImpl implements RegistryService<IZkChildLis
     }
 
     private String getClusterName() {
-        String clusterConfigName = FILE_ROOT_REGISTRY + FILE_CONFIG_SPLIT_CHAR + REGISTRY_TYPE + FILE_CONFIG_SPLIT_CHAR
-            + REGISTRY_CLUSTER;
+        String clusterConfigName = String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_REGISTRY, REGISTRY_TYPE, REGISTRY_CLUSTER);
         return FILE_CONFIG.getConfig(clusterConfigName);
     }
 
