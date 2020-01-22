@@ -50,6 +50,7 @@ server.recovery.rollbacking-retry-period=1000
 server.recovery.timeout-retry-period=1000
 server.max.commit.retry.timeout=-1
 server.max.rollback.retry.timeout=-1
+server.rollback.retry.timeout.unlock.enable=false
 client.undo.data.validation=true
 client.undo.log.serialization=jackson
 server.undo.log.save.days=7
