@@ -15,11 +15,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import static org.mockito.Mockito.mock;
 
 /**
- * @version 1.0
- * @ClassName RedisAutoInjectionTypeConvertTest
- * @Description
  * @Author zhangheng
- * @Date 2020/1/14 17:09
  **/
 public class RedisAutoInjectionTypeConvertTest {
 
