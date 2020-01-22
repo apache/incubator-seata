@@ -39,9 +39,6 @@ public class PostgresqlTableMetaCache extends AbstractTableMetaCache {
 
     private static volatile TableMetaCache tableMetaCache = null;
 
-    private PostgresqlTableMetaCache() {
-    }
-
     /**
      * get instance of type Postgresql keyword checker
      *
