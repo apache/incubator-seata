@@ -18,18 +18,16 @@ package io.seata.spring.boot.autoconfigure.properties.file;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_PREFIX;
+import static io.seata.spring.boot.autoconfigure.StarterConstants.CLIENT_RM_PREFIX;
 
 /**
  * @author xingfudeshi@gmail.com
  */
 @Component
-@ConfigurationProperties(prefix = CLIENT_PREFIX)
-public class ClientProperties {
+@ConfigurationProperties(prefix = CLIENT_RM_PREFIX)
+public class RmProperties {
     private int asyncCommitBufferLimit = 10000;
     private int reportRetryCount = 5;
-    private int commitRetryCount = 5;
-    private int rollbackRetryCount = 5;
     private boolean tableMetaCheckEnable = false;
     private boolean reportSuccessEnable = true;
 
@@ -37,7 +35,7 @@ public class ClientProperties {
         return asyncCommitBufferLimit;
     }
 
-    public ClientProperties setAsyncCommitBufferLimit(int asyncCommitBufferLimit) {
+    public RmProperties setAsyncCommitBufferLimit(int asyncCommitBufferLimit) {
         this.asyncCommitBufferLimit = asyncCommitBufferLimit;
         return this;
     }
@@ -46,26 +44,8 @@ public class ClientProperties {
         return reportRetryCount;
     }
 
-    public ClientProperties setReportRetryCount(int reportRetryCount) {
+    public RmProperties setReportRetryCount(int reportRetryCount) {
         this.reportRetryCount = reportRetryCount;
-        return this;
-    }
-
-    public int getCommitRetryCount() {
-        return commitRetryCount;
-    }
-
-    public ClientProperties setCommitRetryCount(int commitRetryCount) {
-        this.commitRetryCount = commitRetryCount;
-        return this;
-    }
-
-    public int getRollbackRetryCount() {
-        return rollbackRetryCount;
-    }
-
-    public ClientProperties setRollbackRetryCount(int rollbackRetryCount) {
-        this.rollbackRetryCount = rollbackRetryCount;
         return this;
     }
 
@@ -73,7 +53,7 @@ public class ClientProperties {
         return tableMetaCheckEnable;
     }
 
-    public ClientProperties setTableMetaCheckEnable(boolean tableMetaCheckEnable) {
+    public RmProperties setTableMetaCheckEnable(boolean tableMetaCheckEnable) {
         this.tableMetaCheckEnable = tableMetaCheckEnable;
         return this;
     }
@@ -82,7 +62,7 @@ public class ClientProperties {
         return reportSuccessEnable;
     }
 
-    public ClientProperties setReportSuccessEnable(boolean reportSuccessEnable) {
+    public RmProperties setReportSuccessEnable(boolean reportSuccessEnable) {
         this.reportSuccessEnable = reportSuccessEnable;
         return this;
     }
