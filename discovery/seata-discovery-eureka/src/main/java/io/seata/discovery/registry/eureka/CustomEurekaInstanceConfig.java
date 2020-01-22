@@ -62,6 +62,11 @@ public class CustomEurekaInstanceConfig extends MyDataCenterInstanceConfig imple
         return applicationName;
     }
 
+    @Override
+    public String getHostName(boolean refresh) {
+        return this.getIpAddress();
+    }
+
     public void setInstanceId(String instanceId) {
         this.instanceId = instanceId;
     }
