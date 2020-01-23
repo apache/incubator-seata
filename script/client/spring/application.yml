@@ -54,6 +54,7 @@ seata:
     apollo:
       apollo-meta: http://192.168.1.204:8801
       app-id: seata-server
+      namespace: application
     etcd3:
       server-addr: http://localhost:2379
     nacos:
@@ -84,6 +85,9 @@ seata:
     redis:
       server-addr: localhost:6379
       db: 0
+      password:
+      cluster: default
+      timeout: 0
     sofa:
       server-addr: 127.0.0.1:9603
       application: default
