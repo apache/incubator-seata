@@ -21,9 +21,8 @@ seata:
       data-validation: true
       log-serialization: jackson
       log-table: undo_log
-    client:
-      log:
-        exceptionRate: 100
+    log:
+      exceptionRate: 100
   service:
     vgroup-mapping: default
     grouplist: 127.0.0.1:8091

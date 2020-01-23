@@ -118,17 +118,18 @@ public class StarterConstants {
     /**
      * The following special keys need to be normalized.
      */
-    public static String SPECIAL_KEY_VGROUP_MAPPING = "service.vgroup_mapping";
-    public static String NORMALIZED_KEY_VGROUP_MAPPING = "vgroupMapping";
-    public static String SPECIAL_KEY_GROUPLIST = "grouplist";
-    public static String NORMALIZED_KEY_GROUPLIST = "grouplist";
-    public static String SPECIAL_KEY_UNDO = "client.undo.";
-    public static String SPECIAL_KEY_CLIENT = "client.";
-    public static String SPECIAL_KEY_CLIENT_LOCK = "client.rm.lock.";
-    public static String SPECIAL_KEY_TRANSPORT_THREAD_FACTORY = "transport.thread-factory.";
+    public static final String SPECIAL_KEY_VGROUP_MAPPING = "service.vgroup_mapping";
+    public static final String NORMALIZED_KEY_VGROUP_MAPPING = "vgroupMapping";
+    public static final String SPECIAL_KEY_GROUPLIST = "grouplist";
+    public static final String NORMALIZED_KEY_GROUPLIST = "grouplist";
+    public static final String SPECIAL_KEY_UNDO = "client.undo.";
+    public static final String SPECIAL_KEY_CLIENT_RM = "client.rm.";
+    public static final String SPECIAL_KEY_CLIENT_TM = "client.tm.";
+    public static final String SPECIAL_KEY_CLIENT_LOCK = "client.rm.lock.";
+    public static final String SPECIAL_KEY_TRANSPORT_THREAD_FACTORY = "transport.thread-factory.";
 
-    public static String SPECIAL_KEY_REGISTRY_ZK = "registry.zk.";
-    public static String SPECIAL_KEY_CONFIG_ZK = "config.zk.";
-    public static String SPECIAL_KEY_CONFIG_APOLLO = "config.apollo.";
+    public static final String SPECIAL_KEY_REGISTRY_ZK = "registry.zk.";
+    public static final String SPECIAL_KEY_CONFIG_ZK = "config.zk.";
+    public static final String SPECIAL_KEY_CONFIG_APOLLO = "config.apollo.";
 
 }
