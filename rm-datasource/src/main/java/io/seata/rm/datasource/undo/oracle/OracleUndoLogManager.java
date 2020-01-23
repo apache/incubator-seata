@@ -21,6 +21,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 
+import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
 import io.seata.rm.datasource.undo.UndoLogParser;
 import io.seata.sqlparser.util.JdbcConstants;
@@ -30,6 +31,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jsbxyyx
  */
+@LoadLevel(name = JdbcConstants.ORACLE)
 public class OracleUndoLogManager extends AbstractUndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OracleUndoLogManager.class);
@@ -41,11 +43,6 @@ public class OracleUndoLogManager extends AbstractUndoLogManager {
 
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
             " WHERE log_created <= ? and ROWNUM <= ?";
-
-    @Override
-    public String getDbType() {
-        return JdbcConstants.ORACLE;
-    }
 
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {

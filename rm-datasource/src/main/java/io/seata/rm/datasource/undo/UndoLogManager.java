@@ -15,14 +15,14 @@
  */
 package io.seata.rm.datasource.undo;
 
-import io.seata.core.exception.TransactionException;
-import io.seata.rm.datasource.ConnectionProxy;
-import io.seata.rm.datasource.DataSourceProxy;
-
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Set;
+
+import io.seata.core.exception.TransactionException;
+import io.seata.rm.datasource.ConnectionProxy;
+import io.seata.rm.datasource.DataSourceProxy;
 
 /**
  * The type Undo log manager.
@@ -79,10 +79,4 @@ public interface UndoLogManager {
      */
     int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException;
 
-    /**
-     * Get the SQL type of the current UndoLogManager
-     *
-     * @return the db type string
-     */
-    String getDbType();
 }

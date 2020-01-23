@@ -31,7 +31,7 @@ public final class JdbcUtils {
     }
 
     public static String getDbType(String jdbcUrl) {
-        return getDbTypeParser().parseFromJdbcUrl(jdbcUrl);
+        return getDbTypeParser().parseFromJdbcUrl(jdbcUrl).toLowerCase();
     }
 
     static DbTypeParser getDbTypeParser() {

@@ -20,6 +20,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
 
+import io.seata.common.loader.LoadLevel;
 import io.seata.common.util.BlobUtils;
 import io.seata.core.constants.ClientTableColumnsName;
 import io.seata.rm.datasource.undo.AbstractUndoLogManager;
@@ -31,6 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  * @author jsbxyyx
  */
+@LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MySQLUndoLogManager.class);
@@ -47,11 +49,6 @@ public class MySQLUndoLogManager extends AbstractUndoLogManager {
 
     private static final String DELETE_UNDO_LOG_BY_CREATE_SQL = "DELETE FROM " + UNDO_LOG_TABLE_NAME +
             " WHERE log_created <= ? LIMIT ?";
-
-    @Override
-    public String getDbType() {
-        return JdbcConstants.MYSQL;
-    }
 
     @Override
     public int deleteUndoLogByLogCreated(Date logCreated, int limitRows, Connection conn) throws SQLException {

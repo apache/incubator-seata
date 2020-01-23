@@ -15,12 +15,10 @@
  */
 package io.seata.sqlparser.druid;
 
-import io.seata.common.loader.EnhancedServiceLoader;
-
-import java.text.MessageFormat;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import io.seata.common.loader.EnhancedServiceLoader;
 
 /**
  * The SQLOperateRecognizerHolderFactory
@@ -29,7 +27,7 @@ import java.util.Map;
  */
 public class SQLOperateRecognizerHolderFactory {
 
-    private static volatile Map<String, SQLOperateRecognizerHolder> recognizerHolderMap;
+    private static final Map<String, SQLOperateRecognizerHolder> RECOGNIZER_HOLDER_MAP = new ConcurrentHashMap<>();
 
     /**
      * get SQLOperateRecognizer by db type
@@ -38,23 +36,11 @@ public class SQLOperateRecognizerHolderFactory {
      * @return the SQLOperateRecognizer
      */
     public static SQLOperateRecognizerHolder getSQLRecognizerHolder(String dbType) {
-
-        if (recognizerHolderMap == null) {
-            synchronized (SQLOperateRecognizerHolderFactory.class) {
-                if (recognizerHolderMap == null) {
-                    Map<String, SQLOperateRecognizerHolder> initializedMap = new HashMap<>();
-                    List<SQLOperateRecognizerHolder> holderList = EnhancedServiceLoader.loadAll(
-                        SQLOperateRecognizerHolder.class);
-                    for (SQLOperateRecognizerHolder holder : holderList) {
-                        initializedMap.put(holder.getDbType().toLowerCase(), holder);
-                    }
-                    recognizerHolderMap = initializedMap;
-                }
-            }
+        if (RECOGNIZER_HOLDER_MAP.get(dbType) != null) {
+            return RECOGNIZER_HOLDER_MAP.get(dbType);
         }
-        if (recognizerHolderMap.containsKey(dbType)) {
-            return recognizerHolderMap.get(dbType);
-        }
-        throw new UnsupportedOperationException(MessageFormat.format("now not support {0}", dbType));
+        SQLOperateRecognizerHolder recognizerHolder = EnhancedServiceLoader.load(SQLOperateRecognizerHolder.class, dbType);
+        RECOGNIZER_HOLDER_MAP.putIfAbsent(dbType, recognizerHolder);
+        return recognizerHolder;
     }
 }

@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.undo.mysql;
 
+import io.seata.common.loader.LoadLevel;
 import io.seata.rm.datasource.undo.AbstractUndoExecutor;
 import io.seata.rm.datasource.undo.SQLUndoLog;
 import io.seata.rm.datasource.undo.UndoExecutorHolder;
@@ -25,6 +26,7 @@ import io.seata.sqlparser.util.JdbcConstants;
  *
  * @author: Zhibei Hao
  */
+@LoadLevel(name = JdbcConstants.MYSQL)
 public class MySQLUndoExecutorHolder implements UndoExecutorHolder {
 
     @Override
@@ -40,10 +42,5 @@ public class MySQLUndoExecutorHolder implements UndoExecutorHolder {
     @Override
     public AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog) {
         return new MySQLUndoDeleteExecutor(sqlUndoLog);
-    }
-
-    @Override
-    public String getDbType() {
-        return JdbcConstants.MYSQL;
     }
 }

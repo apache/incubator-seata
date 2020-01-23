@@ -15,18 +15,17 @@
  */
 package io.seata.rm.datasource.sql.struct;
 
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.loader.EnhancedServiceLoader;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import io.seata.common.loader.EnhancedServiceLoader;
 
 /**
  * @author guoyao
  */
 public class TableMetaCacheFactory {
 
-    private static volatile Map<String, TableMetaCache> tableMetaCacheMap;
+    private static final Map<String, TableMetaCache> TABLE_META_CACHE_MAP = new ConcurrentHashMap<>();
 
     /**
      * get table meta cache
@@ -35,22 +34,11 @@ public class TableMetaCacheFactory {
      * @return table meta cache
      */
     public static TableMetaCache getTableMetaCache(String dbType) {
-        dbType = dbType.toLowerCase();
-        if (tableMetaCacheMap == null) {
-            synchronized (TableMetaCacheFactory.class) {
-                if (tableMetaCacheMap == null) {
-                    Map<String, TableMetaCache> initializedMap = new HashMap<>();
-                    List<TableMetaCache> cacheList = EnhancedServiceLoader.loadAll(TableMetaCache.class);
-                    for (TableMetaCache cache : cacheList) {
-                        initializedMap.put(cache.getDbType().toLowerCase(), cache);
-                    }
-                    tableMetaCacheMap = initializedMap;
-                }
-            }
+        if (TABLE_META_CACHE_MAP.get(dbType) != null) {
+            return TABLE_META_CACHE_MAP.get(dbType);
         }
-        if (tableMetaCacheMap.containsKey(dbType)) {
-            return tableMetaCacheMap.get(dbType);
-        }
-        throw new NotSupportYetException("not support dbType[" + dbType + "]");
+        TableMetaCache tableMetaCache = EnhancedServiceLoader.load(TableMetaCache.class, dbType);
+        TABLE_META_CACHE_MAP.putIfAbsent(dbType, tableMetaCache);
+        return tableMetaCache;
     }
 }

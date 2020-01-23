@@ -43,11 +43,4 @@ public interface TableMetaCache {
      */
     void refresh(Connection connection, String resourceId);
 
-    /**
-     * Get the SQL type of the current TableMetaCache
-     *
-     * @return the db type string
-     */
-    String getDbType();
-
 }

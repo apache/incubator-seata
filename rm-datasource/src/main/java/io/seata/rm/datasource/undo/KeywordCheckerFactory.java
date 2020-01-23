@@ -15,11 +15,10 @@
  */
 package io.seata.rm.datasource.undo;
 
-import io.seata.common.exception.NotSupportYetException;
-import io.seata.common.loader.EnhancedServiceLoader;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import io.seata.common.loader.EnhancedServiceLoader;
 
 /**
  * The type Keyword checker factory.
@@ -28,7 +27,7 @@ import java.util.Map;
  */
 public class KeywordCheckerFactory {
 
-    private static volatile Map<String,KeywordChecker> keywordCheckerMap;
+    private static final Map<String, KeywordChecker> KEYWORD_CHECKER_MAP = new ConcurrentHashMap<>();
 
     /**
      * get keyword checker
@@ -37,22 +36,11 @@ public class KeywordCheckerFactory {
      * @return keyword checker
      */
     public static KeywordChecker getKeywordChecker(String dbType) {
-        if (keywordCheckerMap == null) {
-            synchronized (KeywordCheckerFactory.class) {
-                if (keywordCheckerMap == null) {
-                    Map<String, KeywordChecker> initializedMap = new HashMap<>();
-                    List<KeywordChecker> checkerList = EnhancedServiceLoader.loadAll(KeywordChecker.class);
-                    for (KeywordChecker checker : checkerList) {
-                        initializedMap.put(checker.getDbType(), checker);
-                    }
-                    keywordCheckerMap = initializedMap;
-                }
-            }
+        if (KEYWORD_CHECKER_MAP.get(dbType) != null) {
+            return KEYWORD_CHECKER_MAP.get(dbType);
         }
-        if (keywordCheckerMap.containsKey(dbType)) {
-            return keywordCheckerMap.get(dbType);
-        }
-        throw new NotSupportYetException(dbType);
-
+        KeywordChecker tableMetaCache = EnhancedServiceLoader.load(KeywordChecker.class, dbType);
+        KEYWORD_CHECKER_MAP.putIfAbsent(dbType, tableMetaCache);
+        return tableMetaCache;
     }
 }

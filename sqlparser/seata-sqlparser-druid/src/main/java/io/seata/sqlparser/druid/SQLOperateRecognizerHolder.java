@@ -61,11 +61,4 @@ public interface SQLOperateRecognizerHolder {
      */
     SQLRecognizer getSelectForUpdateRecognizer(String sql, SQLStatement ast);
 
-    /**
-     * Get the SQL type of the current SQLOperateRecognizerHolder
-     *
-     * @return the db type string
-     */
-    String getDbType();
-
 }

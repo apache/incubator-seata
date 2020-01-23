@@ -45,11 +45,4 @@ public interface UndoExecutorHolder {
      * @return the specific UndoExecutor
      */
     AbstractUndoExecutor getDeleteExecutor(SQLUndoLog sqlUndoLog);
-
-    /**
-     * get the SQL type of the current UndoExecutorHolder
-     *
-     * @return the SQL type string
-     */
-    String getDbType();
 }
