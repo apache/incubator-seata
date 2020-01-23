@@ -307,6 +307,6 @@ public class NettyServerConfig extends NettyBaseConfig {
      * @return the int
      */
     public int getServerShutdownWaitTime() {
-        return CONFIG.getInt(ConfigurationKeys.SHUNDOWN_WAIT, DEFAULT_SHUTDOWN_TIMEOUT_SEC);
+        return CONFIG.getInt(ConfigurationKeys.SHUTDOWN_WAIT, DEFAULT_SHUTDOWN_TIMEOUT_SEC);
     }
 }

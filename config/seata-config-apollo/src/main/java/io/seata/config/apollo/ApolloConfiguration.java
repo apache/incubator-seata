@@ -52,6 +52,8 @@ public class ApolloConfiguration extends AbstractConfiguration {
     private static final String REGISTRY_TYPE = "apollo";
     private static final String APP_ID = "app.id";
     private static final String APOLLO_META = "apollo.meta";
+    private static final String NAMESPACE = "namespace";
+    private static final String DEFAULT_NAMESPACE = "application";
     private static final Configuration FILE_CONFIG = ConfigurationFactory.CURRENT_FILE_INSTANCE;
     private static volatile Config config;
     private ExecutorService configOperateExecutor;
@@ -66,7 +68,7 @@ public class ApolloConfiguration extends AbstractConfiguration {
         if (null == config) {
             synchronized (ApolloConfiguration.class) {
                 if (null == config) {
-                    config = ConfigService.getAppConfig();
+                    config = ConfigService.getConfig(FILE_CONFIG.getConfig(getApolloNamespaceKey(), DEFAULT_NAMESPACE));
                     configOperateExecutor = new ThreadPoolExecutor(CORE_CONFIG_OPERATE_THREAD,
                         MAX_CONFIG_OPERATE_THREAD, Integer.MAX_VALUE, TimeUnit.MILLISECONDS,
                         new LinkedBlockingQueue<>(),
@@ -176,6 +178,10 @@ public class ApolloConfiguration extends AbstractConfiguration {
 
     private static String getApolloAppIdFileKey() {
         return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, APP_ID);
+    }
+
+    private static String getApolloNamespaceKey() {
+        return String.join(FILE_CONFIG_SPLIT_CHAR, FILE_ROOT_CONFIG, REGISTRY_TYPE, NAMESPACE);
     }
 
     private ConfigurationChangeType getChangeType(PropertyChangeType changeType) {

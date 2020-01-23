@@ -399,9 +399,9 @@ public class ConfigurationKeys {
     public static final String SHUTDOWN_PREFIX = TRANSPORT_PREFIX + "shutdown.";
 
     /**
-     * The constant SHUNDOWN_WAIT
+     * The constant SHUTDOWN_WAIT
      */
-    public static final String SHUNDOWN_WAIT = SHUTDOWN_PREFIX + "wait";
+    public static final String SHUTDOWN_WAIT = SHUTDOWN_PREFIX + "wait";
 
     /**
      * The constant ENABLE_CLIENT_BATCH_SEND_REQUEST
