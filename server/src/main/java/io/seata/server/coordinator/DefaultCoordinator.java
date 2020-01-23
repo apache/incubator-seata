@@ -399,7 +399,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                      * Prevent thread safety issues
                      */
                     SessionHolder.getRetryRollbackingSessionManager().removeGlobalSession(rollbackingSession);
-                    LOGGER.error("GlobalSession rollback retry timeout [{}]", rollbackingSession.getXid());
+                    LOGGER.error("GlobalSession rollback retry timeout and removed [{}]", rollbackingSession.getXid());
                     continue;
                 }
                 rollbackingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());
@@ -427,7 +427,7 @@ public class DefaultCoordinator extends AbstractTCInboundHandler
                      * Prevent thread safety issues
                      */
                     SessionHolder.getRetryCommittingSessionManager().removeGlobalSession(committingSession);
-                    LOGGER.error("GlobalSession commit retry timeout [{}]", committingSession.getXid());
+                    LOGGER.error("GlobalSession commit retry timeout and removed [{}]", committingSession.getXid());
                     continue;
                 }
                 committingSession.addSessionLifecycleListener(SessionHolder.getRootSessionManager());

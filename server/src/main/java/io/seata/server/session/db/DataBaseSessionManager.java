@@ -109,11 +109,15 @@ public class DataBaseSessionManager extends AbstractSessionManager
         }
     }
 
+    /**
+     * remove globalSession
+     * 1. rootSessionManager remove normal globalSession
+     * 2. retryCommitSessionManager and retryRollbackSessionManager remove retry expired globalSession
+     * @param session the session
+     * @throws TransactionException
+     */
     @Override
     public void removeGlobalSession(GlobalSession session) throws TransactionException {
-        if (StringUtils.isNotBlank(taskName)) {
-            return;
-        }
         boolean ret = transactionStoreManager.writeSession(LogOperation.GLOBAL_REMOVE, session);
         if (!ret) {
             throw new StoreException("removeGlobalSession failed.");
