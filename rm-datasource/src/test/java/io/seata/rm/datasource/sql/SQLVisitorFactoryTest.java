@@ -15,6 +15,7 @@
  */
 package io.seata.rm.datasource.sql;
 
+import io.seata.common.loader.EnhancedServiceNotFoundException;
 import io.seata.sqlparser.SQLRecognizer;
 import io.seata.sqlparser.SQLType;
 import io.seata.sqlparser.druid.mysql.MySQLDeleteRecognizer;
@@ -182,10 +183,7 @@ public class SQLVisitorFactoryTest {
             SQLVisitorFactory.get("insert into t(id) values (1);delete from t where id = 1", JdbcConstants.ORACLE);
         });
 
-
-
-
-        Assertions.assertThrows(UnsupportedOperationException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.DB2));
+        Assertions.assertThrows(EnhancedServiceNotFoundException.class, () -> SQLVisitorFactory.get("select * from t", JdbcConstants.DB2));
     }
 
     @Test
